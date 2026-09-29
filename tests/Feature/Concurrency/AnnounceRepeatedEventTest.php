@@ -223,9 +223,10 @@ final class AnnounceRepeatedEventTest extends TestCase
         int $left,
         ?string $event = null,
     ): TestResponse {
-        $lockParams = ['info_hash' => $infoHash, 'passkey' => $passkey];
-        $reAnnounceKey = 'isReAnnounce:'.hash('xxh128', http_build_query($lockParams));
-        Redis::connection()->client()->del($reAnnounceKey);
+        foreach (['', 'started', 'stopped', 'completed', 'paused'] as $dedupEvent) {
+            $lockParams = ['info_hash' => $infoHash, 'passkey' => $passkey, 'event' => $dedupEvent];
+            Redis::connection()->client()->del('isReAnnounce:'.hash('xxh128', http_build_query($lockParams)));
+        }
         $frequencyKey = "reAnnounceCheckByInfoHash:{$passkey}:".sha1($infoHash);
         Redis::connection()->client()->del($frequencyKey);
 

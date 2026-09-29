@@ -47,9 +47,29 @@ final class RateLimiter
             $this->warn($dto, 'Passkey invalid');
         }
 
-        $lockParams = ['info_hash' => $infoHashBinary, 'passkey' => $passkey];
+        // The event is part of the dedup key: a stopped/completed announce
+        // right after a started one is a state transition, not a duplicate —
+        // without it the early return skips PeerLifecycle (ghost peer rows
+        // and lost accounting). Only same-event retries inside the window
+        // are deduplicated.
+        $lockParams = ['info_hash' => $infoHashBinary, 'passkey' => $passkey, 'event' => (string) $dto->event];
         $reAnnounceKey = 'isReAnnounce:'.hash('xxh128', http_build_query($lockParams));
         $isReAnnounce = ! RedisGuard::attempt(static fn () => $redis->set($reAnnounceKey, TIMENOW, ['nx', 'ex' => self::RE_ANNOUNCE_INTERVAL]));
+
+        // A stopped/completed announce ends the session: clear the sibling
+        // dedup keys so a subsequent started (client restart within the 5 s
+        // window) is a new session, not a duplicate of the earlier started.
+        if ($dto->isStoppedOrCompleted()) {
+            foreach (['', 'started', 'stopped', 'completed', 'paused'] as $otherEvent) {
+                if ($otherEvent === (string) $dto->event) {
+                    continue;
+                }
+                $otherKey = 'isReAnnounce:'.hash('xxh128', http_build_query(
+                    ['info_hash' => $infoHashBinary, 'passkey' => $passkey, 'event' => $otherEvent]
+                ));
+                RedisGuard::attempt(static fn () => $redis->del($otherKey));
+            }
+        }
 
         if (RedisGuard::attempt(static fn () => $redis->get("torrent_not_exists:{$infoHashBinary}"))) {
             throw TrackerException::failure('torrent not registered with this tracker');

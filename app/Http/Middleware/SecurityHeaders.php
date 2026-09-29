@@ -48,7 +48,7 @@ final class SecurityHeaders
         // new Function() (unsafe-eval) and Filament ships inline boot scripts —
         // a nonce-strict script-src leaves the whole panel dead (login button
         // does nothing). Filament routes get the pragmatic admin policy.
-        $isFilament = $this->isFilamentRoute($request);
+        $isFilament = $this->isRelaxedPolicyRoute($request);
         // Legacy pages keep <style> elements nonce-locked (style-src-elem),
         // but allow style attributes + CSSOM writes (style-src-attr
         // 'unsafe-inline'): legacy JS toggles visibility via element.style,
@@ -81,16 +81,19 @@ final class SecurityHeaders
     }
 
     /**
-     * Check if the current request targets a Filament admin panel route.
-     * Filament routes are prefixed with the panel path (default: "nexusphp")
-     * and also include Livewire endpoints used by the SPA.
+     * Check if the current request targets a route that needs the relaxed
+     * (unsafe-inline/unsafe-eval) CSP: Filament admin routes are prefixed
+     * with the panel path (default: "nexusphp") plus Livewire endpoints,
+     * and the Horizon dashboard ships its own inline boot script
+     * (window.Horizon = {...}) that a nonce-strict policy blocks. Both are
+     * staff-gated surfaces.
      */
-    private function isFilamentRoute(Request $request): bool
+    private function isRelaxedPolicyRoute(Request $request): bool
     {
         $path = $request->path();
 
-        // Filament panel routes
-        if (str_starts_with($path, 'nexusphp') || str_starts_with($path, 'livewire')) {
+        // Filament panel + Livewire + Horizon dashboard routes
+        if (str_starts_with($path, 'nexusphp') || str_starts_with($path, 'livewire') || str_starts_with($path, 'horizon')) {
             return true;
         }
 

@@ -402,10 +402,12 @@ final class AnnounceConcurrencyTest extends TestCase
         int $left,
         ?string $event = null,
     ): TestResponse {
-        // Clear re-announce dedup lock so this announce is not skipped
-        $lockParams = ['info_hash' => $infoHash, 'passkey' => $passkey];
-        $reAnnounceKey = 'isReAnnounce:'.hash('xxh128', http_build_query($lockParams));
-        Redis::connection()->client()->del($reAnnounceKey);
+        // Clear re-announce dedup locks so this announce is not skipped
+        // (keys are hashed on info_hash+passkey+event — clear all variants)
+        foreach (['', 'started', 'stopped', 'completed', 'paused'] as $dedupEvent) {
+            $lockParams = ['info_hash' => $infoHash, 'passkey' => $passkey, 'event' => $dedupEvent];
+            Redis::connection()->client()->del('isReAnnounce:'.hash('xxh128', http_build_query($lockParams)));
+        }
         // Clear frequency gate (fingerprint = sha1 of binary info_hash)
         $frequencyKey = "reAnnounceCheckByInfoHash:{$passkey}:".sha1($infoHash);
         Redis::connection()->client()->del($frequencyKey);

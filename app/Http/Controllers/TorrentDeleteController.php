@@ -54,6 +54,9 @@ class TorrentDeleteController extends LegacyController
             return redirect('/torrents.php');
         }
         $row = $torrent->toArray();
+        $ownerId = (int) ($row['owner'] ?? 0);
+        $name = (string) ($row['name'] ?? '');
+        $anonymous = (int) ($row['anonymous'] ?? 0);
 
         $sure = request()->query('sure');
         if (empty($sure)) {
@@ -67,24 +70,24 @@ class TorrentDeleteController extends LegacyController
         TorrentOps::deleteTorrents($id, false);
 
         $uploadtorrentBonus = (float) $this->globals->get('uploadtorrent_bonus', 0);
-        Bonus::updatePoints('-', $uploadtorrentBonus, (int) $row['owner']);
+        Bonus::updatePoints('-', $uploadtorrentBonus, $ownerId);
 
-        if ($row['anonymous'] == 1 && $currentUserId == $row['owner']) {
-            Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by its anonymous uploader", 'normal');
+        if ($anonymous == 1 && $currentUserId == $ownerId) {
+            Log::writeWithContext("Torrent $id ({$name}) was deleted by its anonymous uploader", 'normal');
         } else {
-            Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by {$curUser['username']}", 'normal');
+            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$curUser['username']}", 'normal');
         }
 
-        if ($currentUserId != $row['owner'] && User::query()->where('id', $row['owner'])->exists()) {
-            $locale = Locale::userLocale((int) $row['owner']);
+        if ($currentUserId != $ownerId && User::query()->where('id', $ownerId)->exists()) {
+            $locale = Locale::userLocale($ownerId);
             $dt = date('Y-m-d H:i:s');
             $subject = Locale::trans('torrent.msg_torrent_deleted', [], $locale);
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
-                .$row['name']
+                .$name
                 .Locale::trans('torrent.msg_was_deleted_by', ['admin' => $curUser['username']], $locale);
             Message::add([
                 'sender' => null,
-                'receiver' => $row['owner'],
+                'receiver' => $ownerId,
                 'subject' => $subject,
                 'msg' => $msg,
                 'added' => $dt,
@@ -128,8 +131,11 @@ class TorrentDeleteController extends LegacyController
             return $this->legacyPage($request, 'delete', true);
         }
         $row = $torrent->toArray();
+        $ownerId = (int) ($row['owner'] ?? 0);
+        $name = (string) ($row['name'] ?? '');
+        $anonymous = (int) ($row['anonymous'] ?? 0);
 
-        if ($currentUserId != $row['owner'] && ! Permissions::userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)) {
+        if ($currentUserId != $ownerId && ! Permissions::userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)) {
             return $this->legacyAbortResponse(__('legacy/delete.std_delete_failed'), __('legacy/delete.std_not_owner'));
         }
 
@@ -160,28 +166,28 @@ class TorrentDeleteController extends LegacyController
 
         TorrentOps::deleteTorrents($id, false);
 
-        if ($row['anonymous'] == 1 && $currentUserId == $row['owner']) {
-            Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by its anonymous uploader ($reasonstr)", 'normal');
+        if ($anonymous == 1 && $currentUserId == $ownerId) {
+            Log::writeWithContext("Torrent $id ({$name}) was deleted by its anonymous uploader ($reasonstr)", 'normal');
         } else {
-            Log::writeWithContext("Torrent $id ({$row['name']}) was deleted by {$curUser['username']} ($reasonstr)", 'normal');
+            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$curUser['username']} ($reasonstr)", 'normal');
         }
 
         $uploadtorrentBonus = (float) $this->globals->get('uploadtorrent_bonus', 0);
-        Bonus::updatePoints('-', $uploadtorrentBonus, (int) $row['owner']);
+        Bonus::updatePoints('-', $uploadtorrentBonus, $ownerId);
 
-        if ($currentUserId != $row['owner'] && User::query()->where('id', $row['owner'])->exists()) {
+        if ($currentUserId != $ownerId && User::query()->where('id', $ownerId)->exists()) {
             $dt = date('Y-m-d H:i:s');
-            $locale = Locale::userLocale((int) $row['owner']);
+            $locale = Locale::userLocale($ownerId);
             $subject = Locale::trans('torrent.msg_torrent_deleted', [], $locale);
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
-                .$row['name']
+                .$name
                 .Locale::trans('torrent.msg_was_deleted_by', [], $locale)
                 ."[url=userdetails.php?id=$currentUserId]{$curUser['username']}[/url]"
                 .Locale::trans('torrent.msg_reason_is', [], $locale)
                 .$reasonstr;
             Message::add([
                 'sender' => null,
-                'receiver' => $row['owner'],
+                'receiver' => $ownerId,
                 'subject' => $subject,
                 'msg' => $msg,
                 'added' => $dt,

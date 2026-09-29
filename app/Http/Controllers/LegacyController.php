@@ -25,7 +25,9 @@ abstract class LegacyController extends Controller
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
         }
 
-        $view = view()->make($page.'.index', $data);
+        /** @var view-string $viewName */
+        $viewName = $this->legacyViewName($page);
+        $view = view()->make($viewName, $data);
 
         /** @var View $view */
         return $view;
@@ -42,7 +44,9 @@ abstract class LegacyController extends Controller
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
         }
 
-        $content = view()->make($page.'.index', $data)->render();
+        /** @var view-string $viewName */
+        $viewName = $this->legacyViewName($page);
+        $content = view()->make($viewName, $data)->render();
 
         // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
         // globals (headers_list/http_response_code/header_remove) that
@@ -73,7 +77,9 @@ abstract class LegacyController extends Controller
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
         }
 
-        $content = view()->make($page.'.index', $data)->render();
+        /** @var view-string $viewName */
+        $viewName = $this->legacyViewName($page);
+        $content = view()->make($viewName, $data)->render();
 
         // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
         // globals (headers_list/http_response_code/header_remove) that
@@ -102,5 +108,10 @@ abstract class LegacyController extends Controller
     protected function legacyAbortResponse(string $heading, string $text, bool $htmlstrip = true): Response
     {
         return response(LegacyResponse::captureAbort($heading, $text, $htmlstrip));
+    }
+
+    private function legacyViewName(string $page): string
+    {
+        return $page.'.index';
     }
 }

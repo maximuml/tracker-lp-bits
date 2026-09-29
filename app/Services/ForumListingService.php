@@ -158,9 +158,9 @@ final class ForumListingService
 
         foreach ($topicRows as $topic) {
             $topicarr = $topic->toArray();
-            $topicid = (int) $topicarr['id'];
-            $locked = (bool) $topicarr['locked'];
-            $hlcolor = (int) $topicarr['hlcolor'];
+            $topicid = (int) ($topicarr['id'] ?? 0);
+            $locked = (bool) ($topicarr['locked'] ?? false);
+            $hlcolor = (int) ($topicarr['hlcolor'] ?? 0);
 
             $posts = $postCounts[$topicid] ?? 0;
 
@@ -187,7 +187,7 @@ final class ForumListingService
                 }
             }
 
-            $arr = $resolvePost((int) $topicarr['lastpost']);
+            $arr = $resolvePost((int) ($topicarr['lastpost'] ?? 0));
             $lppostid = (int) ($arr['id'] ?? 0);
             $lpuserid = (int) ($arr['userid'] ?? 0);
             $lpadded = (string) ($arr['added'] ?? '');
@@ -206,7 +206,7 @@ final class ForumListingService
                 ];
             }
 
-            $arr = $resolvePost((int) $topicarr['firstpost']);
+            $arr = $resolvePost((int) ($topicarr['firstpost'] ?? 0));
             $firstAdded = (string) ($arr['added'] ?? '');
             $lastpostread = $this->index->getLastReadPostId($topicid, $curUser);
 
@@ -223,9 +223,9 @@ final class ForumListingService
             $topics[] = new TopicRow(
                 id: $topicid,
                 forumId: $forumid,
-                subject: SafeHtml::fromTrustedHtml(Format::highlight($search, htmlspecialchars((string) $topicarr['subject']))),
+                subject: SafeHtml::fromTrustedHtml(Format::highlight($search, htmlspecialchars((string) ($topicarr['subject'] ?? '')))),
                 hlcolor: $hlcolor,
-                sticky: $topicarr['sticky'] == 1,
+                sticky: ($topicarr['sticky'] ?? 0) == 1,
                 state: $state,
                 visiblePages: $visiblePages,
                 jumpToPostId: $jumpToPostId,
@@ -234,7 +234,7 @@ final class ForumListingService
                 firstAdded: substr($firstAdded, 0, 10),
                 firstAddedRecent: strtotime($firstAdded) + 86400 > (int) (defined('TIMENOW') ? constant('TIMENOW') : time()),
                 replies: max(0, $posts - 1),
-                views: (int) $topicarr['views'],
+                views: (int) ($topicarr['views'] ?? 0),
                 lastPostAt: $lpadded,
                 lastPoster: UserDisplay::username($lpuserid),
             );
@@ -277,8 +277,8 @@ final class ForumListingService
 
         foreach ($unreadTopics as $topic) {
             $arr = $topic->toArray();
-            $topiclastpost = (int) $arr['lastpost'];
-            $topicid = (int) $arr['id'];
+            $topiclastpost = (int) ($arr['lastpost'] ?? 0);
+            $topicid = (int) ($arr['id'] ?? 0);
 
             $lastpostread = $this->index->getLastReadPostId($topicid, $curUser);
 
@@ -286,7 +286,7 @@ final class ForumListingService
                 continue;
             }
 
-            $forumid = (int) $arr['forumid'];
+            $forumid = (int) ($arr['forumid'] ?? 0);
             $a = $this->index->getForumRow($forumid);
             if ($uc < (int) ($a['minclassread'] ?? 0)) {
                 continue;
@@ -298,8 +298,8 @@ final class ForumListingService
 
             $topics[] = new UnreadTopicRow(
                 topicId: $topicid,
-                subject: SafeHtml::fromTrustedHtml(htmlspecialchars((string) $arr['subject'])),
-                hlcolor: (int) $arr['hlcolor'],
+                subject: SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($arr['subject'] ?? ''))),
+                hlcolor: (int) ($arr['hlcolor'] ?? 0),
                 jumpToPostId: ($lastpostread > 0 && $lastpostread != $lastCatchup) ? $lastpostread : null,
                 forumId: $forumid,
                 forumName: (string) ($a['name'] ?? ''),

@@ -64,16 +64,16 @@ final class ForumTopicViewService
         }
         $arr = $topic->toArray();
 
-        $forumid = (int) $arr['forumid'];
-        $locked = (bool) $arr['locked'];
-        $orgsubject = (string) $arr['subject'];
+        $forumid = (int) ($arr['forumid'] ?? 0);
+        $locked = (bool) ($arr['locked'] ?? false);
+        $orgsubject = (string) ($arr['subject'] ?? '');
         $subject = SafeHtml::fromTrustedHtml(
             $highlight !== ''
                 ? Format::highlight(htmlspecialchars($highlight), $orgsubject)
                 : htmlspecialchars($orgsubject),
         );
-        $sticky = $arr['sticky'] == 1;
-        $views = (int) $arr['views'];
+        $sticky = ($arr['sticky'] ?? 0) == 1;
+        $views = (int) ($arr['views'] ?? 0);
 
         $row = $this->index->getForumRow($forumid);
         $forumname = (string) ($row['name'] ?? '');
@@ -126,7 +126,7 @@ final class ForumTopicViewService
         foreach ($postRows as $postObj) {
             $postArr = $postObj->toArray();
             $allPosts[] = $postArr;
-            $uidArr[$postArr['userid']] = 1;
+            $uidArr[$postArr['userid'] ?? 0] = 1;
         }
         $uidArr = array_keys($uidArr);
 
@@ -157,10 +157,10 @@ final class ForumTopicViewService
 
         $renderedFmt = [];
         if ($this->legacyRedisCache !== null && $allPosts !== []) {
-            $fmtKeys = array_map(static fn ($p) => 'fmt_post_'.md5((string) $p['body']), $allPosts);
+            $fmtKeys = array_map(static fn ($p) => 'fmt_post_'.md5((string) ($p['body'] ?? '')), $allPosts);
             if (LegacyYesNo::isYes($curUser['signatures'] ?? null)) {
                 foreach ($allPosts as $p) {
-                    $sig = (string) (optional($userInfoArr->get((int) $p['userid']))->signature ?? '');
+                    $sig = (string) (optional($userInfoArr->get((int) ($p['userid'] ?? 0)))->signature ?? '');
                     if ($sig !== '') {
                         $fmtKeys[] = 'fmt_sig_'.md5($sig);
                     }
@@ -184,8 +184,8 @@ final class ForumTopicViewService
         $pn = 0;
         foreach ($allPosts as $arr) {
             $pn++;
-            $postid = (int) $arr['id'];
-            $posterid = (int) $arr['userid'];
+            $postid = (int) ($arr['id'] ?? 0);
+            $posterid = (int) ($arr['userid'] ?? 0);
 
             $userInfo = $userInfoArr->get($posterid) ?: User::defaultUser();
             $arr2 = $userInfo->toArray();
@@ -206,7 +206,7 @@ final class ForumTopicViewService
 
             $canViewProtected = $pn + $offset <= 1 || Forum::canViewPost($userId, $arr);
             $bodyContent = $canViewProtected
-                ? $renderFmt('fmt_post_'.md5((string) $arr['body']), static fn () => Format::formatComment((string) $arr['body']))
+                ? $renderFmt('fmt_post_'.md5((string) ($arr['body'] ?? '')), static fn () => Format::formatComment((string) ($arr['body'] ?? '')))
                 : Format::formatComment((string) (__('legacy/forums.text_post_protected')));
             if ($highlight !== '') {
                 $bodyContent = SafeHtml::fromTrustedHtml(Format::highlight(htmlspecialchars($highlight), (string) $bodyContent));
@@ -214,9 +214,9 @@ final class ForumTopicViewService
 
             $editedBy = null;
             $editedAtRaw = null;
-            if (Validators::isId($arr['editedby'])) {
-                $editedBy = SafeHtml::fromTrustedHtml(UserDisplay::username((int) $arr['editedby']));
-                $editedAtRaw = $arr['editdate'];
+            if (Validators::isId($arr['editedby'] ?? null)) {
+                $editedBy = SafeHtml::fromTrustedHtml(UserDisplay::username((int) ($arr['editedby'] ?? 0)));
+                $editedAtRaw = $arr['editdate'] ?? null;
             }
 
             $dt = date('Y-m-d H:i:s', (int) (defined('TIMENOW') ? constant('TIMENOW') : time()) - 900);
@@ -227,7 +227,7 @@ final class ForumTopicViewService
                 number: $pn + $offset,
                 isLast: $isLast,
                 anchorUrl: 'forums.php?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid,
-                addedRaw: $arr['added'],
+                addedRaw: (string) ($arr['added'] ?? ''),
                 by: SafeHtml::fromTrustedHtml(UserDisplay::username($posterid, false, true, true, false, false, true)),
                 authorToggleUrl: $authorid
                     ? '?action=viewtopic&topicid='.$topicid
@@ -239,9 +239,9 @@ final class ForumTopicViewService
                 classImage: UserClass::imagePath((int) ($arr2['class'] ?? 0)),
                 className: $className,
                 postCount: (int) $forumposts,
-                uploaded: Format::size($arr2['uploaded']),
-                downloaded: Format::size($arr2['downloaded']),
-                ratio: SafeHtml::fromTrustedHtml((string) Ratio::forUserId((int) $arr2['id'])),
+                uploaded: Format::size($arr2['uploaded'] ?? 0),
+                downloaded: Format::size($arr2['downloaded'] ?? 0),
+                ratio: SafeHtml::fromTrustedHtml((string) Ratio::forUserId((int) ($arr2['id'] ?? 0))),
                 body: $bodyContent,
                 signature: $signature !== ''
                     ? $renderFmt('fmt_sig_'.md5($signature), static fn () => Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200))

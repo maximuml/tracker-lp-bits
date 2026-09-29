@@ -96,6 +96,11 @@ final class RateLimiterTest extends TestCase
         $this->assertFalse($this->limiter->check($this->dto($passkey, 'stopped'))->isReAnnounce);
         // A same-event retry is still deduplicated.
         $this->assertTrue($this->limiter->check($this->dto($passkey, 'stopped'))->isReAnnounce);
+        // stopped ended the session: a re-start is not deduped against the
+        // first started (still subject to the frequency gate — cleared here).
+        $fingerprint = InfoHash::fromBinary($this->infoHash())->fingerprint();
+        Redis::connection()->client()->del("reAnnounceCheckByInfoHash:{$passkey}:{$fingerprint}");
+        $this->assertFalse($this->limiter->check($this->dto($passkey, 'started'))->isReAnnounce);
     }
 
     public function test_invalid_passkey_flag_warns_regular_announce(): void

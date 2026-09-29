@@ -86,6 +86,18 @@ final class RateLimiterTest extends TestCase
         $this->assertTrue($this->limiter->check($dto)->isReAnnounce);
     }
 
+    public function test_different_event_within_window_is_not_reannounce(): void
+    {
+        $this->hashByte = "\xA7";
+        $passkey = bin2hex(random_bytes(16));
+
+        $this->assertFalse($this->limiter->check($this->dto($passkey, 'started'))->isReAnnounce);
+        // A state transition must reach PeerLifecycle — it is not a duplicate.
+        $this->assertFalse($this->limiter->check($this->dto($passkey, 'stopped'))->isReAnnounce);
+        // A same-event retry is still deduplicated.
+        $this->assertTrue($this->limiter->check($this->dto($passkey, 'stopped'))->isReAnnounce);
+    }
+
     public function test_invalid_passkey_flag_warns_regular_announce(): void
     {
         $this->hashByte = "\xA2";

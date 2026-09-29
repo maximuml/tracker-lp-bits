@@ -209,7 +209,17 @@ class BackupTransferService
         $localFilesystem = new Filesystem($localAdapter);
         $start = Carbon::now();
         try {
-            $remoteFilesystem->writeStream(basename($filename), $localFilesystem->readStream($filename));
+            $remoteName = basename($filename);
+            $remoteFilesystem->writeStream($remoteName, $localFilesystem->readStream($filename));
+            // Some adapters report a failed write as a silent false rather
+            // than throwing — verify the file actually landed (and is whole)
+            // before reporting success.
+            if (! $remoteFilesystem->fileExists($remoteName)) {
+                throw new \RuntimeException("Remote file {$remoteName} missing after upload");
+            }
+            if ($remoteFilesystem->fileSize($remoteName) !== filesize($filename)) {
+                throw new \RuntimeException("Remote file {$remoteName} size mismatch after upload");
+            }
             $speed = ! (float) abs($start->diffInSeconds()) ? 0 : filesize($filename) / (float) abs($start->diffInSeconds());
             $log = 'Elapsed time: '.$start->diffForHumans(null, CarbonInterface::DIFF_ABSOLUTE);
             $log .= ', Speed: '.number_format($speed / 1024, 2).' KB/s';

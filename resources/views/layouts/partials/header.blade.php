@@ -10,9 +10,6 @@
             @else
                 <a class="nxm-logo" href="index.php"><img src="{{ $chrome->logoMain }}" alt="{{ $chrome->siteName }}" /></a>
             @endif
-            @if($chrome->enableDonation)
-                <a class="nxm-donate" href="donate.php"><img src="{{ $chrome->head->picFolder }}/donate.gif" alt="{{ 'Make a donation' }}" /></a>
-            @endif
         </div>
         @if($chrome->user)
         <div class="nxm-collapse" id="nxm-collapse">
@@ -66,6 +63,9 @@
                         </span>
                         <button type="button" class="nxm-iconbtn nxm-theme-toggle" data-persist-url="/web/usercp/theme" title="{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}">{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}</button>
                         <form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nxm-iconbtn" title="{{ __('legacy/functions.text_logout') }}" aria-label="{{ __('legacy/functions.text_logout') }}"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6 1v3h1V2h6v12H7v-2H6v3h8V1H6z"/><path d="M3.3 5.3.6 8l2.7 2.7.7-.7L2.4 8.4h7.6V7.6H2.4L4 6l-.7-.7z"/></svg></button></form>
+                        @if($chrome->enableDonation)
+                        <a class="nxm-donate" href="donate.php"><img src="{{ $chrome->head->picFolder }}/donate.gif" alt="{{ 'Make a donation' }}" /></a>
+                        @endif
                     </div>
                     <details class="nxm-usermenu">
                         <summary class="nxm-usermenu__toggle">
@@ -106,6 +106,9 @@
                 <li><a class="nxm-nav__link" href="login.php">{{ __('legacy/functions.text_login') }}</a></li>
                 <li><a class="nxm-nav__link" href="signup.php">{{ __('legacy/functions.text_signup') }}</a></li>
                 <li><button type="button" class="nxm-linkbtn nxm-theme-toggle" title="{{ 'Theme' }}">[{{ 'Theme' }}]</button></li>
+                @if($chrome->enableDonation)
+                <li><a class="nxm-donate" href="donate.php"><img src="{{ $chrome->head->picFolder }}/donate.gif" alt="{{ 'Make a donation' }}" /></a></li>
+                @endif
             </ul>
         </nav>
         @endif

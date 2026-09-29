@@ -854,9 +854,13 @@ dialog.nx-modal--loading .nx-modal__spinner {
     font-size: inherit;
 }
 
+.nxm-donate {
+    display: inline-flex;
+    align-items: center;
+}
+
 .nxm-donate img {
     display: block;
-    margin-top: 0.4rem;
 }
 
 .nxm-ok { color: var(--nxm-userbar-ok); }

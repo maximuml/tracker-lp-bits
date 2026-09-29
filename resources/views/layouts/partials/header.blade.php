@@ -116,10 +116,6 @@
     @if($chrome->user)
     <div class="nxm-chips" role="group" aria-label="{{ 'Account stats' }}">
         <span class="nxm-userbar__stats">
-            <a href="messages.php" class="nxm-stat" aria-label="{{ __('legacy/functions.title_inbox') }}">
-                <span class="nxm-stat__label">{{ 'Messages' }}</span>
-                <span class="nxm-stat__value">{{ $chrome->userBar->inboxCount }}@if($chrome->userBar->unreadCount > 0) <b>({{ $chrome->userBar->unreadCount }} {{ __('legacy/functions.text_message_new') }})</b>@endif</span>
-            </a>
             <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_ratio') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->ratio }}</span></span>
             <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_uploaded') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->uploaded }}</span></span>
             <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_downloaded') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->downloaded }}</span></span>

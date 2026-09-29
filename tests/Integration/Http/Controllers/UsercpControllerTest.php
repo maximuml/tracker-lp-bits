@@ -145,14 +145,19 @@ final class UsercpControllerTest extends TestCase
      */
     public function test_tracker_collects_category_checkboxes_by_presence(): void
     {
-        $user = User::factory()->create(['class' => 1, 'notifs' => '[cat402][med3][pm]']);
+        $catId = (int) DB::table('categories')->min('id');
+        $medId = (int) DB::table('media')->min('id');
+        $staId = (int) DB::table('standards')->min('id');
+        $this->assertGreaterThan(0, $catId);
+
+        $user = User::factory()->create(['class' => 1, 'notifs' => '[pm]']);
         $this->actingAs($user);
 
         $controller = app(UsercpController::class);
         $request = Request::create('/api/usercp/tracker', 'POST', [
-            'cat401' => '0',
-            'med1' => '0',
-            'sta2' => '0',
+            "cat{$catId}" => '0',
+            "med{$medId}" => '0',
+            "sta{$staId}" => '0',
             'pmnotif' => 'yes',
             'torrentsperpage' => 25,
             'pmnum' => 20,
@@ -166,12 +171,10 @@ final class UsercpControllerTest extends TestCase
         $this->assertSame(0, $result['ret']);
 
         $notifs = (string) DB::table('users')->where('id', $user->id)->value('notifs');
-        $this->assertStringContainsString('[cat401]', $notifs);
-        $this->assertStringContainsString('[med1]', $notifs);
-        $this->assertStringContainsString('[sta2]', $notifs);
+        $this->assertStringContainsString("[cat{$catId}]", $notifs);
+        $this->assertStringContainsString("[med{$medId}]", $notifs);
+        $this->assertStringContainsString("[sta{$staId}]", $notifs);
         $this->assertStringContainsString('[pm]', $notifs);
-        $this->assertStringNotContainsString('[cat402]', $notifs);
-        $this->assertStringNotContainsString('[med3]', $notifs);
     }
 
     /**

@@ -239,3 +239,48 @@ get client with url: http://meilisearch:7700, master key:
     applied via `<link href="styles/<Name>/theme.css">`, then eyeball
     contrast (computed body bg/fg luminance) + `scrollWidth` overflow.
     Restore both DB values and `cache:clear` afterwards.
+27. **Announce re-announce dedup window:** `RateLimiter` sets
+    `isReAnnounce:<hash(info_hash+passkey+event)>` with
+    `RE_ANNOUNCE_INTERVAL=5` (NX+EX); a same-event announce inside ~5 s
+    early-returns before `PeerLifecycle`. The event is part of the key
+    (fixed in devin/1790675163): a stopped/completed right after started
+    still reaches PeerLifecycle. In tests still avoid issuing two
+    same-event announces within 5 s.
+28. **Seed-bonus accrual recipe:** `php artisan cleanup --action=seed_bonus`
+    with NO uid args silently no-ops (job logs "no idStr or idRedisKey").
+    Pass `--id_str=10042,10043` (or `--begin_id/--end_id`) — SeedBonusJob
+    then runs on the queue worker and credits `users.seedbonus`. Needs a
+    REAL `peers` row with `seeder=1` (`event=completed` creates one) else
+    result is 0. `tracker:calculate_seed_bonus <uid>` computes but does
+    not persist (diagnostic only).
+29. **Backup FTP/SFTP e2e recipe:** creds are .env-only
+    (`FTP_HOST/USERNAME/PASSWORD/PORT/ROOT`, `SFTP_*`) — repo `.env`
+    lacks `FTP_*` keys by default; add them + `config:clear`.
+    `stilliard/pure-ftpd` (`-e FTP_USER_NAME=backup -e FTP_USER_PASS=… -e FTP_USER_HOME=/home/backup -e PUBLICHOST=backup-ftp`)
+    works for FTP; for `atmoz/sftp` do NOT use username `backup` — it
+    collides with the Debian system account (uid 34, nologin) → all
+    auth fails; use e.g. `sftpuser:pass:1500:1500:upload`. Settings:
+    `backup.enabled=yes`, `via_ftp=yes`, `via_sftp=yes`,
+    `retention_count=N` in `settings` + `cache:clear`. Run
+    `php artisan backup:cronjob --force=1` — bare `--force` takes no
+    value and the scheduled-hour check skips. Verify the file on the
+    servers — `doTransfer` now checks remote `fileExists`+`fileSize`
+    after writeStream (devin/1790675163), so `transfer_result.*=true`
+    means the file really landed; still spot-check when testing.
+30. **Filament settings fields have no `name` attribute** — Livewire-bound
+    inputs are `wire:model="data.<section>.<key>"` with
+    `id="content.<section>.<key>"`. Select by
+    `#content\.system\.cookie_valid_days` or `[wire\:model*=key]`, not
+    `input[name=...]`. Tab buttons = `button.fi-tabs-item`.
+31. **/horizon dashboard check:** it was CSP-broken (strict nonce
+    blocked Horizon's inline boot script → zero API calls, empty
+    panels); fixed — `isRelaxedPolicyRoute()` whitelists `horizon`.
+    Verify the dashboard actually MOUNTS (supervisors table + overview
+    stats render, `/horizon/api/*` calls fire), not just a 200 + sidebar.
+32. **Comment delete is a 2-step GET-confirm-POST flow:** link
+    `comment.php?action=delete&cid=N&type=torrent` → confirm page with
+    `form[action*="action=delete"]` → POST. Click the submit INSIDE
+    that form; a page-wide `input[type=submit]` first-match can hit
+    search/logout instead.
+33. **PM unread column is `messages.unread` = `1`/`0`** (tinyint-ish, not
+    the legacy `'yes'`/`'no'` string) — assert with `unread=1`.

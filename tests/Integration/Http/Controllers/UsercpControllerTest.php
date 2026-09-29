@@ -137,4 +137,86 @@ final class UsercpControllerTest extends TestCase
         $updated = DB::table('users')->where('id', $user->id)->first();
         $this->assertSame(0, (int) $updated->privacy);
     }
+
+    /**
+     * The category browse-notification grid emits checkboxes with value="0":
+     * presence in POST means checked (legacy isset() semantics). Previously
+     * the collector required === 'yes', so every save wiped cat/med/sta prefs.
+     */
+    public function test_tracker_collects_category_checkboxes_by_presence(): void
+    {
+        $user = User::factory()->create(['class' => 1, 'notifs' => '[cat402][med3][pm]']);
+        $this->actingAs($user);
+
+        $controller = app(UsercpController::class);
+        $request = Request::create('/api/usercp/tracker', 'POST', [
+            'cat401' => '0',
+            'med1' => '0',
+            'sta2' => '0',
+            'pmnotif' => 'yes',
+            'torrentsperpage' => 25,
+            'pmnum' => 20,
+            'sbnum' => 70,
+            'sbrefresh' => 120,
+        ]);
+        app()->instance('request', $request);
+
+        $result = $controller->tracker($request);
+
+        $this->assertSame(0, $result['ret']);
+
+        $notifs = (string) DB::table('users')->where('id', $user->id)->value('notifs');
+        $this->assertStringContainsString('[cat401]', $notifs);
+        $this->assertStringContainsString('[med1]', $notifs);
+        $this->assertStringContainsString('[sta2]', $notifs);
+        $this->assertStringContainsString('[pm]', $notifs);
+        $this->assertStringNotContainsString('[cat402]', $notifs);
+        $this->assertStringNotContainsString('[med3]', $notifs);
+    }
+
+    /**
+     * ttlastpost is a plain checkbox: absent means unchecked → write 'no'.
+     */
+    public function test_forum_unchecked_ttlastpost_disables_showlastpost(): void
+    {
+        $user = User::factory()->create(['class' => 1, 'showlastpost' => 1]);
+        $this->actingAs($user);
+
+        $controller = app(UsercpController::class);
+        $request = Request::create('/api/usercp/forum', 'POST', [
+            'topicsperpage' => 15,
+            'postsperpage' => 25,
+            'signature' => 'sig',
+        ]);
+        app()->instance('request', $request);
+
+        $result = $controller->forum($request);
+
+        $this->assertSame(0, $result['ret']);
+        $this->assertSame(0, (int) DB::table('users')->where('id', $user->id)->value('showlastpost'));
+    }
+
+    public function test_personal_empty_avatar_clears_and_invalid_keeps(): void
+    {
+        $user = User::factory()->create(['class' => 1, 'avatar' => 'https://example.com/a.jpg']);
+        $this->actingAs($user);
+
+        $controller = app(UsercpController::class);
+
+        // Invalid relative path — current avatar kept, not written over.
+        $request = Request::create('/api/usercp/settings', 'POST', [
+            'avatar' => 'not/a/url.jpg',
+        ]);
+        app()->instance('request', $request);
+        $this->assertSame(0, $controller->settings($request)['ret']);
+        $this->assertSame('https://example.com/a.jpg', DB::table('users')->where('id', $user->id)->value('avatar'));
+
+        // Explicit empty field clears the stored avatar.
+        $request = Request::create('/api/usercp/settings', 'POST', [
+            'avatar' => '',
+        ]);
+        app()->instance('request', $request);
+        $this->assertSame(0, $controller->settings($request)['ret']);
+        $this->assertSame('', (string) DB::table('users')->where('id', $user->id)->value('avatar'));
+    }
 }

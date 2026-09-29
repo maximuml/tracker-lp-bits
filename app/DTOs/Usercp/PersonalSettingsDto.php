@@ -72,9 +72,15 @@ final readonly class PersonalSettingsDto
 
     private static function sanitizeAvatar(Request $request): ?string
     {
-        $avatar = (string) $request->input('avatar', '');
+        $avatar = trim((string) $request->input('avatar', ''));
         if ($avatar === '') {
-            $avatar = (string) $request->input('savatar', '');
+            $avatar = trim((string) $request->input('savatar', ''));
+        }
+
+        if ($avatar === '') {
+            // The avatar field is always on the form: an explicit empty
+            // value clears the stored avatar.
+            return $request->has('avatar') ? '' : null;
         }
 
         if (
@@ -86,6 +92,8 @@ final readonly class PersonalSettingsDto
             return htmlspecialchars(trim($avatar));
         }
 
+        // Non-empty but invalid — keep the current avatar rather than
+        // persisting an unsafe or broken URL.
         return null;
     }
 

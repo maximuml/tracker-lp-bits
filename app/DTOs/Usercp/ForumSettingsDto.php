@@ -40,9 +40,9 @@ final readonly class ForumSettingsDto
 
         $signature = htmlspecialchars(trim((string) $request->input('signature', '')));
 
-        $showlastpost = $request->has('ttlastpost')
-            ? $request->input('ttlastpost') === 'yes'
-            : null;
+        // ttlastpost is a plain checkbox: absent from POST means the user
+        // unchecked it — that is an explicit "no", not "leave unchanged".
+        $showlastpost = $request->input('ttlastpost') === 'yes';
 
         return new self(
             $topicsperpage,

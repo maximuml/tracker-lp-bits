@@ -70,3 +70,17 @@ Use when verifying PRs that migrate `usercp.php`, auth pages, bitbucket/attachme
 - For sign-up, the form uses client-side password hashing; if testing with `fetch`, either replicate the JS hashing or use a browser `page.click` on the submit button.
 - `/comments.php` is not the migrated route; use `/comment/add?type=torrent&pid=1` instead.
 - `/recover.php` and `/confirm_resend.php` redirect to `/index.php` when the user is already logged in, so test them in a fresh/incognito context.
+
+## Usercp field-level audit notes (verified Sep 2026)
+
+- Tabs with saveable forms: `personal`, `tracker`, `forum`, `security` (`UsercpController::$allowedActions`); `messenger`/`home` are display-only.
+- personal/tracker/forum save via `type=save` → redirect `?type=saved`. Security is **2-step**: `type=save` → confirm page (fill `input.oldpassword` — `auth-form.js` hashes it into `input[name=response]`) → `type=confirm` → `?type=saved&passkey=1&privacy=1` flags.
+- Field→column map: personal→parked/acceptpms/deletepms/savepms/commentpm/notifs/gender/country/tracker_url_id/avatar/info; tracker→~20 users columns + `users.notifs` bracket string `[cat401][pm][incldead=1]`; forum→topicsperpage/postsperpage/avatars/signatures/showlastpost/clicktopic/signature; security→privacy/passkey/chpassword/email/two_step.
+- **Radio re-render (FIXED)**: tinyint enum columns are mapped via `Enum::tryFrom(int)?->stringValue()` so radios render checked (acceptpms, gender, timetype, appendpromotion, clicktopic, fontsize, tooltip). Saving with no radio checked still writes the `fromStringSafe('')` default — a real form always posts the checked radio.
+- **Category notification checkboxes (FIXED)**: `collectNotifPreferences` uses legacy presence semantics (prefix+digits key shape), so checked boxes collect and `updateTracker` rebuilds `users.notifs` correctly.
+- **ttlastpost (FIXED)**: absent checkbox → explicit `showlastpost=0` write; unchecked now disables again.
+- avatar input accepts ONLY absolute `https?://…(jpg|gif|png|jpeg)` — invalid non-empty values are rejected and keep the current avatar; an explicit empty field clears it. `savatar` select is the fallback source.
+- `notifs[option]` checkboxes (topic_reply/hr_reached) write `[option]` keys into `users.notifs`; `pmnotif`/`emailnotif` may be class-gated (absent for lpfan05).
+- Checkboxes posting `value=yes` work (`in:yes`/`=== 'yes'`); valueless ones post `'on'` → only `has()`-based fields (deletepms/savepms) work with them.
+- Sysop usercp behaves identically to seeded users (same defects, not class-gated).
+- mysql recipe: `docker compose -f docker-compose.yml -f docker-compose.dev.yml exec -T mysql sh -c 'mysql -u$MYSQL_USER -p$MYSQL_PASSWORD nexusphp -e "SQL"'` — always qualify `nexusphp` DB.

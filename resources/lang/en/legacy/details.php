@@ -220,5 +220,6 @@ return [
     'text_reward_sent' => 'Bonus gift sent!',
     'action_approval' => 'Approval',
     'row_tags' => 'Tags',
+    'row_screenshots' => 'Screenshots',
     'torrent_existed' => 'Torrent already uploaded!',
 ];

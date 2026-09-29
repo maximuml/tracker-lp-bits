@@ -31,6 +31,15 @@
 @else
 <x-settings-row :label="__('legacy/details.row_download')">{{ __('legacy/details.text_downloading_not_allowed') ?? '' }}</x-settings-row>
 @endif
+@if (count($screenshots ?? []) > 0)
+<x-settings-row :label="__('legacy/details.row_screenshots')">
+    <div class="nxm-screens">
+    @foreach ($screenshots as $shot)
+        <a class="nxm-screens__item" href="{{ $shot }}" target="_blank" rel="noopener"><img src="{{ $shot }}" alt="{{ $details->title->name }}" loading="lazy" /></a>
+    @endforeach
+    </div>
+</x-settings-row>
+@endif
 @if (! $tagHtml->isEmpty())
 <x-settings-row :label="__('legacy/details.row_tags')">{{ $tagHtml }}</x-settings-row>
 @endif

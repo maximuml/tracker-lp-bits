@@ -13,7 +13,7 @@ $root = dirname(__DIR__);
 
 require $root.'/vendor/autoload.php';
 $app = require $root.'/bootstrap/app.php';
-$app->make(Kernel::class)->bootstrap();
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 if (! app()->environment('local', 'development', 'testing')) {
     fwrite(STDERR, 'dev-seed is for local dev stacks only (APP_ENV='.app()->environment().")\n");
@@ -77,7 +77,7 @@ $releases = [
     ['Linkin.Park.-.Grey.Daze.Amends.2020.FLAC', 408, 'Chester Bennington side project'],
 ];
 
-$screens1 = '[img]/pic/test-poster.jpg[/img] [img]/pic/test-poster.jpg[/img] [img]/pic/test-poster.jpg[/img]';
+$screens1 = '[img]/pic/test-poster.jpg[/img] [img]/pic/bangumi.jpg[/img] [img]/pic/invienova.jpg[/img] [img]/pic/test-poster.jpg[/img]';
 $torDir = $root.'/torrents';
 $baseUrl = 'http://localhost/announce.php';
 
@@ -143,7 +143,6 @@ foreach ($releases as [$name, $cat, $tagline]) {
         ."A fan-archived release for the LP-Bits community. {$tagline}. "
         ."Seeded at full speed; please keep seeding after finish — see H&R rules.\n\n"
         ."[b]Screenshots:[/b]\n{$screens1}\n\n"
-        ."[b]MediaInfo:[/b]\n[quote][font=Courier New]".mediaInfo($name, $size)."[/font][/quote]\n\n"
         .'[b]Notes:[/b] sourced from the fan archive; report issues in the comments.';
 
     $owner = $owners->random();

@@ -1201,6 +1201,13 @@ table.nx-torrents tbody td { background: var(--nxm-surface); }
     table.nx-torrents tbody tr:hover td { background: var(--nxm-surface-alt); }
 }
 .nx-pagination__link--disabled { color: var(--nxm-muted); border-color: var(--nxm-border); cursor: default; }
+
+.nxm-screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: .5rem; max-width: 880px; }
+.nxm-screens__item { display: block; border: 1px solid var(--nxm-border); border-radius: 8px; overflow: hidden; background: var(--nxm-surface-alt); }
+.nxm-screens__item img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; }
+@media (min-width: 721px) {
+    .nxm-screens__item:hover { border-color: var(--nxm-accent); }
+}
 .nxm-td-icon { padding: 0; }
 .nxm-nameblock { display: flex; align-items: center; width: 100%; }
 .nxm-cover { flex: 0 0 auto; text-align: center; width: 46px; height: 46px; }

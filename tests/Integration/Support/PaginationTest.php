@@ -43,16 +43,16 @@ final class PaginationTest extends TestCase
         $this->assertSame(3, $result[5]);
     }
 
-    public function test_render_first_page_prev_is_gray(): void
+    public function test_render_first_page_prev_is_disabled(): void
     {
         $result = Pagination::render(10, 50, '/list.php?', 0, 5, self::LABELS);
-        $this->assertStringContainsString('<span class="gray"><b title="Alt+PageUp">', $result[0]);
+        $this->assertStringContainsString('<span class="nx-pagination__link nx-pagination__link--disabled">&lsaquo; Prev</span>', $result[0]);
     }
 
-    public function test_render_last_page_next_is_gray(): void
+    public function test_render_last_page_next_is_disabled(): void
     {
         $result = Pagination::render(10, 50, '/list.php?', 4, 5, self::LABELS);
-        $this->assertStringContainsString('<span class="gray"><b title="Alt+PageDown">', $result[0]);
+        $this->assertStringContainsString('<span class="nx-pagination__link nx-pagination__link--disabled">Next &rsaquo;</span>', $result[0]);
     }
 
     public function test_render_mid_page_has_both_links(): void
@@ -71,29 +71,25 @@ final class PaginationTest extends TestCase
         $this->assertSame($result[0]->toHtml(), $result[1]->toHtml());
     }
 
-    public function test_render_current_page_is_gray_span(): void
+    public function test_render_current_page_is_marked_current(): void
     {
         $result = Pagination::render(10, 30, '/list.php?', 1, 3, self::LABELS);
-        // Page 1 (0-indexed) shows items "11 - 20" in gray
-        $this->assertStringContainsString('<span class="gray"><b>11&nbsp;-&nbsp;20</b></span>', $result[0]);
+        // Page 1 (0-indexed) covers items "11 - 20" and is the current page button
+        $this->assertStringContainsString('nx-pagination__link--current', $result[0]);
+        $this->assertStringContainsString('aria-current="page" title="11 - 20">2</span>', $result[0]);
     }
 
     public function test_render_pagertop_has_nexus_pagination_class(): void
     {
         $result = Pagination::render(10, 30, '/list.php?', 0, 3, self::LABELS);
-        $this->assertStringContainsString('class="nexus-pagination nx-center"', $result[0]);
+        $this->assertStringContainsString('class="nexus-pagination nx-pagination nx-center"', $result[0]);
     }
 
-    public function test_render_pagerbottom_has_reversed_order(): void
+    public function test_render_pager_top_and_bottom_are_identical(): void
     {
         $result = Pagination::render(10, 30, '/list.php?', 0, 3, self::LABELS);
-        // Top: pager + <br /> + pagerstr
-        $this->assertStringContainsString('&lt;&lt;', $result[0]);
-        // Bottom: pagerstr + <br /> + pager
-        $topParts = explode('<br />', strip_tags($result[0], '<br>'));
-        $bottomParts = explode('<br />', strip_tags($result[1], '<br>'));
-        // In top, navigation comes first; in bottom, page numbers come first
-        $this->assertStringContainsString('Prev', $topParts[0] ?? '');
+        $this->assertStringContainsString('&lsaquo; Prev', $result[0]);
+        $this->assertSame($result[0]->toHtml(), $result[1]->toHtml());
     }
 
     public function test_render_presto_uses_shift_titles(): void
@@ -121,14 +117,14 @@ final class PaginationTest extends TestCase
     {
         // With 20 pages and page=10, dots should appear between page groups
         $result = Pagination::render(10, 200, '/list.php?', 10, 20, self::LABELS);
-        $this->assertStringContainsString('...', $result[0]);
+        $this->assertStringContainsString('…', $result[0]);
     }
 
     public function test_render_last_page_shows_correct_end_count(): void
     {
-        // 25 items, 10 per page = 3 pages. Last page shows "21 - 25"
+        // 25 items, 10 per page = 3 pages. Last page shows the "21 - 25" range in its tooltip
         $result = Pagination::render(10, 25, '/list.php?', 2, 3, self::LABELS);
-        $this->assertStringContainsString('21&nbsp;-&nbsp;25', $result[0]);
+        $this->assertStringContainsString('title="21 - 25"', $result[0]);
     }
 
     public function test_render_href_is_escaped(): void

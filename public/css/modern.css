@@ -1194,6 +1194,13 @@ input[type="reset"] {
 .nxm-offer-actions { display: flex; gap: 8px; }
 .nxm-table { border-collapse: collapse; }
 .nxm-table th { text-align: left; white-space: nowrap; }
+.nxm-th__label { margin-left: .3rem; font-size: .82em; vertical-align: 1px; }
+table.nx-torrents .colhead img { vertical-align: -3px; }
+table.nx-torrents tbody td { background: var(--nxm-surface); }
+@media (min-width: 721px) {
+    table.nx-torrents tbody tr:hover td { background: var(--nxm-surface-alt); }
+}
+.nx-pagination__link--disabled { color: var(--nxm-muted); border-color: var(--nxm-border); cursor: default; }
 .nxm-td-icon { padding: 0; }
 .nxm-nameblock { display: flex; align-items: center; width: 100%; }
 .nxm-cover { flex: 0 0 auto; text-align: center; width: 46px; height: 46px; }

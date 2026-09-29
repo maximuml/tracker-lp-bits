@@ -11,5 +11,6 @@ final readonly class PagerLinkViewModel
         public string $start,
         public string $end,
         public ?string $url,
+        public ?int $num = null,
     ) {}
 }

@@ -87,7 +87,7 @@ final class Pagination
             for ($i = 0; $i < $pages; $i++) {
                 if (($i >= $dotspace && $i <= $curdotend) || ($i >= $curdotstart && $i < $dotend)) {
                     if (! $dotted) {
-                        $links[] = new PagerLinkViewModel(dots: true, start: '', end: '', url: null);
+                        $links[] = new PagerLinkViewModel(dots: true, start: '', end: '', url: null, num: null);
                     }
                     $dotted = 1;
 
@@ -101,6 +101,7 @@ final class Pagination
                     start: (string) $start,
                     end: (string) $end,
                     url: $i != $page ? $href.$pagename.'='.$i : null,
+                    num: $i + 1,
                 );
             }
         }

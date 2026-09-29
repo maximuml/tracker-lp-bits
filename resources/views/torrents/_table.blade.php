@@ -4,15 +4,11 @@
 <tr>
     @foreach ($listVm->columns as $col)
     <th class="colhead" scope="col">
-        @if ($col['sortUrl'])
-            <a href="{{ $col['sortUrl'] }}">
-                @if ($col['iconClass'])<img class="{{ $col['iconClass'] }}" src="pic/trans.gif" alt="{{ $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}" />@else{{ $col['label'] }}@endif
-            </a>
-        @elseif ($col['iconClass'])
-            <img class="{{ $col['iconClass'] }}" src="pic/trans.gif" alt="{{ $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}" />
-        @else
-            {{ $col['label'] }}
-        @endif
+        @if ($col['sortUrl'])<a href="{{ $col['sortUrl'] }}">@endif
+            @if ($col['iconClass'])<img class="{{ $col['iconClass'] }}" src="pic/trans.gif" alt="{{ $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}" />@endif
+            @php($headLabel = ($col['shortLabel'] ?? '') !== '' ? $col['shortLabel'] : $col['label'])
+            @if ($headLabel !== '')<span class="nxm-th__label">{{ $headLabel }}</span>@endif
+        @if ($col['sortUrl'])</a>@endif
     </th>
     @endforeach
 </tr>

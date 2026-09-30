@@ -284,8 +284,8 @@ html[data-theme]:root .nxm-alert--blue {
     color: var(--nxm-accent);
 }
 
-html[data-theme]:root .nxm-alert.nxm-alert--blue a:link,
-html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited {
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:link:not(.nxm-alert__action),
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited:not(.nxm-alert__action) {
     color: var(--nxm-accent);
     text-decoration: underline;
 }

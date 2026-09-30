@@ -634,28 +634,39 @@ a.nxm-logo:link, a.nxm-logo:visited {
 
 .nxm-chips .nxm-userbar__stats {
     display: flex;
-    gap: 0.4rem;
+    gap: 0;
     flex: 1;
     min-width: 0;
     overflow-x: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    /* Edge shadows appear only while the strip actually overflows
+       (covers painted on the element, shadows scroll with content). */
+    background:
+        linear-gradient(to right, var(--nxm-userbar-bg), transparent) local left / 30px 100%,
+        linear-gradient(to left, var(--nxm-userbar-bg), transparent) local right / 30px 100%,
+        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.32), transparent) scroll left / 14px 100%,
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.32), transparent) scroll right / 14px 100%;
+    background-repeat: no-repeat;
 }
-
-
 
 .nxm-chips .nxm-stat {
     display: inline-flex;
     align-items: baseline;
     gap: 0.3rem;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 999px;
-    padding: 0.15rem 0.65rem;
+    padding: 0.1rem 0.55rem;
     white-space: nowrap;
     color: var(--nxm-userbar-stat);
     text-decoration: none;
 }
 
-a.nxm-stat:hover { border-color: var(--nxm-nav-active); text-decoration: none; }
+.nxm-chips .nxm-stat + .nxm-stat {
+    border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.nxm-chips .nxm-stat--key .nxm-stat__value {
+    color: var(--nxm-nav-active);
+    font-weight: 600;
+}
 
 /* ---------- Mobile chrome (burger) ---------- */
 

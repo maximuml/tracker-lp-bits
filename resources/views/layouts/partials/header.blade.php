@@ -121,7 +121,7 @@
     <div class="nxm-chips" role="group" aria-label="{{ 'Account stats' }}">
         <div class="nxm-chips__row">
             <span class="nxm-userbar__stats">
-                <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_ratio') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->ratio }}</span></span>
+                <span class="nxm-stat nxm-stat--key"><span class="nxm-stat__label">{{ __('legacy/functions.text_ratio') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->ratio }}</span></span>
                 <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_uploaded') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->uploaded }}</span></span>
                 <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_downloaded') }}</span> <span class="nxm-stat__value">{{ $chrome->userBar->downloaded }}</span></span>
                 <span class="nxm-stat"><span class="nxm-stat__label">{{ __('legacy/functions.text_active_torrents') }}</span>

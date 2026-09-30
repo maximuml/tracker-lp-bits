@@ -2004,3 +2004,26 @@ a.nx-mail:hover { color: var(--nxm-text); }
     .nx-msgsplit__list { max-height: 14rem; overflow-y: auto; }
     .nx-mail__user { display: none; }
 }
+
+/* E3 usercp: account/security/tokens/activity cards. */
+.nx-ucards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.nx-ucard {
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-surface);
+    padding: 0.7rem 0.9rem;
+    min-width: 0;
+}
+.nx-ucard__title {
+    font-size: 0.8em; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.04em; color: var(--nxm-text-dim);
+    margin-bottom: 0.5rem;
+}
+@media (max-width: 55rem) {
+    .nx-ucards { grid-template-columns: 1fr; }
+}

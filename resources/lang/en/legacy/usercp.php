@@ -232,6 +232,10 @@ return [
     'row_passkey_login_url' => 'Passkey login URL',
     'checkbox_pm_on_topic_reply' => 'Notify me when there are new replies to forum posts',
     'checkbox_pm_on_hr_reached' => 'Notify me when H&R reaches target',
+    'section_account' => 'Account',
+    'section_security' => 'Security',
+    'section_tokens' => 'Tokens',
+    'section_activity' => 'Activity',
     'row_tracker_url' => 'Tracker URL',
     'row_tracker_url_help' => '<b>Note:</b> Once selected, announce can only be sent to the selected link. By default, announce can only be sent to the first default link in the list.',
 ];

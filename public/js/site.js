@@ -1623,12 +1623,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!btn) { return; }
         var input = document.querySelector(btn.getAttribute('data-copy'));
         if (!input) { return; }
+        var real = input.getAttribute('data-copy-value');
+        var shown = input.value;
+        if (real !== null) { input.value = real; }
         input.select();
         input.setSelectionRange(0, input.value.length);
         try { document.execCommand('copy'); } catch (err) {}
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(input.value).catch(function () {});
         }
+        if (real !== null) { input.value = shown; }
         var original = btn.textContent;
         btn.textContent = btn.getAttribute('data-copy-done') || 'Copied';
         setTimeout(function () { btn.textContent = original; }, 1500);
@@ -1653,5 +1657,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     document.addEventListener('click', function (e) {
         if (e.target.closest('input[data-checkall]')) { setTimeout(update, 0); }
+    });
+})();
+
+/* data-reveal buttons: toggle a masked input between its mask and the real
+   value stored in data-copy-value (e.g. the usercp passkey). */
+(function () {
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-reveal]');
+        if (!btn) { return; }
+        var input = document.querySelector(btn.getAttribute('data-reveal'));
+        if (!input) { return; }
+        var real = input.getAttribute('data-copy-value');
+        if (real === null) { return; }
+        var masked = input.getAttribute('data-mask-value') || input.value;
+        var showing = input.value !== masked;
+        input.value = showing ? masked : real;
+        btn.textContent = showing
+            ? (btn.getAttribute('data-label-show') || 'Show')
+            : (btn.getAttribute('data-label-hide') || 'Hide');
     });
 })();

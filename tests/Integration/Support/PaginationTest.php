@@ -68,7 +68,10 @@ final class PaginationTest extends TestCase
     {
         $result = Pagination::render(10, 0, '/list.php?', 0, 0, self::LABELS);
         $this->assertStringNotContainsString('&nbsp;-&nbsp;', $result[0]);
-        $this->assertSame($result[0]->toHtml(), $result[1]->toHtml());
+        $this->assertSame(
+            str_replace('aria-label="Pagination top"', '', $result[0]->toHtml()),
+            str_replace('aria-label="Pagination bottom"', '', $result[1]->toHtml()),
+        );
     }
 
     public function test_render_current_page_is_marked_current(): void
@@ -89,7 +92,12 @@ final class PaginationTest extends TestCase
     {
         $result = Pagination::render(10, 30, '/list.php?', 0, 3, self::LABELS);
         $this->assertStringContainsString('&lsaquo; Prev', $result[0]);
-        $this->assertSame($result[0]->toHtml(), $result[1]->toHtml());
+        $this->assertStringContainsString('aria-label="Pagination top"', $result[0]->toHtml());
+        $this->assertStringContainsString('aria-label="Pagination bottom"', $result[1]->toHtml());
+        $this->assertSame(
+            str_replace('aria-label="Pagination top"', '', $result[0]->toHtml()),
+            str_replace('aria-label="Pagination bottom"', '', $result[1]->toHtml()),
+        );
     }
 
     public function test_render_presto_uses_shift_titles(): void

@@ -1906,7 +1906,7 @@ ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
     background: var(--nxm-surface);
     border-top: 1px solid var(--nxm-border);
 }
-#technical_info { width: 100%; box-sizing: border-box; font-family: var(--nxm-mono, monospace); }
+#technical_info { width: calc(100% - 131px); box-sizing: border-box; font-family: var(--nxm-mono, monospace); }
 
 .nx-upload__submit span { font-weight: 600; font-size: 0.9em; color: var(--nxm-text-dim); }
 

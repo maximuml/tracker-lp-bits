@@ -5,7 +5,9 @@
         - <span class="small">[<a class="altlink" href="news.php"><b>{{ $news->manageLink }}</b></a>]</span>
     @endif
 </h2>
-@if(count($news->items) > 0)
+@if(count($news->items) === 0)
+<x-empty-state :title="__('legacy/index.text_no_news')" />
+@else
 <div class="nx-text"><div>
 @foreach($news->items as $newsItem)
     @if($loop->first)

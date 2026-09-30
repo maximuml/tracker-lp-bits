@@ -11,6 +11,9 @@
         </span>
     @endif
 </h2>
+@if(! $polls->exists)
+<x-empty-state :title="__('legacy/index.std_no_poll')" />
+@endif
 @if($polls->exists)
 <div class="nx-text nx-center">
 <div class="nx-main nx-box nx-box--59">

@@ -175,13 +175,15 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
    section fragment — because the fragment is cached for 120s and a
    per-request CSP nonce inside it goes stale. */
 .lt-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     gap: 12px;
     margin: 8px 0 16px;
-    align-items: start;
+    padding-bottom: 6px;
+    overflow-x: auto;
+    scrollbar-width: thin;
 }
 .lt-grid .lt-card {
+    flex: 0 0 160px;
     border: 1px solid var(--nxm-border, rgba(127,127,127,.35));
     border-radius: 6px;
     overflow: hidden;

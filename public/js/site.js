@@ -1678,3 +1678,20 @@ document.addEventListener('DOMContentLoaded', function () {
             : (btn.getAttribute('data-label-hide') || 'Hide');
     });
 })();
+
+/* index shoutbox: grow the same-origin iframe to fit its message list
+   (was a fixed 180px strip regardless of content). */
+(function () {
+    var frame = document.getElementById('iframe-shout-box');
+    if (!frame) { return; }
+    function size() {
+        try {
+            var doc = frame.contentDocument;
+            var c = doc ? doc.getElementById('shoutbox-content') : null;
+            var h = c ? c.scrollHeight + 4 : 0;
+            frame.style.height = Math.max(120, Math.min(h, 600)) + 'px';
+        } catch (e) {}
+    }
+    frame.addEventListener('load', size);
+    setInterval(size, 2000);
+})();

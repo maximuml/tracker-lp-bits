@@ -59,10 +59,11 @@
 				<div class="nx-fsection">{{ __('legacy/upload.section_media') }}</div>
 
 				@if ($enableTechnicalInfo)
-					<x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')">
+					<div class="nx-fhead nx-nowrap">{{ __('legacy/functions.text_technical_info') }}</div>
+					<div class="nx-ffull">
 						<textarea name="technical_info" id="technical_info" rows="8"@error('technical_info') aria-invalid="true" aria-describedby="technical_info-error"@enderror>{{ old('technical_info') }}</textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}
 						@error('technical_info')<div class="nx-field__error" id="technical_info-error" role="alert">{{ $message }}</div>@enderror
-					</x-settings-row>
+					</div>
 				@endif
 
 				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_type')).'<span class=nx-color-red>*</span>')">

@@ -10,6 +10,7 @@
 @elseif (! $showAny)
     <x-std-message :heading="__('legacy/donate.std_error')" :text="__('legacy/donate.std_no_donation_account_available')" :htmlstrip="false" />
 @else
+    <section class="nx-idx-card">
     <h2>{{ __('legacy/donate.text_donate') }}</h2>
     <div>
         <div class="nx-text">{{ __('legacy/donate.text_donation_note') }}</div>
@@ -72,5 +73,6 @@
             {{ __('legacy/donate.text_after_donation_note_two') }} <b>{{ __('legacy/donate.text_transaction_information') }}</b>{{ __('legacy/donate.text_after_donation_note_two_end') }}
         </div>
     </div>
+</section>
 @endif
 @endsection

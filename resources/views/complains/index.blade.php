@@ -99,6 +99,7 @@
     @endif
 
 @else
+    <section class="nx-idx-card">
     <h2>{{ __('legacy/complains.text_new_complain') ?? 'New complain' }}</h2>
     <form action="" method="post">
         <input type="hidden" name="action" value="new" />
@@ -109,5 +110,6 @@
             <div class="nx-ffull nx-center"><input type="submit" value="{{ __('legacy/complains.text_new_submit') ?? 'Submit' }}" class="btn" /></div>
         </div>
     </form>
+</section>
 @endif
 @endsection

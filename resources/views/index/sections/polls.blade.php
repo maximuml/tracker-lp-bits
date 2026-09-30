@@ -1,4 +1,5 @@
 @if($polls->show)
+<section class="nx-idx-card">
 <h2>{{ $polls->title }}
     @if($polls->canManage)
         <span class="small"> - [<a class="altlink" href="makepoll.php?returnto=main"><b>{{ $polls->newLabel }}</b></a>]
@@ -38,4 +39,5 @@
 </div>
 </div>
 @endif
+</section>
 @endif

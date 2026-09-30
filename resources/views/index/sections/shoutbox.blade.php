@@ -1,4 +1,5 @@
 @if($shoutbox->show)
+<section class="nx-idx-card">
 <h2>
     <a href="#" data-klappe="shoutbox" aria-expanded="true"><img class="minus" src="pic/trans.gif" id="picshoutbox" alt="Show/Hide" title="{{ $shoutbox->showHideTitle }}" /></a>
     {{ $shoutbox->title }} - <span class="small">{{ $shoutbox->autoRefreshLabel }}</span>
@@ -18,4 +19,5 @@
 <input type='reset' class='btn' value="{{ $shoutbox->clearButtonLabel }}" /> <input type='hidden' name='sent' value='yes' /><input type='hidden' name='type' value='shoutbox' />
 </div>
 </form></div>
+</section>
 @endif

@@ -1,4 +1,5 @@
 @if($news->show)
+<section class="nx-idx-card">
 <h2>{{ $news->title }}
     @if($news->canManage)
         - <span class="small">[<a class="altlink" href="news.php"><b>{{ $news->manageLink }}</b></a>]</span>
@@ -19,4 +20,5 @@
 @endforeach
 </div></div>
 @endif
+</section>
 @endif

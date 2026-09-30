@@ -1234,6 +1234,10 @@ table.nx-torrents tbody td { background: var(--nxm-surface); }
 }
 .nx-pagination__link--disabled { color: var(--nxm-muted); border-color: var(--nxm-border); cursor: default; }
 
+.nx-idx-card { border: 1px solid var(--nxm-border); border-radius: 10px; background: var(--nxm-surface); padding: .8rem 1rem; margin: 0 0 .9rem; }
+.nx-idx-card > h2 { margin: 0 0 .6rem; font-size: 1.05rem; }
+.nx-idx-card > :last-child { margin-bottom: 0; }
+
 .nxm-screens { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; max-width: 880px; }
 .nxm-screens__item { display: block; border: 1px solid var(--nxm-border); border-radius: 8px; overflow: hidden; background: var(--nxm-surface-alt); }
 .nxm-screens__item img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; }

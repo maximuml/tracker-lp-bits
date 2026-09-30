@@ -3,6 +3,7 @@
 @section('title', 'Mysql Server Status')
 
 @section('content')
+<section class="nx-idx-card">
 <h1 class="nx-center">
     Mysql Server Status
 </h1>
@@ -127,4 +128,5 @@
     </li>
 @endif
 </ul>
+</section>
 @endsection

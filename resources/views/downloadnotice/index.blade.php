@@ -3,6 +3,7 @@
 @section('title', $title ?? (__('legacy/downloadnotice.head_download_notice')))
 
 @section('content')
+<section class="nx-idx-card">
 <h2>{{ $title }}</h2>
 <div>
 <div class="nx-text"><p>{{ $note }}</p></div>
@@ -58,4 +59,5 @@
 </div>
 @endif
 </div>
+</section>
 @endsection

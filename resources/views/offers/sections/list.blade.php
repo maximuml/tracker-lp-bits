@@ -1,5 +1,6 @@
+<section class="nx-idx-card">
 <h2>{{ __('legacy/offers.text_offers_section')}}</h2>
-<div class="nx-box">
+<div>
 <p><b><span class="nx-size-5">{{ __('legacy/offers.text_rules') }}</span></b></p>
 <div><ul>
 <li>{{ __('legacy/offers.text_rule_one_one') }}{{ $list->rules->uploadClassName }}{{ __('legacy/offers.text_rule_one_two') }}{{ $list->rules->addofferClassName }}{{ __('legacy/offers.text_rule_one_three') }}</li>
@@ -23,6 +24,7 @@
 @endforeach
 </select>&nbsp;&nbsp;<input type="submit" class="btn" value="{{ __('legacy/offers.submit_search') }}" /></form></div>
 </div>
+</section>
 <br /><br />
 @if ($list->table !== null)
 @include('offers._table', ['table' => $list->table])

@@ -1,4 +1,4 @@
-<nav class="nexus-pagination nx-pagination nx-center" aria-label="Pagination">
+<nav class="nexus-pagination nx-pagination nx-center" aria-label="{{ ($top ?? false) ? 'Pagination top' : 'Pagination bottom' }}">
     <ul class="nx-pagination__list">
         <li class="nx-pagination__item">
             @if ($vm->prevUrl !== null)<a class="nx-pagination__link" href="{{ $vm->prevUrl }}" rel="prev" title="{{ $vm->prevTitle }}">&lsaquo; {{ $vm->prevLabel }}</a>

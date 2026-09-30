@@ -18,7 +18,7 @@
 @if ($list->canAddOffer)
 <div class="nx-center"><a href="?add_offer=1"><b>{{ __('legacy/offers.text_add_offer') }}</b></a></div>
 @endif
-<div class="nx-center"><form method="get" action="?">{{ __('legacy/offers.text_search_offers') }}&nbsp;&nbsp;<input type="text" id="specialboxg" name="search" />&nbsp;&nbsp;<select name="category"><option value="0">{{ __('legacy/offers.select_show_all') }}</option>
+<div class="nx-center"><form method="get" action="?"><label for="specialboxg">{{ __('legacy/offers.text_search_offers') }}</label>&nbsp;&nbsp;<input type="text" id="specialboxg" name="search" />&nbsp;&nbsp;<select name="category" aria-label="{{ __('legacy/offers.select_show_all') }}"><option value="0">{{ __('legacy/offers.select_show_all') }}</option>
 @foreach ($list->categories as $cat)
 <option value="{{ $cat->id }}">{{ $cat->name }}</option>
 @endforeach

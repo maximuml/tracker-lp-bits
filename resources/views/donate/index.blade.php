@@ -11,7 +11,7 @@
     <x-std-message :heading="__('legacy/donate.std_error')" :text="__('legacy/donate.std_no_donation_account_available')" :htmlstrip="false" />
 @else
     <section class="nx-idx-card">
-    <h2>{{ __('legacy/donate.text_donate') }}</h2>
+    <h1>{{ __('legacy/donate.text_donate') }}</h1>
     <div>
         <div class="nx-text">{{ __('legacy/donate.text_donation_note') }}</div>
         @if ($showCustom)

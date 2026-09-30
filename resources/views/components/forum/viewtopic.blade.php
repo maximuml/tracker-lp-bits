@@ -8,7 +8,8 @@
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
     <span class="nx-crumbs__current" id="top">{{ $topic->subject }}@if ($topic->locked)&nbsp;<span class="nx-crumbs__locked">[{{ __('legacy/forums.text_locked') }}]</span>@endif</span>
 </nav>
-<x-forum.pager :page="$topic->page" :pages="$topic->pages" :href="$topic->pagerHref()" :items="$topic->pagerItems()" />
+<h1 class="nx-sr-only">{{ $topic->subject }}</h1>
+<x-forum.pager :page="$topic->page" :pages="$topic->pages" :href="$topic->pagerHref()" :items="$topic->pagerItems()" label="Pagination top" />
 <div class="nx-postbar">
     <span>{{ __('legacy/forums.there_is') }}<b>{{ $topic->views }}</b>{{ __('legacy/forums.hits_on_this_topic') }}</span>
     <span class="nx-postbar__actions">
@@ -66,7 +67,7 @@
     @endif
 @endforeach
 </x-frame>
-<x-forum.pager :page="$topic->page" :pages="$topic->pages" :href="$topic->pagerHref()" :items="$topic->pagerItems()" />
+<x-forum.pager :page="$topic->page" :pages="$topic->pages" :href="$topic->pagerHref()" :items="$topic->pagerItems()" label="Pagination bottom" />
 @if ($topic->mayPost)
     <div class="nx-quickreply">
         <b>{{ __('legacy/forums.text_quick_reply') }}</b>

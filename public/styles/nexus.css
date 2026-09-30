@@ -402,7 +402,7 @@ button.nx-btn-link {
 .nti-wrap { margin: 4px 0; }
 .nti-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .nti-col { border: 1px solid var(--nxm-border, rgba(127,127,127,.30)); border-radius: 6px; padding: 8px 10px; background: var(--nxm-surface-alt, rgba(127,127,127,.05)); min-width: 0; }
-.nti-col h4 { margin: 0 0 6px; font-size: 13px; letter-spacing: .3px; text-transform: uppercase; opacity: .85; border-bottom: 1px solid var(--nxm-border, rgba(127,127,127,.25)); padding-bottom: 4px; }
+.nti-col__title { margin: 0 0 6px; font-size: 13px; font-weight: bold; letter-spacing: .3px; text-transform: uppercase; opacity: .85; border-bottom: 1px solid var(--nxm-border, rgba(127,127,127,.25)); padding-bottom: 4px; }
 .nti-kv { margin: 0; padding: 0; font-size: 12px; line-height: 1.45; }
 .nti-kv .nti-row { display: flex; gap: 6px; padding: 1px 0; word-break: break-word; }
 .nti-kv .nti-k { flex: 0 0 38%; opacity: .75; }

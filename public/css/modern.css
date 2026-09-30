@@ -1199,7 +1199,8 @@ html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { text-decoration: un
 }
 a.altlink:link, a.altlink:visited,
 a.altlink_blue:link, a.altlink_blue:visited,
-a.altlink_green:link, a.altlink_green:visited { text-decoration: underline; }
+a.altlink_green:link, a.altlink_green:visited,
+a.faqlink:link, a.faqlink:visited { text-decoration: underline; }
 /* altlink palette is chosen for light backgrounds — lift toward the
    text colour in the dark scheme (same recipe as .nx-hl-*). */
 @media (prefers-color-scheme: dark) {
@@ -1400,7 +1401,7 @@ table.nx-torrents tbody td { background: var(--nxm-surface); }
 .nx-pagination__link--disabled { color: var(--nxm-muted); border-color: var(--nxm-border); cursor: default; }
 
 .nx-idx-card { border: 1px solid var(--nxm-border); border-radius: 10px; background: var(--nxm-surface); padding: .8rem 1rem; margin: 0 0 .9rem; }
-.nx-idx-card > h2 { margin: 0 0 .6rem; font-size: 1.05rem; }
+.nx-idx-card > h2, .nx-idx-card > h1 { margin: 0 0 .6rem; font-size: 1.05rem; }
 .nx-idx-card > :last-child { margin-bottom: 0; }
 
 .nx-mysql-total td { background: var(--nxm-surface-alt); font-weight: 600; }
@@ -1700,6 +1701,7 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 .nx-post { border: 1px solid var(--nxm-border); border-radius: var(--nxm-radius); margin-bottom: 0.6rem; overflow: hidden; }
 .nx-post__head { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--nxm-border); background: var(--nxm-surface-alt); font-size: 0.85rem; }
 .nx-post__meta { min-width: 0; }
+.nx-post__meta :is(a:link, a:visited) { color: var(--nxm-accent-hover); }
 .nx-post__num { white-space: nowrap; }
 .nx-post__top { text-decoration: none; margin-left: 0.3rem; }
 .nx-post__grid { display: grid; grid-template-columns: 6.5rem 1fr; }

@@ -3,6 +3,7 @@
 @section('title', __('legacy/faq.head_faq'))
 
 @section('content')
+<h1 class="nx-sr-only">{{ __('legacy/faq.head_faq') }}</h1>
 @if (! empty($faqCategories))
     <x-frame :caption="__('legacy/faq.text_welcome_to').$SITENAME.' - '.$SLOGAN" :center="false">
     {{ __('legacy/faq.text_welcome_content_one') }} <a class="faqlink" href="contactstaff.php">{{ __('legacy/faq.text_contact') }}</a> {{ __('legacy/faq.text_welcome_content_one_end') }}<br /><br />{{ __('legacy/faq.text_welcome_content_one_two') }}

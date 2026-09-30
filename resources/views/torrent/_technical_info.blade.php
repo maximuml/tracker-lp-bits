@@ -5,7 +5,7 @@
     <div class="nti-grid">
         <div class="nti-col">
             @if ($vm->hasGeneral)
-                <h4>{{ $vm->generalTitle }}</h4>
+                <p class="nti-col__title">{{ $vm->generalTitle }}</p>
                 @include('torrent._nti_kv', ['items' => $vm->generalMain])
                 @if ($vm->generalExtraSpoiler !== null)
                     {{ $vm->generalExtraSpoiler }}
@@ -14,7 +14,7 @@
         </div>
         <div class="nti-col">
             @if ($vm->hasVideo)
-                <h4>{{ $vm->videoTitle }}</h4>
+                <p class="nti-col__title">{{ $vm->videoTitle }}</p>
                 @include('torrent._nti_kv', ['items' => $vm->videosMain])
                 @if ($vm->encodingSpoiler !== null)
                     {{ $vm->encodingSpoiler }}
@@ -23,7 +23,7 @@
         </div>
         <div class="nti-col">
             @if ($vm->hasAudio)
-                <h4>{{ $vm->audioTitle }}</h4>
+                <p class="nti-col__title">{{ $vm->audioTitle }}</p>
                 @foreach ($vm->audioTracks as $track)
                     @include('torrent._nti_track', ['track' => $track])
                 @endforeach

@@ -156,7 +156,7 @@ class TorrentUploadController extends Controller
             }
             $posStateAria = $fieldHasError('pos_state') ? ' aria-invalid="true" aria-describedby="pos_state-error"' : '';
             $pickCellHtml = '<b>'.__('legacy/edit.row_torrent_position').':&nbsp;</b>'
-                .'<select name="pos_state" id="pos_state"'.$posStateAria.'>'.$options.'</select>&nbsp;&nbsp;&nbsp;'
+                .'<select name="pos_state" id="pos_state" aria-label="'.e(__('legacy/edit.row_torrent_position')).'"'.$posStateAria.'>'.$options.'</select>&nbsp;&nbsp;&nbsp;'
                 .view('components.datetime-input', ['label' => SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => $this->oldScalar($request, 'pos_state_until')])->render();
         }
 
@@ -194,6 +194,7 @@ class TorrentUploadController extends Controller
             'descrEditorHtml' => SafeHtml::fromTrustedHtml(BbcodeEditor::html([
                 'form' => 'upload',
                 'text' => 'descr',
+                'label' => __('legacy/upload.section_description'),
                 'content' => $this->oldScalar($request, 'descr'),
                 'withPreview' => true,
                 'invalid' => $fieldHasError('descr'),

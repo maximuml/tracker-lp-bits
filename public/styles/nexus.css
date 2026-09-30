@@ -175,15 +175,13 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
    section fragment — because the fragment is cached for 120s and a
    per-request CSP nonce inside it goes stale. */
 .lt-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     margin: 8px 0 16px;
-    padding-bottom: 6px;
-    overflow-x: auto;
-    scrollbar-width: thin;
+    align-items: start;
 }
 .lt-grid .lt-card {
-    flex: 0 0 160px;
     border: 1px solid var(--nxm-border, rgba(127,127,127,.35));
     border-radius: 6px;
     overflow: hidden;
@@ -259,6 +257,10 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
     -webkit-box-orient: vertical;
 }
 .lt-grid .lt-title a { text-decoration: none; }
+
+@media (max-width: 40rem) {
+    .lt-grid { grid-template-columns: repeat(2, 1fr); }
+}
 .lt-grid .lt-meta {
     margin-top: auto;
     display: flex;

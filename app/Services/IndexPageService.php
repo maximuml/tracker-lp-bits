@@ -195,7 +195,7 @@ final class IndexPageService
         $html = $this->cache->get_value($cacheKey);
 
         if ($html === false || $html === null || $html === '') {
-            $torrents = $this->indexRepository->getLatestTorrents(9);
+            $torrents = $this->indexRepository->getLatestTorrents(12);
             if ($torrents->isNotEmpty()) {
                 UserDisplay::preload($torrents->map(fn ($t) => (int) $t->owner)->all());
                 $items = [];

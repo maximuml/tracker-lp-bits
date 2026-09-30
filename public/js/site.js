@@ -1208,12 +1208,15 @@ document.addEventListener('error', function (e) {
 
     function paint(button) {
         var label = 'Theme: ' + LABELS[currentTheme()];
-        if (button.hasAttribute('data-persist-url') || !persistUrl) {
+        if (button.querySelector('.nxm-theme-ic')) {
+            button.setAttribute('data-theme-state', currentTheme());
+        } else if (button.hasAttribute('data-persist-url') || !persistUrl) {
             button.textContent = '[' + label + ']';
         } else {
             button.textContent = '[Theme]';
         }
         button.setAttribute('title', label);
+        button.setAttribute('aria-label', label);
     }
 
     function paintAll() {
@@ -1292,6 +1295,18 @@ document.addEventListener('error', function (e) {
         }
     });
 })();
+
+/* ===== search shortcut ===== */
+// Cmd/Ctrl+K focuses the header search field (mirrors the ⌘K hint in
+// the search pill).
+document.addEventListener('keydown', function (e) {
+    if (!(e.metaKey || e.ctrlKey) || e.altKey || e.key.toLowerCase() !== 'k') { return; }
+    var input = document.querySelector('.nxm-search input[name="search"]');
+    if (!input) { return; }
+    e.preventDefault();
+    input.focus();
+    input.select();
+});
 
 /* ===== nx-menus.js ===== */
 /**

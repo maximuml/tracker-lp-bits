@@ -2027,3 +2027,30 @@ a.nx-mail:hover { color: var(--nxm-text); }
 @media (max-width: 55rem) {
     .nx-ucards { grid-template-columns: 1fr; }
 }
+
+/* E5 — FAQ accordion + search */
+.nx-faq__search { display: flex; gap: 10px; align-items: center; margin: 0 0 10px; }
+.nx-faq__search-input {
+    flex: 0 1 22rem; padding: 0.4rem 0.7rem;
+    border: 1px solid var(--nxm-border, rgba(127,127,127,.4)); border-radius: 6px;
+    background: var(--nxm-surface, #fff); color: var(--nxm-text, #1d2733); font-size: 0.92rem;
+}
+.nx-faq__search-input:focus { outline: 2px solid var(--nxm-accent, #1f6fd0); outline-offset: 1px; }
+.nx-faq__search-count { font-size: 0.82rem; color: var(--nxm-dim, #6b7280); }
+.nx-faq__item { border-bottom: 1px solid var(--nxm-border, rgba(127,127,127,.25)); }
+.nx-faq__item:first-of-type { border-top: 1px solid var(--nxm-border, rgba(127,127,127,.25)); }
+.nx-faq__item > summary {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 0.55rem 0.4rem; cursor: pointer; list-style: none;
+    font-weight: 600; color: var(--nxm-text, #1d2733);
+}
+.nx-faq__item > summary::-webkit-details-marker { display: none; }
+.nx-faq__item > summary::before {
+    content: '\25B8'; flex: 0 0 1em;
+    color: var(--nxm-dim, #6b7280); transition: transform .15s;
+}
+.nx-faq__item[open] > summary::before { transform: rotate(90deg); }
+.nx-faq__item > summary:hover { background: var(--nxm-surface-alt, rgba(127,127,127,.08)); }
+.nx-faq__answer { padding: 0 0.4rem 0.9rem 1.8rem; line-height: 1.55; }
+.nx-faq__item.nx-faq--hidden,
+.nx-faq.nx-faq--hidden { display: none; }

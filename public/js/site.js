@@ -1695,3 +1695,35 @@ document.addEventListener('DOMContentLoaded', function () {
     frame.addEventListener('load', size);
     setInterval(size, 2000);
 })();
+
+/* E5 — FAQ accordion: filter items by search box, auto-open hash target. */
+(function () {
+    var input = document.querySelector('[data-faq-search]');
+    var items = document.querySelectorAll('.nx-faq__item');
+    var count = document.querySelector('[data-faq-count]');
+    function applyHash() {
+        var id = location.hash.slice(1);
+        var el = id ? document.getElementById(id) : null;
+        if (el && el.tagName === 'DETAILS' && !el.open) { el.open = true; }
+    }
+    if (input && items.length) {
+        input.addEventListener('input', function () {
+            var q = input.value.trim().toLowerCase();
+            var shown = 0;
+            items.forEach(function (item) {
+                var hit = !q || item.textContent.toLowerCase().indexOf(q) !== -1;
+                item.classList.toggle('nx-faq--hidden', !hit);
+                if (hit) { shown++; if (q) { item.open = true; } }
+            });
+            document.querySelectorAll('.nx-faq').forEach(function (g) {
+                g.classList.toggle('nx-faq--hidden', !!q && !g.querySelector('.nx-faq__item:not(.nx-faq--hidden)'));
+            });
+            if (count) {
+                count.hidden = !q;
+                count.textContent = q ? shown + ' / ' + items.length : '';
+            }
+        });
+    }
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+})();

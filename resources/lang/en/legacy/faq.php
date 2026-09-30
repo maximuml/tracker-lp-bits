@@ -13,4 +13,5 @@ return [
     'text_welcome_content_two_three' => 'Before you go any further you should read the %s',
     'text_user_agreement' => 'user agreement',
     'text_contents' => 'Contents',
+    'text_search_faq' => 'Search questions…',
 ];

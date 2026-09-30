@@ -313,7 +313,7 @@ final class IndexPageServiceTest extends TestCase
         // Declared before mockIndexRepo() so it wins over the generic stub;
         // a call with any other limit falls through and yields zero cards.
         $this->indexRepository->shouldReceive('getLatestTorrents')
-            ->with(9)
+            ->with(12)
             ->andReturn(new Collection([$torrent]));
 
         $result = $this->buildWithAllSectionsDisabled([

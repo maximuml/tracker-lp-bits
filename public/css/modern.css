@@ -1845,3 +1845,82 @@ ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
 .nx-faq-badge { display: inline-block; padding: 0 0.4em; border-radius: 3px; font-size: 0.72em; font-weight: 700; line-height: 1.5; vertical-align: 1px; text-transform: uppercase; letter-spacing: 0.03em; }
 .nx-faq-badge--new { background: var(--nxm-accent, #1f6fd0); color: var(--nxm-on-accent, #fff); }
 .nx-faq-badge--updated { background: var(--nxm-warning-bg, #fff8e5); color: var(--nxm-text, #1d2733); border: 1px solid var(--nxm-warning-border, #ffe3a3); }
+
+/* E1 upload page: section labels inside .nx-fgrid, announce copy field,
+   ghost BBCode toolbar groups, sticky submit bar. */
+.nx-fsection {
+    grid-column: 1 / -1;
+    padding: 0.9rem 5px 0.35rem;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nxm-text-dim);
+    border-top: 1px solid var(--nxm-border);
+}
+.nx-upload__note { font-size: 0.85em; color: var(--nxm-text-dim); padding-bottom: 0.6rem; }
+
+.nx-copyfield { display: flex; align-items: center; gap: 0.5rem; max-width: 36rem; }
+.nx-copyfield__input {
+    flex: 1 1 auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85rem;
+    color: var(--nxm-text-dim);
+}
+
+/* BBCode toolbar: ghost buttons in logical groups (bbcode-editor component). */
+.bbcode-toolbar { gap: 0.6rem; align-items: center; }
+.bbcode-group { display: flex; gap: 2px; align-items: center; }
+.bbcode-toolbar input[type="button"] {
+    background: var(--nxm-surface-alt);
+    color: var(--nxm-text);
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    padding: 0.2rem 0.55rem;
+    font-size: 11px;
+    font-weight: 500;
+}
+.bbcode-toolbar input[type="button"]:hover {
+    border-color: var(--nxm-text-dim);
+    background: transparent;
+}
+.bbcode-toolbar select.med { font-size: 11px; padding: 0.2rem 0.3rem; }
+.bbcode-actions input[type="button"].btn {
+    background: var(--nxm-surface-alt);
+    color: var(--nxm-text);
+    border: 1px solid var(--nxm-border);
+    font-weight: 500;
+}
+.bbcode-actions input[type="button"].btn:hover { border-color: var(--nxm-text-dim); }
+
+/* Sticky submit row: stays at the viewport bottom while the form scrolls. */
+.nx-upload__submit {
+    grid-column: 1 / -1;
+    position: sticky;
+    bottom: 0;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.55rem;
+    margin: 0 -5px -5px;
+    background: var(--nxm-surface);
+    border-top: 1px solid var(--nxm-border);
+}
+.nx-upload__submit span { font-weight: 600; font-size: 0.9em; color: var(--nxm-text-dim); }
+
+/* Mobile: stack label/value form grids into a single column (E-plan rule:
+   no side-by-side label tables on narrow screens). */
+.bbcode-body .bbcode { min-width: 0; }
+@media (max-width: 40rem) {
+    .nx-fgrid { grid-template-columns: 1fr; }
+    .nx-fgrid > .nx-fhead { text-align: left; padding-bottom: 0; }
+    .nx-fgrid > .nx-fcell { padding-top: 2px; min-width: 0; }
+    .nx-fgrid > .nx-ffull { min-width: 0; }
+    .nx-fgrid input[type="file"] { max-width: 100%; }
+    .nx-fgrid textarea { max-width: 100%; box-sizing: border-box; }
+    .bbcode-body { flex-direction: column; }
+    .bbcode-smilies-wrap { align-self: stretch; }
+    .bbcode-smilies { grid-template-columns: repeat(7, auto); }
+}

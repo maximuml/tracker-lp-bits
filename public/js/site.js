@@ -1614,3 +1614,23 @@ document.addEventListener('DOMContentLoaded', function () {
         el.hidden = true;
     });
 })();
+
+/* data-copy buttons: copy the referenced input's value to the clipboard
+   and briefly confirm on the button label. */
+(function () {
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-copy]');
+        if (!btn) { return; }
+        var input = document.querySelector(btn.getAttribute('data-copy'));
+        if (!input) { return; }
+        input.select();
+        input.setSelectionRange(0, input.value.length);
+        try { document.execCommand('copy'); } catch (err) {}
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value).catch(function () {});
+        }
+        var original = btn.textContent;
+        btn.textContent = btn.getAttribute('data-copy-done') || 'Copied';
+        setTimeout(function () { btn.textContent = original; }, 1500);
+    });
+})();

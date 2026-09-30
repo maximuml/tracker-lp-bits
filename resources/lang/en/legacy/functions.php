@@ -320,6 +320,8 @@ return [
     'select_an_user_class' => 'Select an user class',
     'input_check_all' => 'Check All',
     'input_uncheck_all' => 'Uncheck All',
+    'text_copy' => 'Copy',
+    'text_copied' => 'Copied',
     'select_at_least_one_record' => 'Select at least one record!',
     'approval_deny_reach_upper_limit' => 'The number of torrents whose current approval was denied: %s reached the upper limit and is not allowed to be upload.',
 ];

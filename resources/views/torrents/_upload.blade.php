@@ -1,16 +1,20 @@
 	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
 			@csrf
 			<div class="nx-fgrid">
-					<div class="nx-ffull nx-colhead nx-center">
-						{{ __('legacy/upload.text_tracker_url') ?? '' }}: &nbsp;&nbsp;&nbsp;&nbsp;<b>{{ $trackerUrl }}</b>
+					<div class="nx-ffull nx-center nx-upload__note">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</div>
+					<div class="nx-fsection">{{ __('legacy/upload.section_file') }}</div>
+					<x-settings-row layout="grid" :label="__('legacy/upload.row_announce_url')">
+						<span class="nx-copyfield">
+							<input type="text" class="nx-copyfield__input" id="announce-url" readonly value="{{ $trackerUrl }}" />
+							<button type="button" class="nx-postbtn" data-copy="#announce-url" data-copy-done="{{ __('legacy/functions.text_copied') }}">{{ __('legacy/functions.text_copy') }}</button>
+						</span>
 						@unless ($torrentDirWritable)
-							<br /><br /><b>ATTENTION</b>: Torrent directory isn't writable. Please contact the administrator about this problem!
+							<div class="nx-field__error" role="alert"><b>ATTENTION</b>: Torrent directory isn't writable. Please contact the administrator about this problem!</div>
 						@endunless
 						@if (empty($max_torrent_size))
-							<br /><br /><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!
+							<div class="nx-field__error" role="alert"><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!</div>
 						@endif
-					</div>
-					<div class="nx-ffull nx-center">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</div>
+					</x-settings-row>
 				@if (count($uploadErrorList) > 0)
 					<div class="nx-ffull">
 						<x-alert type="error" :title="__('legacy/upload.error_summary')">
@@ -50,8 +54,9 @@
 					</x-settings-row>
 				@endif
 
-				<div class="nx-fhead">{{ __('legacy/upload.row_description') ?? '' }}<span class="nx-color-red">*</span></div>
-				<div class="nx-fcell">{{ $descrEditorHtml ?? '' }}@error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror</div>
+				<div class="nx-fsection">{{ __('legacy/upload.section_description') }}<span class="nx-color-red">*</span></div>
+				<div class="nx-ffull">{{ $descrEditorHtml ?? '' }}@error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror</div>
+				<div class="nx-fsection">{{ __('legacy/upload.section_media') }}</div>
 
 				@if ($enableTechnicalInfo)
 					<x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')">
@@ -90,6 +95,7 @@
 					</x-settings-row>
 				</div>
 
+				<div class="nx-fsection">{{ __('legacy/upload.section_publish') }}</div>
 				@if (! empty($offerRows))
 					<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_your_offer')).(!$uploadFreely ? '<span class=nx-color-red>*</span>' : ''))">
 						<select name="offer" id="offer"@error('offer') aria-invalid="true" aria-describedby="offer-error"@enderror>
@@ -119,7 +125,7 @@
 
 				@error('upload')<div class="nx-ffull"><div class="nx-field__error" role="alert">{{ $message }}</div></div>@enderror
 
-				<div class="nx-ffull nx-center"><b>{{ __('legacy/upload.text_read_rules') ?? '' }}</b> <input id="qr" type="submit" class="btn" value="{{ __('legacy/upload.submit_upload') ?? '' }}" /></div>
+				<div class="nx-upload__submit"><span>{{ __('legacy/upload.text_read_rules') ?? '' }}</span> <input id="qr" type="submit" class="btn" value="{{ __('legacy/upload.submit_upload') ?? '' }}" /></div>
 		</div>
 	</form>
 <script src="js/upload.js" type="text/javascript"></script>

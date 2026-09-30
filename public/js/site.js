@@ -1536,3 +1536,29 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 })();
+
+// Alert banners (promo/staff/news): dismissal persists in localStorage keyed
+// by a hash of the banner content, so a changed banner reappears.
+(function () {
+    var storeKey = 'nxm-alert-hide';
+    function readStore() {
+        try {
+            var raw = localStorage.getItem(storeKey);
+            return raw ? (JSON.parse(raw) || {}) : {};
+        } catch (e) { return {}; }
+    }
+    var hidden = readStore();
+    document.querySelectorAll('.nxm-alert[data-alert-key]').forEach(function (el) {
+        if (hidden[el.getAttribute('data-alert-key')]) { el.hidden = true; }
+    });
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-alert-dismiss]');
+        if (!btn) { return; }
+        var el = btn.closest('.nxm-alert');
+        if (!el) { return; }
+        hidden = readStore();
+        hidden[el.getAttribute('data-alert-key')] = 1;
+        try { localStorage.setItem(storeKey, JSON.stringify(hidden)); } catch (e) {}
+        el.hidden = true;
+    });
+})();

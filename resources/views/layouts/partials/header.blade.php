@@ -150,9 +150,11 @@
 
 <main id="main-content" class="nxm-main" tabindex="-1" role="main">
 @foreach($chrome->alerts as $alert)
-<div class="nxm-alert nxm-alert--{{ $alert['color'] }}" role="alert">
-    @if($alert['url'] !== '')<a href="{{ $alert['url'] }}" target="_blank" rel="noopener"><b>{{ $alert['text'] }}</b></a>
-    @else<b>{{ $alert['text'] }}</b>@endif
+<div class="nxm-alert nxm-alert--{{ $alert['color'] }}" role="alert" data-alert-key="{{ md5($alert['url'].'|'.$alert['text']->toHtml()) }}">
+    <span class="nxm-alert__dot" aria-hidden="true"></span>
+    <span class="nxm-alert__text">{{ $alert['text'] }}</span>
+    @if($alert['url'] !== '')<a class="nxm-alert__action" href="{{ $alert['url'] }}" target="_blank" rel="noopener">{{ 'View' }} &rsaquo;</a>@endif
+    <button type="button" class="nxm-alert__dismiss" data-alert-dismiss aria-label="{{ 'Dismiss' }}">&times;</button>
 </div>
 @endforeach
 @if($chrome->offlineMsg)

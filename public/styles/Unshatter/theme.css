@@ -243,22 +243,12 @@ html[data-theme="light"]:root {
 
 /* ---------- Signature details (shared across variants) ---------- */
 
-/* Yellow "shatter" zig-zag rule under page titles — the From Zero scratch
- * motif rendered in pure CSS (no images, CSP-safe). */
+/* Plain hairline under page titles. */
 .nxm-main h1,
 .nxm-page-title {
     padding-bottom: 0.4em;
     margin-bottom: 0.7em;
-    background-image:
-        repeating-linear-gradient(
-            -4deg,
-            var(--nxm-accent) 0 10px,
-            transparent 10px 22px
-        );
-    background-position: 0 100%;
-    background-size: auto 3px;
-    background-repeat: repeat-x;
-    border-bottom: none;
+    border-bottom: 1px solid var(--nxm-border);
 }
 
 /* Yellow square bullet on section/table headers — the From Zero glyph. */

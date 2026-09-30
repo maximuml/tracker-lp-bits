@@ -454,6 +454,7 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-usermenu[open] > summary { background: rgba(255, 255, 255, 0.1); }
 
 .nxm-avatar {
+    position: relative;
     width: 26px;
     height: 26px;
     border-radius: 50%;
@@ -465,6 +466,15 @@ a.nxm-logo:link, a.nxm-logo:visited {
     font-size: 0.75rem;
     font-weight: 700;
     flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.nxm-avatar__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .nxm-usermenu__name {

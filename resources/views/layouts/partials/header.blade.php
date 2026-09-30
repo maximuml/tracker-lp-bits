@@ -58,14 +58,13 @@
                     <div id="nx-notif-panel" class="nx-notif-panel nx-hidden" role="region" aria-label="{{ __('legacy/notifications.title_bell') }}"></div>
                 </span>
                 <button type="button" class="nxm-iconbtn nxm-theme-toggle" data-persist-url="/web/usercp/theme" data-theme-state="{{ $chrome->head->theme }}" title="{{ 'Theme' }}: {{ ucfirst($chrome->head->theme) }}" aria-label="{{ 'Theme' }}"><svg class="nxm-theme-ic nxm-theme-ic--auto" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 1.8A6.2 6.2 0 0 1 8 14.2Z" fill="currentColor" stroke="none"/></svg><svg class="nxm-theme-ic nxm-theme-ic--light" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="3.4"/><path d="M8 1.2v1.8M8 13v1.8M1.2 8h1.8M13 8h1.8M3.2 3.2l1.3 1.3M11.5 11.5l1.3 1.3M12.8 3.2l-1.3 1.3M4.5 11.5l-1.3 1.3"/></svg><svg class="nxm-theme-ic nxm-theme-ic--dark" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 9.6A6 6 0 0 1 6.4 2.5a6 6 0 1 0 7.1 7.1Z"/></svg></button>
-                <form method="post" action="logout.php" class="nx-inline">@csrf<button type="submit" class="nxm-iconbtn" title="{{ __('legacy/functions.text_logout') }}" aria-label="{{ __('legacy/functions.text_logout') }}"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6 1v3h1V2h6v12H7v-2H6v3h8V1H6z"/><path d="M3.3 5.3.6 8l2.7 2.7.7-.7L2.4 8.4h7.6V7.6H2.4L4 6l-.7-.7z"/></svg></button></form>
                 @if($chrome->enableDonation)
                 <a class="nxm-donate" href="donate.php">{{ 'Donate' }}</a>
                 @endif
             </div>
             <details class="nxm-usermenu">
                 <summary class="nxm-usermenu__toggle">
-                    <span class="nxm-avatar" aria-hidden="true">{{ strtoupper(substr((string) ($chrome->user['username'] ?? 'U'), 0, 1)) }}</span>
+                    <span class="nxm-avatar" aria-hidden="true"><span class="nxm-avatar__letter">{{ strtoupper(substr((string) ($chrome->user['username'] ?? 'U'), 0, 1)) }}</span><img class="nxm-avatar__img" src="{{ \App\Support\Avatar::forUser((int) ($chrome->user['id'] ?? 0), (string) ($chrome->user['avatar'] ?? '')) }}" alt="" /></span>
                     <span class="nxm-usermenu__name">{{ $chrome->user['username'] ?? '' }}</span>
                     <span class="nxm-usermenu__caret" aria-hidden="true"></span>
                 </summary>

@@ -20,9 +20,9 @@
                     @if ($faqCategories[$id]['items'][$id2]['flag'] == "1")
                         <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a></li>
                     @elseif ($faqCategories[$id]['items'][$id2]['flag'] == "2")
-                        <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a> <img class="faq_updated" src="pic/trans.gif" alt="Updated" /></li>
+                        <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a> <span class="nx-faq-badge nx-faq-badge--updated">Updated</span></li>
                     @elseif ($faqCategories[$id]['items'][$id2]['flag'] == "3")
-                        <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a> <img class="faq_new" src="pic/trans.gif" alt="New" /></li>
+                        <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a> <span class="nx-faq-badge nx-faq-badge--new">New</span></li>
                     @endif
                 @endforeach
             @endif

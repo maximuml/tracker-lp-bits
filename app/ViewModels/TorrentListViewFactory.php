@@ -297,6 +297,9 @@ final class TorrentListViewFactory
                 ? UserDisplay::username($row['owner'])
                 : null;
 
+            $addedStr = $row['added'] instanceof \DateTimeInterface ? $row['added']->format('Y-m-d H:i:s') : (string) ($row['added'] ?? '');
+            [$addedDate, $addedTime] = array_pad(explode(' ', $addedStr, 2), 2, '');
+
             $outRows[] = new TorrentListRow(
                 id: $id,
                 rowClass: $rowClass,
@@ -326,6 +329,8 @@ final class TorrentListViewFactory
                 commentIsNew: $commentIsNew,
                 lastCommentTooltipId: $tooltipId,
                 added: is_int($row['added']) || is_string($row['added']) || $row['added'] instanceof \DateTimeInterface ? $row['added'] : null,
+                addedDate: $addedDate,
+                addedTime: $addedTime,
                 size: Format::sizeParts((float) $row['size']),
                 seedersUrl: $seedersUrl,
                 seeders: (int) $row['seeders'],
@@ -396,9 +401,9 @@ final class TorrentListViewFactory
         }
         $columns[] = ['key' => 'time', 'label' => '', 'shortLabel' => 'Added', 'iconClass' => 'time', 'iconTitle' => $timetype != UserTimeType::TIMEALIVE->value ? (string) __('legacy/functions.title_time_added') : (string) __('legacy/functions.title_time_alive'), 'sortUrl' => $sortUrl(4)];
         $columns[] = ['key' => 'size', 'label' => '', 'shortLabel' => (string) __('legacy/functions.text_size'), 'iconClass' => 'size', 'iconTitle' => (string) __('legacy/functions.title_size'), 'sortUrl' => $sortUrl(5)];
-        $columns[] = ['key' => 'seeders', 'label' => '', 'shortLabel' => 'S', 'iconClass' => 'seeders', 'iconTitle' => (string) __('legacy/functions.title_number_of_seeders'), 'sortUrl' => $sortUrl(7)];
-        $columns[] = ['key' => 'leechers', 'label' => '', 'shortLabel' => 'L', 'iconClass' => 'leechers', 'iconTitle' => (string) __('legacy/functions.title_number_of_leechers'), 'sortUrl' => $sortUrl(8)];
-        $columns[] = ['key' => 'snatched', 'label' => '', 'shortLabel' => 'Sn', 'iconClass' => 'snatched', 'iconTitle' => (string) __('legacy/functions.title_number_of_snatched'), 'sortUrl' => $sortUrl(6)];
+        $columns[] = ['key' => 'seeders', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center', 'iconClass' => 'seeders', 'iconTitle' => (string) __('legacy/functions.title_number_of_seeders'), 'sortUrl' => $sortUrl(7)];
+        $columns[] = ['key' => 'leechers', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center', 'iconClass' => 'leechers', 'iconTitle' => (string) __('legacy/functions.title_number_of_leechers'), 'sortUrl' => $sortUrl(8)];
+        $columns[] = ['key' => 'snatched', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center', 'iconClass' => 'snatched', 'iconTitle' => (string) __('legacy/functions.title_number_of_snatched'), 'sortUrl' => $sortUrl(6)];
         $columns[] = ['key' => 'uploader', 'label' => (string) __('legacy/functions.col_uploader'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(9)];
 
         return $columns;

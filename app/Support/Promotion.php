@@ -324,10 +324,10 @@ final class Promotion
                 .($badge->domttHtml !== null ? '<template class="nx-tt">'.$badge->domttHtml->toHtml().'</template>' : '').'</b>';
         }
         if ($badge->domttHtml !== null) {
-            return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\" data-domtt-promo /><template class=\"nx-tt\">".$badge->domttHtml->toHtml().'</template>';
+            return " <span class=\"nx-promo nx-promo--{$badge->cssClass}\" role=\"img\" aria-label=\"{$badge->alt}\" data-domtt-promo>{$badge->alt}<template class=\"nx-tt\">".$badge->domttHtml->toHtml().'</template></span>';
         }
 
-        return " <img class=\"{$badge->iconClass}\" src=\"pic/trans.gif\" alt=\"{$badge->alt}\" title=\"{$badge->text}\" />";
+        return " <span class=\"nx-promo nx-promo--{$badge->cssClass}\" role=\"img\" aria-label=\"{$badge->alt}\" title=\"{$badge->text}\">{$badge->alt}</span>";
     }
 
     /**

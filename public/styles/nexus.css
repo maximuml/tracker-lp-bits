@@ -152,16 +152,20 @@ table.msg-alert {
     margin: 0 auto;
 }
 table.msg-alert td {
-    border: none;
-    padding: 10px;
+    border: 1px solid var(--nxm-border, #d8dce3);
+    border-radius: 6px;
+    padding: 8px 16px;
     text-align: center;
+    background: var(--nxm-surface-alt, #eef1f5);
+    color: var(--nxm-text, #1d2733);
 }
-table.msg-alert td.msg-alert-red { background: red; }
-table.msg-alert td.msg-alert-green { background: green; }
-table.msg-alert td.msg-alert-black { background: black; }
-table.msg-alert td.msg-alert-blue { background: blue; }
-table.msg-alert td.msg-alert-orange { background: orange; }
-table.msg-alert td.msg-alert-gray { background: gray; }
+table.msg-alert td.msg-alert-red { background: var(--nxm-danger-bg, #fdf0f0); border-color: var(--nxm-danger-border, #f5c2c7); }
+table.msg-alert td.msg-alert-green { background: var(--nxm-success-bg, #effaf2); border-color: var(--nxm-success-border, #b7e4c7); }
+table.msg-alert td.msg-alert-black { background: var(--nxm-surface, #fff); }
+table.msg-alert td.msg-alert-blue { background: var(--nxm-info-bg, #eef6fd); border-color: var(--nxm-info-border, #b8daff); }
+table.msg-alert td.msg-alert-orange { background: var(--nxm-warning-bg, #fff8e5); border-color: var(--nxm-warning-border, #ffe3a3); }
+table.msg-alert td.msg-alert-gray { background: var(--nxm-surface-alt, #eef1f5); }
+table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accent-text, var(--nxm-accent, #0d5aa7)); }
 
 /* Latest torrents cover grid (index). Lives here — not in the cached
    section fragment — because the fragment is cached for 120s and a
@@ -401,6 +405,8 @@ button.nx-btn-link {
 .nti-track .nti-badge { display: inline-block; font-size: 10px; padding: 0 4px; margin-left: 4px; border-radius: 3px; background: rgba(0,150,80,.20); color: inherit; vertical-align: 1px; }
 .nti-more { margin-top: 6px; font-size: 11px; opacity: .9; }
 .nti-raw { margin-top: 8px; }
+.nti-raw > details > summary { color: var(--nxm-text); cursor: pointer; }
+.nti-raw > details > summary:hover { color: var(--nxm-accent-text, var(--nxm-accent)); }
 @media (max-width: 760px) { .nti-grid { grid-template-columns: 1fr; } }
 
 /* Torrent tag chips: baseline spacing/shape so tags stay readable when

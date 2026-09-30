@@ -28,6 +28,8 @@ html[data-theme="dark"]:root {
     --nxm-success: #6fc76f;
     --nxm-danger: #e8343f;
     --nxm-warning: #ffd400;
+    --nxm-on-success: #111114;
+    --nxm-on-warning: #111114;
 
     /* chrome */
     --nxm-header-bg: #0d0d10;
@@ -87,6 +89,8 @@ html[data-theme="light"]:root {
     --nxm-success: #1a7f37;
     --nxm-danger: #c9232e;
     --nxm-warning: #a87e00;
+    --nxm-on-success: #ffffff;
+    --nxm-on-warning: #111114;
 
     --nxm-header-bg: #0d0d10;
     --nxm-header-text: #f2f2f4;
@@ -142,6 +146,8 @@ html[data-theme="light"]:root {
         --nxm-success: #6fc76f;
         --nxm-danger: #e8343f;
         --nxm-warning: #ffd400;
+    --nxm-on-success: #111114;
+    --nxm-on-warning: #111114;
         --nxm-header-bg: #0d0d10;
         --nxm-header-text: #f2f2f4;
         --nxm-header-dim: #8a8d97;
@@ -196,6 +202,8 @@ html[data-theme="light"]:root {
         --nxm-success: #1a7f37;
         --nxm-danger: #c9232e;
         --nxm-warning: #a87e00;
+    --nxm-on-success: #ffffff;
+    --nxm-on-warning: #111114;
         --nxm-header-bg: #0d0d10;
         --nxm-header-text: #f2f2f4;
         --nxm-header-dim: #8a8d97;

@@ -209,7 +209,7 @@ return [
     'text_torrents_on_promotion' => 'Torrents on promotion: ',
     'text_highlight' => 'Highlight',
     'text_append_words' => "Append words, e.g. '2X Free'",
-    'text_append_icon' => 'Append icon, e.g. <img class="pro_free" src="pic/trans.gif" alt="free" />',
+    'text_append_icon' => 'Append icon, e.g. <span class="nx-promo nx-promo--free">Free</span>',
     'text_no_mark' => 'Off',
     'text_signature_note' => 'May contain <a class="faqlink" href="tags.php" target="_new">BB codes</a>. Max image size is 500*200 and only the first image would be displayed.',
     'row_click_on_topic' => 'Click on topic',

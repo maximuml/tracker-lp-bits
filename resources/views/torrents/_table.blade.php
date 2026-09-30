@@ -3,7 +3,7 @@
 <thead>
 <tr>
     @foreach ($listVm->columns as $col)
-    <th class="colhead" scope="col">
+    <th class="colhead @if (($col['thClass'] ?? '') !== ''){{ $col['thClass'] }}@endif" scope="col">
         @if ($col['sortUrl'])<a href="{{ $col['sortUrl'] }}">@endif
             @if ($col['iconClass'])<img class="{{ $col['iconClass'] }}" src="pic/trans.gif" alt="{{ $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}" />@endif
             @if (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '')<span class="nxm-th__label">{{ ($col['shortLabel'] ?? '') !== '' ? $col['shortLabel'] : $col['label'] }}</span>@endif
@@ -41,8 +41,8 @@
         @endif
     </td>
     @endif
-    <td class="rowfollow nowrap nxm-td-added"><time datetime="{{ str_replace(' ', 'T', (string) $row->added) }}">{{ $row->added }}</time></td>
-    <td class="rowfollow nowrap nxm-td-size">{{ $row->size['value'] }} {{ $row->size['unit'] }}</td>
+    <td class="rowfollow nowrap nxm-td-added"><time datetime="{{ str_replace(' ', 'T', (string) $row->added) }}">{{ $row->addedDate }}<br/>{{ $row->addedTime }}</time></td>
+    <td class="rowfollow nowrap nxm-td-size">{{ $row->size['value'] }}<br/>{{ $row->size['unit'] }}</td>
     <td class="rowfollow nxm-td-seeders nx-center" data-label="{{ 'S' }}">
         @if ($row->seedersUrl)
             <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
@@ -50,8 +50,8 @@
             <span class="{{ $row->seedersZeroClass }}">{{ number_format($row->seeders) }}</span>
         @endif
     </td>
-    <td class="rowfollow nxm-td-leechers" data-label="{{ 'L' }}">@if ($row->leechersUrl)<b><a href="{{ $row->leechersUrl }}">{{ number_format($row->leechers) }}</a></b>@else{{ $row->leechers }}@endif</td>
-    <td class="rowfollow nxm-td-snatched" data-label="{{ 'Sn' }}">@if ($row->snatchedUrl)<a href="{{ $row->snatchedUrl }}"><b>{{ number_format($row->snatched) }}</b></a>@else{{ number_format($row->snatched) }}@endif</td>
+    <td class="rowfollow nxm-td-leechers nx-center" data-label="{{ 'L' }}">@if ($row->leechersUrl)<b><a href="{{ $row->leechersUrl }}">{{ number_format($row->leechers) }}</a></b>@else{{ $row->leechers }}@endif</td>
+    <td class="rowfollow nxm-td-snatched nx-center" data-label="{{ 'Sn' }}">@if ($row->snatchedUrl)<a href="{{ $row->snatchedUrl }}"><b>{{ number_format($row->snatched) }}</b></a>@else{{ number_format($row->snatched) }}@endif</td>
     <td class="rowfollow nxm-td-uploader nx-center">
         @if ($row->uploaderAnonymous)
             <i>{{ __('legacy/functions.text_anonymous') }}</i>@if ($row->uploaderShowOwner)<br />@if ($row->uploaderName)({{ $row->uploaderName }})@else(<i>{{ __('legacy/functions.text_orphaned') }}</i>)@endif @endif

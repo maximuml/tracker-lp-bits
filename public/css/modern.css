@@ -20,6 +20,8 @@
     --nxm-success: #1e7a1e;
     --nxm-danger: #c0392b;
     --nxm-warning: #b95c00;
+    --nxm-on-success: #ffffff;
+    --nxm-on-warning: #ffffff;
 
     /* status tints (alert / error-summary / status surfaces) */
     --nxm-info-bg: #eef6fd;
@@ -92,6 +94,8 @@
         --nxm-success: #5ec07a;
         --nxm-danger: #e07b6d;
         --nxm-warning: #e0a05c;
+        --nxm-on-success: #10151b;
+        --nxm-on-warning: #10151b;
 
         --nxm-info-bg: #16283a;
         --nxm-info-border: #2c4a66;
@@ -154,6 +158,8 @@ html[data-theme="dark"] {
     --nxm-success: #5ec07a;
     --nxm-danger: #e07b6d;
     --nxm-warning: #e0a05c;
+    --nxm-on-success: #10151b;
+    --nxm-on-warning: #10151b;
 
     --nxm-info-bg: #16283a;
     --nxm-info-border: #2c4a66;
@@ -901,31 +907,34 @@ dialog.nx-modal--loading .nx-modal__spinner {
     max-width: var(--nxm-content-width);
     margin: 0.75rem auto;
     padding: 0.6rem 0.8rem;
+    border: 1px solid var(--nxm-border, #d8dce3);
     border-radius: var(--nxm-radius);
-    color: #fff;
+    background: var(--nxm-surface-alt, #eef1f5);
+    color: var(--nxm-text, #1d2733);
     text-align: center;
 }
 
-.nxm-alert a { color: #fff; }
+.nxm-alert a { color: var(--nxm-accent-text, var(--nxm-accent, #0d5aa7)); }
 
-.nxm-alert--red { background: #c0392b; }
-.nxm-alert--green { background: #1e7a1e; }
-.nxm-alert--black { background: #222; }
-.nxm-alert--blue { background: #1a5f9e; }
-.nxm-alert--orange { background: #b95c00; }
-.nxm-alert--gray { background: #555; }
+.nxm-alert--red, .nxm-alert--darkred { background: var(--nxm-danger-bg, #fdf0f0); border-color: var(--nxm-danger-border, #f5c2c7); }
+.nxm-alert--green { background: var(--nxm-success-bg, #edf7e9); border-color: var(--nxm-success-border, #bfe0b2); }
+.nxm-alert--black { background: var(--nxm-surface, #fff); }
+.nxm-alert--blue { background: var(--nxm-info-bg, #e8f2fc); border-color: var(--nxm-info-border, #bcd7f0); }
+.nxm-alert--orange { background: var(--nxm-warning-bg, #fff8e5); border-color: var(--nxm-warning-border, #ffe3a3); }
+.nxm-alert--gray { background: var(--nxm-surface-alt, #eef1f5); }
 
 .nxm-alert-offline {
     max-width: var(--nxm-content-width);
     margin: 0.8rem auto;
     padding: 0.6rem 0.8rem;
-    background: #c0392b;
-    color: #fff;
+    background: var(--nxm-danger-bg, #fdf0f0);
+    border: 1px solid var(--nxm-danger-border, #f5c2c7);
+    color: var(--nxm-text, #1d2733);
     text-align: center;
     border-radius: var(--nxm-radius);
 }
 
-.nxm-alert-offline a { color: #fff; text-decoration: underline; }
+.nxm-alert-offline a { color: var(--nxm-accent-text, var(--nxm-accent, #0d5aa7)); text-decoration: underline; }
 
 .nxm-stat { display: inline-flex; gap: 0.3rem; align-items: baseline; }
 .nxm-stat__label { color: var(--nxm-userbar-dim); }
@@ -1215,9 +1224,12 @@ textarea { resize: vertical; }
 .nxm-table { border-collapse: collapse; }
 .nxm-table th { text-align: left; white-space: nowrap; }
 .nxm-th__label { margin-left: .3rem; font-size: .82em; vertical-align: 1px; }
-table.nx-torrents .colhead img { vertical-align: -3px; }
+table.nx-torrents .colhead img { vertical-align: -3px; background-color: currentColor; }
 table.nx-torrents tbody td { background: var(--nxm-surface); }
 @media (min-width: 721px) {
+    table.nx-torrents { width: 100%; }
+    table.nx-torrents .nxm-td-name { max-width: 0; }
+    table.nx-torrents .nxm-namecell { overflow-wrap: anywhere; }
     table.nx-torrents tbody tr:hover td { background: var(--nxm-surface-alt); }
 }
 .nx-pagination__link--disabled { color: var(--nxm-muted); border-color: var(--nxm-border); cursor: default; }
@@ -1535,7 +1547,7 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 .nx-panel__body { padding: 3px; }
 /* mybonus: seeding loadbar (replaces td.loadbarbg layout cell) */
 .nx-loadbar { width: 400px; margin: 0 auto; }
-.nx-loadbar__bg { display: block; height: 15px; background: url(../styles/bar.gif) repeat-x 0 0; }
+.nx-loadbar__bg { display: block; height: 15px; background: var(--nxm-surface-alt, #262e39); border-radius: 3px; }
 /* details: inline cell groups (replace inner layout <table> of td.no_border_wide) */
 .nxm-detail-cells { display: flex; flex-wrap: wrap; }
 .nxm-detail-cells > div { padding-right: 16px; }
@@ -1545,3 +1557,14 @@ ul.magic li { margin: 0 15px 0 0; text-align: center; float: left; width: 40px; 
 ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
 /* friends: blocked-users grid (replaces layout <table width=100%> cells) */
 .nxm-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); }
+
+/* Promotion badges — text chips replacing the pro_* sprite images. */
+.nx-promo { display: inline-block; padding: 0 0.45em; border-radius: 3px; font-size: 0.78em; font-weight: 700; line-height: 1.5; vertical-align: 1px; letter-spacing: 0.02em; color: var(--nxm-on-accent, #fff); }
+.nx-promo--free, .nx-promo--twoupfree { background: var(--nxm-success, #1e7a1e); color: var(--nxm-on-success, #fff); }
+.nx-promo--twoup { background: var(--nxm-accent, #1f6fd0); }
+.nx-promo--halfdown, .nx-promo--twouphalfdown, .nx-promo--thirtypercent { background: var(--nxm-warning, #b95c00); color: var(--nxm-on-warning, #fff); }
+
+/* FAQ list badges (replace faq_new / faq_updated sprite images). */
+.nx-faq-badge { display: inline-block; padding: 0 0.4em; border-radius: 3px; font-size: 0.72em; font-weight: 700; line-height: 1.5; vertical-align: 1px; text-transform: uppercase; letter-spacing: 0.03em; }
+.nx-faq-badge--new { background: var(--nxm-accent, #1f6fd0); color: var(--nxm-on-accent, #fff); }
+.nx-faq-badge--updated { background: var(--nxm-warning-bg, #fff8e5); color: var(--nxm-text, #1d2733); border: 1px solid var(--nxm-warning-border, #ffe3a3); }

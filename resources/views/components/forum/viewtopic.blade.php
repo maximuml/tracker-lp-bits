@@ -1,6 +1,8 @@
 @props(['topic'])
 <nav class="nx-crumbs" aria-label="breadcrumbs">
-    <a href="forums.php">{{ $topic->sitename }}&nbsp;{{ __('legacy/forums.text_forums') }}</a>
+    <a href="index.php">{{ $topic->sitename }}</a>
+    <span class="nx-crumbs__sep" aria-hidden="true">›</span>
+    <a href="forums.php">{{ trim(__('legacy/forums.text_forums')) }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
     <a href="?action=viewforum&amp;forumid={{ $topic->forumid }}">{{ $topic->forumname }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
@@ -74,7 +76,6 @@
             {{ $topic->quickReply }}
         </form>
     </div>
-    <p class="nx-center"><a class="index" href="?action=reply&amp;topicid={{ $topic->topicid }}">{{ __('legacy/forums.text_add_reply') }}</a></p>
 @else
     <p>{{ $topic->deniedNotice }}</p>
 @endif

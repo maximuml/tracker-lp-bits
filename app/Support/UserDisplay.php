@@ -389,7 +389,7 @@ final class UserDisplay
                 : $username)
                 .$pics
                 .($withtitle
-                    ? ' ('.($title === '' ? $className : "<span class='".$classNameColored."_Name'><b>".htmlspecialchars($title)).'</b></span>)'
+                    ? ' ('.($title === '' ? $className : "<span class='".$classNameColored."_Name'><b>".htmlspecialchars($title).'</b></span>').')'
                     : '');
 
             $username = '<span class="nowrap">'.($bracket ? '('.$username.')' : $username).$medalHtml.'</span>';

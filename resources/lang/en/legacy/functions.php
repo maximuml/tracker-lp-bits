@@ -120,6 +120,8 @@ return [
     'text_at' => ' at ',
     'text_edit' => 'Edit',
     'text_delete' => 'Delete',
+    'text_view' => 'View',
+    'text_dismiss' => 'Dismiss',
     'text_view_original' => 'View original',
     'text_last_edited_by' => 'Last edited by ',
     'text_edited_at' => ' at ',

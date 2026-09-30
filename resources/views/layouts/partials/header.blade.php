@@ -157,8 +157,8 @@
 <div class="nxm-alert nxm-alert--{{ $alert['color'] }}" role="alert" data-alert-key="{{ md5($alert['url'].'|'.$alert['text']->toHtml()) }}">
     <span class="nxm-alert__dot" aria-hidden="true"></span>
     <span class="nxm-alert__text">{{ $alert['text'] }}</span>
-    @if($alert['url'] !== '')<a class="nxm-alert__action" href="{{ $alert['url'] }}" target="_blank" rel="noopener">{{ 'View' }} &rsaquo;</a>@endif
-    <button type="button" class="nxm-alert__dismiss" data-alert-dismiss aria-label="{{ 'Dismiss' }}">&times;</button>
+    @if($alert['url'] !== '')<a class="nxm-alert__action" href="{{ $alert['url'] }}" target="_blank" rel="noopener">{{ __('legacy/functions.text_view') }} &rsaquo;</a>@endif
+    <button type="button" class="nxm-alert__dismiss" data-alert-dismiss aria-label="{{ __('legacy/functions.text_dismiss') }}">&times;</button>
 </div>
 @endforeach
 @if($chrome->offlineMsg)

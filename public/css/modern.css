@@ -975,7 +975,8 @@ dialog.nx-modal--loading .nx-modal__spinner {
 .nxm-alert__text { flex: 1 1 auto; min-width: 0; }
 .nxm-alert__text a { color: var(--nxm-accent-text, var(--nxm-accent, #0d5aa7)); }
 
-.nxm-alert__action {
+a.nxm-alert__action:link,
+a.nxm-alert__action:visited {
     flex: none;
     color: var(--nxm-accent-text, var(--nxm-accent, #0d5aa7));
     text-decoration: none;
@@ -1112,8 +1113,12 @@ td.shoutrow { background-color: var(--nxm-surface-alt); color: var(--nxm-text); 
    links on accent backgrounds keep their own colours. */
 html[data-theme="dark"] .nxm-main :is(a:link, a:visited),
 html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { color: var(--nxm-accent); }
-html[data-theme="dark"] .nxm-main :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited),
-html[data-theme="dark"] .nxm-footer :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited) { color: var(--nxm-on-accent); }
+html[data-theme="dark"] .nxm-main .nx-pagination__link--current :is(a:link, a:visited),
+html[data-theme="dark"] .nxm-footer .nx-pagination__link--current :is(a:link, a:visited) { color: var(--nxm-on-accent); }
+/* Colhead links stay dim on the quiet surface — the on-accent colour was
+   for the old accent-filled header. */
+html[data-theme="dark"] .nxm-main :is(.colhead, .nx-colhead) :is(a:link, a:visited),
+html[data-theme="dark"] .nxm-footer :is(.colhead, .nx-colhead) :is(a:link, a:visited) { color: var(--nxm-text-dim); }
 /* Alert banners keep white links on their coloured backgrounds. */
 html[data-theme="dark"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
 /* Footer links sit inside muted text — accent vs dim text is only ~1:1,
@@ -1124,10 +1129,14 @@ html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { text-decoration: un
     html:not([data-theme]) .nxm-footer :is(a:link, a:visited),
     html[data-theme="auto"] .nxm-main :is(a:link, a:visited),
     html[data-theme="auto"] .nxm-footer :is(a:link, a:visited) { color: var(--nxm-accent); }
-    html:not([data-theme]) .nxm-main :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited),
-    html:not([data-theme]) .nxm-footer :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited),
-    html[data-theme="auto"] .nxm-main :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited),
-    html[data-theme="auto"] .nxm-footer :is(.colhead, .nx-colhead, .nx-pagination__link--current) :is(a:link, a:visited) { color: var(--nxm-on-accent); }
+    html:not([data-theme]) .nxm-main .nx-pagination__link--current :is(a:link, a:visited),
+    html:not([data-theme]) .nxm-footer .nx-pagination__link--current :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-main .nx-pagination__link--current :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-footer .nx-pagination__link--current :is(a:link, a:visited) { color: var(--nxm-on-accent); }
+    html:not([data-theme]) .nxm-main :is(.colhead, .nx-colhead) :is(a:link, a:visited),
+    html:not([data-theme]) .nxm-footer :is(.colhead, .nx-colhead) :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-main :is(.colhead, .nx-colhead) :is(a:link, a:visited),
+    html[data-theme="auto"] .nxm-footer :is(.colhead, .nx-colhead) :is(a:link, a:visited) { color: var(--nxm-text-dim); }
     html:not([data-theme]) .nxm-alert :is(a:link, a:visited),
     html[data-theme="auto"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
     html:not([data-theme]) .nxm-footer :is(a:link, a:visited),

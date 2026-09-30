@@ -251,16 +251,12 @@ html[data-theme="light"]:root {
     border-bottom: 1px solid var(--nxm-border);
 }
 
-/* Yellow square bullet on section/table headers — the From Zero glyph. */
-.nxm-main .colhead,
-.nxm-main .nx-colhead,
-.nxm-panel > .nxm-panel__header,
-.nxm-main > table > tbody > tr:first-child > .colhead {
+/* Yellow square bullet on section headers — the From Zero glyph.
+   Quiet table colheads skip it: one per column reads as noise. */
+.nxm-panel > .nxm-panel__header {
     position: relative;
 }
 
-.nxm-main .colhead::before,
-.nxm-main .nx-colhead::before,
 .nxm-panel > .nxm-panel__header::before {
     content: "";
     display: inline-block;

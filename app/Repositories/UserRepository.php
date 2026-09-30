@@ -58,7 +58,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /** @var array<int, string> */
-    private static array $allowIncludes = ['inviter', 'valid_medals'];
+    private static array $allowIncludes = ['inviter'];
 
     /** @var array<int, string> */
     private static array $allowIncludeFields = ['seeding_leeching_data'];
@@ -335,15 +335,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             'downloadpos', 'parked', 'clientselect', 'showclienterror',
         ];
 
-        return User::query()
-            ->with([
-                'wearing_medals' => function ($query) {
-                    $query->orderBy('user_medals.priority', 'desc')
-                        ->orderBy('user_medals.id', 'desc')
-                        ->limit((int) SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn(3));
-                },
-            ])
-            ->find($id, $neededColumns);
+        return User::query()->find($id, $neededColumns);
     }
 
     public function logModify(int|string $userId, string $comment): void

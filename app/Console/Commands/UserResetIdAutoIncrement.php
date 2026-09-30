@@ -62,7 +62,7 @@ class UserResetIdAutoIncrement extends Command
             'hit_and_runs', 'invites', 'iplog', 'loginattempts', 'lucky_draw_winning_records', 'magic', 'messages', 'offers', 'offervotes', 'peers',
             'pmboxes', 'pollanswers', 'posts', 'readposts', 'reports', 'requests', 'shoutbox', 'snatched',
             'staffmessages', 'sticky_promotion_appends', 'sticky_promotion_participators', 'sticky_promotions', 'subs', 'suggest', 'thanks', 'topics',
-            'torrent_operation_logs', 'torrent_secrets', 'torrents', 'user_ban_logs', 'user_medals', 'user_metas', 'user_permissions', 'user_roles',
+            'torrent_operation_logs', 'torrent_secrets', 'torrents', 'user_ban_logs', 'user_metas', 'user_permissions', 'user_roles',
             'username_change_logs', 'users',
         ];
         $allTables = array_map(

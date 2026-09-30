@@ -9,12 +9,10 @@ use App\Enums\UserClass;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamUserRepository;
-use App\Repositories\MedalRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
-use App\Services\Ajax\MedalActions;
 use App\Services\Ajax\PasskeyActions;
 use App\Services\Ajax\ShoutboxActions;
 use App\Services\AjaxService;
@@ -36,8 +34,8 @@ use Tests\TestCase;
  * Covers the ALLOWED_ACTIONS whitelist, getOffer (found / not found),
  * approval validation, shoutbox validation (post / edit / delete / react),
  * clearShoutBox permission, addToken / removeToken validation, and
- * repository-delegated actions (buyMedal, claimTask, getPasskeyList,
- * toggleUserMedalStatus, attendanceRetroactive).
+ * repository-delegated actions (claimTask, getPasskeyList,
+ * attendanceRetroactive).
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AjaxServiceTest extends TestCase
@@ -45,9 +43,6 @@ final class AjaxServiceTest extends TestCase
     use DatabaseTransactions;
 
     private AjaxService $service;
-
-    /** @var MedalRepository&MockInterface */
-    private MedalRepository $medalRepo;
 
     /** @var AttendanceRepository&MockInterface */
     private AttendanceRepository $attendanceRepo;
@@ -85,10 +80,6 @@ final class AjaxServiceTest extends TestCase
         DB::table('users')->delete();
         DB::table('personal_access_tokens')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-
-        /** @var MedalRepository&MockInterface $medalRepo */
-        $medalRepo = Mockery::mock(MedalRepository::class);
-        $this->medalRepo = $medalRepo;
 
         /** @var AttendanceRepository&MockInterface $attendanceRepo */
         $attendanceRepo = Mockery::mock(AttendanceRepository::class);
@@ -143,7 +134,6 @@ final class AjaxServiceTest extends TestCase
             $this->currentUser,
             new ShoutboxActions(new ShoutboxService, $this->actorContext),
             new PasskeyActions($this->passkeyRepo, $this->currentUser),
-            new MedalActions($this->medalRepo, $this->bonusRepo, $this->currentUser),
         );
     }
 
@@ -203,7 +193,6 @@ final class AjaxServiceTest extends TestCase
             $this->currentUser,
             new ShoutboxActions(new ShoutboxService, $this->actorContext),
             new PasskeyActions($this->passkeyRepo, $this->currentUser),
-            new MedalActions($this->medalRepo, $this->bonusRepo, $this->currentUser),
         );
     }
 
@@ -226,7 +215,6 @@ final class AjaxServiceTest extends TestCase
 
     public function test_allowed_actions_contains_expected_entries(): void
     {
-        $this->assertContains('buyMedal', AjaxService::ALLOWED_ACTIONS);
         $this->assertContains('claimTask', AjaxService::ALLOWED_ACTIONS);
         $this->assertContains('deletePasskey', AjaxService::ALLOWED_ACTIONS);
         $this->assertContains('getOffer', AjaxService::ALLOWED_ACTIONS);
@@ -479,23 +467,6 @@ final class AjaxServiceTest extends TestCase
         $this->assertSame(0, DB::table('personal_access_tokens')->count());
     }
 
-    // --- buyMedal ---
-
-    public function test_buy_medal_delegates_to_bonus_repository(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->bonusRepo->shouldReceive('consumeToBuyMedal')
-            ->with($userId, 5)
-            ->once()
-            ->andReturn(true);
-
-        $result = $this->service->dispatch('buyMedal', ['medal_id' => 5]);
-
-        $this->assertTrue($result);
-    }
-
     // --- claimTask ---
 
     public function test_claim_task_delegates_to_exam_repository(): void
@@ -529,23 +500,6 @@ final class AjaxServiceTest extends TestCase
         $result = $this->service->dispatch('getPasskeyList', []);
 
         $this->assertSame($expectedList, $result);
-    }
-
-    // --- toggleUserMedalStatus ---
-
-    public function test_toggle_user_medal_status_delegates_to_medal_repository(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->medalRepo->shouldReceive('toggleUserMedalStatus')
-            ->with(10, $userId)
-            ->once()
-            ->andReturn(true);
-
-        $result = $this->service->dispatch('toggleUserMedalStatus', ['id' => 10]);
-
-        $this->assertTrue($result);
     }
 
     // --- attendanceRetroactive ---
@@ -596,31 +550,6 @@ final class AjaxServiceTest extends TestCase
             ->andReturn(true);
 
         $result = $this->service->dispatch('deletePasskey', ['credentialId' => 'cred-123']);
-
-        $this->assertTrue($result);
-    }
-
-    // --- saveUserMedal ---
-
-    public function test_save_user_medal_parses_params_and_delegates(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->medalRepo->shouldReceive('saveUserMedal')
-            ->with($userId, Mockery::on(function ($data): bool {
-                return isset($data[1]) && $data[1]['status'] === '1';
-            }))
-            ->once()
-            ->andReturn(true);
-
-        $params = [
-            ['name' => 'status_1', 'value' => '1'],
-            ['name' => 'invalid', 'value' => 'x'], // missing underscore → skipped
-            ['invalid' => 'nope'], // missing name/value → skipped
-        ];
-
-        $result = $this->service->dispatch('saveUserMedal', $params); // @phpstan-ignore argument.type
 
         $this->assertTrue($result);
     }

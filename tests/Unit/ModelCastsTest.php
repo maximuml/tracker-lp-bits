@@ -10,7 +10,6 @@ use App\Models\Cheater;
 use App\Models\IpLog;
 use App\Models\Language;
 use App\Models\TorrentCustomField;
-use App\Models\UserMedal;
 use App\Models\UserRequireSeedTorrent;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Attributes\TestCategory;
@@ -74,18 +73,6 @@ final class ModelCastsTest extends TestCase
     {
         $casts = (new TorrentCustomField)->getCasts();
         $this->assertArrayHasKey('type', $casts);
-    }
-
-    /**
-     * UserMedal has 'expire_at' and 'bonus_addition_expire_at' datetime casts.
-     */
-    public function test_user_medal_has_datetime_casts(): void
-    {
-        $casts = (new UserMedal)->getCasts();
-        $this->assertArrayHasKey('expire_at', $casts);
-        $this->assertSame('datetime', $casts['expire_at']);
-        $this->assertArrayHasKey('bonus_addition_expire_at', $casts);
-        $this->assertSame('datetime', $casts['bonus_addition_expire_at']);
     }
 
     /**

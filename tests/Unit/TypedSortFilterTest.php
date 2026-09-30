@@ -6,7 +6,6 @@ namespace Tests\Unit;
 
 use App\Repositories\AgentAllowRepository;
 use App\Repositories\BaseRepository;
-use App\Repositories\MedalRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\NewsRepository;
 use App\Repositories\RewardRepository;
@@ -102,19 +101,6 @@ final class TypedSortFilterTest extends TestCase
         $this->assertSame('value', $field);
 
         [$field] = $repo->getSortFieldAndType(['sort_field' => 'password']);
-        $this->assertSame('id', $field);
-    }
-
-    /**
-     * MedalRepository has a sort whitelist.
-     */
-    public function test_medal_repository_has_sort_whitelist(): void
-    {
-        $repo = $this->wrapRepo(app(MedalRepository::class));
-        [$field] = $repo->getSortFieldAndType(['sort_field' => 'name']);
-        $this->assertSame('name', $field);
-
-        [$field] = $repo->getSortFieldAndType(['sort_field' => 'evil_column']);
         $this->assertSame('id', $field);
     }
 

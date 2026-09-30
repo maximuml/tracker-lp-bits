@@ -22,13 +22,6 @@
 </ul>
 <div class="nx-center">{{ __('legacy/mybonus.text_you_are_currently_getting') }}{{ $info->currentSeedBonus }}{{ __('legacy/mybonus.text_point') }}{{ \App\Support\Strings::addS((float) $info->currentSeedBonus) }}{{ __('legacy/mybonus.text_per_hour') }} (A = {{ $info->aFactor }})</div>
 <div class="nx-loadbar"><span class="nx-loadbar__bg"><img class="{{ $info->loadbarClass }}" src="pic/trans.gif" alt="{{ $info->percentLabel }}%" /></span></div>
-@if ($info->medalAdditionFactor !== null)
-<h1>{{ __('legacy/mybonus.text_get_by_medal') }}</h1>
-<ul>
-<li>{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(sprintf((string) __('legacy/mybonus.medal_additional_desc'), $info->userId)) }}</li>
-<li>{{ __('legacy/mybonus.medal_additional_factor') }}{{ $info->medalAdditionFactor }}</li>
-</ul>
-@endif
 @if ($info->officialAdditionFactor !== null)
 <h1>{{ __('legacy/mybonus.text_get_by_seeding_official') }}</h1>
 <ul>

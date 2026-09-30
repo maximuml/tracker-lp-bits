@@ -25,7 +25,6 @@ use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
-use App\Support\Medal;
 use App\Support\Network;
 use App\Support\Permissions;
 use App\Support\Strings;
@@ -94,7 +93,7 @@ class UserDetailController extends Controller
             );
         }
 
-        $userModel = $this->userDetailRepository->getUserWithMedals($id);
+        $userModel = User::query()->find($id);
         $temporaryInviteCount = $userModel instanceof User ? $this->userDetailRepository->getTemporaryInviteCount($userModel) : 0;
 
         return view('user.details', array_merge([
@@ -198,25 +197,6 @@ class UserDetailController extends Controller
         $usernameHtml = UserDisplay::username($user['id'], true, false);
         $invitedByHtml = $user['invited_by'] > 0 ? UserDisplay::username($user['invited_by']) : '';
         $avatarHtml = $user['avatar'] ? UserDisplay::avatarImageWithContext(htmlspecialchars(trim((string) $user['avatar']))) : '';
-
-        $medalImagesHtml = '';
-        if ($userModel instanceof User && $userModel->valid_medals->isNotEmpty()) {
-            $medalImagesHtml = Medal::buildImages($userModel->valid_medals, 120, $currentUserId === (int) $user['id']);
-            AssetAppender::js(<<<'JS'
-document.getElementById('save-user-medal-btn').addEventListener("click", function (e) {
-    var form = this.closest('form');
-    var data = serializeForm(form);
-    nativePost('ajax.php', {params: data, action: 'saveUserMedal'}, function (response) {
-        console.log(response)
-        if (response.ret != 0) {
-            layer.alert(response.msg)
-        } else {
-            window.location.reload()
-        }
-    })
-})
-JS, 'footer', false);
-        }
 
         $joinWeeks = '';
         if ($user['added'] !== null && $user['added'] !== '0000-00-00 00:00:00' && $userModel instanceof User) {
@@ -423,7 +403,6 @@ JS, 'footer', false);
             'trueRatio' => $trueRatio,
             'seedLeechRatio' => $seedLeechRatio,
             'joinWeeks' => $joinWeeks,
-            'medalImagesHtml' => SafeHtml::fromTrustedHtml($medalImagesHtml),
             'warned' => $warned,
             'leechwarn' => $leechwarn,
             'elapsedLastWarn' => $elapsedLastWarn,

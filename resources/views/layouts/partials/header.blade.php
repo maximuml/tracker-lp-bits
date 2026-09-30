@@ -81,7 +81,6 @@
                         @else
                         <a href="attendance.php" class="faqlink">{{ __('legacy/functions.text_attendance') }}</a>
                         @endif
-                        <a href="medal.php">{{ $chrome->userBar->medalLabel }}</a>
                         <a href="task.php">{{ $chrome->userBar->taskLabel }}</a>
                         <a href="invite.php?id={{ (int) $chrome->user['id'] }}">{{ __('legacy/functions.text_invite') }}: {{ $chrome->userBar->invites }}@if($chrome->userBar->pendingInvites > 0) ({{ $chrome->userBar->pendingInvites }})@endif</a>
                         @if($chrome->userBar->managementHref !== '')<a href="{{ $chrome->userBar->managementHref }}" target="_blank" rel="noopener">{{ __('legacy/functions.text_management_system') }}</a>@endif

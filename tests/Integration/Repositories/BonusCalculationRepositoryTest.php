@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories;
 
-use App\Enums\MedalGetType;
-use App\Enums\UserMedalStatus;
 use App\Enums\UserStatus;
-use App\Models\Medal;
 use App\Models\Peer;
 use App\Models\Tag;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Models\UserMedal;
 use App\Models\UserMeta;
 use App\Repositories\BonusCalculationRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -24,8 +20,7 @@ use Tests\TestCase;
  * Unit tests for BonusCalculationRepository.
  *
  * Covers getTorrentRowsForBonusCalculation(), getTagGrouped(),
- * getMedalAdditionalFactor(), getHaremAddition(),
- * getCharityReceiverCount(), findGiftReceiver(),
+ * getHaremAddition(), getCharityReceiverCount(), findGiftReceiver(),
  * hasChangeUsernameCard(), hasRainbowIdForever().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
@@ -98,32 +93,6 @@ final class BonusCalculationRepositoryTest extends TestCase
 
         $this->assertArrayHasKey($torrent->id, $result);
         $this->assertSame(1, $result[$torrent->id][$tag->id]);
-    }
-
-    public function test_get_medal_additional_factor_returns_zero_without_medals(): void
-    {
-        $user = User::factory()->create();
-
-        $factor = $this->repository->getMedalAdditionalFactor($user->id, now()->toDateTimeString());
-
-        $this->assertSame(0.0, $factor);
-    }
-
-    public function test_get_medal_additional_factor_sums_factors_for_valid_medals(): void
-    {
-        $user = User::factory()->create();
-        $medal = $this->createMedal(['bonus_addition_factor' => 0.5]);
-        UserMedal::query()->create([
-            'uid' => $user->id,
-            'medal_id' => $medal->id,
-            'expire_at' => null,
-            'status' => UserMedalStatus::NOT_WEARING->value,
-            'bonus_addition_expire_at' => null,
-        ]);
-
-        $factor = $this->repository->getMedalAdditionalFactor($user->id, now()->toDateTimeString());
-
-        $this->assertSame(0.5, $factor);
     }
 
     public function test_get_harem_addition_returns_zero_without_invitees(): void
@@ -221,22 +190,5 @@ final class BonusCalculationRepositoryTest extends TestCase
         ]);
 
         $this->assertTrue($this->repository->hasRainbowIdForever($user->id));
-    }
-
-    /**
-     * @param  array<string, mixed>  $overrides
-     */
-    private function createMedal(array $overrides = []): Medal
-    {
-        return Medal::query()->create(array_merge([
-            'name' => 'Test Medal',
-            'get_type' => MedalGetType::GRANT->value,
-            'price' => 0,
-            'duration' => 0,
-            'bonus_addition_duration' => 0,
-            'bonus_addition_factor' => 0,
-            'gift_fee_factor' => 0,
-            'priority' => 0,
-        ], $overrides));
     }
 }

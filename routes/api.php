@@ -13,7 +13,6 @@ use App\Http\Controllers\ExamUserController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\HitAndRunController;
-use App\Http\Controllers\MedalController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\OfferController;
@@ -33,7 +32,6 @@ use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsercpController;
-use App\Http\Controllers\UserMedalController;
 use App\Support\Permissions;
 use Illuminate\Support\Facades\Route;
 
@@ -239,10 +237,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         Route::apiResource('settings', SettingController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SETTING_LIST));
         Route::apiResource('settings', SettingController::class)->only(['store'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::SETTING_MANAGE));
-        Route::apiResource('medals', MedalController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::MEDAL_LIST));
-        Route::apiResource('medals', MedalController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::MEDAL_MANAGE));
-        Route::apiResource('user-medals', UserMedalController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_MEDAL_LIST));
-        Route::apiResource('user-medals', UserMedalController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_MEDAL_MANAGE));
         Route::apiResource('tags', TagController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TAG_LIST));
         Route::apiResource('tags', TagController::class)->only(['store', 'update', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TAG_MANAGE));
         Route::apiResource('hr', HitAndRunController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::HIT_AND_RUN_LIST));

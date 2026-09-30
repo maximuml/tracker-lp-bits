@@ -138,12 +138,6 @@ enum RoutePermissionEnum: string
     case SETTING_LIST = 'setting:list';
     case SETTING_MANAGE = 'setting:manage';
 
-    /* Medals */
-    case MEDAL_LIST = 'medal:list';
-    case MEDAL_MANAGE = 'medal:manage';
-    case USER_MEDAL_LIST = 'user_medal:list';
-    case USER_MEDAL_MANAGE = 'user_medal:manage';
-
     /* Tags */
     case TAG_LIST = 'tag:list';
     case TAG_MANAGE = 'tag:manage';
@@ -186,8 +180,6 @@ enum RoutePermissionEnum: string
             self::EXAM_USER_MANAGE,
             self::DASHBOARD_VIEW,
             self::SETTING_MANAGE,
-            self::MEDAL_MANAGE,
-            self::USER_MEDAL_MANAGE,
             self::TAG_MANAGE,
             self::HIT_AND_RUN_MANAGE,
             self::HIT_AND_RUN_PARDON,

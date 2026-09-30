@@ -215,9 +215,6 @@ class EditSetting extends Page implements HasForms
                 TextInput::make('system.change_username_min_interval_in_days')
                     ->integer()
                     ->label(__('label.setting.system.change_username_min_interval_in_days')),
-                TextInput::make('system.maximum_number_of_medals_can_be_worn')
-                    ->integer()
-                    ->label(__('label.setting.system.maximum_number_of_medals_can_be_worn')),
                 TextInput::make('system.cookie_valid_days')
                     ->integer()
                     ->label(__('label.setting.system.cookie_valid_days')),

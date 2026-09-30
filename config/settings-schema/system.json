@@ -16,14 +16,6 @@
                 "null"
             ]
         },
-        "maximum_number_of_medals_can_be_worn": {
-            "type": [
-                "integer",
-                "string",
-                "null"
-            ],
-            "pattern": "^[0-9]+$"
-        },
         "cookie_valid_days": {
             "type": [
                 "integer",

@@ -58,7 +58,7 @@ final class BonusTest extends TestCase
 
     public function test_empty_torrent_list_yields_zero_bonus(): void
     {
-        $r = Bonus::aggregateSeedBonus([], $this->settings(), [], null, null, null, 0.0, 0);
+        $r = Bonus::aggregateSeedBonus([], $this->settings(), [], null, null, null, 0);
 
         $this->assertSame(0, $r['count']);
         $this->assertSame(0, $r['torrent_peer_count']);
@@ -70,7 +70,6 @@ final class BonusTest extends TestCase
         $this->assertSame('', $r['last_action']);
         $this->assertSame(0, $r['official_torrent_peer_count']);
         $this->assertSame(2, $r['donor_times']);
-        $this->assertSame(0.0, $r['medal_additional_factor']);
     }
 
     public function test_single_torrent_matches_reference_formula(): void
@@ -85,7 +84,7 @@ final class BonusTest extends TestCase
             'ip' => '10.0.0.1',
         ];
 
-        $r = Bonus::aggregateSeedBonus([$t], $s, [], null, null, null, 0.0, 0);
+        $r = Bonus::aggregateSeedBonus([$t], $s, [], null, null, null, 0);
 
         $expectedA = $this->expectedTemp($t, $s);
         $this->assertSame(1, $r['count']);
@@ -110,7 +109,7 @@ final class BonusTest extends TestCase
             ];
         }
 
-        $r = Bonus::aggregateSeedBonus($rows, $s, [], null, null, null, 0.0, 0);
+        $r = Bonus::aggregateSeedBonus($rows, $s, [], null, null, null, 0);
 
         // 5 torrents counted, but the count used for per-seeding bonus is capped at 2.
         $this->assertSame(2, $r['count']);
@@ -127,7 +126,7 @@ final class BonusTest extends TestCase
         ];
         $tagGrouped = [2 => [99 => 1]]; // torrent 2 carries the official tag
 
-        $r = Bonus::aggregateSeedBonus($rows, $s, $tagGrouped, 99, null, null, 0.0, 0);
+        $r = Bonus::aggregateSeedBonus($rows, $s, $tagGrouped, 99, null, null, 0);
 
         $this->assertSame(1, $r['official_torrent_peer_count']);
         $this->assertSame('3221225472', (string) $r['official_size']); // 3 GiB
@@ -140,8 +139,8 @@ final class BonusTest extends TestCase
         $s = $this->settings();
         $row = ['id' => 1, 'added' => date('Y-m-d H:i:s', time() - 7 * 86400), 'size' => 4 * 1073741824, 'seeders' => 1, 'last_action' => '', 'ip' => ''];
 
-        $full = Bonus::aggregateSeedBonus([$row], $s, [], null, null, null, 0.0, 0);
-        $scaled = Bonus::aggregateSeedBonus([$row], $s, [1 => [42 => 1]], null, 42, 0.25, 0.0, 0);
+        $full = Bonus::aggregateSeedBonus([$row], $s, [], null, null, null, 0);
+        $scaled = Bonus::aggregateSeedBonus([$row], $s, [1 => [42 => 1]], null, 42, 0.25, 0);
 
         $this->assertEqualsWithDelta($full['A'] * 0.25, $scaled['A'], 1e-6);
     }
@@ -154,7 +153,7 @@ final class BonusTest extends TestCase
             ['id' => 2, 'added' => date('Y-m-d H:i:s', time() - 86400), 'size' => 1073741824, 'seeders' => 1, 'last_action' => '2026-05-20 12:00:00', 'ip' => '1.1.1.1'],
         ];
 
-        $r = Bonus::aggregateSeedBonus($rows, $s, [], null, null, null, 0.0, 0);
+        $r = Bonus::aggregateSeedBonus($rows, $s, [], null, null, null, 0);
 
         $this->assertSame('2026-05-20 12:00:00', $r['last_action']);
         $this->assertSame(['1.1.1.1'], $r['ip_arr']); // deduplicated

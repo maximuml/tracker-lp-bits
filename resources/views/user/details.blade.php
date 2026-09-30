@@ -4,9 +4,6 @@
 
 @section('content')
 <h1>{{ $usernameHtml }}<img src="pic/flag/{{ $countryFlagPic }}" alt="{{ $countryName }}" /></h1>
-@if ($medalImagesHtml !== '')
-{{ $medalImagesHtml }}
-@endif
 @if (! \App\Support\LegacyYesNo::isYes($user['enabled'] ?? null))
 <p><b>{{ __('legacy/userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)

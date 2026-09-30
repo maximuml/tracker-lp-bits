@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Enums\TorrentPromotion;
+use App\Enums\TorrentType;
+use App\Enums\TorrentVisible;
+use App\Models\Torrent;
+use App\Models\User;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Rhilip\Bencode\Bencode;
+
 /**
  * Dev-stack fixture seeder: 50 lpfanXX users + 30 Linkin Park torrents with
  * descriptions, screenshots and MediaInfo blocks. Idempotent — skips rows
@@ -19,16 +29,6 @@ if (! app()->environment('local', 'development', 'testing')) {
     fwrite(STDERR, 'dev-seed is for local dev stacks only (APP_ENV='.app()->environment().")\n");
     exit(1);
 }
-
-use App\Enums\TorrentPromotion;
-use App\Enums\TorrentType;
-use App\Enums\TorrentVisible;
-use App\Models\Torrent;
-use App\Models\User;
-use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Rhilip\Bencode\Bencode;
 
 // ---- users ----
 $owners = User::where('id', 1)->get();

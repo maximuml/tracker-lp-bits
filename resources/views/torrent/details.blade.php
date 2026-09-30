@@ -25,7 +25,7 @@
 @include('torrent.details._deny_banner', ['banner' => $details->denyBanner])
 @endif
 
-<table data-nx="data" class="nx-w-97"><caption class="nx-sr-only">{{ $details->title->name }}</caption>
+<table data-nx="data" class="nx-w-97 nxm-kv"><caption class="nx-sr-only">{{ $details->title->name }}</caption>
 @if ($details->downloadAllowed)
 <tr><td class="rowhead nx-w-1p nx-nowrap">{{ __('legacy/details.row_download') }}</td><td class="rowfollow"><a class="index" href="download.php?id={{ $torrentId }}">{{ ($torrentNamePrefix ?? '').'.'.$details->saveAs }}.torrent</a>&nbsp;&nbsp;<a id="bookmark0" href="#" data-bookmark-torrent="{{ $torrentId }}" data-bookmark-counter="0">{{ $details->bookmark }}</a>&nbsp;&nbsp;&nbsp;{{ __('legacy/details.row_upped_by') }}&nbsp;@if ($details->owner->anonymous)<i>{{ __('legacy/details.text_anonymous') }}</i>@if ($details->owner->showUsername) ({{ $details->owner->username }})@endif@elseif ($details->owner->username !== null){{ $details->owner->username }}@else<i></i>@endif{{ $details->uploadTimePrefix }}{{ $details->uploadTime }}</td></tr>
 @else

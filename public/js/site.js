@@ -1443,7 +1443,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // lazy load
     if ("IntersectionObserver" in window) {
-        const fallbackImage = 'pic/misc/spinner.svg';
+        const fallbackImage = 'pic/misc/cover.svg';
         const domainList = ['img1.doubanio.com', 'img2.doubanio.com', 'img3.doubanio.com', 'img9.doubanio.com'];
         const imgList = [...document.querySelectorAll('.nexus-lazy-load')];
         const loadedImages = {};

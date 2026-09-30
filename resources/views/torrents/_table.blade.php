@@ -19,7 +19,7 @@
     <td class="rowfollow nxm-td-name nx-w-99p">
         <div class="torrentname nxm-nameblock">
             @if ($row->coverSrc !== null)
-            <div class="nx-embedded nxm-cover"><img src="pic/misc/spinner.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-cover__img" alt="" /></div>
+            <div class="nx-embedded nxm-cover"><img src="pic/misc/cover.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-cover__img" alt="" /></div>
             @endif
             <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ $row->stickyTitle }}" />&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<span class="new">{{ __('legacy/functions.text_new_uppercase') }}</span>)</b>@endif @if ($row->isBanned) <b>(<span class="striking">{{ __('legacy/functions.text_banned') }}</span>)</b>@endif<x-torrent.badges :set="$row->badges" />@if ($row->tags !== [])<br /><x-torrent.tags :tags="$row->tags" />@endif<x-torrent.progress :progress="$row->progress" /></div>
             <div class="nx-embedded nxm-rowactions">
@@ -41,8 +41,8 @@
         @endif
     </td>
     @endif
-    <td class="rowfollow nowrap nxm-td-added"><time datetime="{{ str_replace(' ', 'T', (string) $row->added) }}">{{ $row->addedDate }}<br/>{{ $row->addedTime }}</time></td>
-    <td class="rowfollow nowrap nxm-td-size">{{ $row->size['value'] }}<br/>{{ $row->size['unit'] }}</td>
+    <td class="rowfollow nowrap nxm-td-added"><time datetime="{{ str_replace(' ', 'T', (string) $row->added) }}">{{ $row->addedDate }} <br/>{{ $row->addedTime }}</time></td>
+    <td class="rowfollow nowrap nxm-td-size">{{ $row->size['value'] }} <br/>{{ $row->size['unit'] }}</td>
     <td class="rowfollow nxm-td-seeders nx-center" data-label="{{ 'S' }}">
         @if ($row->seedersUrl)
             <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>

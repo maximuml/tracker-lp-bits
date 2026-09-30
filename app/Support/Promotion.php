@@ -123,9 +123,9 @@ final class Promotion
     }
 
     private const PROMOTION_CONFIG = [
-        2 => ['class' => 'free', 'text' => 'text_free', 'icon' => 'pro_free', 'alt' => 'Free', 'subColor' => 'nx-color-blue', 'expire' => 'expirefree_torrent'],
+        2 => ['class' => 'free', 'text' => 'text_free', 'icon' => 'pro_free', 'alt' => 'Free', 'subColor' => 'nx-promo-end', 'expire' => 'expirefree_torrent'],
         3 => ['class' => 'twoup', 'text' => 'text_two_times_up', 'icon' => 'pro_2up', 'alt' => '2X', 'subColor' => null, 'expire' => 'expiretwoup_torrent'],
-        4 => ['class' => 'twoupfree', 'text' => 'text_free_two_times_up', 'icon' => 'pro_free2up', 'alt' => '2X Free', 'subColor' => 'nx-color-00cc66', 'expire' => 'expiretwoupfree_torrent'],
+        4 => ['class' => 'twoupfree', 'text' => 'text_free_two_times_up', 'icon' => 'pro_free2up', 'alt' => '2X Free', 'subColor' => 'nx-promo-end nx-promo-end--2up', 'expire' => 'expiretwoupfree_torrent'],
         5 => ['class' => 'halfdown', 'text' => 'text_half_down', 'icon' => 'pro_50pctdown', 'alt' => '50%', 'subColor' => null, 'expire' => 'expirehalfleech_torrent'],
         6 => ['class' => 'twouphalfdown', 'text' => 'text_half_down_two_up', 'icon' => 'pro_50pctdown2up', 'alt' => '2X 50%', 'subColor' => null, 'expire' => 'expiretwouphalfleech_torrent'],
         7 => ['class' => 'thirtypercent', 'text' => 'text_thirty_percent_down', 'icon' => 'pro_30pctdown', 'alt' => '30%', 'subColor' => null, 'expire' => 'expirethirtypercentleech_torrent'],

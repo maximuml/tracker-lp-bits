@@ -884,6 +884,23 @@ dialog.nx-modal--loading .nx-modal__spinner {
     }
     .nxm-td-size br,
     .nxm-td-added br { display: none; }
+    table.nx-torrents .nxm-namecell { overflow-wrap: anywhere; }
+
+    /* Key/value tables (details label+value rows): stack label above
+       value instead of squeezing a second column past the viewport. */
+    table.nxm-kv tbody,
+    table.nxm-kv tbody tr { display: block; }
+    table.nxm-kv tbody td {
+        display: block;
+        width: auto;
+        text-align: left;
+        white-space: normal;
+        border: 0;
+    }
+    table.nxm-kv td.rowhead { padding-bottom: 0; }
+    table.nxm-kv td.rowfollow { overflow-wrap: anywhere; }
+    .nexus-media-info-raw { overflow-x: auto; }
+    h1 { overflow-wrap: anywhere; }
 }
 
 .nxm-search input[type="submit"] {
@@ -1569,6 +1586,9 @@ ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
 .nx-promo--free, .nx-promo--twoupfree { background: var(--nxm-success, #1e7a1e); color: var(--nxm-on-success, #fff); }
 .nx-promo--twoup { background: var(--nxm-accent, #1f6fd0); }
 .nx-promo--halfdown, .nx-promo--twouphalfdown, .nx-promo--thirtypercent { background: var(--nxm-warning, #b95c00); color: var(--nxm-on-warning, #fff); }
+/* "will end in …" timeout suffix — theme-aware hues replacing raw blue/green hex. */
+.nx-promo-end { color: var(--nxm-accent-text); }
+.nx-promo-end--2up { color: var(--nxm-success); }
 
 /* FAQ list badges (replace faq_new / faq_updated sprite images). */
 .nx-faq-badge { display: inline-block; padding: 0 0.4em; border-radius: 3px; font-size: 0.72em; font-weight: 700; line-height: 1.5; vertical-align: 1px; text-transform: uppercase; letter-spacing: 0.03em; }

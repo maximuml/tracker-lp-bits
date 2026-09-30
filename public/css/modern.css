@@ -2061,4 +2061,4 @@ a.nx-mail:hover { color: var(--nxm-text); }
     gap: 0.35rem 1.4rem; margin-bottom: 0.4rem;
     font-size: 0.88rem;
 }
-.nxm-footer__copy { font-size: 0.82rem; color: var(--nxm-dim, #6b7280); }
+.nxm-footer__copy { font-size: 0.82rem; color: var(--nxm-muted, #666); }

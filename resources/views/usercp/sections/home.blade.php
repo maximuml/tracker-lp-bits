@@ -20,7 +20,7 @@
 	<div class="nx-fgrid nx-fgrid--flat">
 	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_passkey')">
 		<span class="nx-copyfield">
-			<input type="text" class="nx-copyfield__input" id="ucp-passkey" readonly value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" data-copy-value="{{ (string) ($curUser['passkey'] ?? '') }}" data-mask-value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" />
+			<input type="text" class="nx-copyfield__input" id="ucp-passkey" readonly aria-label="{{ __('legacy/usercp.row_passkey') }}" value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" data-copy-value="{{ (string) ($curUser['passkey'] ?? '') }}" data-mask-value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" />
 			<button type="button" class="nx-postbtn" data-reveal="#ucp-passkey" data-label-show="{{ __('legacy/functions.text_show') }}" data-label-hide="{{ __('legacy/functions.text_hide') }}">{{ __('legacy/functions.text_show') }}</button>
 			<button type="button" class="nx-postbtn" data-copy="#ucp-passkey" data-copy-done="{{ __('legacy/functions.text_copied') }}">{{ __('legacy/functions.text_copy') }}</button>
 		</span>

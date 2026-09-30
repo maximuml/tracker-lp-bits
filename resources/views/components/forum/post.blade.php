@@ -1,13 +1,13 @@
 @props(['post'])
 <article class="nx-post" id="pid{{ $post->id }}">
     <header class="nx-post__head">
-        <span class="nx-post__meta">
+        <div class="nx-post__meta">
             <a href="{{ $post->anchorUrl }}">#{{ $post->id }}</a>
             <span class="nx-dim">{{ __('legacy/forums.text_by') }}</span> {{ $post->by }}
             <span class="nx-dim">{{ __('legacy/forums.text_at') }}</span> <x-time :value="$post->addedRaw" />
             <span class="nx-dim">|</span>
             <a href="{{ $post->authorToggleUrl }}">{{ $post->authorToggleLabel }}</a>
-        </span>
+        </div>
         <span class="nx-post__num">
             <span class="big">{{ __('legacy/forums.text_number') }}<b>{{ $post->number }}</b>{{ __('legacy/forums.text_lou') }}</span>
             <a class="nx-post__top" href="#top" title="{{ __('legacy/forums.text_back_to_top') }}">↑</a>

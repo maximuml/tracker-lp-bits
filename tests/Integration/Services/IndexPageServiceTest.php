@@ -23,7 +23,6 @@ use App\ViewModels\Index\IndexPollsSection;
 use App\ViewModels\Index\IndexShoutboxSection;
 use App\ViewModels\Index\IndexStatsSection;
 use App\ViewModels\Index\IndexTopUploadersSection;
-use App\ViewModels\Index\IndexTrackerLoadSection;
 use App\ViewModels\IndexPageViewModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -210,7 +209,6 @@ final class IndexPageServiceTest extends TestCase
         $this->assertInstanceOf(IndexTopUploadersSection::class, $result->topUploaders);
         $this->assertInstanceOf(IndexPollsSection::class, $result->polls);
         $this->assertInstanceOf(IndexStatsSection::class, $result->stats);
-        $this->assertInstanceOf(IndexTrackerLoadSection::class, $result->trackerLoad);
         $this->assertInstanceOf(IndexDisclaimerSection::class, $result->disclaimer);
         $this->assertInstanceOf(IndexBrowserNoteSection::class, $result->browserNote);
     }
@@ -353,23 +351,6 @@ final class IndexPageServiceTest extends TestCase
         $this->assertIsArray($result->stats->userStats);
         $this->assertIsArray($result->stats->torrentStats);
         $this->assertContainsOnlyInstancesOf(IndexClassStatRow::class, $result->stats->classStats);
-    }
-
-    public function test_tracker_load_hidden_when_setting_is_no(): void
-    {
-        $result = $this->buildWithAllSectionsDisabled();
-
-        $this->assertFalse($result->trackerLoad->show);
-    }
-
-    public function test_tracker_load_shown_when_setting_is_yes(): void
-    {
-        $result = $this->buildWithAllSectionsDisabled([
-            'showtrackerload' => 'yes',
-        ]);
-
-        $this->assertTrue($result->trackerLoad->show);
-
     }
 
     // ─── Always-on sections ───────────────────────────────────────────

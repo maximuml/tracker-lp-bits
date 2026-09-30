@@ -16,7 +16,6 @@
 @include('index.sections.top_uploaders')
 @include('index.sections.polls')
 @include('index.sections.stats')
-@include('index.sections.tracker_load')
 @include('index.sections.disclaimer')
 @include('index.sections.browser_note')
 @endsection

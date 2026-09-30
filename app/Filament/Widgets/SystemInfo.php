@@ -12,6 +12,8 @@ class SystemInfo extends StatTable
 {
     protected static ?int $sort = 1000;
 
+    protected int|string|array $columnSpan = 'full';
+
     protected function getHeader(): string
     {
         return Locale::trans('dashboard.system_info.page_title', [], null);

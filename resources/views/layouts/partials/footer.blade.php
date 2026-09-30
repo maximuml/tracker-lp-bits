@@ -1,7 +1,13 @@
 </main>
 
 <footer class="nxm-footer" role="contentinfo">
-    <span>(c) <a href="{{ $chrome->baseUrl }}">{{ $chrome->siteName }}</a>
+    <nav class="nxm-footer__links" aria-label="{{ __('legacy/functions.text_footer_nav') }}">
+        <a href="rules.php">{{ __('legacy/functions.text_rules') }}</a>
+        <a href="faq.php">{{ __('legacy/faq.head_faq') }}</a>
+        <a href="staff.php">{{ __('legacy/functions.text_staff') }}</a>
+        <a href="donate.php">{{ 'Donate' }}</a>
+    </nav>
+    <span class="nxm-footer__copy">(c) <a href="{{ $chrome->baseUrl }}">{{ $chrome->siteName }}</a>
         {{ $chrome->footer->icpLicense !== '' ? $chrome->footer->icpLicense.' ' : '' }}{{ $chrome->footer->yearFounded != date('Y') ? $chrome->footer->yearFounded.'-' : '' }}{{ date('Y') }} {{ $chrome->footer->versionHtml }}</span>
     @if($chrome->footer->debugEnabled)
     <div id="sql_debug">SQL query list: <ul>

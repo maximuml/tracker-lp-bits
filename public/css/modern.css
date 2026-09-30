@@ -2054,3 +2054,12 @@ a.nx-mail:hover { color: var(--nxm-text); }
 .nx-faq__answer { padding: 0 0.4rem 0.9rem 1.8rem; line-height: 1.55; }
 .nx-faq__item.nx-faq--hidden,
 .nx-faq.nx-faq--hidden { display: none; }
+
+/* E6 — footer links */
+.nxm-footer { padding: 1rem 0; text-align: center; }
+.nxm-footer__links {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 0.35rem 1.4rem; margin-bottom: 0.4rem;
+    font-size: 0.88rem;
+}
+.nxm-footer__copy { font-size: 0.82rem; color: var(--nxm-dim, #6b7280); }

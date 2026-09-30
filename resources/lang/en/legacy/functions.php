@@ -60,6 +60,7 @@ return [
     'text_rules' => 'Rules',
     'text_faq' => 'FAQ',
     'text_staff' => 'Staff',
+    'text_footer_nav' => 'Site links',
     'std_site_down_for_maintenance' => 'Site is down for maintenance, please check back again later... thanks',
     'text_click_view_full_image' => 'Click this bar to view the full image.',
     'text_image_resized' => 'This image has been resized. Click this bar to view the full image.',

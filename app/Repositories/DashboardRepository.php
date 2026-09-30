@@ -21,6 +21,7 @@ class DashboardRepository extends BaseRepository
 {
     public function __construct(
         private readonly DashboardStatsRepository $statsRepository = new DashboardStatsRepository,
+        private readonly LegacyRedisCache $cache = new LegacyRedisCache,
     ) {}
 
     /** @return  array<string, array<string, mixed>> */
@@ -97,12 +98,11 @@ class DashboardRepository extends BaseRepository
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => RequestContext::instance()->getDbQueryCount() + (int) LegacyDb::lastQuery('COUNT', 'json'),
         ];
-        $cache = app(LegacyRedisCache::class);
         $name = 'redis_io';
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' => sprintf('%d reads, %d writes', $cache->getCacheReadTimes(), $cache->getCacheWriteTimes()),
+            'value' => sprintf('%d reads, %d writes', $this->cache->getCacheReadTimes(), $this->cache->getCacheWriteTimes()),
         ];
         $name = 'memory_usage';
         $result[$name] = [

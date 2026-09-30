@@ -1296,17 +1296,54 @@ document.addEventListener('error', function (e) {
     });
 })();
 
-/* ===== search shortcut ===== */
+/* ===== search shortcut + mid-width overlay ===== */
 // Cmd/Ctrl+K focuses the header search field (mirrors the ⌘K hint in
-// the search pill).
-document.addEventListener('keydown', function (e) {
-    if (!(e.metaKey || e.ctrlKey) || e.altKey || e.key.toLowerCase() !== 'k') { return; }
-    var input = document.querySelector('.nxm-search input[name="search"]');
-    if (!input) { return; }
-    e.preventDefault();
-    input.focus();
-    input.select();
-});
+// the search pill). On mid-widths the pill is hidden behind the
+// magnifier toggle — open the overlay first, then focus.
+(function () {
+    var header = document.querySelector('.nxm-header');
+    var toggle = document.querySelector('.nxm-searchbtn');
+    function input() { return document.querySelector('.nxm-search input[name="search"]'); }
+
+    function setOpen(open) {
+        if (!header || !toggle) { return; }
+        header.classList.toggle('nxm-search--open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    function openAndFocus() {
+        setOpen(true);
+        var el = input();
+        if (el) { el.focus(); el.select(); }
+    }
+
+    if (toggle && header) {
+        toggle.addEventListener('click', function () {
+            if (header.classList.contains('nxm-search--open')) { setOpen(false); return; }
+            openAndFocus();
+        });
+        document.addEventListener('click', function (e) {
+            if (!header.classList.contains('nxm-search--open')) { return; }
+            if (e.target.closest('.nxm-search') || e.target.closest('.nxm-searchbtn')) { return; }
+            setOpen(false);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { setOpen(false); }
+        });
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (!(e.metaKey || e.ctrlKey) || e.altKey || e.key.toLowerCase() !== 'k') { return; }
+        var el = input();
+        if (!el) { return; }
+        e.preventDefault();
+        if (el.offsetParent === null && toggle && toggle.offsetParent !== null) {
+            openAndFocus();
+        } else {
+            el.focus();
+            el.select();
+        }
+    });
+})();
 
 /* ===== nx-menus.js ===== */
 /**

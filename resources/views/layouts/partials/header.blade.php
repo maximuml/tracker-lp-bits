@@ -33,7 +33,7 @@
                 </ul>
             </nav>
             @if($chrome->search->globalSearchEnabled)
-            <form class="nxm-search" action="search.php" method="get" target="{{ $chrome->search->searchFormTarget }}">
+            <form class="nxm-search" id="nxm-search" action="search.php" method="get" target="{{ $chrome->search->searchFormTarget }}">
                 <svg class="nxm-search__icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l4 4"/></svg>
                 <input type="text" name="search" value="{{ $chrome->search->requestSearch }}" placeholder="{{ $chrome->search->searchKeywordPlaceholder }}" />
                 <select name="search_area" aria-label="{{ __('search.search_area') }}">
@@ -47,6 +47,9 @@
             @endif
         </div>
         <div class="nxm-header__actions">
+            @if($chrome->search->globalSearchEnabled)
+            <button type="button" class="nxm-iconbtn nxm-searchbtn" aria-expanded="false" aria-controls="nxm-search" title="{{ 'Search' }}" aria-label="{{ 'Search' }}"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 4 4"/></svg></button>
+            @endif
             <button type="button" class="nxm-burger" aria-expanded="false" aria-controls="nxm-collapse" aria-label="{{ 'Toggle navigation' }}">&#x2630;</button>
             <div class="nxm-userbar__icons">
                 <a href="messages.php"><img class="{{ $chrome->userBar->unreadCount > 0 ? 'inboxnew' : 'inbox' }}" alt="inbox" title="{{ $chrome->userBar->unreadCount > 0 ? __('legacy/functions.title_inbox_new_messages') : __('legacy/functions.title_inbox_no_new_messages') }}" src="pic/trans.gif" /></a><span class="nxm-inbox-count">{{ $chrome->userBar->inboxCount }}@if($chrome->userBar->unreadCount > 0) ({{ $chrome->userBar->unreadCount }})@endif</span>

@@ -678,24 +678,16 @@ a.nxm-logo:link, a.nxm-logo:visited {
 @media (min-width: 721px) and (max-width: 1100px) {
     .nxm-searchbtn { display: inline-flex; }
     .nxm-collapse .nxm-search { display: none; }
+    /* Search overlay: reopen the collapse as a full-width row under the
+       bar, but show only the search form inside it. */
+    .nxm-header.nxm-search--open .nxm-collapse { display: flex; }
+    .nxm-header.nxm-search--open .nxm-collapse .nxm-nav { display: none; }
     .nxm-header.nxm-search--open .nxm-collapse .nxm-search {
         display: flex;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 100%;
-        z-index: 60;
-        width: auto;
+        width: 100%;
         margin-left: 0;
-        padding: 0.45rem 1rem;
-        border-radius: 0;
-        background: var(--nxm-userbar-bg);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-width: 1px 0;
-        box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.6);
     }
     .nxm-collapse .nxm-search input[type="text"] { flex: 1 1 0%; width: 0; min-width: 0; }
-    .nxm-usermenu__name { display: none; }
     .nxm-inbox-count { display: none; }
     .nxm-header__actions { gap: 0.4rem; font-size: 0.8rem; }
     .nxm-userbar__icons { gap: 0.25rem; }
@@ -713,7 +705,7 @@ a.nxm-logo:link, a.nxm-logo:visited {
     display: none;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 1100px) {
     .nxm-burger {
         display: inline-flex;
         align-items: center;

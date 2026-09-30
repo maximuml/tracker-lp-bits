@@ -76,4 +76,5 @@ return [
     'submit_mark_as_read' => 'Mark as read',
     'std_cannot_mark_messages' => 'Could not mark message as read.',
     'std_no_message_selected' => 'No message selected.',
+    'text_selected' => 'selected',
 ];

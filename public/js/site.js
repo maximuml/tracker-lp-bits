@@ -1634,3 +1634,24 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () { btn.textContent = original; }, 1500);
     });
 })();
+
+/* messages.php: reveal the bulk-action bar once any message checkbox is
+   checked, and keep the selected counter in sync. */
+(function () {
+    function update() {
+        var bars = document.querySelectorAll('[data-bulkbar]');
+        if (!bars.length) { return; }
+        var n = document.querySelectorAll('input[name="messages[]"]:checked').length;
+        bars.forEach(function (bar) {
+            bar.hidden = n === 0;
+            var c = bar.querySelector('[data-bulk-count]');
+            if (c) { c.textContent = n; }
+        });
+    }
+    document.addEventListener('change', function (e) {
+        if (e.target.matches('input[name="messages[]"]')) { update(); }
+    });
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('input[data-checkall]')) { setTimeout(update, 0); }
+    });
+})();

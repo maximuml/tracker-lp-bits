@@ -1049,7 +1049,7 @@ html[data-theme="dark"] a.altlink:link, html[data-theme="dark"] a.altlink:visite
 html[data-theme="dark"] a.altlink_blue:link, html[data-theme="dark"] a.altlink_blue:visited { color: color-mix(in srgb, #004e98 40%, var(--nxm-text)); }
 html[data-theme="dark"] a.altlink_green:link, html[data-theme="dark"] a.altlink_green:visited { color: color-mix(in srgb, #007800 40%, var(--nxm-text)); }
 .striking, .new { color: var(--nxm-danger); }
-.hot { color: var(--nxm-warning); }
+.hot { color: var(--nxm-danger); }
 .classic { color: var(--nxm-success); }
 .recommended { color: var(--nxm-accent-text, var(--nxm-accent)); }
 

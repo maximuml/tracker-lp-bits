@@ -225,6 +225,10 @@ final class BBCode
         }
         $videoIdValue = $parameters['v'] ?? '';
         $videoId = is_scalar($videoIdValue) ? (string) $videoIdValue : '';
+        // parse_str() urldecodes the query — a percent-encoded quote (%22)
+        // would otherwise arrive as a literal " and break out of the src
+        // attribute. YouTube ids are [A-Za-z0-9_-]; strip everything else.
+        $videoId = (string) preg_replace('/[^A-Za-z0-9_-]/', '', $videoId);
 
         return sprintf(
             '<iframe width="%s" height="%s" src="https://www.youtube.com/embed/%s" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
@@ -249,8 +253,9 @@ final class BBCode
         if (! $height) {
             $height = 315;
         }
+        $escapedSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8', false);
 
-        return "<video controls width=\"$width\" height=\"$height\"><source src=\"$src\" /><a href=\"$src\">$src</a></video>";
+        return "<video controls width=\"$width\" height=\"$height\"><source src=\"$escapedSrc\" /><a href=\"$escapedSrc\">$escapedSrc</a></video>";
     }
 
     /**
@@ -262,8 +267,9 @@ final class BBCode
         if (empty($src)) {
             return '';
         }
+        $escapedSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8', false);
 
-        return "<audio controls><source src=\"$src\" /><a href=\"$src\">$src</a></audio>";
+        return "<audio controls><source src=\"$escapedSrc\" /><a href=\"$escapedSrc\">$escapedSrc</a></audio>";
     }
 
     /**

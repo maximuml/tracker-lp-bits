@@ -256,7 +256,7 @@ final class Comment
     private static function resolveTempCodes(string $s): string
     {
         $j = 0;
-        while (count(self::$tempCode) || $j > 5) {
+        while (count(self::$tempCode) > 0 && $j <= 5) {
             foreach (self::$tempCode as $key => $code) {
                 $s = str_replace("<tempCode_$key>", $code, $s, $count);
                 if ($count) {

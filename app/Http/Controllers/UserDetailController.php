@@ -134,12 +134,13 @@ class UserDetailController extends Controller
         $currentUserIsFriendOfTarget = $currentUserId > 0 ? $this->userDetailRepository->isFriend($id, $currentUserId) : false;
 
         $showPmButton = false;
+        $acceptPms = UserAcceptPms::fromStringSafe((string) ($user['acceptpms'] ?? ''));
         if ($currentUserId !== $id) {
             if ($staffMember) {
                 $showPmButton = true;
-            } elseif ($user['acceptpms'] === UserAcceptPms::YES->value) {
+            } elseif ($acceptPms === UserAcceptPms::YES) {
                 $showPmButton = ! $targetBlockedMe;
-            } elseif ($user['acceptpms'] === UserAcceptPms::FRIENDS->value) {
+            } elseif ($acceptPms === UserAcceptPms::FRIENDS) {
                 $showPmButton = $currentUserIsFriendOfTarget;
             }
         }

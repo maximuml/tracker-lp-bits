@@ -94,7 +94,7 @@ td.shoutrow .shout-msg-toggle:hover {
 
 td.shoutrow .shout-class-badge {
     display: inline-block;
-    font-size: 9px;
+    font-size: 10px;
     line-height: 12px;
     font-weight: bold;
     letter-spacing: 0.5px;
@@ -127,6 +127,8 @@ td.shoutrow:hover .shout-actions {
 
 .shout-actions a {
     text-decoration: none;
+    padding: .35rem;
+    margin: -.35rem;
 }
 
 .shout-reactions {

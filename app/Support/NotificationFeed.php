@@ -400,7 +400,7 @@ final class NotificationFeed
 
     private function truncate(string $text, int $length = self::MAX_BODY_LENGTH): string
     {
-        $text = trim(strip_tags($text));
+        $text = trim(strip_tags((string) preg_replace('/\[\/?[a-zA-Z*]+(?:=[^\]]*)?\]/', '', $text)));
         if (mb_strlen($text) <= $length) {
             return $text;
         }

@@ -228,7 +228,8 @@ body {
 .nxm-header {
     background: var(--nxm-header-bg);
     color: var(--nxm-header-text);
-    border-bottom: 3px solid var(--nxm-nav-active);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
 
 .nxm-header__bar {
@@ -251,7 +252,10 @@ body {
 }
 
 a.nxm-logo {
-    font-size: 1.3rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--nxm-header-text);
     text-decoration: none;
@@ -262,6 +266,22 @@ a.nxm-logo:link, a.nxm-logo:visited {
     color: var(--nxm-header-text);
 }
 .nxm-logo img { max-height: 40px; display: block; }
+
+.nxm-logo__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--nxm-accent-hover, #60a5fa), var(--nxm-accent, #2563eb) 60%, var(--nxm-nav-active));
+    color: var(--nxm-on-accent, #fff);
+    font-size: 0.85rem;
+    font-weight: 800;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+.nxm-logo__name { font-size: 1.05rem; }
 
 .nxm-slogan {
     color: var(--nxm-header-dim);
@@ -307,10 +327,14 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-more > summary {
     display: flex;
     align-items: center;
-    padding: 0 0.75rem;
+    align-self: center;
+    height: 34px;
+    padding: 0 0.8rem;
+    border-radius: 999px;
     color: var(--nxm-header-text);
     text-decoration: none;
     font-weight: 500;
+    font-size: 0.9rem;
     cursor: pointer;
     white-space: nowrap;
     box-shadow: inset 0 -2px 0 transparent;
@@ -320,18 +344,21 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-nav__list > li > a:focus-visible,
 .nxm-more > summary:hover,
 .nxm-more > summary:focus-visible {
-    color: var(--nxm-userbar-link);
+    color: var(--nxm-header-text);
+    background: rgba(255, 255, 255, 0.08);
     outline: none;
 }
 
 .nxm-nav__list > li > a.nxm-nav__link--active,
 .nxm-nav__list > li > a[aria-current="page"] {
-    color: var(--nxm-userbar-link);
-    box-shadow: inset 0 -2px 0 var(--nxm-userbar-link);
+    color: var(--nxm-header-text);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 -2px 0 var(--nxm-nav-active);
 }
 
 .nxm-more > summary.nxm-nav__link--active {
-    color: var(--nxm-userbar-link);
+    color: var(--nxm-header-text);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .nxm-more { display: flex; }
@@ -397,35 +424,49 @@ a.nxm-logo:link, a.nxm-logo:visited {
     color: var(--nxm-userbar-text);
 }
 
-.nxm-userbar__icons a { color: var(--nxm-userbar-link); text-decoration: none; }
-.nxm-userbar__icons a:hover { text-decoration: underline; }
+.nxm-userbar__icons a { color: var(--nxm-userbar-dim); text-decoration: none; }
 
 .nxm-userbar__icons {
     display: inline-flex;
     flex-wrap: nowrap;
-    gap: 0.4rem;
+    gap: 0.2rem;
     align-items: center;
     color: var(--nxm-userbar-stat);
 }
 
-.nxm-userbar__icons img {
-    vertical-align: middle;
-    margin-right: 0.15rem;
-}
-
 .nxm-iconbtn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.2rem 0.45rem;
+    width: 34px;
+    height: 34px;
+    padding: 0;
     background: transparent;
     border: none;
-    border-radius: var(--nxm-radius);
+    border-radius: 999px;
     color: var(--nxm-userbar-dim);
     font: inherit;
     font-size: 0.8rem;
     line-height: 1.2;
     cursor: pointer;
+}
+
+.nxm-badge {
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--nxm-danger, #e34a4a);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    pointer-events: none;
 }
 .nxm-iconbtn:hover,
 .nxm-iconbtn:focus-visible {
@@ -498,6 +539,68 @@ a.nxm-logo:link, a.nxm-logo:visited {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     color: var(--nxm-text);
 }
+
+.nxm-usermenu__head {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0.6rem;
+}
+.nxm-avatar--lg {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+}
+.nxm-usermenu__who {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.nxm-usermenu__who b {
+    font-size: 0.92rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.nxm-usermenu__who span {
+    font-size: 0.75rem;
+    color: var(--nxm-text-dim);
+}
+
+.nxm-usermenu__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 0.3rem 0.4rem 0.55rem;
+}
+.nxm-stat2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    background: var(--nxm-surface-alt);
+    min-width: 0;
+}
+.nxm-stat2 small {
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--nxm-text-dim);
+}
+.nxm-stat2 b {
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.nxm-stat2 b a { color: inherit; text-decoration: none; }
+.nxm-stat2 b a:hover { text-decoration: underline; }
+.nxm-stat2--wide { grid-column: 1 / -1; }
+.nxm-stat2 .nxm-ok { color: var(--nxm-success, #1e7a1e); }
+.nxm-stat2 .nxm-bad { color: var(--nxm-danger, #c0392b); }
 
 .nxm-usermenu__hello {
     padding: 0.4rem 0.6rem;
@@ -628,59 +731,7 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-theme-toggle[data-theme-state="light"] .nxm-theme-ic--light,
 .nxm-theme-toggle[data-theme-state="dark"] .nxm-theme-ic--dark { display: block; }
 
-/* ---------- Stats chips strip ---------- */
 
-.nxm-chips {
-    background: var(--nxm-userbar-bg);
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
-    font-size: 0.82rem;
-    color: var(--nxm-userbar-text);
-}
-
-.nxm-chips__row {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    max-width: var(--nxm-content-width);
-    margin: 0 auto;
-    padding: 0.45rem 1rem;
-}
-
-.nxm-chips .nxm-userbar__stats {
-    display: flex;
-    gap: 0;
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-    /* Edge shadows appear only while the strip actually overflows
-       (covers painted on the element, shadows scroll with content). */
-    background:
-        linear-gradient(to right, var(--nxm-userbar-bg), transparent) local left / 30px 100%,
-        linear-gradient(to left, var(--nxm-userbar-bg), transparent) local right / 30px 100%,
-        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.32), transparent) scroll left / 14px 100%,
-        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.32), transparent) scroll right / 14px 100%;
-    background-repeat: no-repeat;
-}
-
-.nxm-chips .nxm-stat {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.3rem;
-    padding: 0.1rem 0.55rem;
-    white-space: nowrap;
-    color: var(--nxm-userbar-stat);
-    text-decoration: none;
-}
-
-.nxm-chips .nxm-stat + .nxm-stat {
-    border-left: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.nxm-chips .nxm-stat--key .nxm-stat__value {
-    color: var(--nxm-nav-active);
-    font-weight: 600;
-}
 
 /* ---------- Mid-width search overlay ---------- */
 /* 721–1200px: the inline search pill no longer fits the one-row bar, so
@@ -701,7 +752,6 @@ a.nxm-logo:link, a.nxm-logo:visited {
         margin-left: 0;
     }
     .nxm-collapse .nxm-search input[type="text"] { flex: 1 1 0%; width: 0; min-width: 0; }
-    .nxm-inbox-count { display: none; }
     .nxm-header__actions { gap: 0.4rem; font-size: 0.8rem; }
     .nxm-userbar__icons { gap: 0.25rem; }
     .nxm-nav__list > li > a,
@@ -780,9 +830,8 @@ a.nxm-logo:link, a.nxm-logo:visited {
     .nxm-search select { max-width: 6rem; }
     .nxm-search__kbd { display: none; }
     .nxm-header__actions { font-size: 0.8rem; gap: 0.45rem; }
-    .nxm-userbar__icons { flex-wrap: nowrap; gap: 0.25rem; }
+    .nxm-userbar__icons { flex-wrap: nowrap; gap: 0.2rem; }
     .nxm-usermenu__name { display: none; }
-    .nxm-burger { margin-left: 0; order: -1; }
     .nxm-usermenu { position: relative; }
     .nxm-usermenu__links a,
     .nxm-usermenu__item {
@@ -803,9 +852,7 @@ a.nxm-logo:link, a.nxm-logo:visited {
 }
 
 @media (max-width: 480px) {
-    .nxm-inbox-count { display: none; }
-    .nxm-header__actions { gap: 0.3rem; }
-    .nxm-iconbtn { padding: 0.2rem 0.3rem; }
+    .nxm-header__actions { gap: 0.25rem; }
 }
 
 /* ---------- Data tables ---------- */
@@ -1061,6 +1108,14 @@ a.nxm-alert__action:visited {
 .nxm-alert--blue { background: var(--nxm-info-bg, #e8f2fc); border-color: var(--nxm-info-border, #bcd7f0); }
 .nxm-alert--orange { background: var(--nxm-warning-bg, #fff8e5); border-color: var(--nxm-warning-border, #ffe3a3); }
 .nxm-alert--gray { background: var(--nxm-surface-alt, #eef1f5); }
+
+.nxm-alert--ribbon {
+    border-radius: 999px;
+    width: fit-content;
+    max-width: calc(100% - 2rem);
+    margin-left: auto;
+    margin-right: auto;
+}
 
 .nxm-alert--red .nxm-alert__dot, .nxm-alert--darkred .nxm-alert__dot { background: var(--nxm-danger, #c0392b); }
 .nxm-alert--green .nxm-alert__dot { background: var(--nxm-success, #1e7a1e); }

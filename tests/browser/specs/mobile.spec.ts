@@ -53,7 +53,7 @@ test.describe('mobile viewport', () => {
     await expect(burger).toHaveAttribute('aria-expanded', 'true');
     await expect(panel).toBeVisible();
     await expect(page.locator('.nxm-nav__list a').first()).toBeVisible();
-    await expect(page.locator('.nxm-userbar')).toBeVisible();
+    await expect(page.locator('details.nxm-usermenu')).toBeVisible();
 
     await burger.click();
     await expect(burger).toHaveAttribute('aria-expanded', 'false');

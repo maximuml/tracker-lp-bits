@@ -1,4 +1,5 @@
 @if($polls->show)
+<section class="nx-idx-card">
 <h2>{{ $polls->title }}
     @if($polls->canManage)
         <span class="small"> - [<a class="altlink" href="makepoll.php?returnto=main"><b>{{ $polls->newLabel }}</b></a>]
@@ -10,6 +11,9 @@
         </span>
     @endif
 </h2>
+@if(! $polls->exists)
+<x-empty-state :title="__('legacy/index.std_no_poll')" />
+@endif
 @if($polls->exists)
 <div class="nx-text nx-center">
 <div class="nx-main nx-box nx-box--59">
@@ -38,4 +42,5 @@
 </div>
 </div>
 @endif
+</section>
 @endif

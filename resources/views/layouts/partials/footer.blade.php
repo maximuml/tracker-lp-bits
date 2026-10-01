@@ -1,9 +1,14 @@
 </main>
 
 <footer class="nxm-footer" role="contentinfo">
-    <span>(c) <a href="{{ $chrome->baseUrl }}">{{ $chrome->siteName }}</a>
+    <nav class="nxm-footer__links" aria-label="{{ __('legacy/functions.text_footer_nav') }}">
+        <a href="rules.php">{{ __('legacy/functions.text_rules') }}</a>
+        <a href="faq.php">{{ __('legacy/faq.head_faq') }}</a>
+        <a href="staff.php">{{ __('legacy/functions.text_staff') }}</a>
+        <a href="donate.php">{{ 'Donate' }}</a>
+    </nav>
+    <span class="nxm-footer__copy">(c) <a href="{{ $chrome->baseUrl }}">{{ $chrome->siteName }}</a>
         {{ $chrome->footer->icpLicense !== '' ? $chrome->footer->icpLicense.' ' : '' }}{{ $chrome->footer->yearFounded != date('Y') ? $chrome->footer->yearFounded.'-' : '' }}{{ date('Y') }} {{ $chrome->footer->versionHtml }}</span>
-    <div class="nxm-footer__stats">[page created in <b>{{ $chrome->footer->statsTime }}</b> sec with <b>{{ $chrome->footer->statsDbQueries }}</b> db queries, <b>{{ $chrome->footer->statsCacheReads }}</b> reads and <b>{{ $chrome->footer->statsCacheWrites }}</b> writes of Redis and <b>{{ $chrome->footer->statsRam }}</b> ram]</div>
     @if($chrome->footer->debugEnabled)
     <div id="sql_debug">SQL query list: <ul>
         @foreach($chrome->footer->debugQueries as $query)

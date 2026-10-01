@@ -60,7 +60,7 @@ final class ChromeAlerts
             if (! empty($currentPromotion['remark'])) {
                 $lines[] = sprintf($remarkTpl, $currentPromotion['remark']);
             }
-            $alerts[] = ['url' => 'torrents.php', 'text' => implode('<br/>', $lines), 'color' => 'green'];
+            $alerts[] = ['url' => 'torrents.php', 'text' => implode(' · ', $lines), 'color' => 'green'];
         }
         if ($upcomingPromotion) {
             $promotionText = TorrentPromotion::fromIntSafe((int) ($upcomingPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
@@ -71,7 +71,7 @@ final class ChromeAlerts
             if (! empty($upcomingPromotion['remark'])) {
                 $lines[] = sprintf($remarkTpl, $upcomingPromotion['remark']);
             }
-            $alerts[] = ['url' => 'torrents.php', 'text' => implode('<br/>', $lines), 'color' => 'blue'];
+            $alerts[] = ['url' => 'torrents.php', 'text' => implode(' · ', $lines), 'color' => 'blue'];
         }
         if ($user['leechwarn'] ?? false) {
             $kicktimeout = Time::format($user['leechwarnuntil'], false, false, true);

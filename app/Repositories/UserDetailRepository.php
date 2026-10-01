@@ -93,11 +93,6 @@ class UserDetailRepository
         return $user === null ? null : ['id' => (int) $user->id, 'username' => (string) $user->username];
     }
 
-    public function getUserWithMedals(int $id): ?User
-    {
-        return User::query()->with('valid_medals')->find($id);
-    }
-
     public function getCommentCount(int $userId): int
     {
         return Comment::query()->where('user', $userId)->count();

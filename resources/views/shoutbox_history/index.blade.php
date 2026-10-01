@@ -5,6 +5,7 @@
 @section('content')
 <script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $csrfToken ?? '' }}';</script>
 
+<section class="nx-idx-card">
 <h2>{{ __('legacy/shoutbox.text_history_title')}}</h2>
 <form action="shoutbox_history.php" method="get">
 <div class="nx-row">
@@ -15,7 +16,9 @@
 <div class="nx-cell-5">{{ __('legacy/shoutbox.text_search')}}</div><div class="nx-cell-5"><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></div>
 <div class="nx-cell-5"><input type="submit" class="btn" value="{{ __('legacy/shoutbox.text_filter')}}" /></div></div>
 </form>
+</section>
 
+<section class="nx-idx-card">
 <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/shoutbox.text_history_title') }}</caption>
 @foreach ($items ?? [] as $item)
     <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
@@ -24,6 +27,7 @@
     </td></tr>
 @endforeach
 </table>
+</section>
 
 @if (($totalPages ?? 0) > 1)
     <div class="pagination">

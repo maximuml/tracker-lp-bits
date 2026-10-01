@@ -147,12 +147,6 @@ class SeedBonusJob implements ShouldQueue
                 $bonusLog .= ", haremAdditionFactor: $haremAdditionFactor, haremBonus: $haremBonus, haremAddition: $haremAddition, all_bonus: $all_bonus";
                 $oldValue += $haremAddition;
             }
-            if ($seedBonusResult['medal_additional_factor'] > 0) {
-                $medalAddition = $seedBonusResult['medal_bonus'] * $seedBonusResult['medal_additional_factor'];
-                $all_bonus += $medalAddition;
-                $bonusLog .= ", medalAdditionFactor: {$seedBonusResult['medal_additional_factor']}, medalBonus: {$seedBonusResult['medal_bonus']}, medalAddition: $medalAddition, all_bonus: $all_bonus";
-                $oldValue += $medalAddition;
-            }
             Logger::writeWithContext((string) $bonusLog, (string) 'info', (bool) false);
             $dividend = 3600 / $autoclean_interval_one;
             $all_bonus = $all_bonus / $dividend;

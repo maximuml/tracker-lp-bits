@@ -38,7 +38,6 @@ use App\ViewModels\Index\IndexTodayUserCard;
 use App\ViewModels\Index\IndexTodayUsers;
 use App\ViewModels\Index\IndexTopUploaderRow;
 use App\ViewModels\Index\IndexTopUploadersSection;
-use App\ViewModels\Index\IndexTrackerLoadSection;
 use App\ViewModels\IndexPageViewModel;
 use Carbon\Carbon;
 use Illuminate\Support\HtmlString;
@@ -78,7 +77,6 @@ final class IndexPageService
         $topUploaders = $this->buildTopUploaders();
         $polls = $this->buildPolls($curUser, $canPollManage, $canLog);
         $stats = $this->buildStats();
-        $trackerLoad = $this->buildTrackerLoad();
         $disclaimer = $this->buildDisclaimer();
         $browserNote = $this->buildBrowserNote();
 
@@ -105,7 +103,6 @@ final class IndexPageService
             topUploaders: $topUploaders,
             polls: $polls,
             stats: $stats,
-            trackerLoad: $trackerLoad,
             disclaimer: $disclaimer,
             browserNote: $browserNote,
         );
@@ -198,7 +195,7 @@ final class IndexPageService
         $html = $this->cache->get_value($cacheKey);
 
         if ($html === false || $html === null || $html === '') {
-            $torrents = $this->indexRepository->getLatestTorrents(9);
+            $torrents = $this->indexRepository->getLatestTorrents(12);
             if ($torrents->isNotEmpty()) {
                 UserDisplay::preload($torrents->map(fn ($t) => (int) $t->owner)->all());
                 $items = [];
@@ -488,27 +485,6 @@ final class IndexPageService
                 'rowTotalDownloaded' => __('legacy/index.row_total_downloaded'),
                 'rowTotalData' => __('legacy/index.row_total_data'),
             ],
-        );
-    }
-
-    private function buildTrackerLoad(): IndexTrackerLoadSection
-    {
-        $show = $this->globals->get('showtrackerload', '') === 'yes';
-
-        if (! $show) {
-            return new IndexTrackerLoadSection;
-        }
-
-        $loadAvg = sys_getloadavg();
-        if ($loadAvg === false) {
-            $loadAvg = [0.0, 0.0, 0.0];
-        }
-        $load = sprintf('load average: %.2f, %.2f, %.2f', $loadAvg[0], $loadAvg[1], $loadAvg[2]);
-
-        return new IndexTrackerLoadSection(
-            show: $load !== '',
-            title: __('legacy/index.text_tracker_load'),
-            load: trim($load),
         );
     }
 

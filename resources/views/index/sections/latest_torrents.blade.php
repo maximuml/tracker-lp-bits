@@ -1,3 +1,4 @@
+<section class="nx-idx-card">
 <h2>{{ $title }}</h2>
 <div class="lt-grid">
 @foreach($items as $item)
@@ -23,3 +24,4 @@
     </div>
 @endforeach
 </div>
+</section>

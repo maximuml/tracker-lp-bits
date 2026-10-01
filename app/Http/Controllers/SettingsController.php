@@ -51,7 +51,7 @@ class SettingsController extends LegacyController
             'max_dead_torrent_time', 'maxusers', 'torrent_dir', 'iniupload', 'SITEEMAIL', 'ACCOUNTANTID', 'PAYPALACCOUNT', 'BITCOINADDRESS', 'ETHEREUMADDRESS', 'USDTADDRESS', 'SLOGAN',
             'icplicense', 'autoclean_interval_one', 'autoclean_interval_two', 'autoclean_interval_three', 'autoclean_interval_four', 'autoclean_interval_five',
             'reportemail', 'invitesystem', 'registration', 'enablenfo',
-            'showpolls', 'showstats', 'showlastxtorrents', 'showtrackerload', 'showshoutbox', 'showoffer', 'sptime', 'enablebitbucket',
+            'showpolls', 'showstats', 'showlastxtorrents', 'showshoutbox', 'showoffer', 'sptime', 'enablebitbucket',
             'smalldescription', 'altname', 'defaultlang', 'defstylesheet', 'donation', 'browsecat', 'waitsystem',
             'maxdlsystem', 'bitbucket', 'torrentnameprefix', 'showforumstats', 'verification', 'invite_count', 'invite_timeout', 'seeding_leeching_time_calc_start',
             'startsubid', 'logo', 'showlastxforumposts', 'enable_technical_info', 'site_language_enabled', 'show_top_uploader', 'offer_skip_approved_count',

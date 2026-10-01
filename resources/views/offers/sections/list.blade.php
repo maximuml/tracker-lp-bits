@@ -1,5 +1,6 @@
+<section class="nx-idx-card">
 <h2>{{ __('legacy/offers.text_offers_section')}}</h2>
-<div class="nx-box">
+<div>
 <p><b><span class="nx-size-5">{{ __('legacy/offers.text_rules') }}</span></b></p>
 <div><ul>
 <li>{{ __('legacy/offers.text_rule_one_one') }}{{ $list->rules->uploadClassName }}{{ __('legacy/offers.text_rule_one_two') }}{{ $list->rules->addofferClassName }}{{ __('legacy/offers.text_rule_one_three') }}</li>
@@ -17,12 +18,13 @@
 @if ($list->canAddOffer)
 <div class="nx-center"><a href="?add_offer=1"><b>{{ __('legacy/offers.text_add_offer') }}</b></a></div>
 @endif
-<div class="nx-center"><form method="get" action="?">{{ __('legacy/offers.text_search_offers') }}&nbsp;&nbsp;<input type="text" id="specialboxg" name="search" />&nbsp;&nbsp;<select name="category"><option value="0">{{ __('legacy/offers.select_show_all') }}</option>
+<div class="nx-center"><form method="get" action="?"><label for="specialboxg">{{ __('legacy/offers.text_search_offers') }}</label>&nbsp;&nbsp;<input type="text" id="specialboxg" name="search" />&nbsp;&nbsp;<select name="category" aria-label="{{ __('legacy/offers.select_show_all') }}"><option value="0">{{ __('legacy/offers.select_show_all') }}</option>
 @foreach ($list->categories as $cat)
 <option value="{{ $cat->id }}">{{ $cat->name }}</option>
 @endforeach
 </select>&nbsp;&nbsp;<input type="submit" class="btn" value="{{ __('legacy/offers.submit_search') }}" /></form></div>
 </div>
+</section>
 <br /><br />
 @if ($list->table !== null)
 @include('offers._table', ['table' => $list->table])

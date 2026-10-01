@@ -21,7 +21,7 @@
     </div>
 </div>
 @if ($search->searched && $search->hits > 0)
-    <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" />
+    <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" label="Pagination top" />
     <table data-nx="data" class="nx-forum-table"><caption class="nx-sr-only">{{ __('legacy/forums.head_forum_search') }}</caption>
         <tbody>
         <tr>
@@ -40,5 +40,5 @@
         @endforeach
         </tbody>
     </table>
-    <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" />
+    <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" label="Pagination bottom" />
 @endif

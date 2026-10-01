@@ -195,4 +195,7 @@ return [
     'text_post_asc' => 'Last Post Time Ascendant',
     'text_post_desc' => 'Last Post Time Descendant',
     'text_post_protected' => "[size=3][b]--Privacy protection is enabled in this forum---[/b]\nOnly topic poster,mods,admins and reply's author can read the content.[/size]",
+    'text_pm' => 'PM',
+    'text_report' => 'Report',
+    'text_mod_tools' => 'Moderator tools',
 ];

@@ -13,7 +13,6 @@ use App\ViewModels\Index\IndexPollsSection;
 use App\ViewModels\Index\IndexShoutboxSection;
 use App\ViewModels\Index\IndexStatsSection;
 use App\ViewModels\Index\IndexTopUploadersSection;
-use App\ViewModels\Index\IndexTrackerLoadSection;
 
 /**
  * ViewModel for the index page.
@@ -39,7 +38,6 @@ final class IndexPageViewModel extends ViewModel
         public readonly IndexTopUploadersSection $topUploaders,
         public readonly IndexPollsSection $polls,
         public readonly IndexStatsSection $stats,
-        public readonly IndexTrackerLoadSection $trackerLoad,
         public readonly IndexDisclaimerSection $disclaimer,
         public readonly IndexBrowserNoteSection $browserNote,
     ) {}
@@ -63,7 +61,6 @@ final class IndexPageViewModel extends ViewModel
             'topUploaders' => $this->topUploaders,
             'polls' => $this->polls,
             'stats' => $this->stats,
-            'trackerLoad' => $this->trackerLoad,
             'disclaimer' => $this->disclaimer,
             'browserNote' => $this->browserNote,
         ];

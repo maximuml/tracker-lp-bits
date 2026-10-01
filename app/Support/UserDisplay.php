@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
-use App\Enums\UserMedalStatus;
-use App\Models\UserMedal;
 use App\Models\UserMeta;
-use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
@@ -185,8 +182,6 @@ final class UserDisplay
             return;
         }
 
-        $maxMedals = (int) SiteConfig::current()->system->maximumNumberOfMedalsCanBeWorn(3);
-
         $rainbowIds = array_flip(
             UserMeta::query()
                 ->whereIn('uid', $missing)
@@ -199,38 +194,9 @@ final class UserDisplay
                 ->toArray()
         );
 
-        $medalRows = UserMedal::query()
-            ->whereIn('uid', $missing)
-            ->where('status', UserMedalStatus::WEARING->value)
-            ->where(function ($query) {
-                $query->whereNull('expire_at')->orWhere('expire_at', '>=', now());
-            })
-            ->with('medal')
-            ->orderByDesc('priority')
-            ->orderByDesc('id')
-            ->get();
-
-        $medalsByUser = [];
-        foreach ($medalRows as $userMedal) {
-            $uid = (int) $userMedal->uid;
-            if (! isset($medalsByUser[$uid])) {
-                $medalsByUser[$uid] = [];
-            }
-            if (count($medalsByUser[$uid]) >= $maxMedals) {
-                continue;
-            }
-
-            $medal = $userMedal->medal;
-            if (! $medal) {
-                continue;
-            }
-            $medalsByUser[$uid][] = $medal->toArray();
-        }
-
         foreach ($users as $user) {
             $id = (int) $user->id;
             $arr = $user->toArray();
-            $arr['wearing_medals'] = $medalsByUser[$id] ?? [];
             $arr['__is_rainbow'] = isset($rainbowIds[$id]) ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
@@ -301,7 +267,7 @@ final class UserDisplay
     }
 
     /**
-     * Build a rich username display with icons, medals and link.
+     * Build a rich username display with icons and link.
      *
      * Mirrors `get_username()`.
      */
@@ -329,13 +295,11 @@ final class UserDisplay
                 $leechwarnpic = 'leechwarnedbig';
                 $warnedpic = 'warnedbig';
                 $disabledpic = 'disabledbig';
-                $medalClass = 'nexus-username-medal-big';
             } else {
                 $donorpic = 'star';
                 $leechwarnpic = 'leechwarned';
                 $warnedpic = 'warned';
                 $disabledpic = 'disabled';
-                $medalClass = 'nexus-username-medal';
             }
 
             $now = date('Y-m-d H:i:s');
@@ -369,16 +333,6 @@ final class UserDisplay
                 }
             }
 
-            $medalHtml = '';
-            foreach ($arr['wearing_medals'] ?? [] as $medal) {
-                $medalHtml .= sprintf(
-                    '<img src="%s" title="%s" class="%s preview"/>',
-                    $medal['image_large'],
-                    $medal['name'],
-                    $medalClass,
-                );
-            }
-
             $href = Url::schemeAndHost()."/userdetails.php?id=$id";
             $classNameColored = UserClass::name($arr['class'], true, false, false);
             $className = UserClass::name($arr['class'], false, true, true, ['with_alias' => true]);
@@ -389,10 +343,10 @@ final class UserDisplay
                 : $username)
                 .$pics
                 .($withtitle
-                    ? ' ('.($title === '' ? $className : "<span class='".$classNameColored."_Name'><b>".htmlspecialchars($title)).'</b></span>)'
+                    ? ' ('.($title === '' ? $className : "<span class='".$classNameColored."_Name'><b>".htmlspecialchars($title).'</b></span>').')'
                     : '');
 
-            $username = '<span class="nowrap">'.($bracket ? '('.$username.')' : $username).$medalHtml.'</span>';
+            $username = '<span class="nowrap">'.($bracket ? '('.$username.')' : $username).'</span>';
         } else {
             $username = '<i>'.Locale::trans('nexus.user_not_exists').'</i>';
             $username = '<span class="nowrap">'.($bracket ? '('.$username.')' : $username).'</span>';

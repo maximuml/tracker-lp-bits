@@ -33,7 +33,6 @@ final readonly class BonusInfoViewModel
         public string $percentLabel,
         public string $loadbarClass,
         public int $userId,
-        public ?string $medalAdditionFactor,
         public ?string $officialAdditionFactor,
         public ?string $haremAdditionFactor,
         public SafeHtml $summaryTable,

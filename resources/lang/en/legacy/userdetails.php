@@ -140,7 +140,6 @@ return [
     'text_vip_until_note' => "Time format is YYYY-MM-DD hh:mm:ss. The time until when the VIP status is valid. For this to work, 'VIP auto expires' must be set to 'yes'.",
     'disable_user_migrated' => 'Enable or disable use please go to the new management system.',
     'text_user_id' => 'User ID',
-    'row_medal' => 'Medal',
     'row_donoruntil' => 'Donated until',
     'text_donoruntil_note' => 'Time format is YYYY-MM-DD hh:mm:ss. Leave blank permanently.',
     'change_field_value_migrated' => 'Modification please go to the %s.',

@@ -9,14 +9,19 @@
      data-btn-edit-id="{{ $btnEditId }}" data-btn-preview-id="{{ $btnPreviewId }}">
     <div id="{{ $editId }}" class="bbcode-edit">
         <div class="bbcode-toolbar">
+            <span class="bbcode-group">
             <input class="bbcode-btn bbcode-btn-b" type="button" name="b" value="B" data-bbcode-action="simpletag" data-bbcode-tag="b" />
             <input class="codebuttons bbcode-btn-i" type="button" name="i" value="I" data-bbcode-action="simpletag" data-bbcode-tag="i" />
             <input class="codebuttons bbcode-btn-u" type="button" name="u" value="U" data-bbcode-action="simpletag" data-bbcode-tag="u" />
+            </span>
+            <span class="bbcode-group">
             <input class="codebuttons" type="button" name="url" value="URL" data-bbcode-action="tag_url" data-prompt1="{{ __('legacy/functions.js_prompt_enter_url')}}" data-prompt2="{{ __('legacy/functions.js_prompt_enter_title')}}" data-prompt3="{{ __('legacy/functions.js_prompt_error')}}" />
             <input class="codebuttons" type="button" name="IMG" value="IMG" data-bbcode-action="tag_image" data-prompt1="{{ __('legacy/functions.js_prompt_enter_image_url')}}" data-prompt2="{{ __('legacy/functions.js_prompt_error')}}" />
             <input type="button" name="list" value="List" data-bbcode-action="tag_list" data-prompt1="{{ __('legacy/functions.js_prompt_enter_item')}}" data-prompt2="{{ __('legacy/functions.js_prompt_error')}}" />
             <input class="codebuttons" type="button" name="quote" value="QUOTE" data-bbcode-action="simpletag" data-bbcode-tag="quote" />
             <input type="button" name="tagcount" value="Close all tags" data-bbcode-action="closeall" />
+            </span>
+            <span class="bbcode-group">
             <select class="med codebuttons" name="color" data-bbcode-alterfont="color" aria-label="{{ __('legacy/functions.select_color') }}">
                 <option value="0">--- {{ __('legacy/functions.select_color')}} ---</option>
                 <option value="Black">Black</option>
@@ -93,12 +98,13 @@
                 <option value="6">6</option>
                 <option value="7">7</option>
             </select>
+            </span>
         </div>
         @if ($enableAttach)
             <iframe src="{{ $attachUrl }}" class="bbcode-attach" title="{{ 'Attachments' }}"></iframe>
         @endif
         <div class="bbcode-body">
-            <textarea class="bbcode" cols="100" name="{{ $text }}" id="{{ $text }}" rows="20" data-ctrlenter="compose:qr"@if ($invalid) aria-invalid="true"@if ($describedBy !== '') aria-describedby="{{ $describedBy }}"@endif @endif>{{ $content }}</textarea>
+            <textarea class="bbcode" cols="100" name="{{ $text }}" id="{{ $text }}" rows="20" aria-label="{{ $label !== '' ? $label : $text }}" data-ctrlenter="compose:qr"@if ($invalid) aria-invalid="true"@if ($describedBy !== '') aria-describedby="{{ $describedBy }}"@endif @endif>{{ $content }}</textarea>
             <div class="bbcode-smilies-wrap">
                 <div class="bbcode-smilies">
                     @foreach ($quickSmilies as $smily)

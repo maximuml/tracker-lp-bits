@@ -4,9 +4,6 @@
 
 @section('content')
 <h1>{{ $usernameHtml }}<img src="pic/flag/{{ $countryFlagPic }}" alt="{{ $countryName }}" /></h1>
-@if ($medalImagesHtml !== '')
-{{ $medalImagesHtml }}
-@endif
 @if (! \App\Support\LegacyYesNo::isYes($user['enabled'] ?? null))
 <p><b>{{ __('legacy/userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)
@@ -74,7 +71,7 @@
 <x-settings-row-small :label="__('legacy/userdetails.row_forum_posts')">@if ($forumposts && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewposts&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_posts') ?? '' }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
 @if ($isOwner || $canViewHistory)
 @if ($hrStatusHtml !== '')
-<x-settings-row-small label="H&R"><a href="myhr.php?userid={{ $user['id'] }}" target="_blank">{{ $hrStatusHtml }}</a></x-settings-row-small>
+<x-settings-row-small label="H&R"><a href="myhr.php?userid={{ $user['id'] }}" target="_blank" aria-label="H&R stats">{{ $hrStatusHtml }}</a></x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('legacy/userdetails.row_karma_points')">{{ number_format((float) $user['seedbonus'], 1) }}&nbsp;&nbsp;<a href="bonus-log.php?uid={{ $user['id'] }}" target="_blank" class="altlink">[{{ \App\Support\Locale::trans('bonus-log.view_detail', [], null) }}]</a></x-settings-row-small>
 <x-settings-row-small :label="__('legacy/functions.text_seed_points')">{{ number_format((float) $user['seed_points'], 1) }}&nbsp;&nbsp;<span class='text-muted'>({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_points_updated_at'] }})</span></x-settings-row-small>

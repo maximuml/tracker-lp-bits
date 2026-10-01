@@ -192,7 +192,26 @@ class TorrentDetailsController extends Controller
             $technicalInfoResult = $technicalInfo->renderOnDetailsPage();
         }
 
-        $descr = ! empty($row['descr']) ? Format::formatComment((string) $row['descr']) : '';
+        $rawDescr = (string) ($row['descr'] ?? '');
+        $screenshots = [];
+        if (preg_match_all('/\[img\](?<url>[^<\[\s]+)\[\/img\]/i', $rawDescr, $m) > 0) {
+            foreach (array_unique($m['url']) as $shotUrl) {
+                if (count($screenshots) >= 4) {
+                    break;
+                }
+                if (preg_match('/^(https?:)?\/\//i', $shotUrl) === 1 || str_starts_with($shotUrl, '/')) {
+                    $screenshots[] = $shotUrl;
+                }
+            }
+            foreach ($screenshots as $shotUrl) {
+                $rawDescr = preg_replace('/\[img\]\s*'.preg_quote($shotUrl, '/').'\s*\[\/img\]/i', '', $rawDescr) ?? $rawDescr;
+            }
+            if (stripos($rawDescr, '[img') === false) {
+                $rawDescr = preg_replace('/\[(?:b|u|i|size(?:=[^\]]*)?)\]\s*(?:screenshots?|screen shots?|screens?)\s*:?\s*\[\/(?:b|u|i|size)\]\s*/i', '', $rawDescr) ?? $rawDescr;
+            }
+        }
+
+        $descr = $rawDescr !== '' ? Format::formatComment($rawDescr) : '';
         $bonusOptions = Setting::getBonusRewardOptions();
 
         $showDescription = ! LegacyYesNo::isNo($currentUser['showdescription'] ?? null) && $descr !== '';
@@ -236,6 +255,7 @@ class TorrentDetailsController extends Controller
             'customFieldsHtml' => SafeHtml::fromTrustedHtml($customFieldsHtml),
             'technicalInfoResult' => SafeHtml::fromTrustedHtml((string) ($technicalInfoResult ?? '')),
             'descr' => SafeHtml::fromTrustedHtml($descr),
+            'screenshots' => $screenshots,
             'showDescription' => $showDescription,
             'torrentNamePrefix' => $this->globals->get('torrentnameprefix') ?? '',
             'commentCount' => $commentCount,

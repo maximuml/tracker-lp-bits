@@ -134,32 +134,6 @@ class BonusCalculationRepository extends BaseRepository
         return $tagGrouped;
     }
 
-    public function getMedalAdditionalFactor(int $uid, string $nowStr): float
-    {
-        $medalQuery = DB::table('medals')
-            ->whereIn('id', function ($query) use ($uid, $nowStr) {
-                $query->select('medal_id')
-                    ->from('user_medals')
-                    ->where('uid', $uid)
-                    ->where(function ($q) use ($nowStr) {
-                        $q->whereNull('expire_at')->orWhere('expire_at', '>', $nowStr);
-                    })
-                    ->where(function ($q) use ($nowStr) {
-                        $q->whereNull('bonus_addition_expire_at')->orWhere('bonus_addition_expire_at', '>', $nowStr);
-                    });
-            });
-
-        if (DB::connection()->getDriverName() === 'mysql') {
-            $medalQuery->selectRaw('round(sum(bonus_addition_factor), 5) as factor');
-        } elseif (DB::connection()->getDriverName() === 'pgsql') {
-            $medalQuery->selectRaw('round(sum(bonus_addition_factor)::numeric, 5) as factor');
-        } else {
-            throw new \RuntimeException('Not supported database');
-        }
-
-        return floatval($medalQuery->value('factor') ?? 0);
-    }
-
     public function getHaremAddition(int|string $uid): float|int|string
     {
         $addition = DB::table('users')

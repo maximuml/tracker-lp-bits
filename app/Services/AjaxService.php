@@ -12,7 +12,6 @@ use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamUserRepository;
 use App\Repositories\TorrentModerationRepository;
-use App\Services\Ajax\MedalActions;
 use App\Services\Ajax\PasskeyActions;
 use App\Services\Ajax\ShoutboxActions;
 use App\Support\CurrentUser;
@@ -40,7 +39,6 @@ final class AjaxService
         'removeHitAndRun',
         'consumeBenefit',
         ...ShoutboxActions::ACTIONS,
-        ...MedalActions::ACTIONS,
         'claimTask',
         'addToken',
         'removeToken',
@@ -73,7 +71,6 @@ final class AjaxService
         private readonly CurrentUser $currentUser,
         private readonly ShoutboxActions $shoutboxActions,
         private readonly PasskeyActions $passkeyActions,
-        private readonly MedalActions $medalActions,
         private readonly NotificationFeed $notificationFeed = new NotificationFeed,
     ) {}
 
@@ -83,7 +80,6 @@ final class AjaxService
         return match (true) {
             in_array($action, ShoutboxActions::ACTIONS, true) => $this->shoutboxActions->{$action}($params),
             in_array($action, PasskeyActions::ACTIONS, true) => $this->passkeyActions->{$action}($params),
-            in_array($action, MedalActions::ACTIONS, true) => $this->medalActions->{$action}($params),
             in_array($action, self::MISC_ACTIONS, true) => $this->{$action}($params),
             default => throw new \InvalidArgumentException("Unknown ajax action: {$action}"),
         };

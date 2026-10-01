@@ -15,11 +15,9 @@ use App\Events\UserUpdated;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\User\UserResource;
 use App\Models\Invite;
-use App\Models\Medal;
 use App\Models\User;
 use App\Models\UserMeta;
 use App\Repositories\ExamUserRepository;
-use App\Repositories\MedalRepository;
 use App\Support\Admin;
 use App\Support\Config\SiteConfig;
 use App\Support\Mail;
@@ -103,7 +101,6 @@ class UserProfile extends ViewRecord implements HasActions
             }
             $actions[] = $this->buildWarnAction();
             $actions[] = $this->buildGrantPropsAction();
-            $actions[] = $this->buildGrantMedalAction();
             $actions[] = $this->buildAssignExamAction();
             $actions[] = $this->buildChangeBonusEtcAction();
             $actions[] = $this->buildResetPasswordAction();
@@ -250,33 +247,6 @@ class UserProfile extends ViewRecord implements HasActions
                 $examRep = app(ExamUserRepository::class);
                 try {
                     $examRep->assignToUser($this->getUserRecord()->id, $data['exam_id'], $data['begin'], $data['end']);
-                    $this->sendSuccessNotification();
-                } catch (Exception $exception) {
-                    $this->sendFailNotification($exception->getMessage());
-                }
-            });
-    }
-
-    private function buildGrantMedalAction(): Action
-    {
-        return Action::make(__('admin.resources.user.actions.grant_medal_btn'))
-            ->modalHeading(__('admin.resources.user.actions.grant_medal_btn'))
-            ->schema([
-                Select::make('medal_id')
-                    ->options(Medal::query()->pluck('name', 'id'))
-                    ->label(__('admin.resources.user.actions.grant_medal_medal_label'))
-                    ->required(),
-
-                TextInput::make('duration')
-                    ->label(__('admin.resources.user.actions.grant_medal_duration_label'))
-                    ->helperText(__('admin.resources.user.actions.grant_medal_duration_help'))
-                    ->integer(),
-
-            ])
-            ->action(function ($data) {
-                $medalRep = app(MedalRepository::class);
-                try {
-                    $medalRep->grantToUser($this->getUserRecord()->id, $data['medal_id'], $data['duration']);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());

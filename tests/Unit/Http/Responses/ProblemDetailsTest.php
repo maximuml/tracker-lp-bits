@@ -15,7 +15,7 @@ final class ProblemDetailsTest extends TestCase
     {
         $problem = ProblemDetails::validation(
             ['name' => ['The name field is required.']],
-            '/api/v1/medals',
+            '/api/v1/tags',
         );
 
         $array = $problem->toArray();
@@ -23,7 +23,7 @@ final class ProblemDetailsTest extends TestCase
         $this->assertSame(422, $array['status']);
         $this->assertSame('Validation Error', $array['title']);
         $this->assertSame('The name field is required.', $array['detail']);
-        $this->assertSame('/api/v1/medals', $array['instance']);
+        $this->assertSame('/api/v1/tags', $array['instance']);
         $this->assertArrayHasKey('errors', $array);
         $this->assertSame(['name' => ['The name field is required.']], $array['errors']);
     }
@@ -61,7 +61,7 @@ final class ProblemDetailsTest extends TestCase
 
     public function test_server_error_factory(): void
     {
-        $problem = ProblemDetails::serverError('Database connection failed', '/api/v1/medals');
+        $problem = ProblemDetails::serverError('Database connection failed', '/api/v1/tags');
 
         $array = $problem->toArray();
 

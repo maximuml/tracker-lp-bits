@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Schema;
  *  - tags.id (bigint unsigned)         → torrent_tags.tag_id (int → bigint)
  *  - exams.id (bigint unsigned)        → exam_id columns (int → bigint)
  *  - exam_users.id (bigint unsigned)   → exam_progress.exam_user_id (int → bigint)
- *  - medals.id (bigint unsigned)       → user_medals.medal_id (int → bigint)
  *  - snatched.id (bigint unsigned)     → hit_and_runs.snatched_id (int → bigint)
  *  - shoutbox.id (int)                 → shoutbox_reactions.shoutbox_id (int unsigned → int)
  *
@@ -100,7 +99,6 @@ return new class extends Migration
             'torrent_secrets' => ['uid'],
             'exam_users' => ['uid'],
             'exam_progress' => ['uid'],
-            'user_medals' => ['uid'],
             'user_metas' => ['uid'],
             'bonus_logs' => ['uid'],
             'login_logs' => ['uid'],
@@ -138,9 +136,6 @@ return new class extends Migration
 
         // exam_users.id = bigint unsigned → exam_progress.exam_user_id: int → bigint unsigned
         DB::statement('ALTER TABLE `exam_progress` MODIFY `exam_user_id` BIGINT UNSIGNED NOT NULL DEFAULT 0');
-
-        // medals.id = bigint unsigned → user_medals.medal_id: int → bigint unsigned
-        DB::statement('ALTER TABLE `user_medals` MODIFY `medal_id` BIGINT UNSIGNED NOT NULL DEFAULT 0');
 
         // snatched.id = bigint unsigned → hit_and_runs.snatched_id: int → bigint unsigned
         DB::statement('ALTER TABLE `hit_and_runs` MODIFY `snatched_id` BIGINT UNSIGNED NOT NULL DEFAULT 0');
@@ -187,9 +182,6 @@ return new class extends Migration
             $t->foreign('uid')->references('id')->on('users')->onDelete('cascade');
         });
         Schema::table('exam_progress', function ($t) {
-            $t->foreign('uid')->references('id')->on('users')->onDelete('cascade');
-        });
-        Schema::table('user_medals', function ($t) {
             $t->foreign('uid')->references('id')->on('users')->onDelete('cascade');
         });
         Schema::table('user_metas', function ($t) {
@@ -296,11 +288,6 @@ return new class extends Migration
             $t->foreign('exam_user_id')->references('id')->on('exam_users')->onDelete('cascade');
         });
 
-        // → medals.id ON DELETE CASCADE
-        Schema::table('user_medals', function ($t) {
-            $t->foreign('medal_id')->references('id')->on('medals')->onDelete('cascade');
-        });
-
         // → snatched.id ON DELETE CASCADE
         Schema::table('hit_and_runs', function ($t) {
             $t->foreign('snatched_id')->references('id')->on('snatched')->onDelete('cascade');
@@ -321,7 +308,6 @@ return new class extends Migration
         $fks = [
             ['shoutbox_reactions', 'shoutbox_id'],
             ['hit_and_runs', 'snatched_id'],
-            ['user_medals', 'medal_id'],
             ['exam_progress', 'exam_user_id'],
             ['exam_progress', 'exam_id'],
             ['exam_users', 'exam_id'],
@@ -353,7 +339,6 @@ return new class extends Migration
             ['attendance', 'uid'],
             ['bonus_logs', 'uid'],
             ['user_metas', 'uid'],
-            ['user_medals', 'uid'],
             ['exam_progress', 'uid'],
             ['exam_users', 'uid'],
             ['torrent_secrets', 'uid'],

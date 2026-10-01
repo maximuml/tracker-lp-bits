@@ -62,7 +62,6 @@ class UserResource extends JsonResource
             'share_ratio' => Ratio::forUserId($this->id),
             'seeding_leeching_data' => $this->whenHas('seeding_leeching_data'),
             'inviter' => new UserResource($this->whenLoaded('inviter')),
-            'valid_medals' => MedalResource::collection($this->whenLoaded('valid_medals')),
         ];
 
         return $out;

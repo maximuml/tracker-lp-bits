@@ -391,7 +391,6 @@ return [
     'system' => [
         'change_username_min_interval_in_days' => '365',
         'change_username_card_allow_characters_outside_the_alphabets' => 'no',
-        'maximum_number_of_medals_can_be_worn' => 3,
         'cookie_valid_days' => 365,
         'maximum_upload_speed' => 8000,
         'is_invite_pre_email_and_username' => 'no',

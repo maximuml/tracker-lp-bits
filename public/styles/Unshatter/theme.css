@@ -28,6 +28,8 @@ html[data-theme="dark"]:root {
     --nxm-success: #6fc76f;
     --nxm-danger: #e8343f;
     --nxm-warning: #ffd400;
+    --nxm-on-success: #111114;
+    --nxm-on-warning: #111114;
 
     /* chrome */
     --nxm-header-bg: #0d0d10;
@@ -81,10 +83,14 @@ html[data-theme="light"]:root {
     --nxm-border: #d9d7cc;
     --nxm-accent: #c79500;
     --nxm-accent-hover: #a87e00;
+    --nxm-accent-text: #7f6100;
+    --nxm-accent-text-hover: #6f5600;
     --nxm-on-accent: #111114;
     --nxm-success: #1a7f37;
     --nxm-danger: #c9232e;
     --nxm-warning: #a87e00;
+    --nxm-on-success: #ffffff;
+    --nxm-on-warning: #111114;
 
     --nxm-header-bg: #0d0d10;
     --nxm-header-text: #f2f2f4;
@@ -140,6 +146,8 @@ html[data-theme="light"]:root {
         --nxm-success: #6fc76f;
         --nxm-danger: #e8343f;
         --nxm-warning: #ffd400;
+    --nxm-on-success: #111114;
+    --nxm-on-warning: #111114;
         --nxm-header-bg: #0d0d10;
         --nxm-header-text: #f2f2f4;
         --nxm-header-dim: #8a8d97;
@@ -151,6 +159,26 @@ html[data-theme="light"]:root {
         --nxm-userbar-stat: #f2f2f4;
         --nxm-userbar-ok: #7ee787;
         --nxm-userbar-bad: #e8343f;
+
+        --nxm-name-administrator: #c79af0;
+        --nxm-name-crazyuser: #5cc4ea;
+        --nxm-name-eliteuser: #56c8c8;
+        --nxm-name-extremeuser: #eda55e;
+        --nxm-name-forummoderator: #5cc6d0;
+        --nxm-name-insaneuser: #e082e0;
+        --nxm-name-moderator: #96b2ea;
+        --nxm-name-nexusmaster: #74baea;
+        --nxm-name-peasant: #aab8c6;
+        --nxm-name-poweruser: #ffd400;
+        --nxm-name-retiree: #5cc6d0;
+        --nxm-name-staffleader: #f08080;
+        --nxm-name-sysop: #de9a76;
+        --nxm-name-ultimateuser: #6fd06f;
+        --nxm-name-uploader: #f46e88;
+        --nxm-name-user: #f2f2f4;
+        --nxm-name-vip: #72d272;
+        --nxm-name-veteranuser: #ac9ee4;
+
         --nxm-radius: 0px;
         --nxm-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
         color-scheme: dark;
@@ -168,10 +196,14 @@ html[data-theme="light"]:root {
         --nxm-border: #d9d7cc;
         --nxm-accent: #c79500;
         --nxm-accent-hover: #a87e00;
+        --nxm-accent-text: #7f6100;
+        --nxm-accent-text-hover: #6f5600;
         --nxm-on-accent: #111114;
         --nxm-success: #1a7f37;
         --nxm-danger: #c9232e;
         --nxm-warning: #a87e00;
+    --nxm-on-success: #ffffff;
+    --nxm-on-warning: #111114;
         --nxm-header-bg: #0d0d10;
         --nxm-header-text: #f2f2f4;
         --nxm-header-dim: #8a8d97;
@@ -183,6 +215,26 @@ html[data-theme="light"]:root {
         --nxm-userbar-stat: #f2f2f4;
         --nxm-userbar-ok: #3fae5b;
         --nxm-userbar-bad: #d93440;
+
+        --nxm-name-administrator: #4b0082;
+        --nxm-name-crazyuser: #007faa;
+        --nxm-name-eliteuser: #007575;
+        --nxm-name-extremeuser: #b26100;
+        --nxm-name-forummoderator: #12828c;
+        --nxm-name-insaneuser: #8b008b;
+        --nxm-name-moderator: #4e75bb;
+        --nxm-name-nexusmaster: #287dac;
+        --nxm-name-peasant: #5a6a7a;
+        --nxm-name-poweruser: #a87e00;
+        --nxm-name-retiree: #12828c;
+        --nxm-name-staffleader: #8b0000;
+        --nxm-name-sysop: #a0522d;
+        --nxm-name-ultimateuser: #006400;
+        --nxm-name-uploader: #dc143c;
+        --nxm-name-user: #141417;
+        --nxm-name-vip: #008a00;
+        --nxm-name-veteranuser: #483d8b;
+
         --nxm-radius: 0px;
         --nxm-shadow: 0 1px 3px rgba(20, 20, 23, 0.14);
         color-scheme: light;
@@ -191,34 +243,20 @@ html[data-theme="light"]:root {
 
 /* ---------- Signature details (shared across variants) ---------- */
 
-/* Yellow "shatter" zig-zag rule under page titles — the From Zero scratch
- * motif rendered in pure CSS (no images, CSP-safe). */
+/* Plain hairline under page titles. */
 .nxm-main h1,
 .nxm-page-title {
     padding-bottom: 0.4em;
     margin-bottom: 0.7em;
-    background-image:
-        repeating-linear-gradient(
-            -4deg,
-            var(--nxm-accent) 0 10px,
-            transparent 10px 22px
-        );
-    background-position: 0 100%;
-    background-size: auto 3px;
-    background-repeat: repeat-x;
-    border-bottom: none;
+    border-bottom: 1px solid var(--nxm-border);
 }
 
-/* Yellow square bullet on section/table headers — the From Zero glyph. */
-.nxm-main .colhead,
-.nxm-main .nx-colhead,
-.nxm-panel > .nxm-panel__header,
-.nxm-main > table > tbody > tr:first-child > .colhead {
+/* Yellow square bullet on section headers — the From Zero glyph.
+   Quiet table colheads skip it: one per column reads as noise. */
+.nxm-panel > .nxm-panel__header {
     position: relative;
 }
 
-.nxm-main .colhead::before,
-.nxm-main .nx-colhead::before,
 .nxm-panel > .nxm-panel__header::before {
     content: "";
     display: inline-block;
@@ -246,8 +284,8 @@ html[data-theme]:root .nxm-alert--blue {
     color: var(--nxm-accent);
 }
 
-html[data-theme]:root .nxm-alert.nxm-alert--blue a:link,
-html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited {
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:link:not(.nxm-alert__action),
+html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited:not(.nxm-alert__action) {
     color: var(--nxm-accent);
     text-decoration: underline;
 }
@@ -259,7 +297,7 @@ html[data-theme]:root .nxm-alert.nxm-alert--blue a:hover {
 /* Legacy "alt link" colour — blue on Classic, accent-yellow here. */
 html[data-theme]:root a.altlink_blue:link,
 html[data-theme]:root a.altlink_blue:visited {
-    color: var(--nxm-accent);
+    color: var(--nxm-accent-text, var(--nxm-accent));
 }
 
 html[data-theme]:root a.altlink_blue:hover {

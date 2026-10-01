@@ -6,9 +6,13 @@ namespace App\Repositories;
 
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Database;
+use App\Support\Format;
 use App\Support\Input;
+use App\Support\LegacyDb;
 use App\Support\Locale;
+use App\Support\RequestContext;
 use Composer\InstalledVersions;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Redis;
@@ -17,6 +21,7 @@ class DashboardRepository extends BaseRepository
 {
     public function __construct(
         private readonly DashboardStatsRepository $statsRepository = new DashboardStatsRepository,
+        private readonly LegacyRedisCache $cache = new LegacyRedisCache,
     ) {}
 
     /** @return  array<string, array<string, mixed>> */
@@ -79,6 +84,31 @@ class DashboardRepository extends BaseRepository
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
             'value' => function_exists('sys_getloadavg') ? (($load = sys_getloadavg()) === false ? 'N/A' : implode(', ', $load)) : 'N/A',
+        ];
+
+        $name = 'page_generation';
+        $result[$name] = [
+            'name' => $name,
+            'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
+            'value' => sprintf('%.3f sec', microtime(true) - RequestContext::instance()->getStartTimestamp()),
+        ];
+        $name = 'db_queries';
+        $result[$name] = [
+            'name' => $name,
+            'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
+            'value' => RequestContext::instance()->getDbQueryCount() + (int) LegacyDb::lastQuery('COUNT', 'json'),
+        ];
+        $name = 'redis_io';
+        $result[$name] = [
+            'name' => $name,
+            'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
+            'value' => sprintf('%d reads, %d writes', $this->cache->getCacheReadTimes(), $this->cache->getCacheWriteTimes()),
+        ];
+        $name = 'memory_usage';
+        $result[$name] = [
+            'name' => $name,
+            'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
+            'value' => Format::size(memory_get_usage()),
         ];
 
         return $result;

@@ -1732,7 +1732,7 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 .nx-post__foot { display: flex; justify-content: space-between; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem; border-top: 1px solid var(--nxm-border); }
 .nx-post__contact, .nx-post__tools { display: inline-flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
 .nx-post__status { width: 8px; height: 8px; border-radius: 50%; background: var(--nxm-text-dim); display: inline-block; flex: none; }
-.nx-post__status--on { background: var(--nxm-ok); }
+.nx-post__status--on { background: var(--nxm-userbar-ok); }
 
 .nx-postbtn,
 input.nx-postbtn {
@@ -1754,6 +1754,10 @@ input.nx-postbtn {
 .nx-postbtn:focus-visible { color: var(--nxm-text); border-color: var(--nxm-text-dim); text-decoration: none; }
 .nx-postbtn--danger:hover,
 .nx-postbtn--danger:focus-visible { color: var(--nxm-bad); border-color: var(--nxm-bad); }
+.nx-postbtn:disabled { opacity: 0.55; cursor: default; }
+.nx-det-actions { display: inline-flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+.nx-cmt-tools { display: inline-flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
+.nx-cmt-tools--right { justify-content: flex-end; float: right; }
 
 .nx-modtools { position: relative; }
 .nx-modtools > summary {

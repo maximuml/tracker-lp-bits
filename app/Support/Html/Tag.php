@@ -400,7 +400,7 @@ final class Tag
             ."<textarea id='{$name}' name='{$name}' cols=\"100\" rows=\"8\" data-ctrlenter=\"compose:qr\"></textarea>";
         $html .= Smilies::quickRow($formName, $textareaName);
         $html .= '<br />';
-        $html .= '<input type="submit" id="qr" class="btn" value="'.htmlspecialchars($submitLabel, ENT_QUOTES).'" />';
+        $html .= '<input type="submit" id="qr" class="nx-postbtn" value="'.htmlspecialchars($submitLabel, ENT_QUOTES).'" />';
 
         return $html;
     }

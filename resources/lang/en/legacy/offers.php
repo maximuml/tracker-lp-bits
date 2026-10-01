@@ -74,7 +74,6 @@ return [
     'std_have_no_permission' => 'You do not have permission',
     'std_sorry' => 'Sorry',
     'std_no_votes_yet' => 'No votes yet... ',
-    'std_back_to_offer_detail' => 'Back to Offer details',
     'std_cannot_edit_others_offer' => 'This is not your Offer to edit.',
     'head_edit_offer' => 'Edit Offer ',
     'text_edit_offer' => 'Edit Offer',

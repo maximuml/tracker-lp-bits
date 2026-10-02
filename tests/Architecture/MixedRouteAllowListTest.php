@@ -29,14 +29,15 @@ final class MixedRouteAllowListTest extends TestCase
     /**
      * W0-06: Maximum allowed mixed-method route entries.
      *
-     * Current baseline: 17 entries. This number must only decrease as
-     * routes are split into separate GET/POST actions (W1-01).
+     * Current baseline: 4 entries (BitTorrent protocol endpoints only).
+     * This number must only decrease as routes are split into separate
+     * GET/POST actions (W1-01).
      *
      * To lower: split a Route::match into Route::get + Route::post,
      * remove the entry from MixedRouteAllowList::entries(), and
      * lower this constant.
      */
-    private const MAX_ALLOWED_ENTRIES = 17;
+    private const MAX_ALLOWED_ENTRIES = 4;
 
     public function test_allow_list_count_does_not_exceed_target(): void
     {

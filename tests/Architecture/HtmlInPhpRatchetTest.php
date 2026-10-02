@@ -53,7 +53,7 @@ final class HtmlInPhpRatchetTest extends TestCase
     private const BASELINE_TABLE_LITERALS = 2;
 
     /** Baseline: ob_start() calls (output buffering = inline page rendering). */
-    private const BASELINE_OB_START = 5;
+    private const BASELINE_OB_START = 2;
 
     /** Baseline: lines with `echo` inside app/Services + app/Http/Controllers. */
     private const BASELINE_ECHO_IN_SERVICES = 0;
@@ -62,7 +62,7 @@ final class HtmlInPhpRatchetTest extends TestCase
     private const BASELINE_HTML_LITERAL_LINES = 249;
 
     /** Baseline: HTML literal lines inside app/Repositories (target: 0). */
-    private const BASELINE_REPO_HTML_LITERALS = 7;
+    private const BASELINE_REPO_HTML_LITERALS = 0;
 
     public function test_table_literal_count_does_not_exceed_baseline(): void
     {

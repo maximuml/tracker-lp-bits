@@ -9,7 +9,6 @@ use App\Services\BitbucketService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\Support\Path;
 use Illuminate\Contracts\View\View;
@@ -25,7 +24,6 @@ class BitbucketUploadController extends Controller
         private readonly BitbucketService $bitbucketService,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {}
 
     public function create(Request $request): View|RedirectResponse
@@ -46,7 +44,7 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort((''), (''), false);
         }
 
-        if ($this->globals->get('enablebitbucket_main', 'no') !== 'yes') {
+        if (! SiteConfig::current()->main->enableBitbucket()) {
             LegacyResponse::permissionDenied();
         }
 
@@ -80,7 +78,7 @@ class BitbucketUploadController extends Controller
             LegacyResponse::abort((''), (''), false);
         }
 
-        if ($this->globals->get('enablebitbucket_main', 'no') !== 'yes') {
+        if (! SiteConfig::current()->main->enableBitbucket()) {
             LegacyResponse::permissionDenied();
         }
 

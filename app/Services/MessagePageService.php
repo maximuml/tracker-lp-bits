@@ -7,10 +7,12 @@ namespace App\Services;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
 use App\Support\Html\SafeHtml;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -77,7 +79,7 @@ class MessagePageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'baseUrl' => (string) $this->globals->get('BASEURL', ''),
+            'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'),
             'contentWidth' => (string) $this->globals->get('CONTENT_WIDTH', '737'),
         ];
 

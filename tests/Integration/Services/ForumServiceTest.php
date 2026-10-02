@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -36,6 +37,8 @@ use Tests\TestCase;
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumServiceTest extends TestCase
 {
+    use SeedsLegacySettings;
+
     private int $initialObLevel;
 
     /** @var TopicRepository&Mockery\MockInterface */
@@ -198,9 +201,7 @@ final class ForumServiceTest extends TestCase
     private function mockGlobals(array $values = []): void
     {
         $globals = new Globals;
-        foreach ($values as $key => $value) {
-            $globals->set($key, $value);
-        }
+        $this->seedTestSettings($values, $globals);
         $this->app->instance(Globals::class, $globals);
     }
 

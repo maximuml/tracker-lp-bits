@@ -262,4 +262,44 @@ final class MainConfig extends Config
     {
         return $this->string('icplicense', $default);
     }
+
+    public function enableBitbucket(bool $default = false): bool
+    {
+        return $this->bool('enablebitbucket', $default);
+    }
+
+    public function minOfferVotes(int $default = 0): int
+    {
+        return $this->int('minoffervotes', $default);
+    }
+
+    public function showForumStats(bool $default = false): bool
+    {
+        return $this->bool('showforumstats', $default);
+    }
+
+    public function showLastXForumPosts(bool $default = false): bool
+    {
+        return $this->bool('showlastxforumposts', $default);
+    }
+
+    public function showLastXTorrents(bool $default = false): bool
+    {
+        return $this->bool('showlastxtorrents', $default);
+    }
+
+    public function showPolls(bool $default = false): bool
+    {
+        return $this->bool('showpolls', $default);
+    }
+
+    public function showShoutbox(bool $default = false): bool
+    {
+        return $this->bool('showshoutbox', $default);
+    }
+
+    public function showStats(bool $default = false): bool
+    {
+        return $this->bool('showstats', $default);
+    }
 }

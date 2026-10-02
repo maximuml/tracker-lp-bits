@@ -6,8 +6,10 @@ namespace Tests\Unit\Services;
 
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
+use App\Repositories\SettingRepository;
 use App\Services\BonusService;
 use App\Support\Globals;
+use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Mockery;
@@ -36,6 +38,11 @@ final class BonusServiceTest extends TestCase
         $repo = Mockery::mock(BonusRepository::class);
         /** @var BonusCalculationRepository&Mockery\MockInterface $calcRepo */
         $calcRepo = Mockery::mock(BonusCalculationRepository::class);
+        /** @var SettingRepository&Mockery\MockInterface $settingsRepo */
+        $settingsRepo = Mockery::mock(SettingRepository::class);
+        $settingsRepo->shouldReceive('getAll')->zeroOrMoreTimes()->andReturn([]);
+        $this->app->instance(SettingRepository::class, $settingsRepo);
+        Settings::resetCache();
 
         return new BonusService($repo, $calcRepo, $this->app->make(Globals::class));
     }

@@ -8,7 +8,7 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\SearchBox;
@@ -23,7 +23,6 @@ class RssController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly SearchCategoryTableFactory $searchCategoryTableFactory,
     ) {}
 
@@ -46,7 +45,7 @@ class RssController extends LegacyController
      */
     private function getrssData(): array
     {
-        $browsecatmode = (int) ($this->globals->get('browsecatmode') ?? 1);
+        $browsecatmode = SiteConfig::current()->main->browseCat(1);
         $brsectiontype = $browsecatmode;
 
         $showsubcat = (bool) SearchBox::valueWithContext($brsectiontype, 'showsubcat');
@@ -116,8 +115,8 @@ class RssController extends LegacyController
             return redirect('/getrss.php');
         }
 
-        $browsecatmode = (int) ($this->globals->get('browsecatmode') ?? 1);
-        $baseUrl = (string) $this->globals->get('BASEURL', '');
+        $browsecatmode = SiteConfig::current()->main->browseCat(1);
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
 
         $allowedShowrows = ['10', '50'];
         $showrows = (string) $request->input('showrows', '10');

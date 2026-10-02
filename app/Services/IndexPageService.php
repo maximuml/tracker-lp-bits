@@ -15,7 +15,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Ratio;
@@ -53,7 +52,6 @@ final class IndexPageService
 
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly IndexRepository $indexRepository,
         ?CoverThumb $coverThumb = null,
@@ -110,7 +108,7 @@ final class IndexPageService
 
     private function buildNews(bool $canManage): IndexNewsSection
     {
-        $maxNews = (int) $this->globals->get('maxnewsnum_main', 0);
+        $maxNews = SiteConfig::current()->main->maxNewsNum(0);
         $items = array_values(array_map(
             fn (array $row) => IndexNewsItem::fromRow($row),
             $this->indexRepository->getLatestNews($maxNews),
@@ -130,7 +128,7 @@ final class IndexPageService
 
     private function buildShoutbox(bool $canManage, int $userId): IndexShoutboxSection
     {
-        $show = $this->globals->get('showshoutbox_main', '') === 'yes';
+        $show = SiteConfig::current()->main->showShoutbox();
 
         if (! $show) {
             return new IndexShoutboxSection;
@@ -161,7 +159,7 @@ final class IndexPageService
      */
     private function buildForumPosts(array $curUser): IndexForumPostsSection
     {
-        $show = $this->globals->get('showlastxforumposts_main', '') === 'yes' && ! empty($curUser);
+        $show = SiteConfig::current()->main->showLastXForumPosts() && ! empty($curUser);
 
         if (! $show) {
             return new IndexForumPostsSection;
@@ -184,7 +182,7 @@ final class IndexPageService
 
     private function buildLatestTorrents(): IndexLatestTorrentsSection
     {
-        $show = $this->globals->get('showlastxtorrents_main', '') === 'yes';
+        $show = SiteConfig::current()->main->showLastXTorrents();
 
         if (! $show) {
             return new IndexLatestTorrentsSection;
@@ -296,7 +294,7 @@ final class IndexPageService
      */
     private function buildPolls(array $curUser, bool $canManage, bool $canLog): IndexPollsSection
     {
-        $show = ! empty($curUser) && $this->globals->get('showpolls_main', '') === 'yes';
+        $show = ! empty($curUser) && SiteConfig::current()->main->showPolls();
 
         if (! $show) {
             return new IndexPollsSection;
@@ -384,7 +382,7 @@ final class IndexPageService
 
     private function buildStats(): IndexStatsSection
     {
-        $show = $this->globals->get('showstats_main', '') === 'yes';
+        $show = SiteConfig::current()->main->showStats();
 
         if (! $show) {
             return new IndexStatsSection;
@@ -414,7 +412,7 @@ final class IndexPageService
                 avatar: (string) ($row['avatar'] ?? ''),
             );
         }
-        $maxusers = (int) $this->globals->get('maxusers', 0);
+        $maxusers = SiteConfig::current()->main->maxUsers();
 
         return new IndexStatsSection(
             show: true,

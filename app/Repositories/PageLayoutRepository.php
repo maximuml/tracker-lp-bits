@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Models\Invite;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Input;
@@ -155,7 +156,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
 
         $menuResult = $this->menu->render(
             $script,
-            (string) $this->globals->get('enableoffer', ''),
+            SiteConfig::current()->main->showOffer() ? 'yes' : 'no',
             null,
             $user,
             $this->legacyRedisCache,
@@ -165,7 +166,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         $this->globals->set('nexus_menu_html', $menuResult['html']);
         $this->globals->set('nexus_menu_selected', $menuResult['selected']);
 
-        if ((string) $this->globals->get('where_tweak', '') === 'yes') {
+        if (SiteConfig::current()->tweak->where() === 'yes') {
             $this->userUpdateBatch->add('page', $menuResult['selected']);
         }
     }

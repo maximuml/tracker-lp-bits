@@ -183,7 +183,7 @@ final class UsercpPageService
         }
 
         // IP location
-        $enableLocationTweak = (string) $this->globals->get('enablelocation_tweak', '') === 'yes';
+        $enableLocationTweak = SiteConfig::current()->tweak->enableLocation();
         $ipLocation = '';
         if ($enableLocationTweak) {
             [$locPub, $locMod] = Network::ipLocationWithContext((string) ($curUser['ip'] ?? ''));
@@ -319,7 +319,7 @@ final class UsercpPageService
     {
         return new UsercpForumSection(
             formId: 'form'.Strings::randomCode(6),
-            showTooltipSetting: (string) $this->globals->get('enabletooltip_tweak', '') === 'yes',
+            showTooltipSetting: SiteConfig::current()->tweak->enableTooltip(),
             topicsPerPage: (int) ($curUser['topicsperpage'] ?? 0),
             postsPerPage: (int) ($curUser['postsperpage'] ?? 0),
             avatars: LegacyYesNo::isYes($curUser['avatars'] ?? null),
@@ -345,7 +345,7 @@ final class UsercpPageService
             $trackerUrlOptions[(string) $item->id] = (string) $item->url;
         }
 
-        $baseUrl = Url::absolute((string) $this->globals->get('BASEURL', ''));
+        $baseUrl = Url::absolute(SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'));
         $defaultAvatarUrl = $baseUrl.'/pic/default_avatar.png';
         $bitbucketOptions = [];
         foreach ($this->usercpLookupRepository->getBitbucketOptions() as $sor) {
@@ -378,7 +378,7 @@ final class UsercpPageService
             avatar: (string) ($curUser['avatar'] ?? ''),
             defaultAvatarUrl: $defaultAvatarUrl,
             bitbucketOptions: $bitbucketOptions,
-            enableBitbucket: (string) $this->globals->get('enablebitbucket_main', '') === 'yes',
+            enableBitbucket: SiteConfig::current()->main->enableBitbucket(),
             info: (string) ($curUser['info'] ?? ''),
         );
     }
@@ -388,8 +388,8 @@ final class UsercpPageService
      */
     private function buildSecuritySection(array $curUser, string $type): UsercpSecuritySection
     {
-        $showEmailChange = (string) $this->globals->get('disableemailchange', '') !== 'no'
-            && (string) $this->globals->get('smtptype', '') !== 'none';
+        $showEmailChange = SiteConfig::current()->security->disableEmailChange(true)
+            && SiteConfig::current()->smtp->type() !== 'none';
 
         // Two-step auth
         $hasSecret = ! empty($curUser['two_step_secret']);
@@ -590,8 +590,8 @@ JS;
      */
     private function buildTrackerSection(array $curUser): UsercpTrackerSection
     {
-        $showTooltipSetting = (string) $this->globals->get('enabletooltip_tweak', '') === 'yes';
-        $browsecatmode = (int) $this->globals->get('browsecatmode', 1);
+        $showTooltipSetting = SiteConfig::current()->tweak->enableTooltip();
+        $browsecatmode = SiteConfig::current()->main->browseCat(1);
 
         $notifs = (string) ($curUser['notifs'] ?? '');
         $specialState = 0;
@@ -636,8 +636,8 @@ JS;
 
         return new UsercpTrackerSection(
             formId: 'form'.Strings::randomCode(6),
-            showEmailNotify: (string) $this->globals->get('emailnotify_smtp', '') === 'yes'
-                && (string) $this->globals->get('smtptype', '') !== 'none',
+            showEmailNotify: SiteConfig::current()->smtp->emailNotify()
+                && SiteConfig::current()->smtp->type() !== 'none',
             pmnotif: str_contains($notifs, '[pm]'),
             emailnotif: str_contains($notifs, '[email]'),
             categoriesTable: $categoriesTable,
@@ -653,7 +653,7 @@ JS;
             langOptions: $siteLanguages,
             currentLangId: $currentLangId,
             pmnum: (int) ($curUser['pmnum'] ?? 0),
-            showShoutbox: (string) $this->globals->get('showshoutbox_main', '') === 'yes',
+            showShoutbox: SiteConfig::current()->main->showShoutbox(),
             sbnum: (int) ($curUser['sbnum'] ?? 0),
             sbrefresh: (int) ($curUser['sbrefresh'] ?? 0),
             showdescription: LegacyYesNo::isYes($curUser['showdescription'] ?? null),

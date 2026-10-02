@@ -8,7 +8,6 @@ use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
-use App\Support\Globals;
 use App\Support\Mail;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -195,7 +194,7 @@ class SystemActions extends Page implements HasForms
             return;
         }
 
-        $siteName = (string) app(Globals::class)->get('SITENAME', '');
+        $siteName = SiteConfig::current()->basic->siteName();
         $siteEmail = SiteConfig::current()->main->siteEmail();
         $sent = false;
         foreach ($users as $userRow) {

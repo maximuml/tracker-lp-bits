@@ -6,9 +6,11 @@ namespace App\Http\Controllers;
 
 use App\Enums\FaqType;
 use App\Repositories\InfoRepository;
+use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\RedisGuard;
 use App\Support\Url;
@@ -78,7 +80,7 @@ class FaqController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
         }
 
-        $baseUrl = (string) $this->globals->get('BASEURL', '');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
         $redirectBase = Url::absolute($baseUrl);
         $action = (string) (request()->query('action') ?? '');
 
@@ -198,7 +200,7 @@ class FaqController extends LegacyController
 
         if ($action === 'addsection') {
             $languages = Locale::languageList('rule_lang', null);
-            $defLang = $this->globals->get('deflang', '');
+            $defLang = SiteConfig::current()->main->defaultLang();
 
             return $this->legacyPage($request, 'faqactions', true, [
                 'mode' => 'addsection',

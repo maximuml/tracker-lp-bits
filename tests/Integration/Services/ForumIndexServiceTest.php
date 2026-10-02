@@ -14,7 +14,7 @@ use App\Repositories\TopicRepository;
 use App\Services\ForumIndexService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -54,14 +54,11 @@ final class ForumIndexServiceTest extends TestCase
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     protected function setUp(): void
     {
         parent::setUp();
         Redis::connection()->flushdb();
         $this->currentUser = new CurrentUser;
-        $this->globals = new Globals;
 
         /** @var ForumRepository&MockInterface $repo */
         $repo = Mockery::mock(ForumRepository::class);
@@ -93,7 +90,6 @@ final class ForumIndexServiceTest extends TestCase
 
         $this->service = new ForumIndexService(
             $this->currentUser,
-            $this->globals,
             $this->forumRepo,
             new OverforumRepository,
             $this->cache,
@@ -283,7 +279,8 @@ final class ForumIndexServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->mockCache();
         $this->setUser();
-        $this->globals->set('showforumstats_main', 'yes');
+        Settings::saveBatch('main', ['showforumstats' => 'yes']);
+        Settings::resetCache();
 
         $repo->shouldReceive('updateUserForumAccess')->andReturn(true);
         $repo->shouldReceive('getOverforumsList')->andReturn([]);
@@ -307,7 +304,8 @@ final class ForumIndexServiceTest extends TestCase
         $repo = $this->mockForumRepo();
         $this->mockCache();
         $this->setUser();
-        $this->globals->set('showforumstats_main', 'yes');
+        Settings::saveBatch('main', ['showforumstats' => 'yes']);
+        Settings::resetCache();
 
         $repo->shouldReceive('updateUserForumAccess')->andReturn(true);
         $repo->shouldReceive('getOverforumsList')->andReturn([]);

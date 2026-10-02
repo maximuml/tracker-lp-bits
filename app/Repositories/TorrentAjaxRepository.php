@@ -10,8 +10,8 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
 use App\Support\Database;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\Logger;
@@ -28,7 +28,6 @@ use Meilisearch\Exceptions\ApiException;
 final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
 {
     public function __construct(
-        private readonly Globals $globals,
         private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
         private readonly TorrentModerationRepository $torrentModerationRepository,
     ) {}
@@ -220,8 +219,8 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             $usernameHtmlMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, true);
         }
 
-        $enablelocationTweak = $this->globals->get('enablelocation_tweak');
-        $showLocationColumn = $enablelocationTweak === 'yes' || ($currentUser !== null && Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
+        $enablelocationTweak = SiteConfig::current()->tweak->enableLocation();
+        $showLocationColumn = $enablelocationTweak || ($currentUser !== null && Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
 
         return [
             'torrent' => $torrentArr,

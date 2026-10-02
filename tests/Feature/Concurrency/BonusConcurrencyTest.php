@@ -10,7 +10,7 @@ use App\Models\User;
 use App\Repositories\BonusRepository;
 use App\Services\ThankService;
 use App\Support\Bonus;
-use App\Support\Globals;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -58,7 +58,8 @@ class BonusConcurrencyTest extends TestCase
         $user = User::factory()->create(['seedbonus' => 0.0]);
 
         // bonus_tweak disabled — updatePoints should be a no-op
-        app(Globals::class)->set('bonus_tweak', 'disable');
+        Settings::saveBatch('tweak', ['bonus' => 'disable']);
+        Settings::resetCache();
 
         Bonus::updatePoints('+', 50.0, $user->id);
 
@@ -66,7 +67,8 @@ class BonusConcurrencyTest extends TestCase
         $this->assertSame(0.0, $finalBonus);
 
         // bonus_tweak enabled — updatePoints should work
-        app(Globals::class)->set('bonus_tweak', 'enable');
+        Settings::saveBatch('tweak', ['bonus' => 'enable']);
+        Settings::resetCache();
 
         Bonus::updatePoints('+', 50.0, $user->id);
 
@@ -78,7 +80,8 @@ class BonusConcurrencyTest extends TestCase
     {
         $user = User::factory()->create(['seedbonus' => 42.0]);
 
-        app(Globals::class)->set('bonus_tweak', 'enable');
+        Settings::saveBatch('tweak', ['bonus' => 'enable']);
+        Settings::resetCache();
 
         Bonus::updatePoints('+', 0.0, $user->id);
 

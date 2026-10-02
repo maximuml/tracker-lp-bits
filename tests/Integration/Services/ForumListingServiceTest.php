@@ -15,7 +15,7 @@ use App\Services\ForumIndexService;
 use App\Services\ForumListingService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -51,21 +51,11 @@ final class ForumListingServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        app(Globals::class)->set('SITENAME', 'TestSite');
-        app(Globals::class)->set('lang_functions', [
-            'text_prev' => 'Prev', 'text_next' => 'Next',
-            'submit_submit' => 'Submit', 'submit_preview' => 'Preview',
-            'submit_edit' => 'Edit', 'text_tags' => 'Tags', 'text_smilies' => 'Smilies',
-            'js_prompt_enter_url' => 'URL', 'js_prompt_enter_title' => 'Title',
-            'js_prompt_error' => 'Error', 'js_prompt_enter_image_url' => 'Image URL',
-            'js_prompt_enter_item' => 'Item', 'select_color' => 'Color',
-            'select_font' => 'Font', 'select_size' => 'Size',
-            'text_more_smilies' => 'More',
-        ]);
+        Settings::saveBatch('basic', ['SITENAME' => 'TestSite']);
+        Settings::resetCache();
 
         $indexService = new ForumIndexService(
             $this->app->make(CurrentUser::class),
-            $this->app->make(Globals::class),
             $this->app->make(ForumRepository::class),
             new OverforumRepository,
             $this->app->make(LegacyRedisCache::class),
@@ -75,7 +65,6 @@ final class ForumListingServiceTest extends TestCase
         );
         $this->service = new ForumListingService(
             $indexService,
-            $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(PostRepository::class),
@@ -133,7 +122,6 @@ final class ForumListingServiceTest extends TestCase
 
         $indexService = new ForumIndexService(
             $this->app->make(CurrentUser::class),
-            $this->app->make(Globals::class),
             $forumRepo,
             new OverforumRepository,
             $cacheInstance,
@@ -143,7 +131,6 @@ final class ForumListingServiceTest extends TestCase
         );
         $this->service = new ForumListingService(
             $indexService,
-            $this->app->make(Globals::class),
             $cacheInstance,
             $this->app->make(TopicRepository::class),
             $this->app->make(PostRepository::class),
@@ -451,6 +438,9 @@ final class ForumListingServiceTest extends TestCase
             ]),
         ]);
         $this->postRepo->shouldReceive('countTopicPostsBatch')->with([7])->andReturn([7 => 3]);
+
+        Settings::saveBatch('tweak', ['enabletooltip' => 'no']);
+        Settings::resetCache();
 
         $vm = $this->service->buildViewForum(
             ['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes'],

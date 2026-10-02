@@ -11,7 +11,8 @@ use App\Models\BonusLogs;
 use App\Models\Message;
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
-use App\Support\Globals;
+use App\Support\Config\SiteConfig;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Lock;
@@ -36,13 +37,10 @@ final class BonusService
 
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    private Globals $globals;
-
-    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository, Globals $globals)
+    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository)
     {
         $this->bonusRep = $bonusRep;
         $this->bonusCalculationRepository = $bonusCalculationRepository;
-        $this->globals = $globals;
     }
 
     /**
@@ -69,13 +67,13 @@ final class BonusService
      */
     private function handleExchange(Request $request, array $allBonus, array $curUser, string $lockText): ?RedirectResponse
     {
-        $baseUrl = (string) $this->globals->get('BASEURL', '');
-        $bonusgiftBonus = (string) $this->globals->get('bonusgift_bonus', 'yes');
-        $ratiolimitBonus = (float) $this->globals->get('ratiolimit_bonus', 0);
-        $dlamountlimitBonus = (int) $this->globals->get('dlamountlimit_bonus', 0);
-        $buyinviteClass = (int) $this->globals->get('buyinvite_class', 0);
-        $taxpercentageBonus = (float) $this->globals->get('taxpercentage_bonus', 0);
-        $basictaxBonus = (float) $this->globals->get('basictax_bonus', 0);
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $bonusgiftBonus = SiteConfig::current()->bonus->bonusGift() ? 'yes' : 'no';
+        $ratiolimitBonus = SiteConfig::current()->bonus->ratioLimit();
+        $dlamountlimitBonus = SiteConfig::current()->bonus->dlAmountLimit();
+        $buyinviteClass = (int) SiteConfig::current()->authority->permission('buyinvite', 0);
+        $taxpercentageBonus = SiteConfig::current()->bonus->taxPercentage();
+        $basictaxBonus = SiteConfig::current()->bonus->basicTax();
 
         // Cheat detection
         if (
@@ -166,7 +164,7 @@ final class BonusService
      */
     private function exchangeTraffic(array $curUser, array $bonusarray, float $points, float $ratiolimitBonus, int $dlamountlimitBonus): RedirectResponse
     {
-        $baseUrl = (string) $this->globals->get('BASEURL', '');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
         if (($curUser['uploaded'] ?? 0) > $dlamountlimitBonus * 1073741824) {
             $ratio = ($curUser['downloaded'] ?? 0) > 0
                 ? ($curUser['uploaded'] ?? 0) / ($curUser['downloaded'] ?? 1)

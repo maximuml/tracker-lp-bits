@@ -11,8 +11,8 @@ use App\Models\Peer;
 use App\Models\Torrent;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Path;
 use App\Support\Permissions;
@@ -30,7 +30,6 @@ class TorrentMaintenanceController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {}
 
     public function torrentInfo(Request $request): View|RedirectResponse|Response
@@ -146,7 +145,7 @@ class TorrentMaintenanceController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), __('legacy/takereseed.std_torrent_not_dead'));
         }
 
-        $timeNow = (int) $this->globals->get('TIMENOW', time());
+        $timeNow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
         if ($row !== null && strtotime((string) ($row['last_reseed'] ?? '')) > ($timeNow - 900)) {
             return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), __('legacy/takereseed.std_reseed_sent_recently'));
         }
@@ -161,7 +160,7 @@ class TorrentMaintenanceController extends LegacyController
             ->map(fn ($r) => (array) $r)
             ->all();
 
-        $baseUrl = (string) $this->globals->get('BASEURL', '');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
         foreach ($snatchedRows as $snatchRow) {
             $locale = Locale::userLocale((int) $snatchRow['userid']);
             $rsSubject = Locale::trans('torrent.msg_reseed_request', [], $locale);

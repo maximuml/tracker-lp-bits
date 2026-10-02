@@ -65,4 +65,9 @@ final class TweakConfig extends Config
     {
         return $this->string('bonus', $default);
     }
+
+    public function enableLocation(bool $default = false): bool
+    {
+        return $this->bool('enablelocation', $default);
+    }
 }

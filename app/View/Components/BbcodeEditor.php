@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\View\Components;
 
 use App\Support\AssetAppender;
-use App\Support\Globals;
+use App\Support\Config\SiteConfig;
 use App\Support\Url;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -43,7 +43,6 @@ final class BbcodeEditor extends Component
     public readonly string $attachUrl;
 
     public function __construct(
-        private readonly Globals $globals,
         public readonly string $form = '',
         public readonly string $text = '',
         public readonly string $content = '',
@@ -57,7 +56,7 @@ final class BbcodeEditor extends Component
         $this->btnEditId = "$form-$text-btn-edit";
         $this->btnPreviewId = "$form-$text-btn-preview";
         $this->quickSmilies = self::QUICK_SMILIES;
-        $this->enableAttach = $this->globals->get('enableattach_attachment', '') === 'yes';
+        $this->enableAttach = SiteConfig::current()->attachment->enableAttach();
         $this->attachUrl = Url::schemeAndHost().'/attachment.php';
     }
 

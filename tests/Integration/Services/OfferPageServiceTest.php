@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -36,6 +37,7 @@ use Tests\TestCase;
 final class OfferPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use SeedsLegacySettings;
 
     private int $initialObLevel;
 
@@ -146,9 +148,7 @@ final class OfferPageServiceTest extends TestCase
             'addoffer_class' => 2,
             'againstoffer_class' => 13,
         ];
-        foreach (array_merge($defaults, $values) as $key => $value) {
-            $globals->set($key, $value);
-        }
+        $this->seedTestSettings(array_merge($defaults, $values), $globals);
         $this->app->instance(Globals::class, $globals);
     }
 

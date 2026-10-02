@@ -11,8 +11,9 @@ use App\Models\Message;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
 use App\Support\Bonus;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
@@ -31,7 +32,6 @@ final class OfferVoteService
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly OfferRepository $offerRepository,
         private readonly OfferVoteRepository $offerVoteRepository,
     ) {}
@@ -76,9 +76,9 @@ final class OfferVoteService
         }
         $yeah = (int) $offerVotes->yeah;
         $against = (int) $offerVotes->against;
-        $minoffervotes = (int) ($this->globals->get('minoffervotes') ?? 0);
-        $offeruptimeout = (int) ($this->globals->get('offeruptimeout_main') ?? 0);
-        $offervoteBonus = (float) ($this->globals->get('offervote_bonus') ?? 0);
+        $minoffervotes = SiteConfig::current()->main->minOfferVotes();
+        $offeruptimeout = SiteConfig::current()->main->offerUploadTimeout(0);
+        $offervoteBonus = SiteConfig::current()->bonus->offerVote();
         $finishtime = date('Y-m-d H:i:s');
         $url = Url::absolute($this->baseUrl())."/offers.php?id={$offerid}&off_details=1";
 
@@ -131,7 +131,7 @@ final class OfferVoteService
 
     private function baseUrl(): string
     {
-        return (string) $this->globals->get('BASEURL', '');
+        return SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
     }
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void

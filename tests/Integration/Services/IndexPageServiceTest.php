@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -44,6 +45,7 @@ use Tests\TestCase;
 final class IndexPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use SeedsLegacySettings;
 
     private IndexPageService $service;
 
@@ -74,7 +76,6 @@ final class IndexPageServiceTest extends TestCase
 
         $this->service = new IndexPageService(
             $this->currentUser,
-            $this->globals,
             $this->cache,
             $this->indexRepository,
         );
@@ -89,9 +90,7 @@ final class IndexPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $values */
     private function mockGlobals(array $values = []): void
     {
-        foreach ($values as $key => $value) {
-            $this->globals->set($key, $value);
-        }
+        $this->seedTestSettings($values, $this->globals);
     }
 
     /** @param  array<string, mixed>  $userData */
@@ -189,7 +188,6 @@ final class IndexPageServiceTest extends TestCase
     {
         $service = new IndexPageService(
             $this->currentUser,
-            $this->globals,
             $this->cache,
             $this->indexRepository,
         );

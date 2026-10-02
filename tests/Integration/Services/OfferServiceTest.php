@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -33,6 +34,7 @@ use Tests\TestCase;
 final class OfferServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use SeedsLegacySettings;
 
     private int $initialObLevel;
 
@@ -63,7 +65,7 @@ final class OfferServiceTest extends TestCase
             new OfferRepository,
             new OfferVoteRepository,
             new OfferCommentRepository,
-            new OfferModerationService($this->currentUser, $this->globals, new OfferRepository, new OfferVoteRepository),
+            new OfferModerationService($this->currentUser, new OfferRepository, new OfferVoteRepository),
         );
     }
 
@@ -125,7 +127,7 @@ final class OfferServiceTest extends TestCase
 
     private function mockGlobals(): void
     {
-        $this->globals->set('BASEURL', 'example.com');
+        $this->seedTestSettings(['BASEURL' => 'example.com'], $this->globals);
         $this->globals->set('lang_offers', []);
     }
 

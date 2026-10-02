@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -31,6 +32,7 @@ use Tests\TestCase;
 final class ForumComposeServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use SeedsLegacySettings;
 
     private int $initialObLevel;
 
@@ -59,7 +61,7 @@ final class ForumComposeServiceTest extends TestCase
         $this->initialObLevel = ob_get_level();
         app(Globals::class)->set('maxsubjectlength', 100);
         app(Globals::class)->set('lang_functions', self::LANG_FUNCTIONS);
-        app(Globals::class)->set('enableattach_attachment', 'yes');
+        $this->seedTestSettings(['enableattach_attachment' => 'yes']);
     }
 
     /**

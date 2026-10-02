@@ -25,7 +25,6 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -46,7 +45,6 @@ class TorrentUploadController extends Controller
         private SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
         private TagRepositoryInterface $tagRepository,
         private HitAndRunRepository $hitAndRunRepository,
-        private Globals $globals,
         private CurrentUser $currentUser,
     ) {}
 
@@ -187,7 +185,7 @@ class TorrentUploadController extends Controller
             'pageTitle' => __('legacy/upload.head_upload'),
             'cats' => Category::listByModeWithContext($browsecatmode),
             'trackerUrl' => Tracker::schemaAndHost((int) ($currentUser['tracker_url_id'] ?? 0), true),
-            'torrentDirWritable' => is_writable(Path::resolve((string) ($this->globals->get('torrent_dir') ?? ''), ROOT_PATH)),
+            'torrentDirWritable' => is_writable(Path::resolve(SiteConfig::current()->main->torrentDir(), ROOT_PATH)),
             'nameInputHtml' => SafeHtml::fromTrustedHtml($nameInputHtml),
             'priceLabel' => Locale::trans('label.torrent.price', [], null),
             'priceCellHtml' => SafeHtml::fromTrustedHtml($priceCellHtml),

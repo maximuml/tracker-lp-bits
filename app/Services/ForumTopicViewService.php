@@ -13,9 +13,9 @@ use App\Models\User;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Forum;
-use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
@@ -38,7 +38,6 @@ final class ForumTopicViewService
     public function __construct(
         private readonly ForumIndexService $index,
         private readonly ForumRepositoryInterface $forumRepository,
-        private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
@@ -270,7 +269,7 @@ final class ForumTopicViewService
             topicid: $topicid,
             forumid: $forumid,
             forumname: $forumname,
-            sitename: (string) $this->globals->get('SITENAME', ''),
+            sitename: SiteConfig::current()->basic->siteName(),
             subject: $subject,
             locked: $locked,
             sticky: $sticky,

@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -37,6 +38,7 @@ use Tests\TestCase;
 final class UsercpPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use SeedsLegacySettings;
 
     private UsercpPageService $service;
 
@@ -118,9 +120,7 @@ final class UsercpPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $values */
     private function mockGlobals(array $values = []): void
     {
-        foreach ($values as $key => $value) {
-            $this->globals->set($key, $value);
-        }
+        $this->seedTestSettings($values, $this->globals);
     }
 
     /** @param  array<string, mixed>  $overrides */

@@ -18,6 +18,7 @@ use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use App\Support\Http\SafeReturnUrl;
@@ -259,7 +260,7 @@ final class ForumService
         }
 
         if ($type === 'new') {
-            $starttopicBonus = (float) ($this->globals->get('starttopic_bonus') ?? 0);
+            $starttopicBonus = SiteConfig::current()->bonus->startTopic();
             if ($starttopicBonus > 0) {
                 Bonus::updatePoints('+', $starttopicBonus, $userid);
             }
@@ -271,7 +272,7 @@ final class ForumService
             $this->repository->incrementForumTopicCount($forumid);
             $this->repository->incrementForumPostCount($forumid);
         } else {
-            $makepostBonus = (float) ($this->globals->get('makepost_bonus') ?? 0);
+            $makepostBonus = SiteConfig::current()->bonus->makePost();
             if ($makepostBonus > 0) {
                 Bonus::updatePoints('+', $makepostBonus, $userid);
             }

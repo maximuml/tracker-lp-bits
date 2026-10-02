@@ -36,14 +36,12 @@ echo "=== Verify writable torrents volume ==="
 docker compose exec -T php sh -c 'echo test > /var/www/html/torrents/test_write && rm /var/www/html/torrents/test_write'
 echo "OK: torrents volume is writable"
 
-echo "=== Verify Vite assets and manifest exist ==="
-docker compose exec -T php sh -c 'test -f /var/www/html/public/build/manifest.json || test -f /var/www/html/public/build/.vite/manifest.json'
-echo "OK: Vite manifest exists in public/build"
-
-echo "=== Verify static files in public/build ==="
-# At least one CSS or JS asset should exist
-docker compose exec -T php sh -c 'ls /var/www/html/public/build/assets/ | head -1 | grep -q .'
-echo "OK: static assets exist in public/build/assets/"
+echo "=== Verify static assets exist in public ==="
+# There is no Node/Vite build step (removed in step 1.1): assets ship in the
+# repo, so verify the shipped CSS/JS trees are non-empty in the image.
+docker compose exec -T php sh -c 'ls /var/www/html/public/css/ | head -1 | grep -q .'
+docker compose exec -T php sh -c 'ls /var/www/html/public/js/ | head -1 | grep -q .'
+echo "OK: static assets exist in public/css/ and public/js/"
 
 echo "=== Verify public-data volume init ran ==="
 # assets-init must have completed before php/openresty mounted it.

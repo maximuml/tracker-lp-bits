@@ -415,6 +415,8 @@ final class SystemBulkControllerTest extends TestCase
     {
         Queue::fake();
         $user = $this->enableInviteSystem();
+        Settings::saveBatch('smtp', ['smtptype' => 'none']);
+        Settings::resetCache();
 
         $hash = str_repeat('b', 32);
         DB::table('invites')->insert([

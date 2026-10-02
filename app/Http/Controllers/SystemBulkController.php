@@ -19,7 +19,6 @@ use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Input;
 use App\Support\LegacyAuth;
 use App\Support\LegacyResponse;
@@ -49,19 +48,15 @@ class SystemBulkController extends LegacyController
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
         UserModerationRepositoryInterface $userModerationRepository,
         CurrentUser $currentUser,
-        Globals $globals,
         ?LegacyRedisCache $legacyRedisCache,
     ) {
         $this->userModerationRepository = $userModerationRepository;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
         $this->legacyRedisCache = $legacyRedisCache;
     }
 
@@ -206,7 +201,7 @@ class SystemBulkController extends LegacyController
             }
 
             $hashRecord = null;
-            $timeNow = (int) $this->globals->get('TIMENOW', time());
+            $timeNow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
             if ($hashPost === 'permanent') {
                 // Use CSPRNG for invite token generation (T-08)
                 // Legacy: md5(mt_rand(1, 10000).username.time.passhash) — not CSPRNG, leaked passhash
@@ -230,9 +225,9 @@ class SystemBulkController extends LegacyController
             $signupUrl = Url::schemeAndHost(Url::isSecure())."/signup.php?type=invite&invitenumber=$hash";
             $mailTwo = sprintf(__('legacy/takeinvite.mail_two'), $siteName, $siteName);
             $mailFour = sprintf(__('legacy/takeinvite.mail_four'), $siteName);
-            $reportMail = (string) $this->globals->get('REPORTMAIL', '');
+            $reportMail = SiteConfig::current()->main->reportEmail();
             $mailSix = sprintf(__('legacy/takeinvite.mail_six'), $reportMail, $siteName);
-            $inviteTimeout = (string) $this->globals->get('invite_timeout', '');
+            $inviteTimeout = (string) SiteConfig::current()->main->inviteTimeout();
 
             $message = __('legacy/takeinvite.mail_one').$curUser['username'].$mailTwo.PHP_EOL
                 .'<b><a href="javascript:void(null)" onclick="window.open('.$signupUrl.')">'.__('legacy/takeinvite.mail_here').'</a></b><br />'.PHP_EOL
@@ -244,7 +239,7 @@ class SystemBulkController extends LegacyController
             $sendResult = Mail::sentLegacy(
                 $email,
                 $siteName,
-                (string) $this->globals->get('SITEEMAIL', ''),
+                SiteConfig::current()->main->siteEmail(),
                 $title,
                 $message,
                 'invitesignup',

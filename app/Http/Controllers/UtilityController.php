@@ -18,10 +18,11 @@ use App\Support\Api;
 use App\Support\Attachment\AttachmentService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
+use App\Support\Input;
 use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
@@ -47,8 +48,6 @@ class UtilityController extends LegacyController
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     private ?LegacyRedisCache $legacyRedisCache;
 
     private LegacyHeaderBag $legacyHeaderBag;
@@ -58,7 +57,6 @@ class UtilityController extends LegacyController
         private readonly AjaxService $ajaxService,
         SearchPageRepository $searchPageRepository,
         CurrentUser $currentUser,
-        Globals $globals,
         ?LegacyRedisCache $legacyRedisCache,
         LegacyHeaderBag $legacyHeaderBag,
         private readonly SecureTokenService $secureTokenService,
@@ -67,7 +65,6 @@ class UtilityController extends LegacyController
         $this->usersearchPageService = $usersearchPageService;
         $this->searchPageRepository = $searchPageRepository;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
         $this->legacyRedisCache = $legacyRedisCache;
         $this->legacyHeaderBag = $legacyHeaderBag;
     }
@@ -235,7 +232,7 @@ class UtilityController extends LegacyController
             return response('No attachment found.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        $httpdirectory = (string) $this->globals->get('httpdirectory_attachment', '');
+        $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
         // savedirectory is resolved against ROOT_PATH on upload; resolve the
         // same way here — a bare relative path would resolve against the
         // php-fpm CWD (public/) and miss the real location.
@@ -470,12 +467,12 @@ class UtilityController extends LegacyController
 
     private function buildOpensearchXml(): string
     {
-        $siteName = (string) ($this->globals->get('SITENAME', '') ?? '');
-        $siteEmail = (string) ($this->globals->get('SITEEMAIL', '') ?? '');
-        $slogan = (string) ($this->globals->get('SLOGAN', '') ?? '');
-        $baseUrl = (string) ($this->globals->get('BASEURL', '') ?? '');
-        $dateFounded = (string) ($this->globals->get('datefounded', '') ?? '');
-        $projectName = (string) ($this->globals->get('PROJECTNAME', '') ?? '');
+        $siteName = SiteConfig::current()->basic->siteName();
+        $siteEmail = SiteConfig::current()->main->siteEmail();
+        $slogan = SiteConfig::current()->main->slogan();
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $dateFounded = SiteConfig::current()->tweak->dateFounded();
+        $projectName = PROJECTNAME;
 
         $url = Url::absolute($baseUrl);
         $year = substr($dateFounded, 0, 4);

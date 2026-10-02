@@ -9,8 +9,8 @@ use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -21,7 +21,6 @@ class IndexController extends Controller
     public function __construct(
         private readonly IndexPageService $indexPageService,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly IndexRepository $indexRepository,
         private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
@@ -37,7 +36,7 @@ class IndexController extends Controller
 
         $this->indexRepository->touchLastHome((int) $user['id']);
 
-        if ($request->isMethod('post') && $this->globals->get('showpolls_main', '') === 'yes') {
+        if ($request->isMethod('post') && SiteConfig::current()->main->showPolls()) {
             return $this->handlePollVote($request);
         }
 
@@ -86,7 +85,7 @@ class IndexController extends Controller
             $cache->delete_value('current_poll_result', true);
         }
 
-        $pollvoteBonus = (float) $this->globals->get('pollvote_bonus', 0);
+        $pollvoteBonus = SiteConfig::current()->bonus->pollVote();
         if ($pollvoteBonus > 0) {
             Bonus::updatePoints((string) '+', (float) $pollvoteBonus, $user['id']);
         }

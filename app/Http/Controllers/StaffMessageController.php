@@ -9,7 +9,6 @@ use App\Models\StaffMessage;
 use App\Models\User;
 use App\Support\Cache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\Input;
@@ -25,7 +24,6 @@ class StaffMessageController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {}
 
     public function staffmess(Request $request): View|RedirectResponse|Response
@@ -128,7 +126,7 @@ class StaffMessageController extends LegacyController
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
-        $timeNow = (int) $this->globals->get('TIMENOW', time());
+        $timeNow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
 
         if (UserDisplay::currentClass() < $moderatorClass) {
             $last = $curUser['last_staffmsg'] ?? null;

@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -40,6 +41,7 @@ use Tests\TestCase;
 final class ForumTopicViewServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use SeedsLegacySettings;
 
     private ForumTopicViewService $service;
 
@@ -59,7 +61,7 @@ final class ForumTopicViewServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         $this->initialObLevel = ob_get_level();
-        app(Globals::class)->set('SITENAME', 'TestSite');
+        $this->seedTestSettings(['SITENAME' => 'TestSite'], app(Globals::class));
         app(Globals::class)->set('CURLANGDIR', 'en');
         app(Globals::class)->set('lang_functions', [
             'text_prev' => 'Prev', 'text_next' => 'Next',
@@ -89,7 +91,6 @@ final class ForumTopicViewServiceTest extends TestCase
 
         $indexService = new ForumIndexService(
             $this->app->make(CurrentUser::class),
-            $this->app->make(Globals::class),
             $this->app->make(ForumRepository::class),
             new OverforumRepository,
             $this->app->make(LegacyRedisCache::class),
@@ -100,7 +101,6 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->service = new ForumTopicViewService(
             $indexService,
             $this->app->make(ForumRepository::class),
-            $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),
@@ -169,7 +169,6 @@ final class ForumTopicViewServiceTest extends TestCase
 
         $indexService = new ForumIndexService(
             $this->app->make(CurrentUser::class),
-            $this->app->make(Globals::class),
             $forumRepo,
             new OverforumRepository,
             $cacheInstance,
@@ -180,7 +179,6 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->service = new ForumTopicViewService(
             $indexService,
             $forumRepo,
-            $this->app->make(Globals::class),
             $cacheInstance,
             $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),

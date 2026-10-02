@@ -7,7 +7,7 @@ namespace Tests\Integration\Http\Controllers;
 use App\Http\Controllers\BitbucketUploadController;
 use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
-use App\Support\Globals;
+use App\Support\Settings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
@@ -58,7 +58,8 @@ final class BitbucketUploadControllerTest extends TestCase
         $user = User::factory()->create(['parked' => false]);
         $this->actingAs($user, 'nexus-web');
 
-        app(Globals::class)->set('enablebitbucket_main', 'yes');
+        Settings::saveBatch('main', ['enablebitbucket' => 'yes']);
+        Settings::resetCache();
 
         $controller = app(BitbucketUploadController::class);
         $request = Request::create('/bitbucket-upload', 'GET');
@@ -76,7 +77,8 @@ final class BitbucketUploadControllerTest extends TestCase
         $user = User::factory()->create(['parked' => false]);
         $this->actingAs($user, 'nexus-web');
 
-        app(Globals::class)->set('enablebitbucket_main', 'yes');
+        Settings::saveBatch('main', ['enablebitbucket' => 'yes']);
+        Settings::resetCache();
 
         $ok1 = UploadedFile::fake()->image('multi_a_'.uniqid().'.png', 100, 100);
         $ok2 = UploadedFile::fake()->image('multi_b_'.uniqid().'.jpg', 100, 100);

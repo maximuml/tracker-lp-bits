@@ -9,9 +9,9 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Repositories\LogRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -28,22 +28,19 @@ class LogController extends LegacyController
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     private ?LegacyRedisCache $legacyRedisCache;
 
-    public function __construct(LogRepository $logRepository, CurrentUser $currentUser, Globals $globals, ?LegacyRedisCache $legacyRedisCache)
+    public function __construct(LogRepository $logRepository, CurrentUser $currentUser, ?LegacyRedisCache $legacyRedisCache)
     {
         $this->logRepository = $logRepository;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
         $this->legacyRedisCache = $legacyRedisCache;
     }
 
     public function legacy(Request $request): View|RedirectResponse|Response
     {
         if (! Permission::can(PermissionEnum::LOG)) {
-            $logClass = (int) $this->globals->get('log_class', 0);
+            $logClass = (int) SiteConfig::current()->authority->permission('log', 0);
 
             return $this->legacyAbortResponse(
                 __('legacy/log.std_sorry'),

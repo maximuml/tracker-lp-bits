@@ -9,7 +9,6 @@ use App\Services\CleanupService;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Email;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Mail;
 use App\Support\UserDisplay;
@@ -22,7 +21,6 @@ class SystemMaintenanceController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly MysqlStatsRepository $mysqlStatsRepository,
     ) {}
 
@@ -72,9 +70,8 @@ class SystemMaintenanceController extends LegacyController
                 );
             }
 
-            $globals = $this->globals;
-            $siteName = (string) ($globals->get('SITENAME', '') ?? '');
-            $siteEmail = (string) ($globals->get('SITEEMAIL', '') ?? '');
+            $siteName = SiteConfig::current()->basic->siteName();
+            $siteEmail = SiteConfig::current()->main->siteEmail();
             $title = $siteName.(__('legacy/mailtest.text_smtp_testing_mail'));
             $body = (string) (__('legacy/mailtest.mail_test_mail_content'));
             $sendResult = Mail::queueLegacy($email, $siteName, $siteEmail, $title, $body, 'mailtest', false, false, '', 'UTF-8');

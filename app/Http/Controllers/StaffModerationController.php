@@ -17,7 +17,7 @@ use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Network;
@@ -38,7 +38,6 @@ class StaffModerationController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly ModtaskRepository $modtaskRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
     ) {}
@@ -47,7 +46,7 @@ class StaffModerationController extends LegacyController
     {
         $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
-        $baseUrl = (string) $this->globals->get('BASEURL', '');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
 
         if (! Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO, User::findOrFail($currentUserId))) {
             Log::writeWithContext(

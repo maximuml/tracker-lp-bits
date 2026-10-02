@@ -10,7 +10,6 @@ use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -22,7 +21,6 @@ use Illuminate\View\View;
 class AttendanceController extends LegacyController
 {
     public function __construct(
-        private readonly Globals $globals,
         private readonly CurrentUser $currentUser,
     ) {}
 
@@ -147,12 +145,12 @@ EOP;
      */
     private function bonusLines(): array
     {
-        $initial = (int) ($this->globals->get('attendance_initial_bonus') ?? 0);
-        $step = (int) ($this->globals->get('attendance_step_bonus') ?? 0);
-        $max = (int) ($this->globals->get('attendance_max_bonus') ?? 0);
-        $continuous = $this->globals->get('attendance_continuous_bonus');
+        $initial = (int) SiteConfig::current()->bonus->attendanceInitial(Attendance::INITIAL_BONUS);
+        $step = (int) SiteConfig::current()->bonus->attendanceStep(Attendance::STEP_BONUS);
+        $max = (int) SiteConfig::current()->bonus->attendanceMax(Attendance::MAX_BONUS);
+        $continuous = SiteConfig::current()->bonus->attendanceContinuous(Attendance::CONTINUOUS_BONUS);
         $continuousLines = [];
-        foreach (is_array($continuous) ? $continuous : [] as $day => $value) {
+        foreach ($continuous as $day => $value) {
             $continuousLines[] = sprintf((string) (__('legacy/attendance.continuous')), $day, $value);
         }
 

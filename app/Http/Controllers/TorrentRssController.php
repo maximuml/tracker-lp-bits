@@ -15,7 +15,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
+use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Permissions;
@@ -40,7 +40,6 @@ class TorrentRssController extends LegacyController
         TorrentRepositoryInterface $torrentRepository,
         TorrentDownloadRepositoryInterface $downloadRepository,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly LegacyRedisCache $legacyRedisCache,
     ) {
         $this->torrentRepository = $torrentRepository;
@@ -224,11 +223,11 @@ class TorrentRssController extends LegacyController
         }
 
         $torrentRep = $this->torrentRepository;
-        $baseUrl = Url::absolute((string) $this->globals->get('BASEURL', ''));
-        $siteName = (string) $this->globals->get('SITENAME', '');
+        $baseUrl = Url::absolute(SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'));
+        $siteName = SiteConfig::current()->basic->siteName();
         $slogan = SiteConfig::current()->main->slogan();
         $siteEmail = SiteConfig::current()->main->siteEmail();
-        $projectName = (string) $this->globals->get('PROJECTNAME', '');
+        $projectName = PROJECTNAME;
         $dateFounded = SiteConfig::current()->tweak->dateFounded();
         $year = substr($dateFounded, 0, 4);
         $yearFounded = $year !== '' ? $year : '2007';

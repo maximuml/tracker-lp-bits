@@ -135,6 +135,7 @@ final class SystemMaintenanceControllerTest extends TestCase
         /** @var User $user */
         $user = User::factory()->admin()->create();
         $this->actingAs($user);
+        app(CurrentUser::class)->set($user->toLegacyArray());
     }
 
     /**

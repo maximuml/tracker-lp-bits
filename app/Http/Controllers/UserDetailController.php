@@ -16,11 +16,11 @@ use App\Repositories\HitAndRunRepository;
 use App\Repositories\UserDetailRepository;
 use App\Support\AssetAppender;
 use App\Support\Bonus;
+use App\Support\Config\SiteConfig;
 use App\Support\Country;
 use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
@@ -45,20 +45,16 @@ class UserDetailController extends Controller
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     public function __construct(
         HitAndRunRepository $hitAndRunRepository,
         UserRepositoryInterface $userRepository,
         UserDetailRepository $userDetailRepository,
         CurrentUser $currentUser,
-        Globals $globals,
     ) {
         $this->hitAndRunRepository = $hitAndRunRepository;
         $this->userRepository = $userRepository;
         $this->userDetailRepository = $userDetailRepository;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
     }
 
     public function show(Request $request): View|RedirectResponse
@@ -149,7 +145,7 @@ class UserDetailController extends Controller
 
         $locationInfo = [null, null];
         $locationInfoHtml = '';
-        if ($this->globals->get('enablelocation_tweak', '') === 'yes') {
+        if (SiteConfig::current()->tweak->enableLocation()) {
             if (! empty($user['ip'])) {
                 $locationInfo = Network::ipLocationWithContext($user['ip']);
             }

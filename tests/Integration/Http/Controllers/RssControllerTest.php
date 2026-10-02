@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Globals;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -74,8 +75,9 @@ final class RssControllerTest extends TestCase
         $this->actingAs($user);
         $this->mockCurrentUserWithDefaults($user);
         app()->bind(LegacyRedisCache::class, fn () => null);
-        app(Globals::class)->set('BASEURL', 'http://localhost');
-        app(Globals::class)->set('browsecatmode', 1);
+        Settings::saveBatch('basic', ['BASEURL' => 'http://localhost']);
+        Settings::saveBatch('main', ['browsecat' => 1]);
+        Settings::resetCache();
 
         $controller = app(RssController::class);
         $request = Request::create('/getrss', 'POST', [

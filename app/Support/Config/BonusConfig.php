@@ -132,4 +132,109 @@ final class BonusConfig extends Config
     {
         return $this->int('uploadtorrent', $default);
     }
+
+    public function basicTax(float $default = 0.0): float
+    {
+        return $this->float('basictax', $default);
+    }
+
+    public function bonusGift(bool $default = true): bool
+    {
+        return $this->bool('bonusgift', $default);
+    }
+
+    public function bZero(float $default = 0.0): float
+    {
+        return $this->float('bzero', $default);
+    }
+
+    public function customTitle(float $default = 0.0): float
+    {
+        return $this->float('customtitle', $default);
+    }
+
+    public function dlAmountLimit(int $default = 0): int
+    {
+        return $this->int('dlamountlimit', $default);
+    }
+
+    public function fiveGbUpload(float $default = 0.0): float
+    {
+        return $this->float('fivegbupload', $default);
+    }
+
+    public function l(float $default = 0.0): float
+    {
+        return $this->float('l', $default);
+    }
+
+    public function makePost(float $default = 0.0): float
+    {
+        return $this->float('makepost', $default);
+    }
+
+    public function maxSeeding(int $default = 0): int
+    {
+        return $this->int('maxseeding', $default);
+    }
+
+    public function nZero(float $default = 0.0): float
+    {
+        return $this->float('nzero', $default);
+    }
+
+    public function offerVote(float $default = 0.0): float
+    {
+        return $this->float('offervote', $default);
+    }
+
+    public function oneGbUpload(float $default = 0.0): float
+    {
+        return $this->float('onegbupload', $default);
+    }
+
+    public function oneInvite(float $default = 0.0): float
+    {
+        return $this->float('oneinvite', $default);
+    }
+
+    public function perSeeding(float $default = 0.0): float
+    {
+        return $this->float('perseeding', $default);
+    }
+
+    public function pollVote(float $default = 0.0): float
+    {
+        return $this->float('pollvote', $default);
+    }
+
+    public function ratioLimit(float $default = 0.0): float
+    {
+        return $this->float('ratiolimit', $default);
+    }
+
+    public function startTopic(float $default = 0.0): float
+    {
+        return $this->float('starttopic', $default);
+    }
+
+    public function taxPercentage(float $default = 0.0): float
+    {
+        return $this->float('taxpercentage', $default);
+    }
+
+    public function tenGbUpload(float $default = 0.0): float
+    {
+        return $this->float('tengbupload', $default);
+    }
+
+    public function tZero(float $default = 0.0): float
+    {
+        return $this->float('tzero', $default);
+    }
+
+    public function vipStatus(float $default = 0.0): float
+    {
+        return $this->float('vipstatus', $default);
+    }
 }

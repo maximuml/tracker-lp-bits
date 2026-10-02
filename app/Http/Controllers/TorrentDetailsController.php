@@ -20,7 +20,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
@@ -47,8 +46,6 @@ class TorrentDetailsController extends Controller
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     private TorrentDetailsViewFactory $detailsViewFactory;
 
     private ?LegacyRedisCache $legacyRedisCache;
@@ -58,7 +55,6 @@ class TorrentDetailsController extends Controller
         TagRepositoryInterface $tagRepository,
         TorrentDetailRepository $torrentDetailRepository,
         CurrentUser $currentUser,
-        Globals $globals,
         TorrentDetailsViewFactory $detailsViewFactory,
         ?LegacyRedisCache $legacyRedisCache = null
     ) {
@@ -66,7 +62,6 @@ class TorrentDetailsController extends Controller
         $this->tagRepository = $tagRepository;
         $this->torrentDetailRepository = $torrentDetailRepository;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
         $this->detailsViewFactory = $detailsViewFactory;
         $this->legacyRedisCache = $legacyRedisCache;
     }
@@ -257,7 +252,7 @@ class TorrentDetailsController extends Controller
             'descr' => SafeHtml::fromTrustedHtml($descr),
             'screenshots' => $screenshots,
             'showDescription' => $showDescription,
-            'torrentNamePrefix' => $this->globals->get('torrentnameprefix') ?? '',
+            'torrentNamePrefix' => SiteConfig::current()->main->torrentNamePrefix(),
             'commentCount' => $commentCount,
             'commentPagerTop' => $commentPagerTop instanceof SafeHtml ? $commentPagerTop : SafeHtml::fromTrustedHtml($commentPagerTop),
             'commentPagerBottom' => $commentPagerBottom instanceof SafeHtml ? $commentPagerBottom : SafeHtml::fromTrustedHtml($commentPagerBottom),

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,7 @@ use Tests\TestCase;
 final class BonusPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use SeedsLegacySettings;
 
     private BonusPageService $service;
 
@@ -60,7 +62,7 @@ final class BonusPageServiceTest extends TestCase
         $this->globals = new Globals;
         $this->app->instance(Globals::class, $this->globals);
 
-        $this->service = new BonusPageService($this->currentUser, $this->globals, $rep);
+        $this->service = new BonusPageService($this->currentUser, $rep);
     }
 
     protected function tearDown(): void
@@ -75,9 +77,7 @@ final class BonusPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $values */
     private function mockGlobals(array $values = []): void
     {
-        foreach ($values as $key => $value) {
-            $this->globals->set($key, $value);
-        }
+        $this->seedTestSettings($values, $this->globals);
     }
 
     /** @param  array<string, mixed>  $userData */
@@ -100,7 +100,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new BonusPageService($this->currentUser, $this->globals, $this->bonusCalcRep);
+        $service = new BonusPageService($this->currentUser, $this->bonusCalcRep);
 
         $this->assertInstanceOf(BonusPageService::class, $service);
     }

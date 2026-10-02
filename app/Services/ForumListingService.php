@@ -8,9 +8,9 @@ use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\UserTimeType;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Forum;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
@@ -39,7 +39,6 @@ final class ForumListingService
 {
     public function __construct(
         private readonly ForumIndexService $index,
-        private readonly Globals $globals,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly TopicRepository $topicRepository,
         private readonly PostRepositoryInterface $postRepository,
@@ -84,7 +83,7 @@ final class ForumListingService
         $topicResult = $this->topicRepository->getTopicsByForum($forumid, $search, $sortColumn, $sortDirection, (int) $offset, (int) $perpage);
         $topicRows = $topicResult['rows'];
 
-        $enabletooltipTweak = (string) $this->globals->get('enabletooltip_tweak', '');
+        $enabletooltipTweak = SiteConfig::current()->tweak->enableTooltip() ? 'yes' : 'no';
         $tooltipsEnabled = $enabletooltipTweak === 'yes' && ! LegacyYesNo::isNo($curUser['showlastpost'] ?? null);
 
         $topics = [];
@@ -244,7 +243,7 @@ final class ForumListingService
         $maypost = UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && UserDisplay::currentClass() >= (int) ($row['minclasscreate'] ?? 0) && LegacyYesNo::isYes($curUser['forumpost'] ?? null);
 
         return new TopicListViewModel(
-            siteName: (string) $this->globals->get('SITENAME', ''),
+            siteName: SiteConfig::current()->basic->siteName(),
             forumId: $forumid,
             forumName: $forumname,
             mayPost: $maypost,
@@ -307,7 +306,7 @@ final class ForumListingService
         }
 
         return new UnreadTopicsViewModel(
-            siteName: (string) $this->globals->get('SITENAME', ''),
+            siteName: SiteConfig::current()->basic->siteName(),
             topics: $topics,
             moreBeforePostId: $n > $maxresults ? $topiclastpost : null,
         );

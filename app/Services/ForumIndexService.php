@@ -12,9 +12,9 @@ use App\Repositories\OverforumRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Forum;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\UserDisplay;
 use App\ViewModels\Forum\ForumIndexViewModel;
@@ -34,7 +34,6 @@ final class ForumIndexService
 
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly OverforumRepository $overforumRepository,
         private readonly LegacyRedisCache $cache,
@@ -57,8 +56,8 @@ final class ForumIndexService
             $this->forumRepository->updateUserForumAccess((int) ($curUser['id'] ?? 0), date('Y-m-d H:i:s'));
         }
 
-        $SITENAME = (string) $this->globals->get('SITENAME', '');
-        $showforumstatsMain = (string) $this->globals->get('showforumstats_main', '');
+        $SITENAME = SiteConfig::current()->basic->siteName();
+        $showforumstatsMain = SiteConfig::current()->main->showForumStats();
 
         if (! $overforums = $Cache->get_value('overforums_list')) {
             $overforums = $this->overforumRepository->getOverforumsList();
@@ -129,7 +128,7 @@ final class ForumIndexService
             siteName: $SITENAME,
             canManageForums: Permission::can(PermissionEnum::FORUM_MANAGE),
             sections: $sections,
-            stats: $showforumstatsMain === 'yes' ? $this->loadStats($todayDate) : null,
+            stats: $showforumstatsMain ? $this->loadStats($todayDate) : null,
         );
     }
 

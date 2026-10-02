@@ -14,7 +14,6 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\RequestContext;
@@ -27,7 +26,6 @@ class TorrentSearchRepository
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly TagRepository $tagRepository,
         private readonly QueryBuilder $queryBuilder,
         private readonly SortingBuilder $sortingBuilder,
@@ -46,8 +44,8 @@ class TorrentSearchRepository
     public function getListingData(array $query = []): array
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $browsecatmode = (int) $this->globals->get('browsecatmode', 1);
-        $torrentsperpage_main = (int) $this->globals->get('torrentsperpage_main', 0);
+        $browsecatmode = SiteConfig::current()->main->browseCat(1);
+        $torrentsperpage_main = SiteConfig::current()->main->torrentsPerPage();
         $catimgurl = '';
         $catpadding = 0;
         $catsperrow = 0;

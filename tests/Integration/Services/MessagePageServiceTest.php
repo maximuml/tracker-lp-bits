@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
 /**
@@ -30,6 +31,7 @@ use Tests\TestCase;
 final class MessagePageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use SeedsLegacySettings;
 
     private int $initialObLevel;
 
@@ -138,7 +140,7 @@ final class MessagePageServiceTest extends TestCase
     private function mockGlobals(): void
     {
         $globals = $this->app->make(Globals::class);
-        $globals->set('BASEURL', 'example.com');
+        $this->seedTestSettings(['BASEURL' => 'example.com'], $globals);
         $globals->set('CONTENT_WIDTH', '737');
         $globals->set('lang_messages', [
             'text_inbox' => 'Inbox',

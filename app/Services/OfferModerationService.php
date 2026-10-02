@@ -9,8 +9,9 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
@@ -29,7 +30,6 @@ final class OfferModerationService
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly OfferRepository $offerRepository,
         private readonly OfferVoteRepository $offerVoteRepository,
     ) {}
@@ -44,7 +44,7 @@ final class OfferModerationService
 
     private function baseUrl(): string
     {
-        return (string) $this->globals->get('BASEURL', '');
+        return SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
     }
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void
@@ -78,7 +78,7 @@ final class OfferModerationService
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
         $locale = Locale::userLocale((int) ($arr['userid'] ?? 0));
-        $offeruptimeout = (int) ($this->globals->get('offeruptimeout_main') ?? 0);
+        $offeruptimeout = SiteConfig::current()->main->offerUploadTimeout(0);
 
         if ($offeruptimeout) {
             $timeouthour = (int) floor($offeruptimeout / 3600);
@@ -133,8 +133,8 @@ final class OfferModerationService
         $arr = $offer->toArray();
         $arr['username'] = $offer->user->username ?? '';
         $locale = Locale::userLocale((int) ($arr['userid'] ?? 0));
-        $offeruptimeout = (int) ($this->globals->get('offeruptimeout_main') ?? 0);
-        $minoffervotes = (int) ($this->globals->get('minoffervotes') ?? 0);
+        $offeruptimeout = SiteConfig::current()->main->offerUploadTimeout(0);
+        $minoffervotes = SiteConfig::current()->main->minOfferVotes();
         $curuser = $this->curUser();
 
         $voteCounts = $this->offerVoteRepository->getVoteCounts($offid);

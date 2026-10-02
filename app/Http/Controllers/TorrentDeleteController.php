@@ -9,8 +9,8 @@ use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Bonus;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Log;
@@ -25,7 +25,6 @@ class TorrentDeleteController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {}
 
     public function fastDelete(Request $request): Response|RedirectResponse
@@ -69,7 +68,7 @@ class TorrentDeleteController extends LegacyController
 
         TorrentOps::deleteTorrents($id, false);
 
-        $uploadtorrentBonus = (float) $this->globals->get('uploadtorrent_bonus', 0);
+        $uploadtorrentBonus = (float) SiteConfig::current()->bonus->uploadTorrent();
         Bonus::updatePoints('-', $uploadtorrentBonus, $ownerId);
 
         if ($anonymous == 1 && $currentUserId == $ownerId) {
@@ -155,7 +154,7 @@ class TorrentDeleteController extends LegacyController
             if (empty($reason[2])) {
                 return $this->legacyAbortResponse(__('legacy/delete.std_delete_failed'), __('legacy/delete.std_describe_violated_rule'));
             }
-            $siteName = (string) $this->globals->get('SITENAME', '');
+            $siteName = SiteConfig::current()->basic->siteName();
             $reasonstr = $siteName.' rules broken: '.trim($reason[2]);
         } else {
             if (empty($reason[3])) {
@@ -172,7 +171,7 @@ class TorrentDeleteController extends LegacyController
             Log::writeWithContext("Torrent $id ({$name}) was deleted by {$curUser['username']} ($reasonstr)", 'normal');
         }
 
-        $uploadtorrentBonus = (float) $this->globals->get('uploadtorrent_bonus', 0);
+        $uploadtorrentBonus = (float) SiteConfig::current()->bonus->uploadTorrent();
         Bonus::updatePoints('-', $uploadtorrentBonus, $ownerId);
 
         if ($currentUserId != $ownerId && User::query()->where('id', $ownerId)->exists()) {

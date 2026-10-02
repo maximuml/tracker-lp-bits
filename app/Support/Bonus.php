@@ -339,7 +339,7 @@ class Bonus
     public static function updatePoints(string $type, float $point, int|string $id, ?string $bonusTweak = null): void
     {
         if ($bonusTweak === null) {
-            $bonusTweak = (string) app(Globals::class)->get('bonus_tweak', '');
+            $bonusTweak = SiteConfig::current()->tweak->bonus();
         }
 
         if ($point == 0) {

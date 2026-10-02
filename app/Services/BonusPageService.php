@@ -14,7 +14,6 @@ use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -40,7 +39,6 @@ final class BonusPageService
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly BonusCalculationRepository $bonusCalculationRepository,
     ) {}
 
@@ -52,7 +50,7 @@ final class BonusPageService
         $curUser = (array) ($this->currentUser->get() ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
-        $bonusTweak = (string) $this->globals->get('bonus_tweak', '');
+        $bonusTweak = SiteConfig::current()->tweak->bonus();
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
             LegacyResponse::abort(
                 (string) (__('legacy/mybonus.std_sorry')),
@@ -94,7 +92,7 @@ final class BonusPageService
             allBonus: $allBonus,
             shop: $shop,
             info: $info,
-            sitename: (string) $this->globals->get('SITENAME', ''),
+            sitename: SiteConfig::current()->basic->siteName(),
         );
     }
 
@@ -103,14 +101,14 @@ final class BonusPageService
      */
     public function buildBonusArray(): array
     {
-        $onegbuploadBonus = (float) $this->globals->get('onegbupload_bonus', 0);
-        $fivegbuploadBonus = (float) $this->globals->get('fivegbupload_bonus', 0);
-        $tengbuploadBonus = (float) $this->globals->get('tengbupload_bonus', 0);
-        $oneinviteBonus = (float) $this->globals->get('oneinvite_bonus', 0);
-        $customtitleBonus = (float) $this->globals->get('customtitle_bonus', 0);
-        $vipstatusBonus = (float) $this->globals->get('vipstatus_bonus', 0);
-        $basictaxBonus = (float) $this->globals->get('basictax_bonus', 0);
-        $taxpercentageBonus = (float) $this->globals->get('taxpercentage_bonus', 0);
+        $onegbuploadBonus = SiteConfig::current()->bonus->oneGbUpload();
+        $fivegbuploadBonus = SiteConfig::current()->bonus->fiveGbUpload();
+        $tengbuploadBonus = SiteConfig::current()->bonus->tenGbUpload();
+        $oneinviteBonus = SiteConfig::current()->bonus->oneInvite();
+        $customtitleBonus = SiteConfig::current()->bonus->customTitle();
+        $vipstatusBonus = SiteConfig::current()->bonus->vipStatus();
+        $basictaxBonus = SiteConfig::current()->bonus->basicTax();
+        $taxpercentageBonus = SiteConfig::current()->bonus->taxPercentage();
 
         $results = [];
 
@@ -224,9 +222,9 @@ final class BonusPageService
      */
     private function buildShop(array $allBonus, array $curUser, string $bonus, string $msg, string $lockText): BonusShopViewModel
     {
-        $bonusgiftBonus = (string) $this->globals->get('bonusgift_bonus', 'yes');
-        $ratiolimitBonus = (float) $this->globals->get('ratiolimit_bonus', 0);
-        $dlamountlimitBonus = (int) $this->globals->get('dlamountlimit_bonus', 0);
+        $bonusgiftBonus = SiteConfig::current()->bonus->bonusGift() ? 'yes' : 'no';
+        $ratiolimitBonus = SiteConfig::current()->bonus->ratioLimit();
+        $dlamountlimitBonus = SiteConfig::current()->bonus->dlAmountLimit();
 
         $items = [];
         for ($i = 0; $i < count($allBonus); $i++) {
@@ -264,7 +262,7 @@ final class BonusPageService
         }
 
         return new BonusShopViewModel(
-            sitename: (string) $this->globals->get('SITENAME', ''),
+            sitename: SiteConfig::current()->basic->siteName(),
             msg: SafeHtml::fromUntrustedHtml($msg),
             bonus: $bonus,
             lockText: $lockText,
@@ -356,9 +354,9 @@ final class BonusPageService
      */
     private function buildInfo(array $curUser): BonusInfoViewModel
     {
-        $perseedingBonus = (float) $this->globals->get('perseeding_bonus', 0);
-        $maxseedingBonus = (int) $this->globals->get('maxseeding_bonus', 0);
-        $bzeroBonus = (float) $this->globals->get('bzero_bonus', 0);
+        $perseedingBonus = SiteConfig::current()->bonus->perSeeding();
+        $maxseedingBonus = SiteConfig::current()->bonus->maxSeeding();
+        $bzeroBonus = SiteConfig::current()->bonus->bZero();
 
         $seedBonusResult = Bonus::calculateForUser((int) ($curUser['id'] ?? 0), null);
         $bonusTableResult = Bonus::buildBonusTableForUser($curUser, $seedBonusResult, ['table_style' => 'width: 50%']);
@@ -371,13 +369,13 @@ final class BonusPageService
         return new BonusInfoViewModel(
             perseedingBonus: $perseedingBonus,
             maxseedingBonus: $maxseedingBonus,
-            tzeroBonus: (float) $this->globals->get('tzero_bonus', 0),
-            nzeroBonus: (float) $this->globals->get('nzero_bonus', 0),
+            tzeroBonus: SiteConfig::current()->bonus->tZero(),
+            nzeroBonus: SiteConfig::current()->bonus->nZero(),
             zeroBonusFactor: (float) SiteConfig::current()->bonus->zeroBonusFactor(),
             bzeroBonus: $bzeroBonus,
-            lBonus: (float) $this->globals->get('l_bonus', 0),
+            lBonus: SiteConfig::current()->bonus->l(),
             minSizeLine: $minSize > 0 ? sprintf((string) (__('legacy/mybonus.text_bonus_mini_size')), Format::size($minSize)) : null,
-            donortimesBonus: (float) $this->globals->get('donortimes_bonus', 0),
+            donortimesBonus: SiteConfig::current()->bonus->donorTimes(),
             currentSeedBonus: (string) round((float) $seedBonusResult['seed_bonus'], 3),
             aFactor: (string) round((float) $seedBonusResult['A'], 1),
             percentLabel: (string) $percent,
@@ -386,16 +384,16 @@ final class BonusPageService
             officialAdditionFactor: $bonusTableResult['has_official_addition'] ? (string) $bonusTableResult['official_addition_factor'] : null,
             haremAdditionFactor: $bonusTableResult['has_harem_addition'] ? (string) $bonusTableResult['harem_addition_factor'] : null,
             summaryTable: SafeHtml::fromTrustedHtml((string) $bonusTableResult['table']),
-            uploadtorrentBonus: (float) $this->globals->get('uploadtorrent_bonus', 0),
-            starttopicBonus: (float) $this->globals->get('starttopic_bonus', 0),
-            makepostBonus: (float) $this->globals->get('makepost_bonus', 0),
-            addcommentBonus: (float) $this->globals->get('addcomment_bonus', 0),
-            pollvoteBonus: (float) $this->globals->get('pollvote_bonus', 0),
-            offervoteBonus: (float) $this->globals->get('offervote_bonus', 0),
-            saythanksBonus: (float) $this->globals->get('saythanks_bonus', 0),
-            receivethanksBonus: (float) $this->globals->get('receivethanks_bonus', 0),
-            ratiolimitBonus: (float) $this->globals->get('ratiolimit_bonus', 0),
-            dlamountlimitBonus: (int) $this->globals->get('dlamountlimit_bonus', 0),
+            uploadtorrentBonus: (float) SiteConfig::current()->bonus->uploadTorrent(),
+            starttopicBonus: SiteConfig::current()->bonus->startTopic(),
+            makepostBonus: SiteConfig::current()->bonus->makePost(),
+            addcommentBonus: SiteConfig::current()->bonus->addComment(),
+            pollvoteBonus: SiteConfig::current()->bonus->pollVote(),
+            offervoteBonus: SiteConfig::current()->bonus->offerVote(),
+            saythanksBonus: SiteConfig::current()->bonus->sayThanks(),
+            receivethanksBonus: SiteConfig::current()->bonus->receiveThanks(),
+            ratiolimitBonus: SiteConfig::current()->bonus->ratioLimit(),
+            dlamountlimitBonus: SiteConfig::current()->bonus->dlAmountLimit(),
         );
     }
 }

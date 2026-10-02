@@ -16,7 +16,7 @@ use App\Repositories\TopicModerationRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
-use App\Support\Globals;
+use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyResponse;
 use App\Support\Palette;
@@ -34,7 +34,6 @@ final class ForumModerationService
 {
     public function __construct(
         private readonly ForumRepositoryInterface $repository,
-        private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
@@ -140,7 +139,7 @@ final class ForumModerationService
             $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
         }
 
-        $starttopicBonus = (float) ($this->globals->get('starttopic_bonus') ?? 0);
+        $starttopicBonus = SiteConfig::current()->bonus->startTopic();
         if ($starttopicBonus > 0) {
             Bonus::updatePoints('-', $starttopicBonus, $targetUserid);
         }
@@ -191,7 +190,7 @@ final class ForumModerationService
         }
         $this->topicRepository->updateTopicLastPost($topicid);
 
-        $makepostBonus = (float) ($this->globals->get('makepost_bonus') ?? 0);
+        $makepostBonus = SiteConfig::current()->bonus->makePost();
         if ($makepostBonus > 0) {
             Bonus::updatePoints('-', $makepostBonus, $targetUserid);
         }

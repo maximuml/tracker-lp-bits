@@ -53,10 +53,9 @@ final class ForumPageServiceTest extends TestCase
         Redis::connection()->flushdb();
         $this->initialObLevel = ob_get_level();
         Settings::saveBatch('basic', ['SITENAME' => 'TestSite']);
-        Settings::saveBatch('main', ['postsperpage' => 10, 'topicsperpage' => 20]);
+        Settings::saveBatch('main', ['postsperpage' => 10, 'topicsperpage' => 20, 'showforumstats' => 'no']);
         Settings::resetCache();
         app(Globals::class)->set('CURLANGDIR', 'en');
-        app(Globals::class)->set('showforumstats_main', 'no');
         app(Globals::class)->set('lang_forums', [
             'text_forums' => 'Forums', 'text_search' => 'Search',
             'text_view_unread' => 'Unread', 'text_catch_up' => 'Catch Up',
@@ -299,9 +298,6 @@ final class ForumPageServiceTest extends TestCase
         $this->mockCache();
         $this->setUser();
         $this->setRequest();
-
-        app(Globals::class)->set('forumpostsperpage', null);
-        app(Globals::class)->set('forumtopicsperpage_main', null);
 
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
 

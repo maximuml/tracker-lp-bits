@@ -49,7 +49,7 @@
     <x-forum.pager :page="$list->page" :pages="$list->pages" :href="$list->pagerHref()" :items="$list->pagerItems()" />
     @foreach ($list->tooltips as $tip)
         @if ($loop->first)<div class="nx-hidden">@endif
-        <div id="{{ $tip['id'] }}">{{ $tip['content'] }}</div>
+        <div id="{{ $tip['id'] }}">{{ $tip['content'] }}@if($tip['contentTail'] ?? '')<br />{{ $tip['contentTail'] }}@endif</div>
         @if ($loop->last)</div>@endif
     @endforeach
 @else

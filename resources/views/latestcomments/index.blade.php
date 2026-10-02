@@ -16,7 +16,7 @@
                         {{ $row['usernameHtml'] ?? '' }}
                         &nbsp;&nbsp;<span class="nx-color-gray">{{ __('legacy/functions.text_at')}}</span>
                         {{ $row['timeHtml'] ?? '' }}
-                        {{ $row['parentLinkHtml'] ?? '' }}
+                        @if(($row['parentUrl'] ?? '') !== '') <span class="nx-color-gray">on</span> <a href="{{ $row['parentUrl'] }}">{{ $row['parent_name'] ?? '' }}</a>@endif
             </div>
             <div class="nx-main nx-row">
                 <div class="nx-w-150">

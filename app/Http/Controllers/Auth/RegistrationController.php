@@ -88,14 +88,8 @@ class RegistrationController extends Controller
         // sizing comes from the nx-field__input class in modern.css.
         $oldUsername = old('wantusername');
         $oldEmail = old('email');
-        $usernameInput = '<input type="text" class="nx-field__input" id="wantusername" name="wantusername" aria-label="'
-            .e(__('legacy/signup.row_desired_username')).'" value="'
-            .e($preUsername !== '' ? $preUsername : (is_string($oldUsername) ? $oldUsername : '')).'"'
-            .($preUsername !== '' ? ' readonly' : '').' autocomplete="username" />';
-        $emailInput = '<input type="email" class="nx-field__input" id="email" name="email" aria-label="'
-            .e(__('legacy/signup.row_email_address')).'" value="'
-            .e($preEmail !== '' ? $preEmail : (is_string($oldEmail) ? $oldEmail : '')).'"'
-            .($preEmail !== '' ? ' readonly' : '').' autocomplete="email" />';
+        $usernameValue = $preUsername !== '' ? $preUsername : (is_string($oldUsername) ? $oldUsername : '');
+        $emailValue = $preEmail !== '' ? $preEmail : (is_string($oldEmail) ? $oldEmail : '');
 
         AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
 
@@ -117,8 +111,10 @@ class RegistrationController extends Controller
             'headTitle' => $isInvite
                 ? (__('legacy/signup.head_invite_signup'))
                 : (__('legacy/signup.head_signup')),
-            'usernameInput' => SafeHtml::fromTrustedHtml($usernameInput),
-            'emailInput' => SafeHtml::fromTrustedHtml($emailInput),
+            'usernameValue' => $usernameValue,
+            'usernameReadonly' => $preUsername !== '',
+            'emailValue' => $emailValue,
+            'emailReadonly' => $preEmail !== '',
         ]);
     }
 

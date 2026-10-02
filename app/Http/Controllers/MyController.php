@@ -13,7 +13,6 @@ use App\Services\BonusService;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -120,7 +119,7 @@ class MyController extends Controller
         $headerFilters = [];
         foreach ($allStatus as $key => $value) {
             $filterParams['status'] = $key;
-            $headerFilters[] = sprintf('<a href="?%s" class="%s"><b>%s</b></a>', http_build_query($filterParams), $key == $status ? 'faqlink' : '', $value['text']);
+            $headerFilters[] = ['query' => http_build_query($filterParams), 'active' => $key == $status, 'text' => $value['text']];
         }
 
         $q = htmlspecialchars((string) (request()->query('q') ?? ''));
@@ -184,7 +183,7 @@ JS;
             'userid' => $userid,
             'status' => $status,
             'allStatus' => $allStatus,
-            'headerFilters' => SafeHtml::fromTrustedHtml(implode(' | ', $headerFilters)),
+            'headerFilters' => $headerFilters,
             'queryString' => $queryString,
             'q' => $q,
             'requestUri' => Input::serverValue('REQUEST_URI'),

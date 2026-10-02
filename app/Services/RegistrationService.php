@@ -71,7 +71,7 @@ class RegistrationService
         if ($maxIp > 0 && User::query()->where('ip', $ip)->count() > $maxIp) {
             throw new AuthenticationException(
                 __('legacy/functions.std_the_ip')
-                .'<b>'.htmlspecialchars($ip).'</b>'
+                .htmlspecialchars($ip)
                 .sprintf(__('legacy/functions.std_used_many_times'), SiteConfig::current()->basic->siteName())
             );
         }

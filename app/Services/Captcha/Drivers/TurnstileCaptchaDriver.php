@@ -6,7 +6,6 @@ namespace App\Services\Captcha\Drivers;
 
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
-use App\Support\Captcha;
 
 class TurnstileCaptchaDriver implements CaptchaDriverInterface
 {
@@ -49,18 +48,14 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
             $size = 'auto';
         }
 
-        $attributes = sprintf(
-            'class="cf-turnstile" data-sitekey="%s" data-theme="%s"%s',
-            htmlspecialchars((string) $this->config['site_key'], ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars((string) $theme, ENT_QUOTES, 'UTF-8'),
-            $size === 'auto' ? '' : sprintf(' data-size="%s"', htmlspecialchars($size, ENT_QUOTES, 'UTF-8'))
-        );
-
-        $markup = sprintf(
-            Captcha::rowTemplate((string) ($context['layout'] ?? '')),
-            htmlspecialchars($label, ENT_QUOTES, 'UTF-8'),
-            sprintf('<div %s></div>%s', $attributes, self::$scriptInjected ? '' : '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>')
-        );
+        $markup = view('components.captcha.turnstile', [
+            'grid' => ($context['layout'] ?? '') === 'grid',
+            'label' => $label,
+            'siteKey' => (string) $this->config['site_key'],
+            'theme' => (string) $theme,
+            'size' => $size === 'auto' ? null : $size,
+            'injectScript' => ! self::$scriptInjected,
+        ])->render();
 
         self::$scriptInjected = true;
 

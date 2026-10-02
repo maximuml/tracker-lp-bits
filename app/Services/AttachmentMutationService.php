@@ -339,14 +339,16 @@ class AttachmentMutationService
                     'driver' => $storageDriver,
                 ]);
                 $count_left--;
-                $nonceAttr = ($cspNonce = (string) request()->attributes->get('csp_nonce', '')) !== ''
-                    ? ' nonce="'.htmlspecialchars($cspNonce, ENT_QUOTES).'"'
+                $nonce = (string) request()->attributes->get('csp_nonce', '');
+                $callback = ! empty($callbackFunc) && preg_match('/^preview_custom_field_image_\d+$/', $callbackFunc)
+                    ? (string) $callbackFunc
                     : '';
-                if (! empty($callbackFunc) && preg_match('/^preview_custom_field_image_\d+$/', $callbackFunc)) {
-                    $script = sprintf('<script type="text/javascript"%s>parent.%s("%s", "%s")</script>', $nonceAttr, $callbackFunc, $dlkey, addslashes($url));
-                } else {
-                    $script = '<script type="text/javascript"'.$nonceAttr.">parent.tag_extimage('[attach]".$dlkey."[/attach]');</script>";
-                }
+                $script = view('attachments.callback-script', [
+                    'nonce' => $nonce,
+                    'callback' => $callback,
+                    'dlkey' => $dlkey,
+                    'url' => SafeHtml::fromTrustedHtml('"'.addslashes($url).'"'),
+                ])->render();
             }
         }
 

@@ -119,9 +119,7 @@ class ForumController extends LegacyController
             } elseif ($parentType === 'offer' && $parentId > 0) {
                 $parentUrl = "offers.php?id={$parentId}&off_details=1#cid{$commentId}";
             }
-            $row['parentLinkHtml'] = SafeHtml::fromTrustedHtml($parentUrl !== ''
-                ? ' <span class="nx-color-gray">on</span> <a href="'.$parentUrl.'">'.htmlspecialchars((string) ($row['parent_name'] ?? '')).'</a>'
-                : '');
+            $row['parentUrl'] = $parentUrl;
             $avatar = $showAvatars ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';
             $row['avatarHtml'] = SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext(Avatar::forUser((int) ($row['user'] ?? 0), $avatar)));
             $row['usernameHtml'] = SafeHtml::fromTrustedHtml($userDisplayMap[(int) ($row['user'] ?? 0)]

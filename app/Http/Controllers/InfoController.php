@@ -111,12 +111,10 @@ class InfoController extends LegacyController
             $body = Format::formatComment((string) ($arr['body'] ?? ''));
             $editedBy = $arr['editedby'] ?? 0;
             if (Validators::isId($editedBy) && ! empty($editorNames[(int) $editedBy])) {
-                $body .= '<p><span class="small nx-size-1">'
-                    .(string) (__('legacy/userhistory.text_last_edited'))
-                    .UserDisplay::username((int) $editedBy)
-                    .(string) (__('legacy/userhistory.text_at'))
-                    .(string) ($arr['editdate'] ?? '')
-                    .'</span></p>\n';
+                $body .= view('userhistory.edited-note', [
+                    'editedByHtml' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $editedBy)),
+                    'editdate' => (string) ($arr['editdate'] ?? ''),
+                ])->render();
             }
             $items[] = [
                 'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? ''), true, false, false)),
@@ -221,7 +219,7 @@ class InfoController extends LegacyController
             $name = $this->bitbucketService->getBitbucketName($delete);
             $ok = $this->bitbucketService->deleteBitbucket($delete, $bucketPath);
             if (! $ok && $name !== null) {
-                return $this->legacyAbortResponse('Warning', 'Unable to unlink file: <b>'.htmlspecialchars($name).'</b>. You should contact an administrator about this error.', false);
+                return $this->legacyAbortResponse('Warning', 'Unable to unlink file: '.htmlspecialchars($name).'. You should contact an administrator about this error.', false);
             }
 
             return redirect($request->url());

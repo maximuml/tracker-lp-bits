@@ -75,13 +75,8 @@ class BonusShopController extends LegacyController
                 'deductFormatted' => number_format((float) $row->fail_deduct_bonus),
                 'claimedCount' => ($row->on_going_users_count ?? 0).'/'.($row->max_user_count ?: $infiniteText),
                 'description' => SafeHtml::fromUntrustedHtml((string) ($row->description ?? '')),
-                'claimActionHtml' => SafeHtml::fromTrustedHtml(sprintf(
-                    '<input type="button" class="%s" data-id="%s" value="%s"%s>',
-                    $isClaimed ? '' : 'claim',
-                    (int) $row->id,
-                    e($btnText),
-                    $isClaimed ? ' disabled' : ''
-                )),
+                'claimable' => ! $isClaimed,
+                'claimText' => $btnText,
             ];
         }
 

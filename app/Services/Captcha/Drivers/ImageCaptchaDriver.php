@@ -7,7 +7,6 @@ namespace App\Services\Captcha\Drivers;
 use App\Models\RegImage;
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
-use App\Support\Captcha;
 use App\Support\LegacyHeaderBag;
 use App\Support\Strings;
 
@@ -40,14 +39,14 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         $secret = $context['secret'] ?? '';
 
         $imagehash = $this->issue();
-        $imageUrl = htmlspecialchars(sprintf('image.php?action=regimage&imagehash=%s&secret=%s', $imagehash, $secret), ENT_QUOTES, 'UTF-8');
 
-        $tpl = Captcha::rowTemplate((string) ($context['layout'] ?? ''));
-
-        return implode("\n", [
-            sprintf($tpl, htmlspecialchars($imageLabel, ENT_QUOTES, 'UTF-8'), sprintf('<img src="%s" alt="CAPTCHA" />', $imageUrl)),
-            sprintf($tpl, htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), sprintf('<input type="text" autocomplete="off" aria-label="%s" class="nx-field__input" name="imagestring" value="" /><input type="hidden" name="imagehash" value="%s" />', htmlspecialchars($codeLabel, ENT_QUOTES, 'UTF-8'), htmlspecialchars($imagehash, ENT_QUOTES, 'UTF-8'))),
-        ]);
+        return view('components.captcha.image', [
+            'grid' => ($context['layout'] ?? '') === 'grid',
+            'imageLabel' => $imageLabel,
+            'imageUrl' => sprintf('image.php?action=regimage&imagehash=%s&secret=%s', $imagehash, $secret),
+            'codeLabel' => $codeLabel,
+            'imagehash' => $imagehash,
+        ])->render();
     }
 
     /**

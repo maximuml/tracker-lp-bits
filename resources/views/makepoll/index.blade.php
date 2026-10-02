@@ -6,8 +6,8 @@
 @if (($pollid ?? 0) > 0)
     <h1>{{ __('legacy/makepoll.text_edit_poll')}}</h1>
 @else
-    @if (($ageWarning ?? '') !== '')
-        <p><span class="striking"><b>{{ $ageWarning }}</b></span></p>
+    @if (($pollAge['question'] ?? '') !== '')
+        <p><span class="striking"><b>{{ __('legacy/makepoll.text_current_poll') }}(<i>{{ $pollAge['question'] }}</i>){{ __('legacy/makepoll.text_is_only') }}{{ $pollAge['age'] }}{{ __('legacy/makepoll.text_old') }}</b></span></p>
     @endif
     <h1>{{ __('legacy/makepoll.text_make_poll')}}</h1>
 @endif

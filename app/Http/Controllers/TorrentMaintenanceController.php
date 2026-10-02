@@ -77,21 +77,31 @@ class TorrentMaintenanceController extends LegacyController
      */
     private function torrentStructureBuilder(array $array, string $parent = ''): string
     {
-        $ret = '';
+        return view('components.torrent-structure', ['items' => $this->torrentStructureNodes($array, $parent)])->render();
+    }
+
+    /**
+     * @param  array<string|int, mixed>  $array
+     * @return list<array{item: string|int, type: string, length: int, value: mixed, children: list<array{item: string|int, type: string, length: int, value: mixed, children: mixed}>|null}>
+     */
+    private function torrentStructureNodes(array $array, string $parent = ''): array
+    {
+        $nodes = [];
         foreach ($array as $item => $value) {
-            $value_length = strlen(Bencode::encode($value));
-            if (is_iterable($value)) {
-                $type = $this->isIndexedArray(is_array($value) ? $value : iterator_to_array($value)) ? 'list' : 'dictionary';
-                $ret .= "<li><div class='".$type."'><a href='#' class='js-info-toggle'> + <span class=title>[".$item."]</span> <span class='icon'>(".ucfirst($type).')</span> <span class=length>['.$value_length.']</span></a></div>';
-                $ret .= "<ul class='nx-hidden'>".$this->torrentStructureBuilder(is_array($value) ? $value : iterator_to_array($value), (string) $item).'</ul></li>';
-            } else {
-                $type = is_int($value) ? 'integer' : 'string';
-                $value = ($parent === 'info' && $item === 'pieces') ? '0x'.bin2hex(substr((string) $value, 0, 25)).'...' : $value;
-                $ret .= '<li><div class='.$type.'> - <span class=title>['.$item.']</span> <span class=icon>('.ucfirst($type).')</span> <span class=length>['.$value_length.']</span>: <span class=value>'.$value.'</span></div></li>';
-            }
+            $nodes[] = [
+                'item' => $item,
+                'type' => is_iterable($value)
+                    ? ($this->isIndexedArray(is_array($value) ? $value : iterator_to_array($value)) ? 'list' : 'dictionary')
+                    : (is_int($value) ? 'integer' : 'string'),
+                'length' => strlen(Bencode::encode($value)),
+                'value' => ($parent === 'info' && $item === 'pieces') ? '0x'.bin2hex(substr((string) $value, 0, 25)).'...' : $value,
+                'children' => is_iterable($value)
+                    ? $this->torrentStructureNodes(is_array($value) ? $value : iterator_to_array($value), (string) $item)
+                    : null,
+            ];
         }
 
-        return $ret;
+        return $nodes;
     }
 
     public function takeFlush(Request $request): Response|RedirectResponse

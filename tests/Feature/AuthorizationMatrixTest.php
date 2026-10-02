@@ -161,20 +161,6 @@ class AuthorizationMatrixTest extends TestCase
             'settings.index' => ['/api/v1/settings',      'GET',    RoutePermissionEnum::SETTING_LIST->value],
             'settings.store' => ['/api/v1/settings',      'POST',   RoutePermissionEnum::SETTING_MANAGE->value],
 
-            // Medals
-            'medals.index' => ['/api/v1/medals',        'GET',    RoutePermissionEnum::MEDAL_LIST->value],
-            'medals.show' => ['/api/v1/medals/1',      'GET',    RoutePermissionEnum::MEDAL_LIST->value],
-            'medals.store' => ['/api/v1/medals',         'POST',   RoutePermissionEnum::MEDAL_MANAGE->value],
-            'medals.update' => ['/api/v1/medals/1',      'PUT',    RoutePermissionEnum::MEDAL_MANAGE->value],
-            'medals.destroy' => ['/api/v1/medals/1',     'DELETE', RoutePermissionEnum::MEDAL_MANAGE->value],
-
-            // User medals
-            'user-medals.index' => ['/api/v1/user-medals',    'GET',    RoutePermissionEnum::USER_MEDAL_LIST->value],
-            'user-medals.show' => ['/api/v1/user-medals/1',  'GET',    RoutePermissionEnum::USER_MEDAL_LIST->value],
-            'user-medals.store' => ['/api/v1/user-medals',     'POST',   RoutePermissionEnum::USER_MEDAL_MANAGE->value],
-            'user-medals.update' => ['/api/v1/user-medals/1',  'PUT',    RoutePermissionEnum::USER_MEDAL_MANAGE->value],
-            'user-medals.destroy' => ['/api/v1/user-medals/1',  'DELETE', RoutePermissionEnum::USER_MEDAL_MANAGE->value],
-
             // Tags
             'tags.index' => ['/api/v1/tags',           'GET',    RoutePermissionEnum::TAG_LIST->value],
             'tags.show' => ['/api/v1/tags/1',         'GET',    RoutePermissionEnum::TAG_LIST->value],

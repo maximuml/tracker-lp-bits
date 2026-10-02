@@ -63,6 +63,7 @@ final class EscapedHtmlHelpersTest extends TestCase
         'Http::protocolPrefix' => true,
         'Strings::addS' => true,
         'Locale::trans' => true,
+        'Avatar::forUser' => true,
     ];
 
     /**

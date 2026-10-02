@@ -1208,12 +1208,15 @@ document.addEventListener('error', function (e) {
 
     function paint(button) {
         var label = 'Theme: ' + LABELS[currentTheme()];
-        if (button.hasAttribute('data-persist-url') || !persistUrl) {
+        if (button.querySelector('.nxm-theme-ic')) {
+            button.setAttribute('data-theme-state', currentTheme());
+        } else if (button.hasAttribute('data-persist-url') || !persistUrl) {
             button.textContent = '[' + label + ']';
         } else {
             button.textContent = '[Theme]';
         }
         button.setAttribute('title', label);
+        button.setAttribute('aria-label', label);
     }
 
     function paintAll() {
@@ -1257,6 +1260,14 @@ document.addEventListener('error', function (e) {
     }
     applyToFrames(currentTheme());
 
+    // Keep iframes in sync when data-theme changes outside this toggle
+    // (tests, other scripts) — the click path already propagates itself.
+    if (typeof MutationObserver === 'function') {
+        new MutationObserver(function () {
+            applyToFrames(currentTheme());
+        }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
     paintAll();
 })();
 
@@ -1289,6 +1300,99 @@ document.addEventListener('error', function (e) {
         if (e.key === 'Escape' && panel.classList.contains('nxm-open')) {
             setOpen(false);
             btn.focus();
+        }
+    });
+})();
+
+/* ===== search shortcut + mid-width overlay ===== */
+// Cmd/Ctrl+K focuses the header search field (mirrors the ⌘K hint in
+// the search pill). On mid-widths the pill is hidden behind the
+// magnifier toggle — open the overlay first, then focus.
+(function () {
+    var header = document.querySelector('.nxm-header');
+    var toggle = document.querySelector('.nxm-searchbtn');
+    function input() { return document.querySelector('.nxm-search input[name="search"]'); }
+
+    function setOpen(open) {
+        if (!header || !toggle) { return; }
+        header.classList.toggle('nxm-search--open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    function openAndFocus() {
+        setOpen(true);
+        var el = input();
+        if (el) { el.focus(); el.select(); }
+    }
+
+    if (toggle && header) {
+        toggle.addEventListener('click', function () {
+            if (header.classList.contains('nxm-search--open')) { setOpen(false); return; }
+            openAndFocus();
+        });
+        document.addEventListener('click', function (e) {
+            if (!header.classList.contains('nxm-search--open')) { return; }
+            if (e.target.closest('.nxm-search') || e.target.closest('.nxm-searchbtn')) { return; }
+            setOpen(false);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { setOpen(false); }
+        });
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (!(e.metaKey || e.ctrlKey) || e.altKey || e.key.toLowerCase() !== 'k') { return; }
+        var el = input();
+        if (!el) { return; }
+        e.preventDefault();
+        if (el.offsetParent === null && toggle && toggle.offsetParent !== null) {
+            openAndFocus();
+        } else {
+            el.focus();
+            el.select();
+        }
+    });
+})();
+
+/* ===== nx-menus.js ===== */
+/**
+ * Header <details> dropdowns (nav overflow + user menu): clicking
+ * outside or pressing Escape closes an open menu, and opening one
+ * closes the others.
+ */
+(function () {
+    var menus = document.querySelectorAll('details.nxm-more, details.nxm-usermenu');
+    if (!menus.length) {
+        return;
+    }
+
+    function closeAll(except) {
+        for (var i = 0; i < menus.length; i++) {
+            if (menus[i] !== except && menus[i].hasAttribute('open')) {
+                menus[i].removeAttribute('open');
+            }
+        }
+    }
+
+    for (var i = 0; i < menus.length; i++) {
+        menus[i].addEventListener('toggle', function () {
+            if (this.hasAttribute('open')) {
+                closeAll(this);
+            }
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        var target = e.target;
+        for (var i = 0; i < menus.length; i++) {
+            if (menus[i].hasAttribute('open') && !menus[i].contains(target)) {
+                menus[i].removeAttribute('open');
+            }
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeAll(null);
         }
     });
 })();
@@ -1399,7 +1503,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // lazy load
     if ("IntersectionObserver" in window) {
-        const fallbackImage = 'pic/misc/spinner.svg';
+        const fallbackImage = 'pic/misc/cover.svg';
         const domainList = ['img1.doubanio.com', 'img2.doubanio.com', 'img3.doubanio.com', 'img9.doubanio.com'];
         const imgList = [...document.querySelectorAll('.nexus-lazy-load')];
         const loadedImages = {};
@@ -1491,4 +1595,143 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+})();
+
+// Alert banners (promo/staff/news): dismissal persists in localStorage keyed
+// by a hash of the banner content, so a changed banner reappears.
+(function () {
+    var storeKey = 'nxm-alert-hide';
+    function readStore() {
+        try {
+            var raw = localStorage.getItem(storeKey);
+            return raw ? (JSON.parse(raw) || {}) : {};
+        } catch (e) { return {}; }
+    }
+    var hidden = readStore();
+    document.querySelectorAll('.nxm-alert[data-alert-key]').forEach(function (el) {
+        if (hidden[el.getAttribute('data-alert-key')]) { el.hidden = true; }
+    });
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-alert-dismiss]');
+        if (!btn) { return; }
+        var el = btn.closest('.nxm-alert');
+        if (!el) { return; }
+        hidden = readStore();
+        hidden[el.getAttribute('data-alert-key')] = 1;
+        try { localStorage.setItem(storeKey, JSON.stringify(hidden)); } catch (e) {}
+        el.hidden = true;
+    });
+})();
+
+/* data-copy buttons: copy the referenced input's value to the clipboard
+   and briefly confirm on the button label. */
+(function () {
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-copy]');
+        if (!btn) { return; }
+        var input = document.querySelector(btn.getAttribute('data-copy'));
+        if (!input) { return; }
+        var real = input.getAttribute('data-copy-value');
+        var shown = input.value;
+        if (real !== null) { input.value = real; }
+        input.select();
+        input.setSelectionRange(0, input.value.length);
+        try { document.execCommand('copy'); } catch (err) {}
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value).catch(function () {});
+        }
+        if (real !== null) { input.value = shown; }
+        var original = btn.textContent;
+        btn.textContent = btn.getAttribute('data-copy-done') || 'Copied';
+        setTimeout(function () { btn.textContent = original; }, 1500);
+    });
+})();
+
+/* messages.php: reveal the bulk-action bar once any message checkbox is
+   checked, and keep the selected counter in sync. */
+(function () {
+    function update() {
+        var bars = document.querySelectorAll('[data-bulkbar]');
+        if (!bars.length) { return; }
+        var n = document.querySelectorAll('input[name="messages[]"]:checked').length;
+        bars.forEach(function (bar) {
+            bar.hidden = n === 0;
+            var c = bar.querySelector('[data-bulk-count]');
+            if (c) { c.textContent = n; }
+        });
+    }
+    document.addEventListener('change', function (e) {
+        if (e.target.matches('input[name="messages[]"]')) { update(); }
+    });
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('input[data-checkall]')) { setTimeout(update, 0); }
+    });
+})();
+
+/* data-reveal buttons: toggle a masked input between its mask and the real
+   value stored in data-copy-value (e.g. the usercp passkey). */
+(function () {
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-reveal]');
+        if (!btn) { return; }
+        var input = document.querySelector(btn.getAttribute('data-reveal'));
+        if (!input) { return; }
+        var real = input.getAttribute('data-copy-value');
+        if (real === null) { return; }
+        var masked = input.getAttribute('data-mask-value') || input.value;
+        var showing = input.value !== masked;
+        input.value = showing ? masked : real;
+        btn.textContent = showing
+            ? (btn.getAttribute('data-label-show') || 'Show')
+            : (btn.getAttribute('data-label-hide') || 'Hide');
+    });
+})();
+
+/* index shoutbox: grow the same-origin iframe to fit its message list
+   (was a fixed 180px strip regardless of content). */
+(function () {
+    var frame = document.getElementById('iframe-shout-box');
+    if (!frame) { return; }
+    function size() {
+        try {
+            var doc = frame.contentDocument;
+            var c = doc ? doc.getElementById('shoutbox-content') : null;
+            var h = c ? c.scrollHeight + 4 : 0;
+            frame.style.height = Math.max(120, Math.min(h, 600)) + 'px';
+        } catch (e) {}
+    }
+    frame.addEventListener('load', size);
+    setInterval(size, 2000);
+})();
+
+/* E5 — FAQ accordion: filter items by search box, auto-open hash target. */
+(function () {
+    var input = document.querySelector('[data-faq-search]');
+    var items = document.querySelectorAll('.nx-faq__item');
+    var count = document.querySelector('[data-faq-count]');
+    function applyHash() {
+        var id = location.hash.slice(1);
+        var el = id ? document.getElementById(id) : null;
+        if (el && el.tagName === 'DETAILS' && !el.open) { el.open = true; }
+    }
+    if (input && items.length) {
+        input.addEventListener('input', function () {
+            var q = input.value.trim().toLowerCase();
+            var shown = 0;
+            items.forEach(function (item) {
+                var hit = !q || item.textContent.toLowerCase().indexOf(q) !== -1;
+                item.classList.toggle('nx-faq--hidden', !hit);
+                if (hit) { shown++; if (q) { item.open = true; } }
+            });
+            document.querySelectorAll('.nx-faq').forEach(function (g) {
+                g.classList.toggle('nx-faq--hidden', !!q && !g.querySelector('.nx-faq__item:not(.nx-faq--hidden)'));
+            });
+            if (count) {
+                count.hidden = !q;
+                count.textContent = q ? shown + ' / ' + items.length : '';
+            }
+        });
+    }
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
 })();

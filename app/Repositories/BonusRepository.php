@@ -43,25 +43,6 @@ class BonusRepository extends BaseRepository
 
     /**
      * @param  mixed  $uid
-     * @param  mixed  $medalId
-     */
-    public function consumeToBuyMedal($uid, $medalId): bool
-    {
-        return $this->purchaseRepository->consumeToBuyMedal($uid, $medalId);
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $medalId
-     * @param  mixed  $toUid
-     */
-    public function consumeToGiftMedal($uid, $medalId, $toUid): bool
-    {
-        return $this->purchaseRepository->consumeToGiftMedal($uid, $medalId, $toUid);
-    }
-
-    /**
-     * @param  mixed  $uid
      */
     public function consumeToBuyAttendanceCard($uid): bool
     {

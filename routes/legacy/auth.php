@@ -181,7 +181,6 @@ Route::get('/notifications', [NotificationController::class, 'index'])->middlewa
 Route::post('/notifications', [NotificationController::class, 'markRead'])->middleware('throttle:notifications')->name('notifications.read.legacy');
 Route::get('/latestcomments', [ForumController::class, 'latestcomments'])->name('latestcomments.legacy');
 Route::get('/bonus-log', [BonusHistoryController::class, 'bonusLog'])->name('bonus-log.legacy');
-Route::get('/medal', [BonusShopController::class, 'medal'])->name('medal.legacy');
 Route::get('/task', [BonusShopController::class, 'task'])->name('task.legacy');
 Route::get('/uploaders', [BonusHistoryController::class, 'uploaders'])->name('uploaders.legacy');
 Route::get('/settings', [SettingsController::class, 'settings'])->name('settings.legacy');

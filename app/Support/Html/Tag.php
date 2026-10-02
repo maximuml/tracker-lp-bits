@@ -400,7 +400,7 @@ final class Tag
             ."<textarea id='{$name}' name='{$name}' cols=\"100\" rows=\"8\" data-ctrlenter=\"compose:qr\"></textarea>";
         $html .= Smilies::quickRow($formName, $textareaName);
         $html .= '<br />';
-        $html .= '<input type="submit" id="qr" class="btn" value="'.htmlspecialchars($submitLabel, ENT_QUOTES).'" />';
+        $html .= '<input type="submit" id="qr" class="nx-postbtn" value="'.htmlspecialchars($submitLabel, ENT_QUOTES).'" />';
 
         return $html;
     }
@@ -443,36 +443,6 @@ final class Tag
         }
 
         return Comment::addTempCode(BBCode::youtube($src, $width, $height));
-    }
-
-    /**
-     * Filter and render a `[video]` tag with a temp-code placeholder.
-     *
-     * Backs the legacy `formatVideo()` helper.
-     */
-    public static function formatVideo(string $src, int|string $width, int|string $height): string
-    {
-        $src = Security::filterSrc($src);
-        if (empty($src)) {
-            return '';
-        }
-
-        return Comment::addTempCode(BBCode::video($src, $width, $height));
-    }
-
-    /**
-     * Filter and render an `[audio]` tag with a temp-code placeholder.
-     *
-     * Backs the legacy `formatAudio()` helper.
-     */
-    public static function formatAudio(string $src): string
-    {
-        $src = Security::filterSrc($src);
-        if (empty($src)) {
-            return '';
-        }
-
-        return Comment::addTempCode(BBCode::audio($src));
     }
 
     /**

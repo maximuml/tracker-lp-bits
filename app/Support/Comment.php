@@ -81,14 +81,6 @@ final class Comment
             );
         }
 
-        if (str_contains($s, '[raw]') && str_contains($s, '[/raw]')) {
-            $s = (string) preg_replace_callback(
-                '/\[raw\](.+?)\[\/raw\]/is',
-                static fn (array $m): string => self::addTempCode($m[1]),
-                $s,
-            );
-        }
-
         $s = nl2br($s);
 
         $originalBbTagArray = [
@@ -148,22 +140,6 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[youtube(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s\'"<>]+)\[\/youtube\]/i',
                 static fn (array $m): string => Html::formatYoutube($m[4], $m[2] ?: 0, $m[3] ?: 0),
-                $s,
-            );
-        }
-
-        if (str_contains($s, '[video')) {
-            $s = (string) preg_replace_callback(
-                '/\[video(\,([1-9][0-9]*)\,([1-9][0-9]*))?\]((http|https):\/\/[^\s\'"<>]+)\[\/video\]/i',
-                static fn (array $m): string => Html::formatVideo($m[4], $m[2] ?: 0, $m[3] ?: 0),
-                $s,
-            );
-        }
-
-        if (str_contains($s, '[audio')) {
-            $s = (string) preg_replace_callback(
-                '/\[audio\]((http|https):\/\/[^\s\'"<>]+)\[\/audio\]/i',
-                static fn (array $m): string => Html::formatAudio($m[1]),
                 $s,
             );
         }
@@ -256,7 +232,7 @@ final class Comment
     private static function resolveTempCodes(string $s): string
     {
         $j = 0;
-        while (count(self::$tempCode) || $j > 5) {
+        while (count(self::$tempCode) > 0 && $j <= 5) {
             foreach (self::$tempCode as $key => $code) {
                 $s = str_replace("<tempCode_$key>", $code, $s, $count);
                 if ($count) {

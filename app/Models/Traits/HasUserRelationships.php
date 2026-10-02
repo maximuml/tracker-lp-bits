@@ -7,7 +7,6 @@ namespace App\Models\Traits;
 use App\Enums\ExamUserStatus;
 use App\Enums\PeerSeeder;
 use App\Enums\SnatchFinished;
-use App\Enums\UserMedalStatus;
 use App\Models\Bookmark;
 use App\Models\Comment;
 use App\Models\Country;
@@ -16,7 +15,6 @@ use App\Models\ExamUser;
 use App\Models\HitAndRun;
 use App\Models\Invite;
 use App\Models\Language;
-use App\Models\Medal;
 use App\Models\Message;
 use App\Models\Peer;
 use App\Models\PollAnswer;
@@ -178,35 +176,6 @@ trait HasUserRelationships
     public function hitAndRuns(): HasMany
     {
         return $this->hasMany(HitAndRun::class, 'uid');
-    }
-
-    /**
-     * @return BelongsToMany<Medal, $this>
-     */
-    public function medals(): BelongsToMany
-    {
-        return $this->belongsToMany(Medal::class, 'user_medals', 'uid', 'medal_id')
-            ->withPivot(['id', 'expire_at', 'status', 'priority', 'bonus_addition_expire_at'])
-            ->withTimestamps()
-            ->orderByPivot('priority', 'desc');
-    }
-
-    /**
-     * @return BelongsToMany<Medal, $this>
-     */
-    public function valid_medals(): BelongsToMany
-    {
-        return $this->medals()->where(function ($query) {
-            $query->whereNull('user_medals.expire_at')->orWhere('user_medals.expire_at', '>=', Carbon::now());
-        });
-    }
-
-    /**
-     * @return BelongsToMany<Medal, $this>
-     */
-    public function wearing_medals(): BelongsToMany
-    {
-        return $this->valid_medals()->where('user_medals.status', UserMedalStatus::WEARING->value);
     }
 
     /** @return HasMany<Reward, $this> */

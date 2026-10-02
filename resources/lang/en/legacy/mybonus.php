@@ -121,7 +121,6 @@ where<ul><li><b>A</b> is an intermediate variable</li><li><b>Ti</b> is the <b>i<
     'text_cancel_hr_title' => 'H&R cancel',
     'text_cancel_hr_label' => 'Type in H&R ID:',
     'text_success_cancel_hr' => 'Success cancel one H&R.',
-    'text_success_buy_medal' => 'Success buy the medal.',
     'text_attendance_card' => 'Buy attendance card',
     'text_attendance_card_note' => 'One day to make up the attendance consume one, attend of the target date of the bonus rewards in accordance with the normal calculation, that is, the target date forward to calculate the number of continuous days to obtain rewards.',
     'text_success_buy_attendance_card' => 'Success buy 1 attendance card.',
@@ -157,8 +156,5 @@ where<ul><li><b>A</b> is an intermediate variable</li><li><b>Ti</b> is the <b>i<
     'text_success_buy_change_username_card' => 'Congratulations on your successful purchase of a <b>change username card</b>!',
     'text_change_username_card_already_has' => 'Already have a change username card',
     'text_rainbow_id_already_valid_forever' => 'Already have a permanent Rainbow ID',
-    'text_get_by_medal' => 'Medal bonus will get the following additional bonus value per hour',
-    'medal_additional_desc' => 'Medal bonus calculation formula is the same as above, regardless of minimum guarantee',
-    'medal_additional_factor' => 'The final bonus is the calculated medal bonus multiplied by the medal_additional_factor',
     'text_bonus_mini_size' => 'Torrent size must be at least %s. Torrent size smaller than this volume are excluded from bonus calculations',
 ];

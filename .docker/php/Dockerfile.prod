@@ -7,7 +7,7 @@
 
 # ── Stage 1: Build PHP extensions ──────────────────────────────────────────
 # T-13: Digest-pinned for reproducible builds. Update via Renovate.
-FROM php:8.5-fpm-alpine@sha256:059977c6511192520341f9ae5f106714b7834803d916f6eb592a9e19514a11de AS ext-builder
+FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS ext-builder
 
 RUN apk add --no-cache \
     $PHPIZE_DEPS \
@@ -70,7 +70,8 @@ RUN composer install \
     --ignore-platform-req=ext-redis \
     --ignore-platform-req=ext-pdo_mysql \
     --ignore-platform-req=ext-sockets \
-    --ignore-platform-req=ext-zip
+    --ignore-platform-req=ext-zip \
+    --ignore-platform-req=ext-ftp
 
 # Generate optimized autoloader (no scripts — Octane is dev-only)
 RUN composer dump-autoload \
@@ -80,7 +81,7 @@ RUN composer dump-autoload \
     --no-scripts
 
 # ── Stage 3: Production runtime ────────────────────────────────────────────
-FROM php:8.5-fpm-alpine@sha256:059977c6511192520341f9ae5f106714b7834803d916f6eb592a9e19514a11de AS production
+FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS production
 
 # Copy compiled extensions from ext-builder
 COPY --from=ext-builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
@@ -98,6 +99,12 @@ RUN apk add --no-cache \
     libxml2 \
     gmp \
     oniguruma
+
+# Base snapshot ships nghttp2-libs 1.69.0 (CVE-2026-58055) and
+# pcre2 10.48 (CVE-2026-103111); the alpine 3.24 repo carries fixed
+# versions, so upgrade explicitly until the official php image
+# is rebuilt against them.
+RUN apk upgrade --no-cache nghttp2-libs pcre2
 
 # Configure PHP-FPM: log PHP errors to storage/logs/php_errors.log, tune for production
 RUN sed -i \

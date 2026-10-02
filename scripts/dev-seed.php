@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Enums\TorrentPromotion;
+use App\Enums\TorrentType;
+use App\Enums\TorrentVisible;
+use App\Models\Torrent;
+use App\Models\User;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Rhilip\Bencode\Bencode;
+
 /**
  * Dev-stack fixture seeder: 50 lpfanXX users + 30 Linkin Park torrents with
  * descriptions, screenshots and MediaInfo blocks. Idempotent — skips rows
@@ -19,16 +29,6 @@ if (! app()->environment('local', 'development', 'testing')) {
     fwrite(STDERR, 'dev-seed is for local dev stacks only (APP_ENV='.app()->environment().")\n");
     exit(1);
 }
-
-use App\Enums\TorrentPromotion;
-use App\Enums\TorrentType;
-use App\Enums\TorrentVisible;
-use App\Models\Torrent;
-use App\Models\User;
-use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Rhilip\Bencode\Bencode;
 
 // ---- users ----
 $owners = User::where('id', 1)->get();
@@ -77,7 +77,7 @@ $releases = [
     ['Linkin.Park.-.Grey.Daze.Amends.2020.FLAC', 408, 'Chester Bennington side project'],
 ];
 
-$screens1 = '[img]/pic/test-poster.jpg[/img] [img]/pic/test-poster.jpg[/img] [img]/pic/test-poster.jpg[/img]';
+$screens1 = '[img]/pic/test-poster.jpg[/img] [img]/pic/bangumi.jpg[/img] [img]/pic/invienova.jpg[/img] [img]/pic/test-poster.jpg[/img]';
 $torDir = $root.'/torrents';
 $baseUrl = 'http://localhost/announce.php';
 
@@ -143,7 +143,6 @@ foreach ($releases as [$name, $cat, $tagline]) {
         ."A fan-archived release for the LP-Bits community. {$tagline}. "
         ."Seeded at full speed; please keep seeding after finish — see H&R rules.\n\n"
         ."[b]Screenshots:[/b]\n{$screens1}\n\n"
-        ."[b]MediaInfo:[/b]\n[quote][font=Courier New]".mediaInfo($name, $size)."[/font][/quote]\n\n"
         .'[b]Notes:[/b] sourced from the fan archive; report issues in the comments.';
 
     $owner = $owners->random();

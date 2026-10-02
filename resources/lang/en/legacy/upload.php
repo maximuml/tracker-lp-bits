@@ -37,4 +37,9 @@ return [
     'text_titles_note' => '(If no English Name exists, use pinyin or leave it blank)',
     'fill_quality' => 'Fill quality',
     'fill_setlist' => 'Fill setlist',
+    'section_file' => 'File',
+    'section_description' => 'Description',
+    'section_media' => 'Media',
+    'section_publish' => 'Publish',
+    'row_announce_url' => 'Announce URL',
 ];

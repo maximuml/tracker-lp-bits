@@ -61,7 +61,9 @@ test('signup form creates a working account', async ({ page }) => {
   ).toMatch(/confirm\.php|ok\.php|index\.php|\/index/);
 
   // confirm.php auto-logs the account in — the logout button proves it.
+  // The logout lives inside the avatar dropdown, so open it first.
   const logoutButton = page.locator('form[action*="logout"] button').first();
+  await page.locator('details.nxm-usermenu > summary').click();
   await expect(logoutButton, 'auto-logged-in after confirm').toBeVisible();
 
   // Log out, then verify the account works through the real login form.

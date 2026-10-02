@@ -107,7 +107,6 @@ final class UserModerationAccountCommand
             'exam_users' => 'uid',
             'exam_progress' => 'uid',
             'user_metas' => 'uid',
-            'user_medals' => 'uid',
             'attendance' => 'uid',
             'attendance_logs' => 'uid',
             'login_logs' => 'uid',

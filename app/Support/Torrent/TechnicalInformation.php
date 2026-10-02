@@ -206,7 +206,7 @@ class TechnicalInformation
 
     private function detailsViewModel(): TechnicalInfoViewModel
     {
-        $rawMediaInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
+        $rawMediaInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
         $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawMediaInfo, false));
 
         $general = $this->getGeneralInfo();
@@ -239,7 +239,7 @@ class TechnicalInformation
         $hiddenAudioSpoiler = $hiddenTracksHtml !== ''
             ? SafeHtml::fromTrustedHtml(sprintf(
                 '<div class="nti-more">%s</div>',
-                Format::formatComment(sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)
+                Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)
             ))
             : null;
 
@@ -267,7 +267,7 @@ class TechnicalInformation
     private function columnSpoiler(string $title, array $items): SafeHtml
     {
         $body = view('torrent._nti_spoiler_kv', ['items' => $items])->render();
-        $bbcode = sprintf('[spoiler=%s][raw]%s[/raw][/spoiler]', $title, $body);
+        $bbcode = sprintf('[spoiler=%s]%s[/spoiler]', $title, $body);
 
         return SafeHtml::fromTrustedHtml(sprintf('<div class="nti-more">%s</div>', Format::formatComment($bbcode, false)));
     }

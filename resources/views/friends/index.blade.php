@@ -8,8 +8,9 @@
 
 <div class="nx-main nx-embedded nx-box--737">
 <br />
+<section class="nx-idx-card">
 <h2><a name="friends">{{ __('legacy/friends.text_friendlist')}}</a></h2>
-<div class="nx-box nx-box--tight nx-box--737">
+<div>
 
 @if (empty($friendsList))
     <x-empty-state :title="__('legacy/friends.text_friends_empty')" />
@@ -32,10 +33,10 @@
     </div>
 @endif
 
-</div><br />
+</div>
+</section>
 
-<br /><br />
-<div class="nx-main nx-embedded nx-box--737 nx-cell-5">
+<section class="nx-idx-card">
 <h2><a name="blocks">{{ __('legacy/friends.text_blocked_users')}}</a></h2>
 <div>
 @if ($blocks === [])
@@ -44,7 +45,7 @@
 <div class="nxm-grid-6">@foreach ($blocks as $block)<div>[<span class='small'><a href="friends.php?id={{ $userid }}&action=delete&type=block&targetid={{ $block['id'] }}">D</a></span>] {{ $block['usernameHtml'] }}</div>@endforeach</div>
 @endif
 </div>
-</div>
+</section>
 
 </div>
 @if ($canViewUserList)

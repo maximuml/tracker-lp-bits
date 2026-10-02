@@ -25,7 +25,7 @@
 @include('torrent.details._deny_banner', ['banner' => $details->denyBanner])
 @endif
 
-<table data-nx="data" class="nx-w-97"><caption class="nx-sr-only">{{ $details->title->name }}</caption>
+<table data-nx="data" class="nx-w-97 nxm-kv"><caption class="nx-sr-only">{{ $details->title->name }}</caption>
 @if ($details->downloadAllowed)
 <tr><td class="rowhead nx-w-1p nx-nowrap">{{ __('legacy/details.row_download') }}</td><td class="rowfollow"><a class="index" href="download.php?id={{ $torrentId }}">{{ ($torrentNamePrefix ?? '').'.'.$details->saveAs }}.torrent</a>&nbsp;&nbsp;<a id="bookmark0" href="#" data-bookmark-torrent="{{ $torrentId }}" data-bookmark-counter="0">{{ $details->bookmark }}</a>&nbsp;&nbsp;&nbsp;{{ __('legacy/details.row_upped_by') }}&nbsp;@if ($details->owner->anonymous)<i>{{ __('legacy/details.text_anonymous') }}</i>@if ($details->owner->showUsername) ({{ $details->owner->username }})@endif@elseif ($details->owner->username !== null){{ $details->owner->username }}@else<i></i>@endif{{ $details->uploadTimePrefix }}{{ $details->uploadTime }}</td></tr>
 @else
@@ -40,6 +40,15 @@
 {{ $customFieldsHtml }}
 @if (! $technicalInfoResult->isEmpty())
 <x-settings-row :label="__('legacy/functions.text_technical_info')">{{ $technicalInfoResult }}</x-settings-row>
+@endif
+@if (count($screenshots ?? []) > 0)
+<x-settings-row :label="__('legacy/details.row_screenshots')">
+    <div class="nxm-screens">
+    @foreach ($screenshots as $shot)
+        <a class="nxm-screens__item" href="{{ $shot }}" target="_blank" rel="noopener"><img src="{{ $shot }}" alt="{{ $details->title->name }}" loading="lazy" /></a>
+    @endforeach
+    </div>
+</x-settings-row>
 @endif
 @if ($showDescription)
 <tr><td class="rowhead nowrap nx-va-top nx-align-right"><a href="#" data-klappe="descr"><span class="nowrap"><img class="minus" src="pic/trans.gif" alt="Show/Hide" id="picdescr" title="{{ $details->showOrHideTitle }}" /> {{ __('legacy/details.row_description') }}</span></a></td><td class="rowfollow nx-va-top"><div id='kdescr'>{{ $descr }}</div></td></tr>

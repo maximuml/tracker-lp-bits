@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Schema;
  *      bookmarks.userid, snatched.userid, peers.userid, comments.user,
  *      thanks.userid, hit_and_runs.uid, torrent_buy_logs.uid,
  *      torrent_operation_logs.uid, torrent_secrets.uid, exam_users.uid,
- *      exam_progress.uid, user_medals.uid, user_passkeys.user_id,
+ *      exam_progress.uid, user_passkeys.user_id,
  *      user_metas.uid, bonus_logs.uid, attendance.uid, friends.userid,
  *      friends.friendid, blocks.userid, blocks.blockid, shoutbox_reactions.user_id,
  *      posts.userid, topics.userid, readposts.userid, pollanswers.userid,
@@ -33,7 +33,6 @@ use Illuminate\Support\Facades\Schema;
  *  - exam_users.exam_id (int) → exams.id (bigint unsigned)
  *  - exam_progress.exam_id (int) → exams.id (bigint unsigned)
  *  - exam_progress.exam_user_id (int) → exam_users.id (bigint unsigned)
- *  - user_medals.medal_id (int) → medals.id (bigint unsigned)
  *  - hit_and_runs.snatched_id (int) → snatched.id (bigint unsigned)
  *  - shoutbox_reactions.shoutbox_id (int unsigned) → shoutbox.id (int)
  *

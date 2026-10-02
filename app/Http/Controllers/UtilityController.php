@@ -382,8 +382,6 @@ class UtilityController extends LegacyController
             $tag($t('text_center'), $t('text_center_description'), $t('text_center_syntax'), $t('text_center_example')),
             $tag($t('text_right'), $t('text_right_description'), $t('text_right_syntax'), $t('text_right_example')),
             $tag($t('text_youtube'), $t('text_youtube_description'), $t('text_youtube_syntax'), $t('text_youtube_example')),
-            $tag($t('text_video'), $t('text_video_description'), $t('text_video_syntax'), $t('text_video_example')),
-            $tag($t('text_audio'), $t('text_audio_description'), $t('text_audio_syntax'), $t('text_audio_example')),
             $tag($t('text_spoiler'), $t('text_spoiler_description'), $t('text_spoiler_syntax'), $t('text_spoiler_example')),
             $tag($t('text_hr'), $t('text_hr_description'), $t('text_hr_syntax'), $t('text_hr_example')),
         ];

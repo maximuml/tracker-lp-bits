@@ -151,7 +151,6 @@ return [
             'tab_header' => 'System',
             'change_username_card_allow_characters_outside_the_alphabets' => 'Does the name change card allow characters other than English letters',
             'change_username_min_interval_in_days' => 'The minimum interval days of Change user name',
-            'maximum_number_of_medals_can_be_worn' => 'Maximum number of medals that can be worn',
             'cookie_valid_days' => 'Cookie Valid days',
             'maximum_upload_speed' => 'Maximum upload speed',
             'maximum_upload_speed_help' => 'This value affects cheater detection and is the maximum upload speed for a conservative detection level. Actual Speed Limit = Maximum Upload Speed / Detection Level, from Conservative to Suspicious is 1 to 4. If the Maximum Speed Limit is 1000, and the Detection Level is Conservative, the Actual Speed Limit is 1000/1 = 1000, and the Detection Level is Suspicious, the Actual Speed Limit is 1000/4 = 250. A single upload speed that exceeds the Actual Speed Limit will instantly disable the account. The unit here is Mbps, e.g.: 100 Mbps = 12.5 MB/s.',
@@ -251,17 +250,6 @@ return [
         'unban' => 'Unban IP',
         'ban_bulk' => 'Ban selected IPs',
         'unban_bulk' => 'Unban selected IPs',
-    ],
-    'medal' => [
-        'label' => 'Medal',
-        'image_large' => 'Image large',
-        'image_small' => 'Image small',
-        'get_type' => 'Get type',
-        'duration' => 'Duration',
-        'duration_help' => 'Unit: days. If left blank, the user has permanent possession',
-    ],
-    'user_medal' => [
-        'label' => 'User medal',
     ],
     'exam' => [
         'label' => 'Exam & Task',

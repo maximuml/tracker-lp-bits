@@ -16,11 +16,6 @@ final class SystemConfig extends Config
         return $this->int('cookie_valid_days', $default);
     }
 
-    public function maximumNumberOfMedalsCanBeWorn(int $default = 3): int
-    {
-        return $this->int('maximum_number_of_medals_can_be_worn', $default);
-    }
-
     public function maximumUploadSpeed(int $default = 8000): int
     {
         return $this->int('maximum_upload_speed', $default);

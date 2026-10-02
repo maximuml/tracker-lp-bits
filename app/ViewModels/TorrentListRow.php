@@ -52,6 +52,8 @@ final class TorrentListRow
         public readonly bool $commentIsNew,
         public readonly ?string $lastCommentTooltipId,
         public readonly int|string|\DateTimeInterface|null $added,
+        public readonly string $addedDate,
+        public readonly string $addedTime,
         public readonly array $size,
         public readonly ?string $seedersUrl,
         public readonly int $seeders,

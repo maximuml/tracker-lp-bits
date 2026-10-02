@@ -83,7 +83,10 @@ class MessagePageService
 
         switch ($action) {
             case 'viewmessage':
-                $data['viewmessage'] = $this->buildViewMessage($curUser, $userId, $request);
+                $viewmessage = $this->buildViewMessage($curUser, $userId, $request);
+                $data['viewmessage'] = $viewmessage;
+                $listRequest = $request->duplicate(['box' => $viewmessage['mailbox']]);
+                $data['viewmailbox'] = $this->buildViewMailbox($curUser, $userId, $listRequest);
                 break;
             case 'forward':
                 $data['forward'] = $this->buildForward($userId, $request);

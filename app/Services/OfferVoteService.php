@@ -117,7 +117,7 @@ final class OfferVoteService
         return response(
             '<h1 class="nx-center">'.__('legacy/offers.std_vote_accepted').'</h1>'
             .__('legacy/offers.std_vote_accepted_note')
-            ."<a  href=offers.php?id={$offerid}&off_details=1>".__('legacy/offers.std_back_to_offer_detail').'</a>'
+            ."<a  href=offers.php?id={$offerid}&off_details=1>".__('legacy/offers.std_back_to_offer_detail')
         );
     }
 

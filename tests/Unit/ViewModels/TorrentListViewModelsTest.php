@@ -60,6 +60,8 @@ final class TorrentListViewModelsTest extends TestCase
             commentIsNew: true,
             lastCommentTooltipId: 'lastcom_0',
             added: '2024-01-01 12:00:00',
+            addedDate: '2024-01-01',
+            addedTime: '12:00:00',
             size: ['value' => '4.00', 'unit' => 'GB'],
             seedersUrl: 'details.php?id=42&dllist=1#seeders',
             seeders: 12,

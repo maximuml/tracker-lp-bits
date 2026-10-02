@@ -19,7 +19,7 @@ use Tests\TestCase;
  * Unit tests for UserDetailRepository.
  *
  * Covers getUser(), isFriend(), isBlocked(), getIplogCount(), getPeers(),
- * getTrueTraffic(), getWarnedBy(), getUserWithMedals(), getCommentCount(),
+ * getTrueTraffic(), getWarnedBy(), getCommentCount(),
  * getPostCount(), getTemporaryInviteCount(), getModComment(), and
  * getBonusComment().
  */
@@ -221,23 +221,6 @@ final class UserDetailRepositoryTest extends TestCase
         $this->assertNotNull($result);
         $this->assertSame($user->id, $result['id']);
         $this->assertSame($user->username, $result['username']);
-    }
-
-    public function test_get_user_with_medals_returns_null_when_not_found(): void
-    {
-        $this->assertNull($this->repository->getUserWithMedals(999999));
-    }
-
-    public function test_get_user_with_medals_returns_user_when_found(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create();
-
-        $result = $this->repository->getUserWithMedals($user->id);
-
-        $this->assertNotNull($result);
-        $this->assertSame($user->id, $result->id);
-        $this->assertTrue($result->relationLoaded('valid_medals'));
     }
 
     public function test_get_comment_count_returns_zero_when_none(): void

@@ -96,7 +96,7 @@ class UserResource extends Resource
                 TextInput::make('email')->required(),
                 TextInput::make('password')->password()->required()->visibleOn(CreateUser::class),
                 TextInput::make('password_confirmation')->password()->required()->same('password')->visibleOn(CreateUser::class),
-                TextInput::make('id')->integer(),
+                TextInput::make('id')->integer()->disabled()->dehydrated(false),
                 Select::make('class')->options(User::listClass(UserClassEnum::PEASANT->value, self::currentUser()->class - 1)),
             ]);
     }

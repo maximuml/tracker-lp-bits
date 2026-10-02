@@ -9,7 +9,6 @@ use App\Http\Middleware\Locale;
 use App\Support\Avatar;
 use App\Support\Format;
 use App\Support\Logger;
-use App\Support\Url;
 use App\Support\UserDisplay;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -107,7 +106,7 @@ trait HasUserAccessors
             }
         }
 
-        return Url::schemeAndHost(false).'/'.Avatar::forUser((int) $this->id, '');
+        return Avatar::forUser((int) $this->id, '');
 
     }
 }

@@ -18,7 +18,7 @@ td.shoutrow .shout-avatar-spacer {
 td.shoutrow .shout-avatar {
     border-radius: 50%;
     object-fit: cover;
-    background: rgba(127,127,127,.15);
+    background: var(--nxm-surface-alt, rgba(127,127,127,.15));
 }
 
 td.shoutrow.shout-row-grouped {
@@ -94,7 +94,7 @@ td.shoutrow .shout-msg-toggle:hover {
 
 td.shoutrow .shout-class-badge {
     display: inline-block;
-    font-size: 9px;
+    font-size: 10px;
     line-height: 12px;
     font-weight: bold;
     letter-spacing: 0.5px;
@@ -116,17 +116,14 @@ td.shoutrow .shout-class-badge--staffleader { background: #bf360c; }
 
 .shout-actions {
     font-size: 11px;
-    opacity: .7;
     margin-right: 3px;
     white-space: nowrap;
 }
 
-td.shoutrow:hover .shout-actions {
-    opacity: 1;
-}
-
 .shout-actions a {
     text-decoration: none;
+    padding: .35rem;
+    margin: -.35rem;
 }
 
 .shout-reactions {
@@ -140,8 +137,8 @@ td.shoutrow:hover .shout-actions {
 }
 
 .shout-reaction {
-    border: 1px solid rgba(127,127,127,.35);
-    background: rgba(127,127,127,.08);
+    border: 1px solid var(--nxm-border, rgba(127,127,127,.35));
+    background: var(--nxm-surface-alt, rgba(127,127,127,.08));
     border-radius: 12px;
     padding: 1px 6px;
     font-size: 12px;
@@ -219,15 +216,30 @@ tr:hover .shout-reaction-add,
 .shoutbox-emoji-panel {
     margin: 4px 0;
     padding: 4px;
-    border: 1px solid rgba(127,127,127,.25);
-    border-radius: 4px;
-    background: rgba(127,127,127,.08);
+    border: 1px solid var(--nxm-border, rgba(127,127,127,.25));
+    border-radius: var(--nxm-radius, 4px);
+    background: var(--nxm-surface-alt, rgba(127,127,127,.08));
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.shoutbox-emoji-panel a {
+    display: inline-block;
+    padding: 2px;
+    border-radius: 3px;
+    line-height: 1;
+}
+
+.shoutbox-emoji-panel a:hover {
+    background: var(--nxm-surface, #fff);
+    outline: 1px solid var(--nxm-border, rgba(127,127,127,.25));
 }
 
 .shoutbox-emoji-panel img {
     max-width: 25px;
-    margin: 2px;
     cursor: pointer;
+    vertical-align: middle;
 }
 
 .shoutbox-editing {

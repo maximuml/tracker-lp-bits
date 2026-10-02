@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\ViewModels\Chrome;
 
 use App\Support\AssetAppender;
-use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyDb;
 use App\Support\PageLayoutContext;
-use App\Support\RequestContext;
 
 /**
  * Footer chrome data (ADR 0018): copyright/version line, page-generation
@@ -29,11 +27,6 @@ final class ChromeFooter
         public readonly string $yearFounded,
         public readonly string $icpLicense,
         public readonly SafeHtml $versionHtml,
-        public readonly string $statsTime,
-        public readonly int $statsDbQueries,
-        public readonly int $statsCacheReads,
-        public readonly int $statsCacheWrites,
-        public readonly string $statsRam,
         public readonly bool $debugEnabled,
         public readonly array $debugQueries,
         public readonly array $debugLaravelQueries,
@@ -53,9 +46,6 @@ final class ChromeFooter
         $laravelQueries = [];
         if ($debugEnabled) {
             $laravelQueries = (array) LegacyDb::lastQuery(true, 'json');
-            $dbQueryCount = count($context->queryName) + count($laravelQueries);
-        } else {
-            $dbQueryCount = count($context->queryName) + (int) LegacyDb::lastQuery('COUNT', 'json');
         }
 
         $keyShortcut = '';
@@ -86,11 +76,6 @@ final class ChromeFooter
             yearFounded: substr($context->dateFounded, 0, 4) ?: '2007',
             icpLicense: $context->icpLicenseMain,
             versionHtml: SafeHtml::fromTrustedHtml(defined('VERSION') ? (string) \constant('VERSION') : ''),
-            statsTime: sprintf('%.3f', microtime(true) - RequestContext::instance()->getStartTimestamp()),
-            statsDbQueries: $dbQueryCount,
-            statsCacheReads: (int) ($context->cache?->getCacheReadTimes() ?? 0),
-            statsCacheWrites: (int) ($context->cache?->getCacheWriteTimes() ?? 0),
-            statsRam: Format::size(memory_get_usage()),
             debugEnabled: $debugEnabled,
             debugQueries: array_values(array_map(
                 static fn (array $query): array => ['query' => (string) ($query['query'] ?? ''), 'time' => (string) ($query['time'] ?? '')],

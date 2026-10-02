@@ -6,12 +6,10 @@ namespace App\Repositories;
 
 use App\Enums\BusinessType;
 use App\Enums\HitAndRunStatus;
-use App\Enums\UserMedalStatus;
 use App\Exceptions\NexusException;
 use App\Models\BonusLogs;
 use App\Models\HitAndRun;
 use App\Models\Invite;
-use App\Models\Medal;
 use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
@@ -19,14 +17,13 @@ use App\Models\User;
 use App\Models\UserMeta;
 use App\Services\OutboxService;
 use App\Support\Config\SiteConfig;
-use App\Support\LegacyDb;
 use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Bonus purchase operations: medal/invite/card/rainbow-id/torrent
+ * Bonus purchase operations: invite/card/rainbow-id/torrent
  * purchases, H&R cancellation, and the core consumeUserBonus mutation.
  *
  * Extracted from BonusRepository to keep both classes under the
@@ -36,7 +33,6 @@ class BonusPurchaseRepository extends BaseRepository
 {
     public function __construct(
         private readonly OutboxService $outboxService,
-        private readonly MedalRepository $medalRepository,
         private readonly ToolRepository $toolRepository,
         private readonly UserRepository $userRepository,
         private readonly BonusConsumptionRepository $consumptionRepository,
@@ -72,95 +68,6 @@ class BonusPurchaseRepository extends BaseRepository
                 'status' => HitAndRunStatus::PARDONED->value,
                 'comment' => $newComment,
             ]);
-        });
-
-        return true;
-
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $medalId
-     */
-    public function consumeToBuyMedal($uid, $medalId): bool
-    {
-        $user = User::query()->findOrFail((int) $uid);
-        $medal = Medal::query()->findOrFail((int) $medalId);
-        $exists = $user->valid_medals()->where('medal_id', $medalId)->exists();
-        Logger::writeWithContext((string) LegacyDb::lastQuery(false, 'json'), (string) 'info', (bool) false);
-        if ($exists) {
-            throw new \LogicException("user: $uid already own this medal: $medalId.");
-        }
-        $medal->checkCanBeBuy();
-        $requireBonus = $medal->price;
-        DB::transaction(function () use ($user, $medal, $requireBonus) {
-            $comment = Locale::trans('bonus.comment_buy_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name], $user->locale);
-            Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumptionRepository->consumeUserBonus($user, $requireBonus, BusinessType::BUY_MEDAL->value, "$comment(medal ID: {$medal->id})");
-            $medalRep = $this->medalRepository;
-            $medalRep->userAttachMedal($user, $medal);
-            if ($medal->inventory !== null) {
-                $affectedRows = DB::table('medals')
-                    ->where('id', $medal->id)
-                    ->where('inventory', $medal->inventory)
-                    ->decrement('inventory');
-                if ($affectedRows != 1) {
-                    throw new \RuntimeException("Decrement medal({$medal->id}) inventory affected rows != 1($affectedRows)");
-                }
-            }
-
-        });
-
-        return true;
-
-    }
-
-    /**
-     * @param  mixed  $uid
-     * @param  mixed  $medalId
-     * @param  mixed  $toUid
-     */
-    public function consumeToGiftMedal($uid, $medalId, $toUid): bool
-    {
-        $user = User::query()->findOrFail((int) $uid);
-        $toUser = User::query()->findOrFail((int) $toUid);
-        $medal = Medal::query()->findOrFail((int) $medalId);
-        $exists = $toUser->valid_medals()->where('medal_id', $medalId)->exists();
-        Logger::writeWithContext((string) LegacyDb::lastQuery(false, 'json'), (string) 'info', (bool) false);
-        if ($exists) {
-            throw new \LogicException("user: $toUid already own this medal: $medalId.");
-        }
-        $medal->checkCanBeBuy();
-        $giftFee = $medal->price * ($medal->gift_fee_factor ?? 0);
-        $requireBonus = $medal->price + $giftFee;
-        DB::transaction(function () use ($user, $toUser, $medal, $requireBonus, $giftFee) {
-            $comment = Locale::trans('bonus.comment_gift_medal', ['bonus' => $requireBonus, 'medal_name' => $medal->name, 'to_username' => $toUser->username], $user->locale);
-            Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
-            $this->consumptionRepository->consumeUserBonus($user, $requireBonus, BusinessType::GIFT_MEDAL->value, "$comment(medal ID: {$medal->id})");
-
-            $expireAt = null;
-            if ($medal->duration > 0) {
-                $expireAt = Carbon::now()->addDays((int) $medal->duration)->toDateTimeString();
-            }
-            $msg = [
-                'sender' => null,
-                'receiver' => $toUser->id,
-                'subject' => Locale::trans('message.receive_medal.subject', [], $toUser->locale),
-                'msg' => Locale::trans('message.receive_medal.body', ['username' => $user->username, 'cost_bonus' => $requireBonus, 'medal_name' => $medal->name, 'price' => $medal->price, 'gift_fee_total' => $giftFee, 'gift_fee_factor' => $medal->gift_fee_factor ?? 0, 'expire_at' => $expireAt ?? Locale::trans('label.permanent', [], null), 'bonus_addition_factor' => $medal->bonus_addition_factor ?? 0], $toUser->locale),
-                'added' => now(),
-            ];
-            Message::add($msg);
-            $toUser->medals()->attach([$medal->id => ['expire_at' => $expireAt, 'status' => UserMedalStatus::NOT_WEARING->value]]);
-            if ($medal->inventory !== null) {
-                $affectedRows = DB::table('medals')
-                    ->where('id', $medal->id)
-                    ->where('inventory', $medal->inventory)
-                    ->decrement('inventory');
-                if ($affectedRows != 1) {
-                    throw new \RuntimeException("Decrement medal({$medal->id}) inventory affected rows != 1($affectedRows)");
-                }
-            }
-
         });
 
         return true;

@@ -1,16 +1,20 @@
 	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
 			@csrf
 			<div class="nx-fgrid">
-					<div class="nx-ffull nx-colhead nx-center">
-						{{ __('legacy/upload.text_tracker_url') ?? '' }}: &nbsp;&nbsp;&nbsp;&nbsp;<b>{{ $trackerUrl }}</b>
+					<div class="nx-ffull nx-center nx-upload__note">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</div>
+					<div class="nx-fsection">{{ __('legacy/upload.section_file') }}</div>
+					<x-settings-row layout="grid" :label="__('legacy/upload.row_announce_url')">
+						<span class="nx-copyfield">
+							<input type="text" class="nx-copyfield__input" id="announce-url" readonly value="{{ $trackerUrl }}" aria-label="{{ __('legacy/upload.row_announce_url') }}" />
+							<button type="button" class="nx-postbtn" data-copy="#announce-url" data-copy-done="{{ __('legacy/functions.text_copied') }}">{{ __('legacy/functions.text_copy') }}</button>
+						</span>
 						@unless ($torrentDirWritable)
-							<br /><br /><b>ATTENTION</b>: Torrent directory isn't writable. Please contact the administrator about this problem!
+							<div class="nx-field__error" role="alert"><b>ATTENTION</b>: Torrent directory isn't writable. Please contact the administrator about this problem!</div>
 						@endunless
 						@if (empty($max_torrent_size))
-							<br /><br /><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!
+							<div class="nx-field__error" role="alert"><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!</div>
 						@endif
-					</div>
-					<div class="nx-ffull nx-center">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</div>
+					</x-settings-row>
 				@if (count($uploadErrorList) > 0)
 					<div class="nx-ffull">
 						<x-alert type="error" :title="__('legacy/upload.error_summary')">
@@ -23,7 +27,7 @@
 					</div>
 				@endif
 				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_torrent_file')).'<span class=nx-color-red>*</span>')">
-					<input type="file" class="file" id="torrent" name="file" required @error('file') aria-invalid="true" aria-describedby="file-error"@enderror />
+					<input type="file" class="file" id="torrent" name="file" aria-label="{{ __('legacy/upload.row_torrent_file') }}" required @error('file') aria-invalid="true" aria-describedby="file-error"@enderror />
 					@error('file')<div class="nx-field__error" id="file-error" role="alert">{{ $message }}</div>@enderror
 					@if ($errors->any())
 						<div class="nx-field__help">{{ __('legacy/upload.reselect_file_note') }}</div>
@@ -31,8 +35,8 @@
 				</x-settings-row>
 				@if (($altname_main ?? '') === 'yes')
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_torrent_name')">
-						<b>{{ __('legacy/upload.text_english_title') ?? '' }}</b>&nbsp;<input type="text" id="name" name="name" value="{{ old('name') }}"@error('name') aria-invalid="true" aria-describedby="name-error"@enderror />&nbsp;&nbsp;
-<b>{{ __('legacy/upload.text_chinese_title') ?? '' }}</b>&nbsp;<input type="text" id="cnname" name="cnname" value="{{ old('cnname') }}"@error('cnname') aria-invalid="true" aria-describedby="cnname-error"@enderror><br /><span class="medium">{{ __('legacy/upload.text_titles_note') ?? '' }}</span>
+						<b>{{ __('legacy/upload.text_english_title') ?? '' }}</b>&nbsp;<input type="text" id="name" name="name" aria-label="{{ __('legacy/upload.text_english_title') }}" value="{{ old('name') }}"@error('name') aria-invalid="true" aria-describedby="name-error"@enderror />&nbsp;&nbsp;
+<b>{{ __('legacy/upload.text_chinese_title') ?? '' }}</b>&nbsp;<input type="text" id="cnname" name="cnname" aria-label="{{ __('legacy/upload.text_chinese_title') }}" value="{{ old('cnname') }}"@error('cnname') aria-invalid="true" aria-describedby="cnname-error"@enderror><br /><span class="medium">{{ __('legacy/upload.text_titles_note') ?? '' }}</span>
 						@error('name')<div class="nx-field__error" id="name-error" role="alert">{{ $message }}</div>@enderror
 						@error('cnname')<div class="nx-field__error" id="cnname-error" role="alert">{{ $message }}</div>@enderror
 					</x-settings-row>
@@ -50,18 +54,20 @@
 					</x-settings-row>
 				@endif
 
-				<div class="nx-fhead">{{ __('legacy/upload.row_description') ?? '' }}<span class="nx-color-red">*</span></div>
-				<div class="nx-fcell">{{ $descrEditorHtml ?? '' }}@error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror</div>
+				<div class="nx-fsection">{{ __('legacy/upload.section_description') }}<span class="nx-color-red">*</span></div>
+				<div class="nx-ffull">{{ $descrEditorHtml ?? '' }}@error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror</div>
+				<div class="nx-fsection">{{ __('legacy/upload.section_media') }}</div>
 
 				@if ($enableTechnicalInfo)
-					<x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')">
-						<textarea name="technical_info" id="technical_info" rows="8"@error('technical_info') aria-invalid="true" aria-describedby="technical_info-error"@enderror>{{ old('technical_info') }}</textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}
+					<div class="nx-fhead nx-nowrap">{{ __('legacy/functions.text_technical_info') }}</div>
+					<div class="nx-ffull">
+						<textarea name="technical_info" id="technical_info" rows="8" aria-label="{{ __('legacy/functions.text_technical_info') }}"@error('technical_info') aria-invalid="true" aria-describedby="technical_info-error"@enderror>{{ old('technical_info') }}</textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}
 						@error('technical_info')<div class="nx-field__error" id="technical_info-error" role="alert">{{ $message }}</div>@enderror
-					</x-settings-row>
+					</div>
 				@endif
 
 				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_type')).'<span class=nx-color-red>*</span>')">
-					<select name="type" id="browsecat" data-mode="{{ $browsecatmode }}" required @error('type') aria-invalid="true" aria-describedby="type-error"@enderror>
+					<select name="type" id="browsecat" data-mode="{{ $browsecatmode }}" aria-label="{{ __('legacy/upload.row_type') }}" required @error('type') aria-invalid="true" aria-describedby="type-error"@enderror>
 						<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 						@foreach ($cats as $row)
 							<option value="{{ $row['id'] }}"@selected((string) old('type', '') === (string) $row['id'])>{{ $row['name'] }}</option>
@@ -90,6 +96,7 @@
 					</x-settings-row>
 				</div>
 
+				<div class="nx-fsection">{{ __('legacy/upload.section_publish') }}</div>
 				@if (! empty($offerRows))
 					<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_your_offer')).(!$uploadFreely ? '<span class=nx-color-red>*</span>' : ''))">
 						<select name="offer" id="offer"@error('offer') aria-invalid="true" aria-describedby="offer-error"@enderror>
@@ -112,14 +119,14 @@
 
 				@if ($canBeAnonymous)
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_show_uploader')">
-						<input type="checkbox" id="uplver" name="uplver" value="yes"@checked(old('uplver') === 'yes')@error('uplver') aria-invalid="true" aria-describedby="uplver-error"@enderror />{{ __('legacy/upload.checkbox_hide_uploader_note') ?? '' }}
+						<input type="checkbox" id="uplver" name="uplver" value="yes" aria-label="{{ __('legacy/upload.row_show_uploader') }}"@checked(old('uplver') === 'yes')@error('uplver') aria-invalid="true" aria-describedby="uplver-error"@enderror />{{ __('legacy/upload.checkbox_hide_uploader_note') ?? '' }}
 						@error('uplver')<div class="nx-field__error" id="uplver-error" role="alert">{{ $message }}</div>@enderror
 					</x-settings-row>
 				@endif
 
 				@error('upload')<div class="nx-ffull"><div class="nx-field__error" role="alert">{{ $message }}</div></div>@enderror
 
-				<div class="nx-ffull nx-center"><b>{{ __('legacy/upload.text_read_rules') ?? '' }}</b> <input id="qr" type="submit" class="btn" value="{{ __('legacy/upload.submit_upload') ?? '' }}" /></div>
+				<div class="nx-upload__submit"><span>{{ __('legacy/upload.text_read_rules') ?? '' }}</span> <input id="qr" type="submit" class="btn" value="{{ __('legacy/upload.submit_upload') ?? '' }}" /></div>
 		</div>
 	</form>
 <script src="js/upload.js" type="text/javascript"></script>

@@ -1,6 +1,6 @@
 # 👷‍♀️ 第一阶段：构建阶段，包含所有开发依赖
 # T-13: Digest-pinned for reproducible builds. Update via Renovate.
-FROM php:8.5-fpm-alpine@sha256:059977c6511192520341f9ae5f106714b7834803d916f6eb592a9e19514a11de AS builder
+FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS builder
 
 RUN apk add --no-cache \
     $PHPIZE_DEPS \
@@ -42,7 +42,7 @@ RUN pecl channel-update pecl.php.net \
     && docker-php-ext-enable redis
 
 # 👨‍🍳 第二阶段：运行阶段，仅包含必要运行环境
-FROM php:8.5-fpm-alpine@sha256:059977c6511192520341f9ae5f106714b7834803d916f6eb592a9e19514a11de
+FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7
 
 # 复制已构建的扩展
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
@@ -65,9 +65,11 @@ RUN apk add --no-cache \
     mysql-client~=11.8 \
     mariadb-connector-c~=3.4
 
-# Upgrade curl/libcurl past the pinned base image (8.21.0-r0 has
-# CVE-2026-82209/-80229/-80230/-80255/-13608/-18924/-19931).
-RUN apk upgrade --no-cache curl libcurl
+# Upgrade past the pinned base image: curl/libcurl 8.21.0-r0 has
+# CVE-2026-82209/-80229/-80230/-80255/-13608/-18924/-19931,
+# nghttp2-libs 1.69.0-r0 has CVE-2026-58055 (fixed in 1.70.0-r0),
+# pcre2 10.48-r0 has CVE-2026-103111 (fixed in 10.49-r0).
+RUN apk upgrade --no-cache curl libcurl nghttp2-libs pcre2
 
 # 配置 www.conf
 RUN sed -i \

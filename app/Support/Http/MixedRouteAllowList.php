@@ -44,8 +44,6 @@ final class MixedRouteAllowList
             'PUT api/v1/agent-allows/{agent_allow}' => ['category' => 'api', 'reason' => 'RESTful agent-allow update — PUT+PATCH combined for compatibility'],
             'PUT api/v1/agent-denies/{agent_deny}' => ['category' => 'api', 'reason' => 'RESTful agent-deny update — PUT+PATCH combined for compatibility'],
             'PUT api/v1/exams/{exam}' => ['category' => 'api', 'reason' => 'RESTful exam update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/medals/{medal}' => ['category' => 'api', 'reason' => 'RESTful medal update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/user-medals/{user_medal}' => ['category' => 'api', 'reason' => 'RESTful user-medal update — PUT+PATCH combined for compatibility'],
             'PUT api/v1/tags/{tag}' => ['category' => 'api', 'reason' => 'RESTful tag update — PUT+PATCH combined for compatibility'],
             'PUT api/v1/hr/{hr}' => ['category' => 'api', 'reason' => 'RESTful H&R update — PUT+PATCH combined for compatibility'],
         ];

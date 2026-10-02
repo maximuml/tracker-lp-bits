@@ -56,9 +56,7 @@ class Bonus
         $zeroBonusTag = SiteConfig::current()->bonus->zeroBonusTag();
         $zeroBonusFactor = SiteConfig::current()->bonus->zeroBonusFactor();
 
-        $medalAdditionalFactor = $bonusRep->getMedalAdditionalFactor($uid, $nowStr);
-
-        Logger::writeWithContext("$logPrefix, sql: $sql, count: ".count($torrentResult).", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor, medalAdditionalFactor: $medalAdditionalFactor");
+        Logger::writeWithContext("$logPrefix, sql: $sql, count: ".count($torrentResult).", officialTag: $officialTag, officialAdditionalFactor: $officialAdditionalFactor, zeroBonusTag: $zeroBonusTag, zeroBonusFactor: $zeroBonusFactor");
 
         $result = self::aggregateSeedBonus(
             $torrentResult,
@@ -67,7 +65,6 @@ class Bonus
             $officialTag,
             $zeroBonusTag,
             $zeroBonusFactor,
-            $medalAdditionalFactor,
             $officialAdditionalFactor,
             function ($torrent, $weeks_alive, $gb_size_raw, $gb_size, $temp, $officialAIncrease) use ($logPrefix) {
                 Logger::writeWithContext(sprintf(
@@ -105,7 +102,6 @@ class Bonus
         int|string|null $officialTag,
         int|string|null $zeroBonusTag,
         mixed $zeroBonusFactor,
-        float $medalAdditionalFactor,
         mixed $officialAdditionalFactor,
         ?\Closure $debugLog = null,
     ): array {
@@ -171,22 +167,20 @@ class Bonus
         $seed_bonus = $seed_points = $valuetwo * atan($A / $l_bonus) + ($perseeding_bonus * $count);
         // Official addition doesn't consider the minimum value.
         $official_bonus = $valuetwo * atan($official_a / $l_bonus);
-        $medal_bonus = $valuetwo * atan($A / $l_bonus);
 
         $result = compact(
             'seed_points', 'seed_bonus', 'A', 'count', 'torrent_peer_count', 'size', 'last_action',
-            'official_bonus', 'official_a', 'official_torrent_peer_count', 'official_size', 'medal_bonus',
+            'official_bonus', 'official_a', 'official_torrent_peer_count', 'official_size',
         );
         $result['donor_times'] = $donortimes_bonus;
         $result['official_additional_factor'] = $officialAdditionalFactor;
-        $result['medal_additional_factor'] = $medalAdditionalFactor;
         $result['ip_arr'] = array_keys($ip_arr);
 
         return $result;
     }
 
     /**
-     * Build the per-user bonus breakdown table (basic + optional medal,
+     * Build the per-user bonus breakdown table (basic + optional
      * official and harem addition rows) from an already-resolved
      * calculate_seed_bonus() result and the relevant bonus settings.
      *
@@ -216,7 +210,7 @@ class Bonus
         $totalBonus = $baseBonus;
 
         $rowSpan = 1;
-        $hasHaremAddition = $hasOfficialAddition = $hasMedalAddition = false;
+        $hasHaremAddition = $hasOfficialAddition = false;
         if ($haremFactor > 0) {
             $rowSpan++;
             $hasHaremAddition = true;
@@ -226,11 +220,6 @@ class Bonus
             $rowSpan++;
             $hasOfficialAddition = true;
             $totalBonus += $bonusResult['official_bonus'] * $officialAdditionalFactor;
-        }
-        if ($bonusResult['medal_additional_factor'] > 0) {
-            $rowSpan++;
-            $hasMedalAddition = true;
-            $totalBonus += $bonusResult['medal_bonus'] * $bonusResult['medal_additional_factor'];
         }
 
         $headers = [
@@ -253,17 +242,6 @@ class Bonus
             number_format($baseBonus, 3),
         ];
         $extraRows = [];
-        if ($hasMedalAddition) {
-            $extraRows[] = [
-                Locale::trans('bonus.reward_types.medal_addition', [], null),
-                $bonusResult['torrent_peer_count'],
-                Format::size((float) $bonusResult['size']),
-                number_format($bonusResult['A'], 3),
-                number_format($bonusResult['medal_bonus'], 3),
-                number_format($bonusResult['medal_additional_factor'], 3),
-                number_format($bonusResult['medal_bonus'] * $bonusResult['medal_additional_factor'], 3),
-            ];
-        }
         if ($hasOfficialAddition) {
             $extraRows[] = [
                 Locale::trans('bonus.reward_types.official_addition', [], null),
@@ -301,8 +279,6 @@ class Bonus
             'harem_addition_factor' => $haremFactor,
             'has_official_addition' => $hasOfficialAddition,
             'official_addition_factor' => $officialAdditionalFactor,
-            'has_medal_addition' => $hasMedalAddition,
-            'medal_addition_factor' => $bonusResult['medal_additional_factor'],
         ];
     }
 

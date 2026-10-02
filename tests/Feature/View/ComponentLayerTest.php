@@ -541,7 +541,8 @@ final class ComponentLayerTest extends TestCase
             'value' => '2030-01-01 00:00',
         ])->render();
 
-        $this->assertStringContainsString('Deadline:&nbsp;<input type="datetime-local"', $html);
+        $this->assertStringContainsString('<label for="datetime-picker-pos_state_until">Deadline:&nbsp;</label>', $html);
+        $this->assertStringContainsString('<input type="datetime-local"', $html);
         $this->assertStringContainsString('name="pos_state_until"', $html);
     }
 

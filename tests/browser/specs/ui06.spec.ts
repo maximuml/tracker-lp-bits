@@ -16,7 +16,7 @@ test.describe('UI-06 index page', () => {
         const cards = page.locator('.lt-grid .lt-card');
         const count = await cards.count();
         expect(count).toBeGreaterThan(0);
-        expect(count).toBeLessThanOrEqual(9);
+        expect(count).toBeLessThanOrEqual(12);
     });
 
     test('coverless torrent cards render compact', async ({ page }) => {

@@ -16,12 +16,26 @@ dump_on_failure() {
 }
 trap 'rc=$?; if [ $rc -ne 0 ]; then dump_on_failure; fi' EXIT
 
+# docker compose exec transiently fails on shared runners (exit 255, daemon
+# hiccups) while the container is healthy — retry before declaring failure.
+dex() {
+    local attempt
+    for attempt in 1 2 3 4 5; do
+        if docker compose exec -T "$@"; then
+            return 0
+        fi
+        echo "docker compose exec $* failed (attempt $attempt/5), retrying" >&2
+        sleep 2
+    done
+    return 1
+}
+
 echo "=== Verify PHP health ==="
 # PHP-FPM must respond to a basic artisan command
-docker compose exec -T php php artisan about --no-interaction
+dex php php artisan about --no-interaction
 
 echo "=== Verify non-root UID ==="
-uid=$(docker compose exec -T php id -u)
+uid=$(dex php id -u)
 if [ "$uid" = "0" ]; then
     echo "FAIL: PHP container running as root (uid=0)"
     exit 1
@@ -37,22 +51,22 @@ fi
 echo "OK: rootfs is read-only"
 
 echo "=== Verify writable storage volume ==="
-docker compose exec -T php sh -c 'echo test > /var/www/html/storage/framework/cache/test_write && rm /var/www/html/storage/framework/cache/test_write'
+dex php sh -c 'echo test > /var/www/html/storage/framework/cache/test_write && rm /var/www/html/storage/framework/cache/test_write'
 echo "OK: storage volume is writable"
 
 echo "=== Verify writable attachments volume ==="
-docker compose exec -T php sh -c 'echo test > /var/www/html/attachments/test_write && rm /var/www/html/attachments/test_write'
+dex php sh -c 'echo test > /var/www/html/attachments/test_write && rm /var/www/html/attachments/test_write'
 echo "OK: attachments volume is writable"
 
 echo "=== Verify writable torrents volume ==="
-docker compose exec -T php sh -c 'echo test > /var/www/html/torrents/test_write && rm /var/www/html/torrents/test_write'
+dex php sh -c 'echo test > /var/www/html/torrents/test_write && rm /var/www/html/torrents/test_write'
 echo "OK: torrents volume is writable"
 
 echo "=== Verify static assets exist in public ==="
 # There is no Node/Vite build step (removed in step 1.1): assets ship in the
 # repo, so verify the shipped CSS/JS trees are non-empty in the image.
-docker compose exec -T php sh -c 'ls /var/www/html/public/css/ | head -1 | grep -q .'
-docker compose exec -T php sh -c 'ls /var/www/html/public/js/ | head -1 | grep -q .'
+dex php sh -c 'ls /var/www/html/public/css/ | head -1 | grep -q .'
+dex php sh -c 'ls /var/www/html/public/js/ | head -1 | grep -q .'
 echo "OK: static assets exist in public/css/ and public/js/"
 
 echo "=== Verify public-data volume init ran ==="
@@ -64,15 +78,15 @@ echo "OK: public-data volume synced from image"
 
 echo "=== Verify route/config/view caches ==="
 # Laravel 13 uses routes-v7.php (new route caching format)
-docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/routes-v7.php'
-docker compose exec -T php sh -c 'test -f /var/www/html/bootstrap/cache/config.php'
+dex php sh -c 'test -f /var/www/html/bootstrap/cache/routes-v7.php'
+dex php sh -c 'test -f /var/www/html/bootstrap/cache/config.php'
 # view:cache compiles templates to storage/framework/views/, not a single file
-docker compose exec -T php sh -c 'test -d /var/www/html/storage/framework/views && [ "$(ls -A /var/www/html/storage/framework/views/)" ]'
+dex php sh -c 'test -d /var/www/html/storage/framework/views && [ "$(ls -A /var/www/html/storage/framework/views/)" ]'
 echo "OK: route/config/view caches exist"
 
 echo "=== Verify DB connectivity ==="
 # tinker is dev-only; use migrate:status which always works
-docker compose exec -T php php artisan migrate:status --no-interaction >/dev/null 2>&1
+dex php php artisan migrate:status --no-interaction >/dev/null 2>&1
 echo "OK: DB connectivity verified"
 
 echo "=== Verify Redis connectivity ==="
@@ -82,13 +96,13 @@ docker compose ps redis --format '{{.Status}}' | grep -qi "healthy\|up"
 echo "OK: Redis connectivity verified"
 
 echo "=== Verify MeiliSearch connectivity ==="
-docker compose exec -T php sh -c 'curl -sf http://${MEILISEARCH_HOST:-meilisearch}:7700/health 2>/dev/null'
+dex php sh -c 'curl -sf http://${MEILISEARCH_HOST:-meilisearch}:7700/health 2>/dev/null'
 echo ""
 echo "OK: MeiliSearch connectivity verified"
 
 echo "=== Verify queue worker is running ==="
 # Queue container should be up and horizon should report active
-status=$(docker compose exec -T queue php artisan horizon:status 2>&1)
+status=$(dex queue php artisan horizon:status 2>&1)
 echo "Horizon status: $status"
 echo "$status" | grep -q "running\|active" || { echo "FAIL: horizon not running"; exit 1; }
 echo "OK: queue worker (horizon) is running"
@@ -127,18 +141,12 @@ fi
 echo "OK: /metrics closed without bearer token in production"
 
 echo "=== Verify OpenResty config is valid ==="
-# docker compose exec can transiently fail (exit 255) while the container is
-# healthy — retry a few times before declaring the config bad.
-openresty_ok=0
-for attempt in 1 2 3; do
-    if docker compose exec -T openresty openresty -t 2>&1 | grep -q "syntax is ok\|test is successful"; then
-        openresty_ok=1
-        break
-    fi
-    sleep 3
-done
-if [ "$openresty_ok" != "1" ]; then
+# Keep the output for diagnostics: an empty/garbled exec result previously
+# showed up as an unexplained "did not succeed".
+openresty_out=$(dex openresty openresty -t 2>&1) || true
+if ! printf '%s\n' "$openresty_out" | grep -q "syntax is ok\|test is successful"; then
     echo "FAIL: openresty -t did not succeed"
+    printf '%s\n' "$openresty_out"
     exit 1
 fi
 echo "OK: OpenResty config is valid"

@@ -72,7 +72,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('messages', MessageController::class)->only(['store'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::MESSAGE_STORE));
         Route::apiResource('messages', MessageController::class)->only(['show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::MESSAGE_SHOW));
         Route::put('messages/{message}', [MessageController::class, 'update'])->name('messages.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::MESSAGE_UPDATE));
-        Route::patch('messages/{message}', [MessageController::class, 'update'])->name('messages.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::MESSAGE_UPDATE));
+        Route::patch('messages/{message}', [MessageController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::MESSAGE_UPDATE));
         Route::apiResource('messages', MessageController::class)->only(['destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::MESSAGE_DESTROY));
         Route::get('messages-unread', [MessageController::class, 'listUnread'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::MESSAGE_UNREAD));
@@ -113,7 +113,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('news', NewsController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_LIST));
         Route::apiResource('news', NewsController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_MANAGE));
         Route::put('news/{news}', [NewsController::class, 'update'])->name('news.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_MANAGE));
-        Route::patch('news/{news}', [NewsController::class, 'update'])->name('news.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_MANAGE));
+        Route::patch('news/{news}', [NewsController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_MANAGE));
         Route::get('news-latest', [NewsController::class, 'latest'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_LATEST));
 
@@ -123,7 +123,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('polls', PollController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::POLL_LIST));
         Route::apiResource('polls', PollController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::POLL_MANAGE));
         Route::put('polls/{poll}', [PollController::class, 'update'])->name('polls.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::POLL_MANAGE));
-        Route::patch('polls/{poll}', [PollController::class, 'update'])->name('polls.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::POLL_MANAGE));
+        Route::patch('polls/{poll}', [PollController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::POLL_MANAGE));
         Route::get('polls-latest', [PollController::class, 'latest'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::POLL_LATEST));
         Route::post('polls-vote', [PollController::class, 'vote'])
@@ -140,12 +140,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('forums', ForumController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::FORUM_LIST));
         Route::apiResource('forums', ForumController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::FORUM_MANAGE));
         Route::put('forums/{forum}', [ForumController::class, 'update'])->name('forums.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::FORUM_MANAGE));
-        Route::patch('forums/{forum}', [ForumController::class, 'update'])->name('forums.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::FORUM_MANAGE));
+        Route::patch('forums/{forum}', [ForumController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::FORUM_MANAGE));
 
         Route::apiResource('topics', TopicController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
         Route::apiResource('topics', TopicController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_MANAGE));
         Route::put('topics/{topic}', [TopicController::class, 'update'])->name('topics.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_MANAGE));
-        Route::patch('topics/{topic}', [TopicController::class, 'update'])->name('topics.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_MANAGE));
+        Route::patch('topics/{topic}', [TopicController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_MANAGE));
 
         Route::get('topics/{topic}/posts', [PostController::class, 'index'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TOPIC_LIST));
@@ -190,7 +190,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('agent-allows', AgentAllowController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_ALLOW_LIST));
         Route::apiResource('agent-allows', AgentAllowController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_ALLOW_MANAGE));
         Route::put('agent-allows/{agent_allow}', [AgentAllowController::class, 'update'])->name('agent-allows.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_ALLOW_MANAGE));
-        Route::patch('agent-allows/{agent_allow}', [AgentAllowController::class, 'update'])->name('agent-allows.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_ALLOW_MANAGE));
+        Route::patch('agent-allows/{agent_allow}', [AgentAllowController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_ALLOW_MANAGE));
         Route::get('all-agent-allows', [AgentAllowController::class, 'all'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_ALLOW_ALL));
         Route::post('agent-check', [AgentAllowController::class, 'check'])
@@ -199,7 +199,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('agent-denies', AgentDenyController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_DENY_LIST));
         Route::apiResource('agent-denies', AgentDenyController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_DENY_MANAGE));
         Route::put('agent-denies/{agent_deny}', [AgentDenyController::class, 'update'])->name('agent-denies.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_DENY_MANAGE));
-        Route::patch('agent-denies/{agent_deny}', [AgentDenyController::class, 'update'])->name('agent-denies.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_DENY_MANAGE));
+        Route::patch('agent-denies/{agent_deny}', [AgentDenyController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::AGENT_DENY_MANAGE));
 
         Route::apiResource('users', UserController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_VIEW));
         Route::apiResource('users', UserController::class)->only(['store'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_STORE));
@@ -227,7 +227,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('exams', ExamController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_LIST));
         Route::apiResource('exams', ExamController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_MANAGE));
         Route::put('exams/{exam}', [ExamController::class, 'update'])->name('exams.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_MANAGE));
-        Route::patch('exams/{exam}', [ExamController::class, 'update'])->name('exams.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_MANAGE));
+        Route::patch('exams/{exam}', [ExamController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_MANAGE));
         Route::get('exams-all', [ExamController::class, 'all'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_ALL));
         Route::get('exam-indexes', [ExamController::class, 'indexes'])
@@ -258,11 +258,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::apiResource('tags', TagController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TAG_LIST));
         Route::apiResource('tags', TagController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TAG_MANAGE));
         Route::put('tags/{tag}', [TagController::class, 'update'])->name('tags.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::TAG_MANAGE));
-        Route::patch('tags/{tag}', [TagController::class, 'update'])->name('tags.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::TAG_MANAGE));
+        Route::patch('tags/{tag}', [TagController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::TAG_MANAGE));
         Route::apiResource('hr', HitAndRunController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::HIT_AND_RUN_LIST));
         Route::apiResource('hr', HitAndRunController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::HIT_AND_RUN_MANAGE));
         Route::put('hr/{hr}', [HitAndRunController::class, 'update'])->name('hr.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::HIT_AND_RUN_MANAGE));
-        Route::patch('hr/{hr}', [HitAndRunController::class, 'update'])->name('hr.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::HIT_AND_RUN_MANAGE));
+        Route::patch('hr/{hr}', [HitAndRunController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::HIT_AND_RUN_MANAGE));
         Route::get('hr-status', [HitAndRunController::class, 'listStatus'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::HIT_AND_RUN_LIST_STATUS));
         Route::put('hr-pardon/{id}', [HitAndRunController::class, 'pardon'])

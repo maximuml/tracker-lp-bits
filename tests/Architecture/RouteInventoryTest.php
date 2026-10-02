@@ -255,7 +255,7 @@ final class RouteInventoryTest extends TestCase
 
     private function countAppMutationRoutes(): int
     {
-        $count = 0;
+        $endpoints = [];
         /** @var Route[] $routes */
         $routes = RouteFacade::getRoutes()->getRoutes();
 
@@ -285,9 +285,9 @@ final class RouteInventoryTest extends TestCase
                 continue;
             }
 
-            $count++;
+            $endpoints[$route->uri().'|'.$action] = true;
         }
 
-        return $count;
+        return count($endpoints);
     }
 }

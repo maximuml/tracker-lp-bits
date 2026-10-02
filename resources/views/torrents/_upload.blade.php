@@ -26,7 +26,8 @@
 						</x-alert>
 					</div>
 				@endif
-				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_torrent_file')).'<span class=nx-color-red>*</span>')">
+				<x-settings-row layout="grid">
+					<x-slot:label>{{ __('legacy/upload.row_torrent_file') }}<span class="nx-color-red">*</span></x-slot:label>
 					<input type="file" class="file" id="torrent" name="file" aria-label="{{ __('legacy/upload.row_torrent_file') }}" required @error('file') aria-invalid="true" aria-describedby="file-error"@enderror />
 					@error('file')<div class="nx-field__error" id="file-error" role="alert">{{ $message }}</div>@enderror
 					@if ($errors->any())
@@ -66,7 +67,8 @@
 					</div>
 				@endif
 
-				<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_type')).'<span class=nx-color-red>*</span>')">
+				<x-settings-row layout="grid">
+					<x-slot:label>{{ __('legacy/upload.row_type') }}<span class="nx-color-red">*</span></x-slot:label>
 					<select name="type" id="browsecat" data-mode="{{ $browsecatmode }}" aria-label="{{ __('legacy/upload.row_type') }}" required @error('type') aria-invalid="true" aria-describedby="type-error"@enderror>
 						<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 						@foreach ($cats as $row)
@@ -98,7 +100,8 @@
 
 				<div class="nx-fsection">{{ __('legacy/upload.section_publish') }}</div>
 				@if (! empty($offerRows))
-					<x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/upload.row_your_offer')).(!$uploadFreely ? '<span class=nx-color-red>*</span>' : ''))">
+					<x-settings-row layout="grid">
+						<x-slot:label>{{ __('legacy/upload.row_your_offer') }}@if (! $uploadFreely)<span class="nx-color-red">*</span>@endif</x-slot:label>
 						<select name="offer" id="offer"@error('offer') aria-invalid="true" aria-describedby="offer-error"@enderror>
 							<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 							@foreach ($offerRows as $offerrow)

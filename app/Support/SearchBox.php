@@ -31,7 +31,7 @@ final class SearchBox
             if ($cached !== false && is_array($cached)) {
                 self::$rows = $cached;
             } else {
-                self::$rows = app(SearchBoxRepositoryInterface::class)->getAllRows();
+                self::$rows = self::searchBoxRepository()->getAllRows();
                 if ($cache !== null) {
                     $cache->cache_value('search_box_content', self::$rows, 100500);
                 }
@@ -61,9 +61,9 @@ final class SearchBox
         }
 
         if ($mode > 0) {
-            $ret = app(SearchBoxRepositoryInterface::class)->getTaxonomyList($table, $mode);
+            $ret = self::searchBoxRepository()->getTaxonomyList($table, $mode);
         } else {
-            $ret = app(SearchBoxRepositoryInterface::class)->getTaxonomyList($table, 0);
+            $ret = self::searchBoxRepository()->getTaxonomyList($table, 0);
         }
 
         if ($cache !== null) {
@@ -104,7 +104,7 @@ final class SearchBox
      */
     public static function valueWithContext(int|string $mode, string $item = 'showsubcat'): mixed
     {
-        return self::value(app(LegacyRedisCache::class), $mode, $item);
+        return self::value(LegacyRedisCache::instance(), $mode, $item);
     }
 
     /**
@@ -116,6 +116,11 @@ final class SearchBox
      */
     public static function itemListWithContext(string $table, int|string $mode): array
     {
-        return self::itemList(app(LegacyRedisCache::class), $table, $mode);
+        return self::itemList(LegacyRedisCache::instance(), $table, $mode);
+    }
+
+    private static function searchBoxRepository(): SearchBoxRepositoryInterface
+    {
+        return app(SearchBoxRepositoryInterface::class);
     }
 }

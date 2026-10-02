@@ -266,7 +266,7 @@ final class Time
         bool $oneunit,
         bool $isfuturetime,
     ): array|false|null {
-        $CURUSER = app(CurrentUser::class)->get();
+        $CURUSER = CurrentUser::instance()->get();
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
         $timeStr = $time instanceof Carbon ? $time->toDateTimeString() : (string) $time;
 
@@ -330,7 +330,7 @@ final class Time
             return null;
         }
 
-        if (! app(LegacyRuntime::class)->isLegacy()) {
+        if (! LegacyRuntime::instance()->isLegacy()) {
             try {
                 return Carbon::parse($time)->diffForHumans();
             } catch (\Exception $e) {
@@ -376,7 +376,7 @@ final class Time
             return null;
         }
 
-        if (! app(LegacyRuntime::class)->isLegacy()) {
+        if (! LegacyRuntime::instance()->isLegacy()) {
             $attr = $time instanceof Carbon ? $time->toDateTimeString() : (string) $time;
             try {
                 $inner = SafeHtml::fromPlainText(Carbon::parse($time)->diffForHumans());

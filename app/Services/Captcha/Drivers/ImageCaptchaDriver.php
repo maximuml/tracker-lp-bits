@@ -165,7 +165,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         // T-11: Use LegacyHeaderBag instead of SAPI header() to avoid
         // cross-request header leakage under Octane.
-        app(LegacyHeaderBag::class)->set('Content-Type', 'image/png');
+        LegacyHeaderBag::instance()->set('Content-Type', 'image/png');
         imagepng($im);
         imagedestroy($im);
     }
@@ -183,6 +183,6 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     {
         // T-11: Use LegacyHeaderBag instead of SAPI http_response_code() to
         // avoid cross-request status code leakage under Octane.
-        app(LegacyHeaderBag::class)->setStatusCode(404);
+        LegacyHeaderBag::instance()->setStatusCode(404);
     }
 }

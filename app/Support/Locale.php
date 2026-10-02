@@ -75,7 +75,7 @@ final class Locale
      */
     public static function folderForId(int|string $langId, string $default = 'en'): string
     {
-        return app(LanguageRepository::class)->getFolderForId((int) $langId, $default);
+        return self::languageRepository()->getFolderForId((int) $langId, $default);
     }
 
     /**
@@ -120,7 +120,7 @@ final class Locale
      */
     public static function idFromFolder(string $lang): int
     {
-        return app(LanguageRepository::class)->getIdFromFolder($lang);
+        return self::languageRepository()->getIdFromFolder($lang);
     }
 
     /**
@@ -133,7 +133,7 @@ final class Locale
      */
     public static function languageList(string $type, ?bool $enabled = null): array
     {
-        return app(LanguageRepository::class)->getLanguageList($type, $enabled);
+        return self::languageRepository()->getLanguageList($type, $enabled);
     }
 
     /**
@@ -144,7 +144,7 @@ final class Locale
      */
     public static function guestId(string $langFolder): int
     {
-        return app(LanguageRepository::class)->getGuestId($langFolder);
+        return self::languageRepository()->getGuestId($langFolder);
     }
 
     /**
@@ -152,7 +152,7 @@ final class Locale
      */
     public static function currentLangDir(string $default = ''): string
     {
-        $dir = app(Globals::class)->get('CURLANGDIR', $default);
+        $dir = Globals::instance()->get('CURLANGDIR', $default);
 
         return is_string($dir) ? $dir : $default;
     }
@@ -186,6 +186,11 @@ final class Locale
      */
     public static function userLocale(int $uid): string
     {
-        return app(LanguageRepository::class)->getUserLocale($uid);
+        return self::languageRepository()->getUserLocale($uid);
+    }
+
+    private static function languageRepository(): LanguageRepository
+    {
+        return app(LanguageRepository::class);
     }
 }

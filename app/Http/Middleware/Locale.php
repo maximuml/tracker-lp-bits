@@ -51,7 +51,7 @@ class Locale
 
     public static function getLocaleFromCookie(): string
     {
-        $runtime = app(LegacyRuntime::class);
+        $runtime = LegacyRuntime::instance();
         if ($runtime->isLegacy()) {
             $lang = $runtime->isTracker() ? null : \App\Support\Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
             $log = "legacy runtime, get_langfolder_cookie() or tracker use null: $lang";

@@ -44,6 +44,6 @@ final class Country
      */
     public static function rowWithContext(int|string $id): ?array
     {
-        return self::row(app(LegacyRedisCache::class), $id);
+        return self::row(LegacyRedisCache::instance(), $id);
     }
 }

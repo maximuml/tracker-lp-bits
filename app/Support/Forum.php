@@ -54,7 +54,7 @@ final class Forum
             if ($cached !== false && is_array($cached)) {
                 $moderatorsArray = $cached;
             } else {
-                $moderatorsArray = app(ForumModRepository::class)->getModeratorArray();
+                $moderatorsArray = self::forumModRepository()->getModeratorArray();
                 if ($cache !== null) {
                     $cache->cache_value('forum_moderator_array', $moderatorsArray, 86200);
                 }
@@ -79,14 +79,14 @@ final class Forum
      */
     public static function isModerator(int|string $id, string $in = 'post'): bool
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = CurrentUser::instance()->get() ?? [];
 
-        $forumRep = app(ForumModRepository::class);
+        $forumRep = self::forumModRepository();
         $userId = (int) ($CURUSER['id'] ?? 0);
 
         switch ($in) {
             case 'post':
-                $topicId = app(TopicRepository::class)->getTopicIdByPost((int) $id);
+                $topicId = self::topicRepository()->getTopicIdByPost((int) $id);
                 if ($topicId !== null) {
                     return self::isModerator($topicId, 'topic');
                 }
@@ -94,7 +94,7 @@ final class Forum
                 return false;
 
             case 'topic':
-                return app(TopicRepository::class)->isModeratorOfTopic((int) $id, $userId);
+                return self::topicRepository()->isModeratorOfTopic((int) $id, $userId);
 
             case 'forum':
                 return $forumRep->isModeratorOfForum((int) $id, $userId);
@@ -122,12 +122,12 @@ final class Forum
         static $forumMods = null;
 
         if (! is_array($post)) {
-            $post = app(PostLookupRepository::class)->getPostArrayById((int) $post);
+            $post = self::postLookupRepository()->getPostArrayById((int) $post);
         }
 
         $topicId = $post['topicid'];
         if (! isset($topics[$topicId])) {
-            $topics[$topicId] = app(TopicRepository::class)->getTopicById($topicId);
+            $topics[$topicId] = self::topicRepository()->getTopicById($topicId);
         }
         /** @var Topic $topicInfo */
         $topicInfo = $topics[$topicId];
@@ -141,7 +141,7 @@ final class Forum
         }
 
         if ($forumMods === null) {
-            $forumMods = app(ForumModRepository::class)->getForumMods();
+            $forumMods = self::forumModRepository()->getForumMods();
         }
 
         $isForumMod = isset($forumMods[$forumId]) && $forumMods[$forumId] == $uid;
@@ -187,7 +187,7 @@ final class Forum
         $row = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $row = app(PostLookupRepository::class)->findPostArrayById((int) $postId);
+            $row = self::postLookupRepository()->findPostArrayById((int) $postId);
             if ($cache !== null) {
                 $cache->cache_value($cacheKey, $row, 7200);
             }
@@ -203,7 +203,7 @@ final class Forum
      */
     public static function postRowWithContext(int|string $postId): ?array
     {
-        return self::postRow(app(LegacyRedisCache::class), $postId);
+        return self::postRow(LegacyRedisCache::instance(), $postId);
     }
 
     /**
@@ -211,6 +211,21 @@ final class Forum
      */
     public static function moderatorsWithContext(int|string $forumId, bool $plainText = true): string
     {
-        return self::moderators(app(LegacyRedisCache::class), $forumId, $plainText);
+        return self::moderators(LegacyRedisCache::instance(), $forumId, $plainText);
+    }
+
+    private static function forumModRepository(): ForumModRepository
+    {
+        return app(ForumModRepository::class);
+    }
+
+    private static function topicRepository(): TopicRepository
+    {
+        return app(TopicRepository::class);
+    }
+
+    private static function postLookupRepository(): PostLookupRepository
+    {
+        return app(PostLookupRepository::class);
     }
 }

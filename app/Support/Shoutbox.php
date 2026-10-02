@@ -66,7 +66,7 @@ final class Shoutbox
      */
     public static function applyTypeFilter($query, string $type, $user = null): void
     {
-        app(ShoutboxRepository::class)->applyTypeFilter($query, $type, $user);
+        self::shoutboxRepository()->applyTypeFilter($query, $type, $user);
     }
 
     /**
@@ -189,7 +189,7 @@ final class Shoutbox
             return ['counts' => [], 'mine' => [], 'users' => []];
         }
 
-        return app(ShoutboxRepository::class)->prefetchReactions($shoutIds, $currentUserId);
+        return self::shoutboxRepository()->prefetchReactions($shoutIds, $currentUserId);
     }
 
     /**
@@ -212,8 +212,8 @@ final class Shoutbox
             $myReactions = $myReactionsMap ?? [];
             $reactors = $reactorMap ?? [];
         } else {
-            $counts = app(ShoutboxRepository::class)->getReactionCounts($shoutId);
-            $myReactions = app(ShoutboxRepository::class)->getMyReactions($shoutId, $currentUserId);
+            $counts = self::shoutboxRepository()->getReactionCounts($shoutId);
+            $myReactions = self::shoutboxRepository()->getMyReactions($shoutId, $currentUserId);
 
             $reactors = [];
         }
@@ -290,7 +290,7 @@ final class Shoutbox
                 $nick = $m[1];
                 $key = strtolower($nick);
                 if (! array_key_exists($key, $cache)) {
-                    $cache[$key] = app(ShoutboxRepository::class)->findUserByUsername($nick) ?? false;
+                    $cache[$key] = self::shoutboxRepository()->findUserByUsername($nick) ?? false;
                 }
                 if (! $cache[$key]) {
                     return $m[0];
@@ -336,7 +336,7 @@ final class Shoutbox
                     return $m[0];
                 }
                 if (! array_key_exists($id, $cache)) {
-                    $cache[$id] = app(ShoutboxRepository::class)->torrentExists($id);
+                    $cache[$id] = self::shoutboxRepository()->torrentExists($id);
                 }
                 if (! $cache[$id]) {
                     return $m[0];
@@ -346,5 +346,10 @@ final class Shoutbox
             },
             $html
         );
+    }
+
+    private static function shoutboxRepository(): ShoutboxRepository
+    {
+        return app(ShoutboxRepository::class);
     }
 }

@@ -22,6 +22,11 @@ class CurrentUser
 
     private bool $initialized = false;
 
+    public static function instance(): self
+    {
+        return app(self::class);
+    }
+
     /**
      * Get the current user as a legacy array, or null if not logged in.
      *

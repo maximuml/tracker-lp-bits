@@ -20,7 +20,7 @@ final class SettingsSeed
 {
     public static function seed(): void
     {
-        $globals = app(Globals::class);
+        $globals = Globals::instance();
 
         // load settings from database
         $settings = Settings::get();

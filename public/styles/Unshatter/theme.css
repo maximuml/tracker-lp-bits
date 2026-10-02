@@ -26,10 +26,11 @@ html[data-theme="dark"]:root {
     --nxm-accent-hover: #ffdf47;
     --nxm-on-accent: #111114;
     --nxm-success: #6fc76f;
-    --nxm-danger: #e8343f;
+    --nxm-danger: #ff5252;
     --nxm-warning: #ffd400;
     --nxm-on-success: #111114;
     --nxm-on-warning: #111114;
+    --nxm-on-danger: #111114;
 
     /* chrome */
     --nxm-header-bg: #0d0d10;
@@ -42,7 +43,7 @@ html[data-theme="dark"]:root {
     --nxm-userbar-link: #ffd400;
     --nxm-userbar-stat: #f2f2f4;
     --nxm-userbar-ok: #7ee787;
-    --nxm-userbar-bad: #e8343f;
+    --nxm-userbar-bad: #ff5252;
 
     /* rank name colours — readable on near-black */
     --nxm-name-administrator: #c79af0;
@@ -102,7 +103,7 @@ html[data-theme="light"]:root {
     --nxm-userbar-link: #ffd400;
     --nxm-userbar-stat: #f2f2f4;
     --nxm-userbar-ok: #3fae5b;
-    --nxm-userbar-bad: #d93440;
+    --nxm-userbar-bad: #ff5252;
 
     --nxm-name-administrator: #4b0082;
     --nxm-name-crazyuser: #007faa;
@@ -144,10 +145,11 @@ html[data-theme="light"]:root {
         --nxm-accent-hover: #ffdf47;
         --nxm-on-accent: #111114;
         --nxm-success: #6fc76f;
-        --nxm-danger: #e8343f;
+        --nxm-danger: #ff5252;
         --nxm-warning: #ffd400;
     --nxm-on-success: #111114;
     --nxm-on-warning: #111114;
+        --nxm-on-danger: #111114;
         --nxm-header-bg: #0d0d10;
         --nxm-header-text: #f2f2f4;
         --nxm-header-dim: #8a8d97;
@@ -158,7 +160,7 @@ html[data-theme="light"]:root {
         --nxm-userbar-link: #ffd400;
         --nxm-userbar-stat: #f2f2f4;
         --nxm-userbar-ok: #7ee787;
-        --nxm-userbar-bad: #e8343f;
+        --nxm-userbar-bad: #ff5252;
 
         --nxm-name-administrator: #c79af0;
         --nxm-name-crazyuser: #5cc4ea;
@@ -214,7 +216,7 @@ html[data-theme="light"]:root {
         --nxm-userbar-link: #ffd400;
         --nxm-userbar-stat: #f2f2f4;
         --nxm-userbar-ok: #3fae5b;
-        --nxm-userbar-bad: #d93440;
+        --nxm-userbar-bad: #ff5252;
 
         --nxm-name-administrator: #4b0082;
         --nxm-name-crazyuser: #007faa;
@@ -288,6 +290,16 @@ html[data-theme]:root .nxm-alert.nxm-alert--blue a:link:not(.nxm-alert__action),
 html[data-theme]:root .nxm-alert.nxm-alert--blue a:visited:not(.nxm-alert__action) {
     color: var(--nxm-accent);
     text-decoration: underline;
+}
+
+/* The graphite card is fixed dark in both schemes, so action links take
+ * the accent colour — --nxm-accent-text (olive in light) is unreadable on it. */
+html[data-theme]:root .nxm-alert--blue a.nxm-alert__action:link,
+html[data-theme]:root .nxm-alert--blue a.nxm-alert__action:visited {
+    color: var(--nxm-accent);
+}
+html[data-theme]:root .nxm-alert--blue a.nxm-alert__action:hover {
+    color: var(--nxm-accent-hover);
 }
 
 html[data-theme]:root .nxm-alert.nxm-alert--blue a:hover {

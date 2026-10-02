@@ -1260,6 +1260,14 @@ document.addEventListener('error', function (e) {
     }
     applyToFrames(currentTheme());
 
+    // Keep iframes in sync when data-theme changes outside this toggle
+    // (tests, other scripts) — the click path already propagates itself.
+    if (typeof MutationObserver === 'function') {
+        new MutationObserver(function () {
+            applyToFrames(currentTheme());
+        }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
     paintAll();
 })();
 

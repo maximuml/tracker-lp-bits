@@ -116,13 +116,8 @@ td.shoutrow .shout-class-badge--staffleader { background: #bf360c; }
 
 .shout-actions {
     font-size: 11px;
-    opacity: .7;
     margin-right: 3px;
     white-space: nowrap;
-}
-
-td.shoutrow:hover .shout-actions {
-    opacity: 1;
 }
 
 .shout-actions a {

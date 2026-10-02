@@ -87,15 +87,13 @@ class InviteController extends LegacyController
                 $sendBtnText = $this->userModerationRepository->getInviteBtnText($currentUserId);
                 $disabled = '';
             } catch (\Exception $exception) {
-                [$backText, $backSuffix] = explode('</a>', (string) __('legacy/invite.here_to_go_back'), 2) + [1 => ''];
-
                 return $this->legacyAbortResponse(
                     __('legacy/invite.std_sorry'),
                     view('invite._back_message', [
                         'message' => $exception->getMessage(),
                         'backUrl' => 'invite.php?id='.(string) $currentUserId,
-                        'backText' => $backText,
-                        'backSuffix' => $backSuffix,
+                        'backText' => (string) __('legacy/invite.std_here'),
+                        'backSuffix' => (string) __('legacy/invite.std_to_go_back'),
                     ])->render(),
                     false
                 );

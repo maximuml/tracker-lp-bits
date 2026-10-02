@@ -22,7 +22,6 @@ use App\Support\Time;
 use App\Support\TorrentAccess;
 use App\Support\TorrentBookmark;
 use App\Support\UserDisplay;
-use Illuminate\Support\Str;
 
 /**
  * Assembles {@see TorrentDetailsViewModel} — the presentation assembly
@@ -277,13 +276,8 @@ JS, \json_encode($approvalTitle)), 'footer', false);
      */
     private function buildHotMeter(int $id, array $row): HotMeterRow
     {
-        // `text_view_snatches` carries ` x</b> time(s)</a>` — split the
-        // text parts out so the structural tags stay in Blade.
-        $snatches = (string) __('legacy/details.text_view_snatches');
-        $snatchesPre = Str::before($snatches, '</b>');
-        $snatchesPost = str_contains($snatches, '</b>')
-            ? strip_tags(Str::after($snatches, '</b>'))
-            : '';
+        $snatchesPre = (string) __('legacy/details.text_view_snatches_pre');
+        $snatchesPost = (string) __('legacy/details.text_view_snatches_post');
 
         return new HotMeterRow(
             views: $row['views'],

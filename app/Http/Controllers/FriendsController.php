@@ -157,12 +157,8 @@ class FriendsController extends LegacyController
         $targetid = (int) $targetid;
 
         if (! $sure) {
-            $sureText = (string) __('legacy/friends.std_here_if_sure');
-            if (preg_match('/^<b>(.*?)<\/b><\/a>(.*)$/', $sureText, $m) === 1) {
-                [$sureLinkText, $sureSuffix] = [$m[1], $m[2]];
-            } else {
-                [$sureLinkText, $sureSuffix] = [$sureText, ''];
-            }
+            $sureLinkText = (string) __('legacy/friends.std_here');
+            $sureSuffix = (string) __('legacy/friends.std_if_sure');
             $confirm = (__('legacy/friends.std_delete_note')).$typename.(__('legacy/friends.std_click')).
                 view('friends._confirm_delete', [
                     'userid' => $userid,

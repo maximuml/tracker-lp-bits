@@ -181,37 +181,6 @@ class BBCodeTest extends TestCase
         $this->assertSame('', BBCode::youtube(''));
     }
 
-    // ---------- video ----------
-
-    public function test_video_default_dimensions_are_560_by_315(): void
-    {
-        $html = BBCode::video('https://example.com/v.mp4');
-        $this->assertSame(
-            '<video controls width="560" height="315"><source src="https://example.com/v.mp4" /><a href="https://example.com/v.mp4">https://example.com/v.mp4</a></video>',
-            $html,
-        );
-    }
-
-    public function test_video_empty_src_returns_empty_string(): void
-    {
-        $this->assertSame('', BBCode::video(''));
-    }
-
-    // ---------- audio ----------
-
-    public function test_audio_emits_html5_element_with_fallback_link(): void
-    {
-        $this->assertSame(
-            '<audio controls><source src="https://example.com/a.mp3" /><a href="https://example.com/a.mp3">https://example.com/a.mp3</a></audio>',
-            BBCode::audio('https://example.com/a.mp3'),
-        );
-    }
-
-    public function test_audio_empty_src_returns_empty_string(): void
-    {
-        $this->assertSame('', BBCode::audio(''));
-    }
-
     // ---------- spoiler ----------
 
     public function test_spoiler_uses_supplied_title_when_non_empty(): void

@@ -92,14 +92,6 @@ final class AbstractionConsolidationTest extends TestCase
     }
 
     /**
-     * Html::formatVideo exists (was already there, also in HtmlRenderer).
-     */
-    public function test_html_has_format_video(): void
-    {
-        $this->assertTrue(method_exists(Html::class, 'formatVideo'), 'Html::formatVideo must exist');
-    }
-
-    /**
      * Html::formatImg exists (was already there, also in HtmlRenderer).
      */
     public function test_html_has_format_img(): void

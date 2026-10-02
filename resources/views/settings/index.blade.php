@@ -397,7 +397,8 @@
         [\App\Enums\UserClass::ULTIMATE_USER->value, 'uu', 80, 1536, 4.05, 3.95, 5],
         [\App\Enums\UserClass::NEXUS_MASTER->value, 'nm', 100, 3072, 4.55, 4.45, 10],
     ] as [$class, $prefix, $time, $dl, $prratio, $deratio, $invites])
-    <x-settings-row layout="grid" :label="\App\Support\Html\SafeHtml::fromTrustedHtml((__('legacy/settings.row_promote_to_one')).\App\Support\UserClass::name($class, false, false, true).(__('legacy/settings.row_promote_to_two')))">
+    <x-settings-row layout="grid">
+        <x-slot:label>{{ __('legacy/settings.row_promote_to_one') }}{{ \App\Support\UserClass::name($class, false, false, true) }}{{ __('legacy/settings.row_promote_to_two') }}</x-slot:label>
         {{ __('legacy/settings.text_alias') ?? 'Alias: ' }}<input type="text" name="{{ $class }}_alias" value="{{ (string)($config[$class.'_alias'] ?? '') }}"><br>
         {{ __('legacy/settings.text_member_longer_than') ?? 'Member for ' }}<input type="text" name="{{ $prefix }}time" value="{{ (string)($config[$prefix.'time'] ?? $time) }}">
         {{ __('legacy/settings.text_seed_points_more_than') ?? ' Seed points: ' }}<input type="text" name="{{ $class }}_min_seed_points" value="{{ (string)($config[$class.'_min_seed_points'] ?? 0) }}">

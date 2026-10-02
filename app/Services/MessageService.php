@@ -244,18 +244,15 @@ class MessageService
         $messageUrl = $baseUrl.'/messages.php?action=viewmessage&id='.$messageId;
 
         $title = $siteName.' '.Locale::trans('message.mail_received_pm_from', [], $locale).$sender->username.'!';
-        $body = Locale::trans('message.mail_dear', [], $locale).$recipient->username.",\n\n".
-            Locale::trans('message.mail_you_received_a_pm', [], $locale)."\n\n".
-            Locale::trans('message.mail_sender', [], $locale).': '.$sender->username."\n".
-            Locale::trans('message.mail_subject', [], $locale).': '.$subject."\n".
-            Locale::trans('message.mail_date', [], $locale).': '.date('Y-m-d H:i:s')."\n\n".
-            Locale::trans('message.mail_use_following_url', [], $locale).
-            "<b><a href=\"javascript:void(null)\" onclick=\"window.open('".$messageUrl."')\">".
-            Locale::trans('message.mail_here', [], $locale).'</a></b>'.
-            Locale::trans('message.mail_use_following_url_1', [], $locale).'<br />'.
-            $messageUrl."\n\n".
-            '------'.Locale::trans('message.mail_yours', [], $locale)."\n".
-            sprintf(Locale::trans('message.mail_the_site_team', [], $locale), $siteName);
+        $body = view('emails.new-pm', [
+            'recipientUsername' => (string) $recipient->username,
+            'senderUsername' => (string) $sender->username,
+            'subject' => $subject,
+            'date' => date('Y-m-d H:i:s'),
+            'messageUrl' => $messageUrl,
+            'siteName' => $siteName,
+            'locale' => $locale,
+        ])->render();
 
         Mail::queueLegacy(
             (string) $recipient->email,

@@ -14,7 +14,6 @@ namespace App\Support\Http;
  *
  * Categories:
  * - "protocol": BitTorrent protocol endpoints that accept any method
- * - "api": RESTful endpoints combining PUT+PATCH
  *
  * To reduce this list: split the controller action into separate
  * GET (display) and POST (submit) methods, then change the route to
@@ -34,18 +33,6 @@ final class MixedRouteAllowList
             'GET /scrape' => ['category' => 'protocol', 'reason' => 'BitTorrent scrape — same as announce'],
             'GET /scrape.php' => ['category' => 'protocol', 'reason' => 'Legacy .php alias for scrape'],
 
-            // --- api.php: RESTful (Route::apiResource update — PUT+PATCH combined) ---
-            'PUT api/v1/messages/{message}' => ['category' => 'api', 'reason' => 'RESTful message update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/news/{news}' => ['category' => 'api', 'reason' => 'RESTful news update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/polls/{poll}' => ['category' => 'api', 'reason' => 'RESTful poll update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/forums/{forum}' => ['category' => 'api', 'reason' => 'RESTful forum update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/topics/{topic}' => ['category' => 'api', 'reason' => 'RESTful topic update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/topics/{topic}/posts/{post}' => ['category' => 'api', 'reason' => 'RESTful post update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/agent-allows/{agent_allow}' => ['category' => 'api', 'reason' => 'RESTful agent-allow update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/agent-denies/{agent_deny}' => ['category' => 'api', 'reason' => 'RESTful agent-deny update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/exams/{exam}' => ['category' => 'api', 'reason' => 'RESTful exam update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/tags/{tag}' => ['category' => 'api', 'reason' => 'RESTful tag update — PUT+PATCH combined for compatibility'],
-            'PUT api/v1/hr/{hr}' => ['category' => 'api', 'reason' => 'RESTful H&R update — PUT+PATCH combined for compatibility'],
         ];
     }
 }

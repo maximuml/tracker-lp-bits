@@ -3,7 +3,6 @@
 namespace Tests\Unit\Support;
 
 use App\Support\AuthCookie;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -11,8 +10,6 @@ use Tests\TestCase;
 #[TestCategory(TestCategory::PURE_UNIT)]
 final class AuthCookieTest extends TestCase
 {
-    private const LEGACY_AUTH_KEY = 'test-secret-key-abc123';
-
     // ---------- buildToken() with Laravel encrypter ----------
 
     public function test_build_token_returns_encrypted_string(): void
@@ -86,81 +83,14 @@ final class AuthCookieTest extends TestCase
         $this->assertNull(AuthCookie::verifyToken('not-a-valid-cookie-value'));
     }
 
-    // ---------- legacy HMAC token fallback ----------
+    // ---------- legacy HMAC format is rejected ----------
 
-    private function buildLegacyToken(int $userId, string $authKey, int $expires): string
+    public function test_verify_token_rejects_legacy_hmac_format(): void
     {
-        $json = json_encode(['user_id' => $userId, 'expires' => $expires]);
-        $signature = hash_hmac('sha256', $json, $authKey);
+        $json = json_encode(['user_id' => 99, 'expires' => time() + 3600]);
+        $signature = hash_hmac('sha256', (string) $json, 'any-key');
 
-        return base64_encode($json.'.'.$signature);
-    }
-
-    public function test_verify_legacy_token_valid(): void
-    {
-        $expires = time() + 3600;
-        $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, $expires);
-
-        $result = AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY);
-
-        $this->assertNotNull($result);
-        $this->assertSame(99, $result['user_id']);
-        $this->assertSame($expires, $result['expires']);
-    }
-
-    public function test_verify_legacy_token_wrong_key_returns_null(): void
-    {
-        $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, time() + 3600);
-
-        $this->assertNull(AuthCookie::verifyToken($token, 'wrong-key'));
-    }
-
-    public function test_verify_legacy_token_expired_returns_null(): void
-    {
-        $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, time() - 100);
-
-        $this->assertNull(AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY));
-    }
-
-    public function test_verify_legacy_token_tampered_payload_returns_null(): void
-    {
-        $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, time() + 3600);
-        $decoded = base64_decode($token, true);
-        $tampered = str_replace('"user_id":99', '"user_id":1', $decoded);
-
-        $this->assertNull(AuthCookie::verifyToken(base64_encode($tampered), self::LEGACY_AUTH_KEY));
-    }
-
-    public function test_verify_legacy_token_returns_null_when_fallback_disabled(): void
-    {
-        config()->set('auth.legacy_cookie_fallback', false);
-
-        $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, time() + 3600);
-
-        $this->assertNull(AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY));
-    }
-
-    public function test_verify_legacy_token_increments_retirement_counter(): void
-    {
-        Cache::forget(AuthCookie::LEGACY_COOKIE_COUNTER_KEY);
-
-        $token = $this->buildLegacyToken(99, self::LEGACY_AUTH_KEY, time() + 3600);
-
-        AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY);
-        AuthCookie::verifyToken($token, self::LEGACY_AUTH_KEY);
-
-        $this->assertSame(2, (int) Cache::get(AuthCookie::LEGACY_COOKIE_COUNTER_KEY, 0));
-    }
-
-    public function test_verify_modern_token_does_not_increment_retirement_counter(): void
-    {
-        Cache::forget(AuthCookie::LEGACY_COOKIE_COUNTER_KEY);
-
-        $token = AuthCookie::buildToken(99, null, time() + 3600, 1);
-
-        AuthCookie::verifyToken($token);
-
-        $this->assertSame(0, (int) Cache::get(AuthCookie::LEGACY_COOKIE_COUNTER_KEY, 0));
+        $this->assertNull(AuthCookie::verifyToken(base64_encode($json.'.'.$signature)));
     }
 
     // ---------- computeExpires() ----------

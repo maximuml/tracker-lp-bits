@@ -9,9 +9,7 @@ use App\Models\User;
 use App\Support\Config\SiteConfig;
 use Dotenv\Dotenv;
 use Illuminate\Encryption\Encrypter;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Auth-cookie helpers extracted from `include/functions.php` (Phase 5
@@ -49,8 +47,8 @@ final class AuthCookie
      *
      * New tokens are encrypted with Laravel's encrypter (which uses
      * `APP_KEY`), making them independent of the per-user `auth_key`.
-     * Legacy HMAC tokens are still accepted by `verifyToken()` for the
-     * lifetime of the existing cookie.
+     * The legacy HMAC fallback was removed (ADR 0001, W1-04): only
+     * `APP_KEY`-encrypted tokens are accepted.
      *
      * @param  int  $userId  The user's `users.id`
      * @param  string|null  $authKey  Deprecated; no longer used, kept for call-site compatibility
@@ -75,15 +73,12 @@ final class AuthCookie
     /**
      * Verify and decode a `c_secure_pass` cookie value.
      *
-     * First tries the new Laravel-encrypted token (signed by `APP_KEY`).
-     * If that fails and `$authKey` is provided, falls back to the legacy
-     * HMAC token signed with the user's `auth_key`.
+     * Only Laravel-encrypted tokens (signed by `APP_KEY`) are accepted.
      *
      * @param  string  $token  The raw cookie value
-     * @param  string|null  $authKey  The user's `users.auth_key` for legacy HMAC verification
      * @return array{user_id: int, expires: int, auth_version: int|null}|null
      */
-    public static function verifyToken(string $token, ?string $authKey = null): ?array
+    public static function verifyToken(string $token): ?array
     {
         try {
             $decrypted = self::encrypter()->decryptString($token);
@@ -91,44 +86,11 @@ final class AuthCookie
             if (is_array($data)) {
                 return self::normalizePayload($data);
             }
-        } catch (\RuntimeException $e) {
-            // not an application-encrypted token, or APP_KEY is missing/invalid;
-            // try legacy HMAC below
+        } catch (\RuntimeException) {
+            // not an application-encrypted token, or APP_KEY is missing/invalid
         }
 
-        if (! self::legacyCookieFallbackEnabled() || $authKey === null || $authKey === '') {
-            return null;
-        }
-
-        $legacy = self::decodeCookie([self::COOKIE_NAME => $token]);
-        if ($legacy === null) {
-            return null;
-        }
-
-        $expectedSignature = hash_hmac('sha256', $legacy['token_json'], $authKey);
-        if (! hash_equals($expectedSignature, $legacy['signature'])) {
-            return null;
-        }
-
-        $data = json_decode($legacy['token_json'], true);
-        if (! is_array($data)) {
-            return null;
-        }
-        $payload = self::normalizePayload($data);
-        if ($payload === null) {
-            return null;
-        }
-
-        // W1-04: measure the remaining legacy-cookie traffic before removing
-        // this fallback. Log each accepted legacy cookie so the ops team can
-        // watch the rate drop to zero before flipping the flag off.
-        Log::info('Legacy HMAC auth cookie accepted', [
-            'user_id' => $payload['user_id'],
-            'ip' => request()->ip(),
-        ]);
-        self::incrementLegacyCookieCounter();
-
-        return $payload;
+        return null;
     }
 
     /**
@@ -154,37 +116,6 @@ final class AuthCookie
             'expires' => (int) $data['expires'],
             'auth_version' => $authVersion,
         ];
-    }
-
-    /**
-     * Cache key counting accepted legacy HMAC cookies (W1-04 retirement
-     * signal — readable via `redis-cli GET` without log plumbing).
-     */
-    public const LEGACY_COOKIE_COUNTER_KEY = 'auth:legacy_cookie_accepted';
-
-    /**
-     * Increment the legacy-cookie acceptance counter. Metrics must never
-     * break authentication, so any store failure is swallowed.
-     */
-    private static function incrementLegacyCookieCounter(): void
-    {
-        try {
-            Cache::increment(self::LEGACY_COOKIE_COUNTER_KEY);
-        } catch (\Throwable) {
-            // Intentionally ignored.
-        }
-    }
-
-    /**
-     * Whether the legacy HMAC cookie fallback is enabled.
-     *
-     * The fallback is on by default for the migration window. Once the
-     * log line above stops appearing for a full cookie lifetime, set
-     * `auth.legacy_cookie_fallback=false` to hard-disable it.
-     */
-    private static function legacyCookieFallbackEnabled(): bool
-    {
-        return (bool) config('auth.legacy_cookie_fallback', true);
     }
 
     /**
@@ -370,69 +301,9 @@ final class AuthCookie
     }
 
     /**
-     * Decode the signed user cookie value (c_secure_pass).
-     *
-     * Mirrors `get_user_id_and_signature_from_cookie()`.
-     *
-     * @param  array<string, mixed>  $cookie
-     * @return array{user_id: int, token_json: string, signature: string}|null
-     */
-    public static function decodeCookie(array $cookie): ?array
-    {
-        $log = 'cookie: '.json_encode($cookie);
-        if (empty($cookie[self::COOKIE_NAME])) {
-            Logger::writeWithContext("$log, param not enough");
-
-            return null;
-        }
-
-        $base64Decoded = base64_decode($cookie[self::COOKIE_NAME]);
-        if (empty($base64Decoded)) {
-            Logger::writeWithContext("$log, invalid c_secure_pass");
-
-            return null;
-        }
-
-        $log .= ", base64 decoded: $base64Decoded";
-        $tokenJsonAndSignature = explode('.', $base64Decoded);
-        if (count($tokenJsonAndSignature) !== 2) {
-            Logger::writeWithContext("$log, invalid c_secure_pass base64_decoded");
-
-            return null;
-        }
-
-        $tokenJson = $tokenJsonAndSignature[0];
-        $signature = $tokenJsonAndSignature[1];
-        if (empty($tokenJson) || empty($signature)) {
-            Logger::writeWithContext("$log, no tokenJson or signature");
-
-            return null;
-        }
-
-        $tokenData = json_decode($tokenJson, true);
-        if (! isset($tokenData['user_id'])) {
-            Logger::writeWithContext("$log, no user_id");
-
-            return null;
-        }
-        if (! isset($tokenData['expires']) || $tokenData['expires'] < time()) {
-            Logger::writeWithContext("$log, signature expired");
-
-            return null;
-        }
-
-        return [
-            'user_id' => (int) $tokenData['user_id'],
-            'token_json' => $tokenJson,
-            'signature' => $signature,
-        ];
-    }
-
-    /**
      * Look up the user from the auth cookie.
      *
-     * Accepts both the new Laravel-encrypted token (signed by `APP_KEY`)
-     * and the legacy HMAC token (signed by the user's `auth_key`).
+     * Accepts the Laravel-encrypted token (signed by `APP_KEY`) only.
      * When `$isArray` is true the row is returned as an array, otherwise
      * an Eloquent User model is returned.
      *
@@ -450,58 +321,21 @@ final class AuthCookie
 
         $token = $cookie[self::COOKIE_NAME];
 
-        // New Laravel-encrypted token is verified without a per-user secret.
         $payload = self::verifyToken($token);
-        if ($payload !== null) {
-            $log .= ", uid = {$payload['user_id']} (app encrypted)";
-            $row = self::fetchUser($payload['user_id'], $isArray, $log);
-            if ($row === null) {
-                return null;
-            }
-            if (! self::payloadAuthVersionMatches($payload, $row)) {
-                Logger::writeWithContext("$log, stale auth_version");
-
-                return null;
-            }
-            if ($isArray) {
-                unset($row['auth_key'], $row['passhash'], $row['auth_version']);
-            }
-
-            return $row;
-        }
-
-        // Legacy HMAC token: decode first to get the user id, then load
-        // the user and verify the signature against the stored auth_key.
-        $result = self::decodeCookie($cookie);
-        if (empty($result)) {
+        if ($payload === null) {
             return null;
         }
 
-        $id = $result['user_id'];
-        $log .= ", uid = $id (legacy)";
-
-        $row = self::fetchUser($id, $isArray, $log);
+        $log .= ", uid = {$payload['user_id']}";
+        $row = self::fetchUser($payload['user_id'], $isArray, $log);
         if ($row === null) {
             return null;
         }
-
-        if (is_array($row)) {
-            $authKey = (string) ($row['auth_key'] ?? '');
-        } else {
-            $authKey = (string) $row->auth_key;
-        }
-        $verifiedPayload = self::verifyToken($token, $authKey);
-        if ($verifiedPayload === null) {
-            Logger::writeWithContext("$log, !hash_equals");
-
-            return null;
-        }
-        if (! self::payloadAuthVersionMatches($verifiedPayload, $row)) {
+        if (! self::payloadAuthVersionMatches($payload, $row)) {
             Logger::writeWithContext("$log, stale auth_version");
 
             return null;
         }
-
         if ($isArray) {
             unset($row['auth_key'], $row['passhash'], $row['auth_version']);
         }

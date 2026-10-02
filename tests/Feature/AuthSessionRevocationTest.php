@@ -17,7 +17,6 @@ use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -75,7 +74,7 @@ final class AuthSessionRevocationTest extends TestCase
         $this->assertFalse($provider->validateCredentials($user, $credentials));
     }
 
-    public function test_legacy_hmac_cookie_is_rejected_after_version_increment(): void
+    public function test_legacy_hmac_cookie_is_rejected(): void
     {
         $authKey = Token::randomHex(20);
         $user = User::factory()->create([
@@ -90,11 +89,8 @@ final class AuthSessionRevocationTest extends TestCase
         ];
         $provider = app(NexusWebUserProvider::class);
 
-        $this->assertInstanceOf(User::class, $provider->retrieveByCredentials($credentials));
-
-        DB::table('users')->where('id', $user->id)->increment('auth_version');
-
         $this->assertNull($provider->retrieveByCredentials($credentials));
+        $this->assertFalse($provider->validateCredentials($user, $credentials));
     }
 
     public function test_admin_password_reset_revokes_existing_cookie(): void

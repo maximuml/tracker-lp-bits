@@ -33,7 +33,7 @@ final class NoSuperglobalsTest extends TestCase
     private const APP_DIR = __DIR__.'/../../app';
 
     /** Baseline: actual code lines referencing superglobals (excluding comments). */
-    private const BASELINE = 8;
+    private const BASELINE = 0;
 
     public function test_superglobal_access_does_not_exceed_baseline(): void
     {

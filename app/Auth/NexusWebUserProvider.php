@@ -85,7 +85,6 @@ class NexusWebUserProvider implements UserProvider
 
         $payload = AuthCookie::verifyToken(
             (string) ($credentials['c_secure_pass'] ?? ''),
-            (string) $user->auth_key,
         );
 
         if ($payload === null || $payload['user_id'] !== $user->id) {

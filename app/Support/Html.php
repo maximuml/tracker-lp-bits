@@ -151,16 +151,6 @@ final class Html
         return Tag::formatYoutube($src, $width, $height);
     }
 
-    public static function formatVideo(string $src, int|string $width, int|string $height): string
-    {
-        return Tag::formatVideo($src, $width, $height);
-    }
-
-    public static function formatAudio(string $src): string
-    {
-        return Tag::formatAudio($src);
-    }
-
     public static function formatSpoiler(string $content, string $title = '', bool $defaultCollapsed = true): string
     {
         return Tag::formatSpoiler($content, $title, $defaultCollapsed);

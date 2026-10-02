@@ -921,7 +921,7 @@ class BdInfoExtra
 
     private function detailsViewModel(): BdInfoViewModel
     {
-        $rawBdInfo = sprintf('[spoiler=%s][raw]<pre>%s</pre>[/raw][/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
+        $rawBdInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
         $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawBdInfo, false));
 
         $allDiscs = $this->getAllDiscs();

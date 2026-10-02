@@ -446,36 +446,6 @@ final class Tag
     }
 
     /**
-     * Filter and render a `[video]` tag with a temp-code placeholder.
-     *
-     * Backs the legacy `formatVideo()` helper.
-     */
-    public static function formatVideo(string $src, int|string $width, int|string $height): string
-    {
-        $src = Security::filterSrc($src);
-        if (empty($src)) {
-            return '';
-        }
-
-        return Comment::addTempCode(BBCode::video($src, $width, $height));
-    }
-
-    /**
-     * Filter and render an `[audio]` tag with a temp-code placeholder.
-     *
-     * Backs the legacy `formatAudio()` helper.
-     */
-    public static function formatAudio(string $src): string
-    {
-        $src = Security::filterSrc($src);
-        if (empty($src)) {
-            return '';
-        }
-
-        return Comment::addTempCode(BBCode::audio($src));
-    }
-
-    /**
      * Render a `[spoiler]` tag with a temp-code placeholder.
      *
      * Backs the legacy `formatSpoiler()` helper.

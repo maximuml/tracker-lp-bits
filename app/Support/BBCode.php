@@ -18,8 +18,6 @@ use App\Support\Html\SafeHtml;
  *   - `formatCode()`       (`[code]` block with `<pre><code>` body)
  *   - `formatImg()`        (`<img>` with optional resizer onload hook)
  *   - `formatYoutube()`    (`<iframe>` YouTube embed)
- *   - `formatVideo()`      (HTML5 `<video>` element)
- *   - `formatAudio()`      (HTML5 `<audio>` element)
  *   - `formatSpoiler()`    (`<details>`/`<summary>` collapsible)
  *   - `formatHidden()`     (`<span class="hidden-text">` wrapper)
  *   - `formatTextAlign()`  (`<div class="nx-align-…">`)
@@ -236,40 +234,6 @@ final class BBCode
             $height,
             $videoId
         );
-    }
-
-    /**
-     * Render an HTML5 `<video>` element with a download fallback
-     * anchor. Defaults to 560×315.
-     */
-    public static function video(string $src, int|string $width = 0, int|string $height = 0): string
-    {
-        if (empty($src)) {
-            return '';
-        }
-        if (! $width) {
-            $width = 560;
-        }
-        if (! $height) {
-            $height = 315;
-        }
-        $escapedSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8', false);
-
-        return "<video controls width=\"$width\" height=\"$height\"><source src=\"$escapedSrc\" /><a href=\"$escapedSrc\">$escapedSrc</a></video>";
-    }
-
-    /**
-     * Render an HTML5 `<audio>` element with a download fallback
-     * anchor. No dimension parameters.
-     */
-    public static function audio(string $src): string
-    {
-        if (empty($src)) {
-            return '';
-        }
-        $escapedSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8', false);
-
-        return "<audio controls><source src=\"$escapedSrc\" /><a href=\"$escapedSrc\">$escapedSrc</a></audio>";
     }
 
     /**

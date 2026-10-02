@@ -155,7 +155,7 @@ final class RequestContext
                     }
                 }
             } else {
-                $result = $_SERVER[$field] ?? null;
+                $result = Request::capture()->server->get($field);
                 if ($result !== null && $result !== '') {
                     return $result;
                 }
@@ -196,14 +196,19 @@ final class RequestContext
 
     private function headerFromServer(string $headerName): ?string
     {
+        $serverBag = Request::capture()->server;
         $serverName = 'HTTP_'.str_replace('-', '_', strtoupper($headerName));
-        if (isset($_SERVER[$serverName])) {
-            return $_SERVER[$serverName];
+        $value = $serverBag->get($serverName);
+        if (is_string($value)) {
+            return $value;
         }
 
         $serverName = str_replace('-', '_', strtoupper($headerName));
-        if (in_array($serverName, ['CONTENT_TYPE', 'CONTENT_LENGTH'], true) && isset($_SERVER[$serverName])) {
-            return $_SERVER[$serverName];
+        if (in_array($serverName, ['CONTENT_TYPE', 'CONTENT_LENGTH'], true)) {
+            $value = $serverBag->get($serverName);
+            if (is_string($value)) {
+                return $value;
+            }
         }
 
         return null;
@@ -229,8 +234,9 @@ final class RequestContext
     private function generateRequestId(): string
     {
         $request = $this->requestOrNull();
-        $scriptFilename = $request?->server('SCRIPT_FILENAME') ?? $_SERVER['SCRIPT_FILENAME'] ?? '';
-        $argv = $request?->server('argv') ?? $_SERVER['argv'] ?? [];
+        $serverBag = $request !== null ? $request->server : Request::capture()->server;
+        $scriptFilename = $serverBag->get('SCRIPT_FILENAME', '');
+        $argv = $serverBag->get('argv', []);
         if (! is_array($argv)) {
             $argv = [$argv];
         }

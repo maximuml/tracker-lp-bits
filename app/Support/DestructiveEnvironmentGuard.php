@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Http\Request;
 use RuntimeException;
 
 /**
@@ -165,7 +166,7 @@ final class DestructiveEnvironmentGuard
      */
     private static function serverValue(string $key): ?string
     {
-        $value = $_SERVER[$key] ?? null;
+        $value = Request::capture()->server->get($key);
 
         return is_string($value) && $value !== '' ? $value : null;
     }

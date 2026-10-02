@@ -4,6 +4,18 @@
 # volumes, caches, connectivity) and HTTP smoke through OpenResty.
 set -euo pipefail
 
+# On failure, dump container state + logs so the failing check is diagnosable
+# from the job log alone (the cleanup step removes all evidence otherwise).
+dump_on_failure() {
+    echo "=== FAILURE diagnostics ==="
+    docker compose ps -a || true
+    for svc in php openresty queue scheduler; do
+        echo "=== $svc logs (tail 60) ==="
+        docker compose logs --tail=60 "$svc" 2>&1 || true
+    done
+}
+trap 'rc=$?; if [ $rc -ne 0 ]; then dump_on_failure; fi' EXIT
+
 echo "=== Verify PHP health ==="
 # PHP-FPM must respond to a basic artisan command
 docker compose exec -T php php artisan about --no-interaction
@@ -115,7 +127,20 @@ fi
 echo "OK: /metrics closed without bearer token in production"
 
 echo "=== Verify OpenResty config is valid ==="
-docker compose exec -T openresty openresty -t 2>&1 | grep -q "syntax is ok\|test is successful"
+# docker compose exec can transiently fail (exit 255) while the container is
+# healthy — retry a few times before declaring the config bad.
+openresty_ok=0
+for attempt in 1 2 3; do
+    if docker compose exec -T openresty openresty -t 2>&1 | grep -q "syntax is ok\|test is successful"; then
+        openresty_ok=1
+        break
+    fi
+    sleep 3
+done
+if [ "$openresty_ok" != "1" ]; then
+    echo "FAIL: openresty -t did not succeed"
+    exit 1
+fi
 echo "OK: OpenResty config is valid"
 
 echo "=== Smoke test public pages via OpenResty ==="

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Models\Comment;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Offer comments: the comments table rows linked via the offer column.
  */
-final class OfferCommentRepository extends BaseRepository
+final class OfferCommentRepository extends BaseRepository implements OfferCommentRepositoryInterface
 {
     public function deleteOfferComments(int $offerId): int
     {

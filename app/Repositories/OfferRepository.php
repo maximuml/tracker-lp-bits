@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Enums\OfferAllowed;
 use App\Models\Offer;
 use App\Models\StaffMessage;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\DB;
  * staff notifications, and list queries. Votes and comments live in
  * OfferVoteRepository / OfferCommentRepository.
  */
-final class OfferRepository extends BaseRepository
+final class OfferRepository extends BaseRepository implements OfferRepositoryInterface
 {
     private const DEFAULT_PER_PAGE = 25;
 

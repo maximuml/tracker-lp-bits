@@ -8,6 +8,9 @@ use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
+use App\Contracts\Repositories\OfferCommentRepositoryInterface;
+use App\Contracts\Repositories\OfferRepositoryInterface;
+use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
@@ -16,12 +19,16 @@ use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Repositories\AuthRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\ForumRepository;
 use App\Repositories\MeiliSearchRepository;
+use App\Repositories\OfferCommentRepository;
+use App\Repositories\OfferRepository;
+use App\Repositories\OfferVoteRepository;
 use App\Repositories\PageLayoutRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\SearchBoxRepository;
@@ -30,6 +37,7 @@ use App\Repositories\ToolRepository;
 use App\Repositories\TorrentAjaxRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
+use App\Repositories\UsercpRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use Mockery;
@@ -69,6 +77,30 @@ final class RepositoryContractTest extends TestCase
         $mock = Mockery::mock(MeiliSearchRepositoryInterface::class);
         $this->app->instance(MeiliSearchRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(MeiliSearchRepositoryInterface::class));
+    }
+
+    public function test_offer_comment_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(OfferCommentRepository::class, $this->app->make(OfferCommentRepositoryInterface::class));
+        $mock = Mockery::mock(OfferCommentRepositoryInterface::class);
+        $this->app->instance(OfferCommentRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(OfferCommentRepositoryInterface::class));
+    }
+
+    public function test_offer_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(OfferRepository::class, $this->app->make(OfferRepositoryInterface::class));
+        $mock = Mockery::mock(OfferRepositoryInterface::class);
+        $this->app->instance(OfferRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(OfferRepositoryInterface::class));
+    }
+
+    public function test_offer_vote_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(OfferVoteRepository::class, $this->app->make(OfferVoteRepositoryInterface::class));
+        $mock = Mockery::mock(OfferVoteRepositoryInterface::class);
+        $this->app->instance(OfferVoteRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(OfferVoteRepositoryInterface::class));
     }
 
     public function test_page_layout_repository_interface_binding(): void
@@ -149,5 +181,13 @@ final class RepositoryContractTest extends TestCase
         $mock = Mockery::mock(UserRepositoryInterface::class);
         $this->app->instance(UserRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(UserRepositoryInterface::class));
+    }
+
+    public function test_usercp_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(UsercpRepository::class, $this->app->make(UsercpRepositoryInterface::class));
+        $mock = Mockery::mock(UsercpRepositoryInterface::class);
+        $this->app->instance(UsercpRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(UsercpRepositoryInterface::class));
     }
 }

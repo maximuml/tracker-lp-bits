@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Models\Poll;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Html\SafeHtml;
 use App\Support\UserDisplay;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class PollRepository
@@ -62,6 +64,32 @@ class PollRepository
         }
 
         return $newId;
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, Poll>
+     */
+    public function paginateWithAnswers(int $perPage): LengthAwarePaginator
+    {
+        return Poll::query()->withCount('answers')->latest('id')->paginate($perPage);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function createPoll(array $data): Poll
+    {
+        return Poll::query()->create($data);
+    }
+
+    public function findWithAnswers(int $id): ?Poll
+    {
+        return Poll::query()->withCount('answers')->find($id);
+    }
+
+    public function findPoll(int $id): ?Poll
+    {
+        return Poll::query()->find($id);
     }
 
     /**

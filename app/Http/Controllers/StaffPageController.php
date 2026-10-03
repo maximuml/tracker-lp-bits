@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
-use App\Enums\UserStatus;
 use App\Models\Setting;
 use App\Models\User;
+use App\Repositories\StaffDirectoryRepository;
 use App\Support\Country;
 use App\Support\CurrentUser;
 use App\Support\Permissions;
@@ -23,6 +24,8 @@ class StaffPageController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
+        private readonly UserRepositoryInterface $userRepository,
+        private readonly StaffDirectoryRepository $staffDirectoryRepository,
     ) {}
 
     public function staff(Request $request): View|RedirectResponse|Response
@@ -50,17 +53,9 @@ class StaffPageController extends LegacyController
             ];
         };
 
-        $supportRows = User::query()
-            ->where('support', true)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->orderBy('username')
-            ->get(['id', 'country', 'last_access', 'supportlang', 'supportfor']);
+        $supportRows = $this->staffDirectoryRepository->listSupportStaff();
 
-        $pickerRows = User::query()
-            ->where('picker', true)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->orderBy('username')
-            ->get(['id', 'country', 'last_access', 'pickfor']);
+        $pickerRows = $this->staffDirectoryRepository->listPickers();
 
         $forumMods = DB::table('forummods')
             ->leftJoin('users', 'forummods.userid', '=', 'users.id')
@@ -108,12 +103,7 @@ class StaffPageController extends LegacyController
 
         $staffRows = [];
         $vipClass = defined('UC_VIP') ? \constant('UC_VIP') : 0;
-        $staffUsers = User::query()
-            ->where('class', '>', $vipClass)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->orderByDesc('class')
-            ->orderBy('username')
-            ->get()
+        $staffUsers = $this->staffDirectoryRepository->listStaffAbove($vipClass)
             ->map(fn ($r) => (array) $r->getAttributes())
             ->all();
 
@@ -126,11 +116,7 @@ class StaffPageController extends LegacyController
             $staffRows[] = $buildUserRow($arr, 'stafffor');
         }
 
-        $vipRows = User::query()
-            ->where('class', $vipClass)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->orderBy('username')
-            ->get()
+        $vipRows = $this->staffDirectoryRepository->listAtClass($vipClass)
             ->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'stafffor'))
             ->all();
 

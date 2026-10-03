@@ -355,4 +355,46 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         return User::query()->find($ids, $columns)->keyBy('id');
     }
+
+    public function findById(int $id): ?User
+    {
+        return User::query()->find($id);
+    }
+
+    public function existsById(int $id): bool
+    {
+        return User::query()->where('id', $id)->exists();
+    }
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findByUsername(string $username, array $columns = ['*']): ?User
+    {
+        return User::query()->where('username', $username)->first($columns);
+    }
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findByEmail(string $email, array $columns = ['*']): ?User
+    {
+        return User::query()->where('email', $email)->first($columns);
+    }
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findByPasskey(string $passkey, array $columns = ['*']): ?User
+    {
+        return User::query()->where('passkey', $passkey)->first($columns);
+    }
+
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    public function updateFields(int $id, array $fields): void
+    {
+        User::query()->where('id', $id)->update($fields);
+    }
 }

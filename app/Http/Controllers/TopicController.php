@@ -12,7 +12,6 @@ use App\DTOs\Forum\StoreTopicDto;
 use App\DTOs\Forum\UpdateTopicDto;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Resources\TopicResource;
-use App\Models\Forum;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\TopicModerationRepository;
@@ -41,13 +40,7 @@ class TopicController extends Controller
     public function index(Request $request): array
     {
         $dto = ListTopicsDto::fromRequest($request);
-        $query = Topic::query()
-            ->orderBy('sticky', 'desc')
-            ->with('user', 'firstPost', 'lastPost');
-        if ($dto->forumId !== null) {
-            $query->where('forumid', $dto->forumId);
-        }
-        $list = $query->get();
+        $list = $this->topicRepository->listForIndex($dto->forumId);
         $resource = TopicResource::collection($list);
 
         return $this->success($resource);
@@ -69,7 +62,7 @@ class TopicController extends Controller
 
         $dto = StoreTopicDto::fromRequest($request);
 
-        $forum = Forum::query()->findOrFail($dto->forumId);
+        $forum = $this->forumRepository->getForumOrFail($dto->forumId);
         if ((int) $user->class < (int) $forum->minclassread || (int) $user->class < (int) $forum->minclasscreate) {
             throw ValidationException::withMessages(['forum' => ['Permission denied.']]);
         }
@@ -83,7 +76,7 @@ class TopicController extends Controller
         $this->forumRepository->incrementForumPostCount((int) $forum->id);
         $this->postRepository->updateUserLastPost((int) $user->id, $date);
 
-        $topic = Topic::query()->findOrFail($topicId);
+        $topic = $this->topicRepository->getTopicById($topicId);
 
         return $this->success(new TopicResource($topic->load('user', 'firstPost', 'lastPost')), 'Topic created');
     }

@@ -299,6 +299,19 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
     }
 
     /**
+     * @param  list<string>  $columns
+     */
+    public function findById(int $id, array $columns = ['*']): ?Torrent
+    {
+        return Torrent::query()->where('id', $id)->first($columns);
+    }
+
+    public function findOrFailById(int $id): Torrent
+    {
+        return Torrent::query()->findOrFail($id);
+    }
+
+    /**
      * @param  mixed  $name
      * @param  mixed  $value
      * @param  mixed  $noteText

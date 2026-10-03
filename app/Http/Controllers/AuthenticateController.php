@@ -147,7 +147,7 @@ class AuthenticateController extends Controller
         }
 
         if ($deadline && $deadline > now()->toDateTimeString()) {
-            $user = User::query()->where('passkey', $passkey)->first(['id', 'username', 'passhash', 'secret', 'auth_key', 'status', 'enabled']);
+            $user = $this->userRepository->findByPasskey($passkey, ['id', 'username', 'passhash', 'secret', 'auth_key', 'status', 'enabled']);
             if ($user && $this->userCanLogin($user, 'passkeyLogin')) {
                 $ip = Network::clientIp();
                 AuthCookie::setLoginCookie((int) $user->id, null, (int) 0);
@@ -190,7 +190,7 @@ class AuthenticateController extends Controller
 
         $deadline = SiteConfig::current()->security->loginSecretDeadline();
         if ($deadline && $deadline > now()->toDateTimeString()) {
-            $user = User::query()->where('passkey', $passkey)->first(['id', 'username', 'passhash', 'secret', 'auth_key', 'status', 'enabled']);
+            $user = $this->userRepository->findByPasskey($passkey, ['id', 'username', 'passhash', 'secret', 'auth_key', 'status', 'enabled']);
             if ($user && $this->userCanLogin($user, 'passkeyLoginV2')) {
                 $ip = Network::clientIp();
                 AuthCookie::setLoginCookie((int) $user->id, null, (int) 0);
@@ -263,7 +263,7 @@ class AuthenticateController extends Controller
             $username = $request->username;
             $challenge = Token::randomHex((int) 20);
             RedisGuard::attempt(static fn () => Cache::put(Token::challengeKey($username), $challenge, 300), false);
-            $user = User::query()->where('username', $username)->first(['secret', 'passhash_algo']);
+            $user = $this->userRepository->findByUsername($username, ['secret', 'passhash_algo']);
 
             return $this->success([
                 'challenge' => $challenge,

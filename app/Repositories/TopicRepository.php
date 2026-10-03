@@ -168,6 +168,21 @@ class TopicRepository extends BaseRepository
         return Topic::query()->findOrFail($id);
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Topic>
+     */
+    public function listForIndex(?int $forumId = null): \Illuminate\Database\Eloquent\Collection
+    {
+        $query = Topic::query()
+            ->orderBy('sticky', 'desc')
+            ->with('user', 'firstPost', 'lastPost');
+        if ($forumId !== null) {
+            $query->where('forumid', $forumId);
+        }
+
+        return $query->get();
+    }
+
     public function getLastTopicByForum(int $forumid): ?Topic
     {
         return Topic::query()->where('forumid', $forumid)->orderByDesc('lastpost')->first();

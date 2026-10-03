@@ -82,6 +82,11 @@ class ForumRepository extends BaseRepository implements ForumRepositoryInterface
         return (bool) Forum::query()->where('id', $forumid)->increment('postcount', $amount);
     }
 
+    public function getForumOrFail(int $id): Forum
+    {
+        return Forum::query()->findOrFail($id);
+    }
+
     public function getForumMinclasswrite(int $forumid): ?int
     {
         $forum = Forum::query()->where('id', $forumid)->first(['minclasswrite']);

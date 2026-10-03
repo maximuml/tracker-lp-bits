@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contracts\Repositories;
 
+use App\Models\Forum;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -42,6 +43,8 @@ interface ForumRepositoryInterface
     public function incrementForumTopicCount(int $forumid): bool;
 
     public function incrementForumPostCount(int $forumid, int $amount = 1): bool;
+
+    public function getForumOrFail(int $id): Forum;
 
     public function getForumMinclasswrite(int $forumid): ?int;
 

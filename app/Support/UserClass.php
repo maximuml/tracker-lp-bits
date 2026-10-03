@@ -221,7 +221,10 @@ final class UserClass
         }
 
         if ($className && $b_colored) {
-            $className = "<b class='".str_replace(' ', '', $classNameColor)."_Name'>".$className.'</b>';
+            $className = trim(view('support._class-name-b', [
+                'cls' => str_replace(' ', '', $classNameColor),
+                'inner' => SafeHtml::fromTrustedHtml($className),
+            ])->render());
         }
 
         return SafeHtml::fromTrustedHtml($className);
@@ -244,25 +247,29 @@ final class UserClass
         bool $disabled = false,
         array $labels = [],
     ): SafeHtml {
-        $disabledText = $disabled ? ' disabled = "disabled"' : '';
-        $list = '<select name="'.$selectName.'"'.$disabledText.'>';
+        $options = '';
 
         if ($includeNoClass) {
-            $list .= sprintf(
-                '<option value="%s">%s</option>',
-                Setting::PERMISSION_NO_CLASS,
-                $labels['select_an_user_class'] ?? '---'
-            );
+            $options .= trim(view('support.tag._option', [
+                'value' => Setting::PERMISSION_NO_CLASS,
+                'label' => $labels['select_an_user_class'] ?? '---',
+                'selected' => false,
+            ])->render());
         }
 
         for ($i = $minClass; $i <= $maxClass; $i++) {
-            $selectedAttr = (int) $selected === $i ? ' selected="selected"' : '';
-            $list .= '<option value="'.$i.'"'.$selectedAttr.'>'.self::name($i, false, false, true)."</option>\n";
+            $options .= trim(view('support.tag._option', [
+                'value' => $i,
+                'label' => self::name($i, false, false, true),
+                'selected' => (int) $selected === $i,
+            ])->render())."\n";
         }
 
-        $list .= '</select>';
-
-        return SafeHtml::fromTrustedHtml($list);
+        return SafeHtml::fromTrustedHtml(trim(view('support._class-select', [
+            'name' => $selectName,
+            'disabledAttr' => SafeHtml::fromTrustedHtml($disabled ? ' disabled = "disabled"' : ''),
+            'options' => SafeHtml::fromTrustedHtml($options),
+        ])->render()));
     }
 
     /**

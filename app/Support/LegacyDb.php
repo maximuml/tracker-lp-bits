@@ -48,10 +48,10 @@ final class LegacyDb
         $queries = array_map(static function (array $log) use ($grammar) {
             $bindings = array_map(static function ($binding) {
                 if (is_string($binding) && preg_match('//u', $binding) === false) {
-                    return '<binary:'.bin2hex($binding).'>';
+                    return '[binary:'.bin2hex($binding).']';
                 }
                 if (is_resource($binding) || gettype($binding) === 'resource (closed)') {
-                    return '<resource>';
+                    return '[resource]';
                 }
 
                 return $binding;

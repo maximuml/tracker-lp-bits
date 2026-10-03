@@ -20,8 +20,8 @@ final class CommentTest extends TestCase
         $a = Comment::addTempCode('first');
         $b = Comment::addTempCode('second');
 
-        $this->assertSame('<tempCode_0>', $a);
-        $this->assertSame('<tempCode_1>', $b);
+        $this->assertSame("\x08tempCode_0\x08", $a);
+        $this->assertSame("\x08tempCode_1\x08", $b);
     }
 
     public function test_reset_temp_code_restarts_counter(): void
@@ -29,6 +29,6 @@ final class CommentTest extends TestCase
         Comment::addTempCode('first');
         Comment::resetTempCode();
 
-        $this->assertSame('<tempCode_0>', Comment::addTempCode('second'));
+        $this->assertSame("\x08tempCode_0\x08", Comment::addTempCode('second'));
     }
 }

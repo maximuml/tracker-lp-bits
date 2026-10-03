@@ -26,16 +26,13 @@ final class Tag
      */
     public static function tableRow(string $class, string ...$cells): string
     {
-        if (count($cells) === 0) {
-            return '<tr></tr>';
-        }
         $classAttr = $class !== '' ? sprintf(' class="%s"', $class) : '';
-        $td = '';
-        foreach ($cells as $cell) {
-            $td .= sprintf('<td%s>%s</td>', $classAttr, $cell);
-        }
+        $row = trim(view('support.tag._tr', [
+            'classAttr' => SafeHtml::fromTrustedHtml($classAttr),
+            'cells' => array_map(SafeHtml::fromTrustedHtml(...), $cells),
+        ])->render());
 
-        return '<tr>'.$td."</tr>\n";
+        return $cells === [] ? $row : $row."\n";
     }
 
     /**
@@ -50,7 +47,11 @@ final class Tag
         $maxpage = 'var maxpage='.$pages.';';
         $nonceAttr = $nonce !== '' ? ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"' : '';
 
-        return "\n<script type=\"text/javascript\"".$nonceAttr.">\n//<![CDATA[\n".$maxpage."\n".$currentpage."\n//]]>\n</script>\n";
+        return "\n".ltrim(view('support.tag._key-shortcut', [
+            'nonceAttr' => SafeHtml::fromTrustedHtml($nonceAttr),
+            'maxpage' => $maxpage,
+            'currentpage' => $currentpage,
+        ])->render(), "\n");
     }
 
     /**
@@ -79,9 +80,12 @@ final class Tag
             if ($hide === $id) {
                 continue;
             }
-            $selectedAttr = $selected === $id ? ' selected="selected"' : '';
             $label = (string) ($labels[$key] ?? '');
-            $html .= '<option value="'.$id.'"'.$selectedAttr.'>'.$label.'</option>';
+            $html .= trim(view('support.tag._option', [
+                'value' => $id,
+                'selected' => $selected === $id,
+                'label' => SafeHtml::fromTrustedHtml($label),
+            ])->render());
         }
 
         return $html;
@@ -111,17 +115,22 @@ final class Tag
         int $selectedId,
         iterable $items,
     ): string {
-        $html = '<b>'.$name.'</b>&nbsp;<select name="'.$selectName.'">'."\n"
-            .'<option value="0">'.$chooseOneLabel."</option>\n";
+        $options = [];
         foreach ($items as $row) {
             $rowId = (int) ($row['id'] ?? 0);
-            $rowName = htmlspecialchars((string) ($row['name'] ?? ''));
-            $selectedAttr = $rowId === $selectedId ? ' selected="selected"' : '';
-            $html .= '<option value="'.$rowId.'"'.$selectedAttr.'>'.$rowName."</option>\n";
+            $options[] = SafeHtml::fromTrustedHtml(trim(view('support.tag._option', [
+                'value' => $rowId,
+                'selected' => $rowId === $selectedId,
+                'label' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($row['name'] ?? ''))),
+            ])->render()));
         }
-        $html .= "</select>&nbsp;&nbsp;&nbsp;\n";
 
-        return $html;
+        return ltrim(view('support.tag._torrent-select', [
+            'name' => SafeHtml::fromTrustedHtml($name),
+            'selectName' => SafeHtml::fromTrustedHtml($selectName),
+            'chooseOneLabel' => SafeHtml::fromTrustedHtml($chooseOneLabel),
+            'options' => $options,
+        ])->render(), "\n");
     }
 
     /**
@@ -145,19 +154,18 @@ final class Tag
         string $relation = '',
     ): string {
         $cell = $escape
-            ? str_replace("\n", "<br />\n", htmlspecialchars($follow))
+            ? nl2br(htmlspecialchars($follow))
             : $follow;
 
         $relationAttr = $relation !== ''
             ? sprintf(' relation="%s" class="%s"', $relation, $relation)
             : '';
 
-        return sprintf(
-            '<tr%s><td class="rowhead nowrap nx-va-top nx-align-right">%s</td><td class="rowfollow nx-va-top">%s</td></tr>',
-            $relationAttr,
-            $head,
-            $cell,
-        );
+        return trim(view('support.tag._settings-row', [
+            'relationAttr' => SafeHtml::fromTrustedHtml($relationAttr),
+            'head' => SafeHtml::fromTrustedHtml($head),
+            'cell' => SafeHtml::fromTrustedHtml($cell),
+        ])->render());
     }
 
     /**
@@ -186,7 +194,11 @@ final class Tag
 
         $relationAttr = $relation !== '' ? ' relation = "'.$relation.'"' : '';
 
-        return '<tr'.$relationAttr.'><td class="rowhead nowrap nx-va-top nx-align-right nx-w-1p">'.$head.'</td><td class="rowfollow nx-va-top nx-w-99p">'.$cell.'</td></tr>';
+        return trim(view('support.tag._settings-row-small', [
+            'relationAttr' => SafeHtml::fromTrustedHtml($relationAttr),
+            'head' => SafeHtml::fromTrustedHtml($head),
+            'cell' => SafeHtml::fromTrustedHtml($cell),
+        ])->render());
     }
 
     /**
@@ -203,21 +215,14 @@ final class Tag
         string $relation = '',
     ): string {
         $cell = $escape
-            ? str_replace("\n", "<br />\n", htmlspecialchars($follow))
+            ? nl2br(htmlspecialchars($follow))
             : $follow;
 
-        $open = $relation !== ''
-            ? sprintf('<div class="nx-grouprow %s" relation="%s">', $relation, $relation)
-            : '';
-        $close = $relation !== '' ? '</div>' : '';
-
-        return sprintf(
-            '%s<div class="nx-fhead nx-nowrap">%s</div><div class="nx-fcell">%s</div>%s',
-            $open,
-            $head,
-            $cell,
-            $close,
-        );
+        return trim(view('support.tag._settings-frow', [
+            'relation' => SafeHtml::fromTrustedHtml($relation),
+            'head' => SafeHtml::fromTrustedHtml($head),
+            'cell' => SafeHtml::fromTrustedHtml($cell),
+        ])->render());
     }
 
     /**
@@ -274,7 +279,10 @@ final class Tag
      */
     public static function settingsCells(string $head, string $follow): string
     {
-        return '<td class="rowhead">'.$head.'</td><td class="rowfollow">'.$follow.'</td>';
+        return trim(view('support.tag._settings-cells', [
+            'head' => SafeHtml::fromTrustedHtml($head),
+            'follow' => SafeHtml::fromTrustedHtml($follow),
+        ])->render());
     }
 
     /**
@@ -334,15 +342,18 @@ final class Tag
      */
     public static function tooltipContainer(iterable $items, int $width = 400): string
     {
-        $children = '';
+        $children = [];
         foreach ($items as $item) {
-            $children .= '<div id="'.(string) ($item['id'] ?? '').'">'.(string) ($item['content'] ?? '').'</div>';
+            $children[] = SafeHtml::fromTrustedHtml(trim(view('support.tag._tooltip-child', [
+                'id' => SafeHtml::fromTrustedHtml((string) ($item['id'] ?? '')),
+                'content' => SafeHtml::fromTrustedHtml((string) ($item['content'] ?? '')),
+            ])->render()));
         }
-        if ($children === '') {
+        if ($children === []) {
             return '';
         }
 
-        return '<div class="nx-hidden">'.$children.'</div>';
+        return trim(view('support.tag._tooltip-container', ['children' => $children])->render());
     }
 
     /**
@@ -368,24 +379,13 @@ final class Tag
      */
     public static function buildTable(array $header, iterable $rows, array $options = []): string
     {
-        $table = '<table data-nx="data"><thead><tr>';
-        foreach ($header as $value) {
-            $table .= sprintf('<th class="colhead" scope="col">%s</th>', htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'));
-        }
-        $table .= '</tr></thead><tbody>';
-
         $tdClass = ! empty($options['td-center']) ? 'colfollow' : '';
 
-        foreach ($rows as $row) {
-            $table .= '<tr>';
-            foreach ($header as $headerKey => $headerValue) {
-                $cell = $row[$headerKey] ?? '';
-                $table .= sprintf('<td class="%s">%s</td>', $tdClass, htmlspecialchars((string) $cell, ENT_QUOTES, 'UTF-8'));
-            }
-            $table .= '</tr>';
-        }
-
-        return $table.'</tbody></table>';
+        return trim(view('support.tag._build-table', [
+            'header' => $header,
+            'rows' => $rows,
+            'tdClass' => $tdClass,
+        ])->render());
     }
 
     /**
@@ -395,14 +395,12 @@ final class Tag
      */
     public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
     {
-        $name = htmlspecialchars($textareaName, ENT_QUOTES);
-        $html = "<label class=\"nx-sr-only\" for=\"{$name}\">".htmlspecialchars((string) (__('legacy/functions.row_body'))).'</label>'
-            ."<textarea id='{$name}' name='{$name}' cols=\"100\" rows=\"8\" data-ctrlenter=\"compose:qr\"></textarea>";
-        $html .= Smilies::quickRow($formName, $textareaName);
-        $html .= '<br />';
-        $html .= '<input type="submit" id="qr" class="nx-postbtn" value="'.htmlspecialchars($submitLabel, ENT_QUOTES).'" />';
-
-        return $html;
+        return trim(view('support.tag._quick-reply', [
+            'name' => $textareaName,
+            'label' => (string) (__('legacy/functions.row_body')),
+            'smileRow' => SafeHtml::fromTrustedHtml(Smilies::quickRow($formName, $textareaName)),
+            'submitLabel' => $submitLabel,
+        ])->render());
     }
 
     /**

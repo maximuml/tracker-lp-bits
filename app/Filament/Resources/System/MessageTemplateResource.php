@@ -61,7 +61,7 @@ class MessageTemplateResource extends Resource
                     ->required(),
                 Textarea::make('content')
                     ->label(__('label.content'))
-                    ->helperText(new HtmlString(__('message-template.content_help').'<br/>'.__('message-template.register_welcome_content_help')))
+                    ->helperText(new HtmlString(__('message-template.content_help').view('support._br')->render().__('message-template.register_welcome_content_help')))
                     ->columnSpanFull()
                     ->rows(10)
                     ->required(),

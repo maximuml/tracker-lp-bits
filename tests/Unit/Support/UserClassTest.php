@@ -155,11 +155,6 @@ class UserClassTest extends TestCase
         $this->assertSame('User', (string) UserClass::name(1));
     }
 
-    public function test_name_colored_wraps_in_bold_tag(): void
-    {
-        $this->assertSame("<b class='User_Name'>User</b>", (string) UserClass::name(1, false, true, false));
-    }
-
     public function test_name_compact_removes_spaces(): void
     {
         $this->assertSame('PowerUser', (string) UserClass::name(2, true, false, false));

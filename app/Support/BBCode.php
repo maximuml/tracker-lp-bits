@@ -76,7 +76,12 @@ final class BBCode
         // rel="noopener noreferrer" prevents tabnabbing when target="_blank".
         $targetAttr = $newWindow ? ' target="_blank" rel="noopener noreferrer"' : '';
 
-        return "<a$classAttr href=\"$escapedUrl\"$targetAttr>$escapedText</a>";
+        return trim(view('support._url-link', [
+            'classAttr' => SafeHtml::fromTrustedHtml($classAttr),
+            'url' => SafeHtml::fromTrustedHtml($escapedUrl),
+            'targetAttr' => SafeHtml::fromTrustedHtml($targetAttr),
+            'text' => SafeHtml::fromTrustedHtml($escapedText),
+        ])->render());
     }
 
     /**
@@ -164,7 +169,10 @@ final class BBCode
      */
     public static function code(string $text, string $label): string
     {
-        return '<br /><div class="codetop">'.$label.'</div><div class="codemain"><pre><code>'.$text.'</code></pre></div><br />';
+        return trim(view('support._code-block', [
+            'label' => $label,
+            'text' => SafeHtml::fromTrustedHtml($text),
+        ])->render());
     }
 
     /**
@@ -193,7 +201,11 @@ final class BBCode
             ? " data-scale=\"{$maxWidth}x{$maxHeight}\" data-zoomable "
             : '';
 
-        return "<img id=\"$imgId\" alt=\"image\" src=\"$escapedSrc\"".$resizerAttrs." data-img-fallback=\"$escapedSrc\" />";
+        return trim(view('support._bbcode-img', [
+            'imgId' => $imgId,
+            'escapedSrc' => SafeHtml::fromTrustedHtml($escapedSrc),
+            'resizerAttrs' => SafeHtml::fromTrustedHtml($resizerAttrs),
+        ])->render());
     }
 
     /**
@@ -228,12 +240,11 @@ final class BBCode
         // attribute. YouTube ids are [A-Za-z0-9_-]; strip everything else.
         $videoId = (string) preg_replace('/[^A-Za-z0-9_-]/', '', $videoId);
 
-        return sprintf(
-            '<iframe width="%s" height="%s" src="https://www.youtube.com/embed/%s" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
-            $width,
-            $height,
-            $videoId
-        );
+        return trim(view('support._yt-iframe', [
+            'width' => $width,
+            'height' => $height,
+            'videoId' => $videoId,
+        ])->render());
     }
 
     /**
@@ -262,12 +273,11 @@ final class BBCode
         }
         $contentClass = $defaultCollapsed ? '' : ' open';
 
-        return sprintf(
-            '<details%s><summary>%s</summary>%s</details>',
-            $contentClass,
-            $title,
-            $content
-        );
+        return trim(view('support._spoiler-details', [
+            'contentClass' => SafeHtml::fromTrustedHtml($contentClass),
+            'title' => SafeHtml::fromTrustedHtml($title),
+            'content' => SafeHtml::fromTrustedHtml($content),
+        ])->render());
     }
 
     /**
@@ -279,7 +289,10 @@ final class BBCode
      */
     public static function textAlign(string $text, string $align): string
     {
-        return sprintf('<div class="nx-align-%s">%s</div>', $align, $text);
+        return trim(view('support._align-div', [
+            'align' => $align,
+            'text' => SafeHtml::fromTrustedHtml($text),
+        ])->render());
     }
 
     /**
@@ -318,9 +331,15 @@ final class BBCode
             }
         }
 
-        $text = (string) preg_replace('/\[quote\]/i', '<fieldset><legend> '.$quoteLabel.' </legend><br />', $text);
-        $text = (string) preg_replace('/\[quote=(.+?)\]/i', '<fieldset><legend> '.$quoteLabel.': \\1 </legend><br />', $text);
-        $text = (string) preg_replace('/\[\/quote\]/i', '</fieldset><br />', $text);
+        $open = trim(view('support._quote-open', ['label' => $quoteLabel])->render());
+        $cite = trim(view('support._quote-cite', [
+            'label' => $quoteLabel,
+            'cite' => SafeHtml::fromTrustedHtml('\\1'),
+        ])->render());
+        $close = trim(view('support._quote-close')->render());
+        $text = (string) preg_replace('/\[quote\]/i', $open, $text);
+        $text = (string) preg_replace('/\[quote=(.+?)\]/i', $cite, $text);
+        $text = (string) preg_replace('/\[\/quote\]/i', $close, $text);
 
         return $text;
     }

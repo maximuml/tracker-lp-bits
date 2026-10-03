@@ -294,7 +294,7 @@ class TorrentAjaxController extends LegacyController
                     approval: $torrentRep->shouldShowApprovalStatusIcon($arr['approval_status'])
                         ? new ApprovalBadge(
                             title: (string) Locale::trans("torrent.approval.status_text.{$arr['approval_status']}", [], null),
-                            icon: SafeHtml::fromTrustedHtml((string) (Torrent::$approvalStatus[$arr['approval_status']]['icon'] ?? '')),
+                            icon: Torrent::approvalStatusIcon((int) $arr['approval_status']),
                         )
                         : null,
                 ),

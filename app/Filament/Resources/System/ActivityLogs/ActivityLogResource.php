@@ -140,7 +140,7 @@ class ActivityLogResource extends Resource
                             // 如果值是数组或对象，美化输出
                             if (is_array($value) || is_object($value)) {
                                 $value = json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                                $fields[] = TextEntry::make($key)->html()->getStateUsing(fn () => "<pre><code>$value</code></pre>");
+                                $fields[] = TextEntry::make($key)->html()->getStateUsing(fn () => trim(view('support._pre-code', ['value' => $value])->render()));
                             } else {
                                 $fields[] = TextEntry::make($key)->label(ucfirst($key));
                             }

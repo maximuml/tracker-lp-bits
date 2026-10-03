@@ -54,7 +54,7 @@ final class Format
      */
     public static function sizeCompact(int|float $bytes): string
     {
-        return self::bytesWithSeparator($bytes, '<br />');
+        return self::bytesWithSeparator($bytes, view('support._br-space')->render());
     }
 
     /**

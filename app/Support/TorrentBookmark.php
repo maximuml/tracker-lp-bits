@@ -57,12 +57,12 @@ final class TorrentBookmark
         if (! $bookmarked) {
             return $text
                 ? ($labels['title_bookmark_torrent'] ?? '')
-                : '<img class="delbookmark" src="pic/trans.gif" alt="Unbookmarked" title="'.($labels['title_bookmark_torrent'] ?? '').'" />';
+                : trim(view('support._bookmark-img', ['cls' => 'delbookmark', 'alt' => 'Unbookmarked', 'title' => (string) ($labels['title_bookmark_torrent'] ?? '')])->render());
         }
 
         return $text
             ? ($labels['title_delbookmark_torrent'] ?? '')
-            : '<img class="bookmark" src="pic/trans.gif" alt="Bookmarked" title="'.($labels['title_delbookmark_torrent'] ?? '').'" />';
+            : trim(view('support._bookmark-img', ['cls' => 'bookmark', 'alt' => 'Bookmarked', 'title' => (string) ($labels['title_delbookmark_torrent'] ?? '')])->render());
     }
 
     /**

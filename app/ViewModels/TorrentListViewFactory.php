@@ -216,7 +216,7 @@ final class TorrentListViewFactory
                 approval: $this->moderationRep->shouldShowApprovalStatusIcon($row['approval_status'])
                     ? new ApprovalBadge(
                         title: (string) Locale::trans("torrent.approval.status_text.{$row['approval_status']}", [], null),
-                        icon: SafeHtml::fromTrustedHtml((string) (Torrent::$approvalStatus[$row['approval_status']]['icon'] ?? '')),
+                        icon: Torrent::approvalStatusIcon((int) $row['approval_status']),
                     )
                     : null,
             );
@@ -268,8 +268,13 @@ final class TorrentListViewFactory
                     $lastcomTooltip[] = [
                         'id' => $tooltipId,
                         'content' => SafeHtml::fromTrustedHtml(
-                            ($commentIsNew ? "<b>(<span class='new'>".__('legacy/functions.text_new_uppercase').'</span>)</b> ' : '')
-                            .__('legacy/functions.text_last_commented_by').UserDisplay::username($lastcom['user']).$lastcomtime.'<br />'
+                            trim(view('support._last-comment', [
+                                'isNew' => $commentIsNew,
+                                'newLabel' => (string) __('legacy/functions.text_new_uppercase'),
+                                'byLabel' => (string) __('legacy/functions.text_last_commented_by'),
+                                'user' => SafeHtml::fromTrustedHtml(UserDisplay::username($lastcom['user'])->toHtml()),
+                                'time' => SafeHtml::fromTrustedHtml((string) $lastcomtime),
+                            ])->render())
                             .$renderTt((string) $lastcom['text'])
                         ),
                     ];

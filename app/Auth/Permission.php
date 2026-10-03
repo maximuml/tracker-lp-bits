@@ -8,7 +8,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
-use App\Support\Permissions;
+use App\Services\PermissionChecker;
 use Illuminate\Support\Facades\Auth;
 
 class Permission
@@ -150,6 +150,6 @@ class Permission
 
     private static function userCan(?User $user, PermissionEnum $permission): bool
     {
-        return Permissions::userCan($permission->value, false, $user instanceof User ? $user->id : 0);
+        return PermissionChecker::instance()->userCan($permission->value, false, $user instanceof User ? $user->id : 0);
     }
 }

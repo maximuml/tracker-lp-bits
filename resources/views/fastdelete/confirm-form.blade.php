@@ -1,0 +1,1 @@
+{{ __('legacy/fastdelete.std_delete_torrent_note') }}<form method="post" action="{{ $url }}" style="display:inline"><input type="submit" value="{{ __('legacy/fastdelete.std_here') }}" class="altlink"></form>{{ __('legacy/fastdelete.std_if_sure') }}

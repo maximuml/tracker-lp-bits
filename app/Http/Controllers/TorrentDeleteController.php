@@ -56,11 +56,11 @@ class TorrentDeleteController extends LegacyController
         $name = (string) ($row['name'] ?? '');
         $anonymous = (int) ($row['anonymous'] ?? 0);
 
-        $sure = request()->query('sure');
+        $sure = request()->input('sure');
         if (empty($sure)) {
             return $this->legacyAbortResponse(
                 __('legacy/fastdelete.std_delete_torrent'),
-                (__('legacy/fastdelete.std_delete_torrent_note')).view('components.altlink', ['class' => 'altlink', 'url' => "fastdelete.php?id={$id}&sure=1", 'text' => ' '.__('legacy/fastdelete.std_here')])->render().__('legacy/fastdelete.std_if_sure'),
+                view('fastdelete.confirm-form', ['url' => "fastdelete.php?id={$id}&sure=1"])->render(),
                 false
             );
         }

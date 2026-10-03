@@ -134,29 +134,10 @@ class TorrentUploadController extends Controller
             'setlistLookupBtn',
         );
 
-        $priceCellHtml = '';
-        if (Permission::can(PermissionEnum::TORRENT_SET_PRICE) && $torrentConfig->paidTorrentEnabled()) {
-            $maxPrice = $torrentConfig->maxPrice();
-            $pricePlaceholder = $maxPrice > 0
-                ? Locale::trans('label.torrent.max_price_help', ['max_price' => $maxPrice], null)
-                : '';
-            $priceAria = $fieldHasError('price') ? ' aria-invalid="true" aria-describedby="price-error"' : '';
-            $priceCellHtml = '<input type="number" min="0" id="price" name="price" value="'.e($this->oldScalar($request, 'price')).'" placeholder="'.$pricePlaceholder.'"'.$priceAria.' />&nbsp;&nbsp;'
-                .Locale::trans('label.torrent.price_help', ['tax_factor' => $torrentConfig->taxFactor() * 100 .'%'], null);
-        }
-
-        $pickCellHtml = '';
-        if (Permission::can(PermissionEnum::TORRENT_SET_STICKY)) {
-            $posStateOld = $this->oldScalar($request, 'pos_state', (string) TorrentPosState::NONE->value);
-            $options = '';
-            foreach (Torrent::listPosStates() as $key => $value) {
-                $options .= '<option value="'.$key.'"'.((string) $key === $posStateOld ? ' selected' : '').'>'.$value['text'].'</option>';
-            }
-            $posStateAria = $fieldHasError('pos_state') ? ' aria-invalid="true" aria-describedby="pos_state-error"' : '';
-            $pickCellHtml = '<b>'.__('legacy/edit.row_torrent_position').':&nbsp;</b>'
-                .'<select name="pos_state" id="pos_state" aria-label="'.e(__('legacy/edit.row_pick')).'"'.$posStateAria.'>'.$options.'</select>&nbsp;&nbsp;&nbsp;'
-                .view('components.datetime-input', ['label' => SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => $this->oldScalar($request, 'pos_state_until')])->render();
-        }
+        $priceEnabled = Permission::can(PermissionEnum::TORRENT_SET_PRICE) && $torrentConfig->paidTorrentEnabled();
+        $pricePlaceholder = $priceEnabled && $torrentConfig->maxPrice() > 0
+            ? Locale::trans('label.torrent.max_price_help', ['max_price' => $torrentConfig->maxPrice()], null)
+            : '';
 
         $taxonomyValues = [];
         foreach (SearchBox::$taxonomies as $field => $_taxonomy) {
@@ -188,7 +169,11 @@ class TorrentUploadController extends Controller
             'torrentDirWritable' => is_writable(Path::resolve(SiteConfig::current()->main->torrentDir(), ROOT_PATH)),
             'nameInputHtml' => SafeHtml::fromTrustedHtml($nameInputHtml),
             'priceLabel' => Locale::trans('label.torrent.price', [], null),
-            'priceCellHtml' => SafeHtml::fromTrustedHtml($priceCellHtml),
+            'priceEnabled' => $priceEnabled,
+            'priceValue' => $this->oldScalar($request, 'price'),
+            'pricePlaceholder' => $pricePlaceholder,
+            'priceInvalid' => $fieldHasError('price'),
+            'priceHelp' => Locale::trans('label.torrent.price_help', ['tax_factor' => $torrentConfig->taxFactor() * 100 .'%'], null),
             'descrEditorHtml' => SafeHtml::fromTrustedHtml(BbcodeEditor::html([
                 'form' => 'upload',
                 'text' => 'descr',
@@ -203,7 +188,11 @@ class TorrentUploadController extends Controller
             'customFieldsHtml' => SafeHtml::fromTrustedHtml($customField->renderOnUploadPage(0, $browsecatmode, is_array($oldCustomFields) ? $oldCustomFields : [])),
             'hitAndRunHtml' => SafeHtml::fromTrustedHtml($this->hitAndRunRepository->renderOnUploadPage(is_scalar($oldHr) ? $oldHr : '', $browsecatmode)),
             'tagsHtml' => SafeHtml::fromTrustedHtml($this->tagRepository->renderCheckbox($browsecatmode, $checkedTags)),
-            'pickCellHtml' => SafeHtml::fromTrustedHtml($pickCellHtml),
+            'pickEnabled' => Permission::can(PermissionEnum::TORRENT_SET_STICKY),
+            'posStates' => Torrent::listPosStates(),
+            'posStateOld' => $this->oldScalar($request, 'pos_state', (string) TorrentPosState::NONE->value),
+            'posStateInvalid' => $fieldHasError('pos_state'),
+            'posStateUntil' => $this->oldScalar($request, 'pos_state_until'),
             'canBeAnonymous' => Permission::can(PermissionEnum::BE_ANONYMOUS),
         ]);
     }

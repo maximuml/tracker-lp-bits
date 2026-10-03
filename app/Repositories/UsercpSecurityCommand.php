@@ -173,23 +173,15 @@ final class UsercpSecurityCommand
             $data['editsecret'] = $this->secureTokenService->emailChangeDigest($hash, $email);
 
             $subject = $siteName.(__('legacy/usercp.mail_profile_change_confirmation'));
-            $changeEmailOne = sprintf(__('legacy/usercp.mail_change_email_one'), $siteName);
-            $changeEmailNine = sprintf(__('legacy/usercp.mail_change_email_nine'), $siteName);
+            $body = view('emails.profile-change-confirm', [
+                'username' => $user->username,
+                'email' => $email,
+                'ip' => $request->ip(),
+                'confirmUrl' => $baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail,
+                'siteName' => $siteName,
+            ])->render();
 
-            $body = $changeEmailOne.$user->username
-                .(__('legacy/usercp.mail_change_email_two')).'('.$email.')'
-                .(__('legacy/usercp.mail_change_email_three'))."\n\n"
-                .(__('legacy/usercp.mail_change_email_four')).$request->ip()
-                .(__('legacy/usercp.mail_change_email_five'))."\n\n"
-                .(__('legacy/usercp.mail_change_email_six'))
-                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.(__('legacy/usercp.mail_here')).'</a></b>'
-                .(__('legacy/usercp.mail_change_email_six_1')).'<br />'."\n"
-                .$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
-                .(__('legacy/usercp.mail_change_email_seven'))."\n\n"
-                .'------'.(__('legacy/usercp.mail_change_email_eight'))."\n"
-                .$changeEmailNine;
-
-            Mail::queueLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
+            Mail::queueLegacy($email, $siteName, $siteEmail, $subject, nl2br($body), 'profile change', false, false, '', 'UTF-8');
         }
 
         if (! in_array($privacy, ['normal', 'low', 'strong'], true)) {
@@ -278,20 +270,15 @@ final class UsercpSecurityCommand
             $changedemail = 1;
 
             $subject = $siteName.(__('legacy/usercp.mail_profile_change_confirmation'));
-            $body = (__('legacy/usercp.mail_change_email_one')).$user->username
-                .(__('legacy/usercp.mail_change_email_two')).'('.$email.')'
-                .(__('legacy/usercp.mail_change_email_three'))."\n\n"
-                .(__('legacy/usercp.mail_change_email_four')).$dto->ip
-                .(__('legacy/usercp.mail_change_email_five'))."\n\n"
-                .(__('legacy/usercp.mail_change_email_six'))
-                .'<b><a href="javascript:void(null)" onclick="window.open(\''.$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail.'\')">'.(__('legacy/usercp.mail_here')).'</a></b>'
-                .(__('legacy/usercp.mail_change_email_six_1')).'<br />'."\n"
-                .$baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail."\n\n"
-                .(__('legacy/usercp.mail_change_email_seven'))."\n\n"
-                .'------'.(__('legacy/usercp.mail_change_email_eight'))."\n"
-                .(__('legacy/usercp.mail_change_email_nine'));
+            $body = view('emails.profile-change-confirm', [
+                'username' => $user->username,
+                'email' => $email,
+                'ip' => $dto->ip,
+                'confirmUrl' => $baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail,
+                'siteName' => $siteName,
+            ])->render();
 
-            Mail::queueLegacy($email, $siteName, $siteEmail, $subject, str_replace('<br />', '<br />', nl2br($body)), 'profile change', false, false, '', 'UTF-8');
+            Mail::queueLegacy($email, $siteName, $siteEmail, $subject, nl2br($body), 'profile change', false, false, '', 'UTF-8');
         }
 
         if ($resetpasskey) {

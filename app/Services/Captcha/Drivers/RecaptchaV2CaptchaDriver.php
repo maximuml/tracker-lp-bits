@@ -6,7 +6,6 @@ namespace App\Services\Captcha\Drivers;
 
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
-use App\Support\Captcha;
 
 class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
 {
@@ -44,18 +43,13 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
             $size = 'normal';
         }
 
-        $attributes = sprintf(
-            'class="g-recaptcha" data-sitekey="%s" data-theme="%s" data-size="%s"',
-            htmlspecialchars((string) $this->config['site_key'], ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars((string) $theme, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars((string) $size, ENT_QUOTES, 'UTF-8')
-        );
-
-        return sprintf(
-            Captcha::rowTemplate((string) ($context['layout'] ?? '')),
-            htmlspecialchars($label, ENT_QUOTES, 'UTF-8'),
-            sprintf('<div %s></div>%s', $attributes, '<script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script>')
-        );
+        return view('components.captcha.recaptcha', [
+            'grid' => ($context['layout'] ?? '') === 'grid',
+            'label' => $label,
+            'siteKey' => (string) $this->config['site_key'],
+            'theme' => (string) $theme,
+            'size' => (string) $size,
+        ])->render();
     }
 
     /**

@@ -48,13 +48,13 @@ final class ForumComposeService
         switch ($type) {
             case 'new':
                 $forumname = $this->forumRepository->getForumName((int) $id) ?? '';
-                $title = (__('legacy/forums.text_new_topic_in')).' <a href="'.htmlspecialchars('?action=viewforum&forumid='.$id).'">'.htmlspecialchars($forumname).'</a> '.(__('legacy/forums.text_forum'));
+                $title = view('components.title-link', ['before' => __('legacy/forums.text_new_topic_in').' ', 'url' => '?action=viewforum&forumid='.$id, 'text' => $forumname, 'after' => ' '.__('legacy/forums.text_forum')])->render();
                 $hassubject = true;
                 break;
 
             case 'reply':
                 $topicname = $this->topicRepository->getTopicSubject((int) $id) ?? '';
-                $title = (__('legacy/forums.text_reply_to_topic')).' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$id).'">'.htmlspecialchars($topicname).'</a> ';
+                $title = view('components.title-link', ['before' => __('legacy/forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$id, 'text' => $topicname, 'after' => ' '])->render();
                 break;
 
             case 'quote':
@@ -64,7 +64,7 @@ final class ForumComposeService
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
-                $title = (__('legacy/forums.text_reply_to_topic')).' <a href="'.htmlspecialchars('?action=viewtopic&topicid='.$topicid).'">'.htmlspecialchars($topicname).'</a> ';
+                $title = view('components.title-link', ['before' => __('legacy/forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$topicid, 'text' => $topicname, 'after' => ' '])->render();
                 $body = '[quote='.Input::unescape((string) $post['username']).']'.Input::unescape((string) $post['body']).'[/quote]';
                 $postid = $id;
                 $hiddenId = $topicid;

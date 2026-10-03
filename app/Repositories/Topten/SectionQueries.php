@@ -16,7 +16,7 @@ abstract class SectionQueries
         $html = $topPrefix.$limit.' '.$label;
 
         if ($note !== null && $note !== '') {
-            $html .= '<span class="small">'.$note.'</span>';
+            $html .= view('components.topten.caption-note', ['note' => $note])->render();
         }
 
         return $html;

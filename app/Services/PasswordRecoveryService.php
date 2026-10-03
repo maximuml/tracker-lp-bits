@@ -180,22 +180,14 @@ class PasswordRecoveryService
         $baseUrl = Url::siteBase();
         $siteName = SiteConfig::current()->basic->siteName();
 
-        $mailOne = __('legacy/recover.mail_one');
-        $mailTwo = __('legacy/recover.mail_two');
-        $mailThree = __('legacy/recover.mail_three');
-        $mailFour = sprintf(__('legacy/recover.mail_four'), $siteName);
-        $thisLink = __('legacy/recover.mail_this_link');
-
         $resetUrl = $baseUrl.'/recover.php?id='.$userId.'&secret='.$hash;
 
-        $body = $mailOne
-            .'('.htmlspecialchars($email).')'
-            .$mailTwo
-            .htmlspecialchars($ip)
-            .$mailThree
-            .'<b><a href="'.$resetUrl.'" target="_blank"> '.$thisLink.' </a></b><br />'
-            .$resetUrl
-            .$mailFour;
+        $body = view('emails.password-reset', [
+            'email' => $email,
+            'ip' => $ip,
+            'resetUrl' => $resetUrl,
+            'siteName' => $siteName,
+        ])->render();
 
         try {
             $sent = Mail::queueLegacy(
@@ -203,7 +195,7 @@ class PasswordRecoveryService
                 $siteName,
                 SiteConfig::current()->main->siteEmail(''),
                 $siteName.__('legacy/recover.mail_title'),
-                $body,
+                nl2br($body),
                 'confirmation',
                 true,
                 false,
@@ -228,11 +220,11 @@ class PasswordRecoveryService
         $baseUrl = Url::siteBase();
         $siteName = SiteConfig::current()->basic->siteName();
 
-        $body = (__('legacy/recover.mail_password_changed_one'))
-            .htmlspecialchars((string) $user->username)
-            .(__('legacy/recover.mail_password_changed_two'))
-            .'<b><a href="'.$baseUrl.'/login.php">'.(__('legacy/recover.mail_here')).'</a></b>'
-            .sprintf(__('legacy/recover.mail_password_changed_three'), $siteName);
+        $body = view('emails.password-changed', [
+            'username' => (string) $user->username,
+            'loginUrl' => $baseUrl.'/login.php',
+            'siteName' => $siteName,
+        ])->render();
 
         try {
             $sent = Mail::queueLegacy(
@@ -240,7 +232,7 @@ class PasswordRecoveryService
                 $siteName,
                 SiteConfig::current()->main->siteEmail(''),
                 $siteName.__('legacy/recover.mail_password_changed_title'),
-                $body,
+                nl2br($body),
                 'details',
                 true,
                 false,

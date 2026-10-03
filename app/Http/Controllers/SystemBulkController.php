@@ -162,7 +162,7 @@ class SystemBulkController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_invalid_email_address'));
             }
 
-            $body = str_replace('<br />', '<br />', nl2br(trim(strip_tags((string) request()->post('body')))));
+            $body = trim(strip_tags((string) request()->post('body')));
             if (! $body) {
                 return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_must_enter_personal_message'));
             }
@@ -223,18 +223,17 @@ class SystemBulkController extends LegacyController
             $siteName = Setting::getSiteName();
             $title = $siteName.__('legacy/takeinvite.mail_tilte');
             $signupUrl = Url::schemeAndHost(Url::isSecure())."/signup.php?type=invite&invitenumber=$hash";
-            $mailTwo = sprintf(__('legacy/takeinvite.mail_two'), $siteName, $siteName);
-            $mailFour = sprintf(__('legacy/takeinvite.mail_four'), $siteName);
             $reportMail = SiteConfig::current()->main->reportEmail();
-            $mailSix = sprintf(__('legacy/takeinvite.mail_six'), $reportMail, $siteName);
             $inviteTimeout = (string) SiteConfig::current()->main->inviteTimeout();
 
-            $message = __('legacy/takeinvite.mail_one').$curUser['username'].$mailTwo.PHP_EOL
-                .'<b><a href="javascript:void(null)" onclick="window.open('.$signupUrl.')">'.__('legacy/takeinvite.mail_here').'</a></b><br />'.PHP_EOL
-                .$signupUrl.PHP_EOL
-                .'<br />'.__('legacy/takeinvite.mail_three').$inviteTimeout.$mailFour.$curUser['username'].__('legacy/takeinvite.mail_five').'<br />'.PHP_EOL
-                .$body.PHP_EOL
-                .'<br /><br />'.$mailSix;
+            $message = nl2br(view('emails.invite', [
+                'senderUsername' => $curUser['username'],
+                'signupUrl' => $signupUrl,
+                'inviteTimeout' => $inviteTimeout,
+                'personalBody' => $body,
+                'siteName' => $siteName,
+                'reportMail' => $reportMail,
+            ])->render());
 
             $sendResult = Mail::sentLegacy(
                 $email,

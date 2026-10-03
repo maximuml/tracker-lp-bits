@@ -1,0 +1,1 @@
+<span class="small">{{ $note }}</span>

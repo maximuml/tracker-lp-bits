@@ -231,39 +231,24 @@ class EmailConfirmation
         $siteName = SiteConfig::current()->basic->siteName();
         $reportEmail = SiteConfig::current()->main->reportEmail('');
 
-        $mailOne = __('legacy/confirm_resend.mail_one');
-        $mailTwo = sprintf(__('legacy/confirm_resend.mail_two'), $siteName);
-        $mailThree = __('legacy/confirm_resend.mail_three');
-        $mailFour = __('legacy/confirm_resend.mail_four');
-        $mailFourOne = __('legacy/confirm_resend.mail_four_1');
-        $mailThisLink = __('legacy/confirm_resend.mail_this_link');
-        $mailHere = __('legacy/confirm_resend.mail_here');
-        $mailFive = sprintf(__('legacy/confirm_resend.mail_five'), $siteName, $siteName, $reportEmail, $siteName);
         $title = $siteName.(__('legacy/confirm_resend.mail_title'));
 
-        $body = $mailOne
-            .htmlspecialchars($username)
-            .$mailTwo
-            .'('.htmlspecialchars($email).')'
-            .$mailThree
-            .htmlspecialchars($ip)
-            .$mailFour
-            .'<b><a href="javascript:void(null)" onclick="window.open(\''.$confirmUrl.'\')">'
-            .$mailThisLink
-            .'</a></b><br />'
-            .$confirmUrl
-            .$mailFourOne
-            .'<b><a href="javascript:void(null)" onclick="window.open(\''.$resendUrl.'\')">'.$mailHere.'</a></b><br />'
-            .$resendUrl
-            .'<br />'
-            .$mailFive;
+        $body = view('emails.confirm-resend', [
+            'username' => $username,
+            'email' => $email,
+            'ip' => $ip,
+            'confirmUrl' => $confirmUrl,
+            'resendUrl' => $resendUrl,
+            'siteName' => $siteName,
+            'reportEmail' => $reportEmail,
+        ])->render();
 
         Mail::queueLegacy(
             $email,
             $siteName,
             SiteConfig::current()->main->siteEmail(''),
             $title,
-            $body,
+            nl2br($body),
             'signup',
             false,
             false,

@@ -29,15 +29,15 @@ return [
     'mail_here' => 'HERE',
 
     'mail_title' => ' password reset confirmation',
-    'mail_one' => 'Hi,<br /><br />Someone, hopefully you, requested that the password for the account<br />associated with this email address ',
-    'mail_two' => ' be reset.<br /><br />The request originated from ',
-    'mail_three' => '.<br /><br />If you did not do this ignore this email. Please do not reply.<br /><br />Should you wish to confirm this request, please follow ',
-    'mail_four' => '<br />After you do this, you can choose a new password.<br /><br />------<br />Yours,<br />The %s Team.',
+    'mail_one' => "Hi,\n\nSomeone, hopefully you, requested that the password for the account\nassociated with this email address ",
+    'mail_two' => " be reset.\n\nThe request originated from ",
+    'mail_three' => ".\n\nIf you did not do this ignore this email. Please do not reply.\n\nShould you wish to confirm this request, please follow ",
+    'mail_four' => "\nAfter you do this, you can choose a new password.\n\n------\nYours,\nThe %s Team.",
 
     'mail_password_changed_title' => ' password changed',
-    'mail_password_changed_one' => 'Hi,<br /><br />The password for the account ',
-    'mail_password_changed_two' => ' was changed.<br /><br />If you did not make this change, contact staff immediately.<br /><br />You may login from ',
-    'mail_password_changed_three' => '<br /><br />------<br />Yours,<br />The %s Team.',
+    'mail_password_changed_one' => "Hi,\n\nThe password for the account ",
+    'mail_password_changed_two' => " was changed.\n\nIf you did not make this change, contact staff immediately.\n\nYou may login from ",
+    'mail_password_changed_three' => "\n\n------\nYours,\nThe %s Team.",
     'text_select_lang' => 'Select Site Language: ',
     'std_user_account_unconfirmed' => "The account has not been verified yet. If you didn't receive the confirmation email, try to <a href='confirm_resend.php'><b>reseed it</b></a>.",
 ];

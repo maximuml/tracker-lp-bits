@@ -61,7 +61,7 @@ class WebCommentController extends Controller
 
         $returnUrl = $this->buildScript($type, $parentId);
         $headTitle = __('legacy/comment.head_add_comment_to').$parent['name'];
-        $pageTitle = __('legacy/comment.text_add_comment_to').'<a href="'.e($returnUrl).'">'.e($parent['name']).'</a>';
+        $pageTitle = view('components.title-link', ['before' => __('legacy/comment.text_add_comment_to'), 'url' => $returnUrl, 'text' => $parent['name']])->render();
         $formAction = $this->legacyAction('add', ['type' => $type]);
 
         return view('comments.create', compact('headTitle', 'pageTitle', 'formAction', 'composeType', 'body', 'parentId'));
@@ -112,7 +112,7 @@ class WebCommentController extends Controller
         $parentId = (int) $arr['parent_id'];
         $returnUrl = $this->buildScript($type, $parentId);
         $headTitle = __('legacy/comment.head_edit_comment_to').$arr['name'];
-        $pageTitle = __('legacy/comment.text_edit_comment_to').'<a href="'.e($returnUrl).'">'.e($arr['name']).'</a>';
+        $pageTitle = view('components.title-link', ['before' => __('legacy/comment.text_edit_comment_to'), 'url' => $returnUrl, 'text' => $arr['name']])->render();
         $formAction = $this->legacyAction('edit', ['type' => $type, 'cid' => $commentId]);
         $returnto = $this->safeReturnUrl((string) ($request->headers->get('referer') ?? ''), $returnUrl);
         $body = (string) $arr['text'];

@@ -32,18 +32,6 @@ final class Captcha
     }
 
     /**
-     * Row template for captcha markup: legacy `<tr>` for table hosts or
-     * `nx-fhead`/`nx-fcell` divs for `.nx-fgrid` hosts (the `.nx-auth`
-     * forms re-skin the same pair via CSS, ADR 0020).
-     */
-    public static function rowTemplate(string $layout): string
-    {
-        return $layout === 'grid'
-            ? '<div class="nx-fhead">%s</div><div class="nx-fcell">%s</div>'
-            : '<tr><td class="rowhead">%s</td><td>%s</td></tr>';
-    }
-
-    /**
      * Render the active captcha markup when enabled.
      *
      * Mirrors `show_image_code()`. The `$secret` value is passed by the

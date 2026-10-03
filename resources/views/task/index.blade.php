@@ -32,7 +32,7 @@
     <td>{{ $row['deductFormatted'] }}</td>
     <td>{{ $row['claimedCount'] }}</td>
     <td>{{ $row['description'] }}</td>
-    <td>{{ $row['claimActionHtml'] }}</td>
+    <td><input type="button" class="{{ $row['claimable'] ? 'claim' : '' }}" data-id="{{ $row['id'] }}" value="{{ $row['claimText'] }}"@unless($row['claimable']) disabled @endunless></td>
 </tr>
 @endforeach
 </tbody>

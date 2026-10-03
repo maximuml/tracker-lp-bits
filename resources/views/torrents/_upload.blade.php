@@ -48,9 +48,9 @@
 					</x-settings-row>
 				@endif
 
-				@if ($priceCellHtml !== '')
+				@if ($priceEnabled ?? false)
 					<x-settings-row layout="grid" :label="$priceLabel">
-						{{ $priceCellHtml ?? '' }}
+						<input type="number" min="0" id="price" name="price" value="{{ $priceValue ?? '' }}" placeholder="{{ $pricePlaceholder ?? '' }}"@if($priceInvalid ?? false) aria-invalid="true" aria-describedby="price-error"@endif />&nbsp;&nbsp;{{ $priceHelp ?? '' }}
 						@error('price')<div class="nx-field__error" id="price-error" role="alert">{{ $message }}</div>@enderror
 					</x-settings-row>
 				@endif
@@ -112,9 +112,9 @@
 					</x-settings-row>
 				@endif
 
-				@if ($pickCellHtml !== '')
+				@if ($pickEnabled ?? false)
 					<x-settings-row layout="grid" :label="__('legacy/edit.row_pick')">
-						{{ $pickCellHtml ?? '' }}
+						<b>{{ __('legacy/edit.row_torrent_position') }}:&nbsp;</b><select name="pos_state" id="pos_state" aria-label="{{ __('legacy/edit.row_pick') }}"@if($posStateInvalid ?? false) aria-invalid="true" aria-describedby="pos_state-error"@endif>@foreach($posStates as $posKey => $posState)<option value="{{ $posKey }}"@if((string) $posKey === (string) $posStateOld) selected @endif>{{ $posState['text'] }}</option>@endforeach</select>&nbsp;&nbsp;&nbsp;@include('components.datetime-input', ['label' => new \Illuminate\Support\HtmlString(App\Support\Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => $posStateUntil ?? ''])
 						@error('pos_state')<div class="nx-field__error" id="pos_state-error" role="alert">{{ $message }}</div>@enderror
 						@error('pos_state_until')<div class="nx-field__error" id="pos_state_until-error" role="alert">{{ $message }}</div>@enderror
 					</x-settings-row>

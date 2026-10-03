@@ -201,7 +201,8 @@ final class ForumListingService
                 $tooltipId = 'lastpost_'.$counter;
                 $tooltips[] = [
                     'id' => $tooltipId,
-                    'content' => SafeHtml::fromTrustedHtml(__('legacy/forums.text_last_posted_by').UserDisplay::username($lpuserid).$lastposttime.'<br />'.$lptext),
+                    'content' => SafeHtml::fromTrustedHtml(__('legacy/forums.text_last_posted_by').UserDisplay::username($lpuserid).$lastposttime),
+                    'contentTail' => SafeHtml::fromTrustedHtml($lptext),
                 ];
             }
 

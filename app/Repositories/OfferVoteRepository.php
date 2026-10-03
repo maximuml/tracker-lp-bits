@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\OfferVote;
 use App\Models\Offer;
 use Illuminate\Support\Collection;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Offer votes: the offervotes table plus the yeah/against counters on offers.
  */
-final class OfferVoteRepository extends BaseRepository
+final class OfferVoteRepository extends BaseRepository implements OfferVoteRepositoryInterface
 {
     /**
      * @return array{yeah: int, against: int}

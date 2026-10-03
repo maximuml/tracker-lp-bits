@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\DTOs\Usercp\ForumSettingsDto;
 use App\DTOs\Usercp\PersonalSettingsDto;
 use App\DTOs\Usercp\SecuritySettingsDto;
@@ -14,7 +15,6 @@ use App\Http\Requests\UpdateSecuritySettingsRequest;
 use App\Http\Requests\UpdateTrackerSettingsRequest;
 use App\Models\User;
 use App\Policies\UsercpPolicy;
-use App\Repositories\UsercpRepository;
 use App\Services\UsercpPageService;
 use App\Support\Cache;
 use App\Support\LegacyResponse;
@@ -26,12 +26,12 @@ use Illuminate\View\View;
 
 class UsercpController extends LegacyController
 {
-    private UsercpRepository $repository;
+    private UsercpRepositoryInterface $repository;
 
     private UsercpPageService $pageService;
 
     public function __construct(
-        UsercpRepository $repository,
+        UsercpRepositoryInterface $repository,
         UsercpPageService $pageService,
         private readonly UsercpPolicy $policy,
     ) {

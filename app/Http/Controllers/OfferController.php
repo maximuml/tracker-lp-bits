@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Repositories\OfferRepository;
+use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Services\OfferPageService;
 use App\Services\OfferService;
 use App\Services\OfferVoteService;
@@ -16,7 +16,7 @@ use Illuminate\View\View;
 
 class OfferController extends LegacyController
 {
-    private OfferRepository $repository;
+    private OfferRepositoryInterface $repository;
 
     private OfferService $offerService;
 
@@ -25,7 +25,7 @@ class OfferController extends LegacyController
     private OfferVoteService $offerVoteService;
 
     public function __construct(
-        OfferRepository $repository,
+        OfferRepositoryInterface $repository,
         OfferService $offerService,
         OfferPageService $pageService,
         OfferVoteService $offerVoteService,

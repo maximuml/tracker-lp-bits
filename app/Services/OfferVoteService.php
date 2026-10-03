@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\OfferRepositoryInterface;
+use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
-use App\Repositories\OfferRepository;
-use App\Repositories\OfferVoteRepository;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -32,8 +32,8 @@ final class OfferVoteService
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly OfferRepository $offerRepository,
-        private readonly OfferVoteRepository $offerVoteRepository,
+        private readonly OfferRepositoryInterface $offerRepository,
+        private readonly OfferVoteRepositoryInterface $offerVoteRepository,
     ) {}
 
     public function handleVote(Request $request): ?Response

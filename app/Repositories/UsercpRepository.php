@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\DTOs\Usercp\ForumSettingsDto;
 use App\DTOs\Usercp\PersonalSettingsDto;
 use App\DTOs\Usercp\SecuritySettingsDto;
@@ -17,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-final class UsercpRepository extends BaseRepository
+final class UsercpRepository extends BaseRepository implements UsercpRepositoryInterface
 {
     public function __construct(
         private readonly UsercpSecurityCommand $security,

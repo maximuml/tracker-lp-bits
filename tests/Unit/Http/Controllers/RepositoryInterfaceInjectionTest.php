@@ -6,20 +6,24 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\OfferController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UsercpController;
 use App\Repositories\SearchBoxSchemaBuilder;
 use App\ViewModels\Torrent\TorrentDetailsViewFactory;
 use Mockery;
@@ -55,6 +59,8 @@ final class RepositoryInterfaceInjectionTest extends TestCase
         yield 'TorrentController + TorrentRepositoryInterface' => [TorrentController::class, TorrentRepositoryInterface::class];
         yield 'TorrentController + TorrentDownloadRepositoryInterface' => [TorrentController::class, TorrentDownloadRepositoryInterface::class];
         yield 'TorrentDetailsViewFactory + SearchBoxSchemaBuilder' => [TorrentDetailsViewFactory::class, SearchBoxSchemaBuilder::class];
+        yield 'OfferController + OfferRepositoryInterface' => [OfferController::class, OfferRepositoryInterface::class];
+        yield 'UsercpController + UsercpRepositoryInterface' => [UsercpController::class, UsercpRepositoryInterface::class];
         yield 'TopicController + ForumRepositoryInterface' => [TopicController::class, ForumRepositoryInterface::class];
         yield 'TopicController + PostRepositoryInterface' => [TopicController::class, PostRepositoryInterface::class];
     }

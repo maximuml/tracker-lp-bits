@@ -1,0 +1,1 @@
+<script type="text/javascript"@if($nonce !== '') nonce="{{ $nonce }}"@endif>@if($callback !== '')parent.{{ $callback }}("{{ $dlkey }}", {{ $url }})@else parent.tag_extimage('[attach]{{ $dlkey }}[/attach]');@endif</script>

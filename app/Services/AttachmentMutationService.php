@@ -343,7 +343,7 @@ class AttachmentMutationService
                 $callback = ! empty($callbackFunc) && preg_match('/^preview_custom_field_image_\d+$/', $callbackFunc)
                     ? (string) $callbackFunc
                     : '';
-                $script = view('attachments.callback-script', [
+                $script = view('attachment.callback-script', [
                     'nonce' => $nonce,
                     'callback' => $callback,
                     'dlkey' => $dlkey,

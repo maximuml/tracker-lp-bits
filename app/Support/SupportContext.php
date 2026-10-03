@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Container\Container;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 
 /**
  * Static facade for the per-request NexusContext value object.
@@ -23,7 +23,7 @@ final class SupportContext
 
     public static function reset(): void
     {
-        App::instance(NexusContext::class, new NexusContext);
+        Container::getInstance()->instance(NexusContext::class, new NexusContext);
     }
 
     public static function getContext(): NexusContext
@@ -33,8 +33,8 @@ final class SupportContext
 
     private static function context(): NexusContext
     {
-        if (! App::bound(NexusContext::class)) {
-            App::instance(NexusContext::class, new NexusContext);
+        if (! Container::getInstance()->bound(NexusContext::class)) {
+            Container::getInstance()->instance(NexusContext::class, new NexusContext);
         }
 
         return app(NexusContext::class);

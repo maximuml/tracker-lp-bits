@@ -7,6 +7,7 @@ namespace App\Contracts\Repositories;
 use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Expression;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -56,6 +57,12 @@ interface TorrentRepositoryInterface
      * @return Collection<int, int>
      */
     public function pluckIdsByPosStates(array $posStates): Collection;
+
+    /**
+     * Prepared torrents+categories+extras join for the RSS feed — the
+     * caller layers dynamic filters (bookmarks, approval, paid, taxonomy).
+     */
+    public function newRssBaseQuery(): Builder;
 
     public function getNameById(int $id): ?string;
 

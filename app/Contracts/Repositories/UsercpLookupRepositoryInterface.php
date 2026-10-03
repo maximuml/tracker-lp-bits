@@ -34,4 +34,11 @@ interface UsercpLookupRepositoryInterface
      * @return array<int, \stdClass>
      */
     public function getBitbucketOptions(): array;
+
+    public function countBitbucket(): int;
+
+    /**
+     * @return list<\stdClass>
+     */
+    public function listBitbucket(int $offset, int $limit): array;
 }

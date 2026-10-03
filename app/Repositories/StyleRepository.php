@@ -5,12 +5,21 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Contracts\Repositories\StyleRepositoryInterface;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class StyleRepository implements StyleRepositoryInterface
 {
     /** @var array<int, array<string, mixed>>|null */
     private static ?array $rows = null;
+
+    /**
+     * @return Collection<int, \stdClass>
+     */
+    public function listOrderedByName(): Collection
+    {
+        return DB::table('stylesheets')->orderBy('name')->get();
+    }
 
     /**
      * @return array<int, array<string, mixed>>

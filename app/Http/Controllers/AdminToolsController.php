@@ -18,7 +18,6 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AdminToolsController extends LegacyController
@@ -234,23 +233,13 @@ class AdminToolsController extends LegacyController
             }
         }
 
-        $baseQuery = DB::table('locations')
-            ->when($hasRangeFilter, function ($query) use ($rangeStartIp, $rangeEndIp) {
-                $start = (int) ip2long($rangeStartIp);
-                $end = (int) ip2long($rangeEndIp);
+        $rangeStartInt = $hasRangeFilter ? (int) ip2long($rangeStartIp) : null;
+        $rangeEndInt = $hasRangeFilter ? (int) ip2long($rangeEndIp) : null;
 
-                return $query->whereRaw('INET_ATON(start_ip) <= ? AND INET_ATON(end_ip) >= ?', [$start, $end]);
-            });
-
-        $count = $baseQuery->count();
+        $count = $this->locationService->countLocations($rangeStartInt, $rangeEndInt);
         [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, 'location.php?');
 
-        $locations = (clone $baseQuery)
-            ->orderBy('name')
-            ->orderBy('start_ip')
-            ->offset($offset)
-            ->limit($rpp)
-            ->get();
+        $locations = $this->locationService->listLocations($offset, $rpp, $rangeStartInt, $rangeEndInt);
 
         $rows = [];
         foreach ($locations as $loc) {

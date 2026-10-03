@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\InfoRepositoryInterface;
+use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Services\BitbucketService;
@@ -21,12 +22,11 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class InfoController extends LegacyController
 {
-    public function __construct(private readonly PermissionChecker $permissionChecker,
+    public function __construct(private readonly UsercpLookupRepositoryInterface $usercpLookupRepository, private readonly PermissionChecker $permissionChecker,
         private readonly BitbucketService $bitbucketService,
         private readonly CurrentUser $currentUser,
         private readonly InfoRepositoryInterface $infoRepository,
@@ -226,10 +226,10 @@ class InfoController extends LegacyController
             return redirect($request->url());
         }
 
-        $count = (int) DB::table('bitbucket')->count();
+        $count = $this->usercpLookupRepository->countBitbucket();
         $perpage = 10;
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, 'bitbucketlog.php?');
-        $bitbucketRows = DB::table('bitbucket')->orderByDesc('added')->offset($offset)->limit($perpage)->get();
+        $bitbucketRows = $this->usercpLookupRepository->listBitbucket($offset, $perpage);
 
         $userIds = [];
         $rows = [];

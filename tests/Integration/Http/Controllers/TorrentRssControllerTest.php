@@ -104,7 +104,7 @@ final class TorrentRssControllerTest extends TestCase
     private function bindTorrentRepository(): void
     {
         /** @var TorrentRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(TorrentRepository::class);
+        $repository = Mockery::mock(TorrentRepository::class)->shouldIgnoreMissing();
         app()->instance(TorrentRepository::class, $repository);
     }
 

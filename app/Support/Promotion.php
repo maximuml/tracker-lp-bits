@@ -12,6 +12,7 @@ use App\Models\TorrentState;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\ViewModels\Torrent\PromotionBadge;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Pure promotion (special-state) presentation helpers, drained out of
@@ -369,6 +370,14 @@ final class Promotion
      *
      * Mirrors `get_global_sp_state()`.
      */
+    /**
+     * Set-all global promotion state (`torrents_state.global_sp_state`).
+     */
+    public static function setGlobalSpecialState(int $state): void
+    {
+        DB::table('torrents_state')->update(['global_sp_state' => $state]);
+    }
+
     public static function globalSpecialState(): int
     {
         static $state;

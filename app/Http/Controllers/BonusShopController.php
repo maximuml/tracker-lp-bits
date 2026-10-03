@@ -14,11 +14,11 @@ use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
+use App\Support\Promotion;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Js;
 use Illuminate\View\View;
 
@@ -150,7 +150,7 @@ JS;
             if (! $request->isMethod('post')) {
                 return $this->legacyAbortResponse('Error', 'Permission denied.');
             }
-            DB::table('torrents_state')->update(['global_sp_state' => $stateMap[$action]]);
+            Promotion::setGlobalSpecialState($stateMap[$action]);
             $this->legacyRedisCache?->delete_value('global_promotion_state');
 
             return $this->legacyAbortResponse('Success', $messages[$action]);

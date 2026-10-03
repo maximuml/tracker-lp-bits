@@ -10,6 +10,7 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
 use App\Repositories\MessageRepository;
 use App\Repositories\PeerRepository;
+use App\Repositories\TorrentAjaxRepository;
 use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -23,13 +24,12 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Rhilip\Bencode\Bencode;
 
 class TorrentMaintenanceController extends LegacyController
 {
-    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository, private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
+    public function __construct(private readonly TorrentAjaxRepository $torrentAjaxRepository, private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository, private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly CurrentUser $currentUser,
     ) {}
 
@@ -161,15 +161,7 @@ class TorrentMaintenanceController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), __('legacy/takereseed.std_reseed_sent_recently'));
         }
 
-        $snatchedRows = DB::table('snatched')
-            ->join('users', 'snatched.userid', '=', 'users.id')
-            ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
-            ->where('snatched.finished', 1)
-            ->where('snatched.torrentid', $reseedid)
-            ->select('snatched.userid', 'snatched.torrentid', 'torrents.name as torrent_name', 'users.id')
-            ->get()
-            ->map(fn ($r) => (array) $r)
-            ->all();
+        $snatchedRows = $this->torrentAjaxRepository->listFinishedSnatchersForReseed($reseedid);
 
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
         foreach ($snatchedRows as $snatchRow) {

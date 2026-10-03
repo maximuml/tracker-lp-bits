@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
+use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
@@ -22,13 +23,12 @@ use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
 class RegistrationController extends Controller
 {
-    public function __construct(private readonly InviteRepository $inviteRepository,
+    public function __construct(private readonly UsercpLookupRepositoryInterface $usercpLookupRepository, private readonly InviteRepository $inviteRepository,
         private RegistrationService $registrationService,
         private WebAuthService $authService,
     ) {}
@@ -70,7 +70,7 @@ class RegistrationController extends Controller
             $captchaMarkup = Captcha::renderHtml('yes', $secret, 'grid');
         }
 
-        $countries = DB::table('countries')->orderBy('name')->get(['id', 'name']);
+        $countries = $this->usercpLookupRepository->getCountryOptions();
 
         $isPreRegister = SiteConfig::current()->system->isInvitePreEmailAndUsername();
         $preUsername = $isInvite && $isPreRegister && ! empty($invite->pre_register_username)

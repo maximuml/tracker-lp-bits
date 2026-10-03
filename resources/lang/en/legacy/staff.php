@@ -23,7 +23,7 @@ return [
     'text_duties' => 'Staff Duties',
     'title_online' => 'Online',
     'title_offline' => 'Offline',
-    'title_send_pm' => 'Send&nbsp;PM',
+    'title_send_pm' => 'Send PM',
     'text_vip' => 'VIP',
     'text_vip_note' => 'VIP status is only granted to those who have made special contribution to %s, e.g. former staff members.',
     'text_reason' => 'Reason',

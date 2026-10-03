@@ -52,7 +52,7 @@ final class OutboxDispatcher
     private function publish(OutboxEvent $event): bool
     {
         // Atomic claim: only proceed if we can transition pending→processing
-        $claimed = DB::table('outbox_events')
+        $claimed = OutboxEvent::query()
             ->where('id', $event->id)
             ->where('status', OutboxEvent::STATUS_PENDING)
             ->update([

@@ -166,6 +166,10 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
+        $userRepository->shouldReceive('findByUsername')
+            ->once()
+            ->with('testuser', ['secret', 'passhash_algo'])
+            ->andReturn(null);
 
         $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => 'testuser']);
@@ -188,6 +192,10 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
+        $userRepository->shouldReceive('findByUsername')
+            ->once()
+            ->with('testuser', ['secret', 'passhash_algo'])
+            ->andReturn(null);
 
         $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => 'testuser']);
@@ -217,6 +225,10 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
+        $userRepository->shouldReceive('findByUsername')
+            ->once()
+            ->with($user->username, ['secret', 'passhash_algo'])
+            ->andReturn($user);
 
         $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => $user->username]);
@@ -237,6 +249,10 @@ final class AuthenticateControllerTest extends TestCase
 
         /** @var UserRepository&Mockery\MockInterface $userRepository */
         $userRepository = Mockery::mock(UserRepository::class);
+        $userRepository->shouldReceive('findByUsername')
+            ->once()
+            ->with('no_such_user_xyz', ['secret', 'passhash_algo'])
+            ->andReturn(null);
 
         $controller = new AuthenticateController($repository, $userRepository, $this->app);
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => 'no_such_user_xyz']);

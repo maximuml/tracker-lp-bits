@@ -16,7 +16,6 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class StaffPageController extends LegacyController
@@ -55,13 +54,7 @@ class StaffPageController extends LegacyController
 
         $pickerRows = $this->staffDirectoryRepository->listPickers();
 
-        $forumMods = DB::table('forummods')
-            ->leftJoin('users', 'forummods.userid', '=', 'users.id')
-            ->orderBy('forummods.forumid')
-            ->orderBy('forummods.userid')
-            ->get(['forummods.userid AS userid', 'users.last_access', 'users.country'])
-            ->unique('userid')
-            ->values();
+        $forumMods = $this->staffDirectoryRepository->listForumModerators();
 
         // Preload user display rows to avoid N+1 in buildUserRow
         $allUserIds = $supportRows->pluck('id')
@@ -80,11 +73,7 @@ class StaffPageController extends LegacyController
         $modUserIds = $forumMods->map(fn ($m) => (int) ((array) $m)['userid'])->all();
         $modForums = $modUserIds === []
             ? collect()
-            : DB::table('forums as f')
-                ->leftJoin('forummods as fm', 'f.id', '=', 'fm.forumid')
-                ->whereIn('fm.userid', $modUserIds)
-                ->get(['fm.userid', 'f.id', 'f.name'])
-                ->groupBy('userid');
+            : $this->staffDirectoryRepository->listModeratedForums($modUserIds);
 
         $forumModRows = [];
         foreach ($forumMods as $modRow) {
@@ -144,13 +133,13 @@ class StaffPageController extends LegacyController
         $adminClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : PHP_INT_MAX;
 
         if (UserDisplay::currentClass() >= $sysopClass) {
-            $sysopPanels = DB::table('sysoppanel')->get()->map(fn ($r) => (array) $r)->all();
+            $sysopPanels = $this->staffDirectoryRepository->listSysopPanels();
         }
         if (UserDisplay::currentClass() >= $adminClass) {
-            $adminPanels = DB::table('adminpanel')->get()->map(fn ($r) => (array) $r)->all();
+            $adminPanels = $this->staffDirectoryRepository->listAdminPanels();
         }
         if (UserDisplay::currentClass() >= $moderatorClass) {
-            $modPanels = DB::table('modpanel')->get()->map(fn ($r) => (array) $r)->all();
+            $modPanels = $this->staffDirectoryRepository->listModPanels();
         }
 
         return $this->legacyPage($request, 'staffpanel', true, [

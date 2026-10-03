@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class TorrentListingRepository
@@ -92,6 +93,23 @@ class TorrentListingRepository
             ->get()
             ->map(fn ($row) => (array) $row)
             ->all();
+    }
+
+    /**
+     * Keyword suggestions matching a prefix, most frequent first.
+     *
+     * @return Collection<int, \stdClass>
+     */
+    public function suggestKeywords(string $prefix, int $limit = 10): Collection
+    {
+        return DB::table('suggest')
+            ->selectRaw('keywords AS suggest, COUNT(*) AS count')
+            ->where('keywords', 'like', $prefix.'%')
+            ->groupBy('keywords')
+            ->orderByDesc('count')
+            ->orderByDesc('keywords')
+            ->limit($limit)
+            ->get();
     }
 
     public function cleanupSuggest(int $secondsBack = 518400): void

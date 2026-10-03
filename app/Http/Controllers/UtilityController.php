@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
 use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Repositories\SearchPageRepository;
+use App\Repositories\TorrentListingRepository;
 use App\Repositories\UsercpSecurityCommand;
 use App\Services\AjaxService;
 use App\Services\AttachmentMutationService;
@@ -38,7 +40,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -54,7 +55,7 @@ class UtilityController extends LegacyController
 
     private LegacyHeaderBag $legacyHeaderBag;
 
-    public function __construct(private readonly UsercpSecurityCommand $usercpSecurityCommand, private readonly UserRepositoryInterface $userRepository,
+    public function __construct(private readonly AttachmentRepositoryInterface $attachmentRepository, private readonly TorrentListingRepository $torrentListingRepository, private readonly UsercpSecurityCommand $usercpSecurityCommand, private readonly UserRepositoryInterface $userRepository,
         UsersearchPageService $usersearchPageService,
         private readonly AjaxService $ajaxService,
         SearchPageRepository $searchPageRepository,
@@ -229,8 +230,8 @@ class UtilityController extends LegacyController
             return response('Invalid id or key.', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        $row = (array) DB::table('attachments')->where('id', $id)->where('dlkey', $dlkey)->first();
-        if (! $row) {
+        $row = $this->attachmentRepository->findByIdAndDlkey($id, $dlkey) ?? [];
+        if ($row === []) {
             return response('No attachment found.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
@@ -251,7 +252,7 @@ class UtilityController extends LegacyController
             $filename = 'attachment';
         }
 
-        DB::table('attachments')->where('id', $id)->increment('downloads');
+        $this->attachmentRepository->incrementDownloads($id);
 
         if ($this->legacyRedisCache !== null) {
             $this->legacyRedisCache->delete_value('attachment_'.$dlkey.'_content');
@@ -412,14 +413,7 @@ class UtilityController extends LegacyController
             return response('', 200, $headers);
         }
 
-        $suggestRows = DB::table('suggest')
-            ->selectRaw('keywords AS suggest, COUNT(*) AS count')
-            ->where('keywords', 'like', $q.'%')
-            ->groupBy('keywords')
-            ->orderByDesc('count')
-            ->orderByDesc('keywords')
-            ->limit(10)
-            ->get();
+        $suggestRows = $this->torrentListingRepository->suggestKeywords($q);
 
         $result = '';
         $i = 0;

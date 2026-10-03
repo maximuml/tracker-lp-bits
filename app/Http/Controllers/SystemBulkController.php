@@ -7,14 +7,15 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Enums\UserStatus;
 use App\Jobs\BulkUserIncrementJob;
 use App\Jobs\BulkUserMessageJob;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\InviteRepository;
+use App\Repositories\ModerationRepository;
 use App\Repositories\UserDetailRepository;
+use App\Repositories\UserListingRepository;
 use App\Services\PermissionChecker;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
@@ -40,7 +41,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -52,7 +52,7 @@ class SystemBulkController extends LegacyController
 
     private ?LegacyRedisCache $legacyRedisCache;
 
-    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly InviteRepository $inviteRepository, private readonly UserDetailRepository $userDetailRepository,
+    public function __construct(private readonly ModerationRepository $moderationRepository, private readonly UserListingRepository $userListingRepository, private readonly PermissionChecker $permissionChecker, private readonly InviteRepository $inviteRepository, private readonly UserDetailRepository $userDetailRepository,
         UserModerationRepositoryInterface $userModerationRepository,
         CurrentUser $currentUser,
         ?LegacyRedisCache $legacyRedisCache,
@@ -308,13 +308,10 @@ class SystemBulkController extends LegacyController
         }
 
         if (request()->post('setdealt')) {
-            DB::table('reports')
-                ->whereIn('id', $delreportIds)
-                ->where('dealtwith', 0)
-                ->update(['dealtwith' => 1, 'dealtby' => $currentUserId]);
+            $this->moderationRepository->markReportsDealt($delreportIds, $currentUserId);
             $this->legacyRedisCache?->delete_value('staff_new_report_count', true);
         } elseif (request()->post('delete')) {
-            DB::table('reports')->whereIn('id', $delreportIds)->delete();
+            $this->moderationRepository->deleteReports($delreportIds);
             $this->legacyRedisCache?->delete_value('staff_new_report_count', true);
             $this->legacyRedisCache?->delete_value('staff_report_count', true);
         }
@@ -451,12 +448,7 @@ class SystemBulkController extends LegacyController
             // Temp invites still use the legacy artisan command path; dispatch
             // the increment job for the messages, then run the invite command
             // synchronously (it has its own queue via GenerateTemporaryInvite).
-            $userIds = DB::table('users')
-                ->whereIn('class', $classIds)
-                ->where('enabled', true)
-                ->where('status', UserStatus::CONFIRMED->value)
-                ->pluck('id')
-                ->all();
+            $userIds = $this->userListingRepository->listConfirmedEnabledIdsByClasses($classIds);
 
             if (! $dryRun && ! empty($userIds)) {
                 $idStr = implode(',', $userIds);

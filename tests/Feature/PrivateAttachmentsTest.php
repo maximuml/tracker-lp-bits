@@ -41,8 +41,9 @@ final class PrivateAttachmentsTest extends TestCase
     public function test_controller_checks_dlkey(): void
     {
         $source = file_get_contents(app_path('Http/Controllers/UtilityController.php'));
+        $repoSource = file_get_contents(app_path('Repositories/AttachmentRepository.php'));
         $this->assertStringContainsString('dlkey', $source, 'getattachment must verify dlkey');
-        $this->assertStringContainsString("where('dlkey'", $source, 'getattachment must query by dlkey');
+        $this->assertStringContainsString("where('dlkey'", $repoSource, 'getattachment must query by dlkey');
     }
 
     /**

@@ -28,6 +28,25 @@ class ModerationRepository extends BaseRepository
     }
 
     /**
+     * @param  array<int>  $ids
+     */
+    public function markReportsDealt(array $ids, int $dealtBy): void
+    {
+        DB::table('reports')
+            ->whereIn('id', $ids)
+            ->where('dealtwith', 0)
+            ->update(['dealtwith' => 1, 'dealtby' => $dealtBy]);
+    }
+
+    /**
+     * @param  array<int>  $ids
+     */
+    public function deleteReports(array $ids): void
+    {
+        DB::table('reports')->whereIn('id', $ids)->delete();
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public function getForumPost(int $postId): ?array

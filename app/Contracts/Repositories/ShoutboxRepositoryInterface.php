@@ -6,6 +6,7 @@ namespace App\Contracts\Repositories;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 interface ShoutboxRepositoryInterface
 {
@@ -49,4 +50,20 @@ interface ShoutboxRepositoryInterface
      * @param  array<string, mixed>|object|null  $user
      */
     public function applyTypeFilter($query, string $type, $user = null): void;
+
+    /**
+     * @param  array<string, mixed>|null  $user
+     */
+    public function maxId(string $type, ?array $user): int;
+
+    /**
+     * @param  array<string, mixed>|null  $user
+     * @return Collection<int, \stdClass>
+     */
+    public function listLatest(string $type, ?array $user, int $limit): Collection;
+
+    /**
+     * @param  array<string, mixed>|null  $user
+     */
+    public function newAfterIdQuery(string $type, int $lastId, ?array $user): Builder;
 }

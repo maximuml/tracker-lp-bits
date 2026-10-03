@@ -10,6 +10,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class ShoutboxRepository extends BaseRepository implements ShoutboxRepositoryInterface
@@ -295,5 +296,43 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
     public function applyTypeFilter($query, string $type, $user = null): void
     {
         $query->where('type', ShoutboxType::SB->value);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $user
+     */
+    public function maxId(string $type, ?array $user): int
+    {
+        $query = DB::table('shoutbox');
+        $this->applyTypeFilter($query, $type, $user);
+
+        return (int) $query->max('id');
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $user
+     * @return Collection<int, \stdClass>
+     */
+    public function listLatest(string $type, ?array $user, int $limit): Collection
+    {
+        $query = DB::table('shoutbox')->orderByDesc('date')->limit($limit);
+        $this->applyTypeFilter($query, $type, $user);
+
+        return $query->get();
+    }
+
+    /**
+     * Prepared query for shouts after $lastId — re-executed by the SSE loop.
+     *
+     * @param  array<string, mixed>|null  $user
+     */
+    public function newAfterIdQuery(string $type, int $lastId, ?array $user): Builder
+    {
+        $query = DB::table('shoutbox')
+            ->orderBy('id')
+            ->where('id', '>', $lastId);
+        $this->applyTypeFilter($query, $type, $user);
+
+        return $query;
     }
 }

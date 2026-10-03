@@ -23,7 +23,6 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -76,13 +75,8 @@ class ShoutboxController extends LegacyController
         $refresh = (int) ($currentUser['sbrefresh'] ?? 120);
         $limit = (int) ($currentUser['sbnum'] ?? 70);
 
-        $lastIdQuery = DB::table('shoutbox');
-        Shoutbox::applyTypeFilter($lastIdQuery, $where, $currentUser ?: null);
-        $lastId = (int) $lastIdQuery->max('id');
-
-        $query = DB::table('shoutbox')->orderByDesc('date')->limit($limit);
-        Shoutbox::applyTypeFilter($query, $where, $currentUser ?: null);
-        $rows = $query->get();
+        $lastId = $this->repository->maxId($where, $currentUser ?: null);
+        $rows = $this->repository->listLatest($where, $currentUser ?: null, $limit);
 
         $shoutIds = array_values($rows->pluck('id')->map(fn ($id) => (int) $id)->all());
         $reactionData = Shoutbox::prefetchReactions($shoutIds, $currentUserId);
@@ -447,15 +441,7 @@ class ShoutboxController extends LegacyController
      */
     private function runShoutLoop(string $type, int $lastId, int $maxLoops, int $interval, callable $owns): void
     {
-        $buildQuery = function (string $type, int $lastId) {
-            $query = DB::table('shoutbox')
-                ->orderBy('id')
-                ->where('id', '>', $lastId);
-            Shoutbox::applyTypeFilter($query, $type, $this->currentUser->get());
-
-            return $query;
-        };
-
+        $buildQuery = fn (string $type, int $lastId) => $this->repository->newAfterIdQuery($type, $lastId, $this->currentUser->get());
         $query = $buildQuery($type, $lastId);
 
         for ($i = 0; $i < $maxLoops; $i++) {

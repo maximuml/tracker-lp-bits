@@ -46,29 +46,27 @@ class UserProfile extends ViewRecord implements HasActions
     use InteractsWithRecord;
     use OptionsTrait;
 
-    private static ?UserRepositoryInterface $rep = null;
+    private UserRepositoryInterface $rep;
 
-    private static ?UserModerationRepositoryInterface $moderationRep = null;
+    private UserModerationRepositoryInterface $moderationRep;
+
+    private ExamRepositoryInterface $examRepository;
+
+    private ExamUserRepository $examUserRepository;
+
+    public function boot(
+        UserRepositoryInterface $rep,
+        UserModerationRepositoryInterface $moderationRep,
+        ExamRepositoryInterface $examRepository,
+        ExamUserRepository $examUserRepository,
+    ): void {
+        $this->rep = $rep;
+        $this->moderationRep = $moderationRep;
+        $this->examRepository = $examRepository;
+        $this->examUserRepository = $examUserRepository;
+    }
 
     protected static string $resource = UserResource::class;
-
-    private function getRep(): UserRepositoryInterface
-    {
-        if (! self::$rep) {
-            self::$rep = app(UserRepositoryInterface::class);
-        }
-
-        return self::$rep;
-    }
-
-    private function getModerationRep(): UserModerationRepositoryInterface
-    {
-        if (! self::$moderationRep) {
-            self::$moderationRep = app(UserModerationRepositoryInterface::class);
-        }
-
-        return self::$moderationRep;
-    }
 
     private function currentUser(): User
     {
@@ -127,12 +125,12 @@ class UserProfile extends ViewRecord implements HasActions
                 Hidden::make('uid')->default($this->getUserRecord()->id),
             ])
             ->action(function ($data) {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
                     if ($data['action'] == 'enable') {
-                        $this->getModerationRep()->enableUser($this->currentUser(), $data['uid'], $data['reason']);
+                        $this->moderationRep->enableUser($this->currentUser(), $data['uid'], $data['reason']);
                     } elseif ($data['action'] == 'disable') {
-                        $this->getModerationRep()->disableUser($this->currentUser(), $data['uid'], $data['reason']);
+                        $this->moderationRep->disableUser($this->currentUser(), $data['uid'], $data['reason']);
                     }
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
@@ -147,9 +145,9 @@ class UserProfile extends ViewRecord implements HasActions
             ->modalHeading(__('admin.resources.user.actions.disable_two_step_authentication'))
             ->requiresConfirmation()
             ->action(function ($data) {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
-                    $this->getModerationRep()->removeTwoStepAuthentication($this->currentUser(), $this->getUserRecord()->id);
+                    $this->moderationRep->removeTwoStepAuthentication($this->currentUser(), $this->getUserRecord()->id);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -194,12 +192,12 @@ class UserProfile extends ViewRecord implements HasActions
                     ->label(__('admin.resources.user.actions.change_bonus_etc_reason_label')),
             ])
             ->action(function ($data) {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
                     if ($data['field'] == 'tmp_invites') {
-                        $this->getModerationRep()->addTemporaryInvite($this->currentUser(), $this->getUserRecord()->id, $data['action'], $data['value'], $data['duration'], $data['reason']);
+                        $this->moderationRep->addTemporaryInvite($this->currentUser(), $this->getUserRecord()->id, $data['action'], $data['value'], $data['duration'], $data['reason']);
                     } else {
-                        $this->getModerationRep()->incrementDecrement($this->currentUser(), $this->getUserRecord()->id, $data['action'], $data['field'], $data['value'], $data['reason']);
+                        $this->moderationRep->incrementDecrement($this->currentUser(), $this->getUserRecord()->id, $data['action'], $data['field'], $data['value'], $data['reason']);
                     }
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
@@ -220,7 +218,7 @@ class UserProfile extends ViewRecord implements HasActions
                     ->required(),
             ])
             ->action(function ($data) {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
                     $userRep->resetPassword($this->getUserRecord()->id, $data['password'], $data['password_confirmation']);
                     $this->sendSuccessNotification();
@@ -236,7 +234,7 @@ class UserProfile extends ViewRecord implements HasActions
             ->modalHeading(__('admin.resources.user.actions.assign_exam_btn'))
             ->schema([
                 Select::make('exam_id')
-                    ->options(app(ExamRepositoryInterface::class)->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
+                    ->options($this->examRepository->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
                     ->label(__('admin.resources.user.actions.assign_exam_exam_label'))->required(),
                 DateTimePicker::make('begin')->label(__('admin.resources.user.actions.assign_exam_begin_label')),
                 DateTimePicker::make('end')->label(__('admin.resources.user.actions.assign_exam_end_label'))
@@ -244,7 +242,7 @@ class UserProfile extends ViewRecord implements HasActions
 
             ])
             ->action(function ($data) {
-                $examRep = app(ExamUserRepository::class);
+                $examRep = $this->examUserRepository;
                 try {
                     $examRep->assignToUser($this->getUserRecord()->id, $data['exam_id'], $data['begin'], $data['end']);
                     $this->sendSuccessNotification();
@@ -311,9 +309,9 @@ class UserProfile extends ViewRecord implements HasActions
         return Action::make($this->getUserRecord()->downloadpos ? __('admin.resources.user.actions.disable_download_privileges_btn') : __('admin.resources.user.actions.enable_download_privileges_btn'))
             ->requiresConfirmation()
             ->action(function () {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
-                    $this->getModerationRep()->updateDownloadPrivileges($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->downloadpos);
+                    $this->moderationRep->updateDownloadPrivileges($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->downloadpos);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -326,9 +324,9 @@ class UserProfile extends ViewRecord implements HasActions
         return Action::make($this->getUserRecord()->uploadpos ? __('admin.resources.user.actions.disable_upload_privileges_btn') : __('admin.resources.user.actions.enable_upload_privileges_btn'))
             ->requiresConfirmation()
             ->action(function () {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
-                    $this->getModerationRep()->updateUploadPrivileges($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->uploadpos);
+                    $this->moderationRep->updateUploadPrivileges($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->uploadpos);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -341,9 +339,9 @@ class UserProfile extends ViewRecord implements HasActions
         return Action::make($this->getUserRecord()->forumpost ? __('admin.resources.user.actions.disable_forumpost_btn') : __('admin.resources.user.actions.enable_forumpost_btn'))
             ->requiresConfirmation()
             ->action(function () {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
-                    $this->getModerationRep()->updateForumPost($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->forumpost);
+                    $this->moderationRep->updateForumPost($this->currentUser(), $this->getUserRecord()->id, ! $this->getUserRecord()->forumpost);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -377,9 +375,9 @@ class UserProfile extends ViewRecord implements HasActions
                     ->placeholder(__('admin.resources.user.actions.warn_reason_placeholder')),
             ])
             ->action(function (array $data) {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
-                    $this->getModerationRep()->warnUser($this->currentUser(), $this->getUserRecord()->id, (int) $data['weeks'], (string) ($data['reason'] ?? ''));
+                    $this->moderationRep->warnUser($this->currentUser(), $this->getUserRecord()->id, (int) $data['weeks'], (string) ($data['reason'] ?? ''));
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());
@@ -400,7 +398,7 @@ class UserProfile extends ViewRecord implements HasActions
 
             ])
             ->action(function ($data) {
-                $rep = $this->getRep();
+                $rep = $this->rep;
                 try {
                     $rep->addMeta($this->getUserRecord(), $data, $data);
                     $this->sendSuccessNotification();
@@ -413,7 +411,7 @@ class UserProfile extends ViewRecord implements HasActions
     private function buildDeleteAction(): DeleteAction
     {
         return DeleteAction::make()->using(function () {
-            $this->getModerationRep()->destroy($this->getUserRecord()->id);
+            $this->moderationRep->destroy($this->getUserRecord()->id);
 
             return redirect(self::$resource::getUrl('index'));
         });
@@ -436,7 +434,7 @@ class UserProfile extends ViewRecord implements HasActions
             UserMeta::META_KEY_PERSONALIZED_USERNAME,
             UserMeta::META_KEY_CHANGE_USERNAME,
         ];
-        $metaList = $this->getRep()->listMetas($this->getUserRecord()->id, $metaKeys);
+        $metaList = $this->rep->listMetas($this->getUserRecord()->id, $metaKeys);
         $props = [];
         foreach ($metaList as $metaKey => $metas) {
             $meta = $metas->first();
@@ -489,9 +487,9 @@ class UserProfile extends ViewRecord implements HasActions
                     ->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
             ])
             ->action(function ($data) {
-                $userRep = $this->getRep();
+                $userRep = $this->rep;
                 try {
-                    $this->getModerationRep()->changeClass($this->currentUser(), $this->getUserRecord(), $data['class'], $data['reason'], $data);
+                    $this->moderationRep->changeClass($this->currentUser(), $this->getUserRecord(), $data['class'], $data['reason'], $data);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());

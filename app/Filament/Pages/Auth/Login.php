@@ -24,6 +24,16 @@ use Illuminate\Validation\ValidationException;
  */
 class Login extends \Filament\Auth\Pages\Login
 {
+    private Timebox $timebox;
+
+    private LoginResponse $loginResponse;
+
+    public function boot(Timebox $timebox, LoginResponse $loginResponse): void
+    {
+        $this->timebox = $timebox;
+        $this->loginResponse = $loginResponse;
+    }
+
     public function authenticate(): ?LoginResponse
     {
         try {
@@ -44,7 +54,7 @@ class Login extends \Filament\Auth\Pages\Login
         ];
         $remember = $data['remember'] ?? false;
 
-        $attempted = app(Timebox::class)->call(function () use ($guard, $credentials, $remember): bool {
+        $attempted = $this->timebox->call(function () use ($guard, $credentials, $remember): bool {
             $this->fireAttemptingEvent($guard, $credentials, $remember);
 
             return $guard->attempt($credentials, $remember);
@@ -67,7 +77,7 @@ class Login extends \Filament\Auth\Pages\Login
 
         session()->regenerate();
 
-        return app(LoginResponse::class);
+        return $this->loginResponse;
     }
 
     public function form(Schema $schema): Schema

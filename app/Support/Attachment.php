@@ -105,7 +105,7 @@ final class Attachment
         $row = Cache::get('attachment_'.$dlkey.'_content');
 
         if (empty($row) && strlen($dlkey) == 32) {
-            $row = app(AttachmentRepository::class)->findByDlkey($dlkey);
+            $row = self::attachmentRepository()->findByDlkey($dlkey);
             Cache::put('attachment_'.$dlkey.'_content', $row, 86400);
         }
 
@@ -174,7 +174,7 @@ final class Attachment
             $dlkey = $matches[1];
             $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
             $cached = Cache::get('attachment_'.$dlkey.'_content');
-            $row = is_array($cached) ? $cached : (app(AttachmentRepository::class)->findByDlkey($dlkey) ?? []);
+            $row = is_array($cached) ? $cached : (self::attachmentRepository()->findByDlkey($dlkey) ?? []);
             Cache::put('attachment_'.$dlkey.'_content', $row, 86400);
 
             if (empty($row) || ($row['isimage'] ?? 0) != 1) {
@@ -213,5 +213,10 @@ final class Attachment
         };
 
         return trim(view('support._attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
+    }
+
+    private static function attachmentRepository(): AttachmentRepository
+    {
+        return app(AttachmentRepository::class);
     }
 }

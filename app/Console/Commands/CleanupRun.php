@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Services\CleanupService;
+use App\Contracts\CleanupServiceInterface;
 use App\Support\Logger;
 use Illuminate\Console\Command;
 
@@ -16,7 +16,7 @@ final class CleanupRun extends Command
     /** @var string */
     protected $description = 'Run periodic cleanup tasks (peers, visibility, forum/offers, users, dead torrents).';
 
-    public function handle(CleanupService $service): int
+    public function handle(CleanupServiceInterface $service): int
     {
         $lockFile = sprintf('%s/nexus_cleanup_cli.lock', sys_get_temp_dir());
         $fd = fopen($lockFile, 'c');

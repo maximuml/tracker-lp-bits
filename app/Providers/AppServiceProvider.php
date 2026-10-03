@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\CleanupServiceInterface;
 use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
@@ -35,6 +36,7 @@ use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
+use App\Services\CleanupService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
@@ -106,6 +108,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // W3-07: Repository contracts for the 10 most-used repositories.
+        $this->app->bind(CleanupServiceInterface::class, CleanupService::class);
         $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);
         $this->app->bind(ExamRepositoryInterface::class, ExamRepository::class);
         $this->app->bind(ForumRepositoryInterface::class, ForumRepository::class);

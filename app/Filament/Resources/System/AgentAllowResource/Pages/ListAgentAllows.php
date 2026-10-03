@@ -17,6 +17,14 @@ class ListAgentAllows extends PageList
 {
     protected static string $resource = AgentAllowResource::class;
 
+    private AgentAllowRepository $agentAllowRepository;
+
+    public function boot(
+        AgentAllowRepository $agentAllowRepository,
+    ): void {
+        $this->agentAllowRepository = $agentAllowRepository;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -29,7 +37,7 @@ class ListAgentAllows extends PageList
                 ])
                 ->modalHeading(__('admin.resources.agent_allow.check_modal_header'))
                 ->action(function ($data) {
-                    $agentAllowRep = app(AgentAllowRepository::class);
+                    $agentAllowRep = $this->agentAllowRepository;
                     try {
                         $result = $agentAllowRep->checkClient($data['peer_id'], $data['agent']);
                         Admin::successNotification(__('admin.resources.agent_allow.check_pass_msg', ['id' => $result->id]));

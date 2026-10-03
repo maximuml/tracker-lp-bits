@@ -40,7 +40,7 @@ class Bonus
         $nowStr = date('Y-m-d H:i:s');
         $logPrefix = "[CALCULATE_SEED_BONUS], uid: $uid, torrentIdArr: ".json_encode($torrentIdArr);
 
-        $bonusRep = app(BonusCalculationRepository::class);
+        $bonusRep = self::bonusCalculationRepository();
         $torrentData = $bonusRep->getTorrentRowsForBonusCalculation($uid, $torrentIdArr, $minSize);
         $sql = $torrentData['sql'];
         $torrentResult = $torrentData['torrentResult'];
@@ -289,7 +289,17 @@ class Bonus
      */
     public static function haremAddition(int|string $uid): float|int|string
     {
-        return app(BonusCalculationRepository::class)->getHaremAddition($uid);
+        return self::bonusCalculationRepository()->getHaremAddition($uid);
+    }
+
+    private static function bonusCalculationRepository(): BonusCalculationRepository
+    {
+        return app(BonusCalculationRepository::class);
+    }
+
+    private static function bonusRepository(): BonusRepository
+    {
+        return app(BonusRepository::class);
     }
 
     /**
@@ -352,6 +362,6 @@ class Bonus
 
         $op = $type === '-' ? '-' : '+';
 
-        app(BonusRepository::class)->updateSeedBonus($op, $point, $id);
+        self::bonusRepository()->updateSeedBonus($op, $point, $id);
     }
 }

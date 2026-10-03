@@ -12,6 +12,13 @@ class UserStat extends StatTable
 {
     protected static ?int $sort = 100;
 
+    private DashboardRepository $dashboardRepository;
+
+    public function boot(DashboardRepository $dashboardRepository): void
+    {
+        $this->dashboardRepository = $dashboardRepository;
+    }
+
     protected function getHeader(): string
     {
         return Locale::trans('dashboard.user.page_title', [], null);
@@ -20,7 +27,7 @@ class UserStat extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        $dashboardRep = app(DashboardRepository::class);
+        $dashboardRep = $this->dashboardRepository;
 
         return $dashboardRep->statUsers();
     }

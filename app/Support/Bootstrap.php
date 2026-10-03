@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Services\CleanupService;
+use App\Contracts\CleanupServiceInterface;
 
 /**
  * Legacy bootstrap/cleanup helpers drained out of `include/functions.php`.
@@ -52,6 +52,6 @@ final class Bootstrap
             return false;
         }
 
-        return app(CleanupService::class)->runAll(false, $printProgress);
+        return app(CleanupServiceInterface::class)->runAll(false, $printProgress);
     }
 }

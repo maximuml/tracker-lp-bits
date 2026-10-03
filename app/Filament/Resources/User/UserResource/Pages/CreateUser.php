@@ -15,9 +15,17 @@ class CreateUser extends CreateRecord implements HasActions
 {
     protected static string $resource = UserResource::class;
 
+    private UserRepositoryInterface $userRepository;
+
+    public function boot(
+        UserRepositoryInterface $userRepository,
+    ): void {
+        $this->userRepository = $userRepository;
+    }
+
     public function create(bool $another = false): void
     {
-        $userRep = app(UserRepositoryInterface::class);
+        $userRep = $this->userRepository;
         $data = $this->form->getState();
         try {
             $this->record = $userRep->store($data);

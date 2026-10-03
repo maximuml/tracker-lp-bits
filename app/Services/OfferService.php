@@ -134,7 +134,7 @@ final class OfferService
         $descr = $pic.$descrmain;
 
         if ($this->offerRepository->offerNameExists($name)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_offer_exists').'<a class=altlink href=offers.php>'.__('legacy/offers.text_view_all_offers').'</a>', false);
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_offer_exists').view('components.altlink', ['class' => 'altlink', 'url' => 'offers.php', 'text' => __('legacy/offers.text_view_all_offers')])->render(), false);
         }
 
         $id = $this->offerRepository->createOffer([
@@ -193,7 +193,7 @@ final class OfferService
         }
 
         if ($sure === 0) {
-            $this->abort(__('legacy/offers.std_delete_offer'), __('legacy/offers.std_delete_offer_note')."<br /><form method=post action=offers.php?id={$offerId}&del_offer=1&sure=1>".__('legacy/offers.text_reason_is').'<input type=text name=reason><input type=submit value="'.__('legacy/offers.submit_confirm').'"></form>', false);
+            $this->abort(__('legacy/offers.std_delete_offer'), __('legacy/offers.std_delete_offer_note').view('offers.delete-confirm-form', ['url' => "offers.php?id={$offerId}&del_offer=1&sure=1"])->render(), false);
         }
 
         $reason = (string) $request->input('reason');

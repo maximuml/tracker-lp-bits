@@ -66,9 +66,7 @@ final class LegacyAuth
         } catch (CaptchaValidationException $exception) {
             $message = $exception->getMessage();
 
-            $defaultMessage = (__('legacy/functions.std_invalid_image_code'))
-                .'<a href="'.\htmlspecialchars($where).'"><b>'
-                .(__('legacy/functions.std_here')).'</b></a>'.(__('legacy/functions.std_to_request_new_image'));
+            $defaultMessage = view('auth._invalid_image_code', ['where' => $where])->render();
 
             if ($message === '' || $message === 'Invalid captcha response.' || $message === 'Missing captcha parameters.') {
                 $message = $defaultMessage;
@@ -197,7 +195,7 @@ final class LegacyAuth
             if ($ipCount > $settings['maxip']) {
                 LegacyResponse::abort(
                     (string) (__('legacy/functions.std_sorry')),
-                    (string) (__('legacy/functions.std_the_ip')).'<b>'.\htmlspecialchars($ip).'</b>'.\sprintf((string) (__('legacy/functions.std_used_many_times')), Setting::getSiteName()),
+                    view('auth._ip_used_many_times', ['ip' => $ip, 'siteName' => Setting::getSiteName()])->render(),
                     false,
                     true,
                 );
@@ -274,7 +272,7 @@ final class LegacyAuth
         $nip = ip2long($ip);
 
         if ($nip && self::authRepository()->isIpBanned($nip)) {
-            $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.(__('legacy/functions.text_unauthorized_ip'))."</body></html>\n";
+            $html = view('errors.unauthorized-ip')->render()."\n";
             throw new HttpResponseException(new Response($html, 403));
         }
 

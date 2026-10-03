@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ComplainRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
@@ -19,12 +20,12 @@ use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class SupportController extends LegacyController
 {
     public function __construct(
+        private readonly ComplainRepositoryInterface $complainRepository,
         private readonly ComplainService $complainService,
         private readonly CurrentUser $currentUser,
         private readonly UserRepositoryInterface $userRepository,
@@ -107,7 +108,7 @@ class SupportController extends LegacyController
 
         if ($uid <= 0) {
             $uuid = filter_var((string) ($request->input('uuid') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $owns = DB::table('complains')->where('id', $id)->where('uuid', $uuid)->exists();
+            $owns = $this->complainRepository->existsByIdAndUuid($id, $uuid);
             if (! $owns) {
                 return $this->legacyAbortResponse(('Error'), 'Permission denied.');
             }
@@ -145,24 +146,12 @@ class SupportController extends LegacyController
 
         $pendingRows = [];
         if ($request->input('page') === null) {
-            $pendingRows = DB::table('complains')
-                ->where('answered', 0)
-                ->orderByDesc('id')
-                ->get(['added', 'uuid', 'email'])
-                ->map(fn ($r) => (array) $r)
-                ->all();
+            $pendingRows = $this->complainRepository->listPending();
         }
 
-        $count = (int) DB::table('complains')->where('answered', 1)->count();
+        $count = $this->complainRepository->countAnswered();
         [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager(20, $count, '?action=list&');
-        $processedRows = DB::table('complains')
-            ->where('answered', 1)
-            ->orderByDesc('id')
-            ->offset($offset)
-            ->limit($rpp)
-            ->get(['added', 'uuid', 'email'])
-            ->map(fn ($r) => (array) $r)
-            ->all();
+        $processedRows = $this->complainRepository->listAnswered($offset, $rpp);
 
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'list',
@@ -185,19 +174,14 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(('Error'), 'Permission denied.');
         }
 
-        $complain = (array) DB::table('complains')->where('uuid', $uuid)->first();
+        $complain = $this->complainRepository->findByUuid($uuid) ?? [];
         if (empty($complain)) {
             return $this->legacyAbortResponse(('Error'), 'Complain not found.');
         }
 
         $user = $this->userRepository->findByEmail((string) ($complain['email'] ?? ''), ['id', 'username']);
 
-        $replyRows = DB::table('complain_replies')
-            ->where('complain', (int) ($complain['id'] ?? 0))
-            ->orderByDesc('id')
-            ->get()
-            ->map(fn ($r) => (array) $r)
-            ->all();
+        $replyRows = $this->complainRepository->listReplies((int) ($complain['id'] ?? 0));
 
         $replyUserIds = array_filter(array_unique(array_column($replyRows, 'userid')));
         $replyUserMap = [];

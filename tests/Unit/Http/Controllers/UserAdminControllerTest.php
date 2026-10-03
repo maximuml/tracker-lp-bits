@@ -6,11 +6,11 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\UserAdminController;
 use App\Repositories\BonusRepository;
-use App\Services\PermissionChecker;
 use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
+use App\Services\PermissionChecker;
 use App\Support\CurrentUser;
 use Mockery;
 use Tests\Attributes\TestCategory;

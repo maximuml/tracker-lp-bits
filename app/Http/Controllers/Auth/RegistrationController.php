@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
+use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
@@ -11,7 +12,6 @@ use App\Http\Requests\Auth\ConfirmResendRequest;
 use App\Http\Requests\Auth\SignupRequest;
 use App\Models\Setting;
 use App\Repositories\InviteRepository;
-use App\Repositories\UsercpLookupRepository;
 use App\Services\RegistrationService;
 use App\Services\WebAuthService;
 use App\Support\AssetAppender;
@@ -28,7 +28,7 @@ use Illuminate\View\View;
 
 class RegistrationController extends Controller
 {
-    public function __construct(private readonly UsercpLookupRepository $usercpLookupRepository, private readonly InviteRepository $inviteRepository,
+    public function __construct(private readonly UsercpLookupRepositoryInterface $usercpLookupRepository, private readonly InviteRepository $inviteRepository,
         private RegistrationService $registrationService,
         private WebAuthService $authService,
     ) {}

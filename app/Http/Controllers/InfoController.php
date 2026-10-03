@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\InfoRepositoryInterface;
+use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
-use App\Repositories\UsercpLookupRepository;
 use App\Services\BitbucketService;
 use App\Services\PermissionChecker;
 use App\Support\CurrentUser;
@@ -26,7 +26,7 @@ use Illuminate\View\View;
 
 class InfoController extends LegacyController
 {
-    public function __construct(private readonly UsercpLookupRepository $usercpLookupRepository, private readonly PermissionChecker $permissionChecker,
+    public function __construct(private readonly UsercpLookupRepositoryInterface $usercpLookupRepository, private readonly PermissionChecker $permissionChecker,
         private readonly BitbucketService $bitbucketService,
         private readonly CurrentUser $currentUser,
         private readonly InfoRepositoryInterface $infoRepository,

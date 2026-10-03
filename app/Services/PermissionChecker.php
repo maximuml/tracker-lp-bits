@@ -17,4 +17,9 @@ class PermissionChecker
     {
         return Permissions::userCan($permission, $fail, $uid);
     }
+
+    public function hasRoleWorkSeeding(int $uid): bool
+    {
+        return Permissions::hasRoleWorkSeeding($uid);
+    }
 }

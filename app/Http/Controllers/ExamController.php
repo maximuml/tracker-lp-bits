@@ -8,7 +8,6 @@ use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Http\Requests\ExamRequest;
 use App\Http\Requests\GenericIndexRequest;
 use App\Http\Resources\ExamResource;
-use App\Models\Exam;
 use App\Support\Locale;
 
 class ExamController extends Controller
@@ -101,7 +100,7 @@ class ExamController extends Controller
     /** @return  array<string, mixed> */
     public function all(): array
     {
-        $result = Exam::query()->orderBy('id', 'desc')->get();
+        $result = $this->repository->listAll();
         $resource = ExamResource::collection($result);
 
         return $this->success($resource);

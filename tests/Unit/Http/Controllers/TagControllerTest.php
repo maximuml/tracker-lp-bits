@@ -7,6 +7,7 @@ namespace Tests\Unit\Http\Controllers;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Http\Controllers\TagController;
 use App\Http\Requests\GenericIndexRequest;
+use App\Models\Tag;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -38,6 +39,24 @@ final class TagControllerTest extends TestCase
         $request->validateResolved();
 
         $result = $this->app->make(TagController::class)->index($request);
+
+        $this->assertSame(0, $result['ret']);
+        $this->assertArrayHasKey('data', $result);
+    }
+
+    public function test_show_delegates_to_repository_get_detail(): void
+    {
+        $tag = tap(new Tag, fn (Tag $t) => $t->id = 4);
+
+        /** @var TagRepositoryInterface&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(TagRepositoryInterface::class);
+        $repository->shouldReceive('getDetail')
+            ->once()
+            ->with(4)
+            ->andReturn($tag);
+        $this->app->instance(TagRepositoryInterface::class, $repository);
+
+        $result = $this->app->make(TagController::class)->show(4);
 
         $this->assertSame(0, $result['ret']);
         $this->assertArrayHasKey('data', $result);

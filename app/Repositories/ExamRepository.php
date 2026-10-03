@@ -118,6 +118,14 @@ class ExamRepository extends BaseRepository implements ExamRepositoryInterface
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
+     */
+    public function listAll()
+    {
+        return Exam::query()->orderBy('id', 'desc')->get();
+    }
+
+    /**
      * list valid exams
      *
      * @param  mixed  $excludeId

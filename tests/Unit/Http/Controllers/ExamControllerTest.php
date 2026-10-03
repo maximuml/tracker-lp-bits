@@ -11,6 +11,7 @@ use App\Http\Requests\ExamRequest;
 use App\Http\Requests\GenericIndexRequest;
 use App\Models\Exam;
 use App\Support\RedisGuard;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
@@ -141,6 +142,23 @@ final class ExamControllerTest extends TestCase
         $result = $this->app->make(ExamController::class)->destroy(3);
 
         $this->assertSame(0, $result['ret']);
+    }
+
+    public function test_all_delegates_to_repository_list_all(): void
+    {
+        $collection = new Collection([$this->makeExam(2)]);
+
+        /** @var ExamRepositoryInterface&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ExamRepositoryInterface::class);
+        $repository->shouldReceive('listAll')
+            ->once()
+            ->andReturn($collection);
+        $this->app->instance(ExamRepositoryInterface::class, $repository);
+
+        $result = $this->app->make(ExamController::class)->all();
+
+        $this->assertSame(0, $result['ret']);
+        $this->assertArrayHasKey('data', $result);
     }
 
     public function test_indexes_delegates_to_repository(): void

@@ -9,7 +9,6 @@ use App\Http\Requests\GenericIndexRequest;
 use App\Http\Requests\TagStoreRequest;
 use App\Http\Requests\TagUpdateRequest;
 use App\Http\Resources\TagResource;
-use App\Models\Tag;
 
 class TagController extends Controller
 {
@@ -58,7 +57,7 @@ class TagController extends Controller
      */
     public function show($id): array
     {
-        $result = Tag::query()->findOrFail($id);
+        $result = $this->repository->getDetail((int) $id);
         $resource = new TagResource($result);
 
         return $this->success($resource);

@@ -9,6 +9,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Controllers\BonusHistoryController;
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\RewardRepository;
+use App\Repositories\TorrentDetailRepository;
 use App\Repositories\UserListingRepository;
 use App\Support\CurrentUser;
 use Mockery;
@@ -30,6 +31,7 @@ final class BonusHistoryControllerTest extends TestCase
         $calculationRepository = Mockery::mock(BonusCalculationRepository::class);
 
         $controller = new BonusHistoryController(
+            Mockery::mock(TorrentDetailRepository::class),
             Mockery::mock(RewardRepository::class),
             Mockery::mock(TorrentRepositoryInterface::class),
             Mockery::mock(UserListingRepository::class),

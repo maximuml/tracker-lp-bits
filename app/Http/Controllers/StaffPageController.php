@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Models\User;
@@ -24,7 +23,6 @@ class StaffPageController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly UserRepositoryInterface $userRepository,
         private readonly StaffDirectoryRepository $staffDirectoryRepository,
     ) {}
 

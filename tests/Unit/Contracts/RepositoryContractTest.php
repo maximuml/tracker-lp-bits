@@ -139,7 +139,6 @@ final class RepositoryContractTest extends TestCase
         $this->assertSame($mock, $this->app->make(OfferVoteRepositoryInterface::class));
     }
 
-
     public function test_page_layout_repository_interface_binding(): void
     {
         $this->assertInstanceOf(PageLayoutRepository::class, $this->app->make(PageLayoutRepositoryInterface::class));
@@ -236,7 +235,6 @@ final class RepositoryContractTest extends TestCase
         $this->assertSame($mock, $this->app->make(UserRepositoryInterface::class));
     }
 
-
     public function test_category_repository_interface_binding(): void
     {
         $this->assertInstanceOf(CategoryRepository::class, $this->app->make(CategoryRepositoryInterface::class));
@@ -292,5 +290,4 @@ final class RepositoryContractTest extends TestCase
         $this->app->instance(UsercpRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(UsercpRepositoryInterface::class));
     }
->>>>>>> 66b13437 (refactor(repositories): extract contracts for 6 more final repos (W2-01/W2-02))
 }

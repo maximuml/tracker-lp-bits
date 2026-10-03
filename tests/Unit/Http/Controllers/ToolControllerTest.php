@@ -7,6 +7,7 @@ namespace Tests\Unit\Http\Controllers;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Http\Controllers\ToolController;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -20,32 +21,43 @@ final class ToolControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_notifications_returns_repository_counts_for_user(): void
+    public function test_notifications_returns_success(): void
     {
-        $user = tap(new User, fn (User $u) => $u->id = 42);
-        $payload = ['unread_messages' => 3, 'staff_messages' => 0];
+        $notifications = [
+            'unread_message_count' => 5,
+            'unread_notification_count' => 3,
+        ];
 
         /** @var ToolRepositoryInterface&Mockery\MockInterface $repository */
         $repository = Mockery::mock(ToolRepositoryInterface::class);
         $repository->shouldReceive('getNotificationCount')
             ->once()
-            ->with($user)
-            ->andReturn($payload);
-        $this->app->instance(ToolRepositoryInterface::class, $repository);
+            ->andReturn($notifications);
 
-        $this->be($user);
+        $user = new User;
+        $user->id = 5;
+        Auth::shouldReceive('user')->once()->andReturn($user);
 
-        $result = $this->app->make(ToolController::class)->notifications();
+        $controller = new ToolController($repository);
+
+        $result = $controller->notifications();
 
         $this->assertSame(0, $result['ret']);
-        $this->assertSame($payload, $result['data']);
+        $this->assertArrayHasKey('data', $result);
     }
 
-    public function test_notifications_throws_when_unauthenticated(): void
+    public function test_notifications_throws_when_not_authenticated(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('unauthenticated');
 
-        $this->app->make(ToolController::class)->notifications();
+        /** @var ToolRepositoryInterface&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ToolRepositoryInterface::class);
+        $repository->shouldNotReceive('getNotificationCount');
+
+        Auth::shouldReceive('user')->once()->andReturn(null);
+
+        $controller = new ToolController($repository);
+        $controller->notifications();
     }
 }

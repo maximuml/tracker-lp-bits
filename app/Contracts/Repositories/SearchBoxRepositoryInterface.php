@@ -12,6 +12,13 @@ use Illuminate\Database\Eloquent\Collection;
 interface SearchBoxRepositoryInterface
 {
     /**
+     * Lightweight id+name list for select dropdowns.
+     *
+     * @return \Illuminate\Support\Collection<int, \stdClass>
+     */
+    public function listIdName(): \Illuminate\Support\Collection;
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     public function getAllRows(): array;

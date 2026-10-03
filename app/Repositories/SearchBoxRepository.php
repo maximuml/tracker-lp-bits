@@ -30,7 +30,17 @@ class SearchBoxRepository extends BaseRepository implements SearchBoxRepositoryI
 
     /**
      * Fetch all search-box rows, decoding JSON columns.
+    /**
+     * Lightweight id+name list for select dropdowns.
      *
+     * @return Collection<int, \stdClass>
+     */
+    public function listIdName(): Collection
+    {
+        return DB::table('searchbox')->get(['id', 'name']);
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     public function getAllRows(): array

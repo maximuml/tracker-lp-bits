@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\StyleRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Language;
@@ -24,7 +26,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class SettingsController extends LegacyController
@@ -35,7 +36,7 @@ class SettingsController extends LegacyController
 
     private IndexRepository $indexRepository;
 
-    public function __construct(private readonly LanguageRepository $languageRepository, TagRepositoryInterface $tagRepository, CurrentUser $currentUser, IndexRepository $indexRepository)
+    public function __construct(private readonly SearchBoxRepositoryInterface $searchBoxRepository, private readonly StyleRepositoryInterface $styleRepository, private readonly LanguageRepository $languageRepository, TagRepositoryInterface $tagRepository, CurrentUser $currentUser, IndexRepository $indexRepository)
     {
         $this->tagRepository = $tagRepository;
         $this->currentUser = $currentUser;
@@ -150,8 +151,8 @@ class SettingsController extends LegacyController
             $data['config'] = Settings::fromDb($section);
 
             if ($section === 'main') {
-                $data['searchboxes'] = DB::table('searchbox')->get(['id', 'name']);
-                $data['stylesheets'] = DB::table('stylesheets')->orderBy('name')->get();
+                $data['searchboxes'] = $this->searchBoxRepository->listIdName();
+                $data['stylesheets'] = $this->styleRepository->listOrderedByName();
                 $allSiteLanguages = $this->languageRepository->listSiteLanguages();
                 $data['allSiteLanguages'] = $allSiteLanguages;
                 $data['allEnabledLangs'] = Language::listEnabled(true);

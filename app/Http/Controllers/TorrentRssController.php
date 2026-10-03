@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
@@ -26,7 +27,6 @@ use App\Support\UserDisplay;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
 class TorrentRssController extends LegacyController
@@ -35,7 +35,7 @@ class TorrentRssController extends LegacyController
 
     private TorrentDownloadRepositoryInterface $downloadRepository;
 
-    public function __construct(private readonly PermissionChecker $permissionChecker,
+    public function __construct(private readonly UserRepositoryInterface $userRepository, private readonly PermissionChecker $permissionChecker,
         TorrentRepositoryInterface $torrentRepository,
         TorrentDownloadRepositoryInterface $downloadRepository,
         private readonly CurrentUser $currentUser,
@@ -86,17 +86,13 @@ class TorrentRssController extends LegacyController
             $paidFilter = (string) $request->input('paid');
         }
 
-        $baseQuery = DB::table('torrents')
-            ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
-            ->leftJoin('torrent_extras', 'torrents.id', '=', 'torrent_extras.torrent_id')
-            ->select('torrents.id', 'torrents.category', 'torrents.name', 'torrent_extras.descr', 'torrents.info_hash', 'torrents.size', 'torrents.added', 'torrents.anonymous', 'torrents.owner', 'categories.name as category_name');
+        $baseQuery = $this->torrentRepository->newRssBaseQuery();
 
         $dllink = false;
         $inclbookmarked = 0;
+        /** @var array<string, mixed> $rssUser */
         $rssUser = (array) RedisGuard::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
-            $row = DB::table('users')->where('passkey', $passkey)->first(['id', 'enabled', 'parked', 'passkey']);
-
-            return $row ? (array) $row : [];
+            return $this->userRepository->findByPasskey($passkey, ['id', 'enabled', 'parked', 'passkey'])?->toArray() ?? [];
         });
 
         if (empty($rssUser)) {

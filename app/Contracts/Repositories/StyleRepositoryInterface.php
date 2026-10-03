@@ -4,8 +4,18 @@ declare(strict_types=1);
 
 namespace App\Contracts\Repositories;
 
+use Illuminate\Support\Collection;
+
 interface StyleRepositoryInterface
 {
+    /**
+     * @return array<string, mixed>|null
+     */
+    /**
+     * @return Collection<int, \stdClass>
+     */
+    public function listOrderedByName(): Collection;
+
     /**
      * @return array<string, mixed>|null
      */

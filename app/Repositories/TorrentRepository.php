@@ -352,6 +352,18 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
         return Torrent::query()->whereIn('pos_state', $posStates)->pluck('id');
     }
 
+    /**
+     * Prepared torrents+categories+extras join for the RSS feed — the
+     * controller layers dynamic filters (bookmarks, approval, paid, taxonomy).
+     */
+    public function newRssBaseQuery(): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('torrents')
+            ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+            ->leftJoin('torrent_extras', 'torrents.id', '=', 'torrent_extras.torrent_id')
+            ->select('torrents.id', 'torrents.category', 'torrents.name', 'torrent_extras.descr', 'torrents.info_hash', 'torrents.size', 'torrents.added', 'torrents.anonymous', 'torrents.owner', 'categories.name as category_name');
+    }
+
     public function getNameById(int $id): ?string
     {
         $name = Torrent::query()->where('id', $id)->value('name');

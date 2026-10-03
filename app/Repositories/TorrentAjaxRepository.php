@@ -382,4 +382,21 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
 
         throw new \InvalidArgumentException("Unknown user torrent list type: {$type}");
     }
+
+    /**
+     * Finished snatchers of a torrent joined with users — reseed notify targets.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function listFinishedSnatchersForReseed(int $torrentId): array
+    {
+        return array_values(DB::table('snatched')
+            ->join('users', 'snatched.userid', '=', 'users.id')
+            ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
+            ->where('snatched.finished', 1)
+            ->where('snatched.torrentid', $torrentId)
+            ->get(['snatched.userid', 'snatched.torrentid', 'torrents.name as torrent_name', 'users.id'])
+            ->map(fn ($r): array => (array) $r)
+            ->all());
+    }
 }

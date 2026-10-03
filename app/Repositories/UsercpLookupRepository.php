@@ -82,6 +82,24 @@ final class UsercpLookupRepository extends BaseRepository implements UsercpLooku
             ->all();
     }
 
+    public function countBitbucket(): int
+    {
+        return (int) DB::table('bitbucket')->count();
+    }
+
+    /**
+     * @return list<\stdClass>
+     */
+    public function listBitbucket(int $offset, int $limit): array
+    {
+        return array_values(DB::table('bitbucket')
+            ->orderByDesc('added')
+            ->offset($offset)
+            ->limit($limit)
+            ->get()
+            ->all());
+    }
+
     /**
      * @return array<int, \stdClass>
      */

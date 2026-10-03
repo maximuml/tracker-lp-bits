@@ -142,7 +142,7 @@ final class OfferModerationService
         $no = (int) $voteCounts['against'];
 
         if ($yes === 0 && $no === 0) {
-            $this->abort(__('legacy/offers.std_sorry'), __('legacy/offers.std_no_votes_yet')."<a href=offers.php?id={$offid}&off_details=1><b>".__('legacy/offers.std_offer_details').'</b></a></p>', false);
+            $this->abort(__('legacy/offers.std_sorry'), __('legacy/offers.std_no_votes_yet').view('offers._details_link', ['url' => "offers.php?id={$offid}&off_details=1"])->render(), false);
         }
 
         $finishvotetime = date('Y-m-d H:i:s');

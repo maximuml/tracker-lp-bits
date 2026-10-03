@@ -72,7 +72,9 @@ class RegistrationService
             throw new AuthenticationException(
                 __('legacy/functions.std_the_ip')
                 .htmlspecialchars($ip)
-                .sprintf(__('legacy/functions.std_used_many_times'), SiteConfig::current()->basic->siteName())
+                .__('legacy/functions.std_used_many_times')
+                .htmlspecialchars(SiteConfig::current()->basic->siteName())
+                .'.'
             );
         }
     }

@@ -60,7 +60,7 @@ class TorrentDeleteController extends LegacyController
         if (empty($sure)) {
             return $this->legacyAbortResponse(
                 __('legacy/fastdelete.std_delete_torrent'),
-                (__('legacy/fastdelete.std_delete_torrent_note'))."<a class=altlink href=fastdelete.php?id=$id&sure=1> ".__('legacy/fastdelete.std_here').'</a>'.__('legacy/fastdelete.std_if_sure'),
+                (__('legacy/fastdelete.std_delete_torrent_note')).view('components.altlink', ['class' => 'altlink', 'url' => "fastdelete.php?id={$id}&sure=1", 'text' => ' '.__('legacy/fastdelete.std_here')])->render().__('legacy/fastdelete.std_if_sure'),
                 false
             );
         }

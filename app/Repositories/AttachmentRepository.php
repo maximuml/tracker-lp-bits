@@ -38,6 +38,21 @@ final class AttachmentRepository implements AttachmentRepositoryInterface
             ->all();
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function findByIdAndDlkey(int $id, string $dlkey): ?array
+    {
+        $row = DB::table('attachments')->where('id', $id)->where('dlkey', $dlkey)->first();
+
+        return $row === null ? null : (array) $row;
+    }
+
+    public function incrementDownloads(int $id): void
+    {
+        DB::table('attachments')->where('id', $id)->increment('downloads');
+    }
+
     public function countRecentForUser(int $userId): int
     {
         $now = date('Y-m-d H:i:s', time() - 86400);

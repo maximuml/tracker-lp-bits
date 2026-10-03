@@ -17,5 +17,12 @@ interface AttachmentRepositoryInterface
      */
     public function findByDlkeys(array $dlkeys): array;
 
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function findByIdAndDlkey(int $id, string $dlkey): ?array;
+
+    public function incrementDownloads(int $id): void;
+
     public function countRecentForUser(int $userId): int;
 }

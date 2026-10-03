@@ -142,6 +142,23 @@ class UserListingRepository
     }
 
     /**
+     * Confirmed+enabled user ids in the given classes (bulk-message target list).
+     *
+     * @param  array<int>  $classIds
+     * @return array<int>
+     */
+    public function listConfirmedEnabledIdsByClasses(array $classIds): array
+    {
+        return DB::table('users')
+            ->whereIn('class', $classIds)
+            ->where('enabled', true)
+            ->where('status', UserStatus::CONFIRMED->value)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
      * @param  list<int>  $excludeIds
      * @return Collection<int, User>
      */

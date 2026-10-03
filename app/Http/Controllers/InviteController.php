@@ -6,12 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\InviteValid;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Invite;
 use App\Models\Setting;
-use App\Models\User;
 use App\Repositories\InviteRepository;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
@@ -29,7 +29,7 @@ use Illuminate\View\View;
 
 class InviteController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly UserRepositoryInterface $userRepository,
         private readonly UserModerationRepositoryInterface $userModerationRepository,
         private readonly CurrentUser $currentUser,
         private readonly InviteRepository $inviteRepository,
@@ -50,7 +50,7 @@ class InviteController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/invite.std_sorry'), __('legacy/invite.std_permission_denied'));
         }
 
-        $user = User::query()->find($id);
+        $user = $this->userRepository->findById($id);
         if (! $user) {
             return $this->legacyAbortResponse(__('legacy/invite.std_sorry'), 'Invalid id');
         }
@@ -100,11 +100,7 @@ class InviteController extends LegacyController
             }
 
             $inv = $user->toArray();
-            $temporaryInvites = Invite::query()->where('inviter', $currentUserId)
-                ->where('invitee', '')
-                ->where('expired_at', '>', now())
-                ->orderBy('expired_at', 'asc')
-                ->get();
+            $temporaryInvites = $this->inviteRepository->listPendingForInviter($currentUserId);
 
             $inviteOptions = [];
             if ((int) ($inv['invites'] ?? 0) > 0) {

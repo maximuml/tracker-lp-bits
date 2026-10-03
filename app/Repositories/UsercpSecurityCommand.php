@@ -322,4 +322,15 @@ final class UsercpSecurityCommand
     {
         return User::query()->where('email', $email)->where('id', '!=', $userId)->exists();
     }
+
+    /**
+     * Apply the verified email change only while the expected editsecret still matches.
+     */
+    public function applyEmailChange(int $userId, string $expectedSecret, string $email): int
+    {
+        return User::query()
+            ->where('id', $userId)
+            ->where('editsecret', $expectedSecret)
+            ->update(['editsecret' => '', 'email' => $email]);
+    }
 }

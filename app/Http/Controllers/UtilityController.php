@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
 use App\Models\SearchBox;
 use App\Models\Setting;
-use App\Models\User;
 use App\Repositories\SearchPageRepository;
+use App\Repositories\UsercpSecurityCommand;
 use App\Services\AjaxService;
 use App\Services\AttachmentMutationService;
 use App\Services\SecureTokenService;
@@ -53,7 +54,7 @@ class UtilityController extends LegacyController
 
     private LegacyHeaderBag $legacyHeaderBag;
 
-    public function __construct(
+    public function __construct(private readonly UsercpSecurityCommand $usercpSecurityCommand, private readonly UserRepositoryInterface $userRepository,
         UsersearchPageService $usersearchPageService,
         private readonly AjaxService $ajaxService,
         SearchPageRepository $searchPageRepository,
@@ -73,7 +74,7 @@ class UtilityController extends LegacyController
     public function search(Request $request): View|RedirectResponse
     {
         $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
+        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($curUser['id'] ?? 0)) : null;
         if ($currentUser === null) {
             $qs = $request->getQueryString();
 
@@ -559,7 +560,7 @@ XML;
             abort(404);
         }
 
-        $user = User::query()->where('id', $id)->first(['editsecret']);
+        $user = $this->userRepository->findById($id, ['editsecret']);
         if (! $user) {
             abort(404);
         }
@@ -568,7 +569,7 @@ XML;
             abort(404);
         }
 
-        $affected = User::query()->where('id', $id)->where('editsecret', $user->editsecret)->update(['editsecret' => '', 'email' => $email]);
+        $affected = $this->usercpSecurityCommand->applyEmailChange($id, (string) $user->editsecret, $email);
         if (! $affected) {
             abort(404);
         }

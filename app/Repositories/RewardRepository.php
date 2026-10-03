@@ -9,6 +9,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\LegacyDb;
 use App\Support\Logger;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RewardRepository extends BaseRepository
@@ -113,5 +114,13 @@ class RewardRepository extends BaseRepository
         $result = $model->delete();
 
         return $result;
+    }
+
+    public function countSince(int $userId, Carbon $since): int
+    {
+        return Reward::query()
+            ->where('userid', $userId)
+            ->where('created_at', '>=', $since)
+            ->count();
     }
 }

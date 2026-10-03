@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\UserBanLog;
 use App\Repositories\ModerationRepository;
+use App\Repositories\UserModerationRepository;
 use App\Services\LocationService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -23,7 +23,7 @@ use Illuminate\View\View;
 
 class AdminToolsController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly UserModerationRepository $userModerationRepository,
         private readonly ModerationRepository $moderationRepository,
         private readonly LocationService $locationService,
         private readonly CurrentUser $currentUser,
@@ -41,18 +41,11 @@ class AdminToolsController extends LegacyController
         $qRaw = is_scalar($request->input('q', '')) ? (string) $request->input('q', '') : '';
         $q = htmlspecialchars($qRaw);
 
-        $query = UserBanLog::query();
-        if (! empty($q)) {
-            $query->where('username', 'like', "%{$q}%");
-        }
-        $total = (int) (clone $query)->count();
+        $queryParam = $q === '' ? null : $q;
+        $total = $this->userModerationRepository->countBanLogs($queryParam);
         $perPage = 50;
         [$paginationTop, $paginationBottom, $limit, $offset] = Pagination::pager($perPage, $total, '?');
-        $rows = (clone $query)
-            ->offset($offset)
-            ->take($perPage)
-            ->orderBy('id', 'desc')
-            ->get()
+        $rows = $this->userModerationRepository->listBanLogs($queryParam, $offset, $perPage)
             ->toArray();
 
         $header = [

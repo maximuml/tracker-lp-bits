@@ -6,9 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\Category;
 use App\Support\CurrentUser;
@@ -37,7 +37,7 @@ use Illuminate\View\View;
 
 class TorrentAjaxController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly UserRepositoryInterface $userRepository,
         protected CurrentUser $currentUser,
         protected TorrentAjaxRepositoryInterface $torrentAjaxRepository,
         protected PeerTableFactory $peerTableFactory,
@@ -75,7 +75,7 @@ class TorrentAjaxController extends LegacyController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
+        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($curUser['id'] ?? 0)) : null;
 
         $headers = [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
@@ -178,7 +178,7 @@ class TorrentAjaxController extends LegacyController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? User::query()->find((int) ($curUser['id'] ?? 0)) : null;
+        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($curUser['id'] ?? 0)) : null;
 
         if ($currentUser === null || (! Permissions::userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id) && $currentUser->id !== $targetUserId)) {
             return response('', 403, ['Content-Type' => 'text/html; charset=utf-8']);
@@ -399,7 +399,7 @@ class TorrentAjaxController extends LegacyController
         }
 
         $userId = (int) ($this->currentUser->get()['id'] ?? 0);
-        $user = User::query()->find($userId);
+        $user = $this->userRepository->findById($userId);
 
         if ($user === null) {
             return response()->json(['torrents' => []]);

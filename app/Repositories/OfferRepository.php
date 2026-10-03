@@ -26,9 +26,12 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
     /** @var list<string> */
     private const ALLOWED_SORT_COLUMNS = ['category', 'name', 'added', 'comments', 'yeah', 'against', 'v_res'];
 
-    public function findOffer(int $id): ?Offer
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findOffer(int $id, array $columns = ['*']): ?Offer
     {
-        return Offer::query()->where('id', $id)->first();
+        return Offer::query()->where('id', $id)->first($columns);
     }
 
     public function findOfferWithUser(int $id): ?Offer
@@ -247,5 +250,17 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
                 'type' => $direction,
             ]),
         ];
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Offer>
+     */
+    public function listAllowedForUser(int $userId): \Illuminate\Database\Eloquent\Collection
+    {
+        return Offer::query()
+            ->where('allowed', 'yes')
+            ->where('userid', $userId)
+            ->orderBy('name')
+            ->get();
     }
 }

@@ -20,6 +20,7 @@ use App\Http\Resources\InviteResource;
 use App\Http\Resources\TorrentResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Repositories\UserDetailRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,7 +32,7 @@ class UserController extends Controller
 
     private ExamRepositoryInterface $examRepository;
 
-    public function __construct(UserRepositoryInterface $repository, UserModerationRepositoryInterface $moderationRepository, ExamRepositoryInterface $examRepository)
+    public function __construct(private readonly UserDetailRepository $userDetailRepository, UserRepositoryInterface $repository, UserModerationRepositoryInterface $moderationRepository, ExamRepositoryInterface $examRepository)
     {
         $this->repository = $repository;
         $this->moderationRepository = $moderationRepository;
@@ -189,18 +190,7 @@ class UserController extends Controller
 
     private function getUserProfile(int $id): UserResource
     {
-        $user = User::query()->withCount([
-            'comments', 'posts', 'seeding_torrents', 'leeching_torrents',
-            'torrents' => function ($query) {
-                $query->whereHas('snatches');
-            },
-            'completed_torrents' => function ($query) use ($id) {
-                $query->where('torrents.owner', '!=', $id);
-            },
-            'incomplete_torrents' => function ($query) use ($id) {
-                $query->where('torrents.owner', '!=', $id);
-            },
-        ])->findOrFail($id);
+        $user = $this->userDetailRepository->findProfileWithCounts($id);
         $resource = new UserResource($user);
 
         return $resource;

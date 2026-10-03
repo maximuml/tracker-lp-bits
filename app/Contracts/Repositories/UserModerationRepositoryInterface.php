@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Contracts\Repositories;
 
 use App\Models\User;
+use App\Models\UserBanLog;
 use Illuminate\Support\Collection;
 
 interface UserModerationRepositoryInterface
@@ -113,4 +114,13 @@ interface UserModerationRepositoryInterface
      * @return mixed
      */
     public function getInviteBtnText(int $uid);
+
+    public function latestBanLogForUser(int $userId): ?UserBanLog;
+
+    public function countBanLogs(?string $usernameQuery): int;
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, UserBanLog>
+     */
+    public function listBanLogs(?string $usernameQuery, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection;
 }

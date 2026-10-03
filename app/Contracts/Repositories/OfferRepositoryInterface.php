@@ -10,7 +10,10 @@ use Illuminate\Support\Collection;
 
 interface OfferRepositoryInterface
 {
-    public function findOffer(int $id): ?Offer;
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findOffer(int $id, array $columns = ['*']): ?Offer;
 
     public function findOfferWithUser(int $id): ?Offer;
 
@@ -51,4 +54,9 @@ interface OfferRepositoryInterface
      * @return array<string, mixed>
      */
     public function list(Request $request): array;
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Offer>
+     */
+    public function listAllowedForUser(int $userId): \Illuminate\Database\Eloquent\Collection;
 }

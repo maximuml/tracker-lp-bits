@@ -274,4 +274,12 @@ class CommentRepository
 
         return (bool) $deleted;
     }
+
+    /**
+     * @param  array<string>  $columns
+     */
+    public function findById(int $id, array $columns = ['*']): ?Comment
+    {
+        return Comment::query()->find($id, $columns);
+    }
 }

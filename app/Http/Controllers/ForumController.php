@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\DTOs\Forum\StoreForumDto;
 use App\DTOs\Forum\UpdateForumDto;
 use App\Http\Requests\ForumMoveTopicRequest;
@@ -29,7 +30,7 @@ use Illuminate\View\View;
 
 class ForumController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly ForumRepositoryInterface $forumRepository,
         private readonly ForumService $service,
         private readonly ForumPageService $pageService,
         private readonly CurrentUser $currentUser,
@@ -144,7 +145,7 @@ class ForumController extends LegacyController
      */
     public function index(): array
     {
-        $forums = Forum::query()->orderBy('sort')->get();
+        $forums = $this->forumRepository->listOrdered();
 
         return $this->success(ForumResource::collection($forums));
     }

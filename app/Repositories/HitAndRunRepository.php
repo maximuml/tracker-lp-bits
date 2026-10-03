@@ -17,6 +17,7 @@ use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -291,5 +292,39 @@ class HitAndRunRepository extends BaseRepository
         }
 
         return '';
+    }
+
+    public function countForUser(int $userId, string|int $status): int
+    {
+        return HitAndRun::query()
+            ->where('uid', $userId)
+            ->where('status', $status)
+            ->count();
+    }
+
+    /**
+     * @return Collection<int, HitAndRun>
+     */
+    public function paginateForUser(int $userId, string|int $status, int $offset, int $perPage, ?int $searchId = null): Collection
+    {
+        return HitAndRun::query()
+            ->where('uid', $userId)
+            ->where('status', $status)
+            ->with([
+                'torrent' => function ($query) {
+                    $query->select(['id', 'size', 'name', 'category']);
+                },
+                'torrent.basic_category',
+                'snatch',
+                'user' => function ($query) {
+                    $query->select(['id', 'lang']);
+                },
+                'user.language',
+            ])
+            ->when($searchId !== null, fn ($query) => $query->where('id', $searchId))
+            ->offset($offset)
+            ->limit($perPage)
+            ->orderBy('id', 'desc')
+            ->get();
     }
 }

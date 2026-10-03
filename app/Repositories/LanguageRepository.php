@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Http\Middleware\Locale;
 use App\Models\Language;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class LanguageRepository extends BaseRepository
@@ -92,5 +93,13 @@ class LanguageRepository extends BaseRepository
         }
 
         return Locale::$languageMaps[$folder] ?? $folder;
+    }
+
+    /**
+     * @return Collection<int, Language>
+     */
+    public function listSiteLanguages(): Collection
+    {
+        return Language::query()->where('site_lang', 1)->get();
     }
 }

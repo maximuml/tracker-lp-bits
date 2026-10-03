@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Controllers\BonusHistoryController;
 use App\Repositories\BonusCalculationRepository;
+use App\Repositories\RewardRepository;
+use App\Repositories\UserListingRepository;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -27,9 +30,12 @@ final class BonusHistoryControllerTest extends TestCase
         $calculationRepository = Mockery::mock(BonusCalculationRepository::class);
 
         $controller = new BonusHistoryController(
+            Mockery::mock(RewardRepository::class),
+            Mockery::mock(TorrentRepositoryInterface::class),
+            Mockery::mock(UserListingRepository::class),
+            Mockery::mock(UserRepositoryInterface::class),
             $calculationRepository,
             Mockery::mock(CurrentUser::class),
-            Mockery::mock(Globals::class),
         );
 
         $this->assertInstanceOf(BonusHistoryController::class, $controller);

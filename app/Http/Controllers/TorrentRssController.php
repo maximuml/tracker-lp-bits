@@ -10,7 +10,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Models\SearchBox;
-use App\Models\Torrent;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -180,7 +179,7 @@ class TorrentRssController extends LegacyController
                 $posStates[] = TorrentPosState::STICKY_SECOND->value;
             }
             if (! empty($posStates)) {
-                $prependIdArr = Torrent::query()->whereIn('pos_state', $posStates)->pluck('id')->toArray();
+                $prependIdArr = $this->torrentRepository->pluckIdsByPosStates($posStates)->toArray();
             }
         }
 

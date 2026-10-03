@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Message;
-use App\Models\Peer;
 use App\Models\Torrent;
+use App\Repositories\PeerRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
@@ -28,7 +29,7 @@ use Rhilip\Bencode\Bencode;
 
 class TorrentMaintenanceController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly CurrentUser $currentUser,
     ) {}
 
@@ -39,7 +40,7 @@ class TorrentMaintenanceController extends LegacyController
             abort(404);
         }
 
-        $torrent = Torrent::query()->find($id, ['id', 'name']);
+        $torrent = $this->torrentRepository->findById($id, ['id', 'name']);
         if (! $torrent instanceof Torrent) {
             abort(404);
         }
@@ -118,7 +119,7 @@ class TorrentMaintenanceController extends LegacyController
         if ($currentClass >= UserClassEnum::MODERATOR->value || $currentUserId === $id) {
             $deadtime = Time::deadThreshold(SiteConfig::current()->main->anninterthree());
             $lastAction = date('Y-m-d H:i:s', $deadtime);
-            $effected = Peer::query()->where('last_action', '<', $lastAction)->where('userid', $id)->delete();
+            $effected = $this->peerRepository->deleteInactiveForUser($id, $lastAction);
 
             return $this->legacyAbortResponse(
                 __('legacy/takeflush.std_success'),
@@ -147,10 +148,10 @@ class TorrentMaintenanceController extends LegacyController
         }
 
         $reseedid = (int) (request()->query('reseedid') ?? request()->query('id') ?? 0);
-        $torrent = Torrent::query()->find($reseedid);
+        $torrent = $this->torrentRepository->findById($reseedid);
         $row = $torrent instanceof Torrent ? $torrent->toArray() : null;
 
-        $seederCount = (int) Peer::query()->where('torrent', $reseedid)->count();
+        $seederCount = $this->peerRepository->countForTorrent($reseedid);
         if ($seederCount > 0) {
             return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), __('legacy/takereseed.std_torrent_not_dead'));
         }
@@ -188,7 +189,7 @@ class TorrentMaintenanceController extends LegacyController
             ]);
         }
 
-        Torrent::query()->where('id', $reseedid)->update([
+        $this->torrentRepository->updateFields($reseedid, [
             'last_reseed' => now(),
             'seeders' => $seederCount,
         ]);

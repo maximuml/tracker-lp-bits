@@ -9,10 +9,8 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\UsernameChangeType;
 use App\Enums\UserPrivacy;
 use App\Models\Message;
-use App\Models\User;
-use App\Models\UserModifyLog;
-use App\Models\UsernameChangeLog;
 use App\Repositories\ModtaskRepository;
+use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -36,7 +34,7 @@ use Illuminate\View\View;
 
 class StaffModerationController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly UserDetailRepository $userDetailRepository,
         private readonly CurrentUser $currentUser,
         private readonly ModtaskRepository $modtaskRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
@@ -48,7 +46,7 @@ class StaffModerationController extends LegacyController
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
 
-        if (! Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO, User::findOrFail($currentUserId))) {
+        if (! Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO, $this->userDetailRepository->findOrFailById($currentUserId))) {
             Log::writeWithContext(
                 'User '.($currentUser['username'] ?? '')." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
                 'mod'
@@ -75,7 +73,7 @@ class StaffModerationController extends LegacyController
         }
 
         $userId = (int) request()->post('userid');
-        $userInfo = User::query()->findOrFail($userId);
+        $userInfo = $this->userDetailRepository->findOrFailById($userId);
 
         $class = $userInfo->class;
 
@@ -136,7 +134,7 @@ class StaffModerationController extends LegacyController
 
         $userModifyLogs = [];
 
-        if (Permission::can(PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO, User::findOrFail($currentUserId))) {
+        if (Permission::can(PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO, $this->userDetailRepository->findOrFailById($currentUserId))) {
             $locale = Locale::userLocale($userId);
             $email = (string) (request()->post('email') ?? '');
             $username = (string) (request()->post('username') ?? '');
@@ -169,7 +167,7 @@ class StaffModerationController extends LegacyController
                     'msg' => $msg,
                     'added' => now(),
                 ]);
-                UsernameChangeLog::query()->create([
+                $this->userDetailRepository->insertUsernameChangeLog([
                     'uid' => $arr['id'],
                     'operator' => $currentUser['username'],
                     'change_type' => UsernameChangeType::ADMIN->value,
@@ -358,7 +356,7 @@ class StaffModerationController extends LegacyController
                     'updated_at' => date('Y-m-d H:i:s'),
                 ];
             }
-            UserModifyLog::query()->insert($insert);
+            $this->userDetailRepository->insertUserModifyLogs($insert);
         }
 
         Cache::clearUser($userId, $arr['passhash']);

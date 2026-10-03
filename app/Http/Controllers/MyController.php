@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\HitAndRunStatus;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\HitAndRun;
 use App\Models\User;
+use App\Repositories\HitAndRunRepository;
 use App\Services\BonusPageService;
 use App\Services\BonusService;
 use App\Support\AssetAppender;
@@ -31,7 +33,7 @@ class MyController extends Controller
 
     private CurrentUser $currentUser;
 
-    public function __construct(BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser)
+    public function __construct(private readonly HitAndRunRepository $hitAndRunRepository, private readonly UserRepositoryInterface $userRepository, BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser)
     {
         $this->bonusPageService = $bonusPageService;
         $this->bonusService = $bonusService;
@@ -106,12 +108,13 @@ class MyController extends Controller
             $pagerParams['userid'] = $userid;
         }
 
-        $userInfo = User::query()->find($userid, User::$commonFields);
+        $userInfo = $this->userRepository->findById($userid, User::$commonFields);
         if (! $userInfo instanceof User) {
             LegacyResponse::abort('Error', 'User not exists.');
         }
 
         $status = request()->query('status') ?? HitAndRunStatus::INSPECTING->value;
+        $status = is_array($status) ? HitAndRunStatus::INSPECTING->value : $status;
         $allStatus = HitAndRun::listStatus();
         $pagerParams['status'] = $status;
         $filterParams = $pagerParams;
@@ -124,31 +127,13 @@ class MyController extends Controller
 
         $q = htmlspecialchars((string) (request()->query('q') ?? ''));
 
-        $baseQuery = HitAndRun::query()->where('uid', $userid)->where('status', $status);
-        $rescount = (int) (clone $baseQuery)->count();
+        $rescount = $this->hitAndRunRepository->countForUser($userid, $status);
         [$pagertop, $pagerbottom, $limit, $offset, $pageSize] = Pagination::pager(50, $rescount, sprintf('?%s&', $queryString));
 
         $list = [];
         if ($rescount > 0) {
-            $query = (clone $baseQuery)
-                ->with([
-                    'torrent' => function ($query) {
-                        $query->select(['id', 'size', 'name', 'category']);
-                    },
-                    'torrent.basic_category',
-                    'snatch',
-                    'user' => function ($query) {
-                        $query->select(['id', 'lang']);
-                    },
-                    'user.language',
-                ])
-                ->offset($offset)
-                ->limit($pageSize)
-                ->orderBy('id', 'desc');
-            if (! empty($q)) {
-                $query->where('id', $q);
-            }
-            $list = $query->get();
+            $searchId = $q === '' ? null : (int) $q;
+            $list = $this->hitAndRunRepository->paginateForUser($userid, $status, $offset, $pageSize, $searchId);
         }
 
         $cancelHrBonus = SiteConfig::current()->bonus->cancelHr();

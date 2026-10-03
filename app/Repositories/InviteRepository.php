@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\InviteValid;
 use App\Enums\UserStatus;
+use App\Models\Invite;
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class InviteRepository
@@ -109,5 +113,55 @@ class InviteRepository
             ->get()
             ->map(fn ($row) => (array) $row)
             ->all();
+    }
+
+    /**
+     * @param  array<string>  $columns
+     */
+    public function findValidByHash(string $hash, array $columns = ['*']): ?Invite
+    {
+        return Invite::query()
+            ->where('hash', $hash)
+            ->where('valid', InviteValid::YES->value)
+            ->first($columns);
+    }
+
+    /**
+     * @return Collection<int, Invite>
+     */
+    public function listPendingForInviter(int $inviterId): Collection
+    {
+        return Invite::query()
+            ->where('inviter', $inviterId)
+            ->where('invitee', '')
+            ->where('expired_at', '>', Carbon::now())
+            ->orderBy('expired_at')
+            ->get();
+    }
+
+    public function existsForInvitee(string $email): bool
+    {
+        return Invite::query()->where('invitee', $email)->exists();
+    }
+
+    public function findByInviterAndHash(int $inviterId, string $hash): ?Invite
+    {
+        return Invite::query()
+            ->where('inviter', $inviterId)
+            ->where('hash', $hash)
+            ->first();
+    }
+
+    /**
+     * @param  array<string, mixed>  $rows
+     */
+    public function insertInvites(array $rows): bool
+    {
+        return Invite::query()->insert($rows);
+    }
+
+    public function decrementInvites(int $inviterId): int
+    {
+        return User::query()->where('id', $inviterId)->decrement('invites');
     }
 }

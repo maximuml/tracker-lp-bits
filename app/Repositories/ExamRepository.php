@@ -262,4 +262,27 @@ class ExamRepository extends BaseRepository implements ExamRepositoryInterface
             return false;
         }
     }
+
+    public function countEnabledTasks(): int
+    {
+        return Exam::query()
+            ->where('type', ExamType::TASK->value)
+            ->where('status', ExamStatus::ENABLED->value)
+            ->count();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
+     */
+    public function listEnabledTasks(int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
+    {
+        return Exam::query()
+            ->where('type', ExamType::TASK->value)
+            ->where('status', ExamStatus::ENABLED->value)
+            ->orderBy('id', 'desc')
+            ->withCount('onGoingUsers')
+            ->offset($offset)
+            ->take($perPage)
+            ->get();
+    }
 }

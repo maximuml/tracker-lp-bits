@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Comment;
 use App\Models\Message;
-use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\CommentRepository;
 use App\Support\Bonus;
@@ -27,7 +27,7 @@ class WebCommentController extends Controller
 {
     private CommentRepository $commentRepository;
 
-    public function __construct(CommentRepository $commentRepository)
+    public function __construct(private readonly TorrentRepositoryInterface $torrentRepository, CommentRepository $commentRepository)
     {
         $this->commentRepository = $commentRepository;
     }
@@ -266,7 +266,7 @@ class WebCommentController extends Controller
         }
 
         if ($type === 'torrent') {
-            $torrent = Torrent::find($parentId);
+            $torrent = $this->torrentRepository->findById((int) $parentId);
             if (! $torrent) {
                 abort(404, __('legacy/comment.std_no_torrent_id'));
             }

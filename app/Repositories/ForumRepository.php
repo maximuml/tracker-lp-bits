@@ -108,4 +108,20 @@ class ForumRepository extends BaseRepository implements ForumRepositoryInterface
     {
         return User::query()->find($ids, $columns)->keyBy('id');
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Forum>
+     */
+    public function listOrdered(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Forum::query()->orderBy('sort')->get();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function create(array $data): Forum
+    {
+        return Forum::query()->create($data);
+    }
 }

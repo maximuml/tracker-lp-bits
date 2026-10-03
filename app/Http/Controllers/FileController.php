@@ -6,10 +6,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\FileResource;
 use App\Models\File;
+use App\Repositories\TorrentDetailRepository;
 use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
+    public function __construct(private readonly TorrentDetailRepository $torrentDetailRepository) {}
+
     /**
      * torrent file list
      *
@@ -18,7 +21,7 @@ class FileController extends Controller
     public function index(Request $request): array
     {
         $torrentId = $request->torrent_id;
-        $files = File::query()->where('torrent', $torrentId)->get();
+        $files = $this->torrentDetailRepository->listFilesForTorrent($torrentId);
         $resource = FileResource::collection($files);
 
         return $this->success($resource);

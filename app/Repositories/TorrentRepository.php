@@ -28,6 +28,7 @@ use App\Support\Torrent\TorrentStatus;
 use App\Utils\ApiQueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 /**
  * Torrent repository: listing, detail, peer/snatch, and presentation helpers.
@@ -306,9 +307,12 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
         return Torrent::query()->where('id', $id)->first($columns);
     }
 
-    public function findOrFailById(int $id): Torrent
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findOrFailById(int $id, array $columns = ['*']): Torrent
     {
-        return Torrent::query()->findOrFail($id);
+        return Torrent::query()->findOrFail($id, $columns);
     }
 
     /**
@@ -327,5 +331,36 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
             'btnText' => (string) $btnText,
             'btnId' => (string) $btnId,
         ])->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    public function updateFields(int $id, array $fields): void
+    {
+        Torrent::query()->where('id', $id)->update($fields);
+    }
+
+    /**
+     * @param  list<int|string>  $posStates
+     * @return Collection<int, int>
+     */
+    public function pluckIdsByPosStates(array $posStates): Collection
+    {
+        return Torrent::query()->whereIn('pos_state', $posStates)->pluck('id');
+    }
+
+    public function getNameById(int $id): ?string
+    {
+        $name = Torrent::query()->where('id', $id)->value('name');
+
+        return $name === null ? null : (string) $name;
+    }
+
+    public function getOwnerId(int $id): ?int
+    {
+        $owner = Torrent::query()->where('id', $id)->value('owner');
+
+        return $owner === null ? null : (int) $owner;
     }
 }

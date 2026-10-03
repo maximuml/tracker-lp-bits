@@ -56,4 +56,14 @@ interface ForumRepositoryInterface
      * @return Collection<int, User>
      */
     public function getUsersByIds(array $ids, array $columns): Collection;
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Forum>
+     */
+    public function listOrdered(): \Illuminate\Database\Eloquent\Collection;
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function create(array $data): Forum;
 }

@@ -74,6 +74,5 @@ return [
     'row_enable_custom_field' => 'Enable custom field',
     'row_custom_field_display_name' => 'Custom field display name',
     'row_custom_field_display' => 'Custom field display',
-    'row_custom_field_display_help' => "Use 'specific label' to represent custom field's label and value，such as one custom field's name is 'artist'，<br/>then it's label：<%artist.label%>，it's value：<%artist.value%>",
     'row_searchbox_extras' => 'Extras',
 ];

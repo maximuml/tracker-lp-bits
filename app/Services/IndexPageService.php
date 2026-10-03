@@ -39,7 +39,6 @@ use App\ViewModels\Index\IndexTopUploaderRow;
 use App\ViewModels\Index\IndexTopUploadersSection;
 use App\ViewModels\IndexPageViewModel;
 use Carbon\Carbon;
-use Illuminate\Support\HtmlString;
 
 /**
  * Prepares section data for the index page, replacing the legacy
@@ -285,7 +284,6 @@ final class IndexPageService
     {
         return new IndexBrowserNoteSection(
             show: true,
-            note: new HtmlString((string) (__('legacy/index.text_browser_note'))),
         );
     }
 

@@ -367,7 +367,6 @@ final class IndexPageServiceTest extends TestCase
         $result = $this->buildWithAllSectionsDisabled();
 
         $this->assertTrue($result->browserNote->show);
-        $this->assertNotNull($result->browserNote->note);
     }
 
     public function test_news_always_shown(): void

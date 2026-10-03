@@ -100,7 +100,7 @@ final class LegacyAuth
         if ($type === 'login') {
             LegacyResponse::abort(
                 (string) (__('legacy/functions.std_login_failed')),
-                (string) (__('legacy/functions.std_login_failed_note')),
+                view('components.login-failed-note')->render(),
                 false,
                 $head,
             );

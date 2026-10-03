@@ -26,7 +26,7 @@ return [
     'text_send_pm' => 'Send PM',
     'text_added_you_to_friendslist' => 'Added you to friendslist',
     'text_add_to_friends' => 'Add to Friends',
-    'text_blocklist_empty' => '<em>Your blocked userlist is empty</em>',
+    'text_blocklist_empty' => 'Your blocked userlist is empty',
     'text_blocked_users' => 'Blocked Users',
     'text_find_user' => 'Find users/browse user list',
     'text_neighbors' => 'Neighbors',

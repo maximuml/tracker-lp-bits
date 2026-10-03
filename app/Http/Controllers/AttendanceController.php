@@ -72,13 +72,12 @@ class AttendanceController extends LegacyController
         }
 
         if ($data['hasAttendedToday']) {
-            $data['headerLeft'] = SafeHtml::fromTrustedHtml(sprintf(
-                (string) (__('legacy/attendance.attend_info')).(string) (__('legacy/attendance.retroactive_description')),
-                $attendance->total_days,
-                $attendance->days,
-                $attendance->points,
-                $curUser['attendance_card'] ?? 0
-            ));
+            $data['headerLeft'] = SafeHtml::fromTrustedHtml(view('attendance._header-left', [
+                'totalDays' => $attendance->total_days,
+                'days' => $attendance->days,
+                'points' => $attendance->points,
+                'cards' => $curUser['attendance_card'] ?? 0,
+            ])->render());
             $data['headerRight'] = SafeHtml::fromTrustedHtml(Locale::trans(
                 'attendance.ranking',
                 ['ranking' => $data['myRanking'], 'counts' => $data['todayCounts']],

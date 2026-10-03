@@ -103,7 +103,7 @@ final class Permissions
         if ($runtime->isLegacy() && ! $runtime->isTracker()) {
             $requireClass = SiteConfig::current()->authority->permission($permission);
             if ($requireClass !== null && isset(User::$classes[$requireClass])) {
-                LegacyResponse::abort(__('legacy/functions.std_sorry'), __('legacy/functions.std_permission_denied_only').UserClass::name($requireClass, false, true, true).sprintf(__('legacy/functions.std_or_above_can_view'), SiteConfig::current()->basic->siteName()), false);
+                LegacyResponse::abort(__('legacy/functions.std_sorry'), __('legacy/functions.std_permission_denied_only').UserClass::name($requireClass, false, true, true).__('legacy/functions.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => SiteConfig::current()->basic->siteName()])->render(), false);
             } else {
                 LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/functions.std_permission_denied'));
             }

@@ -360,8 +360,8 @@ final class OfferPageService
         $rules = new OfferRulesViewModel(
             uploadClassName: UserClass::name((int) $globalData['uploadClass'], false, true, true),
             addofferClassName: UserClass::name((int) $globalData['addofferClass'], false, true, true),
-            skipApprovedText: ($c = SiteConfig::current()->main->offerSkipApprovedCount()) > 0
-                ? SafeHtml::fromUntrustedHtml(sprintf((string) (__('legacy/offers.text_rule_skip_offer')), $c))
+            skipApprovedCount: ($c = SiteConfig::current()->main->offerSkipApprovedCount()) > 0
+                ? $c
                 : null,
             minVotes: (int) $globalData['minoffervotes'],
             showVoteTimeout: $globalData['offervotetimeoutMain'] > 0,

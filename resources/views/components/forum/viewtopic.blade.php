@@ -78,6 +78,6 @@
         </form>
     </div>
 @else
-    <p>{{ $topic->deniedNotice }}</p>
+    {{ $topic->deniedNotice }}
 @endif
 {{ $topic->keyScript }}

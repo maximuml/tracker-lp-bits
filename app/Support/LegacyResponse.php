@@ -114,7 +114,8 @@ final class LegacyResponse
             (string) (__('legacy/functions.std_sorry')),
             (string) (__('legacy/functions.std_permission_denied_only'))
                 .UserClass::name($allowMinimumClass, false, true, true)
-                .\sprintf((string) (__('legacy/functions.std_or_above_can_view')), SiteConfig::current()->basic->siteName()),
+                .(string) (__('legacy/functions.std_or_above_can_view'))
+                .view('components.permission-faq-note', ['siteName' => SiteConfig::current()->basic->siteName()])->render(),
             false,
         );
     }

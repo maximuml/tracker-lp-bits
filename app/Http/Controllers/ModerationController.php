@@ -119,7 +119,7 @@ class ModerationController extends LegacyController
                 'kind' => 'user',
                 'userHtml' => UserDisplay::username($user),
                 'mid' => (string) __('legacy/report.text_to_staff'),
-                'extraNote' => SafeHtml::fromUntrustedHtml((string) __('legacy/report.text_not_for_leechers')),
+                'extraNote' => (string) __('legacy/report.text_not_for_leechers'),
                 'field' => 'takeuser',
                 'id' => $user,
             ])->render();

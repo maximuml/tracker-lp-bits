@@ -63,11 +63,11 @@ class TorrentUploadController extends Controller
         // __('legacy/x.k') conversion lands.
 
         if ($currentUser['parked']) {
-            LegacyResponse::abort(__('legacy/upload.std_sorry'), __('legacy/upload.std_unauthorized_to_upload'), false);
+            LegacyResponse::abort(__('legacy/upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
         }
 
         if (! $currentUser['uploadpos']) {
-            LegacyResponse::abort(__('legacy/upload.std_sorry'), __('legacy/upload.std_unauthorized_to_upload'), false);
+            LegacyResponse::abort(__('legacy/upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
         }
 
         $enableoffer = SiteConfig::current()->main->showOffer(false) ? 'yes' : 'no';
@@ -86,7 +86,7 @@ class TorrentUploadController extends Controller
         $uploadFreely = LegacyResponse::canUpload('torrents');
         $allowtorrents = $has_allowed_offer || $uploadFreely;
         if (! $allowtorrents) {
-            LegacyResponse::abort(__('legacy/upload.std_sorry'), __('legacy/upload.std_please_offer'), false);
+            LegacyResponse::abort(__('legacy/upload.std_sorry'), view('upload._please-offer')->render(), false);
         }
 
         $browsecatmode = SiteConfig::current()->main->browseCat(1);

@@ -155,7 +155,7 @@ class TorrentDownloadController extends LegacyController
         switch ($type) {
             case 'client':
                 $title = __('legacy/downloadnotice.text_client_banned_notice');
-                $note = __('legacy/downloadnotice.text_client_banned_note');
+                $note = view('downloadnotice._note', ['type' => 'client'])->render();
                 $noticenexttime = __('legacy/downloadnotice.text_notice_not_show_again');
                 $showrationotice = false;
                 $showclientnotice = true;
@@ -166,7 +166,7 @@ class TorrentDownloadController extends LegacyController
                 $note = '';
                 if ($leechwarnuntiltime && $timenow < $leechwarnuntiltime) {
                     $kicktimeout = Time::format($curUser['leechwarnuntil'], false, false, true);
-                    $note = (__('legacy/downloadnotice.text_low_ratio_note_one')).$kicktimeout.(__('legacy/downloadnotice.text_low_ratio_note_two'));
+                    $note = view('downloadnotice._note', ['type' => 'ratio', 'kicktimeout' => $kicktimeout])->render();
                 }
                 $title = __('legacy/downloadnotice.text_low_ratio_notice');
                 $noticenexttime = __('legacy/downloadnotice.text_notice_always_show');
@@ -178,7 +178,7 @@ class TorrentDownloadController extends LegacyController
             default:
                 $type = 'firsttime';
                 $title = __('legacy/downloadnotice.text_first_time_download_notice');
-                $note = __('legacy/downloadnotice.text_first_time_download_note');
+                $note = view('downloadnotice._note', ['type' => 'firsttime'])->render();
                 $noticenexttime = __('legacy/downloadnotice.text_notice_not_show_again');
                 $showrationotice = true;
                 $showclientnotice = true;

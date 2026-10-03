@@ -194,6 +194,7 @@ class ShoutboxController extends LegacyController
                 'avatarSpacer' => $isContinuation,
                 'classBadge' => SafeHtml::fromTrustedHtml($classBadge),
                 'username' => SafeHtml::fromTrustedHtml($username),
+                'isGuest' => $currUserId <= 0,
                 'reactions' => SafeHtml::fromTrustedHtml(Shoutbox::renderReactions(
                     $shoutId,
                     $currentUserId,
@@ -287,6 +288,7 @@ class ShoutboxController extends LegacyController
                 'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) ($arr['date'] ?? 0), true)),
                 'actions' => SafeHtml::fromTrustedHtml(Shoutbox::renderActions($arr, $currentUserId, $isStaff)),
                 'username' => SafeHtml::fromTrustedHtml($username),
+                'isGuest' => $uid <= 0,
                 'reactions' => SafeHtml::fromTrustedHtml(Shoutbox::renderReactions(
                     $shoutId,
                     $currentUserId,

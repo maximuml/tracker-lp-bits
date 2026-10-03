@@ -1,0 +1,1 @@
+{{ __('legacy/aboutnexus.text_stylesheet_note', ['site' => $projectName]) }}<br /><br />{{ __('legacy/aboutnexus.text_stylesheet_list', ['tracker' => $siteName]) }}<a href="#contact" class="faqlink">{{ __('legacy/aboutnexus.text_contact_us') }}</a>{{ __('legacy/aboutnexus.text_stylesheet_list_tail') }}

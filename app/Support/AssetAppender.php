@@ -18,10 +18,10 @@ final class AssetAppender
     public static function js(string $js, string $position, bool $isFile, ?string $key = null): void
     {
         if ($isFile) {
-            $append = sprintf('<script type="text/javascript" src="%s"></script>', $js);
+            $append = trim(view('support._js-append', ['src' => $js])->render());
         } else {
             $nonce = self::cspNonce();
-            $append = sprintf('<script type="text/javascript" nonce="%s">%s</script>', $nonce, $js);
+            $append = trim(view('support._js-append', ['content' => SafeHtml::fromTrustedHtml($js), 'nonce' => $nonce])->render());
         }
         self::appendJsCss($append, $position, $key);
     }
@@ -29,10 +29,10 @@ final class AssetAppender
     public static function css(string $css, string $position, bool $isFile, ?string $key = null): void
     {
         if ($isFile) {
-            $append = sprintf('<link rel="stylesheet" href="%s" type="text/css">', $css);
+            $append = trim(view('support._css-append', ['src' => $css])->render());
         } else {
             $nonce = self::cspNonce();
-            $append = sprintf('<style type="text/css" nonce="%s">%s</style>', $nonce, $css);
+            $append = trim(view('support._css-append', ['content' => SafeHtml::fromTrustedHtml($css), 'nonce' => $nonce])->render());
         }
         self::appendJsCss($append, $position, $key);
     }

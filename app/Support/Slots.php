@@ -87,16 +87,17 @@ final class Slots
         string $slotsLabel,
         string $unlimitedLabel,
     ): string {
+        $unlimited = ['slotsLabel' => $slotsLabel, 'unlimited' => $unlimitedLabel];
         if ($maxdlsystem != 'yes' || $userClass >= $vipClass) {
-            return "<span class='color_slots'>{$slotsLabel}</span>{$unlimitedLabel}";
+            return trim(view('support._slots', $unlimited)->render());
         }
 
         $max = self::maxDownloadSlots($uploaded, $downloaded);
 
         if ($max > 0) {
-            return "<span class='color_slots'>{$slotsLabel}</span><a href='faq.php#id215'>{$max}</a>";
+            return trim(view('support._slots', ['slotsLabel' => $slotsLabel, 'max' => $max])->render());
         }
 
-        return "<span class='color_slots'>{$slotsLabel}</span>{$unlimitedLabel}";
+        return trim(view('support._slots', $unlimited)->render());
     }
 }

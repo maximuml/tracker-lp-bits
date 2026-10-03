@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Html\SafeHtml;
 
 /**
  * Legacy main-menu helper extracted from `include/functions.php`.
@@ -34,7 +35,7 @@ final class Menu
 
         if ($customMenu !== null && $customMenu !== '') {
             return [
-                'html' => '<div id="nav">'.$customMenu.'</div>',
+                'html' => view('support._menu-custom', ['customMenu' => SafeHtml::fromTrustedHtml($customMenu)])->render(),
                 'selected' => $selected,
             ];
         }
@@ -46,7 +47,7 @@ final class Menu
         $items[] = $this->item($selected, 'home', 'index.php', __('legacy/functions.text_home'));
         $items[] = $this->item($selected, 'forums', 'forums.php', __('legacy/functions.text_forums'));
         $items[] = $this->item($selected, 'latestcomments', 'latestcomments.php', __('legacy/functions.text_latest_comments'));
-        $items[] = $this->item($selected, 'torrents', 'torrents.php', $normalSectionName[$langDir] ?? (__('legacy/functions.text_torrents')), "rel='sub-menu'");
+        $items[] = $this->item($selected, 'torrents', 'torrents.php', $normalSectionName[$langDir] ?? (__('legacy/functions.text_torrents')), true);
 
         if ($enableOffer === 'yes') {
             $items[] = $this->item($selected, 'offers', 'offers.php', __('legacy/functions.text_offers'));
@@ -65,7 +66,7 @@ final class Menu
         }
         $items[] = $this->item($selected, 'contactstaff', 'contactstaff.php', __('legacy/functions.text_contactstaff'));
 
-        $html = '<div id="nav"><ul id="mainmenu" class="menu">'.implode('', $items).'</ul></div>';
+        $html = view('support._menu', ['items' => $items])->render();
 
         return ['html' => $html, 'selected' => $selected];
     }
@@ -90,10 +91,13 @@ final class Menu
         };
     }
 
-    private function item(string $selected, string $key, string $href, string $label, string $attrs = ''): string
+    private function item(string $selected, string $key, string $href, string $label, bool $subMenu = false): SafeHtml
     {
-        $class = $selected === $key ? ' class="selected"' : '';
-
-        return '<li'.$class.'><a href="'.$href.'"'.($attrs ? ' '.$attrs : '').'>'.$label.'</a></li>';
+        return SafeHtml::fromTrustedHtml(trim(view('support._menu-item', [
+            'href' => $href,
+            'label' => $label,
+            'selected' => $selected === $key,
+            'subMenu' => $subMenu,
+        ])->render()));
     }
 }

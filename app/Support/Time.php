@@ -173,7 +173,7 @@ final class Time
     public static function formatAbsoluteTime(string $time, bool $twoline): string
     {
         if ($twoline) {
-            return str_replace(' ', '<br /> ', $time);
+            return self::breakJoin(explode(' ', $time));
         }
 
         return $time;
@@ -193,7 +193,20 @@ final class Time
 
     private static function spanTitle(string $title, string $inner): string
     {
-        return '<span title="'.$title.'">'.$inner.'</span>';
+        return trim(view('support._span-title', [
+            'title' => SafeHtml::fromTrustedHtml($title),
+            'inner' => SafeHtml::fromTrustedHtml($inner),
+        ])->render());
+    }
+
+    /**
+     * @param  list<string>  $parts
+     */
+    private static function breakJoin(array $parts): string
+    {
+        return trim(view('support._break-join', [
+            'parts' => array_map(SafeHtml::fromTrustedHtml(...), $parts),
+        ])->render());
     }
 
     /**
@@ -211,7 +224,7 @@ final class Time
         $newtime = $elapsed.($withago ? $textAgo : '');
 
         if ($twoline) {
-            $newtime = str_replace('&nbsp;', '<br /> ', $newtime);
+            $newtime = self::breakJoin(explode('&nbsp;', $newtime));
         } elseif ($oneunit) {
             // Legacy quirk preserved: original used `if ($length = strpos(...))`
             // which is falsy when the separator is at offset 0 OR absent.

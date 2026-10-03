@@ -31,15 +31,14 @@ final class Message
      */
     public static function messageAlert(string $url, string $text, string $bgcolor = 'red'): string
     {
-        $safeUrl = htmlspecialchars($url, ENT_QUOTES);
-        $inner = $url !== ''
-            ? '<b><a href="'.$safeUrl.'" target=\'_blank\'><span class="nx-color-white">'.$text.'</span></a></b>'
-            : '<b><span class="nx-color-white">'.$text.'</span></b>';
-
         $colorClass = in_array($bgcolor, ['red', 'green', 'black', 'blue', 'orange', 'gray'], true)
             ? 'msg-alert-'.$bgcolor
             : 'msg-alert-red';
 
-        return '<table class="msg-alert"><tr><td class="'.$colorClass.'">'."\n".$inner.'</td></tr></table><br />';
+        return trim(view('support.html._msg-alert', [
+            'colorClass' => $colorClass,
+            'url' => $url,
+            'text' => SafeHtml::fromTrustedHtml($text),
+        ])->render());
     }
 }

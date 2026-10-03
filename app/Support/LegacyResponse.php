@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Models\User;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -71,7 +72,7 @@ final class LegacyResponse
             // the test environment), fall back to a minimal shell — mirroring
             // the old inline PHP which emitted partial HTML before throwing.
             if (($html ?? '') === '') {
-                $html = '<!DOCTYPE html><html><head><title>Error</title></head><body>';
+                $html = trim(view('support._error-shell')->render());
             }
         }
 
@@ -225,7 +226,7 @@ final class LegacyResponse
      */
     public static function notFound(): void
     {
-        throw new HttpResponseException(new Response("<h1>Not Found</h1>\n", 404));
+        throw new HttpResponseException(new Response(view('support._not-found')->render(), 404));
     }
 
     /**
@@ -244,7 +245,10 @@ final class LegacyResponse
         if (ob_get_level() > 0 && (string) ob_get_status()['name'] !== '') {
             $nonce = (string) request()->attributes->get('csp_nonce', '');
             $nonceAttr = $nonce !== '' ? ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"' : '';
-            throw new HttpResponseException(new Response('<script type="text/javascript"'.$nonceAttr.">window.location.href = '".htmlspecialchars($url, ENT_QUOTES)."';</script>"));
+            throw new HttpResponseException(new Response(trim(view('support._js-redirect', [
+                'nonceAttr' => SafeHtml::fromTrustedHtml($nonceAttr),
+                'url' => $url,
+            ])->render())));
         }
 
         throw new HttpResponseException(new RedirectResponse($url, 302));

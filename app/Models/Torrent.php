@@ -63,6 +63,7 @@ use App\Models\Traits\HasTorrentScopes;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\App;
 use Laravel\Scout\ModelObserver;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\SearchableScope;
@@ -306,7 +307,7 @@ class Torrent extends NexusModel
         static::addGlobalScope(new SearchableScope);
 
         static::whenBooted(function () {
-            if (app()->bound('config')) {
+            if (App::bound('config')) {
                 static::observe(new ModelObserver);
             }
             (new self)->registerSearchableMacros();

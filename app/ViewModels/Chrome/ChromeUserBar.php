@@ -7,9 +7,6 @@ namespace App\ViewModels\Chrome;
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Models\HitAndRun;
 use App\Models\User;
-use App\Repositories\AttendanceRepository;
-use App\Repositories\HitAndRunRepository;
-use App\Repositories\StaffMessageRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Env;
@@ -63,6 +60,7 @@ final class ChromeUserBar
     public static function load(
         PageLayoutContext $context,
         PageLayoutRepositoryInterface $repo,
+        ChromeRepositories $chrome,
         bool $skipUserData = false,
     ): self {
         $user = $context->user;
@@ -84,7 +82,7 @@ final class ChromeUserBar
         $slotsEnabled = $context->maxdlSystem === 'yes' && $context->userClass() < $context->vipClass;
         $maxSlots = $slotsEnabled ? Slots::maxDownloadSlots((int) $user['uploaded'], (int) $user['downloaded']) : 0;
 
-        $attendance = app(AttendanceRepository::class)->getAttendance($userId, date('Ymd'));
+        $attendance = $chrome->attendance->getAttendance($userId, date('Ymd'));
 
         $managementHref = '';
         if ($context->userClass() >= User::getAccessAdminClassMin()) {
@@ -95,7 +93,7 @@ final class ChromeUserBar
         $hitAndRunStatsHtml = SafeHtml::fromTrustedHtml('');
         if ($hitAndRunEnabled) {
             $hitAndRunStatsHtml = SafeHtml::fromTrustedHtml(
-                (string) app(HitAndRunRepository::class)->getStatusStats($userId)
+                (string) $chrome->hitAndRun->getStatusStats($userId)
             );
         }
 
@@ -107,10 +105,10 @@ final class ChromeUserBar
             $reportCount = (int) self::cachedCount($cache, 'staff_report_count', fn () => $repo->getTotalReports(), 900);
         }
 
-        $staffMessageTotal = self::staffMessageRepository()->getStaffMessageCountCache($userId, 'total');
+        $staffMessageTotal = $chrome->staffMessages->getStaffMessageCountCache($userId, 'total');
         if ($staffMessageTotal === false) {
-            $staffMessageTotal = self::staffMessageRepository()->countStaffMessage($userId);
-            self::staffMessageRepository()->updateStaffMessageCountCache($userId, 'total', $staffMessageTotal);
+            $staffMessageTotal = $chrome->staffMessages->countStaffMessage($userId);
+            $chrome->staffMessages->updateStaffMessageCountCache($userId, 'total', $staffMessageTotal);
         }
 
         self::appendToastAssets($userId);
@@ -207,10 +205,5 @@ final class ChromeUserBar
         }
 
         return $value;
-    }
-
-    private static function staffMessageRepository(): StaffMessageRepository
-    {
-        return app(StaffMessageRepository::class);
     }
 }

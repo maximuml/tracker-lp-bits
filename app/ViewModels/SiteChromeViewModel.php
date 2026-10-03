@@ -11,6 +11,7 @@ use App\ViewModels\Chrome\ChromeAlerts;
 use App\ViewModels\Chrome\ChromeFooter;
 use App\ViewModels\Chrome\ChromeHead;
 use App\ViewModels\Chrome\ChromeNav;
+use App\ViewModels\Chrome\ChromeRepositories;
 use App\ViewModels\Chrome\ChromeSearch;
 use App\ViewModels\Chrome\ChromeUserBar;
 
@@ -54,6 +55,7 @@ final class SiteChromeViewModel
     public static function load(
         string $title,
         PageLayoutRepositoryInterface $repo,
+        ChromeRepositories $chrome,
         ?PageLayoutContext $context = null,
         string $variant = 'modern',
         bool $msgalert = true,
@@ -63,12 +65,12 @@ final class SiteChromeViewModel
         $user = $context->user;
         $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
 
-        $userBar = ChromeUserBar::load($context, $repo, $skipUserData);
+        $userBar = ChromeUserBar::load($context, $repo, $chrome, $skipUserData);
         $navItems = ChromeNav::items($context);
 
         $alerts = [];
         if ($user !== null && ! empty($user['id']) && ! $skipUserData) {
-            $alerts = ChromeAlerts::load($context, (int) $user['id'], $userBar->unreadCount, $repo, $msgalert);
+            $alerts = ChromeAlerts::load($context, (int) $user['id'], $userBar->unreadCount, $repo, $msgalert, $chrome);
         }
 
         return new self(
@@ -85,7 +87,7 @@ final class SiteChromeViewModel
             enableDonation: $context->enableDonation === 'yes',
             userBar: $userBar,
             search: ChromeSearch::load($context),
-            head: ChromeHead::load($context, $title, $variant, $cspNonce),
+            head: ChromeHead::load($context, $title, $variant, $cspNonce, $chrome),
             footer: ChromeFooter::load($context, $variant, $cspNonce),
         );
     }

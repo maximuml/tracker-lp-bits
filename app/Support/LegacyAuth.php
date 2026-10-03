@@ -67,8 +67,8 @@ final class LegacyAuth
             $message = $exception->getMessage();
 
             $defaultMessage = (__('legacy/functions.std_invalid_image_code'))
-                .'<a href="'.\htmlspecialchars($where).'">'
-                .(__('legacy/functions.std_here_to_request_new'));
+                .'<a href="'.\htmlspecialchars($where).'"><b>'
+                .(__('legacy/functions.std_here')).'</b></a>'.(__('legacy/functions.std_to_request_new_image'));
 
             if ($message === '' || $message === 'Invalid captcha response.' || $message === 'Missing captcha parameters.') {
                 $message = $defaultMessage;

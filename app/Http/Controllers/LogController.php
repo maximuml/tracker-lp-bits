@@ -262,12 +262,8 @@ class LogController extends LegacyController
             // (e.g. <img src="/log.php?action=poll&do=delete&pollid=1&sure=1">).
             // GET with sure=0 shows a confirmation form with a POST button.
             if (! $request->isMethod('post')) {
-                $sureText = (string) __('legacy/log.std_here_if_sure');
-                if (preg_match('/<b>(.*?)<\/b><\/a>(.*)$/', $sureText, $m) === 1) {
-                    [$sureLinkText, $sureSuffix] = [$m[1], $m[2]];
-                } else {
-                    [$sureLinkText, $sureSuffix] = [$sureText, ''];
-                }
+                $sureLinkText = (string) __('legacy/log.std_here');
+                $sureSuffix = (string) __('legacy/log.std_if_sure');
                 $confirm = view('log._delete_poll_confirm', [
                     'pollid' => $pollid,
                     'returnto' => $returnto,

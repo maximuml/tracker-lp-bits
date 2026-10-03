@@ -167,12 +167,8 @@ class WebCommentController extends Controller
         $formAction = $this->legacyAction('delete', ['type' => $type, 'cid' => $commentId]);
         $heading = __('legacy/comment.std_delete_comment');
         $message = __('legacy/comment.std_delete_comment_note');
-        $sureText = (string) __('legacy/comment.std_here_if_sure');
-        if (preg_match('/<b>(.*?)<\/b><\/a>(.*)$/', $sureText, $m) === 1) {
-            [$confirmLabel, $confirmSuffix] = [$m[1], $m[2]];
-        } else {
-            [$confirmLabel, $confirmSuffix] = [$sureText, ''];
-        }
+        $confirmLabel = (string) __('legacy/comment.std_here');
+        $confirmSuffix = (string) __('legacy/comment.std_if_sure');
         $cancelLabel = $this->lang('text_back');
         $cancelUrl = $referer !== '' ? $referer : $this->buildScript($type, (int) $arr['pid']);
         $returnto = $referer;

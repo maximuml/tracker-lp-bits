@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Tests\Unit\Contracts;
 
 use App\Contracts\Repositories\AuthRepositoryInterface;
+use App\Contracts\Repositories\CategoryRepositoryInterface;
+use App\Contracts\Repositories\CleanupMonitorRepositoryInterface;
+use App\Contracts\Repositories\ExamProgressCalculatorInterface;
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Contracts\Repositories\MysqlStatsRepositoryInterface;
+use App\Contracts\Repositories\NotificationFeedRepositoryInterface;
 use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
@@ -23,15 +27,21 @@ use App\Contracts\Repositories\ToptenRepositoryInterface;
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\Contracts\Repositories\UserSearchRepositoryInterface;
 use App\Repositories\AuthRepository;
+use App\Repositories\CategoryRepository;
+use App\Repositories\CleanupMonitorRepository;
+use App\Repositories\ExamProgressCalculator;
 use App\Repositories\ExamRepository;
 use App\Repositories\ForumRepository;
 use App\Repositories\InfoRepository;
 use App\Repositories\MeiliSearchRepository;
 use App\Repositories\MysqlStatsRepository;
+use App\Repositories\NotificationFeedRepository;
 use App\Repositories\OfferCommentRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
@@ -45,9 +55,11 @@ use App\Repositories\ToptenRepository;
 use App\Repositories\TorrentAjaxRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
+use App\Repositories\UsercpLookupRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
+use App\Repositories\UserSearchRepository;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -224,6 +236,55 @@ final class RepositoryContractTest extends TestCase
         $this->assertSame($mock, $this->app->make(UserRepositoryInterface::class));
     }
 
+
+    public function test_category_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(CategoryRepository::class, $this->app->make(CategoryRepositoryInterface::class));
+        $mock = Mockery::mock(CategoryRepositoryInterface::class);
+        $this->app->instance(CategoryRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(CategoryRepositoryInterface::class));
+    }
+
+    public function test_cleanup_monitor_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(CleanupMonitorRepository::class, $this->app->make(CleanupMonitorRepositoryInterface::class));
+        $mock = Mockery::mock(CleanupMonitorRepositoryInterface::class);
+        $this->app->instance(CleanupMonitorRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(CleanupMonitorRepositoryInterface::class));
+    }
+
+    public function test_exam_progress_calculator_interface_binding(): void
+    {
+        $this->assertInstanceOf(ExamProgressCalculator::class, $this->app->make(ExamProgressCalculatorInterface::class));
+        $mock = Mockery::mock(ExamProgressCalculatorInterface::class);
+        $this->app->instance(ExamProgressCalculatorInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(ExamProgressCalculatorInterface::class));
+    }
+
+    public function test_notification_feed_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(NotificationFeedRepository::class, $this->app->make(NotificationFeedRepositoryInterface::class));
+        $mock = Mockery::mock(NotificationFeedRepositoryInterface::class);
+        $this->app->instance(NotificationFeedRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(NotificationFeedRepositoryInterface::class));
+    }
+
+    public function test_usercp_lookup_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(UsercpLookupRepository::class, $this->app->make(UsercpLookupRepositoryInterface::class));
+        $mock = Mockery::mock(UsercpLookupRepositoryInterface::class);
+        $this->app->instance(UsercpLookupRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(UsercpLookupRepositoryInterface::class));
+    }
+
+    public function test_user_search_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(UserSearchRepository::class, $this->app->make(UserSearchRepositoryInterface::class));
+        $mock = Mockery::mock(UserSearchRepositoryInterface::class);
+        $this->app->instance(UserSearchRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(UserSearchRepositoryInterface::class));
+    }
+
     public function test_usercp_repository_interface_binding(): void
     {
         $this->assertInstanceOf(UsercpRepository::class, $this->app->make(UsercpRepositoryInterface::class));
@@ -231,4 +292,5 @@ final class RepositoryContractTest extends TestCase
         $this->app->instance(UsercpRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(UsercpRepositoryInterface::class));
     }
+>>>>>>> 66b13437 (refactor(repositories): extract contracts for 6 more final repos (W2-01/W2-02))
 }

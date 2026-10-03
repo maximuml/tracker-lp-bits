@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Enums\UserAcceptPms;
 use App\Enums\UserAppendPromotion;
@@ -19,7 +20,7 @@ use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Repositories\StyleRepository;
 use App\Repositories\TokenRepository;
-use App\Repositories\UsercpLookupRepository;
+
 use App\Repositories\UserPasskeyRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
@@ -69,7 +70,7 @@ final class UsercpPageService
         private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly UsercpRepositoryInterface $usercpRepository,
-        private readonly UsercpLookupRepository $usercpLookupRepository,
+        private readonly UsercpLookupRepositoryInterface $usercpLookupRepository,
         private readonly UserPasskeyRepository $passkeyRepository,
         private readonly TokenRepository $tokenRepository,
         private readonly SearchCategoryTableFactory $searchCategoryTableFactory

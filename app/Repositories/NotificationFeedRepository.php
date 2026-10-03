@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\NotificationFeedRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\DB;
  * plus item/count queries for channels not owned by another repository
  * (comments on own torrents, replies in own forum topics).
  */
-final class NotificationFeedRepository extends BaseRepository
+final class NotificationFeedRepository extends BaseRepository implements NotificationFeedRepositoryInterface
 {
     public const CHANNELS = ['pm', 'shout', 'comment', 'topic_reply', 'staff'];
 

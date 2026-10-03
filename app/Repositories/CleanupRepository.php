@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\CleanupMonitorRepositoryInterface;
 use App\Jobs\SeedBonusJob;
 use App\Jobs\UpdateTorrentSeedersEtc;
 use App\Jobs\UpdateUserSeedingLeechingTime;
@@ -51,7 +52,7 @@ class CleanupRepository extends BaseRepository
     private static int $scanSize = 500;
 
     public function __construct(
-        private readonly CleanupMonitorRepository $monitor
+        private readonly CleanupMonitorRepositoryInterface $monitor
     ) {}
 
     /**

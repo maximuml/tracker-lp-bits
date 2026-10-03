@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Enums\BitbucketPublic;
 use App\Models\Comment;
 use App\Models\Post;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\DB;
  * Usercp lookup repository: read-only dropdown options and per-user
  * stat counts used to build the user control panel pages.
  */
-final class UsercpLookupRepository extends BaseRepository
+final class UsercpLookupRepository extends BaseRepository implements UsercpLookupRepositoryInterface
 {
     public function getCommentCount(int $userId): int
     {

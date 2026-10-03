@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\CategoryRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Bridge for legacy category management pages until full Blade migration.
  */
-final class CategoryRepository
+final class CategoryRepository implements CategoryRepositoryInterface
 {
     public function tableNameForType(string $type): string
     {

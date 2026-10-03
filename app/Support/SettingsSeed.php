@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\StyleRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Attendance;
 use App\Models\User;
-use App\Repositories\StyleRepository;
 
 /**
  * Generated settings seed migrated from `include/config.php`.
@@ -94,7 +94,7 @@ final class SettingsSeed
         $globals->set('enablebitbucket_main', $MAIN['enablebitbucket']);
         $globals->set('altname_main', $MAIN['altname'] ?? '');
         $globals->set('deflang', $MAIN['defaultlang']);
-        $firstStylesheetId = app(StyleRepository::class)->firstId() ?? 3;
+        $firstStylesheetId = app(StyleRepositoryInterface::class)->firstId() ?? 3;
         $globals->set('defcss', (int) ($MAIN['defstylesheet'] ?: $firstStylesheetId));
         $globals->set('enabledonation', $MAIN['donation']);
         $searchBoxIds = app(SearchBoxRepositoryInterface::class)->getOrderedIds();

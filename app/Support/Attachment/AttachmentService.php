@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Attachment;
 
-use App\Repositories\AttachmentRepository;
+use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Support\Config\AttachmentConfig;
 use App\Support\Config\SiteConfig;
 use App\Support\UserDisplay;
@@ -51,7 +51,7 @@ class AttachmentService
 
     public function set_count_so_far(): void
     {
-        $this->countsofar = app(AttachmentRepository::class)->countRecentForUser($this->userid);
+        $this->countsofar = app(AttachmentRepositoryInterface::class)->countRecentForUser($this->userid);
     }
 
     public function get_count_limit_class(int $class): int

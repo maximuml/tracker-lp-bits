@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Contracts;
 
+use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\CategoryRepositoryInterface;
 use App\Contracts\Repositories\CleanupMonitorRepositoryInterface;
+use App\Contracts\Repositories\CountryRepositoryInterface;
 use App\Contracts\Repositories\ExamProgressCalculatorInterface;
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
@@ -21,6 +23,8 @@ use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\ShoutboxRepositoryInterface;
+use App\Contracts\Repositories\SiteLogRepositoryInterface;
+use App\Contracts\Repositories\StyleRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Contracts\Repositories\ToptenRepositoryInterface;
@@ -32,9 +36,11 @@ use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Contracts\Repositories\UserSearchRepositoryInterface;
+use App\Repositories\AttachmentRepository;
 use App\Repositories\AuthRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\CleanupMonitorRepository;
+use App\Repositories\CountryRepository;
 use App\Repositories\ExamProgressCalculator;
 use App\Repositories\ExamRepository;
 use App\Repositories\ForumRepository;
@@ -49,6 +55,8 @@ use App\Repositories\PageLayoutRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\SearchBoxRepository;
 use App\Repositories\ShoutboxRepository;
+use App\Repositories\SiteLogRepository;
+use App\Repositories\StyleRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\ToolRepository;
 use App\Repositories\ToptenRepository;
@@ -289,5 +297,37 @@ final class RepositoryContractTest extends TestCase
         $mock = Mockery::mock(UsercpRepositoryInterface::class);
         $this->app->instance(UsercpRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(UsercpRepositoryInterface::class));
+    }
+
+    public function test_attachment_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(AttachmentRepository::class, $this->app->make(AttachmentRepositoryInterface::class));
+        $mock = Mockery::mock(AttachmentRepositoryInterface::class);
+        $this->app->instance(AttachmentRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(AttachmentRepositoryInterface::class));
+    }
+
+    public function test_country_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(CountryRepository::class, $this->app->make(CountryRepositoryInterface::class));
+        $mock = Mockery::mock(CountryRepositoryInterface::class);
+        $this->app->instance(CountryRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(CountryRepositoryInterface::class));
+    }
+
+    public function test_site_log_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(SiteLogRepository::class, $this->app->make(SiteLogRepositoryInterface::class));
+        $mock = Mockery::mock(SiteLogRepositoryInterface::class);
+        $this->app->instance(SiteLogRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(SiteLogRepositoryInterface::class));
+    }
+
+    public function test_style_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(StyleRepository::class, $this->app->make(StyleRepositoryInterface::class));
+        $mock = Mockery::mock(StyleRepositoryInterface::class);
+        $this->app->instance(StyleRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(StyleRepositoryInterface::class));
     }
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Http\Controllers\ToolController;
 use App\Models\User;
-use App\Repositories\ToolRepository;
 use Illuminate\Support\Facades\Auth;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -28,8 +28,8 @@ final class ToolControllerTest extends TestCase
             'unread_notification_count' => 3,
         ];
 
-        /** @var ToolRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ToolRepository::class);
+        /** @var ToolRepositoryInterface&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ToolRepositoryInterface::class);
         $repository->shouldReceive('getNotificationCount')
             ->once()
             ->andReturn($notifications);
@@ -51,14 +51,13 @@ final class ToolControllerTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('unauthenticated');
 
-        /** @var ToolRepository&Mockery\MockInterface $repository */
-        $repository = Mockery::mock(ToolRepository::class);
+        /** @var ToolRepositoryInterface&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ToolRepositoryInterface::class);
         $repository->shouldNotReceive('getNotificationCount');
 
         Auth::shouldReceive('user')->once()->andReturn(null);
 
         $controller = new ToolController($repository);
-
         $controller->notifications();
     }
 }

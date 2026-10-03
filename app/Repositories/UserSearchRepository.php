@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\UserSearchRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Administrative user search query builder, migrated from usersearch_content.php.
  */
-final class UserSearchRepository
+final class UserSearchRepository implements UserSearchRepositoryInterface
 {
     public function __construct(
         private readonly UserSearchFilters $filters = new UserSearchFilters

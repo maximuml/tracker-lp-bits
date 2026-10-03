@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Enums\FaqType;
 use App\Models\Faq;
 use App\Models\Language;
@@ -20,7 +21,7 @@ use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 use Illuminate\Support\Facades\DB;
 
-final class InfoRepository
+final class InfoRepository implements InfoRepositoryInterface
 {
     /**
      * @return array<string, mixed>

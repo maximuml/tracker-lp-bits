@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ToptenRepositoryInterface;
 use App\Support\Config\SiteConfig;
 use App\Support\Settings;
 
-final class ToptenRepository
+final class ToptenRepository implements ToptenRepositoryInterface
 {
     public function __construct(
         private readonly Topten\UserSections $userSections = new Topten\UserSections,

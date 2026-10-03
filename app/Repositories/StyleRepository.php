@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\StyleRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-final class StyleRepository
+final class StyleRepository implements StyleRepositoryInterface
 {
     /** @var array<int, array<string, mixed>>|null */
     private static ?array $rows = null;

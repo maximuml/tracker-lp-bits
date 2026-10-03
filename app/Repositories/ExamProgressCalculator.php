@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ExamProgressCalculatorInterface;
 use App\Enums\ExamIndex;
 use App\Models\Exam;
 use App\Support\Format;
@@ -15,7 +16,7 @@ use App\Support\Locale;
  * Stateless: takes an Exam model and a progress array, returns a formatted
  * array. Performs no database writes.
  */
-final class ExamProgressCalculator
+final class ExamProgressCalculator implements ExamProgressCalculatorInterface
 {
     /**
      * @param  array<int|string, mixed>  $progress

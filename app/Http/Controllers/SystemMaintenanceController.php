@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\CleanupServiceInterface;
-use App\Repositories\MysqlStatsRepository;
+use App\Contracts\Repositories\MysqlStatsRepositoryInterface;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Email;
@@ -21,7 +21,7 @@ class SystemMaintenanceController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly MysqlStatsRepository $mysqlStatsRepository,
+        private readonly MysqlStatsRepositoryInterface $mysqlStatsRepository,
         private readonly CleanupServiceInterface $cleanupService,
     ) {}
 

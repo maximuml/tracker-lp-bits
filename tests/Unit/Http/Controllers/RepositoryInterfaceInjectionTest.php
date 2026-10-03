@@ -6,20 +6,30 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Contracts\Repositories\InfoRepositoryInterface;
+use App\Contracts\Repositories\MysqlStatsRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
+use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
+use App\Contracts\Repositories\ToptenRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\InfoController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\RulesController;
+use App\Http\Controllers\ShoutboxController;
+use App\Http\Controllers\SystemMaintenanceController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\ToptenController;
 use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\UserController;
@@ -63,6 +73,12 @@ final class RepositoryInterfaceInjectionTest extends TestCase
         yield 'UsercpController + UsercpRepositoryInterface' => [UsercpController::class, UsercpRepositoryInterface::class];
         yield 'TopicController + ForumRepositoryInterface' => [TopicController::class, ForumRepositoryInterface::class];
         yield 'TopicController + PostRepositoryInterface' => [TopicController::class, PostRepositoryInterface::class];
+        yield 'InfoController + InfoRepositoryInterface' => [InfoController::class, InfoRepositoryInterface::class];
+        yield 'RulesController + InfoRepositoryInterface' => [RulesController::class, InfoRepositoryInterface::class];
+        yield 'FaqController + InfoRepositoryInterface' => [FaqController::class, InfoRepositoryInterface::class];
+        yield 'ShoutboxController + ShoutboxRepositoryInterface' => [ShoutboxController::class, ShoutboxRepositoryInterface::class];
+        yield 'ToptenController + ToptenRepositoryInterface' => [ToptenController::class, ToptenRepositoryInterface::class];
+        yield 'SystemMaintenanceController + MysqlStatsRepositoryInterface' => [SystemMaintenanceController::class, MysqlStatsRepositoryInterface::class];
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\CleanupMonitorRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Http\Middleware\Locale;
 use App\Models\Avp;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  * Cleanup monitoring: overdue-cleanup and failed-queue-job alarms,
  * extracted from CleanupRepository.
  */
-final class CleanupMonitorRepository
+final class CleanupMonitorRepository implements CleanupMonitorRepositoryInterface
 {
     public function __construct(
         private readonly ToolRepositoryInterface $toolRepository,

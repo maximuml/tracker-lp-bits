@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Models\Attachment;
 use Illuminate\Support\Facades\DB;
 
-final class AttachmentRepository
+final class AttachmentRepository implements AttachmentRepositoryInterface
 {
     /**
      * @return array<string, mixed>|null

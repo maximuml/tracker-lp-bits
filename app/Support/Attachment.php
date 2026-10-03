@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\AttachmentRepository;
+use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use Illuminate\Support\Facades\Cache;
@@ -215,8 +215,8 @@ final class Attachment
         return trim(view('support._attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
     }
 
-    private static function attachmentRepository(): AttachmentRepository
+    private static function attachmentRepository(): AttachmentRepositoryInterface
     {
-        return app(AttachmentRepository::class);
+        return app(AttachmentRepositoryInterface::class);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\AttachmentRepository;
+use App\Contracts\Repositories\AttachmentRepositoryInterface;
 
 /**
  * Description-AST helpers extracted from `include/functions.php`.
@@ -52,7 +52,7 @@ final class Description
         $pattern = '/(\[attach\](.*)\[\/attach\])/isU';
         $matchCount = preg_match_all($pattern, $description, $matches);
         if ($matchCount) {
-            $attachments = app(AttachmentRepository::class)->findByDlkeys($matches[2]);
+            $attachments = app(AttachmentRepositoryInterface::class)->findByDlkeys($matches[2]);
             if (! empty($attachments)) {
                 $description = (string) preg_replace_callback($pattern, function ($matches) use ($attachments) {
                     $item = $attachments[$matches[2]] ?? null;

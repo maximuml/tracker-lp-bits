@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Enums\ShoutboxType;
 use App\Models\Torrent;
 use App\Models\User;
@@ -11,7 +12,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-final class ShoutboxRepository extends BaseRepository
+final class ShoutboxRepository extends BaseRepository implements ShoutboxRepositoryInterface
 {
     private const DEFAULT_PER_PAGE = 50;
 

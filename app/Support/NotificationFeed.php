@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\NotificationFeedRepositoryInterface;
+use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\NotificationFeedRepository;
@@ -46,8 +48,8 @@ final class NotificationFeed
 
     public function __construct(
         private readonly MessageRepository $messageRepository = new MessageRepository,
-        private readonly ShoutboxRepository $shoutboxRepository = new ShoutboxRepository,
-        private readonly NotificationFeedRepository $feedRepository = new NotificationFeedRepository,
+        private readonly ShoutboxRepositoryInterface $shoutboxRepository = new ShoutboxRepository,
+        private readonly NotificationFeedRepositoryInterface $feedRepository = new NotificationFeedRepository,
         ?StaffMessageRepository $staffMessageRepository = null,
     ) {
         $this->staffMessageRepository = $staffMessageRepository ?? app(StaffMessageRepository::class);

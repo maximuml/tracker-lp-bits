@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
-use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
@@ -33,7 +33,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ShoutboxController extends LegacyController
 {
     public function __construct(
-        private readonly ShoutboxRepository $repository,
+        private readonly ShoutboxRepositoryInterface $repository,
         private readonly ShoutboxService $shoutboxService,
         private readonly ActorContext $actorContext,
         private readonly CurrentUser $currentUser,

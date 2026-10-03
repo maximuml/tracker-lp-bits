@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\CountryRepository;
+use App\Contracts\Repositories\CountryRepositoryInterface;
 use App\Support\Cache\LegacyRedisCache;
 
 /**
@@ -28,7 +28,7 @@ final class Country
         $row = is_object($cache) && method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
 
         if ($row === false) {
-            $row = app(CountryRepository::class)->findById($id);
+            $row = app(CountryRepositoryInterface::class)->findById($id);
             if (is_object($cache) && method_exists($cache, 'cache_value')) {
                 $cache->cache_value($cacheKey, $row, 86400);
             }

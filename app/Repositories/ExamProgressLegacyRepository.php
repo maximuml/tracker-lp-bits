@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ExamProgressCalculatorInterface;
 use App\Enums\ExamIndex;
 use App\Enums\ExamUserIsDone;
 use App\Enums\ExamUserStatus;
@@ -28,7 +29,7 @@ use Carbon\Carbon;
 class ExamProgressLegacyRepository
 {
     public function __construct(
-        private readonly ExamProgressCalculator $examProgressCalculator = new ExamProgressCalculator,
+        private readonly ExamProgressCalculatorInterface $examProgressCalculator = new ExamProgressCalculator,
     ) {}
 
     /**

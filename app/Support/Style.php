@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\StyleRepositoryInterface;
 use App\Repositories\StyleRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
@@ -40,7 +41,7 @@ final class Style
             if ($cached !== false) {
                 self::$stylesheetRows = is_array($cached) ? $cached : [];
             } else {
-                self::$stylesheetRows = self::styleRepository()->all();
+                self::$stylesheetRows = StyleRepository::all();
                 if (is_object($cache) && method_exists($cache, 'cache_value')) {
                     $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
                 }
@@ -138,8 +139,8 @@ final class Style
         return self::styleRepository()->firstId() ?? 3;
     }
 
-    private static function styleRepository(): StyleRepository
+    private static function styleRepository(): StyleRepositoryInterface
     {
-        return app(StyleRepository::class);
+        return app(StyleRepositoryInterface::class);
     }
 }

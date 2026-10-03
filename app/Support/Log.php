@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\SiteLogRepository;
+use App\Contracts\Repositories\SiteLogRepositoryInterface;
 
 /**
  * Legacy site-log helper extracted from `include/functions.php`.
@@ -17,7 +17,7 @@ final class Log
 {
     public static function write(string $text, string $security = 'normal', ?int $userId = null): void
     {
-        app(SiteLogRepository::class)->create($text, $security, $userId);
+        app(SiteLogRepositoryInterface::class)->create($text, $security, $userId);
     }
 
     public static function writeWithContext(string $text, string $security = 'normal'): void

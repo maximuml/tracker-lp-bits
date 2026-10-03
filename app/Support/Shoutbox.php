@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\ShoutboxRepository;
+use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Support\Html\SafeHtml;
 use Illuminate\Database\Query\Builder;
 
@@ -349,8 +349,8 @@ final class Shoutbox
         );
     }
 
-    private static function shoutboxRepository(): ShoutboxRepository
+    private static function shoutboxRepository(): ShoutboxRepositoryInterface
     {
-        return app(ShoutboxRepository::class);
+        return app(ShoutboxRepositoryInterface::class);
     }
 }

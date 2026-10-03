@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Repositories\CategoryRepository;
+use App\Contracts\Repositories\CategoryRepositoryInterface;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Html\SafeHtml;
 
@@ -234,8 +234,8 @@ final class Category
         return trim(view('support._cat-icon', $data)->render());
     }
 
-    private static function categoryRepository(): CategoryRepository
+    private static function categoryRepository(): CategoryRepositoryInterface
     {
-        return app(CategoryRepository::class);
+        return app(CategoryRepositoryInterface::class);
     }
 }

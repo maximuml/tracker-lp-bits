@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
-use App\Repositories\InfoRepository;
 use App\Services\BitbucketService;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -29,7 +29,7 @@ class InfoController extends LegacyController
     public function __construct(
         private readonly BitbucketService $bitbucketService,
         private readonly CurrentUser $currentUser,
-        private readonly InfoRepository $infoRepository,
+        private readonly InfoRepositoryInterface $infoRepository,
     ) {}
 
     public function userhistory(Request $request): View|RedirectResponse|Response

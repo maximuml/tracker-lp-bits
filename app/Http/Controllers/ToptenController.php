@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\ToptenRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
-use App\Repositories\ToptenRepository;
 use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\RedisGuard;
@@ -18,7 +18,7 @@ class ToptenController extends Controller
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly ToptenRepository $toptenRepository,
+        private readonly ToptenRepositoryInterface $toptenRepository,
     ) {}
 
     public function legacy(Request $request): Response|RedirectResponse

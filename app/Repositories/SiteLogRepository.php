@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\SiteLogRepositoryInterface;
 use App\Enums\SitelogSecurityLevel;
 use App\Models\SiteLog;
 
-final class SiteLogRepository
+final class SiteLogRepository implements SiteLogRepositoryInterface
 {
     public function create(string $text, string $security = 'normal', ?int $userId = null): void
     {

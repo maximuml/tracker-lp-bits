@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\UserSearchRepositoryInterface;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserSearchRepository;
@@ -35,7 +36,7 @@ final class UsersearchPageService
 {
     public function __construct(
         private readonly CurrentUser $currentUser = new CurrentUser,
-        private readonly UserSearchRepository $userSearchRepository = new UserSearchRepository,
+        private readonly UserSearchRepositoryInterface $userSearchRepository = new UserSearchRepository,
         private readonly UserListingRepository $userListingRepository = new UserListingRepository,
     ) {}
 

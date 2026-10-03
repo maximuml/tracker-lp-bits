@@ -60,7 +60,7 @@ class TorrentDeleteController extends LegacyController
         if (empty($sure)) {
             return $this->legacyAbortResponse(
                 __('legacy/fastdelete.std_delete_torrent'),
-                view('fastdelete.confirm-form', ['url' => "fastdelete.php?id={$id}&sure=1"])->render(),
+                view('fastdelete.confirm-form', ['id' => $id])->render(),
                 false
             );
         }

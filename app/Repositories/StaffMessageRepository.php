@@ -8,8 +8,8 @@ use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Events\StaffMessageCreated;
 use App\Models\StaffMessage;
+use App\Services\PermissionChecker;
 use App\Support\Cache;
-use App\Support\Permissions;
 use App\Support\RedisGuard;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Redis;
@@ -47,7 +47,7 @@ class StaffMessageRepository extends BaseRepository
         if ($answered !== null) {
             $query->where('answered', $answered);
         }
-        if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) $uid)) {
+        if (! PermissionChecker::instance()->userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) $uid)) {
             // Not staff member only can see authorized
             $permissions = $this->toolRepository->listUserAllPermissions($uid);
             $query->whereIn('permission', $permissions);

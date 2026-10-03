@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Chrome;
 
+use App\Services\PermissionChecker;
 use App\Support\PageLayoutContext;
-use App\Support\Permissions;
 use App\Support\SearchBox;
 use App\Support\Settings;
 
@@ -55,15 +55,15 @@ final class ChromeNav
             $items[] = ['key' => 'offers', 'href' => 'offers.php', 'label' => __('legacy/functions.text_offers')];
         }
         $items[] = ['key' => 'upload', 'href' => 'upload.php', 'label' => __('legacy/functions.text_upload')];
-        if (Permissions::userCan('topten', false, $userId)) {
+        if (PermissionChecker::instance()->userCan('topten', false, $userId)) {
             $items[] = ['key' => 'topten', 'href' => 'topten.php', 'label' => __('legacy/functions.text_top_ten')];
         }
-        if (Permissions::userCan('log', false, $userId)) {
+        if (PermissionChecker::instance()->userCan('log', false, $userId)) {
             $items[] = ['key' => 'log', 'href' => 'log.php', 'label' => __('legacy/functions.text_log')];
         }
         $items[] = ['key' => 'rules', 'href' => 'rules.php', 'label' => __('legacy/functions.text_rules')];
         $items[] = ['key' => 'faq', 'href' => 'faq.php', 'label' => __('legacy/functions.text_faq')];
-        if (Permissions::userCan('staffmem', false, $userId)) {
+        if (PermissionChecker::instance()->userCan('staffmem', false, $userId)) {
             $items[] = ['key' => 'staff', 'href' => 'staff.php', 'label' => __('legacy/functions.text_staff')];
         }
         $items[] = ['key' => 'contactstaff', 'href' => 'contactstaff.php', 'label' => __('legacy/functions.text_contactstaff')];

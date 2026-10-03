@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Services\PermissionChecker;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Html\SafeHtml;
 
@@ -53,15 +54,15 @@ final class Menu
             $items[] = $this->item($selected, 'offers', 'offers.php', __('legacy/functions.text_offers'));
         }
         $items[] = $this->item($selected, 'upload', 'upload.php', __('legacy/functions.text_upload'));
-        if (Permissions::userCan('topten', false, $userId)) {
+        if (PermissionChecker::instance()->userCan('topten', false, $userId)) {
             $items[] = $this->item($selected, 'topten', 'topten.php', __('legacy/functions.text_top_ten'));
         }
-        if (Permissions::userCan('log', false, $userId)) {
+        if (PermissionChecker::instance()->userCan('log', false, $userId)) {
             $items[] = $this->item($selected, 'log', 'log.php', __('legacy/functions.text_log'));
         }
         $items[] = $this->item($selected, 'rules', 'rules.php', __('legacy/functions.text_rules'));
         $items[] = $this->item($selected, 'faq', 'faq.php', __('legacy/functions.text_faq'));
-        if (Permissions::userCan('staffmem', false, $userId)) {
+        if (PermissionChecker::instance()->userCan('staffmem', false, $userId)) {
             $items[] = $this->item($selected, 'staff', 'staff.php', __('legacy/functions.text_staff'));
         }
         $items[] = $this->item($selected, 'contactstaff', 'contactstaff.php', __('legacy/functions.text_contactstaff'));

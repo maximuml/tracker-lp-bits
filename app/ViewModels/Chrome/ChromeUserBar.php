@@ -7,6 +7,7 @@ namespace App\ViewModels\Chrome;
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Models\HitAndRun;
 use App\Models\User;
+use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Env;
@@ -14,7 +15,6 @@ use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\PageLayoutContext;
-use App\Support\Permissions;
 use App\Support\Ratio;
 use App\Support\Slots;
 use App\Support\UserDisplay;
@@ -97,7 +97,7 @@ final class ChromeUserBar
             );
         }
 
-        $canStaffmem = Permissions::userCan('staffmem', false, $userId);
+        $canStaffmem = PermissionChecker::instance()->userCan('staffmem', false, $userId);
         $cheaterCount = 0;
         $reportCount = 0;
         if ($canStaffmem) {

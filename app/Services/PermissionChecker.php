@@ -13,6 +13,11 @@ use App\Support\Permissions;
  */
 class PermissionChecker
 {
+    public static function instance(): self
+    {
+        return app(self::class);
+    }
+
     public function userCan(string $permission, bool $fail = false, int $uid = 0): bool
     {
         return Permissions::userCan($permission, $fail, $uid);

@@ -10,6 +10,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Html\SafeHtml;
@@ -17,7 +18,6 @@ use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Pagination;
-use App\Support\Permissions;
 use App\Support\UserDisplay;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -220,7 +220,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
         }
 
         $enablelocationTweak = SiteConfig::current()->tweak->enableLocation();
-        $showLocationColumn = $enablelocationTweak || ($currentUser !== null && Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
+        $showLocationColumn = $enablelocationTweak || ($currentUser !== null && PermissionChecker::instance()->userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
 
         return [
             'torrent' => $torrentArr,
@@ -307,7 +307,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
                     ])
                     ->orderByDesc('torrents.id');
 
-                if ($currentUser === null || ($currentUser->id !== $targetUserId && ! Permissions::userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUser->id))) {
+                if ($currentUser === null || ($currentUser->id !== $targetUserId && ! PermissionChecker::instance()->userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUser->id))) {
                     $query->where('torrents.anonymous', 0);
                 }
 

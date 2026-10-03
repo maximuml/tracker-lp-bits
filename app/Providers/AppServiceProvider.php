@@ -106,6 +106,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // W3-07: Repository contracts for the 10 most-used repositories.
+        $this->app->bind(\App\Contracts\CleanupServiceInterface::class, \App\Services\CleanupService::class);
         $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);
         $this->app->bind(ExamRepositoryInterface::class, ExamRepository::class);
         $this->app->bind(ForumRepositoryInterface::class, ForumRepository::class);

@@ -56,6 +56,18 @@ class EditSetting extends Page implements HasForms
         return $content;
     }
 
+    private TokenRepository $tokenRepository;
+
+    private ToolRepository $toolRepository;
+
+    public function boot(
+        TokenRepository $tokenRepository,
+        ToolRepository $toolRepository,
+    ): void {
+        $this->tokenRepository = $tokenRepository;
+        $this->toolRepository = $toolRepository;
+    }
+
     public function getTitle(): string
     {
         return __('label.setting.nav_text');
@@ -176,7 +188,7 @@ class EditSetting extends Page implements HasForms
                 Radio::make('backup.frequency')->options(['daily' => 'daily', 'hourly' => 'hourly'])->inline(true)->label(__('label.setting.backup.frequency'))->helperText(__('label.setting.backup.frequency_help')),
                 Select::make('backup.hour')->options(array_map(fn (int $hour): string => (string) $hour, range(0, 23)))->label(__('label.setting.backup.hour'))->helperText(__('label.setting.backup.hour_help')),
                 Select::make('backup.minute')->options(array_map(fn (int $minute): string => (string) $minute, range(0, 59)))->label(__('label.setting.backup.minute'))->helperText(__('label.setting.backup.minute_help')),
-                TextInput::make('backup.export_path')->label(__('label.setting.backup.export_path'))->helperText(new HtmlString(__('label.setting.backup.export_path_help', ['default_path' => app(ToolRepository::class)->getBackupExportPathDefault()]))),
+                TextInput::make('backup.export_path')->label(__('label.setting.backup.export_path'))->helperText(new HtmlString(__('label.setting.backup.export_path_help', ['default_path' => $this->toolRepository->getBackupExportPathDefault()]))),
                 TextInput::make('backup.retention_count')->numeric()->label(__('label.setting.backup.retention_count'))->helperText(new HtmlString(__('label.setting.backup.retention_count_help', ['default_count' => ToolRepository::BACKUP_RETENTION_COUNT_DEFAULT]))),
                 Radio::make('backup.via_ftp')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.backup.via_ftp'))->helperText(new HtmlString(__('label.setting.backup.via_ftp_help'))),
                 Radio::make('backup.via_sftp')->options(self::$yesOrNo)->inline(true)->label(__('label.setting.backup.via_sftp'))->helperText(new HtmlString(__('label.setting.backup.via_sftp_help'))),
@@ -490,7 +502,7 @@ class EditSetting extends Page implements HasForms
 
         $name = "$id.user_token_allowed";
         $schema[] = CheckboxList::make($name)
-            ->options(app(TokenRepository::class)->listUserTokenPermissions())
+            ->options($this->tokenRepository->listUserTokenPermissions())
             ->label(__("label.setting.{$name}"))
             ->helperText(__("label.setting.{$name}_help"))
             ->columns(2);

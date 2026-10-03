@@ -21,7 +21,7 @@ use Illuminate\Support\HtmlString;
  * Cleanup orchestrator. Replaces the monolithic `docleanup()` with discrete,
  * idempotent task methods and Redis-locked dispatch.
  */
-final class CleanupService
+final class CleanupService implements \App\Contracts\CleanupServiceInterface
 {
     /** @var array<int, array<int, array<string, string>>> */
     private const CLASSES = [

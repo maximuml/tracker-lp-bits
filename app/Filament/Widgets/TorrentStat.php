@@ -12,6 +12,13 @@ class TorrentStat extends StatTable
 {
     protected static ?int $sort = 102;
 
+    private DashboardRepository $dashboardRepository;
+
+    public function boot(DashboardRepository $dashboardRepository): void
+    {
+        $this->dashboardRepository = $dashboardRepository;
+    }
+
     protected function getHeader(): string
     {
         return Locale::trans('dashboard.torrent.page_title', [], null);
@@ -20,7 +27,7 @@ class TorrentStat extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        $dashboardRep = app(DashboardRepository::class);
+        $dashboardRep = $this->dashboardRepository;
 
         return $dashboardRep->statTorrents();
     }

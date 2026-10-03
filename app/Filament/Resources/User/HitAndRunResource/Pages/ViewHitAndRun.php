@@ -90,6 +90,14 @@ class ViewHitAndRun extends ViewRecord
         return $data;
     }
 
+    private HitAndRunRepository $hitAndRunRepository;
+
+    public function boot(
+        HitAndRunRepository $hitAndRunRepository,
+    ): void {
+        $this->hitAndRunRepository = $hitAndRunRepository;
+    }
+
     protected function getViewData(): array
     {
         return [
@@ -105,7 +113,7 @@ class ViewHitAndRun extends ViewRecord
             $actions[] = Action::make('Pardon')
                 ->requiresConfirmation()
                 ->action(function () {
-                    $hitAndRunRep = app(HitAndRunRepository::class);
+                    $hitAndRunRep = $this->hitAndRunRepository;
                     $user = Auth::user();
                     if (! $user instanceof User) {
                         throw new \RuntimeException('Expected an authenticated user.');

@@ -11,6 +11,13 @@ class CategoryActivity extends StatTable
 {
     protected static ?int $sort = 201;
 
+    private DashboardRepository $dashboardRepository;
+
+    public function boot(DashboardRepository $dashboardRepository): void
+    {
+        $this->dashboardRepository = $dashboardRepository;
+    }
+
     protected function getHeader(): string
     {
         return __('admin.dashboard.category_activity');
@@ -19,6 +26,6 @@ class CategoryActivity extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        return app(DashboardRepository::class)->categoryActivity();
+        return $this->dashboardRepository->categoryActivity();
     }
 }

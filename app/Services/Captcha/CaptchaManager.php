@@ -109,10 +109,7 @@ class CaptchaManager
             $config = null;
             if (function_exists('app')) {
                 try {
-                    $repository = app('config');
-                    if ($repository) {
-                        $config = $repository->get('captcha');
-                    }
+                    $config = config('captcha');
                 } catch (\Throwable $exception) {
                     $config = null;
                 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\SystemMaintenanceController;
-use App\Services\CleanupService;
+use App\Contracts\CleanupServiceInterface;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Mockery;
@@ -59,12 +59,17 @@ final class SystemMaintenanceControllerTest extends TestCase
 
     public function test_cron_returns_response_with_trigger_cron_output(): void
     {
-        app()->bind(CleanupService::class, function () {
-            return new class
+        app()->bind(CleanupServiceInterface::class, function () {
+            return new class implements CleanupServiceInterface
             {
                 public function triggerCron(): string
                 {
                     return 'cron-ok';
+                }
+
+                public function runAll(bool $forceAll = false, bool $printProgress = false): string|bool
+                {
+                    return '';
                 }
 
                 public function runFull(bool $forceAll = false, bool $printProgress = true): string
@@ -86,12 +91,17 @@ final class SystemMaintenanceControllerTest extends TestCase
 
     public function test_docleanup_returns_response_with_run_full_output(): void
     {
-        app()->bind(CleanupService::class, function () {
-            return new class
+        app()->bind(CleanupServiceInterface::class, function () {
+            return new class implements CleanupServiceInterface
             {
                 public function triggerCron(): string
                 {
                     return 'cron-ok';
+                }
+
+                public function runAll(bool $forceAll = false, bool $printProgress = false): string|bool
+                {
+                    return '';
                 }
 
                 public function runFull(bool $forceAll = false, bool $printProgress = true): string
@@ -113,12 +123,17 @@ final class SystemMaintenanceControllerTest extends TestCase
 
     public function test_docleanup_passes_forceall_flag(): void
     {
-        app()->bind(CleanupService::class, function () {
-            return new class
+        app()->bind(CleanupServiceInterface::class, function () {
+            return new class implements CleanupServiceInterface
             {
                 public function triggerCron(): string
                 {
                     return 'cron-ok';
+                }
+
+                public function runAll(bool $forceAll = false, bool $printProgress = false): string|bool
+                {
+                    return '';
                 }
 
                 public function runFull(bool $forceAll = false, bool $printProgress = true): string

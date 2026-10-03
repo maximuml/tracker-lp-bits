@@ -16,6 +16,14 @@ class EditExam extends EditRecord
 {
     protected static string $resource = ExamResource::class;
 
+    private ExamRepositoryInterface $examRepository;
+
+    public function boot(
+        ExamRepositoryInterface $examRepository,
+    ): void {
+        $this->examRepository = $examRepository;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -36,7 +44,7 @@ class EditExam extends EditRecord
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
-        $examRep = app(ExamRepositoryInterface::class);
+        $examRep = $this->examRepository;
         try {
             $this->record = $examRep->update($data, $this->getExamRecord()->id);
             Admin::successNotification('');

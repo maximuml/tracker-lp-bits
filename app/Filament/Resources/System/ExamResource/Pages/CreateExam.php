@@ -15,10 +15,18 @@ class CreateExam extends CreateRecord
 {
     protected static string $resource = ExamResource::class;
 
+    private ExamRepositoryInterface $examRepository;
+
+    public function boot(
+        ExamRepositoryInterface $examRepository,
+    ): void {
+        $this->examRepository = $examRepository;
+    }
+
     public function create(bool $another = false): void
     {
         $data = $this->form->getState();
-        $examRep = app(ExamRepositoryInterface::class);
+        $examRep = $this->examRepository;
         try {
             $this->record = $examRep->store($data);
             Admin::successNotification('');

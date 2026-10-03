@@ -60,6 +60,14 @@ class SystemActions extends Page implements HasForms
      */
     public ?array $massmailData = [];
 
+    private UserModerationRepositoryInterface $userModerationRepository;
+
+    public function boot(
+        UserModerationRepositoryInterface $userModerationRepository,
+    ): void {
+        $this->userModerationRepository = $userModerationRepository;
+    }
+
     public function mount(): void
     {
         $this->delacctForm->fill();
@@ -115,7 +123,7 @@ class SystemActions extends Page implements HasForms
         }
 
         $name = $user->username;
-        $userRep = app(UserModerationRepositoryInterface::class);
+        $userRep = $this->userModerationRepository;
         $userRep->destroy((int) $user->id);
 
         Notification::make()

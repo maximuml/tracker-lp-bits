@@ -14,11 +14,19 @@ class EditForum extends EditRecord
     protected static string $resource = ForumResource::class;
 
     /** @return array<DeleteAction> */
+    private ForumRepositoryInterface $forumRepository;
+
+    public function boot(
+        ForumRepositoryInterface $forumRepository,
+    ): void {
+        $this->forumRepository = $forumRepository;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             DeleteAction::make()
-                ->using(fn ($record) => app(ForumRepositoryInterface::class)->deleteForum($record->id)),
+                ->using(fn ($record) => $this->forumRepository->deleteForum($record->id)),
         ];
     }
 }

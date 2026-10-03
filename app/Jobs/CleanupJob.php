@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Services\CleanupService;
+use App\Contracts\CleanupServiceInterface;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -44,7 +44,7 @@ final class CleanupJob implements ShouldBeUnique, ShouldQueue
         return self::class;
     }
 
-    public function handle(CleanupService $service): void
+    public function handle(CleanupServiceInterface $service): void
     {
         $result = $service->runAll(false, false);
 

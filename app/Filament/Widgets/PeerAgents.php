@@ -11,6 +11,13 @@ class PeerAgents extends StatTable
 {
     protected static ?int $sort = 202;
 
+    private DashboardRepository $dashboardRepository;
+
+    public function boot(DashboardRepository $dashboardRepository): void
+    {
+        $this->dashboardRepository = $dashboardRepository;
+    }
+
     protected function getHeader(): string
     {
         return __('admin.dashboard.peer_agents');
@@ -19,6 +26,6 @@ class PeerAgents extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        return app(DashboardRepository::class)->peerAgents();
+        return $this->dashboardRepository->peerAgents();
     }
 }

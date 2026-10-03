@@ -14,11 +14,19 @@ class EditOverForum extends EditRecord
     protected static string $resource = OverForumResource::class;
 
     /** @return array<DeleteAction> */
+    private OverforumRepository $overforumRepository;
+
+    public function boot(
+        OverforumRepository $overforumRepository,
+    ): void {
+        $this->overforumRepository = $overforumRepository;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             DeleteAction::make()
-                ->using(fn ($record) => app(OverforumRepository::class)->deleteOverforum($record->id)),
+                ->using(fn ($record) => $this->overforumRepository->deleteOverforum($record->id)),
         ];
     }
 }

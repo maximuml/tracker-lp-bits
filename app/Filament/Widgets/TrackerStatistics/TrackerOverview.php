@@ -11,6 +11,13 @@ class TrackerOverview extends StatTable
 {
     protected static ?int $sort = 10;
 
+    private DashboardRepository $dashboardRepository;
+
+    public function boot(DashboardRepository $dashboardRepository): void
+    {
+        $this->dashboardRepository = $dashboardRepository;
+    }
+
     protected function getHeader(): string
     {
         return __('dashboard.tracker.overview');
@@ -21,7 +28,7 @@ class TrackerOverview extends StatTable
      */
     protected function getTableRows(): array
     {
-        $dashboardRep = app(DashboardRepository::class);
+        $dashboardRep = $this->dashboardRepository;
 
         return $dashboardRep->statTracker();
     }

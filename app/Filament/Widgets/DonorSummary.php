@@ -11,6 +11,13 @@ class DonorSummary extends StatTable
 {
     protected static ?int $sort = 203;
 
+    private DashboardRepository $dashboardRepository;
+
+    public function boot(DashboardRepository $dashboardRepository): void
+    {
+        $this->dashboardRepository = $dashboardRepository;
+    }
+
     protected function getHeader(): string
     {
         return __('admin.dashboard.donor_summary');
@@ -19,6 +26,6 @@ class DonorSummary extends StatTable
     /** @return array<int|string, array<string, mixed>> */
     protected function getTableRows(): array
     {
-        return app(DashboardRepository::class)->donorSummary();
+        return $this->dashboardRepository->donorSummary();
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Services\PermissionChecker;
-
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Html\SafeHtml;
 

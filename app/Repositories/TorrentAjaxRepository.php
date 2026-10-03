@@ -11,7 +11,6 @@ use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Services\PermissionChecker;
-
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Html\SafeHtml;

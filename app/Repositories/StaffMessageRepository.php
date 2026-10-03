@@ -9,7 +9,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Events\StaffMessageCreated;
 use App\Models\StaffMessage;
 use App\Services\PermissionChecker;
-
 use App\Support\Cache;
 use App\Support\RedisGuard;
 use Illuminate\Database\Eloquent\Builder;

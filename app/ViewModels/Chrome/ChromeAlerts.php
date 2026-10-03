@@ -9,7 +9,6 @@ use App\Enums\ExamType;
 use App\Enums\TorrentPromotion;
 use App\Models\TorrentState;
 use App\Services\PermissionChecker;
-
 use App\Support\Exam;
 use App\Support\Html\SafeHtml;
 use App\Support\PageLayoutContext;

@@ -12,7 +12,6 @@ use App\Exceptions\TrackerException;
 use App\Jobs\BuyTorrent;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Services\PermissionChecker;
-
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Logger;

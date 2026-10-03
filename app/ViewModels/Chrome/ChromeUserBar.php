@@ -107,10 +107,10 @@ final class ChromeUserBar
             $reportCount = (int) self::cachedCount($cache, 'staff_report_count', fn () => $repo->getTotalReports(), 900);
         }
 
-        $staffMessageTotal = app(StaffMessageRepository::class)->getStaffMessageCountCache($userId, 'total');
+        $staffMessageTotal = self::staffMessageRepository()->getStaffMessageCountCache($userId, 'total');
         if ($staffMessageTotal === false) {
-            $staffMessageTotal = app(StaffMessageRepository::class)->countStaffMessage($userId);
-            app(StaffMessageRepository::class)->updateStaffMessageCountCache($userId, 'total', $staffMessageTotal);
+            $staffMessageTotal = self::staffMessageRepository()->countStaffMessage($userId);
+            self::staffMessageRepository()->updateStaffMessageCountCache($userId, 'total', $staffMessageTotal);
         }
 
         self::appendToastAssets($userId);
@@ -207,5 +207,10 @@ final class ChromeUserBar
         }
 
         return $value;
+    }
+
+    private static function staffMessageRepository(): StaffMessageRepository
+    {
+        return app(StaffMessageRepository::class);
     }
 }

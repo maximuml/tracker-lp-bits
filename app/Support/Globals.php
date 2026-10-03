@@ -14,6 +14,11 @@ namespace App\Support;
  */
 class Globals
 {
+    public static function instance(): self
+    {
+        return app(self::class);
+    }
+
     /**
      * Get a global value by key, or default if not set.
      */

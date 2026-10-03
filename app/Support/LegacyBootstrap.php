@@ -62,7 +62,7 @@ final class LegacyBootstrap
         // LegacyRedisCache is now registered as a singleton in
         // AppServiceProvider::register(). Just resolve it to trigger
         // the connection + language folder setup.
-        app(LegacyRedisCache::class);
+        LegacyRedisCache::instance();
     }
 
     private static function bootDatabase(): void
@@ -93,7 +93,7 @@ final class LegacyBootstrap
         // translator (resources/lang/en/legacy/*.php). CURLANGDIR is the
         // locale folder cookie still read by Locale::currentFolder() and
         // a few repositories.
-        app(Globals::class)->set('CURLANGDIR', Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
+        Globals::instance()->set('CURLANGDIR', Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
     }
 
     private static function bootUser(?Request $request): void

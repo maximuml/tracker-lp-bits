@@ -163,7 +163,7 @@ final class Cache
     {
         Logger::writeWithContext('clear_category_cache');
         self::forgetWithLocales('category_content');
-        foreach (app(SearchBoxRepositoryInterface::class)->getOrderedIds() as $id) {
+        foreach (self::searchBoxRepository()->getOrderedIds() as $id) {
             self::forgetWithLocales("category_list_mode_{$id}");
         }
     }
@@ -171,7 +171,7 @@ final class Cache
     public static function clearTaxonomy(string $table): void
     {
         Logger::writeWithContext("clear_taxonomy_cache: $table");
-        foreach (app(SearchBoxRepositoryInterface::class)->getOrderedIds() as $id) {
+        foreach (self::searchBoxRepository()->getOrderedIds() as $id) {
             self::forgetWithLocales("{$table}_list_mode_{$id}");
         }
         self::forgetWithLocales("{$table}_list_mode_0");
@@ -242,7 +242,7 @@ final class Cache
         // connection — delete there too so invalidation does not silently
         // depend on CACHE_STORE pointing at the same backend. Nullable: tests
         // bind it to null to simulate Redis being down.
-        app(LegacyRedisCache::class)?->delete_value($key, true);
+        LegacyRedisCache::instance()?->delete_value($key, true);
     }
 
     /**
@@ -268,5 +268,10 @@ final class Cache
                 }
             }
         } while ($it > 0);
+    }
+
+    private static function searchBoxRepository(): SearchBoxRepositoryInterface
+    {
+        return app(SearchBoxRepositoryInterface::class);
     }
 }

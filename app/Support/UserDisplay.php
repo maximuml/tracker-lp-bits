@@ -46,8 +46,8 @@ final class UserDisplay
      */
     public static function currentClass(): string|int
     {
-        $user = app(CurrentUser::class)->get();
-        if (app(LegacyRuntime::class)->isLegacy()) {
+        $user = CurrentUser::instance()->get();
+        if (LegacyRuntime::instance()->isLegacy()) {
             return $user['class'] ?? '';
         }
 
@@ -75,8 +75,8 @@ final class UserDisplay
      */
     public static function currentId(): int
     {
-        $user = app(CurrentUser::class)->get();
-        if (app(LegacyRuntime::class)->isLegacy()) {
+        $user = CurrentUser::instance()->get();
+        if (LegacyRuntime::instance()->isLegacy()) {
             return (int) ($user['id'] ?? 0);
         }
 
@@ -94,8 +94,8 @@ final class UserDisplay
      */
     public static function currentUsername(): string
     {
-        $user = app(CurrentUser::class)->get();
-        if (app(LegacyRuntime::class)->isLegacy()) {
+        $user = CurrentUser::instance()->get();
+        if (LegacyRuntime::instance()->isLegacy()) {
             return $user['username'] ?? '';
         }
 
@@ -120,14 +120,14 @@ final class UserDisplay
         }
 
         $row = RedisGuard::remember("user_{$id}_content", 3600, function () use ($id) {
-            $user = app(UserRepositoryInterface::class)->findForDisplay($id);
+            $user = self::userRepository()->findForDisplay($id);
 
             if (! $user) {
                 return false;
             }
 
             $arr = $user->toArray();
-            $metas = app(UserRepositoryInterface::class)->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
+            $metas = self::userRepository()->listMetas($id, UserMeta::META_KEY_PERSONALIZED_USERNAME);
             $arr['__is_rainbow'] = $metas->isNotEmpty() ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
@@ -173,7 +173,7 @@ final class UserDisplay
             'downloadpos', 'parked', 'clientselect', 'showclienterror',
         ];
 
-        $users = app(UserRepositoryInterface::class)->getByIds($missing, $columns);
+        $users = self::userRepository()->getByIds($missing, $columns);
         if ($users->isEmpty()) {
             foreach ($missing as $id) {
                 self::$rowCache[$id] = false;
@@ -357,5 +357,10 @@ final class UserDisplay
         }
 
         return SafeHtml::fromTrustedHtml($username);
+    }
+
+    private static function userRepository(): UserRepositoryInterface
+    {
+        return app(UserRepositoryInterface::class);
     }
 }

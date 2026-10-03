@@ -40,7 +40,7 @@ final class Style
             if ($cached !== false) {
                 self::$stylesheetRows = is_array($cached) ? $cached : [];
             } else {
-                self::$stylesheetRows = app(StyleRepository::class)->all();
+                self::$stylesheetRows = self::styleRepository()->all();
                 if (is_object($cache) && method_exists($cache, 'cache_value')) {
                     $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
                 }
@@ -59,7 +59,7 @@ final class Style
     public static function cssUri(mixed $cache, int|string $cssId, int|string $defaultId, string $file = ''): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
-        $uri = $row['uri'] ?? app(StyleRepository::class)->uri($defaultId);
+        $uri = $row['uri'] ?? self::styleRepository()->uri($defaultId);
         // ADR 0019: Classic is the hard fallback — a stale defstylesheet or
         // user.stylesheet pointing at a pruned row must never emit a bare
         // 'theme.css' that 404s at the site root.
@@ -88,9 +88,9 @@ final class Style
      */
     public static function highlightColor(?int $userStyleId): string
     {
-        $fallback = app(StyleRepository::class)->highlightColor(5) ?? '';
+        $fallback = self::styleRepository()->highlightColor(5) ?? '';
         if ($userStyleId !== null && $userStyleId > 0) {
-            $hltr = app(StyleRepository::class)->highlightColor($userStyleId) ?? '';
+            $hltr = self::styleRepository()->highlightColor($userStyleId) ?? '';
             if (! empty($hltr)) {
                 return (string) $hltr;
             }
@@ -105,10 +105,10 @@ final class Style
      */
     public static function cssUriWithContext(string $file = ''): string
     {
-        $user = app(CurrentUser::class)->get() ?? [];
+        $user = CurrentUser::instance()->get() ?? [];
         $defaultId = self::defaultStylesheetId();
 
-        return self::cssUri(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
+        return self::cssUri(LegacyRedisCache::instance(), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
     }
 
     /**
@@ -117,10 +117,10 @@ final class Style
      */
     public static function addiCodeWithContext(): SafeHtml
     {
-        $user = app(CurrentUser::class)->get() ?? [];
+        $user = CurrentUser::instance()->get() ?? [];
         $defaultId = self::defaultStylesheetId();
 
-        return SafeHtml::fromTrustedHtml(self::addiCode(app(LegacyRedisCache::class), $user ? $user['stylesheet'] : $defaultId, $defaultId));
+        return SafeHtml::fromTrustedHtml(self::addiCode(LegacyRedisCache::instance(), $user ? $user['stylesheet'] : $defaultId, $defaultId));
     }
 
     /**
@@ -135,6 +135,11 @@ final class Style
             return $configured;
         }
 
-        return app(StyleRepository::class)->firstId() ?? 3;
+        return self::styleRepository()->firstId() ?? 3;
+    }
+
+    private static function styleRepository(): StyleRepository
+    {
+        return app(StyleRepository::class);
     }
 }

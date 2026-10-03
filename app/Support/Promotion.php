@@ -112,7 +112,7 @@ final class Promotion
      */
     public static function rowClassWithContext(int $promotion, ?string $posState = '', ?array $torrent = []): ?string
     {
-        $user = app(CurrentUser::class)->get() ?? [];
+        $user = CurrentUser::instance()->get() ?? [];
 
         return self::rowClass(
             $promotion,
@@ -269,7 +269,7 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
     ): ?PromotionBadge {
-        $user = app(CurrentUser::class)->get() ?? [];
+        $user = CurrentUser::instance()->get() ?? [];
 
         return self::badge(
             $promotion,

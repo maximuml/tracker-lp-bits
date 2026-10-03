@@ -283,7 +283,7 @@ final class Tag
      */
     public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
     {
-        $items = SearchBox::itemList(app(LegacyRedisCache::class), $listName, $mode);
+        $items = SearchBox::itemList(LegacyRedisCache::instance(), $listName, $mode);
         $chooseOne = __('legacy/functions.select_choose_one');
 
         return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);

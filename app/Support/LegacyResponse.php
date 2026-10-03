@@ -42,7 +42,7 @@ final class LegacyResponse
         bool $head = true,
         bool $foot = true,
     ): never {
-        $renderer = app(PageRenderer::class);
+        $renderer = self::pageRenderer();
 
         try {
             if ($head) {
@@ -85,7 +85,7 @@ final class LegacyResponse
      */
     public static function captureAbort(string $heading, string $text, bool $htmlstrip = true, string $title = ''): string
     {
-        $renderer = app(PageRenderer::class);
+        $renderer = self::pageRenderer();
 
         return (string) $renderer->headerHtml($title)
             .view('partials.std-message', [
@@ -143,7 +143,7 @@ final class LegacyResponse
             return true;
         }
 
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = CurrentUser::instance()->get() ?? [];
 
         $msg = 'Invalid ID Attempt: Username: '.($CURUSER['username'] ?? '')
             .' - UserID: '.($CURUSER['id'] ?? '')
@@ -168,7 +168,7 @@ final class LegacyResponse
             'text' => (string) (__('legacy/functions.std_invalid_id')),
         ])->render();
 
-        $renderer = app(PageRenderer::class);
+        $renderer = self::pageRenderer();
         $html = ($stdfoot ? (string) $renderer->headerHtml() : '')
             .$errorHtml
             .($stdfoot ? (string) $renderer->footerHtml() : '');
@@ -184,7 +184,7 @@ final class LegacyResponse
      */
     public static function canUpload(string $where = 'torrents'): bool
     {
-        $CURUSER = app(CurrentUser::class)->get() ?? [];
+        $CURUSER = CurrentUser::instance()->get() ?? [];
 
         if (! ($CURUSER['uploadpos'] ?? true)) {
             return false;
@@ -247,5 +247,10 @@ final class LegacyResponse
         }
 
         throw new HttpResponseException(new RedirectResponse($url, 302));
+    }
+
+    private static function pageRenderer(): PageRenderer
+    {
+        return app(PageRenderer::class);
     }
 }

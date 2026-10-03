@@ -152,7 +152,7 @@ final class AuthCookie
         }
 
         $expires = self::computeExpires($durationSeconds);
-        $authVersion = app(AuthRepositoryInterface::class)->getAuthVersion($userId);
+        $authVersion = self::authRepository()->getAuthVersion($userId);
         if ($authVersion === null || $authVersion < 1) {
             return;
         }
@@ -174,7 +174,7 @@ final class AuthCookie
             $update['lang'] = $langId;
         }
 
-        app(AuthRepositoryInterface::class)->updateLogin($userId, $update);
+        self::authRepository()->updateLogin($userId, $update);
     }
 
     /**
@@ -192,7 +192,7 @@ final class AuthCookie
         }
 
         $expires = self::computeExpires($durationSeconds);
-        $authVersion = app(AuthRepositoryInterface::class)->getAuthVersion($userId);
+        $authVersion = self::authRepository()->getAuthVersion($userId);
         if ($authVersion === null || $authVersion < 1) {
             return;
         }
@@ -369,10 +369,10 @@ final class AuthCookie
     {
         $isAjax = RequestContext::instance()->isAjax();
         $selfEnableBonus = SiteConfig::current()->bonus->selfEnable();
-        $shouldIgnoreEnabled = app(LegacyRuntime::class)->isLegacy() && ! $isAjax && $selfEnableBonus > 0;
+        $shouldIgnoreEnabled = LegacyRuntime::instance()->isLegacy() && ! $isAjax && $selfEnableBonus > 0;
 
         if ($isArray) {
-            $row = app(AuthRepositoryInterface::class)->findUserArrayForCookie($id, $shouldIgnoreEnabled);
+            $row = self::authRepository()->findUserArrayForCookie($id, $shouldIgnoreEnabled);
             if ($row === null) {
                 Logger::writeWithContext("$log, user not exists");
 
@@ -382,7 +382,7 @@ final class AuthCookie
             return $row;
         }
 
-        $row = app(AuthRepositoryInterface::class)->findUserModelForCookie($id, $shouldIgnoreEnabled);
+        $row = self::authRepository()->findUserModelForCookie($id, $shouldIgnoreEnabled);
         if ($row === null) {
             Logger::writeWithContext("$log, user not exists");
 
@@ -390,5 +390,10 @@ final class AuthCookie
         }
 
         return $row;
+    }
+
+    private static function authRepository(): AuthRepositoryInterface
+    {
+        return app(AuthRepositoryInterface::class);
     }
 }

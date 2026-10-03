@@ -266,16 +266,16 @@ class Torrent extends NexusModel
      */
     public function shouldBeSearchable(): bool
     {
-        return app(MeiliSearchRepositoryInterface::class)->isEnabled();
+        return self::meiliSearchRepository()->isEnabled();
     }
 
     /** @return  array<int|string, mixed> */
     public function toSearchableArray(): array
     {
-        $fields = app(MeiliSearchRepositoryInterface::class)->getRequiredFields();
+        $fields = self::meiliSearchRepository()->getRequiredFields();
         $row = [];
         foreach ($fields as $field) {
-            $row[$field] = app(MeiliSearchRepositoryInterface::class)->formatValueForMeili($field, $this->getAttribute($field));
+            $row[$field] = self::meiliSearchRepository()->formatValueForMeili($field, $this->getAttribute($field));
         }
 
         return $row;
@@ -414,5 +414,10 @@ class Torrent extends NexusModel
         }
 
         return $searchBox->getTaxonomyLabel($field);
+    }
+
+    private static function meiliSearchRepository(): MeiliSearchRepositoryInterface
+    {
+        return app(MeiliSearchRepositoryInterface::class);
     }
 }

@@ -10,6 +10,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Models\SearchBox;
+use App\Services\PermissionChecker;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -17,7 +18,6 @@ use App\Support\Format;
 use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Log;
-use App\Support\Permissions;
 use App\Support\RedisGuard;
 use App\Support\Strings;
 use App\Support\TorrentBookmark;
@@ -35,7 +35,7 @@ class TorrentRssController extends LegacyController
 
     private TorrentDownloadRepositoryInterface $downloadRepository;
 
-    public function __construct(
+    public function __construct(private readonly PermissionChecker $permissionChecker,
         TorrentRepositoryInterface $torrentRepository,
         TorrentDownloadRepositoryInterface $downloadRepository,
         private readonly CurrentUser $currentUser,
@@ -119,7 +119,7 @@ class TorrentRssController extends LegacyController
             }
         }
 
-        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) ($rssUser['id'] ?? 0))) {
+        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) ($rssUser['id'] ?? 0))) {
             $baseQuery->where('torrents.approval_status', TorrentApprovalStatus::ALLOW->value);
         }
 

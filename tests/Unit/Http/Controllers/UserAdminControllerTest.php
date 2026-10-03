@@ -6,6 +6,7 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\UserAdminController;
 use App\Repositories\BonusRepository;
+use App\Services\PermissionChecker;
 use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserModerationRepository;
@@ -36,6 +37,7 @@ final class UserAdminControllerTest extends TestCase
         $bonusRepository = Mockery::mock(BonusRepository::class);
 
         $controller = new UserAdminController(
+            Mockery::mock(PermissionChecker::class),
             Mockery::mock(StaffDirectoryRepository::class),
             $userRepository,
             $userModerationRepository,

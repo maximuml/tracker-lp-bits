@@ -8,9 +8,9 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\StaffDirectoryRepository;
+use App\Services\PermissionChecker;
 use App\Support\Country;
 use App\Support\CurrentUser;
-use App\Support\Permissions;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +21,7 @@ use Illuminate\View\View;
 
 class StaffPageController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly PermissionChecker $permissionChecker,
         private readonly CurrentUser $currentUser,
         private readonly StaffDirectoryRepository $staffDirectoryRepository,
     ) {}
@@ -31,7 +31,7 @@ class StaffPageController extends LegacyController
         $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
-        if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 

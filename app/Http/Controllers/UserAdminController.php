@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Repositories\BonusRepository;
 use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\UserListingRepository;
+use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
@@ -20,7 +21,6 @@ use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Pagination;
-use App\Support\Permissions;
 use App\Support\Time;
 use App\Support\User;
 use App\Support\UserClass;
@@ -39,7 +39,7 @@ class UserAdminController extends LegacyController
 
     private BonusRepository $bonusRepository;
 
-    public function __construct(private readonly StaffDirectoryRepository $staffDirectoryRepository,
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly StaffDirectoryRepository $staffDirectoryRepository,
         UserRepositoryInterface $userRepository,
         UserModerationRepositoryInterface $userModerationRepository,
         BonusRepository $bonusRepository,
@@ -53,7 +53,7 @@ class UserAdminController extends LegacyController
 
     public function users(Request $request): View|RedirectResponse|Response
     {
-        if (! Permissions::userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) ($this->currentUser->get()['id'] ?? 0))) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) ($this->currentUser->get()['id'] ?? 0))) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 

@@ -10,13 +10,13 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Torrent;
 use App\Repositories\TorrentModerationRepository;
+use App\Services\PermissionChecker;
 use App\Support\Category;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
-use App\Support\Permissions;
 use App\Support\Promotion;
 use App\Support\Ratio;
 use App\Support\Strings;
@@ -37,7 +37,7 @@ use Illuminate\View\View;
 
 class TorrentAjaxController extends LegacyController
 {
-    public function __construct(private readonly UserRepositoryInterface $userRepository,
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly UserRepositoryInterface $userRepository,
         protected CurrentUser $currentUser,
         protected TorrentAjaxRepositoryInterface $torrentAjaxRepository,
         protected PeerTableFactory $peerTableFactory,
@@ -180,7 +180,7 @@ class TorrentAjaxController extends LegacyController
         $curUser = $this->currentUser->get() ?? [];
         $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($curUser['id'] ?? 0)) : null;
 
-        if ($currentUser === null || (! Permissions::userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id) && $currentUser->id !== $targetUserId)) {
+        if ($currentUser === null || (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id) && $currentUser->id !== $targetUserId)) {
             return response('', 403, ['Content-Type' => 'text/html; charset=utf-8']);
         }
 
@@ -243,7 +243,7 @@ class TorrentAjaxController extends LegacyController
 
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $shouldShowClient = $showClient
-            && (Permissions::userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUserId) || $currentUserId == $id);
+            && ($this->permissionChecker->userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUserId) || $currentUserId == $id);
         $maxNameLength = ($currentUser['fontsize'] ?? null) == 'large' ? 70 : 80;
 
         $vmRows = [];

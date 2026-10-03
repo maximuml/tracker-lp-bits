@@ -11,11 +11,11 @@ use App\Models\Comment;
 use App\Models\User;
 use App\Repositories\CommentRepository;
 use App\Repositories\MessageRepository;
+use App\Services\PermissionChecker;
 use App\Support\Bonus;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
-use App\Support\Permissions;
 use App\Support\Url;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -27,7 +27,7 @@ class WebCommentController extends Controller
 {
     private CommentRepository $commentRepository;
 
-    public function __construct(private readonly MessageRepository $messageRepository, private readonly TorrentRepositoryInterface $torrentRepository, CommentRepository $commentRepository)
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository, private readonly TorrentRepositoryInterface $torrentRepository, CommentRepository $commentRepository)
     {
         $this->commentRepository = $commentRepository;
     }
@@ -105,7 +105,7 @@ class WebCommentController extends Controller
         }
 
         $user = $this->currentUser();
-        if ((int) $arr['user'] !== (int) $user->id && ! Permissions::userCan('commanage', false, (int) $user->id)) {
+        if ((int) $arr['user'] !== (int) $user->id && ! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
             abort(403, __('legacy/comment.std_permission_denied'));
         }
 
@@ -136,7 +136,7 @@ class WebCommentController extends Controller
         if (! $arr) {
             abort(404, __('legacy/comment.std_invalid_id'));
         }
-        if ((int) $arr['user'] !== (int) $user->id && ! Permissions::userCan('commanage', false, (int) $user->id)) {
+        if ((int) $arr['user'] !== (int) $user->id && ! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
             abort(403, __('legacy/comment.std_permission_denied'));
         }
 
@@ -154,7 +154,7 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $user = $this->currentUser();
-        if (! Permissions::userCan('commanage', false, (int) $user->id)) {
+        if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
             abort(403, __('legacy/comment.std_permission_denied'));
         }
 
@@ -181,7 +181,7 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $user = $this->currentUser();
-        if (! Permissions::userCan('commanage', false, (int) $user->id)) {
+        if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
             abort(403, __('legacy/comment.std_permission_denied'));
         }
 
@@ -212,7 +212,7 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $user = $this->currentUser();
-        if (! Permissions::userCan('commanage', false, (int) $user->id)) {
+        if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
             abort(403, __('legacy/comment.std_permission_denied'));
         }
 
@@ -276,7 +276,7 @@ class WebCommentController extends Controller
 
     private function assertNotFlood(User $user): void
     {
-        if (Permissions::userCan('commanage', false, (int) $user->id)) {
+        if ($this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
             return;
         }
 

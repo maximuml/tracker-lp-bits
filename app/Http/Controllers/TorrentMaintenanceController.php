@@ -10,13 +10,13 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
 use App\Repositories\MessageRepository;
 use App\Repositories\PeerRepository;
+use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Path;
-use App\Support\Permissions;
 use App\Support\Time;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -29,7 +29,7 @@ use Rhilip\Bencode\Bencode;
 
 class TorrentMaintenanceController extends LegacyController
 {
-    public function __construct(private readonly MessageRepository $messageRepository, private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository, private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly CurrentUser $currentUser,
     ) {}
 
@@ -47,7 +47,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
-        if (! Permissions::userCan(PermissionEnum::TORRENT_STRUCTURE->value, false, $currentUserId)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_STRUCTURE->value, false, $currentUserId)) {
             abort(403);
         }
 
@@ -143,7 +143,7 @@ class TorrentMaintenanceController extends LegacyController
         }
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
-        if (! Permissions::userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
             return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), ('Permission denied.'));
         }
 

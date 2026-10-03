@@ -11,11 +11,11 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\ReportType;
 use App\Repositories\CommentRepository;
 use App\Repositories\ModerationRepository;
+use App\Services\PermissionChecker;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
-use App\Support\Permissions;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -27,7 +27,7 @@ use Illuminate\View\View;
 
 class ModerationController extends LegacyController
 {
-    public function __construct(private readonly OfferRepositoryInterface $offerRepository, private readonly CommentRepository $commentRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserRepositoryInterface $userRepository,
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly OfferRepositoryInterface $offerRepository, private readonly CommentRepository $commentRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserRepositoryInterface $userRepository,
         private readonly CurrentUser $currentUser,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly ModerationRepository $moderationRepository,
@@ -226,7 +226,7 @@ class ModerationController extends LegacyController
         $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
-        if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 

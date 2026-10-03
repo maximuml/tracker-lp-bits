@@ -8,13 +8,13 @@ use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Services\BitbucketService;
+use App\Services\PermissionChecker;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Pagination;
-use App\Support\Permissions;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -26,7 +26,7 @@ use Illuminate\View\View;
 
 class InfoController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly PermissionChecker $permissionChecker,
         private readonly BitbucketService $bitbucketService,
         private readonly CurrentUser $currentUser,
         private readonly InfoRepositoryInterface $infoRepository,
@@ -46,7 +46,7 @@ class InfoController extends LegacyController
         LegacyResponse::assertId($userid, true);
 
         $viewerId = (int) ($curUser['id'] ?? 0);
-        if ($viewerId != $userid && ! Permissions::userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId)) {
+        if ($viewerId != $userid && ! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId)) {
             LegacyResponse::permissionDenied();
         }
 

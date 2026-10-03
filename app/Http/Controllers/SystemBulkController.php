@@ -15,6 +15,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\InviteRepository;
 use App\Repositories\UserDetailRepository;
+use App\Services\PermissionChecker;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -29,7 +30,6 @@ use App\Support\Lock;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Mail;
-use App\Support\Permissions;
 use App\Support\RedisGuard;
 use App\Support\SetlistLookup;
 use App\Support\Url;
@@ -52,7 +52,7 @@ class SystemBulkController extends LegacyController
 
     private ?LegacyRedisCache $legacyRedisCache;
 
-    public function __construct(private readonly InviteRepository $inviteRepository, private readonly UserDetailRepository $userDetailRepository,
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly InviteRepository $inviteRepository, private readonly UserDetailRepository $userDetailRepository,
         UserModerationRepositoryInterface $userModerationRepository,
         CurrentUser $currentUser,
         ?LegacyRedisCache $legacyRedisCache,
@@ -292,7 +292,7 @@ class SystemBulkController extends LegacyController
         }
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
-        if (! Permissions::userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 

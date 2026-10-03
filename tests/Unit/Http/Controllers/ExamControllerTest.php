@@ -10,6 +10,7 @@ use App\Http\Controllers\ExamController;
 use App\Http\Requests\ExamRequest;
 use App\Http\Requests\GenericIndexRequest;
 use App\Models\Exam;
+use App\Support\RedisGuard;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
@@ -25,7 +26,11 @@ final class ExamControllerTest extends TestCase
 
         // `Setting::get` reads the `nexus_settings_in_laravel` cache key
         // before falling back to the DB — seeding it keeps Locale::trans
-        // reachable in the no-services suite (CACHE_DRIVER=array).
+        // reachable in the no-services suite (CACHE_DRIVER=array). The
+        // RedisGuard reset clears any down-flag an earlier test left so
+        // `attempt()` actually runs the remember() call instead of
+        // short-circuiting to `getFromDb()`.
+        RedisGuard::reset();
         Cache::put('nexus_settings_in_laravel', [], 600);
     }
 

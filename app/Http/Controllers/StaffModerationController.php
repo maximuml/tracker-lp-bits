@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\RuleRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UsernameChangeType;
 use App\Enums\UserPrivacy;
@@ -29,12 +30,11 @@ use Illuminate\Database\Query\Expression;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class StaffModerationController extends LegacyController
 {
-    public function __construct(private readonly MessageRepository $messageRepository, private readonly UserDetailRepository $userDetailRepository,
+    public function __construct(private readonly RuleRepositoryInterface $ruleRepository, private readonly MessageRepository $messageRepository, private readonly UserDetailRepository $userDetailRepository,
         private readonly CurrentUser $currentUser,
         private readonly ModtaskRepository $modtaskRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
@@ -380,7 +380,7 @@ class StaffModerationController extends LegacyController
             $title = (string) request()->post('title');
             $text = (string) request()->post('text');
             $language = (int) request()->post('language');
-            DB::table('rules')->insert([
+            $this->ruleRepository->insert([
                 'title' => $title,
                 'text' => $text,
                 'lang_id' => $language,
@@ -395,7 +395,7 @@ class StaffModerationController extends LegacyController
             $title = (string) request()->post('title');
             $text = (string) request()->post('text');
             $language = (int) request()->post('language');
-            DB::table('rules')->where('id', $id)->update([
+            $this->ruleRepository->updateById($id, [
                 'title' => $title,
                 'text' => $text,
                 'lang_id' => $language,
@@ -414,7 +414,7 @@ class StaffModerationController extends LegacyController
             if (! $sure) {
                 return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href="?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
             }
-            DB::table('rules')->where('id', $id)->delete();
+            $this->ruleRepository->deleteById($id);
             Cache::forgetWithLocales('rules');
 
             return redirect('modrules.php');
@@ -433,7 +433,7 @@ class StaffModerationController extends LegacyController
 
         if ($act === 'edit') {
             $id = (int) (request()->query('id') ?? 0);
-            $rule = (array) DB::table('rules')->where('id', $id)->first();
+            $rule = $this->ruleRepository->findById($id) ?? [];
             $langs = Locale::languageList('site_lang', null);
 
             return $this->legacyPage($request, 'modrules', true, [
@@ -443,18 +443,11 @@ class StaffModerationController extends LegacyController
             ]);
         }
 
-        $rules = DB::table('rules')
-            ->leftJoin('language', 'rules.lang_id', '=', 'language.id')
-            ->orderBy('lang_name')
-            ->orderBy('rules.id')
-            ->get(['rules.*', 'language.lang_name'])
-            ->map(function ($r): array {
-                $arr = (array) $r;
-                $arr['textHtml'] = Format::formatComment($arr['text']);
+        $rules = array_map(function (array $arr): array {
+            $arr['textHtml'] = Format::formatComment($arr['text']);
 
-                return $arr;
-            })
-            ->all();
+            return $arr;
+        }, $this->ruleRepository->listAllWithLang());
 
         return $this->legacyPage($request, 'modrules', true, [
             'mode' => 'list',

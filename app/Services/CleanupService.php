@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\CleanupServiceInterface;
 use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
 use App\Support\Config\SiteConfig;
@@ -21,7 +22,7 @@ use Illuminate\Support\HtmlString;
  * Cleanup orchestrator. Replaces the monolithic `docleanup()` with discrete,
  * idempotent task methods and Redis-locked dispatch.
  */
-final class CleanupService implements \App\Contracts\CleanupServiceInterface
+final class CleanupService implements CleanupServiceInterface
 {
     /** @var array<int, array<int, array<string, string>>> */
     private const CLASSES = [

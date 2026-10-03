@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Repositories\MysqlStatsRepository;
 use App\Contracts\CleanupServiceInterface;
+use App\Repositories\MysqlStatsRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Email;

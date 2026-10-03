@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
-use App\Http\Controllers\SystemMaintenanceController;
 use App\Contracts\CleanupServiceInterface;
+use App\Http\Controllers\SystemMaintenanceController;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Mockery;

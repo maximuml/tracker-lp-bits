@@ -10,11 +10,12 @@ use App\Enums\TorrentApprovalStatus;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Services\PermissionChecker;
+
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\Support\Logger;
 use App\Support\Pagination;
-use App\Support\Permissions;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,12 +45,12 @@ class SearchPageRepository
         }
 
         $approvalStatus = null;
-        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! Permissions::userCan(PermissionEnum::TORRENT_APPROVAL->value, false, $currentUser->id)) {
+        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! PermissionChecker::instance()->userCan(PermissionEnum::TORRENT_APPROVAL->value, false, $currentUser->id)) {
             $approvalStatus = TorrentApprovalStatus::ALLOW->value;
         }
 
         $banned = null;
-        if (! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $currentUser->id)) {
+        if (! PermissionChecker::instance()->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $currentUser->id)) {
             $banned = 0;
         }
 

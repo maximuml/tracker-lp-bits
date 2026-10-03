@@ -8,10 +8,11 @@ use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Enums\ExamType;
 use App\Enums\TorrentPromotion;
 use App\Models\TorrentState;
+use App\Services\PermissionChecker;
+
 use App\Support\Exam;
 use App\Support\Html\SafeHtml;
 use App\Support\PageLayoutContext;
-use App\Support\Permissions;
 use App\Support\Settings;
 use App\Support\Strings;
 use App\Support\Time;
@@ -135,7 +136,7 @@ final class ChromeAlerts
             ];
         }
 
-        if (Permissions::userCan('torrent-approval', false, $userId) && Settings::get('torrent.approval_status_none_visible') == 'no') {
+        if (PermissionChecker::instance()->userCan('torrent-approval', false, $userId) && Settings::get('torrent.approval_status_none_visible') == 'no') {
             $toApprovalCounts = $context->cache?->get_value('TORRENT_APPROVAL_NONE');
             if ($toApprovalCounts === false) {
                 $toApprovalCounts = $repo->getTorrentApprovalNoneCount();
@@ -151,7 +152,7 @@ final class ChromeAlerts
             }
         }
 
-        if (Permissions::userCan('staffmem', false, $userId)) {
+        if (PermissionChecker::instance()->userCan('staffmem', false, $userId)) {
             $complaints = $context->cache?->get_value('COMPLAINTS_COUNT_CACHE');
             if ($complaints === false) {
                 $complaints = $repo->getOpenComplaintsCount();

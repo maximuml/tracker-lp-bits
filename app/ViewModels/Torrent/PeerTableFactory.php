@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Torrent;
 
+use App\Services\PermissionChecker;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
-use App\Support\Permissions;
 use App\Support\Ratio;
 use App\Support\Strings;
 
@@ -31,7 +31,7 @@ final class PeerTableFactory
             $privacy = $privacyData[$e['userid']] ?? '';
             $secs = max(1, $e['la'] - $e['st']);
             $isStrongPrivacy = $privacy === 'strong' || (LegacyYesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
-            $canView = Permissions::userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
+            $canView = PermissionChecker::instance()->userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
 
             $uploaded = (float) $e['uploaded'];
             $downloaded = (float) $e['downloaded'];

@@ -11,10 +11,11 @@ use App\Enums\TorrentApprovalStatus;
 use App\Exceptions\TrackerException;
 use App\Jobs\BuyTorrent;
 use App\Repositories\TorrentPurchaseRepository;
+use App\Services\PermissionChecker;
+
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Logger;
-use App\Support\Permissions;
 use App\Support\RedisGuard;
 use App\Utils\MsgAlert;
 use Illuminate\Support\Facades\Cache;
@@ -71,13 +72,13 @@ final class TorrentGate
 
         $ctx = $ctx->withTorrent($torrent);
 
-        if ($torrent['banned'] && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())) {
+        if ($torrent['banned'] && ! PermissionChecker::instance()->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())) {
             throw TrackerException::failure('torrent banned');
         }
 
         if ($torrent['approval_status'] != TorrentApprovalStatus::ALLOW->value
             && ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
-            && ! Permissions::userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())
+            && ! PermissionChecker::instance()->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())
         ) {
             throw TrackerException::failure('torrent review not approved');
         }

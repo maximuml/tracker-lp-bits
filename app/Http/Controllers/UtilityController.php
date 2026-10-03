@@ -31,6 +31,7 @@ use App\Support\Style;
 use App\Support\Url;
 use App\Support\View as LegacyView;
 use App\ViewModels\TorrentListViewFactory;
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -337,50 +338,61 @@ class UtilityController extends LegacyController
     }
 
     /**
-     * @return list<array<string, string|SafeHtml>>
+     * @return list<array<string, string|SafeHtml|ViewContract>>
      */
     private function tagItems(string $siteName, string $username): array
     {
         $schemeHost = Url::schemeAndHost(false);
         $t = fn (string $key): string => (string) __('legacy/tags.'.$key);
-        $tag = function (string $name, string $description, string $syntax, string $example, string $remarks = ''): array {
+        $ph = function (string $raw): string|ViewContract {
+            $parts = explode('|', $raw);
+            if (count($parts) === 1) {
+                return $raw;
+            }
+
+            return view('tags._ph', ['parts' => $parts]);
+        };
+        $tag = function (string $name, string $description, string|ViewContract $syntax, string $example, string|ViewContract $remarks = ''): array {
             return [
                 'name' => SafeHtml::fromTrustedHtml($name),
                 'description' => SafeHtml::fromTrustedHtml($description),
-                'syntax' => SafeHtml::fromTrustedHtml($syntax),
+                'syntax' => $syntax instanceof ViewContract ? $syntax : SafeHtml::fromTrustedHtml($syntax),
                 'example' => SafeHtml::fromTrustedHtml($example),
                 'result' => Format::formatComment($example),
-                'remarks' => SafeHtml::fromTrustedHtml($remarks),
+                'remarks' => $remarks instanceof ViewContract ? $remarks : SafeHtml::fromTrustedHtml($remarks),
             ];
         };
+        $syntax = fn (string $key): string|ViewContract => $ph($t($key));
+        $remarks = fn (string $key): string|ViewContract => $ph($t($key));
+        $imageRemarks = fn (string $key): ViewContract => view('tags._image-ext', ['pre' => $t($key)]);
 
         return [
-            $tag($t('text_bold'), $t('text_bold_description'), $t('text_bold_syntax'), $t('text_bold_example')),
-            $tag($t('text_italic'), $t('text_italic_description'), $t('text_italic_syntax'), $t('text_italic_example')),
-            $tag($t('text_underline'), $t('text_underline_description'), $t('text_underline_syntax'), $t('text_underline_example')),
-            $tag($t('text_strikethrough'), $t('text_strikethrough_description'), $t('text_strikethrough_syntax'), $t('text_strikethrough_example')),
-            $tag($t('text_hide'), $t('text_hide_description'), $t('text_hide_syntax'), $t('text_hide_example')),
-            $tag($t('text_color_one'), $t('text_color_one_description'), $t('text_color_one_syntax'), $t('text_color_one_example'), $t('text_color_one_remarks')),
-            $tag($t('text_color_two'), $t('text_color_two_description'), $t('text_color_two_syntax'), $t('text_color_two_example'), $t('text_color_two_remarks')),
-            $tag($t('text_size'), $t('text_size_description'), $t('text_size_syntax'), $t('text_size_example'), $t('text_size_remarks')),
-            $tag($t('text_font'), $t('text_font_description'), $t('text_font_syntax'), $t('text_font_example'), $t('text_font_remarks')),
-            $tag($t('text_hyperlink_one'), $t('text_hyperlink_one_description'), $t('text_hyperlink_one_syntax'), sprintf($t('text_hyperlink_one_example'), $schemeHost), $t('text_hyperlink_one_remarks')),
-            $tag($t('text_hyperlink_two'), $t('text_hyperlink_two_description'), $t('text_hyperlink_two_syntax'), sprintf($t('text_hyperlink_two_example'), $schemeHost, $siteName), $t('text_hyperlink_two_remarks')),
-            $tag($t('text_image_one'), $t('text_image_one_description'), $t('text_image_one_syntax'), sprintf($t('text_image_one_example'), $schemeHost), $t('text_image_one_remarks')),
-            $tag($t('text_image_two'), $t('text_image_two_description'), $t('text_image_two_syntax'), sprintf($t('text_image_two_example'), $schemeHost), $t('text_image_two_remarks')),
-            $tag($t('text_quote_one'), $t('text_quote_one_description'), $t('text_quote_one_syntax'), sprintf($t('text_quote_one_example'), $siteName)),
-            $tag($t('text_quote_two'), $t('text_quote_two_description'), $t('text_quote_two_syntax'), sprintf($t('text_quote_two_example'), $username, $siteName)),
-            $tag($t('text_list'), $t('text_description'), $t('text_list_syntax'), $t('text_list_example')),
-            $tag($t('text_preformat'), $t('text_preformat_description'), $t('text_preformat_syntax'), $t('text_preformat_example')),
-            $tag($t('text_code'), $t('text_code_description'), $t('text_code_syntax'), $t('text_code_example')),
-            $tag($t('text_site'), $t('text_site_description'), $t('text_site_syntax'), $t('text_site_example')),
-            $tag($t('text_siteurl'), $t('text_siteurl_description'), $t('text_siteurl_syntax'), $t('text_siteurl_example')),
-            $tag($t('text_left'), $t('text_left_description'), $t('text_left_syntax'), $t('text_left_example')),
-            $tag($t('text_center'), $t('text_center_description'), $t('text_center_syntax'), $t('text_center_example')),
-            $tag($t('text_right'), $t('text_right_description'), $t('text_right_syntax'), $t('text_right_example')),
-            $tag($t('text_youtube'), $t('text_youtube_description'), $t('text_youtube_syntax'), $t('text_youtube_example')),
-            $tag($t('text_spoiler'), $t('text_spoiler_description'), $t('text_spoiler_syntax'), $t('text_spoiler_example')),
-            $tag($t('text_hr'), $t('text_hr_description'), $t('text_hr_syntax'), $t('text_hr_example')),
+            $tag($t('text_bold'), $t('text_bold_description'), $syntax('text_bold_syntax'), $t('text_bold_example')),
+            $tag($t('text_italic'), $t('text_italic_description'), $syntax('text_italic_syntax'), $t('text_italic_example')),
+            $tag($t('text_underline'), $t('text_underline_description'), $syntax('text_underline_syntax'), $t('text_underline_example')),
+            $tag($t('text_strikethrough'), $t('text_strikethrough_description'), $syntax('text_strikethrough_syntax'), $t('text_strikethrough_example')),
+            $tag($t('text_hide'), $t('text_hide_description'), $syntax('text_hide_syntax'), $t('text_hide_example')),
+            $tag($t('text_color_one'), $t('text_color_one_description'), $syntax('text_color_one_syntax'), $t('text_color_one_example'), $remarks('text_color_one_remarks')),
+            $tag($t('text_color_two'), $t('text_color_two_description'), $syntax('text_color_two_syntax'), $t('text_color_two_example'), $remarks('text_color_two_remarks')),
+            $tag($t('text_size'), $t('text_size_description'), $syntax('text_size_syntax'), $t('text_size_example'), $remarks('text_size_remarks')),
+            $tag($t('text_font'), $t('text_font_description'), $syntax('text_font_syntax'), $t('text_font_example'), $remarks('text_font_remarks')),
+            $tag($t('text_hyperlink_one'), $t('text_hyperlink_one_description'), $syntax('text_hyperlink_one_syntax'), sprintf($t('text_hyperlink_one_example'), $schemeHost), $remarks('text_hyperlink_one_remarks')),
+            $tag($t('text_hyperlink_two'), $t('text_hyperlink_two_description'), $syntax('text_hyperlink_two_syntax'), sprintf($t('text_hyperlink_two_example'), $schemeHost, $siteName), $remarks('text_hyperlink_two_remarks')),
+            $tag($t('text_image_one'), $t('text_image_one_description'), $syntax('text_image_one_syntax'), sprintf($t('text_image_one_example'), $schemeHost), $imageRemarks('text_image_one_remarks')),
+            $tag($t('text_image_two'), $t('text_image_two_description'), $syntax('text_image_two_syntax'), sprintf($t('text_image_two_example'), $schemeHost), $imageRemarks('text_image_two_remarks')),
+            $tag($t('text_quote_one'), $t('text_quote_one_description'), $syntax('text_quote_one_syntax'), sprintf($t('text_quote_one_example'), $siteName)),
+            $tag($t('text_quote_two'), $t('text_quote_two_description'), $syntax('text_quote_two_syntax'), sprintf($t('text_quote_two_example'), $username, $siteName)),
+            $tag($t('text_list'), $t('text_description'), $syntax('text_list_syntax'), $t('text_list_example')),
+            $tag($t('text_preformat'), $t('text_preformat_description'), $syntax('text_preformat_syntax'), $t('text_preformat_example')),
+            $tag($t('text_code'), $t('text_code_description'), $syntax('text_code_syntax'), $t('text_code_example')),
+            $tag($t('text_site'), $t('text_site_description'), $syntax('text_site_syntax'), $t('text_site_example')),
+            $tag($t('text_siteurl'), $t('text_siteurl_description'), $syntax('text_siteurl_syntax'), $t('text_siteurl_example')),
+            $tag($t('text_left'), $t('text_left_description'), $syntax('text_left_syntax'), $t('text_left_example')),
+            $tag($t('text_center'), $t('text_center_description'), $syntax('text_center_syntax'), $t('text_center_example')),
+            $tag($t('text_right'), $t('text_right_description'), $syntax('text_right_syntax'), $t('text_right_example')),
+            $tag($t('text_youtube'), $t('text_youtube_description'), $syntax('text_youtube_syntax'), $t('text_youtube_example')),
+            $tag($t('text_spoiler'), $t('text_spoiler_description'), $syntax('text_spoiler_syntax'), $t('text_spoiler_example')),
+            $tag($t('text_hr'), $t('text_hr_description'), $syntax('text_hr_syntax'), $t('text_hr_example')),
         ];
     }
 

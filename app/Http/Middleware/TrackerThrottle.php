@@ -22,7 +22,7 @@ class TrackerThrottle extends ThrottleRequests
 {
     public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
     {
-        app(LegacyRuntime::class)->markTracker();
+        LegacyRuntime::instance()->markTracker();
 
         if (! RedisGuard::available()) {
             return $next($request);

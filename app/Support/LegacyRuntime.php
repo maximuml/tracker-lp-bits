@@ -34,6 +34,11 @@ final class LegacyRuntime
         $this->reset();
     }
 
+    public static function instance(): self
+    {
+        return app(self::class);
+    }
+
     public function isLegacy(): bool
     {
         return $this->legacy;

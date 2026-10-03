@@ -87,7 +87,7 @@ return [
     'col_vote' => 'Vote',
     'std_already_voted' => "You've already voted",
     'std_already_voted_note' => "<p>You've already voted, max 1 vote per offer</p><p>Back to the ",
-    'std_back_to_offer_detail' => '<b>offer details</b></a></p>',
+    'std_offer_details' => 'offer details',
     'head_vote_for_offer' => 'Vote For Offer',
     'std_vote_accepted' => 'Vote accepted',
     'std_vote_accepted_note' => '<p>Your vote have been accepted</p><p>Back to the ',

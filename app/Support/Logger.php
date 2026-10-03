@@ -93,8 +93,8 @@ final class Logger
         $user = null;
         $passkey = '';
 
-        if (app(LegacyRuntime::class)->isLegacy()) {
-            $curUser = app(CurrentUser::class)->get();
+        if (LegacyRuntime::instance()->isLegacy()) {
+            $curUser = CurrentUser::instance()->get();
             if (is_array($curUser) && ! empty($curUser)) {
                 $user = $curUser;
                 $passkey = (string) ($curUser['passkey'] ?? '');

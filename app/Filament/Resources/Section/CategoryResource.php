@@ -105,7 +105,7 @@ class CategoryResource extends Resource
                 EditAction::make(),
                 DeleteAction::make()->using(function (Category $record) {
                     try {
-                        $rep = app(SearchBoxRepositoryInterface::class);
+                        $rep = self::searchBoxRepository();
                         $rep->deleteCategory($record->id);
                     } catch (Exception $exception) {
                         Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();
@@ -115,7 +115,7 @@ class CategoryResource extends Resource
             ->toolbarActions([
                 DeleteBulkAction::make()->using(function (Collection $records) {
                     try {
-                        $rep = app(SearchBoxRepositoryInterface::class);
+                        $rep = self::searchBoxRepository();
                         $rep->deleteCategory($records->pluck('id')->toArray());
                     } catch (Exception $exception) {
                         Notification::make()->danger()->body($exception->getMessage() ?: class_basename($exception))->send();
@@ -138,5 +138,10 @@ class CategoryResource extends Resource
             'create' => CreateCategory::route('/create'),
             'edit' => EditCategory::route('/{record}/edit'),
         ];
+    }
+
+    private static function searchBoxRepository(): SearchBoxRepositoryInterface
+    {
+        return app(SearchBoxRepositoryInterface::class);
     }
 }

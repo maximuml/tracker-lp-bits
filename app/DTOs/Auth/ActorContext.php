@@ -50,7 +50,7 @@ final readonly class ActorContext
     public static function fromAuth(?User $user = null): self
     {
         if ($user === null) {
-            $cached = app(CurrentUser::class)->get();
+            $cached = CurrentUser::instance()->get();
             if ($cached !== null) {
                 $userId = (int) ($cached['id'] ?? 0);
                 if ($userId > 0) {

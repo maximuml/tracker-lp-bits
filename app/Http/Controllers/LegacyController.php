@@ -19,7 +19,7 @@ abstract class LegacyController extends Controller
      */
     protected function legacyPage(Request $request, string $page, bool $auth = true, array $data = []): View|RedirectResponse
     {
-        if ($auth && app(CurrentUser::class)->get() === null) {
+        if ($auth && CurrentUser::instance()->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
@@ -38,7 +38,7 @@ abstract class LegacyController extends Controller
      */
     protected function legacyPageWithRedirect(Request $request, string $page, bool $auth = true, array $data = []): Response|RedirectResponse
     {
-        if ($auth && app(CurrentUser::class)->get() === null) {
+        if ($auth && CurrentUser::instance()->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
@@ -51,7 +51,7 @@ abstract class LegacyController extends Controller
         // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
         // globals (headers_list/http_response_code/header_remove) that
         // leak state across Octane worker requests.
-        $headerBag = app(LegacyHeaderBag::class);
+        $headerBag = LegacyHeaderBag::instance();
         $status = $headerBag->getStatusCode();
 
         // Check for a Location header (redirect)
@@ -71,7 +71,7 @@ abstract class LegacyController extends Controller
      */
     protected function legacyPageRaw(Request $request, string $page, bool $auth = true, array $data = []): Response|RedirectResponse
     {
-        if ($auth && app(CurrentUser::class)->get() === null) {
+        if ($auth && CurrentUser::instance()->get() === null) {
             $qs = $request->getQueryString();
 
             return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
@@ -84,7 +84,7 @@ abstract class LegacyController extends Controller
         // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
         // globals (headers_list/http_response_code/header_remove) that
         // leak state across Octane worker requests.
-        $headerBag = app(LegacyHeaderBag::class);
+        $headerBag = LegacyHeaderBag::instance();
         $status = $headerBag->getStatusCode();
 
         // Check for a Location header (redirect)

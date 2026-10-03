@@ -67,8 +67,8 @@ final class LegacyAuth
             $message = $exception->getMessage();
 
             $defaultMessage = (__('legacy/functions.std_invalid_image_code'))
-                .'<a href="'.\htmlspecialchars($where).'">'
-                .(__('legacy/functions.std_here_to_request_new'));
+                .'<a href="'.\htmlspecialchars($where).'"><b>'
+                .(__('legacy/functions.std_here')).'</b></a>'.(__('legacy/functions.std_to_request_new_image'));
 
             if ($message === '' || $message === 'Invalid captcha response.' || $message === 'Missing captcha parameters.') {
                 $message = $defaultMessage;
@@ -93,7 +93,7 @@ final class LegacyAuth
     ): void {
         $ip = $context->ip;
 
-        app(AuthRepositoryInterface::class)->recordFailedLogin($ip, $recover);
+        self::authRepository()->recordFailedLogin($ip, $recover);
 
         if ($type === 'silent') {
             return;
@@ -123,7 +123,7 @@ final class LegacyAuth
     {
 
         if ($context->isLoggedIn()) {
-            app(AuthRepositoryInterface::class)->updateUserLang((int) ($context->user['id'] ?? 0), $context->langId());
+            self::authRepository()->updateUserLang((int) ($context->user['id'] ?? 0), $context->langId());
 
             LegacyResponse::abort(
                 (string) (__('legacy/functions.std_permission_denied')),
@@ -180,7 +180,7 @@ final class LegacyAuth
         }
 
         if ($maxuserscheck) {
-            $userCount = app(AuthRepositoryInterface::class)->countUsers();
+            $userCount = self::authRepository()->countUsers();
             if ($userCount >= $settings['maxusers']) {
                 LegacyResponse::abort(
                     (string) (__('legacy/functions.std_sorry')),
@@ -193,7 +193,7 @@ final class LegacyAuth
 
         if ($ipcheck) {
             $ip = $context->ip;
-            $ipCount = app(AuthRepositoryInterface::class)->countUsersByIp($ip);
+            $ipCount = self::authRepository()->countUsersByIp($ip);
             if ($ipCount > $settings['maxip']) {
                 LegacyResponse::abort(
                     (string) (__('legacy/functions.std_sorry')),
@@ -244,7 +244,7 @@ final class LegacyAuth
     public static function userIdFromName(string $username, LegacyAuthContext $context): int
     {
 
-        $id = app(AuthRepositoryInterface::class)->getUserIdByUsername($username);
+        $id = self::authRepository()->getUserIdByUsername($username);
 
         if ($id === null) {
             LegacyResponse::abort(
@@ -261,7 +261,7 @@ final class LegacyAuth
      *
      * Mirrors `userlogin()`: checks the IP ban list, reads the user from
      * the cookie, generates a missing passkey, and returns the user row.
-     * The caller is responsible for populating app(CurrentUser::class)->set() so the
+     * The caller is responsible for populating CurrentUser::instance()->set() so the
      * rest of the legacy page keeps working.
      *
      * @return array<string, mixed>|null
@@ -273,7 +273,7 @@ final class LegacyAuth
         $ip = $context->ip;
         $nip = ip2long($ip);
 
-        if ($nip && app(AuthRepositoryInterface::class)->isIpBanned($nip)) {
+        if ($nip && self::authRepository()->isIpBanned($nip)) {
             $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>'.(__('legacy/functions.text_unauthorized_ip'))."</body></html>\n";
             throw new HttpResponseException(new Response($html, 403));
         }
@@ -288,7 +288,7 @@ final class LegacyAuth
 
         if (empty($row['passkey'])) {
             $passkey = app(PasskeyGenerator::class)->generate();
-            app(AuthRepositoryInterface::class)->updateUserPasskey((int) $row['id'], $passkey);
+            self::authRepository()->updateUserPasskey((int) $row['id'], $passkey);
         }
 
         $row['old_ip'] = $row['ip'];
@@ -312,15 +312,15 @@ final class LegacyAuth
         $user = self::loginFromCookie($context);
 
         if ($user !== null) {
-            app(Globals::class)->set('oldip', $user['old_ip'] ?? $user['ip'] ?? '');
-            app(Globals::class)->set('CURUSER', $user);
-            app(CurrentUser::class)->set($user);
+            Globals::instance()->set('oldip', $user['old_ip'] ?? $user['ip'] ?? '');
+            Globals::instance()->set('CURUSER', $user);
+            CurrentUser::instance()->set($user);
 
             return true;
         }
 
-        app(Globals::class)->set('CURUSER', null);
-        app(CurrentUser::class)->set(null);
+        Globals::instance()->set('CURUSER', null);
+        CurrentUser::instance()->set(null);
 
         return false;
     }
@@ -353,5 +353,10 @@ final class LegacyAuth
     public static function requireLoginFromContext(bool $mainPage = false): void
     {
         self::requireLogin($mainPage, LegacyAuthContext::fromSupportContext());
+    }
+
+    private static function authRepository(): AuthRepositoryInterface
+    {
+        return app(AuthRepositoryInterface::class);
     }
 }

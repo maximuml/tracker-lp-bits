@@ -25,6 +25,11 @@ class LegacyHeaderBag
     /** @var array<string, list<string>> */
     private array $headers = [];
 
+    public static function instance(): self
+    {
+        return app(self::class);
+    }
+
     private ?int $statusCode = null;
 
     /**

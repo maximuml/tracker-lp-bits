@@ -29,6 +29,11 @@ class LegacyRedisCache
 
     public ?\Redis $redis = null;
 
+    public static function instance(): ?self
+    {
+        return app(self::class);
+    }
+
     public function __construct()
     {
         $connectResult = $this->connect(); // Connect to Redis

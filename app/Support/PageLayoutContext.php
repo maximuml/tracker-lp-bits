@@ -104,8 +104,8 @@ final class PageLayoutContext
         $basic = $siteConfig->basic;
 
         return new self(
-            user: app(CurrentUser::class)->get(),
-            cache: app(LegacyRedisCache::class),
+            user: CurrentUser::instance()->get(),
+            cache: LegacyRedisCache::instance(),
             defaultStylesheet: $main->defStylesheet(0),
             langDir: Locale::currentLangDir(),
             siteName: $basic->siteName(),
@@ -123,8 +123,8 @@ final class PageLayoutContext
             iniUploadMain: $main->iniUpload(0),
             dateFounded: $tweak->dateFounded(),
             icpLicenseMain: $main->icpLicense(),
-            addKeyShortcut: (string) app(Globals::class)->get('add_key_shortcut', ''),
-            queryName: (array) app(Globals::class)->get('query_name', []),
+            addKeyShortcut: (string) Globals::instance()->get('add_key_shortcut', ''),
+            queryName: (array) Globals::instance()->get('query_name', []),
             enableSqlDebugTweak: $tweak->enableSqlDebug(false) ? 'yes' : 'no',
             sqlDebugTweak: $tweak->sqlDebug(0),
             analyticsCodeTweak: $tweak->analyticsCode(),
@@ -136,8 +136,8 @@ final class PageLayoutContext
             customMenu: null,
             maxdlSystem: $main->maxDlSystem(false) ? 'yes' : '',
             whereTweak: $tweak->where(),
-            menuHtml: (string) app(Globals::class)->get('nexus_menu_html', ''),
-            menuSelected: (string) app(Globals::class)->get('nexus_menu_selected', ''),
+            menuHtml: (string) Globals::instance()->get('nexus_menu_html', ''),
+            menuSelected: (string) Globals::instance()->get('nexus_menu_selected', ''),
             adminClass: defined('UC_ADMINISTRATOR') ? (int) \constant('UC_ADMINISTRATOR') : 0,
             moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
             sysopClass: defined('UC_SYSOP') ? (int) \constant('UC_SYSOP') : 0,

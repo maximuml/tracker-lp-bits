@@ -83,4 +83,10 @@ interface SearchBoxRepositoryInterface
      * @return Collection<int, Category>
      */
     public function getCategoriesForTable(SearchBox $searchBox, bool $selectUnselect = false): Collection;
+
+    /**
+     * @param  array<int>|int  $id
+     * @return mixed
+     */
+    public function deleteCategory($id);
 }

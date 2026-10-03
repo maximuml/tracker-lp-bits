@@ -102,7 +102,7 @@ class CheaterResource extends Resource
                             'dealtwith' => 1,
                             'dealtby' => Auth::id() ?? 0,
                         ]);
-                        $cache = app(LegacyRedisCache::class);
+                        $cache = LegacyRedisCache::instance();
                         $cache?->delete_value('staff_new_cheater_count', true);
                     }),
                 DeleteAction::make(),
@@ -122,7 +122,7 @@ class CheaterResource extends Resource
                                 'dealtby' => Auth::id() ?? 0,
                             ]);
                         });
-                        $cache = app(LegacyRedisCache::class);
+                        $cache = LegacyRedisCache::instance();
                         $cache?->delete_value('staff_new_cheater_count', true);
                     }),
             ]);

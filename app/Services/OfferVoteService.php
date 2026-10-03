@@ -58,7 +58,7 @@ final class OfferVoteService
             $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_cannot_vote_youself'));
         }
         if ($this->offerVoteRepository->userVoted($offerid, $userid)) {
-            $this->abort(__('legacy/offers.std_already_voted'), __('legacy/offers.std_already_voted_note')."<a  href=offers.php?id={$offerid}&off_details=1>".__('legacy/offers.std_back_to_offer_detail'), false);
+            $this->abort(__('legacy/offers.std_already_voted'), __('legacy/offers.std_already_voted_note')."<a  href=offers.php?id={$offerid}&off_details=1><b>".__('legacy/offers.std_offer_details').'</b></a></p>', false);
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offerid);
@@ -117,7 +117,7 @@ final class OfferVoteService
         return response(
             '<h1 class="nx-center">'.__('legacy/offers.std_vote_accepted').'</h1>'
             .__('legacy/offers.std_vote_accepted_note')
-            ."<a  href=offers.php?id={$offerid}&off_details=1>".__('legacy/offers.std_back_to_offer_detail')
+            ."<a  href=offers.php?id={$offerid}&off_details=1><b>".__('legacy/offers.std_offer_details').'</b></a></p>'
         );
     }
 

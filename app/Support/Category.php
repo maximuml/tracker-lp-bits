@@ -53,7 +53,7 @@ final class Category
             if ($cached !== false && is_array($cached)) {
                 self::$iconRows = $cached;
             } else {
-                self::$iconRows = app(CategoryRepository::class)->getIconRows();
+                self::$iconRows = self::categoryRepository()->getIconRows();
                 if ($cache !== null) {
                     $cache->cache_value('category_icon_content', self::$iconRows, 156400);
                 }
@@ -77,7 +77,7 @@ final class Category
             if ($cached !== false && is_array($cached)) {
                 self::$categoryRows = $cached;
             } else {
-                self::$categoryRows = app(CategoryRepository::class)->getCategoryRows();
+                self::$categoryRows = self::categoryRepository()->getCategoryRows();
                 if ($cache !== null) {
                     $cache->cache_value('category_content', self::$categoryRows, 126400);
                 }
@@ -98,7 +98,7 @@ final class Category
      */
     public static function rowWithContext(int|string|null $catId = null): ?array
     {
-        return self::row(app(LegacyRedisCache::class), $catId);
+        return self::row(LegacyRedisCache::instance(), $catId);
     }
 
     /**
@@ -108,7 +108,7 @@ final class Category
      */
     public static function iconRowWithContext(int|string $typeId): ?array
     {
-        return self::iconRow(app(LegacyRedisCache::class), $typeId);
+        return self::iconRow(LegacyRedisCache::instance(), $typeId);
     }
 
     /**
@@ -118,7 +118,7 @@ final class Category
      */
     public static function listByModeWithContext(int|string $catmode = 1): array
     {
-        return self::listByMode(app(LegacyRedisCache::class), $catmode);
+        return self::listByMode(LegacyRedisCache::instance(), $catmode);
     }
 
     /**
@@ -143,7 +143,7 @@ final class Category
             }
         }
 
-        $ret = app(CategoryRepository::class)->getCategoriesByMode($catmode);
+        $ret = self::categoryRepository()->getCategoriesByMode($catmode);
 
         if ($cache !== null) {
             $cache->cache_value($cacheKey, $ret, 3600);
@@ -195,7 +195,7 @@ final class Category
      */
     public static function secondIconData(array $row): array
     {
-        $cache = app(LegacyRedisCache::class);
+        $cache = LegacyRedisCache::instance();
         $source = $row['source'] ?? '';
         $medium = $row['medium'] ?? '';
         $codec = $row['codec'] ?? '';
@@ -208,7 +208,7 @@ final class Category
         $sirow = $cache !== null ? $cache->get_value($cacheKey) : false;
 
         if ($sirow === false) {
-            $sirowData = app(CategoryRepository::class)->findSecondIcon($row);
+            $sirowData = self::categoryRepository()->findSecondIcon($row);
             $sirow = $sirowData ?? 'not allowed';
             if ($cache !== null) {
                 $cache->cache_value($cacheKey, $sirow, 600);
@@ -227,5 +227,10 @@ final class Category
         $data = self::iconData($categoryId);
 
         return '<img'.($data['iconClass'] !== '' ? ' class="'.$data['iconClass'].'"' : '').' src="pic/cattrans.gif" alt="'.$data['name'].'" title="'.$data['name'].'" />';
+    }
+
+    private static function categoryRepository(): CategoryRepository
+    {
+        return app(CategoryRepository::class);
     }
 }

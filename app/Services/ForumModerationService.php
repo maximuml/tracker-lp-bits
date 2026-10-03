@@ -126,7 +126,7 @@ final class ForumModerationService
 
         $sure = (int) $request->query('sure', 0);
         if ($sure !== 1) {
-            LegacyResponse::abort(__('legacy/forums.std_delete_topic'), (__('legacy/forums.std_delete_topic_note'))."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".(__('legacy/forums.std_here_if_sure')), false);
+            LegacyResponse::abort(__('legacy/forums.std_delete_topic'), (__('legacy/forums.std_delete_topic_note'))."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".(__('legacy/forums.std_here')).'</a>'.(__('legacy/forums.std_if_sure')), false);
         }
 
         $postCount = $this->postRepository->countTopicPosts($topicid);
@@ -168,11 +168,11 @@ final class ForumModerationService
         $prevPostId = $this->postLookupRepository->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
-            LegacyResponse::abort(__('legacy/forums.std_error'), (__('legacy/forums.std_cannot_delete_post'))."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".(__('legacy/forums.std_delete_topic_instead')), false);
+            LegacyResponse::abort(__('legacy/forums.std_error'), (__('legacy/forums.std_cannot_delete_post'))."<a class=altlink href=?action=deletetopic&topicid={$topicid}&sure=1>".(__('legacy/forums.std_delete_topic_link')).'</a>'.(__('legacy/forums.std_instead')), false);
         }
 
         if ($sure !== 1) {
-            LegacyResponse::abort(__('legacy/forums.std_delete_post'), (__('legacy/forums.std_delete_post_note'))."<a class=altlink href=?action=deletepost&postid={$postid}&sure=1>".(__('legacy/forums.std_here_if_sure')), false);
+            LegacyResponse::abort(__('legacy/forums.std_delete_post'), (__('legacy/forums.std_delete_post_note'))."<a class=altlink href=?action=deletepost&postid={$postid}&sure=1>".(__('legacy/forums.std_here')).'</a>'.(__('legacy/forums.std_if_sure')), false);
         }
 
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;

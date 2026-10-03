@@ -10,10 +10,9 @@ use App\Support\Html\SafeHtml;
  * The "Hot Meter" row: views, hits, snatched count (linking to
  * viewsnatches.php) and last-seeder time.
  *
- * `snatchesPre`/`snatchesPost` are the text parts of
- * `legacy/details.text_view_snatches` split around its `</b>` marker —
- * the structural tags live in the Blade view. `lastSeederLabel` is the
- * entity-decoded `row_last_seeder` text.
+ * `snatchesPre`/`snatchesPost` are the two text parts rendered around
+ * the `<b>` — the structural tags live in the Blade view.
+ * `lastSeederLabel` is the entity-decoded `row_last_seeder` text.
  */
 final class HotMeterRow
 {

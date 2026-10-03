@@ -121,10 +121,10 @@ final class ChromeAlerts
             }
         }
 
-        $staffMessages = app(StaffMessageRepository::class)->getStaffMessageCountCache($userId, 'new');
+        $staffMessages = self::staffMessageRepository()->getStaffMessageCountCache($userId, 'new');
         if ($staffMessages === false) {
-            $staffMessages = app(StaffMessageRepository::class)->countStaffMessage($userId, 0);
-            app(StaffMessageRepository::class)->updateStaffMessageCountCache($userId, 'new', $staffMessages);
+            $staffMessages = self::staffMessageRepository()->countStaffMessage($userId, 0);
+            self::staffMessageRepository()->updateStaffMessageCountCache($userId, 'new', $staffMessages);
         }
         $staffMessages = (int) $staffMessages;
         if ($staffMessages > 0) {
@@ -222,5 +222,10 @@ final class ChromeAlerts
         return in_array($color, ['red', 'green', 'black', 'blue', 'orange', 'gray'], true)
             ? $color
             : 'red';
+    }
+
+    private static function staffMessageRepository(): StaffMessageRepository
+    {
+        return app(StaffMessageRepository::class);
     }
 }

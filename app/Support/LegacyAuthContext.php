@@ -69,8 +69,8 @@ final class LegacyAuthContext
         }
 
         return new self(
-            user: app(CurrentUser::class)->get(),
-            cache: app(LegacyRedisCache::class),
+            user: CurrentUser::instance()->get(),
+            cache: LegacyRedisCache::instance(),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
             requestUri: Input::serverValue('REQUEST_URI'),
             requestBody: request()->post(),

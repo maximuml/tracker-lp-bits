@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\UserMeta;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\UserDetailRepository;
+use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
@@ -26,7 +27,6 @@ use App\Support\LegacyResponse;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Network;
-use App\Support\Permissions;
 use App\Support\Strings;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -46,6 +46,7 @@ class UserDetailController extends Controller
     private CurrentUser $currentUser;
 
     public function __construct(
+        private readonly PermissionChecker $permissionChecker,
         HitAndRunRepository $hitAndRunRepository,
         UserRepositoryInterface $userRepository,
         UserDetailRepository $userDetailRepository,
@@ -276,7 +277,7 @@ JS, \json_encode(__('legacy/userdetails.sure_to_remove_leech_warn'))), 'footer',
 
         $claimAllSeedingConfirmation = Locale::trans('claim.claim_all_seeding_confirmation', [], null);
         $claimJs = '';
-        if ($userModel instanceof User && $userModel->id === $currentUserId && Permissions::hasRoleWorkSeeding($userModel->id)) {
+        if ($userModel instanceof User && $userModel->id === $currentUserId && $this->permissionChecker->hasRoleWorkSeeding($userModel->id)) {
             $claimJs = <<<JS
 document.body.addEventListener("click", function (e) {
     if (!e.target || e.target.id !== "claim-all-seeding") return;

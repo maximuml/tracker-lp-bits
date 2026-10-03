@@ -9,12 +9,12 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Torrent;
 use App\Repositories\MessageRepository;
+use App\Services\PermissionChecker;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Log;
-use App\Support\Permissions;
 use App\Support\TorrentOps;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +23,7 @@ use Illuminate\View\View;
 
 class TorrentDeleteController extends LegacyController
 {
-    public function __construct(private readonly MessageRepository $messageRepository,
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository,
         private readonly CurrentUser $currentUser,
         private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly UserRepositoryInterface $userRepository,
@@ -45,8 +45,8 @@ class TorrentDeleteController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/fastdelete.std_delete_failed'), __('legacy/fastdelete.std_missing_form_data'));
         }
 
-        if (! Permissions::userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)
-            || ! Permissions::userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)
+            || ! $this->permissionChecker->userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
             return $this->legacyAbortResponse(__('legacy/fastdelete.std_delete_failed'), __('legacy/fastdelete.text_no_permission'));
         }
 
@@ -123,7 +123,7 @@ class TorrentDeleteController extends LegacyController
             return $this->legacyPage($request, 'delete', true);
         }
 
-        if (! Permissions::userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
             return $this->legacyAbortResponse(__('legacy/delete.std_delete_failed'), __('legacy/delete.std_not_owner'));
         }
 
@@ -136,7 +136,7 @@ class TorrentDeleteController extends LegacyController
         $name = (string) ($row['name'] ?? '');
         $anonymous = (int) ($row['anonymous'] ?? 0);
 
-        if ($currentUserId != $ownerId && ! Permissions::userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)) {
+        if ($currentUserId != $ownerId && ! $this->permissionChecker->userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)) {
             return $this->legacyAbortResponse(__('legacy/delete.std_delete_failed'), __('legacy/delete.std_not_owner'));
         }
 

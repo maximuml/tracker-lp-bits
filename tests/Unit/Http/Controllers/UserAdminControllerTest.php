@@ -10,6 +10,7 @@ use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
+use App\Services\PermissionChecker;
 use App\Support\CurrentUser;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -36,6 +37,7 @@ final class UserAdminControllerTest extends TestCase
         $bonusRepository = Mockery::mock(BonusRepository::class);
 
         $controller = new UserAdminController(
+            Mockery::mock(PermissionChecker::class),
             Mockery::mock(StaffDirectoryRepository::class),
             $userRepository,
             $userModerationRepository,

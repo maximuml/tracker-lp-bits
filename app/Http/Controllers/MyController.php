@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Repositories\HitAndRunRepository;
 use App\Services\BonusPageService;
 use App\Services\BonusService;
+use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -19,7 +20,6 @@ use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Pagination;
-use App\Support\Permissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -33,7 +33,7 @@ class MyController extends Controller
 
     private CurrentUser $currentUser;
 
-    public function __construct(private readonly HitAndRunRepository $hitAndRunRepository, private readonly UserRepositoryInterface $userRepository, BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser)
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly HitAndRunRepository $hitAndRunRepository, private readonly UserRepositoryInterface $userRepository, BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser)
     {
         $this->bonusPageService = $bonusPageService;
         $this->bonusService = $bonusService;
@@ -101,7 +101,7 @@ class MyController extends Controller
 
         $requestedUserId = request()->query('userid');
         if (! empty($requestedUserId)) {
-            if (! Permissions::userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId) && (int) $requestedUserId != $viewerId) {
+            if (! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId) && (int) $requestedUserId != $viewerId) {
                 LegacyResponse::permissionDenied();
             }
             $userid = (int) $requestedUserId;

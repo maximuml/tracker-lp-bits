@@ -25,6 +25,7 @@ use App\ViewModels\Bonus\BonusShopItem;
 use App\ViewModels\Bonus\BonusShopViewModel;
 use App\ViewModels\Bonus\BonusTradeButton;
 use App\ViewModels\BonusPageViewModel;
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Http\Request;
 
 /**
@@ -121,9 +122,9 @@ final class BonusPageService
         // 100.0 GB Uploaded
         $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->hundredGbUpload(), 'traffic', 107374182400, (string) (__('legacy/mybonus.text_uploaded_four')), (string) (__('legacy/mybonus.text_uploaded_note')));
         // 10.0 GB Downloaded
-        $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->tenGbDownload(), 'traffic_downloaded', 10737418240, (string) (__('legacy/mybonus.text_downloaded_ten_gb')), (string) (__('legacy/mybonus.text_download_note')));
+        $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->tenGbDownload(), 'traffic_downloaded', 10737418240, view('my.sections._data-color', ['pre' => (string) (__('legacy/mybonus.text_downloaded_ten_gb')), 'color' => '#ff4500', 'text' => (string) (__('legacy/mybonus.text_downloaded_label'))]), view('my.sections._download-note'));
         // 100.0 GB Downloaded
-        $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->hundredGbDownload(), 'traffic_downloaded', 107374182400, (string) (__('legacy/mybonus.text_downloaded_hundred_gb')), (string) (__('legacy/mybonus.text_download_note')));
+        $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->hundredGbDownload(), 'traffic_downloaded', 107374182400, view('my.sections._data-color', ['pre' => (string) (__('legacy/mybonus.text_downloaded_hundred_gb')), 'color' => '#ff4500', 'text' => (string) (__('legacy/mybonus.text_downloaded_label'))]), view('my.sections._download-note'));
 
         // Invite
         if ($oneinviteBonus > 0) {
@@ -147,7 +148,7 @@ final class BonusPageService
         if ($basictaxBonus || $taxpercentageBonus) {
             $onehundredaftertax = 100 - $taxpercentageBonus - $basictaxBonus;
             $giftTax = [
-                'charges' => SafeHtml::fromUntrustedHtml(__('legacy/mybonus.text_system_charges_receiver')),
+                'charges' => view('my.sections._gift-charges'),
                 'amounts' => ($basictaxBonus ? $basictaxBonus.(__('legacy/mybonus.text_tax_bonus_point')).Strings::addS($basictaxBonus).($taxpercentageBonus ? (__('legacy/mybonus.text_tax_plus')) : '') : '').($taxpercentageBonus ? $taxpercentageBonus.(__('legacy/mybonus.text_percent_of_transfered_amount')) : ''),
                 'rest' => (__('legacy/mybonus.text_as_tax')).$onehundredaftertax.(__('legacy/mybonus.text_tax_example_note')),
             ];
@@ -177,7 +178,7 @@ final class BonusPageService
     /**
      * @return array<string, mixed>
      */
-    private function bonusItem(float $points, string $art, int $menge, string $name, string $description): array
+    private function bonusItem(float $points, string $art, int $menge, string|ViewContract $name, string|ViewContract $description): array
     {
         return [
             'points' => $points,
@@ -194,23 +195,23 @@ final class BonusPageService
     private function resolveDoMessage(string $do, array $curUser, string $lockText): string
     {
         return match ($do) {
-            'upload' => (string) (__('legacy/mybonus.text_success_upload')),
-            'download' => (string) (__('legacy/mybonus.text_success_download')),
-            'invite' => (string) (__('legacy/mybonus.text_success_invites')),
-            'tmp_invite' => (string) (__('legacy/mybonus.text_success_tmp_invites')),
+            'upload' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_upload')), 'b' => (string) (__('legacy/mybonus.text_uploaded_amount')), 'post' => '!'])->render(),
+            'download' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_download')), 'b' => (string) (__('legacy/mybonus.text_downloaded_amount')), 'post' => '!'])->render(),
+            'invite' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_invites')), 'b' => '1', 'post' => (string) (__('legacy/mybonus.text_new_invite'))])->render(),
+            'tmp_invite' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_tmp_invites')), 'b' => '1', 'post' => (string) (__('legacy/mybonus.text_new_tmp_invite'))])->render(),
             'vip' => view('my.sections._vip_msg', [
                 'pre' => (string) (__('legacy/mybonus.text_success_vip')),
                 'name' => UserClass::name(UC_VIP, false, false, true),
                 'post' => (string) (__('legacy/mybonus.text_success_vip_two')),
             ])->render(),
-            'vipfalse' => (string) (__('legacy/mybonus.text_no_permission')),
-            'title' => sprintf((string) (__('legacy/mybonus.text_success_custom_title')), (string) ($curUser['title'] ?? '')),
-            'transfer' => (string) (__('legacy/mybonus.text_success_gift')),
+            'vipfalse' => view('my.sections._b-msg', ['pre' => '', 'b' => (string) (__('legacy/mybonus.text_error_bang')), 'post' => (string) (__('legacy/mybonus.text_no_permission'))])->render(),
+            'title' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_custom_title')), 'b' => (string) ($curUser['title'] ?? ''), 'post' => '!'])->render(),
+            'transfer' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_gift')), 'b' => (string) (__('legacy/mybonus.text_karma')), 'post' => (string) (__('legacy/mybonus.text_karma_well'))])->render(),
             'charity' => (string) (__('legacy/mybonus.text_success_charity')),
             'cancel_hr' => (string) (__('legacy/mybonus.text_success_cancel_hr')),
             'attendance_card' => (string) (__('legacy/mybonus.text_success_buy_attendance_card')),
-            'rainbow_id' => (string) (__('legacy/mybonus.text_success_buy_rainbow_id')),
-            'change_username_card' => (string) (__('legacy/mybonus.text_success_buy_change_username_card')),
+            'rainbow_id' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_buy_rainbow_id')), 'b' => '30', 'post' => (string) (__('legacy/mybonus.text_rainbow_days'))])->render(),
+            'change_username_card' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_buy_change_username_card')), 'b' => (string) (__('legacy/mybonus.text_change_username_card')), 'post' => '!'])->render(),
             'duplicated' => $lockText,
             default => '',
         };
@@ -252,8 +253,12 @@ final class BonusPageService
             $items[] = new BonusShopItem(
                 index: $i,
                 art: $art,
-                name: SafeHtml::fromUntrustedHtml((string) $bonusarray['name']),
-                description: SafeHtml::fromUntrustedHtml((string) $bonusarray['description']),
+                name: $bonusarray['name'] instanceof ViewContract
+                    ? SafeHtml::fromTrustedHtml($bonusarray['name']->render())
+                    : SafeHtml::fromUntrustedHtml((string) $bonusarray['name']),
+                description: $bonusarray['description'] instanceof ViewContract
+                    ? SafeHtml::fromTrustedHtml($bonusarray['description']->render())
+                    : SafeHtml::fromUntrustedHtml((string) $bonusarray['description']),
                 pointsLabel: $pointsLabel,
                 trade: $trade,
                 pointsLabel2: $pointsLabel2,

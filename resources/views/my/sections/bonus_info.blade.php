@@ -12,7 +12,7 @@
 @if ($info->perseedingBonus > 0)
 <li>{{ $info->perseedingBonus }}{{ __('legacy/mybonus.text_point') }}{{ \App\Support\Strings::addS($info->perseedingBonus) }}{{ __('legacy/mybonus.text_for_seeding_torrent') }}{{ $info->maxseedingBonus }}{{ __('legacy/mybonus.text_torrent') }}{{ \App\Support\Strings::addS($info->maxseedingBonus) }})</li>
 @endif
-<li>{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/mybonus.text_bonus_formula_one').$info->tzeroBonus.__('legacy/mybonus.text_bonus_formula_two').$info->nzeroBonus.__('legacy/mybonus.text_bonus_formula_wi').$info->zeroBonusFactor.__('legacy/mybonus.text_bonus_formula_three').$info->bzeroBonus.__('legacy/mybonus.text_bonus_formula_four').$info->lBonus.__('legacy/mybonus.text_bonus_formula_five')) }}</li>
+<li>{{ view('my.sections._bonus-formula', ['info' => $info]) }}</li>
 @if ($info->minSizeLine !== null)
 <li>{{ $info->minSizeLine }}</li>
 @endif
@@ -32,7 +32,7 @@
 @if ($info->haremAdditionFactor !== null)
 <h1>{{ __('legacy/mybonus.text_get_by_harem') }}</h1>
 <ul>
-<li>{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(sprintf((string) __('legacy/mybonus.harem_additional_desc'), $info->userId)) }}</li>
+<li>{{ __('legacy/mybonus.harem_additional_desc') }}<a href="invite.php?id={{ $info->userId }}" class="altlink" target="_blank">{{ __('legacy/mybonus.text_here') }}</a></li>
 <li>{{ __('legacy/mybonus.harem_additional_factor') }}{{ $info->haremAdditionFactor }}</li>
 <li>{{ __('legacy/mybonus.harem_additional_note') }}</li>
 </ul>
@@ -65,10 +65,15 @@
 @if ($info->receivethanksBonus > 0)
 <li>{{ __('legacy/mybonus.text_receive_thanks') }}{{ $info->receivethanksBonus }}{{ __('legacy/mybonus.text_point') }}{{ \App\Support\Strings::addS($info->receivethanksBonus) }}</li>
 @endif
-{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/mybonus.text_howto_get_karma_four')) }}
+</ul>
+<h1>{{ __('legacy/mybonus.text_howto_get_karma_four') }}</h1>
+<ul>
 @if ($info->ratiolimitBonus > 0)
 <li>{{ __('legacy/mybonus.text_user_with_ratio_above') }}{{ $info->ratiolimitBonus }}{{ __('legacy/mybonus.text_and_uploaded_amount_above') }}{{ $info->dlamountlimitBonus }}{{ __('legacy/mybonus.text_cannot_exchange_uploading') }}</li>
 @endif
-{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/mybonus.text_howto_get_karma_five').$info->uploadtorrentBonus.__('legacy/mybonus.text_point').\App\Support\Strings::addS($info->uploadtorrentBonus).__('legacy/mybonus.text_howto_get_karma_six')) }}
+<li>{{ __('legacy/mybonus.text_howto_get_karma_five') }}<br />{{ __('legacy/mybonus.text_howto_get_karma_five_tail') }}{{ $info->uploadtorrentBonus }}{{ __('legacy/mybonus.text_point') }}{{ \App\Support\Strings::addS($info->uploadtorrentBonus) }}.</li>
+<li>{{ __('legacy/mybonus.text_howto_get_karma_six') }}</li>
+<li>{{ __('legacy/mybonus.text_staff_can_give') }}</li>
+</ul>
 </div>
 </div>

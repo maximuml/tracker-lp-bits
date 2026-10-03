@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ViewModels\Bonus;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\View\View as ViewContract;
 
 /**
  * One row of the karma shop table. `name`, `description` and
@@ -24,7 +25,7 @@ final readonly class BonusShopItem
         public SafeHtml $pointsLabel,
         public BonusTradeButton $trade,
         public ?string $pointsLabel2 = null,
-        /** @var array{charges: SafeHtml, amounts: string, rest: string}|null */
+        /** @var array{charges: SafeHtml|ViewContract, amounts: string, rest: string}|null */
         public ?array $giftTax = null,
     ) {}
 }

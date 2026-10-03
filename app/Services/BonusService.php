@@ -291,7 +291,7 @@ final class BonusService
         $usernamegift = trim((string) $request->post('username', ''));
         $arr = $this->bonusCalculationRepository->findGiftReceiver($usernamegift);
         if (empty($arr)) {
-            LegacyResponse::abort((string) (__('legacy/mybonus.text_error')), (string) (__('legacy/mybonus.text_receiver_not_exists')), false);
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_error')), view('my.sections._abort-receiver-not-exists')->render(), false);
         }
         $useridgift = (int) $arr['id'];
         $userseedbonus = (float) $arr['seedbonus'];
@@ -309,7 +309,7 @@ final class BonusService
             $aftertaxpoint -= $basictaxBonus;
         }
         if ((int) $curUser['id'] === $useridgift) {
-            LegacyResponse::abort((string) (__('legacy/mybonus.text_huh')), (string) (__('legacy/mybonus.text_karma_self_giving_warning')), false);
+            LegacyResponse::abort((string) (__('legacy/mybonus.text_huh')), view('my.sections._abort-karma-self')->render(), false);
         }
         $points2 = number_format($points, 1);
         $points2receiver = number_format($aftertaxpoint, 1);

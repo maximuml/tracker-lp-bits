@@ -43,6 +43,14 @@ final class ForumService
     {
         $action = (string) $request->input('action', $request->query('action', ''));
 
+        if (! $request->isMethod('POST')) {
+            return match ($action) {
+                'deletetopic' => $this->moderation->deleteTopic($request),
+                'deletepost' => $this->moderation->deletePost($request),
+                default => [],
+            };
+        }
+
         if ($action === 'post') {
             return $this->handlePost($request);
         }

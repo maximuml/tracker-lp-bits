@@ -108,7 +108,7 @@ final class ForumModerationService
 
     public function deleteTopic(Request $request): RedirectResponse
     {
-        $topicid = (int) $request->query('topicid');
+        $topicid = (int) $request->input('topicid');
         $topic = Topic::query()->whereKey($topicid)->first();
 
         if ($topic === null) {
@@ -124,9 +124,9 @@ final class ForumModerationService
             LegacyResponse::permissionDenied();
         }
 
-        $sure = (int) $request->query('sure', 0);
-        if ($sure !== 1) {
-            LegacyResponse::abort(__('legacy/forums.std_delete_topic'), (__('legacy/forums.std_delete_topic_note')).view('components.altlink', ['class' => 'altlink', 'url' => "?action=deletetopic&topicid={$topicid}&sure=1", 'text' => __('legacy/forums.std_here')])->render().__('legacy/forums.std_if_sure'), false);
+        $sure = (int) $request->input('sure', 0);
+        if ($sure !== 1 || ! $request->isMethod('POST')) {
+            LegacyResponse::abort(__('legacy/forums.std_delete_topic'), (__('legacy/forums.std_delete_topic_note')).view('forums._confirm-form', ['action' => 'deletetopic', 'name' => 'topicid', 'value' => $topicid, 'text' => __('legacy/forums.std_here')])->render().__('legacy/forums.std_if_sure'), false);
         }
 
         $postCount = $this->postRepository->countTopicPosts($topicid);
@@ -149,8 +149,8 @@ final class ForumModerationService
 
     public function deletePost(Request $request): RedirectResponse
     {
-        $postid = (int) $request->query('postid');
-        $sure = (int) $request->query('sure', 0);
+        $postid = (int) $request->input('postid');
+        $sure = (int) $request->input('sure', 0);
 
         $post = Post::query()->whereKey($postid)->first();
         if ($post === null) {
@@ -171,8 +171,8 @@ final class ForumModerationService
             LegacyResponse::abort(__('legacy/forums.std_error'), (__('legacy/forums.std_cannot_delete_post')).view('components.altlink', ['class' => 'altlink', 'url' => "?action=deletetopic&topicid={$topicid}&sure=1", 'text' => __('legacy/forums.std_delete_topic_link')])->render().__('legacy/forums.std_instead'), false);
         }
 
-        if ($sure !== 1) {
-            LegacyResponse::abort(__('legacy/forums.std_delete_post'), (__('legacy/forums.std_delete_post_note')).view('components.altlink', ['class' => 'altlink', 'url' => "?action=deletepost&postid={$postid}&sure=1", 'text' => __('legacy/forums.std_here')])->render().__('legacy/forums.std_if_sure'), false);
+        if ($sure !== 1 || ! $request->isMethod('POST')) {
+            LegacyResponse::abort(__('legacy/forums.std_delete_post'), (__('legacy/forums.std_delete_post_note')).view('forums._confirm-form', ['action' => 'deletepost', 'name' => 'postid', 'value' => $postid, 'text' => __('legacy/forums.std_here')])->render().__('legacy/forums.std_if_sure'), false);
         }
 
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;

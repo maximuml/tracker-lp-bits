@@ -345,9 +345,7 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals();
         $this->mockCache();
 
-        $request = Request::create('/forums.php', 'GET', [
-            'action' => 'hltopic',
-            'topicid' => 1,
+        $request = Request::create('/forums.php?action=hltopic&topicid=1', 'POST', [
             'color' => 1,
         ]);
 
@@ -966,9 +964,7 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals();
         $this->mockCache();
 
-        $request = Request::create('/forums.php', 'GET', [
-            'action' => 'hltopic',
-            'topicid' => 1,
+        $request = Request::create('/forums.php?action=hltopic&topicid=1', 'POST', [
             'color' => 1,
         ]);
 
@@ -982,9 +978,7 @@ final class ForumServiceTest extends TestCase
         $this->mockGlobals();
         $this->mockCache();
 
-        $request = Request::create('/forums.php', 'GET', [
-            'action' => 'hltopic',
-            'topicid' => 0,
+        $request = Request::create('/forums.php?action=hltopic&topicid=0', 'POST', [
             'color' => 1,
         ]);
 

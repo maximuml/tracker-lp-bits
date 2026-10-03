@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\CleanupServiceInterface;
+use Illuminate\Support\Facades\App;
 
 /**
  * Legacy bootstrap/cleanup helpers drained out of `include/functions.php`.
@@ -48,7 +49,7 @@ final class Bootstrap
      */
     public static function autoClean(bool $printProgress = false): string|bool
     {
-        if (app()->runningUnitTests()) {
+        if (App::runningUnitTests()) {
             return false;
         }
 

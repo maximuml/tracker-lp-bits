@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 
 /**
@@ -22,7 +23,7 @@ final class SupportContext
 
     public static function reset(): void
     {
-        app()->instance(NexusContext::class, new NexusContext);
+        Container::getInstance()->instance(NexusContext::class, new NexusContext);
     }
 
     public static function getContext(): NexusContext
@@ -32,8 +33,8 @@ final class SupportContext
 
     private static function context(): NexusContext
     {
-        if (! app()->bound(NexusContext::class)) {
-            app()->instance(NexusContext::class, new NexusContext);
+        if (! Container::getInstance()->bound(NexusContext::class)) {
+            Container::getInstance()->instance(NexusContext::class, new NexusContext);
         }
 
         return app(NexusContext::class);

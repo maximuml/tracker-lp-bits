@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Container\Container;
+
 /**
  * Legacy request-input helpers extracted from `include/functions.php`.
  *
@@ -30,7 +32,7 @@ final class Input
      */
     public static function serverValue(string $key, string $default = ''): string
     {
-        if (! app()->bound('request')) {
+        if (! Container::getInstance()->bound('request')) {
             return $default;
         }
         $value = request()->server($key, $default);
@@ -46,7 +48,7 @@ final class Input
      */
     public static function cookieValue(string $key, ?string $default = null): ?string
     {
-        if (! app()->bound('request')) {
+        if (! Container::getInstance()->bound('request')) {
             return $default;
         }
         $value = request()->cookie($key);

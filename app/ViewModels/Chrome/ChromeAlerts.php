@@ -8,7 +8,6 @@ use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Enums\ExamType;
 use App\Enums\TorrentPromotion;
 use App\Models\TorrentState;
-use App\Repositories\StaffMessageRepository;
 use App\Support\Exam;
 use App\Support\Html\SafeHtml;
 use App\Support\PageLayoutContext;
@@ -39,6 +38,7 @@ final class ChromeAlerts
         int $unread,
         PageLayoutRepositoryInterface $repo,
         bool $msgalert,
+        ChromeRepositories $chrome,
     ): array {
         if (! $msgalert) {
             return [];
@@ -121,10 +121,10 @@ final class ChromeAlerts
             }
         }
 
-        $staffMessages = self::staffMessageRepository()->getStaffMessageCountCache($userId, 'new');
+        $staffMessages = $chrome->staffMessages->getStaffMessageCountCache($userId, 'new');
         if ($staffMessages === false) {
-            $staffMessages = self::staffMessageRepository()->countStaffMessage($userId, 0);
-            self::staffMessageRepository()->updateStaffMessageCountCache($userId, 'new', $staffMessages);
+            $staffMessages = $chrome->staffMessages->countStaffMessage($userId, 0);
+            $chrome->staffMessages->updateStaffMessageCountCache($userId, 'new', $staffMessages);
         }
         $staffMessages = (int) $staffMessages;
         if ($staffMessages > 0) {
@@ -222,10 +222,5 @@ final class ChromeAlerts
         return in_array($color, ['red', 'green', 'black', 'blue', 'orange', 'gray'], true)
             ? $color
             : 'red';
-    }
-
-    private static function staffMessageRepository(): StaffMessageRepository
-    {
-        return app(StaffMessageRepository::class);
     }
 }

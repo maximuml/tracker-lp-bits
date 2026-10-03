@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\View\Composers;
 
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
+use App\ViewModels\Chrome\ChromeRepositories;
 use App\ViewModels\SiteChromeViewModel;
 use Illuminate\Support\Facades\App;
 use Illuminate\View\View;
@@ -24,6 +25,7 @@ final class SiteChromeComposer
 {
     public function __construct(
         private readonly PageLayoutRepositoryInterface $layouts,
+        private readonly ChromeRepositories $chromeRepositories,
     ) {}
 
     public function compose(View $view): void
@@ -46,7 +48,7 @@ final class SiteChromeComposer
         }
 
         $title = trim($view->getFactory()->yieldContent('title'));
-        $view->with('chrome', SiteChromeViewModel::load($title, $this->layouts, variant: $variant));
+        $view->with('chrome', SiteChromeViewModel::load($title, $this->layouts, $this->chromeRepositories, variant: $variant));
         $view->with('locale', str_replace('_', '-', App::getLocale()));
     }
 }

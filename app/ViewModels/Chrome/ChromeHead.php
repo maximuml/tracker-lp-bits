@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Chrome;
 
-use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\PageLayoutContext;
 use App\Support\SearchBox;
 use App\Support\Style;
+use Illuminate\Support\Facades\App;
 
 /**
  * `<head>` chrome data (ADR 0018): title assembly, html-lang/theme/fontsize
@@ -42,6 +42,7 @@ final class ChromeHead
         string $title,
         string $variant,
         string $cspNonce,
+        ChromeRepositories $chrome,
     ): self {
         $fullTitle = $title === '' ? $context->siteName : $context->siteName.' :: '.$title;
         if ($context->titleKeywordsTweak !== '') {
@@ -49,11 +50,11 @@ final class ChromeHead
         }
         $fullTitle .= ' - Powered by '.PROJECTNAME;
 
-        [$headStyles, $headScripts, $inlineHeadHtml, $picFolder, $packThemeUrl] = self::headAssets($context, $variant, $cspNonce);
+        [$headStyles, $headScripts, $inlineHeadHtml, $picFolder, $packThemeUrl] = self::headAssets($context, $variant, $cspNonce, $chrome);
 
         return new self(
             title: $fullTitle,
-            locale: str_replace('_', '-', app()->getLocale()),
+            locale: str_replace('_', '-', App::getLocale()),
             theme: $context->userTheme(),
             fontSize: $context->userFontSize() ?? 'medium',
             cspNonce: $cspNonce,
@@ -74,7 +75,7 @@ final class ChromeHead
      *
      * @return array{0: list<string>, 1: list<string>, 2: SafeHtml, 3: string, 4: ?string}
      */
-    private static function headAssets(PageLayoutContext $context, string $variant, string $cspNonce): array
+    private static function headAssets(PageLayoutContext $context, string $variant, string $cspNonce, ChromeRepositories $chrome): array
     {
         $picFolder = Forum::picFolder($context->langDir);
         $cssUpdateDate = $context->cssDateTweak !== '' ? '?'.$context->cssDateTweak : '';
@@ -85,7 +86,7 @@ final class ChromeHead
         if ($context->user !== null) {
             $requireSearchBoxIds = SearchBox::requiredIds();
             if ($requireSearchBoxIds !== []) {
-                foreach (app(SearchBoxRepositoryInterface::class)->listIcon($requireSearchBoxIds) as $icon) {
+                foreach ($chrome->searchBox->listIcon($requireSearchBoxIds) as $icon) {
                     $cssfile = trim((string) ($icon['cssfile'] ?? ''), '/');
                     if ($cssfile !== '') {
                         $iconStyles[] = $cssfile.$cssUpdateDate;

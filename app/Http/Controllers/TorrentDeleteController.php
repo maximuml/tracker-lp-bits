@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Permissions;
@@ -193,15 +192,8 @@ class TorrentDeleteController extends LegacyController
             ]);
         }
 
-        $returnto = (string) request()->post('returnto');
-        if ($returnto !== '') {
-            $ret = '<a href="'.htmlspecialchars($returnto).'">'.(__('legacy/delete.text_go_back')).'</a>';
-        } else {
-            $ret = '<a href="index.php">'.(__('legacy/delete.text_back_to_index')).'</a>';
-        }
-
         return $this->legacyPage($request, 'delete', true, [
-            'ret' => SafeHtml::fromTrustedHtml($ret),
+            'returnto' => (string) request()->post('returnto'),
             'message' => __('legacy/delete.text_torrent_deleted'),
         ]);
     }

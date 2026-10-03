@@ -50,7 +50,7 @@
 
         <div class="nx-field">
             <label class="nx-field__label" for="wantusername">{{ __('legacy/signup.row_desired_username')}}</label>
-            {{ $usernameInput }}
+            <input type="text" class="nx-field__input" id="wantusername" name="wantusername" aria-label="{{ __('legacy/signup.row_desired_username') }}" value="{{ $usernameValue }}"@if($usernameReadonly) readonly @endif autocomplete="username" />
             <p class="nx-field__help">{{ __('legacy/signup.text_allowed_characters')}}</p>
         </div>
         <div class="nx-field">
@@ -69,7 +69,7 @@
 
         <div class="nx-field">
             <label class="nx-field__label" for="email">{{ __('legacy/signup.row_email_address')}}</label>
-            {{ $emailInput }}
+            <input type="email" class="nx-field__input" id="email" name="email" aria-label="{{ __('legacy/signup.row_email_address') }}" value="{{ $emailValue }}"@if($emailReadonly) readonly @endif autocomplete="email" />
         </div>
 
         <div class="nx-field">

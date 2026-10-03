@@ -1,0 +1,1 @@
+<x-captcha.row :grid="$grid" :label="$label"><div class="cf-turnstile" data-sitekey="{{ $siteKey }}" data-theme="{{ $theme }}"@if($size) data-size="{{ $size }}"@endif></div>@if($injectScript)<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>@endif</x-captcha.row>

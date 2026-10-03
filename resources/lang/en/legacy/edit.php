@@ -38,7 +38,7 @@ return [
     'select_free_two_times_up' => 'free and 2x up',
     'select_half_down' => '50% down',
     'select_choose_torrent_state' => 'Set torrent on promotion',
-    'row_torrent_position' => 'Torrent&nbsp;Postion',
+    'row_torrent_position' => 'Torrent Position',
     'select_choose_recommended_movie' => 'Choose if the poster of a movie torrent will be shown on the main page',
     'select_hot' => 'hot',
     'select_classic' => 'classic',

@@ -92,7 +92,7 @@ class PollController extends LegacyController
             return redirect('/');
         }
 
-        $ageWarning = '';
+        $pollAge = null;
         if ($pollid <= 0) {
             $lastPoll = $this->pollRepository->lastPoll();
             if (! empty($lastPoll)) {
@@ -103,7 +103,7 @@ class PollController extends LegacyController
                 } else {
                     $t = $hours.(__('legacy/makepoll.text_hour')).Strings::addS($hours);
                 }
-                $ageWarning = (__('legacy/makepoll.text_current_poll')).'(<i>'.htmlspecialchars((string) $lastPoll['question']).'</i>)'.(__('legacy/makepoll.text_is_only')).$t.(__('legacy/makepoll.text_old'));
+                $pollAge = ['question' => (string) $lastPoll['question'], 'age' => $t];
             }
         }
 
@@ -113,7 +113,7 @@ class PollController extends LegacyController
             'poll' => $poll,
             'pollid' => $pollid,
             'returnto' => htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
-            'ageWarning' => SafeHtml::fromTrustedHtml($ageWarning),
+            'pollAge' => $pollAge,
             'title' => $pollid > 0
                 ? (__('legacy/makepoll.head_edit_poll'))
                 : (__('legacy/makepoll.head_new_poll')),

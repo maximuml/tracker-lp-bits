@@ -110,4 +110,9 @@ final class UsercpLookupRepository extends BaseRepository implements UsercpLooku
             ->get()
             ->all();
     }
+
+    public function countryExists(int $countryId): bool
+    {
+        return DB::table('countries')->where('id', $countryId)->exists();
+    }
 }

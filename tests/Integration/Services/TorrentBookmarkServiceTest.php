@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Repositories\BookmarkRepository;
+use App\Repositories\TorrentDetailRepository;
+use App\Repositories\TorrentDownloadRepository;
+use App\Repositories\TorrentRepository;
 use App\Services\TorrentBookmarkService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -34,7 +38,7 @@ final class TorrentBookmarkServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new TorrentBookmarkService;
+        $this->service = new TorrentBookmarkService(new BookmarkRepository, new TorrentRepository(new TorrentDownloadRepository), new TorrentDetailRepository);
     }
 
     private function insertTorrent(int $id, int $owner = 10): void

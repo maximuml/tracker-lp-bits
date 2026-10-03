@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserGender;
@@ -21,7 +22,6 @@ use App\Support\Network;
 use App\Support\Token;
 use App\Support\Url;
 use App\Support\Validators;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Orchestrates the user registration flow.
@@ -31,6 +31,7 @@ class RegistrationService
     private const MAX_USERNAME_LENGTH = 12;
 
     public function __construct(
+        private UsercpLookupRepositoryInterface $usercpLookupRepository,
         private WebAuthService $authService,
         private EmailConfirmation $emailConfirmation,
         private InviteValidator $inviteValidator,
@@ -306,7 +307,7 @@ class RegistrationService
             throw new AuthenticationException(__('legacy/takesignup.std_invalid_gender'));
         }
 
-        if (DB::table('countries')->where('id', $country)->doesntExist()) {
+        if (! $this->usercpLookupRepository->countryExists((int) $country)) {
             throw new AuthenticationException(__('legacy/takesignup.std_invalid_gender'));
         }
     }

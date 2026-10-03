@@ -13,6 +13,7 @@ use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 
 class TorrentDetailRepository
@@ -203,5 +204,48 @@ class TorrentDetailRepository
             ->whereHas('user')
             ->with(['user'])
             ->paginate();
+    }
+
+    /**
+     * Latest comment row for a torrent.
+     */
+    public function getLastComment(int $torrentId): ?\stdClass
+    {
+        /** @var \stdClass|null $row */
+        $row = DB::table('comments')->where('torrent', $torrentId)->orderBy('id', 'desc')->first();
+
+        return $row;
+    }
+
+    /**
+     * Latest comment per torrent.
+     *
+     * @param  array<int>  $torrentIds
+     * @return SupportCollection<int|string, \stdClass> keyed by torrent id
+     */
+    public function listLastCommentsForTorrents(array $torrentIds): SupportCollection
+    {
+        return DB::table('comments')
+            ->whereIn('id', function ($q) use ($torrentIds) {
+                $q->selectRaw('MAX(id)')->from('comments')->whereIn('torrent', $torrentIds)->groupBy('torrent');
+            })
+            ->get()
+            ->keyBy('torrent');
+    }
+
+    public function hasThanksRecord(int $torrentId, int $userId): bool
+    {
+        return DB::table('thanks')
+            ->where('torrentid', $torrentId)
+            ->where('userid', $userId)
+            ->exists();
+    }
+
+    public function insertThanks(int $torrentId, int $userId): void
+    {
+        DB::table('thanks')->insert([
+            'torrentid' => $torrentId,
+            'userid' => $userId,
+        ]);
     }
 }

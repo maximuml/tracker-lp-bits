@@ -196,10 +196,7 @@ class EmailConfirmation
      */
     private function revokeConfirmationTokens(int $userId): void
     {
-        DB::table(self::CONFIRMATION_TOKEN_TABLE)
-            ->where('user_id', $userId)
-            ->whereNull('consumed_at')
-            ->update(['revoked' => 1]);
+        $this->tokenService->revokeUnconsumed(self::CONFIRMATION_TOKEN_TABLE, $userId);
     }
 
     /**

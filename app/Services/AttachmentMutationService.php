@@ -11,7 +11,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\Support\Logger;
 use App\Support\Path;
-use Illuminate\Support\Facades\DB;
 
 class AttachmentMutationService
 {
@@ -325,7 +324,7 @@ class AttachmentMutationService
             }
             if (! $warning) { // insert into database and add code to editor
                 $dlkey = bin2hex(random_bytes(16));
-                DB::table('attachments')->insert([
+                Attachment::query()->insert([
                     'userid' => $CURUSER['id'],
                     'width' => $width,
                     'added' => date('Y-m-d H:i:s'),

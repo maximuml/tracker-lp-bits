@@ -15,7 +15,6 @@ use App\Support\Logger;
 use App\Support\Ratio;
 use App\Support\Time;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class HitAndRunStatusService
 {
@@ -131,7 +130,7 @@ class HitAndRunStatusService
     public function inspectingToReached(HitAndRun $hitAndRun, array $update, string $logPrefix = '', array &$messages = []): bool
     {
         $update['status'] = HitAndRunStatus::REACHED->value;
-        $affectedRows = DB::table($hitAndRun->getTable())
+        $affectedRows = HitAndRun::query()
             ->where('id', $hitAndRun->id)
             ->where('status', HitAndRunStatus::INSPECTING->value)
             ->update($update);
@@ -172,7 +171,7 @@ class HitAndRunStatusService
             'status' => HitAndRunStatus::UNREACHED->value,
             'comment' => $comment,
         ];
-        $affectedRows = DB::table($hitAndRun->getTable())
+        $affectedRows = HitAndRun::query()
             ->where('id', $hitAndRun->id)
             ->where('status', HitAndRunStatus::INSPECTING->value)
             ->update($update);

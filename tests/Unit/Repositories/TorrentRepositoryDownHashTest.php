@@ -3,6 +3,8 @@
 namespace Tests\Unit\Repositories;
 
 use App\Repositories\MeiliSearchRepository;
+use App\Repositories\TorrentAjaxRepository;
+use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\TorrentPurchaseRepository;
@@ -32,7 +34,16 @@ class TorrentRepositoryDownHashTest extends TestCase
                 $this->downloadRepository,
                 $meiliSearchRepository,
             ),
-            new TorrentStatsService,
+            new TorrentStatsService(
+                new TorrentAjaxRepository(
+                    $meiliSearchRepository,
+                    new TorrentModerationRepository(
+                        $this->downloadRepository,
+                        $meiliSearchRepository,
+                    ),
+                ),
+                new TorrentDetailRepository,
+            ),
             new TorrentPromotionService(
                 new TorrentModerationRepository(
                     $this->downloadRepository,

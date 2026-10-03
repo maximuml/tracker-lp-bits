@@ -38,4 +38,11 @@ interface TorrentAjaxRepositoryInterface
      * @return array<string, mixed>
      */
     public function userTorrentList(int $targetUserId, string $type, int $page, ?User $currentUser = null): array;
+
+    /**
+     * Latest snatched row for a user on a torrent.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getLatestSnatchForUser(int $torrentId, int $userId): ?array;
 }

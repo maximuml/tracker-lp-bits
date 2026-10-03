@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
+use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
@@ -27,6 +28,7 @@ class PasswordRecoveryService
     private const RECOVERY_TOKEN_TABLE = 'password_recovery_tokens';
 
     public function __construct(
+        private UserDetailRepository $userDetailRepository,
         private WebAuthService $authService,
         private SecureTokenService $tokenService,
         private readonly PasswordSetup $passwordSetup,
@@ -55,9 +57,7 @@ class PasswordRecoveryService
             throw new AuthenticationException(__('legacy/recover.std_invalid_email_address'));
         }
 
-        $user = (array) DB::table('users')
-            ->whereRaw('BINARY email = ?', [$email])
-            ->first();
+        $user = $this->userDetailRepository->findByEmailBinary($email)?->getAttributes() ?? [];
 
         if (empty($user)) {
             $this->authService->recordFailedAttempt($ip);
@@ -168,11 +168,7 @@ class PasswordRecoveryService
 
     private function revokeActiveTokens(int $userId): void
     {
-        DB::table(self::RECOVERY_TOKEN_TABLE)
-            ->where('user_id', $userId)
-            ->whereNull('consumed_at')
-            ->where('revoked', 0)
-            ->update(['revoked' => 1]);
+        $this->tokenService->revokeUnconsumed(self::RECOVERY_TOKEN_TABLE, $userId);
     }
 
     private function sendResetRequestEmail(string $email, int $userId, string $hash, string $ip): void

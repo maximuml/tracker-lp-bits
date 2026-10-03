@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ComplainRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Models\Complain;
 use App\Models\User;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 final class ComplainService
 {
     public function __construct(
+        private readonly ComplainRepositoryInterface $complainRepository,
         private readonly ToolRepositoryInterface $toolRepository,
         private readonly ?LegacyRedisCache $legacyRedisCache = null,
     ) {}
@@ -51,7 +53,7 @@ final class ComplainService
             return null;
         }
 
-        $complainId = (int) DB::table('complains')->insertGetId([
+        $complainId = $this->complainRepository->insertComplain([
             'uuid' => DB::raw('UUID()'),
             'email' => $email,
             'body' => $body,
@@ -74,7 +76,7 @@ final class ComplainService
             return false;
         }
 
-        DB::table('complain_replies')->insert([
+        $this->complainRepository->insertReply([
             'complain' => $complainId,
             'userid' => $userId,
             'added' => now()->toDateTimeString(),
@@ -105,7 +107,7 @@ final class ComplainService
      */
     public function toggleAnswered(int $complainId, bool $answered): void
     {
-        DB::table('complains')->where('id', $complainId)->update([
+        $this->complainRepository->updateById($complainId, [
             'answered' => $answered ? 1 : 0,
         ]);
 

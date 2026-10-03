@@ -335,4 +335,69 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
 
         return $query;
     }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function insertMessage(array $data): void
+    {
+        DB::table('shoutbox')->insert($data);
+    }
+
+    public function findById(int $id): ?\stdClass
+    {
+        /** @var \stdClass|null $row */
+        $row = DB::table('shoutbox')->where('id', $id)->first();
+
+        return $row;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateById(int $id, array $data): void
+    {
+        DB::table('shoutbox')->where('id', $id)->update($data);
+    }
+
+    public function deleteWithReactions(int $id): void
+    {
+        DB::table('shoutbox')->where('id', $id)->delete();
+        DB::table('shoutbox_reactions')->where('shoutbox_id', $id)->delete();
+    }
+
+    public function deleteAllWithReactions(): void
+    {
+        DB::table('shoutbox')->delete();
+        DB::table('shoutbox_reactions')->delete();
+    }
+
+    /**
+     * Toggle a reaction: deletes the existing row or inserts a new one.
+     *
+     * @return bool True when the reaction was added, false when removed.
+     */
+    public function toggleReaction(int $shoutId, int $userId, string $reaction): bool
+    {
+        $existing = DB::table('shoutbox_reactions')
+            ->where('shoutbox_id', $shoutId)
+            ->where('user_id', $userId)
+            ->where('reaction', $reaction)
+            ->first();
+
+        if ($existing) {
+            DB::table('shoutbox_reactions')->where('id', $existing->id)->delete();
+
+            return false;
+        }
+
+        DB::table('shoutbox_reactions')->insert([
+            'shoutbox_id' => $shoutId,
+            'user_id' => $userId,
+            'reaction' => $reaction,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return true;
+    }
 }

@@ -64,4 +64,28 @@ final class ComplainRepository implements ComplainRepositoryInterface
             ->map(fn ($r): array => (array) $r)
             ->all());
     }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function insertComplain(array $data): int
+    {
+        return (int) DB::table('complains')->insertGetId($data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function insertReply(array $data): void
+    {
+        DB::table('complain_replies')->insert($data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateById(int $id, array $data): void
+    {
+        DB::table('complains')->where('id', $id)->update($data);
+    }
 }

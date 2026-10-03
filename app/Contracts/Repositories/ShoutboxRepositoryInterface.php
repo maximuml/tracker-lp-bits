@@ -66,4 +66,27 @@ interface ShoutboxRepositoryInterface
      * @param  array<string, mixed>|null  $user
      */
     public function newAfterIdQuery(string $type, int $lastId, ?array $user): Builder;
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function insertMessage(array $data): void;
+
+    public function findById(int $id): ?\stdClass;
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateById(int $id, array $data): void;
+
+    public function deleteWithReactions(int $id): void;
+
+    public function deleteAllWithReactions(): void;
+
+    /**
+     * Toggle a reaction: deletes the existing row or inserts a new one.
+     *
+     * @return bool True when the reaction was added, false when removed.
+     */
+    public function toggleReaction(int $shoutId, int $userId, string $reaction): bool;
 }

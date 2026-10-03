@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Repositories\BitbucketRepository;
 use App\Services\BitbucketService;
 use App\Support\Globals;
 use App\Support\Path;
@@ -41,7 +42,7 @@ final class BitbucketServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new BitbucketService;
+        $this->service = new BitbucketService(new BitbucketRepository);
     }
 
     protected function tearDown(): void

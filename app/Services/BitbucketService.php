@@ -6,11 +6,11 @@ namespace App\Services;
 
 use App\Enums\BitbucketPublic;
 use App\Models\User;
+use App\Repositories\BitbucketRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Path;
 use App\Support\Url;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use LogicException;
 
 /**
@@ -24,6 +24,8 @@ final class BitbucketService
     private const SCALE_HEIGHT = 200;
 
     private const SCALE_WIDTH = 150;
+
+    public function __construct(private readonly BitbucketRepository $bitbucketRepository) {}
 
     /**
      * Process an uploaded avatar image: validate, resize, save, and update DB.
@@ -102,7 +104,7 @@ final class BitbucketService
         $url = str_replace(' ', '%20', htmlspecialchars(Url::absolute($baseUrl)."/{$bitbucket}/{$filename}"));
         $public = $isPublic ? BitbucketPublic::YES->value : BitbucketPublic::NO->value;
 
-        DB::table('bitbucket')->insert([
+        $this->bitbucketRepository->insert([
             'owner' => $currentUser['id'],
             'name' => $filename,
             'added' => date('Y-m-d H:i:s'),
@@ -128,13 +130,13 @@ final class BitbucketService
      */
     public function deleteBitbucket(int $id, string $bucketPath): bool
     {
-        $bitbucket = DB::table('bitbucket')->where('id', $id)->first(['name', 'owner']);
+        $bitbucket = $this->bitbucketRepository->findColumnsById($id, ['name', 'owner']);
         if (! $bitbucket) {
             return true;
         }
 
         $file = $bucketPath.'/'.$bitbucket->name;
-        DB::table('bitbucket')->where('id', $id)->delete();
+        $this->bitbucketRepository->deleteById($id);
 
         if (file_exists($file) && ! unlink($file)) {
             return false;
@@ -148,7 +150,7 @@ final class BitbucketService
      */
     public function getBitbucketName(int $id): ?string
     {
-        $row = DB::table('bitbucket')->where('id', $id)->first(['name']);
+        $row = $this->bitbucketRepository->findColumnsById($id, ['name']);
 
         return $row ? (string) $row->name : null;
     }

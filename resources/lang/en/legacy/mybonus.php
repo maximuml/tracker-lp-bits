@@ -33,7 +33,7 @@ return [
     'text_plus_only' => '+ only!',
     'submit_exchange' => 'Exchange!',
     'text_unavailable' => 'Currently not available!',
-    'text_more_points_needed' => 'more&nbsp;points needed',
+    'text_more_points_needed' => 'more points needed',
     'text_what_is_karma' => 'What the hell are these Karma Bonus points, and how do I get them?',
     'text_get_by_seeding' => 'You get following karma points per hour by seeding:',
     'text_for_seeding_torrent' => ' for each torrent you are seeding (max of ',

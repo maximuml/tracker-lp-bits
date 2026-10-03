@@ -74,7 +74,7 @@ class StaffDirectoryRepository extends BaseRepository
     /**
      * Forum moderators joined with display columns, one row per user.
      *
-     * @return \Illuminate\Support\Collection<int, object>
+     * @return \Illuminate\Support\Collection<int, \stdClass>
      */
     public function listForumModerators(): \Illuminate\Support\Collection
     {
@@ -90,8 +90,8 @@ class StaffDirectoryRepository extends BaseRepository
     /**
      * Forums moderated by each of the given users, grouped by userid.
      *
-     * @param  list<int>  $userIds
-     * @return \Illuminate\Support\Collection<int, \Illuminate\Support\Collection<int, object>>
+     * @param  array<int>  $userIds
+     * @return \Illuminate\Support\Collection<int|string, \Illuminate\Support\Collection<int, \stdClass>>
      */
     public function listModeratedForums(array $userIds): \Illuminate\Support\Collection
     {

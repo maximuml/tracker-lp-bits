@@ -1,0 +1,1 @@
+<b><span class="striking">

@@ -1,0 +1,2 @@
+@props(['cls', 'userId', 'name', 'title', 'mention', 'loggedIn'])
+@if($loggedIn && $title !== '')<a class="{{ $cls }} shout-nick-reply" href="userdetails.php?id={{ $userId }}" data-nick="{{ $name }}" title="{{ $title }}">{{ $mention }}</a>@elseif($loggedIn)<a class="{{ $cls }} shout-nick-reply" href="userdetails.php?id={{ $userId }}" data-nick="{{ $name }}">{{ $mention }}</a>@else<a class="{{ $cls }}" href="userdetails.php?id={{ $userId }}">{{ $mention }}</a>@endif

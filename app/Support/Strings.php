@@ -109,7 +109,10 @@ final class Strings
      */
     public static function hidden(string $text): SafeHtml
     {
-        return SafeHtml::fromTrustedHtml('<span class="hidden-text">'.$text.'</span>');
+        return SafeHtml::fromTrustedHtml(trim(view('support._span-class', [
+            'cls' => 'hidden-text',
+            'text' => SafeHtml::fromTrustedHtml($text),
+        ])->render()));
     }
 
     /**
@@ -123,9 +126,11 @@ final class Strings
     public static function highlight(
         string $needle,
         string $haystack,
-        string $open = '<b><span class="striking">',
-        string $close = '</span></b>',
+        ?string $open = null,
+        ?string $close = null,
     ): string {
+        $open ??= trim(view('support._hl-open')->render());
+        $close ??= trim(view('support._hl-close')->render());
         $needleLength = strlen($needle);
         if ($needleLength === 0) {
             return $haystack;

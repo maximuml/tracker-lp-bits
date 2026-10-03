@@ -22,19 +22,21 @@ final class Progress
         $p = (float) $p;
         $maxpx = 45;
 
-        $progress = '';
+        $segments = [];
         if ($p == 0) {
-            $progress = '<img class="progbarrest" src="pic/trans.gif" width="'.$maxpx.'" alt="" />';
+            $segments[] = ['class' => 'progbarrest', 'width' => $maxpx];
         } elseif ($p == 100) {
-            $progress = '<img class="progbargreen" src="pic/trans.gif" width="'.$maxpx.'" alt="" />';
-        } elseif ($p >= 1 && $p <= 30) {
-            $progress = '<img class="progbarred" src="pic/trans.gif" width="'.(int) round($p * ($maxpx / 100)).'" alt="" /><img class="progbarrest" src="pic/trans.gif" width="'.(int) round((100 - $p) * ($maxpx / 100)).'" alt="" />';
-        } elseif ($p >= 31 && $p <= 65) {
-            $progress = '<img class="progbaryellow" src="pic/trans.gif" width="'.(int) round($p * ($maxpx / 100)).'" alt="" /><img class="progbarrest" src="pic/trans.gif" width="'.(int) round((100 - $p) * ($maxpx / 100)).'" alt="" />';
-        } elseif ($p >= 66 && $p <= 99) {
-            $progress = '<img class="progbargreen" src="pic/trans.gif" width="'.(int) round($p * ($maxpx / 100)).'" alt="" /><img class="progbarrest" src="pic/trans.gif" width="'.(int) round((100 - $p) * ($maxpx / 100)).'" alt="" />';
+            $segments[] = ['class' => 'progbargreen', 'width' => $maxpx];
+        } elseif ($p >= 1 && $p <= 99) {
+            $fill = match (true) {
+                $p <= 30 => 'progbarred',
+                $p <= 65 => 'progbaryellow',
+                default => 'progbargreen',
+            };
+            $segments[] = ['class' => $fill, 'width' => (int) round($p * ($maxpx / 100))];
+            $segments[] = ['class' => 'progbarrest', 'width' => (int) round((100 - $p) * ($maxpx / 100))];
         }
 
-        return '<img class="bar_left" src="pic/trans.gif" alt="" />'.$progress.'<img class="bar_right" src="pic/trans.gif" alt="" />';
+        return trim(view('support._progress-bar', ['segments' => $segments])->render());
     }
 }

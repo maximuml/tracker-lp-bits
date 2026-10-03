@@ -47,6 +47,10 @@ final class HtmlInPhpRatchetTest extends TestCase
      */
     private const EXCLUDED_SUBPATHS = [
         'Support/Metrics/',
+        // Sanitizer/parser internals: markup strings are data for
+        // DOMDocument/tag reconstruction, never emitted markup.
+        'Support/Html/Escape.php',
+        'Support/Html/HtmlSanitizer.php',
     ];
 
     /** Baseline: lines with a quoted '<table literal (layout markup in PHP). */
@@ -59,7 +63,7 @@ final class HtmlInPhpRatchetTest extends TestCase
     private const BASELINE_ECHO_IN_SERVICES = 0;
 
     /** Baseline: lines where a quoted string starts an HTML tag ('<div', "</td", '<!--'). */
-    private const BASELINE_HTML_LITERAL_LINES = 162;
+    private const BASELINE_HTML_LITERAL_LINES = 109;
 
     /** Baseline: HTML literal lines inside app/Repositories (target: 0). */
     private const BASELINE_REPO_HTML_LITERALS = 0;
@@ -180,6 +184,10 @@ final class HtmlInPhpRatchetTest extends TestCase
                 }
 
                 foreach (explode("\n", $content) as $lineNo => $line) {
+                    if (preg_match('/^\s*(\*|\/\/|\/\*)/', $line) === 1) {
+                        continue;
+                    }
+
                     if (preg_match($pattern, $line) === 1) {
                         $found[] = sprintf('%s:%d', $relative, $lineNo + 1);
                     }

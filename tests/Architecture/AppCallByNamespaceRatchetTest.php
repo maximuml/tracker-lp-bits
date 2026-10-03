@@ -28,10 +28,10 @@ final class AppCallByNamespaceRatchetTest extends TestCase
      * @var array<string, int>
      */
     private const BASELINES = [
-        'Controllers' => 7,
-        'Services' => 3,
+        'Controllers' => 2,
+        'Services' => 1,
         'Repositories' => 0,
-        'Other' => 262,
+        'Other' => 109,
     ];
 
     public function test_app_calls_in_controllers_do_not_exceed_baseline(): void

@@ -301,16 +301,17 @@ final class Shoutbox
                 }
                 $cls = $isMe ? 'shout-mention shout-mention-me' : 'shout-mention';
                 $name = $cache[$key]['name'];
-                $title = '';
                 $tooltip = __('legacy/shoutbox.tooltip_nick_reply');
-                if ($tooltip !== 'legacy/shoutbox.tooltip_nick_reply') {
-                    $title = ' title="'.htmlspecialchars((string) $tooltip, ENT_QUOTES).'"';
-                }
-                if ($currentUserId > 0) {
-                    return '<a class="'.$cls.' shout-nick-reply" href="userdetails.php?id='.$cache[$key]['id'].'" data-nick="'.htmlspecialchars($name, ENT_QUOTES).'"'.$title.'>@'.htmlspecialchars($name).'</a>';
-                }
+                $title = $tooltip !== 'legacy/shoutbox.tooltip_nick_reply' ? (string) $tooltip : '';
 
-                return '<a class="'.$cls.'" href="userdetails.php?id='.$cache[$key]['id'].'">@'.htmlspecialchars($name).'</a>';
+                return trim(view('support._shout-mention', [
+                    'cls' => $cls,
+                    'userId' => $cache[$key]['id'],
+                    'name' => $name,
+                    'title' => $title,
+                    'mention' => '@'.$name,
+                    'loggedIn' => $currentUserId > 0,
+                ])->render());
             },
             $html
         );
@@ -342,7 +343,7 @@ final class Shoutbox
                     return $m[0];
                 }
 
-                return '<a class="shout-torrent" href="details.php?id='.$id.'" target="_blank">#'.$id.'</a>';
+                return trim(view('support._shout-torrent', ['id' => $id])->render());
             },
             $html
         );

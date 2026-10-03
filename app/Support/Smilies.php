@@ -30,22 +30,21 @@ final class Smilies
 
     public static function link(string $formname, string $taname, int $smilyNumber): SafeHtml
     {
-        return SafeHtml::fromTrustedHtml('<a href="#" data-smile="[em'.$smilyNumber.']"'
-            .' data-smile-form="'.htmlspecialchars($formname, ENT_QUOTES).'"'
-            .' data-smile-text="'.htmlspecialchars($taname, ENT_QUOTES).'"'
-            .' data-domtt-content>'
-            .'<img class="nx-smiley" src="pic/smilies/'.$smilyNumber.'.gif" alt="[em'.$smilyNumber.']" /><template class="nx-tt"><img src="pic/smilies/'.$smilyNumber.'.gif" alt="" /></template></a>');
+        return SafeHtml::fromTrustedHtml(trim(view('support._smile-link', [
+            'formname' => $formname,
+            'taname' => $taname,
+            'n' => $smilyNumber,
+        ])->render()));
     }
 
     public static function quickRow(string $formname, string $taname): string
     {
-        $row = '<div class="nx-center">';
+        $links = [];
         foreach (self::QUICK_NUMBERS as $smilyNumber) {
-            $row .= self::link($formname, $taname, $smilyNumber);
+            $links[] = self::link($formname, $taname, $smilyNumber);
         }
-        $row .= '</div>';
 
-        return $row;
+        return trim(view('support._smile-row', ['links' => $links])->render());
     }
 
     /**

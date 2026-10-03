@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Repositories\CategoryRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\Html\SafeHtml;
 
 /**
  * Legacy category / icon helpers extracted from `include/functions.php`.
@@ -157,7 +158,11 @@ final class Category
         $catImg = self::iconImg($categoryId);
 
         if ($link !== '') {
-            $catImg = '<a href="'.$link.'cat='.$categoryId.'">'.$catImg.'</a>';
+            $catImg = trim(view('support._cat-link', [
+                'link' => $link,
+                'id' => $categoryId,
+                'img' => SafeHtml::fromTrustedHtml($catImg),
+            ])->render());
         }
 
         return $catImg;
@@ -226,7 +231,7 @@ final class Category
     {
         $data = self::iconData($categoryId);
 
-        return '<img'.($data['iconClass'] !== '' ? ' class="'.$data['iconClass'].'"' : '').' src="pic/cattrans.gif" alt="'.$data['name'].'" title="'.$data['name'].'" />';
+        return trim(view('support._cat-icon', $data)->render());
     }
 
     private static function categoryRepository(): CategoryRepository

@@ -228,7 +228,7 @@ final class Ratio
             $s = '52';
         }
 
-        return SafeHtml::fromTrustedHtml('<img src="pic/smilies/'.$s.'.gif" alt="" />');
+        return SafeHtml::fromTrustedHtml(trim(view('support._smiley-img', ['s' => $s])->render()));
     }
 
     /**
@@ -271,7 +271,7 @@ final class Ratio
             $color = self::color($ratio);
             $formatted = number_format($ratio, 3);
             if ($color !== '') {
-                $formatted = '<span class="'.self::colorClass($ratio).'">'.$formatted.'</span>';
+                $formatted = trim(view('support._span-class', ['cls' => self::colorClass($ratio), 'text' => $formatted])->render());
             }
 
             return $formatted;
@@ -298,7 +298,7 @@ final class Ratio
             $color = self::color($ratio);
             $ratio = $ratio > 10000 ? 'Inf.' : number_format($ratio, 3);
             if ($color) {
-                $ratio = '<span class="'.self::colorClass($ratio).'">'.$ratio.'</span>';
+                $ratio = trim(view('support._span-class', ['cls' => self::colorClass($ratio), 'text' => $ratio])->render());
             }
         } elseif ($uped > 0) {
             $ratio = 'Inf.';
@@ -322,7 +322,7 @@ final class Ratio
         $color = self::color($ratio);
         $formatted = number_format($ratio, $decimals);
         if ($color !== '' || $alwaysWrap) {
-            return SafeHtml::fromTrustedHtml('<span class="'.self::colorClass($ratio).'">'.$formatted.'</span>');
+            return SafeHtml::fromTrustedHtml(trim(view('support._span-class', ['cls' => self::colorClass($ratio), 'text' => $formatted])->render()));
         }
 
         return SafeHtml::fromTrustedHtml($formatted);

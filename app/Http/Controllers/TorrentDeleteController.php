@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Message;
 use App\Models\Torrent;
-use App\Models\User;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -24,6 +25,8 @@ class TorrentDeleteController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
+        private readonly TorrentRepositoryInterface $torrentRepository,
+        private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     public function fastDelete(Request $request): Response|RedirectResponse
@@ -47,7 +50,7 @@ class TorrentDeleteController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/fastdelete.std_delete_failed'), __('legacy/fastdelete.text_no_permission'));
         }
 
-        $torrent = Torrent::query()->where('id', $id)->first(['name', 'owner', 'seeders', 'anonymous']);
+        $torrent = $this->torrentRepository->findById($id, ['name', 'owner', 'seeders', 'anonymous']);
         if (! $torrent instanceof Torrent) {
             return redirect('/torrents.php');
         }
@@ -76,7 +79,7 @@ class TorrentDeleteController extends LegacyController
             Log::writeWithContext("Torrent $id ({$name}) was deleted by {$curUser['username']}", 'normal');
         }
 
-        if ($currentUserId != $ownerId && User::query()->where('id', $ownerId)->exists()) {
+        if ($currentUserId != $ownerId && $this->userRepository->existsById($ownerId)) {
             $locale = Locale::userLocale($ownerId);
             $dt = date('Y-m-d H:i:s');
             $subject = Locale::trans('torrent.msg_torrent_deleted', [], $locale);
@@ -124,7 +127,7 @@ class TorrentDeleteController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/delete.std_delete_failed'), __('legacy/delete.std_not_owner'));
         }
 
-        $torrent = Torrent::query()->find($id, ['name', 'owner', 'seeders', 'anonymous']);
+        $torrent = $this->torrentRepository->findById($id, ['name', 'owner', 'seeders', 'anonymous']);
         if ($torrent === null) {
             return $this->legacyPage($request, 'delete', true);
         }
@@ -173,7 +176,7 @@ class TorrentDeleteController extends LegacyController
         $uploadtorrentBonus = (float) SiteConfig::current()->bonus->uploadTorrent();
         Bonus::updatePoints('-', $uploadtorrentBonus, $ownerId);
 
-        if ($currentUserId != $ownerId && User::query()->where('id', $ownerId)->exists()) {
+        if ($currentUserId != $ownerId && $this->userRepository->existsById($ownerId)) {
             $dt = date('Y-m-d H:i:s');
             $locale = Locale::userLocale($ownerId);
             $subject = Locale::trans('torrent.msg_torrent_deleted', [], $locale);

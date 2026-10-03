@@ -47,6 +47,11 @@ interface ExamRepositoryInterface
     public function listValid($excludeId = null, $isDiscovered = null, $type = null);
 
     /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
+     */
+    public function listAll();
+
+    /**
      * @return Collection<int, Exam>
      */
     public function listMatchExam(int $uid);

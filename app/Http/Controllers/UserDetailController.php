@@ -89,7 +89,7 @@ class UserDetailController extends Controller
             );
         }
 
-        $userModel = User::query()->find($id);
+        $userModel = $this->userRepository->findById($id);
         $temporaryInviteCount = $userModel instanceof User ? $this->userDetailRepository->getTemporaryInviteCount($userModel) : 0;
 
         return view('user.details', array_merge([

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\InfoRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\User;
 use App\Services\BitbucketService;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -30,6 +30,7 @@ class InfoController extends LegacyController
         private readonly BitbucketService $bitbucketService,
         private readonly CurrentUser $currentUser,
         private readonly InfoRepositoryInterface $infoRepository,
+        private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     public function userhistory(Request $request): View|RedirectResponse|Response
@@ -184,11 +185,11 @@ class InfoController extends LegacyController
             if ($username === '' || $donated === '') {
                 $error = 'Missing form data.';
             } else {
-                $user = User::query()->where('username', $username)->first(['id']);
+                $user = $this->userRepository->findByUsername($username, ['id']);
                 if (! $user) {
                     $error = 'Unable to update account.';
                 } else {
-                    User::query()->where('id', $user->id)->update(['donated' => $donated]);
+                    $this->userRepository->updateFields((int) $user->id, ['donated' => $donated]);
 
                     return redirect('/userdetails.php?id='.$user->id);
                 }

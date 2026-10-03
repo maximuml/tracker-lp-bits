@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AgentDenyIndexRequest;
 use App\Http\Requests\AgentDenyRequest;
 use App\Http\Resources\AgentDenyResource;
-use App\Models\AgentDeny;
 use App\Repositories\AgentDenyRepository;
 
 class AgentDenyController extends Controller
@@ -56,7 +55,7 @@ class AgentDenyController extends Controller
      */
     public function show($id): array
     {
-        $result = AgentDeny::query()->findOrFail($id);
+        $result = $this->repository->getDetail($id);
         $resource = new AgentDenyResource($result);
 
         return $this->success($resource);

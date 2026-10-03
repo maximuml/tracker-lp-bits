@@ -86,7 +86,7 @@ class PostController extends Controller
             return $postId;
         });
 
-        $post = Post::query()->findOrFail($postId);
+        $post = $this->postLookupRepository->getPostOrFail($postId);
         $post->load('user');
 
         return $this->success(new PostResource($post), 'Post created');

@@ -94,4 +94,28 @@ interface UserRepositoryInterface
      * @return Collection<int, User>
      */
     public function getByIds(array $ids, array $columns = []): Collection;
+
+    public function findById(int $id): ?User;
+
+    public function existsById(int $id): bool;
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findByUsername(string $username, array $columns = ['*']): ?User;
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findByEmail(string $email, array $columns = ['*']): ?User;
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findByPasskey(string $passkey, array $columns = ['*']): ?User;
+
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    public function updateFields(int $id, array $fields): void;
 }

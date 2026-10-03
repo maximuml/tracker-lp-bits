@@ -120,6 +120,11 @@ class PostLookupRepository extends BaseRepository
             ->value('id');
     }
 
+    public function getPostOrFail(int $id): Post
+    {
+        return Post::query()->findOrFail($id);
+    }
+
     /**
      * @return array<string, mixed>
      */

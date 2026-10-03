@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
-use App\Models\User;
 use App\Services\ComplainService;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
@@ -27,6 +27,7 @@ class SupportController extends LegacyController
     public function __construct(
         private readonly ComplainService $complainService,
         private readonly CurrentUser $currentUser,
+        private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     public function complains(Request $request): View|RedirectResponse|Response
@@ -189,7 +190,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(('Error'), 'Complain not found.');
         }
 
-        $user = User::query()->where('email', (string) ($complain['email'] ?? ''))->first(['id', 'username']);
+        $user = $this->userRepository->findByEmail((string) ($complain['email'] ?? ''), ['id', 'username']);
 
         $replyRows = DB::table('complain_replies')
             ->where('complain', (int) ($complain['id'] ?? 0))

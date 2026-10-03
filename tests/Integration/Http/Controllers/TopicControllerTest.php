@@ -99,6 +99,7 @@ final class TopicControllerTest extends TestCase
 
         /** @var ForumRepository&Mockery\MockInterface $repo */
         $repo = Mockery::mock(ForumRepository::class);
+        $repo->shouldReceive('getForumOrFail')->once()->with($forum->id)->andReturn($forum);
         $repo->shouldReceive('incrementForumTopicCount')->once();
         $repo->shouldReceive('incrementForumPostCount')->once();
         app()->instance(ForumRepository::class, $repo);
@@ -107,6 +108,7 @@ final class TopicControllerTest extends TestCase
         $topicRepo = Mockery::mock(TopicRepository::class);
         $topicRepo->shouldReceive('createTopic')->once()->andReturn(500);
         $topicRepo->shouldReceive('updateTopicFirstLastPost')->once();
+        $topicRepo->shouldReceive('getTopicById')->once()->with(500)->andReturnUsing(fn () => Topic::query()->findOrFail(500));
         app()->instance(TopicRepository::class, $topicRepo);
 
         /** @var PostRepository&Mockery\MockInterface $postRepo */

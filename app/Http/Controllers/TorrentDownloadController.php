@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Exceptions\NexusException;
-use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\IpLogRepository;
 use App\Support\Config\SiteConfig;
@@ -35,6 +36,8 @@ class TorrentDownloadController extends LegacyController
         private readonly CurrentUser $currentUser,
         private readonly IpLogRepository $ipLogRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
+        private readonly TorrentRepositoryInterface $torrentRepository,
+        private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     public function download(Request $request, TorrentDownloadRepositoryInterface $torrentRepository): SymfonyResponse
@@ -50,7 +53,7 @@ class TorrentDownloadController extends LegacyController
             }
             $uid = (int) $params[0];
             $hash = $params[1];
-            $user = User::query()->find($uid);
+            $user = $this->userRepository->findById($uid);
             if (! $user) {
                 throw new NexusException('download.invalid_uid');
             }
@@ -64,7 +67,7 @@ class TorrentDownloadController extends LegacyController
             }
             $id = (int) $decrypted[0];
         } elseif (SiteConfig::current()->torrent->downloadSupportPasskey() && ! empty($passkey) && ! empty($id)) {
-            $user = User::query()->where('passkey', $passkey)->first();
+            $user = $this->userRepository->findByPasskey((string) $passkey);
             if (! $user) {
                 throw new NexusException('download.invalid_passkey');
             }
@@ -92,24 +95,20 @@ class TorrentDownloadController extends LegacyController
             }
         }
 
-        if (! $user instanceof User) {
-            throw new NexusException('download.invalid_user');
-        }
-
         $ip = Network::clientIp();
-        User::query()->where('id', $user->id)->update([
+        $this->userRepository->updateFields((int) $user->id, [
             'last_access' => now()->toDateTimeString(),
             'ip' => $ip,
         ]);
         $this->ipLogRepository->saveToCache($user->id, $request->getPathInfo(), [$ip]);
 
-        $torrent = Torrent::query()->findOrFail($id);
+        $torrent = $this->torrentRepository->findOrFailById($id);
 
         Gate::forUser($user)->authorize('download', $torrent);
 
         if (strlen((string) $user->passkey) != 32) {
             $passkey = $this->passkeyGenerator->generate();
-            User::query()->where('id', $user->id)->update(['passkey' => $passkey]);
+            $this->userRepository->updateFields((int) $user->id, ['passkey' => $passkey]);
             $user->passkey = $passkey;
         }
 
@@ -223,7 +222,7 @@ class TorrentDownloadController extends LegacyController
                 $update['showclienterror'] = false;
             }
             if (! empty($update)) {
-                User::query()->where('id', $userId)->update($update);
+                $this->userRepository->updateFields((int) $userId, $update);
             }
         }
 

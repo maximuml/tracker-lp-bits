@@ -15,6 +15,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\RewardRepository;
+use App\Repositories\TorrentDetailRepository;
 use App\Repositories\UserListingRepository;
 use App\Support\Api;
 use App\Support\AssetAppender;
@@ -38,7 +39,7 @@ class BonusHistoryController extends LegacyController
 {
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(private readonly RewardRepository $rewardRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserListingRepository $userListingRepository, private readonly UserRepositoryInterface $userRepository,
+    public function __construct(private readonly TorrentDetailRepository $torrentDetailRepository, private readonly RewardRepository $rewardRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserListingRepository $userListingRepository, private readonly UserRepositoryInterface $userRepository,
         BonusCalculationRepository $bonusCalculationRepository,
         private readonly CurrentUser $currentUser,
     ) {
@@ -202,19 +203,7 @@ JS;
         $timeEnd = strtotime('+1 month', $timeStart) ?: time();
         $sqlEndTime = date('Y-m-d H:i:s', $timeEnd);
 
-        $uploaders = DB::table('torrents')
-            ->leftJoin('users', 'torrents.owner', '=', 'users.id')
-            ->where('users.class', '>=', $uploaderClass)
-            ->where('torrents.added', '>', $sqlStartTime)
-            ->where('torrents.added', '<', $sqlEndTime)
-            ->groupBy('users.id', 'users.username')
-            ->orderBy($sortColumn, $sortDirection)
-            ->get([
-                'users.id AS userid',
-                'users.username AS username',
-                DB::raw('COUNT(torrents.id) AS torrent_count'),
-                DB::raw('SUM(torrents.size) AS torrent_size'),
-            ]);
+        $uploaders = $this->torrentRepository->listUploaderStats($sqlStartTime, $sqlEndTime, $uploaderClass, $sortColumn, $sortDirection);
 
         $hasUpUserIds = [];
         foreach ($uploaders as $uploader) {
@@ -226,12 +215,7 @@ JS;
         UserDisplay::preload($allUserIds);
         $lastTorrents = $allUserIds === []
             ? collect()
-            : DB::table('torrents')
-                ->whereIn('id', function ($q) use ($allUserIds) {
-                    $q->selectRaw('MAX(id)')->from('torrents')->whereIn('owner', $allUserIds)->groupBy('owner');
-                })
-                ->get(['id', 'name', 'added', 'owner'])
-                ->keyBy('owner');
+            : $this->torrentRepository->listLastTorrentsForOwners($allUserIds);
 
         $rows = [];
         foreach ($uploaders as $uploader) {
@@ -315,8 +299,8 @@ JS;
             return response()->json(Api::failWithContext('You are giving magic to yourself.', $validated));
         }
 
-        $alreadyMagic = DB::table('magic')->where('torrentid', $torrentId)->where('userid', $userId)->count();
-        if ($alreadyMagic != 0) {
+        $alreadyMagic = $this->torrentDetailRepository->hasMagicRecord($torrentId, $userId);
+        if ($alreadyMagic) {
             return response()->json(Api::failWithContext('You already gave the magic value!', $validated));
         }
 
@@ -332,11 +316,7 @@ JS;
             return response()->json(Api::failWithContext('Invalid torrent owner!', $validated));
         }
 
-        DB::table('magic')->insert([
-            'torrentid' => $torrentId,
-            'userid' => $userId,
-            'value' => $value,
-        ]);
+        $this->torrentDetailRepository->insertMagic($torrentId, $userId, $value);
 
         Bonus::updatePoints('-', (float) $value, $userId);
         BonusLogs::add($userId, (float) ($curUser['seedbonus'] ?? 0), $value, (float) ($curUser['seedbonus'] ?? 0) - $value, '', BusinessType::REWARD_TORRENT->value);

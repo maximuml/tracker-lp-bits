@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\News;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class NewsRepository extends BaseRepository
 {
@@ -77,5 +78,39 @@ class NewsRepository extends BaseRepository
         $result = $model->delete();
 
         return $result;
+    }
+
+    public function deleteById(int $id): int
+    {
+        return News::query()->where('id', $id)->delete();
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    public function insertGetId(array $attributes): int
+    {
+        return (int) News::query()->insertGetId($attributes);
+    }
+
+    public function findById(int $id): ?News
+    {
+        return News::query()->find($id);
+    }
+
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    public function updateFields(int $id, array $fields): int
+    {
+        return News::query()->where('id', $id)->update($fields);
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, News>
+     */
+    public function paginateLatest(int $perPage)
+    {
+        return News::query()->with(['user'])->latest('added')->paginate($perPage);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Message\ListUnreadDto;
 use App\DTOs\Message\MessageListDto;
 use App\DTOs\Message\StoreMessageDto;
@@ -13,7 +14,6 @@ use App\Http\Requests\MoveOrDeleteMessageRequest;
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Resources\MessageResource;
 use App\Models\Message;
-use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Services\MessageService;
@@ -42,6 +42,7 @@ class MessageController extends LegacyController
         MessageService $legacyService,
         MessagePageService $pageService,
         private readonly CurrentUser $currentUser,
+        private readonly UserRepositoryInterface $userRepository,
     ) {
         $this->repository = $repository;
         $this->legacyService = $legacyService;
@@ -85,7 +86,7 @@ class MessageController extends LegacyController
         }
         $replyto = $replyto !== null && $replyto !== '' ? (int) $replyto : 0;
 
-        $user = User::query()->find($receiver);
+        $user = $this->userRepository->findById($receiver);
         if (! $user) {
             return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_no_user_id'));
         }
@@ -93,7 +94,7 @@ class MessageController extends LegacyController
         $subject = '';
         $body = '';
         if ($replyto > 0) {
-            $msg = Message::query()->find($replyto);
+            $msg = $this->repository->findById($replyto);
             if (! $msg) {
                 return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
             }
@@ -224,9 +225,7 @@ class MessageController extends LegacyController
         $dto = UpdateMessageDto::fromRequest($request);
 
         if ($dto->unread !== null) {
-            Message::query()->where('id', (int) $message->id)->where(function ($q) use ($userId) {
-                $q->where('receiver', $userId)->orWhere('sender', $userId);
-            })->update(['unread' => $dto->unread]);
+            $this->repository->setUnreadForUser((int) $message->id, $userId, $dto->unread);
         }
 
         if ($dto->location !== null) {
@@ -258,12 +257,7 @@ class MessageController extends LegacyController
     {
         $dto = ListUnreadDto::fromRequest($request);
 
-        $messages = Message::query()
-            ->where('receiver', Auth::id())
-            ->where('unread', true)
-            ->with('send_user')
-            ->orderByDesc('id')
-            ->paginate($dto->perPage);
+        $messages = $this->repository->paginateUnread((int) Auth::id(), $dto->perPage);
 
         return $this->success(MessageResource::collection($messages));
     }

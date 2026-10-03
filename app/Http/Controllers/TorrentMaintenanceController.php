@@ -7,8 +7,8 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Models\Message;
 use App\Models\Torrent;
+use App\Repositories\MessageRepository;
 use App\Repositories\PeerRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -29,7 +29,7 @@ use Rhilip\Bencode\Bencode;
 
 class TorrentMaintenanceController extends LegacyController
 {
-    public function __construct(private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
+    public function __construct(private readonly MessageRepository $messageRepository, private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly CurrentUser $currentUser,
     ) {}
 
@@ -180,7 +180,7 @@ class TorrentMaintenanceController extends LegacyController
                 .Locale::trans('torrent.msg_ask_reseed', [], $locale)
                 .'[url='.Url::absolute($baseUrl).'/details.php?id='.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
                 .Locale::trans('torrent.msg_thank_you', [], $locale);
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $snatchRow['userid'],
                 'subject' => $rsSubject,

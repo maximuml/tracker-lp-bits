@@ -155,7 +155,7 @@ class ForumController extends LegacyController
      */
     public function store(Request $request): array
     {
-        $forum = Forum::query()->create(StoreForumDto::fromRequest($request)->toArray());
+        $forum = $this->forumRepository->create(StoreForumDto::fromRequest($request)->toArray());
 
         return $this->success(new ForumResource($forum), 'Forum created');
     }

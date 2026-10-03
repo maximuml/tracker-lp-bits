@@ -8,9 +8,9 @@ use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Comment;
-use App\Models\Message;
 use App\Models\User;
 use App\Repositories\CommentRepository;
+use App\Repositories\MessageRepository;
 use App\Support\Bonus;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -27,7 +27,7 @@ class WebCommentController extends Controller
 {
     private CommentRepository $commentRepository;
 
-    public function __construct(private readonly TorrentRepositoryInterface $torrentRepository, CommentRepository $commentRepository)
+    public function __construct(private readonly MessageRepository $messageRepository, private readonly TorrentRepositoryInterface $torrentRepository, CommentRepository $commentRepository)
     {
         $this->commentRepository = $commentRepository;
     }
@@ -329,7 +329,7 @@ class WebCommentController extends Controller
         $message = Locale::trans($messageKey, [], $locale)
             .' [url='.Url::siteBase().'/'.$this->buildScript($type, $parentId).'] '.$name.'[/url].';
 
-        Message::add([
+        $this->messageRepository->add([
             'sender' => null,
             'receiver' => $ownerId,
             'subject' => $subject,

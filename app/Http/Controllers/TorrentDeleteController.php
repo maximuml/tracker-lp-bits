@@ -7,8 +7,8 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Message;
 use App\Models\Torrent;
+use App\Repositories\MessageRepository;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -23,7 +23,7 @@ use Illuminate\View\View;
 
 class TorrentDeleteController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly MessageRepository $messageRepository,
         private readonly CurrentUser $currentUser,
         private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly UserRepositoryInterface $userRepository,
@@ -86,7 +86,7 @@ class TorrentDeleteController extends LegacyController
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
                 .$name
                 .Locale::trans('torrent.msg_was_deleted_by', ['admin' => $curUser['username']], $locale);
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $ownerId,
                 'subject' => $subject,
@@ -186,7 +186,7 @@ class TorrentDeleteController extends LegacyController
                 ."[url=userdetails.php?id=$currentUserId]{$curUser['username']}[/url]"
                 .Locale::trans('torrent.msg_reason_is', [], $locale)
                 .$reasonstr;
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $ownerId,
                 'subject' => $subject,

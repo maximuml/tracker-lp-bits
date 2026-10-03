@@ -22,6 +22,10 @@ use Tests\Attributes\TestCategory;
  * builders, views): 11 — all remaining matches are docblock prose and
  * locale-folder `$lang` variables in Locale/LanguageRepository, not
  * legacy language-array reads.
+ * Lowered to 0 after tightening the matcher: it now requires the
+ * `lang_` group suffix and skips comment lines, so locale-folder
+ * variables (`$lang`, `$langMap`, `$languageMaps`) and docblock prose
+ * no longer count; every real `$lang_x['k']` read is converted.
  *
  * Hard rules (not baselines):
  *   - lang/ directory must not come back
@@ -30,19 +34,19 @@ use Tests\Attributes\TestCategory;
  *     for a single key.
  *
  * To check the current count:
- *   grep -roh '\$lang[a-zA-Z0-9_]*\s*\[' app/ resources/views/ | wc -l
+ *   grep -roh '\$lang_[a-zA-Z0-9_]*\s*\[' app/ resources/views/ | wc -l
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class LegacyLangRatchetTest extends TestCase
 {
     private const BASE_DIR = __DIR__.'/../..';
 
-    /** Baseline: `$lang…[` reads across app/ and resources/views. */
-    private const BASELINE_LANG_ARRAY_REFS = 11;
+    /** Baseline: `$lang_<group>[` reads across app/ and resources/views. */
+    private const BASELINE_LANG_ARRAY_REFS = 0;
 
     public function test_lang_array_reads_do_not_exceed_baseline(): void
     {
-        $offenders = $this->matchingLines('/\$lang[a-zA-Z0-9_]*\s*\[/');
+        $offenders = $this->matchingLines('/\$lang_[a-zA-Z0-9_]*\s*\[/');
 
         $this->assertLessThanOrEqual(
             self::BASELINE_LANG_ARRAY_REFS,
@@ -102,6 +106,10 @@ final class LegacyLangRatchetTest extends TestCase
                 }
 
                 foreach (explode("\n", $content) as $lineNo => $line) {
+                    if (preg_match('#^\s*(//|\*|/\*)#', $line) === 1) {
+                        continue;
+                    }
+
                     if (preg_match_all($pattern, $line, $m) > 0) {
                         foreach ($m[0] as $_) {
                             $found[] = sprintf('%s:%d', $relative, $lineNo + 1);

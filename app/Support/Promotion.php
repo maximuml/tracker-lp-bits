@@ -226,7 +226,12 @@ final class Promotion
                     $text = (string) __('legacy/functions.'.$config['text']);
                     $timeout = SafeHtml::fromTrustedHtml((string) $timeoutStr);
                     $subColor = $config['subColor'];
-                    $domttHtml = SafeHtml::fromTrustedHtml("<b><span class=\"{$config['class']}\">$text</span></b>".((string) __('legacy/functions.text_will_end_in'))."<b>$timeoutStr</b>");
+                    $domttHtml = SafeHtml::fromTrustedHtml(trim(view('support._promo-domtt', [
+                        'cls' => $config['class'],
+                        'text' => $text,
+                        'endIn' => (string) __('legacy/functions.text_will_end_in'),
+                        'timeout' => SafeHtml::fromTrustedHtml($timeoutStr),
+                    ])->render()));
                 } else {
                     $promotion = 1;
                 }
@@ -314,20 +319,30 @@ final class Promotion
             $endIn = (string) __('legacy/functions.text_will_end_in');
 
             return $badge->subColor !== null
-                ? ' <span class="'.$badge->subColor.'">'.$endIn.$badge->timeout->toHtml().'</span>'
+                ? ltrim(view('support._promo-sub', [
+                    'subColor' => $badge->subColor,
+                    'endIn' => $endIn,
+                    'timeout' => SafeHtml::fromTrustedHtml($badge->timeout->toHtml()),
+                ])->render(), "\n")
                 : ' '.$endIn.$badge->timeout->toHtml();
         }
         if ($badge->mode === 'word') {
             $tip = $badge->domttHtml !== null ? ' data-domtt-promo' : '';
 
-            return " <b>[<span class='{$badge->cssClass}'$tip>{$badge->text}</span>"
-                .($badge->domttHtml !== null ? '<template class="nx-tt">'.$badge->domttHtml->toHtml().'</template>' : '').'</b>';
-        }
-        if ($badge->domttHtml !== null) {
-            return " <span class=\"nx-promo nx-promo--{$badge->cssClass}\" role=\"img\" aria-label=\"{$badge->alt}\" data-domtt-promo>{$badge->alt}<template class=\"nx-tt\">".$badge->domttHtml->toHtml().'</template></span>';
+            return ltrim(view('support._promo-word', [
+                'cls' => $badge->cssClass,
+                'tip' => SafeHtml::fromTrustedHtml($tip),
+                'text' => $badge->text,
+                'domtt' => $badge->domttHtml !== null ? SafeHtml::fromTrustedHtml($badge->domttHtml->toHtml()) : null,
+            ])->render(), "\n");
         }
 
-        return " <span class=\"nx-promo nx-promo--{$badge->cssClass}\" role=\"img\" aria-label=\"{$badge->alt}\" title=\"{$badge->text}\">{$badge->alt}</span>";
+        return ltrim(view('support._promo-icon', [
+            'cls' => $badge->cssClass,
+            'alt' => $badge->alt,
+            'text' => $badge->text,
+            'domtt' => $badge->domttHtml !== null ? SafeHtml::fromTrustedHtml($badge->domttHtml->toHtml()) : null,
+        ])->render(), "\n");
     }
 
     /**

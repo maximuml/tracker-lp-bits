@@ -447,7 +447,7 @@ class UserProfile extends ViewRecord implements HasActions
             if ($meta->meta_key == UserMeta::META_KEY_PERSONALIZED_USERNAME) {
                 $text .= sprintf('(%s)', $meta->getDeadlineText());
             }
-            $props[] = "<div>{$text}</div>";
+            $props[] = trim(view('support._prop-div', ['text' => $text])->render());
         }
 
         return $props;

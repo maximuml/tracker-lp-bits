@@ -35,7 +35,7 @@ final class Comment
         self::$tempCode[$key] = $value;
         self::$tempCodeCount++;
 
-        return "<tempCode_$key>";
+        return "\x08tempCode_$key\x08";
     }
 
     /**
@@ -83,34 +83,17 @@ final class Comment
 
         $s = nl2br($s);
 
-        $originalBbTagArray = [
-            '[siteurl]', '[site]', '[*]', '[b]', '[/b]', '[i]', '[/i]',
-            '[u]', '[/u]', '[s]', '[/s]', '[pre]', '[/pre]', '[/color]',
-            '[/font]', '[/size]', '[hr]', '  ',
-        ];
-        $replaceXhtmlTagArray = [
-            Url::schemeAndHost(),
-            SiteConfig::current()->basic->siteName(),
-            '&#x2022; ',
-            '<b>', '</b>', '<i>', '</i>', '<u>', '</u>', '<s>', '</s>',
-            '<pre>', '</pre>', '</span>', '</span>', '</span>', '<hr>',
-            ' &nbsp;',
-        ];
-        $s = str_replace($originalBbTagArray, $replaceXhtmlTagArray, $s);
+        /** @var array<string, string> $literalMap */
+        $literalMap = config('bbcode.literal_map');
+        $s = str_replace(
+            ['[siteurl]', '[site]', ...array_keys($literalMap)],
+            [Url::schemeAndHost(), SiteConfig::current()->basic->siteName(), ...array_values($literalMap)],
+            $s,
+        );
 
-        $originalBbTagArray = [
-            "/\[font=([^\[\(&\\\\;]+?)\]/is",
-            "/\[color=([#0-9a-z]{1,15})\]/is",
-            "/\[color=([a-z]+)\]/is",
-            "/\[size=([1-7])\]/is",
-        ];
-        $replaceXhtmlTagArray = [
-            '<span face="\\1">',
-            '<span>',
-            '<span>',
-            '<span>',
-        ];
-        $s = (string) preg_replace($originalBbTagArray, $replaceXhtmlTagArray, $s);
+        /** @var array<string, string> $spanMap */
+        $spanMap = config('bbcode.span_map');
+        $s = (string) preg_replace(array_keys($spanMap), array_values($spanMap), $s);
 
         if ($enableimage) {
             $imgReplaceCount = 0;
@@ -192,7 +175,7 @@ final class Comment
             static function (array $m): string {
                 $smile = Smilies::pathFor((int) (int) $m[1]);
 
-                return $smile ? '<img src="'.$smile.'" alt="[em'.$m[1].']" />' : '[em'.$m[1].']';
+                return $smile ? trim(view('support._em-img', ['smile' => $smile, 'n' => $m[1]])->render()) : '[em'.$m[1].']';
             },
             $s,
         );
@@ -234,7 +217,7 @@ final class Comment
         $j = 0;
         while (count(self::$tempCode) > 0 && $j <= 5) {
             foreach (self::$tempCode as $key => $code) {
-                $s = str_replace("<tempCode_$key>", $code, $s, $count);
+                $s = str_replace("\x08tempCode_$key\x08", $code, $s, $count);
                 if ($count) {
                     unset(self::$tempCode[$key]);
                 }

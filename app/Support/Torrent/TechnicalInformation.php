@@ -237,10 +237,9 @@ class TechnicalInformation
             $hiddenTracksHtml .= view('torrent._nti_track', ['track' => $this->audioTrackVm($track)])->render();
         }
         $hiddenAudioSpoiler = $hiddenTracksHtml !== ''
-            ? SafeHtml::fromTrustedHtml(sprintf(
-                '<div class="nti-more">%s</div>',
-                Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)
-            ))
+            ? SafeHtml::fromTrustedHtml(trim(view('support._nti-more', [
+                'inner' => SafeHtml::fromTrustedHtml(Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)),
+            ])->render()))
             : null;
 
         return new TechnicalInfoViewModel(
@@ -269,7 +268,9 @@ class TechnicalInformation
         $body = view('torrent._nti_spoiler_kv', ['items' => $items])->render();
         $bbcode = sprintf('[spoiler=%s]%s[/spoiler]', $title, $body);
 
-        return SafeHtml::fromTrustedHtml(sprintf('<div class="nti-more">%s</div>', Format::formatComment($bbcode, false)));
+        return SafeHtml::fromTrustedHtml(trim(view('support._nti-more', [
+            'inner' => SafeHtml::fromTrustedHtml(Format::formatComment($bbcode, false)),
+        ])->render()));
     }
 
     /** @param  array<string, mixed>  $track */

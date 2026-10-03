@@ -241,7 +241,7 @@ final class UserDisplay
 
     public static function avatarImage(string $url, string $langFolder): string
     {
-        return '<img src="'.$url.'" alt="avatar" width="150px" data-avatar-check="'.$langFolder.'" />';
+        return trim(view('support._avatar-img', ['url' => $url, 'langFolder' => $langFolder])->render());
     }
 
     /**
@@ -305,13 +305,14 @@ final class UserDisplay
             $now = date('Y-m-d H:i:s');
             $donorUntil = $arr['donoruntil'] ?? null;
             $isDonor = $arr['donor'] && ($donorUntil === null || $donorUntil < '1970' || $donorUntil >= $now);
-            $pics = $isDonor ? '<img class="'.$donorpic.'" src="/pic/trans.gif" alt="Donor" />' : '';
+            $pic = fn (string $cls, string $alt): string => trim(view('support._user-pic', ['cls' => $cls, 'alt' => $alt])->render());
+            $pics = $isDonor ? $pic($donorpic, 'Donor') : '';
 
             if ($arr['enabled']) {
-                $pics .= ($arr['leechwarn'] ? '<img class="'.$leechwarnpic.'" src="/pic/trans.gif" alt="Leechwarned" />' : '')
-                    .($arr['warned'] ? '<img class="'.$warnedpic.'" src="/pic/trans.gif" alt="Warned" />' : '');
+                $pics .= ($arr['leechwarn'] ? $pic($leechwarnpic, 'Leechwarned') : '')
+                    .($arr['warned'] ? $pic($warnedpic, 'Warned') : '');
             } else {
-                $pics .= '<img class="'.$disabledpic.'" src="/pic/trans.gif" alt="Disabled" />'."\n";
+                $pics .= $pic($disabledpic, 'Disabled')."\n";
             }
 
             $username = htmlspecialchars((string) $arr['username']);
@@ -322,14 +323,14 @@ final class UserDisplay
             }
             if ($underline) {
                 $hasSetRainbow = true;
-                $username = "<u{$rainbow}>{$username}</u>";
+                $username = self::inlineWrap('u', $rainbow, $username);
             }
             if ($bold) {
                 if ($hasSetRainbow) {
-                    $username = "<b>{$username}</b>";
+                    $username = self::inlineWrap('b', '', $username);
                 } else {
                     $hasSetRainbow = true;
-                    $username = "<b{$rainbow}>{$username}</b>";
+                    $username = self::inlineWrap('b', $rainbow, $username);
                 }
             }
 
@@ -339,17 +340,30 @@ final class UserDisplay
             $title = $arr['title'] ?? '';
 
             $username = ($link
-                ? '<a '.$link_ext.' href="'.$href.'"'.($target ? ' target="_blank"' : '')." class='".$classNameColored."_Name'>".$username.'</a>'
+                ? trim(view('support._user-link', [
+                    'linkExt' => SafeHtml::fromTrustedHtml($link_ext),
+                    'href' => $href,
+                    'targetAttr' => SafeHtml::fromTrustedHtml($target ? ' target="_blank"' : ''),
+                    'cls' => $classNameColored,
+                    'inner' => SafeHtml::fromTrustedHtml($username),
+                ])->render())
                 : $username)
                 .$pics
                 .($withtitle
-                    ? ' ('.($title === '' ? $className : "<span class='".$classNameColored."_Name'><b>".htmlspecialchars($title).'</b></span>').')'
+                    ? ' ('.($title === '' ? $className : trim(view('support._user-title', [
+                        'cls' => $classNameColored,
+                        'title' => $title,
+                    ])->render())).')'
                     : '');
 
-            $username = '<span class="nowrap">'.($bracket ? '('.$username.')' : $username).'</span>';
+            $username = trim(view('support._user-nowrap', [
+                'inner' => SafeHtml::fromTrustedHtml($bracket ? '('.$username.')' : $username),
+            ])->render());
         } else {
-            $username = '<i>'.Locale::trans('nexus.user_not_exists').'</i>';
-            $username = '<span class="nowrap">'.($bracket ? '('.$username.')' : $username).'</span>';
+            $username = self::inlineWrap('i', '', (string) Locale::trans('nexus.user_not_exists'));
+            $username = trim(view('support._user-nowrap', [
+                'inner' => SafeHtml::fromTrustedHtml($bracket ? '('.$username.')' : $username),
+            ])->render());
         }
 
         if (func_num_args() === 1) {
@@ -357,6 +371,15 @@ final class UserDisplay
         }
 
         return SafeHtml::fromTrustedHtml($username);
+    }
+
+    private static function inlineWrap(string $tag, string $rainbow, string $inner): string
+    {
+        return trim(view('support._user-inline', [
+            'tag' => $tag,
+            'rainbow' => SafeHtml::fromTrustedHtml($rainbow),
+            'inner' => SafeHtml::fromTrustedHtml($inner),
+        ])->render());
     }
 
     private static function userRepository(): UserRepositoryInterface

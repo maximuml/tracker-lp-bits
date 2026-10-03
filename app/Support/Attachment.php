@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Repositories\AttachmentRepository;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -52,9 +53,16 @@ final class Attachment
         string $sizeLabel,
     ): string {
         $onclick = $imageResizer ? ' data-zoomable data-zoom-src="'.htmlspecialchars($url).'"' : '';
-        $tooltip = "<strong>$sizeLabel</strong>: $sizeText<br />$timeText";
 
-        return '<img id="attach'.$id.'" alt="'.htmlspecialchars($filename).'" src="'.htmlspecialchars($url).'"'.$onclick.' data-domtt-promo /><template class="nx-tt">'.$tooltip.'</template>';
+        return trim(view('support._attach-img', [
+            'id' => $id,
+            'filename' => $filename,
+            'url' => $url,
+            'onclick' => SafeHtml::fromTrustedHtml($onclick),
+            'sizeLabel' => $sizeLabel,
+            'sizeText' => $sizeText,
+            'timeText' => SafeHtml::fromTrustedHtml($timeText),
+        ])->render());
     }
 
     /**
@@ -71,11 +79,18 @@ final class Attachment
     ): string {
         $icon = self::iconForFileType((string) ($row['filetype'] ?? ''));
         $downloadCount = number_format((int) ($row['downloads'] ?? 0));
-        $href = htmlspecialchars("getattachment.php?id=$id&dlkey=$dlkey");
-        $filenameHtml = htmlspecialchars($filename);
-        $tooltip = "<strong>$downloadsLabel</strong>: $downloadCount<br />$timeText";
+        $href = "getattachment.php?id=$id&dlkey=$dlkey";
 
-        return '<div class="attach">'.$icon.'&nbsp;&nbsp;<a href="'.$href.'" target="_blank" id="attach'.$id.'" data-domtt-promo>'.$filenameHtml.'</a><template class="nx-tt">'.$tooltip.'</template>&nbsp;&nbsp;<span class="size">('.$sizeText.')</span></div>';
+        return trim(view('support._attach-file', [
+            'icon' => SafeHtml::fromTrustedHtml($icon),
+            'href' => $href,
+            'id' => $id,
+            'filename' => $filename,
+            'downloadsLabel' => $downloadsLabel,
+            'downloadCount' => $downloadCount,
+            'timeText' => SafeHtml::fromTrustedHtml($timeText),
+            'sizeText' => $sizeText,
+        ])->render());
     }
 
     /**
@@ -124,7 +139,11 @@ final class Attachment
         [$row, $url] = self::rowAndUrlByKey($dlkey);
 
         if (empty($row)) {
-            return '<div>'.Locale::trans('attachment.text_key').$dlkey.Locale::trans('attachment.not_found').'</div>';
+            return trim(view('support._attach-notfound', [
+                'before' => Locale::trans('attachment.text_key'),
+                'dlkey' => $dlkey,
+                'after' => Locale::trans('attachment.not_found'),
+            ])->render());
         }
 
         return self::render(
@@ -181,16 +200,18 @@ final class Attachment
 
     private static function iconForFileType(string $filetype): string
     {
-        return match ($filetype) {
-            'application/x-bittorrent' => '<img alt="torrent" src="pic/attachicons/torrent.gif" />',
+        [$alt, $icon] = match ($filetype) {
+            'application/x-bittorrent' => ['torrent', 'torrent'],
             'application/zip',
             'application/rar',
             'application/x-7z-compressed',
-            'application/x-gzip' => '<img alt="archive" src="pic/attachicons/archive.gif" />',
+            'application/x-gzip' => ['archive', 'archive'],
             'audio/mpeg',
-            'audio/ogg' => '<img alt="audio" src="pic/attachicons/audio.gif" />',
-            'video/x-flv' => '<img alt="flv" src="pic/attachicons/flv.gif" />',
-            default => '<img alt="other" src="pic/attachicons/common.gif" />',
+            'audio/ogg' => ['audio', 'audio'],
+            'video/x-flv' => ['flv', 'flv'],
+            default => ['other', 'common'],
         };
+
+        return trim(view('support._attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
     }
 }

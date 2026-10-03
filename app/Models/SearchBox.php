@@ -281,7 +281,11 @@ class SearchBox extends NexusModel
             if ((string) $key === (string) $selectedValue) {
                 $selected = ' selected';
             }
-            $options[] = sprintf('<option value="%s"%s>%s</option>', $key, $selected, $text);
+            $options[] = trim(view('support._option-bare', [
+                'value' => $key,
+                'selected' => $selected !== '',
+                'label' => $text,
+            ])->render());
         }
 
         return implode('', $options);

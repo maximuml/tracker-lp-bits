@@ -68,10 +68,10 @@ class IpSearch extends Page implements HasTable
                 TextColumn::make('ip_count')
                     ->label(__('ip-search.ip_count'))
                     ->state(function (array $record) {
-                        return new HtmlString(sprintf(
-                            '<a href="%s" target="_blank"><b>%s</b></a>',
-                            IpLogResource::getUrl('index', ['filters[uid][uid]' => $record['userid']]), $record['ip_count']
-                        ));
+                        return new HtmlString(trim(view('support._ipsearch-link', [
+                            'url' => IpLogResource::getUrl('index', ['filters[uid][uid]' => $record['userid']]),
+                            'label' => $record['ip_count'],
+                        ])->render()));
                     }),
                 TextColumn::make('ip_last_access')
                     ->label(__('ip-search.ip_last_access')),

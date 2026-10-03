@@ -6,6 +6,7 @@ namespace App\Models\Traits;
 
 use App\Enums\UserClass as UserClassEnum;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 
 /**
@@ -107,7 +108,10 @@ trait HasClassLadder
             $class_name = str_replace(' ', '', $class_name);
         }
         if ($class_name && $b_colored) {
-            return "<b class='".str_replace(' ', '', $class_name_color)."_Name'>".$class_name.'</b>';
+            return trim(view('support._class-name-b', [
+                'cls' => str_replace(' ', '', $class_name_color),
+                'inner' => SafeHtml::fromTrustedHtml($class_name),
+            ])->render());
         }
 
         return $class_name;

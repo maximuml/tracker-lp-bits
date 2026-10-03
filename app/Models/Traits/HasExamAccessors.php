@@ -63,7 +63,7 @@ trait HasExamAccessors
             }
         }
 
-        return implode('<br/>', $arr);
+        return implode(view('support._br')->render(), $arr);
     }
 
     public function getFilterFormattedAttribute(): string
@@ -111,6 +111,6 @@ trait HasExamAccessors
             $arr[] = sprintf('%s: %s', Locale::trans("exam.filters.{$filter}", [], null), $donateStatus->pluck('text')->implode(', '));
         }
 
-        return implode('<br/>', $arr);
+        return implode(view('support._br')->render(), $arr);
     }
 }

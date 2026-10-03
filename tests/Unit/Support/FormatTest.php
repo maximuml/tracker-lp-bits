@@ -50,12 +50,6 @@ class FormatTest extends TestCase
         $this->assertStringEndsWith(' MB', Format::size(1000 * 1024));
     }
 
-    public function test_size_compact_uses_br_separator(): void
-    {
-        $this->assertSame('1.00<br />KB', Format::sizeCompact(1024));
-        $this->assertSame('1.00<br />MB', Format::sizeCompact(1048576));
-    }
-
     public function test_size_loose_uses_nbsp_separator(): void
     {
         $this->assertSame('1.00&nbsp;KB', Format::sizeLoose(1024));

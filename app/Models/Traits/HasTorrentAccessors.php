@@ -156,10 +156,15 @@ trait HasTorrentAccessors
     {
         $html = [];
         foreach ($this->tags as $tag) {
-            $html[] = sprintf(
-                '<span style="color: %s;background-color: %s;border-radius: %s;font-size: %s;padding: %s;margin: %s">%s</span>',
-                $tag->font_color, $tag->color, $tag->border_radius, $tag->font_size, $tag->padding, $tag->margin, $tag->name
-            );
+            $html[] = trim(view('filament._color-badge', [
+                'fontColor' => $tag->font_color,
+                'color' => $tag->color,
+                'radius' => $tag->border_radius,
+                'size' => $tag->font_size,
+                'pad' => $tag->padding,
+                'margin' => $tag->margin,
+                'text' => $tag->name,
+            ])->render());
         }
 
         return implode('', $html);

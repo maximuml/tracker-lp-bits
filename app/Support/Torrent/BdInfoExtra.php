@@ -996,9 +996,12 @@ class BdInfoExtra
         if ($hiddenParts !== []) {
             $hiddenContent = '';
             foreach ($hiddenParts as $key => $value) {
-                $hiddenContent .= sprintf('<b>%s: </b>%s<br>', $key, $value);
+                $hiddenContent .= view('support._nti-hidden-line', [
+                    'key' => $key,
+                    'value' => SafeHtml::fromTrustedHtml($value),
+                ])->render();
             }
-            $hiddenContent = rtrim($hiddenContent, '<br>');
+            $hiddenContent = (string) preg_replace('/[<br>]+$/', '', $hiddenContent);
 
             $spoilerTitle = str_starts_with(array_keys($parts)[0], $audioPrefix)
                 ? Locale::trans('torrent.collapse_show_more_audio', [], null)

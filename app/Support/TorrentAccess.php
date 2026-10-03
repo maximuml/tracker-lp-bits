@@ -8,6 +8,7 @@ use App\Enums\HitAndRunMode;
 use App\Enums\TorrentHr;
 use App\Models\HitAndRun;
 use App\Models\Torrent;
+use App\Support\Html\SafeHtml;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -42,18 +43,20 @@ final class TorrentAccess
             return new HtmlString('');
         }
 
-        $name = sprintf(
-            '<div class="fi-color fi-color-primary fi-text-color-600 dark:fi-text-color-300 fi-link fi-size-sm fi-ac-link-action"><a href="/details.php?id=%s" target="_blank" title="%s">%s</a></div>',
-            $torrent->id,
-            $torrent->name,
-            Str::limit($torrent->name, $length)
-        );
+        $name = view('filament._fi-torrent-link', [
+            'id' => $torrent->id,
+            'title' => $torrent->name,
+            'name' => Str::limit($torrent->name, $length),
+        ])->render();
         $tags = '';
         if ($withTags) {
             $tags = sprintf('&nbsp;<div>%s</div>', $torrent->tagsFormatted);
         }
 
-        return new HtmlString('<div style="display:flex">'.$name.$tags.'</div>');
+        return new HtmlString(view('filament._fi-torrent-cell', [
+            'name' => SafeHtml::fromTrustedHtml($name),
+            'tags' => SafeHtml::fromTrustedHtml($tags),
+        ])->render());
     }
 
     /**

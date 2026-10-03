@@ -7,6 +7,7 @@ namespace App\ViewModels\Torrent;
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
+use App\Enums\TorrentType;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Repositories\SearchBoxSchemaBuilder;
@@ -265,7 +266,7 @@ JS, \json_encode($approvalTitle)), 'footer', false);
     {
         return new TorrentInfoRow(
             torrentId: $id,
-            numFiles: ($row['type'] ?? '') === 'multi' ? (int) $row['numfiles'] : null,
+            numFiles: TorrentType::tryFrom((int) ($row['type'] ?? 0)) === TorrentType::MULTI ? (int) $row['numfiles'] : null,
             infoHash: bin2hex(Strings::padHash($row['info_hash'])),
             showStructure: Permission::can(PermissionEnum::TORRENT_STRUCTURE),
         );

@@ -6,6 +6,7 @@ namespace App\Contracts\Repositories;
 
 use App\Models\Torrent;
 use App\Models\User;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -59,4 +60,19 @@ interface TorrentRepositoryInterface
     public function getNameById(int $id): ?string;
 
     public function getOwnerId(int $id): ?int;
+
+    /**
+     * Per-uploader torrent aggregation for the bonus-history report.
+     *
+     * @return Collection<int, \stdClass>
+     */
+    public function listUploaderStats(string $startTime, string $endTime, int $minClass, string|Expression $sortColumn, string $sortDirection): Collection;
+
+    /**
+     * Latest torrent per owner, keyed by owner id.
+     *
+     * @param  array<int>  $ownerIds
+     * @return Collection<int|string, \stdClass>
+     */
+    public function listLastTorrentsForOwners(array $ownerIds): Collection;
 }

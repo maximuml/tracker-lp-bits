@@ -88,6 +88,23 @@ class TorrentDetailRepository
         ];
     }
 
+    public function hasMagicRecord(int $torrentId, int $userId): bool
+    {
+        return DB::table('magic')
+            ->where('torrentid', $torrentId)
+            ->where('userid', $userId)
+            ->exists();
+    }
+
+    public function insertMagic(int $torrentId, int $userId, int $value): void
+    {
+        DB::table('magic')->insert([
+            'torrentid' => $torrentId,
+            'userid' => $userId,
+            'value' => $value,
+        ]);
+    }
+
     /**
      * @return array<int|string, mixed>
      */

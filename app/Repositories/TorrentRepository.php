@@ -26,9 +26,11 @@ use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Torrent\TorrentStatus;
 use App\Utils\ApiQueryBuilder;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Torrent repository: listing, detail, peer/snatch, and presentation helpers.
@@ -362,5 +364,43 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
         $owner = Torrent::query()->where('id', $id)->value('owner');
 
         return $owner === null ? null : (int) $owner;
+    }
+
+    /**
+     * Per-uploader torrent aggregation for the bonus-history report.
+     *
+     * @return Collection<int, \stdClass>
+     */
+    public function listUploaderStats(string $startTime, string $endTime, int $minClass, string|Expression $sortColumn, string $sortDirection): Collection
+    {
+        return DB::table('torrents')
+            ->leftJoin('users', 'torrents.owner', '=', 'users.id')
+            ->where('users.class', '>=', $minClass)
+            ->where('torrents.added', '>', $startTime)
+            ->where('torrents.added', '<', $endTime)
+            ->groupBy('users.id', 'users.username')
+            ->orderBy($sortColumn, $sortDirection === 'desc' ? 'desc' : 'asc')
+            ->get([
+                'users.id AS userid',
+                'users.username AS username',
+                DB::raw('COUNT(torrents.id) AS torrent_count'),
+                DB::raw('SUM(torrents.size) AS torrent_size'),
+            ]);
+    }
+
+    /**
+     * Latest torrent per owner, keyed by owner id.
+     *
+     * @param  array<int>  $ownerIds
+     * @return Collection<int|string, \stdClass>
+     */
+    public function listLastTorrentsForOwners(array $ownerIds): Collection
+    {
+        return DB::table('torrents')
+            ->whereIn('id', function ($q) use ($ownerIds) {
+                $q->selectRaw('MAX(id)')->from('torrents')->whereIn('owner', $ownerIds)->groupBy('owner');
+            })
+            ->get(['id', 'name', 'added', 'owner'])
+            ->keyBy('owner');
     }
 }

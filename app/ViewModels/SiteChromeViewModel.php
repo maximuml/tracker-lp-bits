@@ -81,7 +81,7 @@ final class SiteChromeViewModel
             navItems: $navItems,
             alerts: $alerts,
             offlineMsg: $context->offlineMsg,
-            offlineMsgHtml: SafeHtml::fromTrustedHtml((string) (__('legacy/functions.text_website_offline_warning'))),
+            offlineMsgHtml: SafeHtml::fromTrustedHtml(view('components.offline-warning')->render()),
             enableDonation: $context->enableDonation === 'yes',
             userBar: $userBar,
             search: ChromeSearch::load($context),

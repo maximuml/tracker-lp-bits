@@ -39,5 +39,4 @@ return [
     'mail_password_changed_two' => " was changed.\n\nIf you did not make this change, contact staff immediately.\n\nYou may login from ",
     'mail_password_changed_three' => "\n\n------\nYours,\nThe %s Team.",
     'text_select_lang' => 'Select Site Language: ',
-    'std_user_account_unconfirmed' => "The account has not been verified yet. If you didn't receive the confirmation email, try to <a href='confirm_resend.php'><b>reseed it</b></a>.",
 ];

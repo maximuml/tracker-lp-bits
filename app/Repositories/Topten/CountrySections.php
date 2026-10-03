@@ -72,7 +72,7 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_per_user')),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_per_user'), __('legacy/topten.text_countries_per_user_note')),
                 'limits' => [25],
                 'subtype' => 'avg',
                 'what' => __('legacy/topten.col_average'),
@@ -93,7 +93,7 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_ratio')),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_ratio'), __('legacy/topten.text_countries_ratio_note')),
                 'limits' => [25],
                 'subtype' => 'r',
                 'what' => __('legacy/topten.col_ratio'),

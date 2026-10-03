@@ -87,7 +87,7 @@ final class OtherSections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_client')),
+                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_client'), __('legacy/topten.text_most_client_note')),
                 'limits' => [100, 250],
                 'subtype' => 'mcli',
             ];

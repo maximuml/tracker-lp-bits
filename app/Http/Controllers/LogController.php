@@ -44,7 +44,7 @@ class LogController extends LegacyController
 
             return $this->legacyAbortResponse(
                 __('legacy/log.std_sorry'),
-                (__('legacy/log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).sprintf(__('legacy/log.std_or_above_can_view'), Setting::getSiteName()),
+                (__('legacy/log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).__('legacy/log.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => Setting::getSiteName()])->render(),
                 false
             );
         }

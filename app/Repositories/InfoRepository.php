@@ -50,10 +50,10 @@ final class InfoRepository
             ],
             'notes' => [
                 'version' => SafeHtml::fromTrustedHtml(sprintf(__('legacy/aboutnexus.text_version_note'), $siteName, PROJECTNAME)),
-                'nexus' => SafeHtml::fromTrustedHtml(sprintf(PROJECTNAME.(__('legacy/aboutnexus.text_nexus_note')), PROJECTNAME)),
-                'authorization' => SafeHtml::fromTrustedHtml(sprintf(__('legacy/aboutnexus.text_authorization_note'), PROJECTNAME)),
-                'translation' => SafeHtml::fromTrustedHtml(PROJECTNAME.(__('legacy/aboutnexus.text_translation_note'))),
-                'stylesheet' => SafeHtml::fromTrustedHtml(sprintf(__('legacy/aboutnexus.text_stylesheet_note'), PROJECTNAME, $siteName)),
+                'nexus' => view('aboutnexus._nexus', ['projectName' => PROJECTNAME]),
+                'authorization' => view('aboutnexus._authorization', ['projectName' => PROJECTNAME]),
+                'translation' => view('aboutnexus._translation', ['projectName' => PROJECTNAME]),
+                'stylesheet' => view('aboutnexus._stylesheet', ['projectName' => PROJECTNAME, 'siteName' => $siteName]),
                 'contact' => SafeHtml::fromTrustedHtml(__('legacy/aboutnexus.text_contact_note')),
             ],
         ];

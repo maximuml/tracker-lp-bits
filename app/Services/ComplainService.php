@@ -87,11 +87,10 @@ final class ComplainService
                 $this->toolRepository->sendMail(
                     $complain->email,
                     __('legacy/complains.reply_notify_subject'),
-                    sprintf(
-                        __('legacy/complains.reply_notify_body'),
-                        SiteConfig::current()->basic->siteName(),
-                        Url::schemeAndHost(false).'/complains.php?action=view&id='.$complain->uuid
-                    )
+                    view('emails.complain-reply', [
+                        'siteName' => SiteConfig::current()->basic->siteName(),
+                        'url' => Url::schemeAndHost(false).'/complains.php?action=view&id='.$complain->uuid,
+                    ])->render()
                 );
             } catch (\Throwable $exception) {
                 Logger::writeWithContext((string) $exception->getMessage(), 'error', false);

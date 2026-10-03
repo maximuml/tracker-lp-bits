@@ -1,0 +1,1 @@
+{{ __('legacy/attendance.attend_info') }}<b>{{ $totalDays }}</b>{{ __('legacy/attendance.attend_info_days') }}<b>{{ $days }}</b>{{ __('legacy/attendance.attend_info_get') }}<b>{{ $points }}</b>{{ __('legacy/attendance.attend_info_bonus') }}{{ __('legacy/attendance.retroactive_description') }}<b>{{ $cards }}</b>{{ __('legacy/attendance.retroactive_description_tail') }}

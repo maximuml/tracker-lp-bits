@@ -4,8 +4,8 @@
 <p><b><span class="nx-size-5">{{ __('legacy/offers.text_rules') }}</span></b></p>
 <div><ul>
 <li>{{ __('legacy/offers.text_rule_one_one') }}{{ $list->rules->uploadClassName }}{{ __('legacy/offers.text_rule_one_two') }}{{ $list->rules->addofferClassName }}{{ __('legacy/offers.text_rule_one_three') }}</li>
-@if ($list->rules->skipApprovedText !== null)
-<li>{{ $list->rules->skipApprovedText }}</li>
+@if ($list->rules->skipApprovedCount !== null)
+<li>{{ __('legacy/offers.text_rule_skip_offer_pre') }}<b>{{ $list->rules->skipApprovedCount }}</b>{{ __('legacy/offers.text_rule_skip_offer_post') }}</li>
 @endif
 <li>{{ __('legacy/offers.text_rule_two_one') }}<b>{{ $list->rules->minVotes }}</b>{{ __('legacy/offers.text_rule_two_two') }}</li>
 @if ($list->rules->showVoteTimeout)

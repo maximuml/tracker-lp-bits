@@ -287,9 +287,7 @@ final class ForumTopicViewService
                 ? SafeHtml::fromTrustedHtml(Html::quickReply('compose', 'body', (string) (__('legacy/forums.submit_add_reply'))))
                 : null,
             deniedNotice: ! $maypost
-                ? SafeHtml::fromUntrustedHtml((string) __(
-                    $locked ? 'legacy/forums.text_topic_locked_new_denied' : 'legacy/forums.text_unpermitted_posting_here',
-                ))
+                ? SafeHtml::fromTrustedHtml(view('forums._denied-notice', ['locked' => $locked])->render())
                 : null,
             keyScript: SafeHtml::fromTrustedHtml(Html::keyShortcutScript($page, max(0, $pages - 1), (string) $request->attributes->get('csp_nonce', ''))),
         );

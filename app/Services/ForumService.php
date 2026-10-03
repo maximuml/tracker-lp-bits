@@ -115,7 +115,7 @@ final class ForumService
         $user = $this->user();
 
         if (! ($user['forumpost'] ?? true)) {
-            LegacyResponse::abort(__('legacy/forums.std_sorry'), __('legacy/forums.std_unauthorized_to_post'), false);
+            LegacyResponse::abort(__('legacy/forums.std_sorry'), view('forums._unauthorized-post')->render(), false);
         }
 
         $id = (int) $request->input('id');

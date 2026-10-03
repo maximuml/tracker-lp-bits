@@ -28,6 +28,8 @@ return [
     'no_complaints_have_been_processed' => 'No complaints have been processed',
     'text_view_band_log' => 'View ban log',
     'reply_notify_subject' => 'Complaint replied',
-    'reply_notify_body' => 'You have a reply to your complaint on the site %s, click here <a href="%s" target="_blank">to see it</a>.',
+    'reply_notify_body' => 'You have a reply to your complaint on the site :site, click here ',
+    'reply_notify_link' => 'to see it',
+    'reply_notify_tail' => '.',
     'complain_not_enabled' => 'Complaint not enabled',
 ];

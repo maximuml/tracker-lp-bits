@@ -15,7 +15,7 @@ final class OfferRulesViewModel
     public function __construct(
         public readonly SafeHtml $uploadClassName,
         public readonly SafeHtml $addofferClassName,
-        public readonly ?SafeHtml $skipApprovedText,
+        public readonly ?int $skipApprovedCount,
         public readonly int $minVotes,
         public readonly bool $showVoteTimeout,
         public readonly int $voteTimeoutHours,

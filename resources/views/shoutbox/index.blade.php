@@ -94,7 +94,7 @@ function shoutAttachToggleHandler() {
     @endif
     <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/index.text_shoutbox') }}</caption>
     @foreach ($items as $item)
-        <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[{{ $item['time'] }}]</span> {{ $item['actions'] }} @include('shoutbox._avatar', ['url' => $item['avatarUrl'], 'userId' => $item['avatarUserId'], 'tooltip' => $item['avatarTooltip'], 'spacer' => $item['avatarSpacer']]) {{ $item['classBadge'] }}{{ $item['username'] }} {{ $item['reactions'] }} @include('shoutbox._message', ['id' => $item['msgId'], 'isLong' => $item['msgLong'], 'raw' => $item['msgRaw'], 'formatted' => $item['msgFormatted'], 'editedTime' => $item['editedTime'], 'labelMore' => $item['labelMore'], 'labelLess' => $item['labelLess']])
+        <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[{{ $item['time'] }}]</span> {{ $item['actions'] }} @include('shoutbox._avatar', ['url' => $item['avatarUrl'], 'userId' => $item['avatarUserId'], 'tooltip' => $item['avatarTooltip'], 'spacer' => $item['avatarSpacer']]) {{ $item['classBadge'] }}@if (! empty($item['isGuest']))<b>{{ $item['username'] }}</b>@else{{ $item['username'] }}@endif {{ $item['reactions'] }} @include('shoutbox._message', ['id' => $item['msgId'], 'isLong' => $item['msgLong'], 'raw' => $item['msgRaw'], 'formatted' => $item['msgFormatted'], 'editedTime' => $item['editedTime'], 'labelMore' => $item['labelMore'], 'labelLess' => $item['labelLess']])
 </td></tr>
     @endforeach
     </table>

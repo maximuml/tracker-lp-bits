@@ -1,0 +1,1 @@
+{{ __('legacy/upload.std_unauthorized_to_upload') }}(<a class="faqlink" href="messages.php">{{ __('legacy/upload.text_inbox') }}</a>)

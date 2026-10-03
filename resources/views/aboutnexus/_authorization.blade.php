@@ -1,0 +1,1 @@
+{{ __('legacy/aboutnexus.text_authorization_note', ['site' => $projectName]) }}<a href="#contact" class="faqlink">{{ __('legacy/aboutnexus.text_contact_us') }}</a>{{ __('legacy/aboutnexus.text_authorization_note_tail') }}

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Enums\FaqType;
-use App\Repositories\InfoRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\Html;
@@ -22,11 +22,11 @@ use Illuminate\View\View;
 
 class FaqController extends LegacyController
 {
-    private InfoRepository $infoRepository;
+    private InfoRepositoryInterface $infoRepository;
 
     private Globals $globals;
 
-    public function __construct(InfoRepository $infoRepository, Globals $globals)
+    public function __construct(InfoRepositoryInterface $infoRepository, Globals $globals)
     {
         $this->infoRepository = $infoRepository;
         $this->globals = $globals;

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\MysqlStatsRepositoryInterface;
 use DateTime;
 use Illuminate\Support\Facades\DB;
 
-final class MysqlStatsRepository
+final class MysqlStatsRepository implements MysqlStatsRepositoryInterface
 {
     /** @var list<string> */
     private static array $byteUnits = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];

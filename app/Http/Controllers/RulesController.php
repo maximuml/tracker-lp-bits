@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Models\Setting;
-use App\Repositories\InfoRepository;
 use App\Support\Locale;
 use App\Support\RedisGuard;
 use App\Support\Url;
@@ -17,7 +17,7 @@ use Illuminate\View\View;
 class RulesController extends LegacyController
 {
     public function __construct(
-        private readonly InfoRepository $infoRepository,
+        private readonly InfoRepositoryInterface $infoRepository,
     ) {}
 
     public function rules(Request $request): Response|RedirectResponse

@@ -7,15 +7,19 @@ namespace Tests\Unit\Contracts;
 use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
+use App\Contracts\Repositories\MysqlStatsRepositoryInterface;
 use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
+use App\Contracts\Repositories\ToptenRepositoryInterface;
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
@@ -25,15 +29,19 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Repositories\AuthRepository;
 use App\Repositories\ExamRepository;
 use App\Repositories\ForumRepository;
+use App\Repositories\InfoRepository;
 use App\Repositories\MeiliSearchRepository;
+use App\Repositories\MysqlStatsRepository;
 use App\Repositories\OfferCommentRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
 use App\Repositories\PageLayoutRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\SearchBoxRepository;
+use App\Repositories\ShoutboxRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\ToolRepository;
+use App\Repositories\ToptenRepository;
 use App\Repositories\TorrentAjaxRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
@@ -71,12 +79,28 @@ final class RepositoryContractTest extends TestCase
         $this->assertSame($mock, $this->app->make(ForumRepositoryInterface::class));
     }
 
+    public function test_info_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(InfoRepository::class, $this->app->make(InfoRepositoryInterface::class));
+        $mock = Mockery::mock(InfoRepositoryInterface::class);
+        $this->app->instance(InfoRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(InfoRepositoryInterface::class));
+    }
+
     public function test_meili_search_repository_interface_binding(): void
     {
         $this->assertInstanceOf(MeiliSearchRepository::class, $this->app->make(MeiliSearchRepositoryInterface::class));
         $mock = Mockery::mock(MeiliSearchRepositoryInterface::class);
         $this->app->instance(MeiliSearchRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(MeiliSearchRepositoryInterface::class));
+    }
+
+    public function test_mysql_stats_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(MysqlStatsRepository::class, $this->app->make(MysqlStatsRepositoryInterface::class));
+        $mock = Mockery::mock(MysqlStatsRepositoryInterface::class);
+        $this->app->instance(MysqlStatsRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(MysqlStatsRepositoryInterface::class));
     }
 
     public function test_offer_comment_repository_interface_binding(): void
@@ -103,6 +127,7 @@ final class RepositoryContractTest extends TestCase
         $this->assertSame($mock, $this->app->make(OfferVoteRepositoryInterface::class));
     }
 
+
     public function test_page_layout_repository_interface_binding(): void
     {
         $this->assertInstanceOf(PageLayoutRepository::class, $this->app->make(PageLayoutRepositoryInterface::class));
@@ -127,6 +152,14 @@ final class RepositoryContractTest extends TestCase
         $this->assertSame($mock, $this->app->make(SearchBoxRepositoryInterface::class));
     }
 
+    public function test_shoutbox_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(ShoutboxRepository::class, $this->app->make(ShoutboxRepositoryInterface::class));
+        $mock = Mockery::mock(ShoutboxRepositoryInterface::class);
+        $this->app->instance(ShoutboxRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(ShoutboxRepositoryInterface::class));
+    }
+
     public function test_tag_repository_interface_binding(): void
     {
         $this->assertInstanceOf(TagRepository::class, $this->app->make(TagRepositoryInterface::class));
@@ -141,6 +174,14 @@ final class RepositoryContractTest extends TestCase
         $mock = Mockery::mock(ToolRepositoryInterface::class);
         $this->app->instance(ToolRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(ToolRepositoryInterface::class));
+    }
+
+    public function test_topten_repository_interface_binding(): void
+    {
+        $this->assertInstanceOf(ToptenRepository::class, $this->app->make(ToptenRepositoryInterface::class));
+        $mock = Mockery::mock(ToptenRepositoryInterface::class);
+        $this->app->instance(ToptenRepositoryInterface::class, $mock);
+        $this->assertSame($mock, $this->app->make(ToptenRepositoryInterface::class));
     }
 
     public function test_torrent_repository_interface_binding(): void

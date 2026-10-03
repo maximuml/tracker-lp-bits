@@ -27,11 +27,15 @@ final class ExamControllerTest extends TestCase
         // `Setting::get` reads the `nexus_settings_in_laravel` cache key
         // before falling back to the DB — seeding it keeps Locale::trans
         // reachable in the no-services suite (CACHE_DRIVER=array). The
+        // seed uses the same defaults file as SettingsTableSeeder so the
+        // value sticking in Setting::get's process-static stays identical
+        // to a freshly seeded database for every later test. The
         // RedisGuard reset clears any down-flag an earlier test left so
         // `attempt()` actually runs the remember() call instead of
         // short-circuiting to `getFromDb()`.
         RedisGuard::reset();
-        Cache::put('nexus_settings_in_laravel', [], 600);
+        $settings = require base_path('database/settings.default.php');
+        Cache::put('nexus_settings_in_laravel', $settings, 600);
     }
 
     protected function tearDown(): void

@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
+use App\Events\StaffMessageCreated;
 use App\Models\StaffMessage;
 use App\Support\Cache;
 use App\Support\Permissions;
@@ -97,5 +98,22 @@ class StaffMessageRepository extends BaseRepository
             },
             false
         );
+    }
+
+    /**
+     * Create a staff message and fire the event. Mirrors the former
+     * `StaffMessage::add()` static helper.
+     */
+    public function add(int $sender, string $subject, string $msg): StaffMessage
+    {
+        $record = StaffMessage::query()->create([
+            'sender' => $sender,
+            'subject' => $subject,
+            'msg' => $msg,
+            'added' => now(),
+        ]);
+        event(new StaffMessageCreated($record));
+
+        return $record;
     }
 }

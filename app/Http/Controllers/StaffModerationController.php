@@ -8,7 +8,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UsernameChangeType;
 use App\Enums\UserPrivacy;
-use App\Models\Message;
+use App\Repositories\MessageRepository;
 use App\Repositories\ModtaskRepository;
 use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
@@ -34,7 +34,7 @@ use Illuminate\View\View;
 
 class StaffModerationController extends LegacyController
 {
-    public function __construct(private readonly UserDetailRepository $userDetailRepository,
+    public function __construct(private readonly MessageRepository $messageRepository, private readonly UserDetailRepository $userDetailRepository,
         private readonly CurrentUser $currentUser,
         private readonly ModtaskRepository $modtaskRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
@@ -146,7 +146,7 @@ class StaffModerationController extends LegacyController
                 $userModifyLogs[] = $modifyLog;
                 $subject = Locale::trans('user.msg_email_change', [], $locale);
                 $msg = Locale::trans('user.msg_your_email_changed_from', [], $locale).$arr['email'].Locale::trans('user.msg_to_new', [], $locale).$email.Locale::trans('user.msg_by', [], $locale).$currentUser['username'];
-                Message::add([
+                $this->messageRepository->add([
                     'sender' => null,
                     'receiver' => $userId,
                     'subject' => $subject,
@@ -160,7 +160,7 @@ class StaffModerationController extends LegacyController
                 $userModifyLogs[] = "Username changed from {$arr['username']} to {$username} by {$currentUser['username']}";
                 $subject = Locale::trans('user.msg_username_change', [], $locale);
                 $msg = Locale::trans('user.msg_your_username_changed_from', [], $locale).$arr['username'].Locale::trans('user.msg_to_new', [], $locale).$username.Locale::trans('user.msg_by', [], $locale).$currentUser['username'];
-                Message::add([
+                $this->messageRepository->add([
                     'sender' => null,
                     'receiver' => $userId,
                     'subject' => $subject,
@@ -201,7 +201,7 @@ class StaffModerationController extends LegacyController
             if (($donor !== (bool) $arr['donor']) && (($donor && $donoruntil && $donoruntil >= $nowStr) || (! $donor))) {
                 $subject = Locale::trans('user.msg_your_donor_status_changed', [], $locale);
                 $msg = Locale::trans('user.msg_donor_status_changed_by', [], $locale).$currentUser['username'];
-                Message::add([
+                $this->messageRepository->add([
                     'sender' => null,
                     'receiver' => $userId,
                     'subject' => $subject,
@@ -235,7 +235,7 @@ class StaffModerationController extends LegacyController
                 $msg = '';
             }
 
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
@@ -257,7 +257,7 @@ class StaffModerationController extends LegacyController
             }
 
             $subject = Locale::trans('user.msg_you_are_warned', [], $locale);
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
@@ -290,7 +290,7 @@ class StaffModerationController extends LegacyController
                 $subject = Locale::trans('user.msg_posting_rights_removed', [], $locale);
                 $msg = Locale::trans('user.msg_your_posting_rights_removed', [], $locale).$currentUser['username'].Locale::trans('user.msg_probably_reason_two', [], $locale);
             }
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
@@ -310,7 +310,7 @@ class StaffModerationController extends LegacyController
                 $subject = Locale::trans('user.msg_upload_rights_removed', [], $locale);
                 $msg = Locale::trans('user.msg_your_upload_rights_removed', [], $locale).$currentUser['username'].Locale::trans('user.msg_probably_reason_two', [], $locale);
             }
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,
@@ -330,7 +330,7 @@ class StaffModerationController extends LegacyController
                 $subject = Locale::trans('user.msg_download_rights_removed', [], $locale);
                 $msg = Locale::trans('user.msg_your_download_rights_removed', [], $locale).$currentUser['username'].Locale::trans('user.msg_probably_reason_three', [], $locale);
             }
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $userId,
                 'subject' => $subject,

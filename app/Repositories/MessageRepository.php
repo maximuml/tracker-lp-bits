@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\DTOs\Message\StoreMessageDto;
+use App\Events\MessageCreated;
 use App\Models\Message;
 use App\Models\User;
+use App\Support\Cache;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -267,5 +269,20 @@ class MessageRepository extends BaseRepository
         }
 
         return $notifications;
+    }
+
+    /**
+     * Send a PM: clear the receiver's inbox-count cache, create the row, fire
+     * the event. Mirrors the former `Message::add()` static helper.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function add(array $data): Message
+    {
+        Cache::clearInboxCount((int) $data['receiver']);
+        $message = Message::query()->create($data);
+        event(new MessageCreated($message));
+
+        return $message;
     }
 }

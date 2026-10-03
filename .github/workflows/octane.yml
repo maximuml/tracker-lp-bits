@@ -62,7 +62,14 @@ jobs:
       - name: Download RoadRunner binary
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./vendor/bin/rr get-binary
+        run: |
+          # api.github.com flakes (idle timeouts) on shared runners — retry.
+          attempt=1
+          until ./vendor/bin/rr get-binary; do
+            attempt=$((attempt + 1))
+            if [ "$attempt" -gt 4 ]; then exit 1; fi
+            sleep $((attempt * 5))
+          done
 
       - name: Prepare environment
         run: |

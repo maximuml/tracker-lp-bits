@@ -6,6 +6,7 @@ namespace Tests\Integration\Services;
 
 use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
+use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
 use App\Support\Shoutbox;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -40,7 +41,7 @@ final class ShoutboxServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new ShoutboxService;
+        $this->service = new ShoutboxService(new ShoutboxRepository);
     }
 
     private function insertUser(int $id): void

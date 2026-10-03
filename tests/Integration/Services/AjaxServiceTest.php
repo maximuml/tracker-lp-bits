@@ -9,6 +9,7 @@ use App\Enums\UserClass;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamUserRepository;
+use App\Repositories\ShoutboxRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
@@ -132,7 +133,7 @@ final class AjaxServiceTest extends TestCase
             $this->bonusRepo,
             $this->examRepo,
             $this->currentUser,
-            new ShoutboxActions(new ShoutboxService, $this->actorContext),
+            new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
             new PasskeyActions($this->passkeyRepo, $this->currentUser),
         );
     }
@@ -191,7 +192,7 @@ final class AjaxServiceTest extends TestCase
             $this->bonusRepo,
             $this->examRepo,
             $this->currentUser,
-            new ShoutboxActions(new ShoutboxService, $this->actorContext),
+            new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
             new PasskeyActions($this->passkeyRepo, $this->currentUser),
         );
     }

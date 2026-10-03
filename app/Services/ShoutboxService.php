@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\ShoutboxType;
 use App\Support\Lock;
 use App\Support\Shoutbox;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Handles shoutbox message and reaction mutations.
@@ -27,6 +27,8 @@ final class ShoutboxService
     private const DELETE_LOCK_SECONDS = 10;
 
     private const REACT_LOCK_SECONDS = 5;
+
+    public function __construct(private readonly ShoutboxRepositoryInterface $repository) {}
 
     /**
      * Post a new shoutbox message.
@@ -48,7 +50,7 @@ final class ShoutboxService
             return false;
         }
 
-        DB::table('shoutbox')->insert([
+        $this->repository->insertMessage([
             'userid' => $userId,
             'date' => time(),
             'text' => $text,
@@ -67,7 +69,7 @@ final class ShoutboxService
             return false;
         }
 
-        $msg = DB::table('shoutbox')->where('id', $id)->first();
+        $msg = $this->repository->findById($id);
         if (! $msg) {
             return true;
         }
@@ -88,8 +90,7 @@ final class ShoutboxService
             return false;
         }
         try {
-            DB::table('shoutbox')->where('id', $id)->delete();
-            DB::table('shoutbox_reactions')->where('shoutbox_id', $id)->delete();
+            $this->repository->deleteWithReactions($id);
 
             return true;
         } finally {
@@ -110,7 +111,7 @@ final class ShoutboxService
             return false;
         }
 
-        $msg = DB::table('shoutbox')->where('id', $id)->first();
+        $msg = $this->repository->findById($id);
         if (! $msg) {
             return false;
         }
@@ -130,7 +131,7 @@ final class ShoutboxService
             return false;
         }
         try {
-            DB::table('shoutbox')->where('id', $id)->update([
+            $this->repository->updateById($id, [
                 'text' => $text,
                 'edited_by' => $userId,
                 'edited_at' => time(),
@@ -151,8 +152,7 @@ final class ShoutboxService
             return false;
         }
 
-        DB::table('shoutbox')->delete();
-        DB::table('shoutbox_reactions')->delete();
+        $this->repository->deleteAllWithReactions();
 
         return true;
     }
@@ -174,27 +174,7 @@ final class ShoutboxService
             return null;
         }
         try {
-            $table = DB::table('shoutbox_reactions');
-            $existing = $table
-                ->where('shoutbox_id', $id)
-                ->where('user_id', $userId)
-                ->where('reaction', $reaction)
-                ->first();
-
-            if ($existing) {
-                $table->where('id', $existing->id)->delete();
-
-                return 'removed';
-            }
-
-            $table->insert([
-                'shoutbox_id' => $id,
-                'user_id' => $userId,
-                'reaction' => $reaction,
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-
-            return 'added';
+            return $this->repository->toggleReaction($id, $userId, $reaction) ? 'added' : 'removed';
         } finally {
             $lock->release();
         }

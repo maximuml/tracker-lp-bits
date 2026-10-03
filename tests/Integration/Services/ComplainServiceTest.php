@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\Models\Complain;
+use App\Repositories\ComplainRepository;
 use App\Repositories\ToolRepository;
 use App\Services\ComplainService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -49,12 +50,12 @@ final class ComplainServiceTest extends TestCase
         /** @var ToolRepository&MockInterface $repo */
         $repo = Mockery::mock(ToolRepository::class);
 
-        return new ComplainService($repo);
+        return new ComplainService(new ComplainRepository, $repo);
     }
 
     private function serviceWithRepo(ToolRepository $repo): ComplainService
     {
-        return new ComplainService($repo);
+        return new ComplainService(new ComplainRepository, $repo);
     }
 
     private function insertComplain(string $email = 'test@test.com', string $uuid = 'test-uuid-123'): int

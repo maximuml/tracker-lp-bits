@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Controllers\MessageController;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Services\MessageService;
 use App\Support\CurrentUser;
-use App\Contracts\Repositories\UserRepositoryInterface;
 use Illuminate\Http\Request;
 use Mockery;
 use Tests\Attributes\TestCategory;

@@ -8,11 +8,9 @@ use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
-use App\Enums\UserStatus;
 use App\Models\Setting;
-use App\Models\User;
-use App\Models\UserBanLog;
 use App\Repositories\BonusRepository;
+use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\UserListingRepository;
 use App\Support\AssetAppender;
 use App\Support\CurrentUser;
@@ -24,6 +22,7 @@ use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Permissions;
 use App\Support\Time;
+use App\Support\User;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Carbon\Carbon;
@@ -40,7 +39,7 @@ class UserAdminController extends LegacyController
 
     private BonusRepository $bonusRepository;
 
-    public function __construct(
+    public function __construct(private readonly StaffDirectoryRepository $staffDirectoryRepository,
         UserRepositoryInterface $userRepository,
         UserModerationRepositoryInterface $userModerationRepository,
         BonusRepository $bonusRepository,
@@ -67,7 +66,7 @@ class UserAdminController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Invalid letter.');
         }
 
-        if (! \App\Support\User::isValidUserClass($class)) {
+        if (! User::isValidUserClass($class)) {
             $class = '-';
         }
 
@@ -177,7 +176,7 @@ class UserAdminController extends LegacyController
                 return $this->legacyAbortResponse('Error', 'Sorry, password is too short (min is 6 chars)');
             }
 
-            $user = User::query()->where('username', $username)->first();
+            $user = $this->userRepository->findByUsername($username);
             if (! $user) {
                 return $this->legacyAbortResponse('Error', "Sorry, that username doesn't exist.");
             }
@@ -251,7 +250,7 @@ class UserAdminController extends LegacyController
             return $this->legacyPage($request, 'self-enable', true, $viewData);
         }
 
-        $latestBanLog = UserBanLog::query()->where('uid', $currentUserId)->orderByDesc('id')->first();
+        $latestBanLog = $this->userModerationRepository->latestBanLogForUser($currentUserId);
         if (! $latestBanLog) {
             $viewData['latestBanLog'] = null;
 
@@ -281,7 +280,7 @@ class UserAdminController extends LegacyController
 
             $userRep = $this->userRepository;
             $bonusRep = $this->bonusRepository;
-            $operator = User::query()->find($currentUserId);
+            $operator = $this->userRepository->findById($currentUserId);
             if ($operator) {
                 $bonusRep->consumeUserBonus($currentUserId, $total, BusinessType::SELF_ENABLE->value, $title);
                 $this->userModerationRepository->enableUser($operator, $currentUserId, $title);
@@ -316,10 +315,7 @@ class UserAdminController extends LegacyController
             LegacyResponse::assertId($status, true);
         }
 
-        $rows = User::query()
-            ->where('status', UserStatus::PENDING->value)
-            ->orderBy('username')
-            ->get()
+        $rows = $this->staffDirectoryRepository->listPendingOrdered()
             ->map(fn ($user) => $user->getAttributes())
             ->toArray();
 

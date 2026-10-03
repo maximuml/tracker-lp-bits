@@ -356,9 +356,12 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return User::query()->find($ids, $columns)->keyBy('id');
     }
 
-    public function findById(int $id): ?User
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findById(int $id, array $columns = ['*']): ?User
     {
-        return User::query()->find($id);
+        return User::query()->find($id, $columns);
     }
 
     public function existsById(int $id): bool

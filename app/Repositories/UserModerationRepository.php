@@ -15,6 +15,7 @@ use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
 use App\Models\Message;
 use App\Models\User;
+use App\Models\UserBanLog;
 use App\Services\ModerationService;
 use App\Support\Cache;
 use App\Support\Locale;
@@ -332,5 +333,33 @@ class UserModerationRepository extends BaseRepository implements UserModerationR
     private function clearCache(User $user)
     {
         Cache::clearUser($user->id, (string) $user->passkey);
+    }
+
+    public function latestBanLogForUser(int $userId): ?UserBanLog
+    {
+        return UserBanLog::query()
+            ->where('uid', $userId)
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
+    public function countBanLogs(?string $usernameQuery): int
+    {
+        return UserBanLog::query()
+            ->when($usernameQuery !== null && $usernameQuery !== '', fn ($q) => $q->where('username', 'like', "%{$usernameQuery}%"))
+            ->count();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, UserBanLog>
+     */
+    public function listBanLogs(?string $usernameQuery, int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection
+    {
+        return UserBanLog::query()
+            ->when($usernameQuery !== null && $usernameQuery !== '', fn ($q) => $q->where('username', 'like', "%{$usernameQuery}%"))
+            ->orderBy('id', 'desc')
+            ->offset($offset)
+            ->take($perPage)
+            ->get();
     }
 }

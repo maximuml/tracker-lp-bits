@@ -8,7 +8,6 @@ use App\Http\Requests\AgentAllowCheckRequest;
 use App\Http\Requests\AgentAllowIndexRequest;
 use App\Http\Requests\AgentAllowRequest;
 use App\Http\Resources\AgentAllowResource;
-use App\Models\AgentAllow;
 use App\Repositories\AgentAllowRepository;
 
 class AgentAllowController extends Controller
@@ -73,7 +72,7 @@ class AgentAllowController extends Controller
      */
     public function show($id): array
     {
-        $result = AgentAllow::query()->findOrFail($id);
+        $result = $this->repository->getDetail($id);
         $resource = new AgentAllowResource($result);
 
         return $this->success($resource);
@@ -110,7 +109,7 @@ class AgentAllowController extends Controller
     /** @return  array<string, mixed> */
     public function all(): array
     {
-        $result = AgentAllow::query()->orderBy('id', 'desc')->get();
+        $result = $this->repository->listLatest();
         $resource = AgentAllowResource::collection($result);
 
         return $this->success($resource);

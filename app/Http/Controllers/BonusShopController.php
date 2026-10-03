@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\ExamStatus;
+use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Enums\ExamType;
-use App\Models\Exam;
 use App\Models\User;
+use App\Repositories\UserDetailRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -24,7 +24,7 @@ use Illuminate\View\View;
 
 class BonusShopController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly UserDetailRepository $userDetailRepository, private readonly ExamRepositoryInterface $examRepository,
         private readonly CurrentUser $currentUser,
         private readonly ?LegacyRedisCache $legacyRedisCache,
     ) {}
@@ -34,22 +34,13 @@ class BonusShopController extends LegacyController
         $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
 
-        $query = Exam::query()
-            ->where('type', ExamType::TASK->value)
-            ->where('status', ExamStatus::ENABLED->value);
-
-        $total = (clone $query)->count();
+        $total = $this->examRepository->countEnabledTasks();
         $perPage = 20;
         [$pagertop, $pagerbottom, , $offset, $pageSize] = Pagination::pager($perPage, $total, '?');
 
-        $examRows = (clone $query)
-            ->offset($offset)
-            ->take($pageSize)
-            ->orderBy('id', 'desc')
-            ->withCount('onGoingUsers')
-            ->get();
+        $examRows = $this->examRepository->listEnabledTasks($offset, $pageSize);
 
-        $userInfo = User::query()->findOrFail($currentUserId, User::$commonFields);
+        $userInfo = $this->userDetailRepository->findOrFailById($currentUserId, User::$commonFields);
         $userTasks = $userInfo->onGoingExamAndTasks()
             ->where('type', ExamType::TASK->value)
             ->orderBy('id', 'desc')

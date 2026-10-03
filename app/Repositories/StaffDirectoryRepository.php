@@ -58,4 +58,15 @@ class StaffDirectoryRepository extends BaseRepository
             ->orderBy('username')
             ->get();
     }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function listPendingOrdered(): Collection
+    {
+        return User::query()
+            ->where('status', UserStatus::PENDING->value)
+            ->orderBy('username')
+            ->get();
+    }
 }

@@ -316,4 +316,12 @@ class AgentAllowRepository extends BaseRepository
         return 1;
 
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, AgentAllow>
+     */
+    public function listLatest(): \Illuminate\Database\Eloquent\Collection
+    {
+        return AgentAllow::query()->orderBy('id', 'desc')->get();
+    }
 }

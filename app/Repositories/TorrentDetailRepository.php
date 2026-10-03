@@ -6,9 +6,13 @@ namespace App\Repositories;
 
 use App\Enums\TorrentOperationAction;
 use App\Models\Comment;
+use App\Models\File;
+use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class TorrentDetailRepository
@@ -162,5 +166,25 @@ class TorrentDetailRepository
             ->where('action_type', TorrentOperationAction::APPROVAL_DENY->value)
             ->orderBy('id', 'desc')
             ->first();
+    }
+
+    /**
+     * @return Collection<int, File>
+     */
+    public function listFilesForTorrent(int $torrentId): Collection
+    {
+        return File::query()->where('torrent', $torrentId)->get();
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, Thank>
+     */
+    public function paginateThanks(int $torrentId): LengthAwarePaginator
+    {
+        return Thank::query()
+            ->where('torrentid', $torrentId)
+            ->whereHas('user')
+            ->with(['user'])
+            ->paginate();
     }
 }

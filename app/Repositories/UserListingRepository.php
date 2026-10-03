@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Enums\UserStatus;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -137,5 +139,20 @@ class UserListingRepository
         }
 
         return compact('peers', 'posts', 'comments', 'bannedIps');
+    }
+
+    /**
+     * @param  list<int>  $excludeIds
+     * @return Collection<int, User>
+     */
+    public function listAboveClassExcluding(int $class, array $excludeIds): Collection
+    {
+        return User::query()
+            ->where('class', '>=', $class)
+            ->when(! empty($excludeIds), function ($q) use ($excludeIds) {
+                $q->whereNotIn('id', $excludeIds);
+            })
+            ->orderBy('username')
+            ->get(['id AS userid', 'username']);
     }
 }

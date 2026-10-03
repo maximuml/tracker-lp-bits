@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Models\OverForum;
 use App\Support\Cache;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class OverforumRepository extends BaseRepository
@@ -42,5 +44,13 @@ class OverforumRepository extends BaseRepository
     private function clearOverforumCache(): void
     {
         Cache::forgetWithLocales('overforums_list');
+    }
+
+    /**
+     * @return Collection<int, OverForum>
+     */
+    public function listOrdered(): Collection
+    {
+        return OverForum::query()->orderBy('sort')->get();
     }
 }

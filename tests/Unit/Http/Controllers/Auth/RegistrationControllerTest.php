@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Requests\Auth\ConfirmResendRequest;
 use App\Http\Requests\Auth\SignupRequest;
 use App\Models\User;
+use App\Repositories\InviteRepository;
 use App\Services\RegistrationService;
 use App\Services\WebAuthService;
 use Illuminate\Http\RedirectResponse;
@@ -43,7 +44,7 @@ final class RegistrationControllerTest extends TestCase
             new RedirectResponse('index.php')
         );
 
-        $controller = new RegistrationController($registrationService, $authService);
+        $controller = new RegistrationController(Mockery::mock(InviteRepository::class), $registrationService, $authService);
         $request = SignupRequest::create('/signup', 'POST', [
             'wantusername' => 'newuser',
             'wantpassword' => 'password',
@@ -74,7 +75,7 @@ final class RegistrationControllerTest extends TestCase
             new RedirectResponse('ok.php?type=confirm')
         );
 
-        $controller = new RegistrationController($registrationService, $authService);
+        $controller = new RegistrationController(Mockery::mock(InviteRepository::class), $registrationService, $authService);
         $request = Request::create('/confirm', 'GET', ['id' => 1, 'secret' => 'abc']);
 
         $response = $controller->confirm($request);
@@ -98,7 +99,7 @@ final class RegistrationControllerTest extends TestCase
             new RedirectResponse('ok.php?type=confirmed')
         );
 
-        $controller = new RegistrationController($registrationService, $authService);
+        $controller = new RegistrationController(Mockery::mock(InviteRepository::class), $registrationService, $authService);
         $request = Request::create('/confirm', 'GET', ['id' => 1, 'secret' => 'bad']);
 
         $response = $controller->confirm($request);
@@ -128,7 +129,7 @@ final class RegistrationControllerTest extends TestCase
             new RedirectResponse('ok.php?type=confirm')
         );
 
-        $controller = new RegistrationController($registrationService, $authService);
+        $controller = new RegistrationController(Mockery::mock(InviteRepository::class), $registrationService, $authService);
         $request = Request::create('/confirm', 'GET', ['id' => 1, 'secret' => 'abc']);
 
         $response = $controller->confirm($request);
@@ -151,7 +152,7 @@ final class RegistrationControllerTest extends TestCase
             new RedirectResponse('index.php')
         );
 
-        $controller = new RegistrationController($registrationService, $authService);
+        $controller = new RegistrationController(Mockery::mock(InviteRepository::class), $registrationService, $authService);
         $request = ConfirmResendRequest::create('/confirm_resend', 'POST', [
             'email' => 'test@test.com',
         ]);

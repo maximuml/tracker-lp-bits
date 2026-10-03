@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\UserModifyLog;
+use App\Models\UsernameChangeLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -128,5 +129,61 @@ class UserDetailRepository
             ->get()
             ->map(fn ($item) => sprintf('[%s] %s', $item->created_at->format('Y-m-d'), $item->comment))
             ->implode("\n");
+    }
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findOrFailById(int $id, array $columns = ['*']): User
+    {
+        return User::query()->findOrFail($id, $columns);
+    }
+
+    public function findProfileWithCounts(int $id): User
+    {
+        return User::query()->withCount([
+            'comments', 'posts', 'seeding_torrents', 'leeching_torrents',
+            'torrents' => function ($query) {
+                $query->whereHas('snatches');
+            },
+            'completed_torrents' => function ($query) use ($id) {
+                $query->where('torrents.owner', '!=', $id);
+            },
+            'incomplete_torrents' => function ($query) use ($id) {
+                $query->where('torrents.owner', '!=', $id);
+            },
+        ])->findOrFail($id);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function insertUsernameChangeLog(array $data): void
+    {
+        UsernameChangeLog::query()->create($data);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    public function insertUserModifyLogs(array $rows): void
+    {
+        UserModifyLog::query()->insert($rows);
+    }
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findByUsername(string $username, array $columns = ['*']): ?User
+    {
+        return User::query()->where('username', $username)->first($columns);
+    }
+
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findByEmail(string $email, array $columns = ['*']): ?User
+    {
+        return User::query()->where('email', $email)->first($columns);
     }
 }

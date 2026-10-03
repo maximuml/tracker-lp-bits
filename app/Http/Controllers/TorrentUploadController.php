@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
-use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentPosState;
 use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Exceptions\UploadValidationException;
 use App\Http\Requests\TorrentUploadRequest;
-use App\Models\Offer;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
@@ -40,7 +39,7 @@ use Illuminate\Validation\ValidationException;
 
 class TorrentUploadController extends Controller
 {
-    public function __construct(
+    public function __construct(private readonly OfferRepositoryInterface $offerRepository,
         private TorrentRepositoryInterface $torrentRepository,
         private SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
         private TagRepositoryInterface $tagRepository,
@@ -74,11 +73,7 @@ class TorrentUploadController extends Controller
         $has_allowed_offer = 0;
         $offerRows = [];
         if ($enableoffer === 'yes') {
-            $offerRows = Offer::query()
-                ->where('allowed', OfferAllowed::ALLOWED->value)
-                ->where('userid', $currentUser['id'])
-                ->orderBy('name')
-                ->get()
+            $offerRows = $this->offerRepository->listAllowedForUser((int) $currentUser['id'])
                 ->toArray();
             $has_allowed_offer = count($offerRows);
         }

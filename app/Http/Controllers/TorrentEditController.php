@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\TagRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\TorrentEditRequest;
 use App\Models\Torrent;
@@ -32,7 +33,7 @@ use Illuminate\View\View;
 
 class TorrentEditController extends Controller
 {
-    public function __construct(
+    public function __construct(private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
         private readonly TagRepositoryInterface $tagRepository,
         private readonly HitAndRunRepository $hitAndRunRepository,
@@ -54,7 +55,7 @@ class TorrentEditController extends Controller
             abort(404);
         }
 
-        $torrent = Torrent::query()->find($id);
+        $torrent = $this->torrentRepository->findById($id);
         if (! $torrent instanceof Torrent) {
             abort(404);
         }

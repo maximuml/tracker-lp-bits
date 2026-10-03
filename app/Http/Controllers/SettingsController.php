@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\IndexRepository;
+use App\Repositories\LanguageRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Html;
@@ -34,7 +35,7 @@ class SettingsController extends LegacyController
 
     private IndexRepository $indexRepository;
 
-    public function __construct(TagRepositoryInterface $tagRepository, CurrentUser $currentUser, IndexRepository $indexRepository)
+    public function __construct(private readonly LanguageRepository $languageRepository, TagRepositoryInterface $tagRepository, CurrentUser $currentUser, IndexRepository $indexRepository)
     {
         $this->tagRepository = $tagRepository;
         $this->currentUser = $currentUser;
@@ -151,7 +152,7 @@ class SettingsController extends LegacyController
             if ($section === 'main') {
                 $data['searchboxes'] = DB::table('searchbox')->get(['id', 'name']);
                 $data['stylesheets'] = DB::table('stylesheets')->orderBy('name')->get();
-                $allSiteLanguages = Language::query()->where('site_lang', 1)->get();
+                $allSiteLanguages = $this->languageRepository->listSiteLanguages();
                 $data['allSiteLanguages'] = $allSiteLanguages;
                 $data['allEnabledLangs'] = Language::listEnabled(true);
             }

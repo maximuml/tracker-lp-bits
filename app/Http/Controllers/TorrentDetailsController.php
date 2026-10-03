@@ -6,13 +6,14 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\TorrentApprovalStatus;
 use App\Models\Setting;
 use App\Models\Torrent;
-use App\Models\TorrentBuyLog;
 use App\Models\TorrentOperationLog;
 use App\Models\User;
 use App\Repositories\TorrentDetailRepository;
+use App\Repositories\TorrentPurchaseRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Comment;
@@ -50,7 +51,7 @@ class TorrentDetailsController extends Controller
 
     private ?LegacyRedisCache $legacyRedisCache;
 
-    public function __construct(
+    public function __construct(private readonly TorrentPurchaseRepository $torrentPurchaseRepository, private readonly TorrentRepositoryInterface $torrentRepository,
         TorrentDownloadRepositoryInterface $downloadRepository,
         TagRepositoryInterface $tagRepository,
         TorrentDetailRepository $torrentDetailRepository,
@@ -77,7 +78,7 @@ class TorrentDetailsController extends Controller
             return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
         }
 
-        $torrent = Torrent::query()->find($id);
+        $torrent = $this->torrentRepository->findById($id);
         if (! $torrent instanceof Torrent) {
             abort(404);
         }
@@ -108,7 +109,7 @@ class TorrentDetailsController extends Controller
             ? $this->torrentDetailRepository->getLatestApprovalDenyLog($id)
             : null;
 
-        $hasBuy = TorrentBuyLog::query()->where('uid', $currentUser['id'] ?? 0)->where('torrent_id', $id)->exists();
+        $hasBuy = $this->torrentPurchaseRepository->hasBuySuccess((int) ($currentUser['id'] ?? 0), $id);
 
         $requestFlags = [
             'hit' => $request->has('hit'),

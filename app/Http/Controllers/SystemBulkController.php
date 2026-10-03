@@ -13,6 +13,8 @@ use App\Jobs\BulkUserMessageJob;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\User;
+use App\Repositories\InviteRepository;
+use App\Repositories\UserDetailRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -50,7 +52,7 @@ class SystemBulkController extends LegacyController
 
     private ?LegacyRedisCache $legacyRedisCache;
 
-    public function __construct(
+    public function __construct(private readonly InviteRepository $inviteRepository, private readonly UserDetailRepository $userDetailRepository,
         UserModerationRepositoryInterface $userModerationRepository,
         CurrentUser $currentUser,
         ?LegacyRedisCache $legacyRedisCache,
@@ -180,7 +182,7 @@ class SystemBulkController extends LegacyController
                         Locale::trans('user.username_invalid', ['username' => $preRegisterUsername], null)
                     );
                 }
-                if (User::query()->where('username', $preRegisterUsername)->exists()) {
+                if ($this->userDetailRepository->findByUsername($preRegisterUsername, ['id']) !== null) {
                     return $this->legacyAbortResponse(
                         __('legacy/takeinvite.head_invitation_failed'),
                         Locale::trans('user.username_already_exists', ['username' => $preRegisterUsername], null)
@@ -188,10 +190,10 @@ class SystemBulkController extends LegacyController
                 }
             }
 
-            if (User::query()->where('email', $email)->count() > 0) {
+            if ($this->userDetailRepository->findByEmail($email, ['id']) !== null) {
                 return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_email_address').htmlspecialchars($email).__('legacy/takeinvite.std_is_in_use'));
             }
-            if (Invite::query()->where('invitee', $email)->count() > 0) {
+            if ($this->inviteRepository->existsForInvitee($email)) {
                 return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), __('legacy/takeinvite.std_invitation_already_sent_to').htmlspecialchars($email).__('legacy/takeinvite.std_await_user_registeration'));
             }
 
@@ -207,7 +209,7 @@ class SystemBulkController extends LegacyController
                 // Legacy: md5(mt_rand(1, 10000).username.time.passhash) — not CSPRNG, leaked passhash
                 $hash = bin2hex(random_bytes(32));
             } else {
-                $hashRecord = Invite::query()->where('inviter', $currentUserId)->where('hash', $hashPost)->first();
+                $hashRecord = $this->inviteRepository->findByInviterAndHash($currentUserId, $hashPost);
                 if (! $hashRecord instanceof Invite) {
                     return $this->legacyAbortResponse(__('legacy/takeinvite.head_invitation_failed'), ('Hash does not exist.'));
                 }
@@ -269,8 +271,8 @@ class SystemBulkController extends LegacyController
                         'time_invited' => now()->toDateTimeString(),
                     ] + $update;
                     unset($insert['valid']); // already included
-                    Invite::query()->insert($insert);
-                    User::query()->where('id', $currentUserId)->decrement('invites');
+                    $this->inviteRepository->insertInvites($insert);
+                    $this->inviteRepository->decrementInvites($currentUserId);
                 }
             }
         } finally {

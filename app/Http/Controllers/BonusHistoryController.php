@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\MagicRewardRequest;
 use App\Models\BonusLogs;
-use App\Models\Reward;
 use App\Models\Setting;
-use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\BonusCalculationRepository;
+use App\Repositories\RewardRepository;
+use App\Repositories\UserListingRepository;
 use App\Support\Api;
 use App\Support\AssetAppender;
 use App\Support\Bonus;
@@ -36,7 +38,7 @@ class BonusHistoryController extends LegacyController
 {
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(
+    public function __construct(private readonly RewardRepository $rewardRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserListingRepository $userListingRepository, private readonly UserRepositoryInterface $userRepository,
         BonusCalculationRepository $bonusCalculationRepository,
         private readonly CurrentUser $currentUser,
     ) {
@@ -52,7 +54,7 @@ class BonusHistoryController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Invalid uid.');
         }
 
-        $user = User::query()->where('id', $uid)->first(User::$commonFields);
+        $user = $this->userRepository->findById((int) $uid, User::$commonFields);
         if (! $user) {
             return $this->legacyAbortResponse('Error', "Invalid uid: {$uid}");
         }
@@ -218,13 +220,7 @@ JS;
         foreach ($uploaders as $uploader) {
             $hasUpUserIds[] = (int) ((array) $uploader)['userid'];
         }
-        $nonUploaderQuery = User::query()
-            ->where('class', '>=', $uploaderClass)
-            ->when(! empty($hasUpUserIds), function ($q) use ($hasUpUserIds) {
-                $q->whereNotIn('id', $hasUpUserIds);
-            })
-            ->orderBy('username')
-            ->get(['id AS userid', 'username']);
+        $nonUploaderQuery = $this->userListingRepository->listAboveClassExcluding($uploaderClass, $hasUpUserIds);
 
         $allUserIds = array_merge($hasUpUserIds, $nonUploaderQuery->pluck('userid')->map(fn ($id) => (int) $id)->all());
         UserDisplay::preload($allUserIds);
@@ -311,7 +307,7 @@ JS;
             return response()->json(Api::failWithContext('You do not have such bonus!', $validated));
         }
 
-        $torrentOwner = Torrent::query()->where('id', $torrentId)->value('owner');
+        $torrentOwner = $this->torrentRepository->getOwnerId((int) $torrentId);
         if (! $torrentOwner) {
             return response()->json(Api::failWithContext('Invalid torrent id!', $validated));
         }
@@ -325,13 +321,13 @@ JS;
         }
 
         $todayStr = now()->startOfDay();
-        $todayCount = Reward::query()->where('userid', $userId)->where('created_at', '>=', $todayStr)->count();
+        $todayCount = $this->rewardRepository->countSince($userId, $todayStr);
         $timesLimit = Setting::getBonusRewardTimesLimit();
         if ($timesLimit > 0 && $todayCount >= $timesLimit) {
             return response()->json(Api::failWithContext('You already reach times limit!', $validated));
         }
 
-        $torrentOwnerInfo = User::query()->find((int) $torrentOwner, User::$commonFields);
+        $torrentOwnerInfo = $this->userRepository->findById((int) $torrentOwner, User::$commonFields);
         if (! $torrentOwnerInfo) {
             return response()->json(Api::failWithContext('Invalid torrent owner!', $validated));
         }

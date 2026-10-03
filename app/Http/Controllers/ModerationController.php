@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\OfferRepositoryInterface;
+use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\ReportType;
-use App\Models\Comment;
-use App\Models\Offer;
-use App\Models\Torrent;
-use App\Models\User;
+use App\Repositories\CommentRepository;
 use App\Repositories\ModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -27,7 +27,7 @@ use Illuminate\View\View;
 
 class ModerationController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly OfferRepositoryInterface $offerRepository, private readonly CommentRepository $commentRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserRepositoryInterface $userRepository,
         private readonly CurrentUser $currentUser,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly ModerationRepository $moderationRepository,
@@ -103,7 +103,7 @@ class ModerationController extends LegacyController
             if ($user == $currentUserId) {
                 return $this->legacyAbortResponse(__('legacy/report.std_sorry'), __('legacy/report.std_cannot_report_oneself'));
             }
-            $userRow = User::query()->where('id', $user)->first(['username', 'class']);
+            $userRow = $this->userRepository->findById((int) $user, ['username', 'class']);
             if (! $userRow) {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_user_id'));
             }
@@ -128,7 +128,7 @@ class ModerationController extends LegacyController
         }
 
         if ($torrent && Validators::isId($torrent)) {
-            $name = Torrent::query()->where('id', $torrent)->value('name');
+            $name = $this->torrentRepository->getNameById((int) $torrent);
             if (! $name) {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_torrent_id'));
             }
@@ -166,17 +166,17 @@ class ModerationController extends LegacyController
         }
 
         if ($commentid && Validators::isId($commentid)) {
-            $comment = Comment::query()->where('id', $commentid)->first(['id', 'user', 'torrent', 'offer']);
+            $comment = $this->commentRepository->findById((int) $commentid, ['id', 'user', 'torrent', 'offer']);
             if (! $comment) {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_comment_id'));
             }
             $arr = $comment->toArray();
             if ($arr['torrent'] ?? null) {
-                $name = Torrent::query()->where('id', $arr['torrent'])->value('name');
+                $name = $this->torrentRepository->getNameById((int) $arr['torrent']);
                 $url = 'details.php?id='.$arr['torrent'].'#'.$commentid;
                 $of = __('legacy/report.text_of_torrent');
             } elseif ($arr['offer'] ?? null) {
-                $name = Offer::query()->where('id', $arr['offer'])->value('name');
+                $name = $this->offerRepository->getOfferName((int) $arr['offer']);
                 $url = 'offers.php?id='.$arr['offer'].'&off_details=1#'.$commentid;
                 $of = __('legacy/report.text_of_offer');
             } else {
@@ -199,7 +199,7 @@ class ModerationController extends LegacyController
         }
 
         if ($reportofferid && Validators::isId($reportofferid)) {
-            $offer = Offer::query()->where('id', $reportofferid)->first(['id', 'name']);
+            $offer = $this->offerRepository->findOffer((int) $reportofferid, ['id', 'name']);
             if (! $offer) {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_offer_id'));
             }
@@ -257,7 +257,7 @@ class ModerationController extends LegacyController
             switch ($typeString) {
                 case 'torrent':
                     $type = __('legacy/reports.text_torrent');
-                    $torrent = Torrent::query()->where('id', $row['reportid'])->first(['id', 'name']);
+                    $torrent = $this->torrentRepository->findById((int) $row['reportid'], ['id', 'name']);
                     if (! $torrent) {
                         $reporting = (string) (__('legacy/reports.text_torrent_does_not_exist'));
                     } else {
@@ -271,7 +271,7 @@ class ModerationController extends LegacyController
                     break;
                 case 'user':
                     $type = __('legacy/reports.text_user');
-                    $userId = User::query()->where('id', $row['reportid'])->value('id');
+                    $userId = $this->userRepository->existsById((int) $row['reportid']) ? (int) $row['reportid'] : null;
                     if (! $userId) {
                         $reporting = (string) (__('legacy/reports.text_user_does_not_exist'));
                     } else {
@@ -283,7 +283,7 @@ class ModerationController extends LegacyController
                     break;
                 case 'offer':
                     $type = __('legacy/reports.text_offer');
-                    $offer = Offer::query()->where('id', $row['reportid'])->first(['id', 'name']);
+                    $offer = $this->offerRepository->findOffer((int) $row['reportid'], ['id', 'name']);
                     if (! $offer) {
                         $reporting = (string) (__('legacy/reports.text_offer_does_not_exist'));
                     } else {
@@ -312,17 +312,17 @@ class ModerationController extends LegacyController
                     break;
                 case 'comment':
                     $type = __('legacy/reports.text_comment');
-                    $comment = Comment::query()->where('id', $row['reportid'])->first(['id', 'user', 'torrent', 'offer']);
+                    $comment = $this->commentRepository->findById((int) $row['reportid'], ['id', 'user', 'torrent', 'offer']);
                     if (! $comment) {
                         $reporting = (string) (__('legacy/reports.text_comment_does_not_exist'));
                     } else {
                         $arr = $comment->toArray();
                         if ($arr['torrent'] ?? null) {
-                            $name = Torrent::query()->where('id', $arr['torrent'])->value('name');
+                            $name = $this->torrentRepository->getNameById((int) $arr['torrent']);
                             $url = 'details.php?id='.$arr['torrent'].'#cid'.$row['reportid'];
                             $of = __('legacy/reports.text_of_torrent');
                         } elseif ($arr['offer'] ?? null) {
-                            $name = Offer::query()->where('id', $arr['offer'])->value('name');
+                            $name = $this->offerRepository->getOfferName((int) $arr['offer']);
                             $url = 'offers.php?id='.$arr['offer'].'&off_details=1#cid'.$row['reportid'];
                             $of = __('legacy/reports.text_of_offer');
                         } else {

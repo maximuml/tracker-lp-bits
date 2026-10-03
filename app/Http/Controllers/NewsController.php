@@ -12,6 +12,7 @@ use App\Http\Requests\NewsUpdateRequest;
 use App\Http\Resources\NewsResource;
 use App\Models\News;
 use App\Repositories\IndexRepository;
+use App\Repositories\NewsRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -27,6 +28,7 @@ class NewsController extends LegacyController
         private readonly CurrentUser $currentUser,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly IndexRepository $indexRepository,
+        private readonly NewsRepository $newsRepository,
     ) {}
 
     public function news(Request $request): Response|RedirectResponse|View
@@ -61,7 +63,7 @@ class NewsController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/news.std_delete_news_item'), $confirm, false);
             }
 
-            News::query()->where('id', $newsid)->delete();
+            $this->newsRepository->deleteById($newsid);
             $this->invalidateNewsCache();
 
             if ($returnto !== '') {
@@ -93,7 +95,7 @@ class NewsController extends LegacyController
             $notify = $request->input('notify') === 'yes';
 
             $currentUser = (array) ($this->currentUser->get() ?? []);
-            $newsId = (int) News::query()->insertGetId([
+            $newsId = $this->newsRepository->insertGetId([
                 'userid' => (int) ($currentUser['id'] ?? 0),
                 'added' => $added,
                 'body' => $body,
@@ -107,7 +109,7 @@ class NewsController extends LegacyController
 
             $this->invalidateNewsCache();
 
-            $news = News::query()->find($newsId);
+            $news = $this->newsRepository->findById($newsId);
             if (! $news) {
                 return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_something_weird_happened'));
             }
@@ -125,7 +127,7 @@ class NewsController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_invalid_news_id'));
             }
 
-            $news = News::query()->where('id', $newsid)->first();
+            $news = $this->newsRepository->findById($newsid);
             if (! $news) {
                 return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_invalid_news_id').$newsid);
             }
@@ -141,7 +143,7 @@ class NewsController extends LegacyController
                 }
                 $notify = $request->input('notify') === 'yes';
 
-                News::query()->where('id', $newsid)->update([
+                $this->newsRepository->updateFields($newsid, [
                     'body' => $body,
                     'title' => $title,
                     'notify' => $notify,
@@ -197,7 +199,7 @@ class NewsController extends LegacyController
     {
         $perPage = (int) $request->input('limit', 20);
 
-        $news = News::query()->with(['user'])->latest('added')->paginate($perPage);
+        $news = $this->newsRepository->paginateLatest($perPage);
 
         return $this->success(NewsResource::collection($news));
     }
@@ -222,7 +224,7 @@ class NewsController extends LegacyController
         $data['added'] = now()->toDateTimeString();
         $data['notify'] = ($data['notify'] ?? 'no') === 'yes';
 
-        $news = News::query()->create($data);
+        $news = $this->newsRepository->store($data);
         event(new NewsCreated($news));
 
         $this->invalidateNewsCache();

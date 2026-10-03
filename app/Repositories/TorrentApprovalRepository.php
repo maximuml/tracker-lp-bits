@@ -12,12 +12,15 @@ use App\Enums\TorrentPromotion;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\Snatch;
 use App\Models\Torrent;
+use App\Models\TorrentDenyReason;
 use App\Models\TorrentOperationLog;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Json;
 use App\Support\Locale;
 use App\Support\Logger;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -183,5 +186,26 @@ class TorrentApprovalRepository extends BaseRepository
             ->where('owner', $ownerId)
             ->where('approval_status', TorrentApprovalStatus::DENY->value)
             ->count();
+    }
+
+    /**
+     * @return Collection<int, TorrentDenyReason>
+     */
+    public function listDenyReasons(): Collection
+    {
+        return TorrentDenyReason::query()->orderBy('priority', 'desc')->get();
+    }
+
+    /**
+     * @param  list<string>  $actionTypes
+     * @return LengthAwarePaginator<int, TorrentOperationLog>
+     */
+    public function paginateApprovalLogs(int $torrentId, array $actionTypes, int $perPage): LengthAwarePaginator
+    {
+        return TorrentOperationLog::query()
+            ->where('tid', $torrentId)
+            ->whereIn('action_type', $actionTypes)
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
     }
 }

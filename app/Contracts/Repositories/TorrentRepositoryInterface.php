@@ -7,6 +7,7 @@ namespace App\Contracts\Repositories;
 use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 interface TorrentRepositoryInterface
 {
@@ -39,5 +40,23 @@ interface TorrentRepositoryInterface
      */
     public function findById(int $id, array $columns = ['*']): ?Torrent;
 
-    public function findOrFailById(int $id): Torrent;
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findOrFailById(int $id, array $columns = ['*']): Torrent;
+
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    public function updateFields(int $id, array $fields): void;
+
+    /**
+     * @param  list<int|string>  $posStates
+     * @return Collection<int, int>
+     */
+    public function pluckIdsByPosStates(array $posStates): Collection;
+
+    public function getNameById(int $id): ?string;
+
+    public function getOwnerId(int $id): ?int;
 }

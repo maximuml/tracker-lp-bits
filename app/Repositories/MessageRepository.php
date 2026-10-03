@@ -8,6 +8,7 @@ use App\DTOs\Message\StoreMessageDto;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -209,6 +210,31 @@ class MessageRepository extends BaseRepository
         $result = $model->delete();
 
         return $result;
+    }
+
+    public function findById(int $id): ?Message
+    {
+        return Message::query()->find($id);
+    }
+
+    public function setUnreadForUser(int $messageId, int $userId, mixed $unread): int
+    {
+        return Message::query()->where('id', $messageId)->where(function ($q) use ($userId) {
+            $q->where('receiver', $userId)->orWhere('sender', $userId);
+        })->update(['unread' => $unread]);
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, Message>
+     */
+    public function paginateUnread(int $userId, int $perPage)
+    {
+        return Message::query()
+            ->where('receiver', $userId)
+            ->where('unread', true)
+            ->with('send_user')
+            ->orderByDesc('id')
+            ->paginate($perPage);
     }
 
     /**

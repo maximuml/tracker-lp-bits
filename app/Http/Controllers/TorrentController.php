@@ -17,9 +17,8 @@ use App\Http\Resources\TorrentOperationLogResource;
 use App\Http\Resources\TorrentResource;
 use App\Models\Setting;
 use App\Models\Torrent;
-use App\Models\TorrentDenyReason;
-use App\Models\TorrentOperationLog;
 use App\Models\User;
+use App\Repositories\TorrentApprovalRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Logger;
@@ -38,7 +37,7 @@ class TorrentController extends Controller
 
     private UploadRepository $uploadRepository;
 
-    public function __construct(TorrentRepositoryInterface $repository, TorrentDownloadRepositoryInterface $downloadRepository, TorrentModerationRepository $moderationRepository, UploadRepository $uploadRepository)
+    public function __construct(private readonly TorrentApprovalRepository $torrentApprovalRepository, TorrentRepositoryInterface $repository, TorrentDownloadRepositoryInterface $downloadRepository, TorrentModerationRepository $moderationRepository, UploadRepository $uploadRepository)
     {
         $this->repository = $repository;
         $this->downloadRepository = $downloadRepository;
@@ -116,8 +115,8 @@ class TorrentController extends Controller
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
         $torrentId = $request->torrent_id;
-        $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
-        $denyReasons = TorrentDenyReason::query()->orderBy('priority', 'desc')->get();
+        $torrent = $this->repository->findOrFailById($torrentId, Torrent::$commentFields);
+        $denyReasons = $this->torrentApprovalRepository->listDenyReasons();
 
         return view('torrent/approval', compact('torrent', 'denyReasons'));
     }
@@ -134,12 +133,7 @@ class TorrentController extends Controller
             TorrentOperationAction::APPROVAL_ALLOW->value,
             TorrentOperationAction::APPROVAL_DENY->value,
         ];
-        $records = TorrentOperationLog::query()
-            ->with(['user'])
-            ->where('torrent_id', $torrentId)
-            ->whereIn('action_type', $actionTypes)
-            ->orderBy('id', 'desc')
-            ->paginate($request->limit);
+        $records = $this->torrentApprovalRepository->paginateApprovalLogs($torrentId, $actionTypes, (int) $request->limit);
 
         $resource = TorrentOperationLogResource::collection($records);
 

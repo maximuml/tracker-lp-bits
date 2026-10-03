@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Jobs\BulkUserMessageJob;
 use App\Models\StaffMessage;
 use App\Models\User;
@@ -22,7 +23,7 @@ use Illuminate\View\View;
 
 class StaffMessageController extends LegacyController
 {
-    public function __construct(
+    public function __construct(private readonly UserRepositoryInterface $userRepository,
         private readonly CurrentUser $currentUser,
     ) {}
 
@@ -142,7 +143,7 @@ class StaffMessageController extends LegacyController
 
         StaffMessage::add($currentUserId, $subject, $msg);
 
-        User::query()->where('id', $currentUserId)->update(['last_staffmsg' => date('Y-m-d H:i:s')]);
+        $this->userRepository->updateFields($currentUserId, ['last_staffmsg' => date('Y-m-d H:i:s')]);
         Cache::clearStaffMessage();
 
         $returnto = (string) request()->post('returnto');

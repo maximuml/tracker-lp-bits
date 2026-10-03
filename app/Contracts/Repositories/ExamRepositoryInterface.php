@@ -57,4 +57,11 @@ interface ExamRepositoryInterface
     public function listMatchExam(int $uid);
 
     public function isExamMatchUser(Exam $exam, User|int $user): bool;
+
+    public function countEnabledTasks(): int;
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
+     */
+    public function listEnabledTasks(int $offset, int $perPage): \Illuminate\Database\Eloquent\Collection;
 }

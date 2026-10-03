@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\InviteValid;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ConfirmResendRequest;
 use App\Http\Requests\Auth\SignupRequest;
-use App\Models\Invite;
 use App\Models\Setting;
+use App\Repositories\InviteRepository;
 use App\Services\RegistrationService;
 use App\Services\WebAuthService;
 use App\Support\AssetAppender;
@@ -29,7 +28,7 @@ use Illuminate\View\View;
 
 class RegistrationController extends Controller
 {
-    public function __construct(
+    public function __construct(private readonly InviteRepository $inviteRepository,
         private RegistrationService $registrationService,
         private WebAuthService $authService,
     ) {}
@@ -61,10 +60,7 @@ class RegistrationController extends Controller
 
         $invite = null;
         if ($isInvite && $code !== '') {
-            $invite = Invite::query()
-                ->where('hash', $code)
-                ->where('valid', InviteValid::YES->value)
-                ->first();
+            $invite = $this->inviteRepository->findValidByHash($code);
         }
 
         $captchaEnabled = $this->authService->isCaptchaEnabled();

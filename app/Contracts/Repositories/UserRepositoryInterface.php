@@ -95,7 +95,10 @@ interface UserRepositoryInterface
      */
     public function getByIds(array $ids, array $columns = []): Collection;
 
-    public function findById(int $id): ?User;
+    /**
+     * @param  list<string>  $columns
+     */
+    public function findById(int $id, array $columns = ['*']): ?User;
 
     public function existsById(int $id): bool;
 

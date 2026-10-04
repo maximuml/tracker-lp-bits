@@ -10,6 +10,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Exceptions\TrackerException;
 use App\Jobs\BuyTorrent;
+use App\Models\Torrent;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
@@ -39,8 +40,9 @@ final class TorrentGate
 
         $lookupTorrent = static function () use ($ctx) {
             $tsField = Database::unixTimestampField('added');
-            $torrent = DB::table('torrents')
+            $torrent = Torrent::query()
                 ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
+                ->toBase()
                 ->select([
                     'torrents.id', 'torrents.size', 'torrents.owner', 'torrents.sp_state',
                     'torrents.seeders', 'torrents.leechers', 'torrents.times_completed',

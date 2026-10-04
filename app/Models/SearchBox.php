@@ -32,7 +32,6 @@ use App\Support\Locale;
 use App\Support\Logger;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -211,7 +210,7 @@ class SearchBox extends NexusModel
         }
         $table = self::$taxonomies[$torrentField]['table'];
 
-        return DB::table($table)->where(function (Builder $query) use ($searchBox) {
+        return self::query()->from($table)->toBase()->where(function (Builder $query) use ($searchBox) {
             return $query->whereIn('mode', [$searchBox->id, 0]);
         })->orderBy('sort_index', 'desc')->orderBy('id', 'desc')->get();
     }

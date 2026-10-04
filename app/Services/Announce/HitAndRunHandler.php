@@ -9,11 +9,11 @@ use App\Enums\TorrentHr;
 use App\Enums\UserClass as UserClassEnum;
 use App\Events\HitAndRunCreated;
 use App\Models\HitAndRun;
+use App\Models\Snatch;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 final class HitAndRunHandler
 {
@@ -88,13 +88,13 @@ final class HitAndRunHandler
                 'updated_at' => $dt,
             ];
 
-            $affectedRows = DB::table('hit_and_runs')->insertOrIgnore($hrRecord);
+            $affectedRows = HitAndRun::query()->insertOrIgnore($hrRecord);
             Logger::writeWithContext((string) "[HR_LOG] user: {$userId}, torrent: {$torrentId}, total downloaded: {$snatchInfo['downloaded']} >= required: {$requiredDownloaded}, [INSERT_H&R], affectedRows: {$affectedRows}", (string) 'info', (bool) false);
 
             if ($affectedRows > 0) {
                 $hitAndRunRecord = HitAndRun::query()->where('uid', $userId)->where('torrent_id', $torrentId)->first();
                 if ($hitAndRunRecord) {
-                    DB::table('snatched')->where('id', (int) $snatchInfo['id'])->update(['hit_and_run_id' => $hitAndRunRecord->id]);
+                    Snatch::query()->where('id', (int) $snatchInfo['id'])->update(['hit_and_run_id' => $hitAndRunRecord->id]);
                     event(new HitAndRunCreated($hitAndRunRecord));
                 }
             }

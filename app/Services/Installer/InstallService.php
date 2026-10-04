@@ -7,6 +7,7 @@ namespace App\Services\Installer;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
+use App\Models\Setting;
 use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
@@ -78,7 +79,7 @@ final class InstallService
         /** @var array<string, array<string, mixed>> $settings */
         $settings = require $defaultSettingsFile;
         $settingsFromDb = [];
-        if (Schema::hasTable('settings') && DB::table('settings')->count() > 0) {
+        if (Schema::hasTable('settings') && Setting::query()->count() > 0) {
             /** @var array<string, array<string, mixed>> $settingsFromDb */
             $settingsFromDb = Settings::fromDb() ?: [];
         }

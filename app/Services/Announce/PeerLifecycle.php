@@ -6,6 +6,8 @@ namespace App\Services\Announce;
 
 use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
+use App\Models\Peer;
+use App\Models\Snatch;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use Illuminate\Support\Facades\DB;
@@ -100,10 +102,11 @@ final class PeerLifecycle
      */
     public function findSelf(): ?array
     {
-        $selfRecord = DB::table('peers')
+        $selfRecord = Peer::query()
             ->where('torrent', $this->torrentId)
             ->where('userid', $this->userId)
             ->where('peer_id', $this->peerId)
+            ->toBase()
             ->first();
 
         if (! $selfRecord) {
@@ -130,7 +133,7 @@ final class PeerLifecycle
             return;
         }
 
-        $isPeerExist = DB::table('peers')
+        $isPeerExist = Peer::query()
             ->where('torrent', $this->torrentId)
             ->where('peer_id', $this->peerId)
             ->where('userid', $this->userId)
@@ -142,7 +145,7 @@ final class PeerLifecycle
             return;
         }
 
-        $sameIPRecord = DB::table('peers')
+        $sameIPRecord = Peer::query()
             ->where('torrent', $this->torrentId)
             ->where('userid', $this->userId)
             ->where('ip', $this->ip)
@@ -151,7 +154,7 @@ final class PeerLifecycle
             $this->limitGuard->warn('You cannot seed the same torrent in the same location from more than 1 client.', 300);
         }
 
-        $valid = DB::table('peers')
+        $valid = Peer::query()
             ->where('torrent', $this->torrentId)
             ->where('userid', $this->userId)
             ->count();
@@ -193,18 +196,18 @@ final class PeerLifecycle
         Logger::writeWithContext((string) ("[INSERT PEER] peer not exists for torrent: {$this->torrentId}, user: {$this->userId}, peer_id: ".bin2hex($this->peerId)), (string) 'info', (bool) false);
 
         try {
-            DB::table('peers')->insert($peerInsert);
+            Peer::query()->insert($peerInsert);
             $this->torrentUpdate[$this->seeder === 1 ? 'seeders' : 'leechers'] = DB::raw(
                 $this->seeder === 1 ? 'seeders + 1' : 'leechers + 1'
             );
 
-            $existingSnatchId = DB::table('snatched')
+            $existingSnatchId = Snatch::query()
                 ->where('torrentid', $this->torrentId)
                 ->where('userid', $this->userId)
                 ->value('id');
 
             if ($existingSnatchId) {
-                DB::table('snatched')->where('id', (int) $existingSnatchId)->update([
+                Snatch::query()->where('id', (int) $existingSnatchId)->update([
                     'to_go' => $this->left,
                     'last_action' => $this->dt,
                 ]);
@@ -221,7 +224,7 @@ final class PeerLifecycle
                     'startdat' => $this->dt,
                     'last_action' => $this->dt,
                 ];
-                DB::table('snatched')->insert($snatchInsert);
+                Snatch::query()->insert($snatchInsert);
                 $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
             }
         } catch (\Exception $exception) {
@@ -270,7 +273,7 @@ final class PeerLifecycle
 
         $peerUpdate = array_merge($peerUpdate, $peerIPUpdate);
 
-        $peerAffected = DB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->update($peerUpdate);
+        $peerAffected = Peer::query()->where('id', (int) ($this->self['id'] ?? 0))->update($peerUpdate);
 
         if ($peerAffected > 0) {
             if ($this->seeder !== (int) ($this->self['seeder'] ?? 0)) {
@@ -284,7 +287,7 @@ final class PeerLifecycle
             }
 
             if (! empty($this->snatchInfo)) {
-                DB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
+                Snatch::query()->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
             }
         }
     }
@@ -293,14 +296,14 @@ final class PeerLifecycle
     {
         $snatchUpdate = $this->buildSnatchUpdate($upthis, $downthis, $snatchTimeColumn, $snatchTimeIncrement, $leechTimeNoSeederIncrement);
 
-        $deleted = DB::table('peers')->where('id', (int) ($this->self['id'] ?? 0))->delete();
+        $deleted = Peer::query()->where('id', (int) ($this->self['id'] ?? 0))->delete();
         if ($deleted) {
             $this->torrentUpdate[((int) ($this->self['seeder'] ?? 0)) === 1 ? 'seeders' : 'leechers'] = DB::raw(
                 ((int) ($this->self['seeder'] ?? 0)) === 1 ? 'seeders - 1' : 'leechers - 1'
             );
 
             if (! empty($this->snatchInfo)) {
-                DB::table('snatched')->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
+                Snatch::query()->where('id', (int) $this->snatchInfo['id'])->update($snatchUpdate);
             }
         }
     }

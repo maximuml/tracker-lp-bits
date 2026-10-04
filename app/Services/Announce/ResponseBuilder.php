@@ -7,9 +7,10 @@ namespace App\Services\Announce;
 use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
+use App\Models\Peer;
+use App\Models\Torrent;
 use App\Support\Config\SiteConfig;
 use App\Support\Strings;
-use Illuminate\Support\Facades\DB;
 
 final class ResponseBuilder
 {
@@ -82,7 +83,7 @@ final class ResponseBuilder
         $counts = $this->countPeers($torrentId) ?: (object) ['seeders' => 0, 'leechers' => 0];
         $complete = (int) ($counts->seeders ?? 0);
         $incomplete = (int) ($counts->leechers ?? 0);
-        $downloaded = (int) (DB::table('torrents')->where('id', $torrentId)->value('times_completed') ?? 0);
+        $downloaded = (int) (Torrent::query()->where('id', $torrentId)->value('times_completed') ?? 0);
 
         $peerIdBinary = $this->dto->peerId->toBinary();
 
@@ -90,7 +91,7 @@ final class ResponseBuilder
         $peers6 = '';
 
         if ($this->dto->event !== 'stopped') {
-            $query = DB::table('peers')
+            $query = Peer::query()
                 ->where('torrent', $torrentId)
                 ->where(function ($q) use ($peerIdBinary, $userId) {
                     $q->where('peer_id', '!=', $peerIdBinary)
@@ -102,7 +103,7 @@ final class ResponseBuilder
                 $query->where('seeder', 0);
             }
 
-            foreach ($query->inRandomOrder()->get() as $row) {
+            foreach ($query->toBase()->inRandomOrder()->get() as $row) {
                 if ($this->dto->compact) {
                     if (! empty($row->ipv4)) {
                         $peers .= inet_pton($row->ipv4).pack('n', (int) $row->port);
@@ -139,9 +140,10 @@ final class ResponseBuilder
 
     public function countPeers(int $torrentId): ?\stdClass
     {
-        return DB::table('peers')
+        return Peer::query()
             ->where('torrent', $torrentId)
             ->selectRaw('SUM(CASE WHEN seeder = 1 THEN 1 ELSE 0 END) as seeders, SUM(CASE WHEN seeder = 0 THEN 1 ELSE 0 END) as leechers')
+            ->toBase()
             ->first();
     }
 

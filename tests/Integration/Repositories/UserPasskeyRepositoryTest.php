@@ -7,6 +7,7 @@ namespace Tests\Integration\Repositories;
 use App\Models\Passkey;
 use App\Models\User;
 use App\Repositories\UserPasskeyRepository;
+use App\Support\RequestContext;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -39,7 +40,7 @@ final class UserPasskeyRepositoryTest extends TestCase
     {
         parent::setUp();
         DB::table('user_passkeys')->delete();
-        $this->repository = new UserPasskeyRepository;
+        $this->repository = new UserPasskeyRepository(app(RequestContext::class));
 
         /** @var User $user */
         $user = User::factory()->create();

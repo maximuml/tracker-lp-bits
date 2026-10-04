@@ -39,8 +39,6 @@ final class SharedGetPostActionTest extends TestCase
      * @var array<string, true>
      */
     private const BASELINE_URIS = [
-        // API
-        'api/v1/usercp/settings' => true,
         // Filament redirect stubs — GET and POST both only redirect to the
         // Filament replacement page; nothing left to split.
         'bans' => true,

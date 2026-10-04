@@ -8,10 +8,10 @@ use App\DTOs\AnnounceRequestDto;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
+use App\Models\Peer;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Url;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Wait-time and simultaneous-leech slot policy for new peers, plus the
@@ -73,7 +73,7 @@ final class PeerLimitGuard
             };
 
             if ($max > 0) {
-                $leechingCount = DB::table('peers')
+                $leechingCount = Peer::query()
                     ->where('userid', $userId)
                     ->where('seeder', 0)
                     ->count();

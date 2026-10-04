@@ -119,4 +119,29 @@ class StaffDirectoryRepository extends BaseRepository
     {
         return array_values(DB::table('modpanel')->get()->map(fn ($r): array => (array) $r)->all());
     }
+
+    public function panelMenuExists(string $table, string $url): bool
+    {
+        return DB::table($table)->where('url', $url)->exists();
+    }
+
+    /** @param  array<string, mixed>  $menu */
+    public function insertPanelMenu(string $table, array $menu): int
+    {
+        return (int) DB::table($table)->insertGetId($menu);
+    }
+
+    /**
+     * @param  list<string>  $urls
+     * @param  list<string>  $tables
+     */
+    public function deletePanelMenusByUrls(array $urls, array $tables): int
+    {
+        $deleted = 0;
+        foreach ($tables as $table) {
+            $deleted += DB::table($table)->whereIn('url', $urls)->delete();
+        }
+
+        return $deleted;
+    }
 }

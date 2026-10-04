@@ -8,6 +8,9 @@ use App\DTOs\Announce\AnnounceContext;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\ClientNotAllowedException;
 use App\Exceptions\TrackerException;
+use App\Models\Peer;
+use App\Models\Snatch;
+use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\AgentAllowRepository;
 use App\Repositories\CleanupRepository;
@@ -297,7 +300,7 @@ class AnnounceService
         if (! empty($torrentUpdate)) {
             $torrentUpdate['visible'] = 1;
             $torrentUpdate['last_action'] = $ctx->dt;
-            DB::table('torrents')->where('id', $ctx->torrentId())->update($torrentUpdate);
+            Torrent::query()->where('id', $ctx->torrentId())->update($torrentUpdate);
             Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_TORRENT], '.Json::encode($torrentUpdate)), (string) 'info', (bool) false);
         }
 
@@ -309,24 +312,27 @@ class AnnounceService
     {
         // Lock the existing peer row if present
         if ($ctx->self !== null && ! empty($ctx->self['id'])) {
-            DB::table('peers')
+            Peer::query()
                 ->where('id', (int) $ctx->self['id'])
                 ->lockForUpdate()
+                ->toBase()
                 ->first();
         }
 
         // Lock the snatch row if present
         if (! empty($ctx->snatchInfo) && ! empty($ctx->snatchInfo['id'])) {
-            DB::table('snatched')
+            Snatch::query()
                 ->where('id', (int) $ctx->snatchInfo['id'])
                 ->lockForUpdate()
+                ->toBase()
                 ->first();
         }
 
         // Lock the user row to serialize uploaded/downloaded increments
-        DB::table('users')
+        User::query()
             ->where('id', $ctx->userId())
             ->lockForUpdate()
+            ->toBase()
             ->first();
     }
 

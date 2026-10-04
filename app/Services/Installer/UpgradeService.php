@@ -16,6 +16,7 @@ use App\Models\Torrent;
 use App\Models\TorrentTag;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
+use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\TokenRepository;
 use App\Repositories\ToolRepository;
 use App\Support\Cache;
@@ -40,6 +41,7 @@ use Illuminate\Support\Str;
 final class UpgradeService
 {
     public function __construct(
+        private readonly StaffDirectoryRepository $staffDirectory,
         private readonly InstallService $install,
         private readonly TagRepositoryInterface $tags,
         private readonly AttendanceRepository $attendance,
@@ -301,8 +303,8 @@ final class UpgradeService
     private function addMenu(string $table, array $menus, ?callable $log): void
     {
         foreach ($menus as $menu) {
-            if (DB::table($table)->where('url', $menu['url'])->count() === 0) {
-                $id = DB::table($table)->insertGetId($menu);
+            if (! $this->staffDirectory->panelMenuExists($table, $menu['url'])) {
+                $id = $this->staffDirectory->insertPanelMenu($table, $menu);
                 $this->log($log, '[ADD MENU] insert: '.json_encode($menu)." to table: $table, id: $id");
             }
         }
@@ -319,9 +321,7 @@ final class UpgradeService
         if ($menus === []) {
             return;
         }
-        foreach ($tables as $table) {
-            DB::table($table)->whereIn('url', $menus)->delete();
-        }
+        $this->staffDirectory->deletePanelMenusByUrls($menus, $tables);
     }
 
     private function initTag(): void

@@ -7,7 +7,6 @@ namespace App\Services;
 use App\Contracts\Repositories\UserSearchRepositoryInterface;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
-use App\Repositories\UserSearchRepository;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
@@ -35,9 +34,9 @@ use Illuminate\Support\Facades\Schema;
 final class UsersearchPageService
 {
     public function __construct(
-        private readonly CurrentUser $currentUser = new CurrentUser,
-        private readonly UserSearchRepositoryInterface $userSearchRepository = new UserSearchRepository,
-        private readonly UserListingRepository $userListingRepository = new UserListingRepository,
+        private readonly CurrentUser $currentUser,
+        private readonly UserSearchRepositoryInterface $userSearchRepository,
+        private readonly UserListingRepository $userListingRepository,
     ) {}
 
     /**

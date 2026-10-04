@@ -8,8 +8,6 @@ use App\Contracts\Repositories\NotificationFeedRepositoryInterface;
 use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Models\User;
 use App\Repositories\MessageRepository;
-use App\Repositories\NotificationFeedRepository;
-use App\Repositories\ShoutboxRepository;
 use App\Repositories\StaffMessageRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -44,16 +42,12 @@ final class NotificationFeed
         'staff' => 4,
     ];
 
-    private readonly StaffMessageRepository $staffMessageRepository;
-
     public function __construct(
-        private readonly MessageRepository $messageRepository = new MessageRepository,
-        private readonly ShoutboxRepositoryInterface $shoutboxRepository = new ShoutboxRepository,
-        private readonly NotificationFeedRepositoryInterface $feedRepository = new NotificationFeedRepository,
-        ?StaffMessageRepository $staffMessageRepository = null,
-    ) {
-        $this->staffMessageRepository = $staffMessageRepository ?? app(StaffMessageRepository::class);
-    }
+        private readonly MessageRepository $messageRepository,
+        private readonly ShoutboxRepositoryInterface $shoutboxRepository,
+        private readonly NotificationFeedRepositoryInterface $feedRepository,
+        private readonly StaffMessageRepository $staffMessageRepository,
+    ) {}
 
     /**
      * Items newer than the caller-supplied cursors (toast/push semantics).

@@ -20,7 +20,7 @@ class UserPasskeyRepository extends BaseRepository
 {
     public function __construct(
         private readonly RequestContext $requestContext,
-        private readonly UserRepository $userRepository = new UserRepository,
+        private readonly UserRepository $userRepository,
     ) {}
 
     /** @return  mixed */

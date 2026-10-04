@@ -40,7 +40,7 @@ final class ExamProgressRepositoryTest extends TestCase
         DB::table('exam_progress')->delete();
         DB::table('exam_users')->delete();
         DB::table('exams')->delete();
-        $this->repository = new ExamProgressRepository;
+        $this->repository = app(ExamProgressRepository::class);
     }
 
     protected function tearDown(): void

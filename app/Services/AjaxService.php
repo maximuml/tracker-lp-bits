@@ -71,7 +71,7 @@ final class AjaxService
         private readonly CurrentUser $currentUser,
         private readonly ShoutboxActions $shoutboxActions,
         private readonly PasskeyActions $passkeyActions,
-        private readonly NotificationFeed $notificationFeed = new NotificationFeed,
+        private readonly NotificationFeed $notificationFeed,
     ) {}
 
     /** @param array<string, mixed> $params */

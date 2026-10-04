@@ -42,7 +42,7 @@ final class NotificationFeedTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->repository = new NotificationFeedRepository;
-        $this->feed = new NotificationFeed;
+        $this->feed = app(NotificationFeed::class);
     }
 
     private function createUser(string $username, int $class = 1): int

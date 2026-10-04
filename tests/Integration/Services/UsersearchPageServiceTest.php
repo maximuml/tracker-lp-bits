@@ -58,7 +58,7 @@ final class UsersearchPageServiceTest extends TestCase
 
     private function service(): UsersearchPageService
     {
-        return new UsersearchPageService;
+        return app(UsersearchPageService::class);
     }
 
     /** @param  array<string, mixed>  $overrides */

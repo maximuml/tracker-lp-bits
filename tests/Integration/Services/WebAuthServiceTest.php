@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
+use App\Repositories\UserAccountRepository;
 use App\Repositories\UserRepository;
 use App\Services\WebAuthService;
 use App\Support\PasswordHasher;
@@ -43,7 +45,7 @@ final class WebAuthServiceTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repo */
         $repo = Mockery::mock(UserRepository::class);
 
-        return new WebAuthService($repo);
+        return new WebAuthService($repo, app(AuthRepositoryInterface::class), new UserAccountRepository);
     }
 
     // --- validatePassword ---
@@ -95,7 +97,7 @@ final class WebAuthServiceTest extends TestCase
         // Use a mock service to avoid DB write during rehash
         /** @var UserRepository&Mockery\MockInterface $repo */
         $repo = Mockery::mock(UserRepository::class);
-        $service = new WebAuthService($repo);
+        $service = new WebAuthService($repo, app(AuthRepositoryInterface::class), new UserAccountRepository);
 
         $this->assertTrue($service->validatePassword($user, $password));
     }

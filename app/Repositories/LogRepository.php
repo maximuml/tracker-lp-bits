@@ -231,4 +231,35 @@ class LogRepository
     {
         return Cheater::query()->where('added', '<', $before)->delete();
     }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    public function insertCheater(array $row): bool
+    {
+        return Cheater::query()->insert($row);
+    }
+
+    /**
+     * Most recent cheater row id for user+torrent added after $after.
+     */
+    public function findRecentCheaterId(int $userId, int $torrentId, string $after): int|string|null
+    {
+        return Cheater::query()
+            ->where('userid', $userId)
+            ->where('torrentid', $torrentId)
+            ->where('added', '>', $after)
+            ->value('id');
+    }
+
+    /**
+     * Repeat-offence marker: hit+1, dealtwith reset.
+     */
+    public function incrementCheaterHit(int $id): int
+    {
+        return Cheater::query()->where('id', $id)->update([
+            'hit' => DB::raw('hit + 1'),
+            'dealtwith' => 0,
+        ]);
+    }
 }

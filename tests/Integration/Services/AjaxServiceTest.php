@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
 use App\Repositories\AttendanceRepository;
@@ -11,6 +12,7 @@ use App\Repositories\BonusRepository;
 use App\Repositories\ExamUserRepository;
 use App\Repositories\ShoutboxRepository;
 use App\Repositories\TorrentModerationRepository;
+use App\Repositories\UserAccountRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
@@ -137,6 +139,8 @@ final class AjaxServiceTest extends TestCase
             new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
             new PasskeyActions($this->passkeyRepo, $this->currentUser),
             app(NotificationFeed::class),
+            new UserAccountRepository,
+            app(OfferRepositoryInterface::class),
         );
     }
 
@@ -197,6 +201,8 @@ final class AjaxServiceTest extends TestCase
             new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
             new PasskeyActions($this->passkeyRepo, $this->currentUser),
             app(NotificationFeed::class),
+            new UserAccountRepository,
+            app(OfferRepositoryInterface::class),
         );
     }
 

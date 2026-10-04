@@ -301,4 +301,9 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
     {
         return Offer::query()->whereIn('id', $ids)->delete();
     }
+
+    public function findOrFailById(int $id): Offer
+    {
+        return Offer::query()->findOrFail($id);
+    }
 }

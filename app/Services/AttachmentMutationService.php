@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Attachment;
+use App\Repositories\AttachmentRepository;
 use App\Support\Attachment\AttachmentService;
 use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
@@ -14,12 +15,16 @@ use App\Support\Path;
 
 class AttachmentMutationService
 {
+    public function __construct(
+        private readonly AttachmentRepository $attachmentRepository,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $CURUSER
      * @param  array<string, mixed>|null  $file
      * @return array{warning: string, script: SafeHtml|string, count_left: int}
      */
-    public static function processUpload(array $CURUSER, AttachmentService $Attach, string $altsize, string $callbackFunc, ?array $file): array
+    public function processUpload(array $CURUSER, AttachmentService $Attach, string $altsize, string $callbackFunc, ?array $file): array
     {
         $warning = '';
         $script = '';
@@ -324,7 +329,7 @@ class AttachmentMutationService
             }
             if (! $warning) { // insert into database and add code to editor
                 $dlkey = bin2hex(random_bytes(16));
-                Attachment::query()->insert([
+                $this->attachmentRepository->insertAttachment([
                     'userid' => $CURUSER['id'],
                     'width' => $width,
                     'added' => date('Y-m-d H:i:s'),

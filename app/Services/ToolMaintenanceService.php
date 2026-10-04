@@ -6,13 +6,16 @@ namespace App\Services;
 
 use App\Enums\UserClass as UserClassEnum;
 use App\Http\Middleware\Locale;
-use App\Models\Invite;
 use App\Models\Message;
 use App\Models\News;
 use App\Models\Poll;
-use App\Models\PollAnswer;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
+use App\Repositories\InviteRepository;
+use App\Repositories\MessageLookupRepository;
+use App\Repositories\NewsRepository;
+use App\Repositories\PollRepository;
+use App\Repositories\UserAccountRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale as SupportLocale;
 use App\Support\Logger;
@@ -27,7 +30,12 @@ use Symfony\Component\Mime\Email;
 class ToolMaintenanceService
 {
     public function __construct(
-        private readonly AttendanceRepository $attendanceRepository = new AttendanceRepository,
+        private readonly AttendanceRepository $attendanceRepository,
+        private readonly NewsRepository $newsRepository,
+        private readonly MessageLookupRepository $messageLookupRepository,
+        private readonly PollRepository $pollRepository,
+        private readonly InviteRepository $inviteRepository,
+        private readonly UserAccountRepository $userAccountRepository,
     ) {}
 
     /**
@@ -98,17 +106,17 @@ class ToolMaintenanceService
         $result['attendance'] = $attendance ? 0 : 1;
 
         // unread news
-        $count = News::query()->where('added', '>', $user->last_home ?? '1970-01-01 00:00:00')->count();
+        $count = $this->newsRepository->countAddedAfter($user->last_home ?? '1970-01-01 00:00:00');
         $result['news'] = $count;
 
         // unread messages
-        $count = Message::query()->where('receiver', $user->id)->where('unread', true)->count();
+        $count = $this->messageLookupRepository->countUnreadFor((int) $user->id);
         $result['message'] = $count;
 
         // un-vote poll
-        $total = Poll::query()->count();
-        $userVoteRow = PollAnswer::query()->where('userid', $user->id)->selectRaw('count(distinct(pollid)) as counts')->first();
-        $result['poll'] = $total - ($userVoteRow === null ? 0 : (int) $userVoteRow->counts);
+        $total = $this->pollRepository->countAll();
+        $voted = $this->pollRepository->countPollIdsVotedBy((int) $user->id);
+        $result['poll'] = $total - $voted;
 
         return $result;
     }
@@ -183,7 +191,7 @@ class ToolMaintenanceService
             $hash = Str::random(32);
             $hashArr[$hash] = $hash;
         }
-        $exists = Invite::query()->whereIn('hash', array_values($hashArr))->get(['id', 'hash']);
+        $exists = $this->inviteRepository->listByHashes(array_values($hashArr));
         foreach ($exists as $value) {
             unset($hashArr[$value->hash]);
         }
@@ -209,8 +217,8 @@ class ToolMaintenanceService
             $msg = SupportLocale::trans($msgTransKey, $msgContext, $locale);
             Logger::writeWithContext((string) sprintf('%s - %s', $subject, $msg), (string) 'error', (bool) false);
         } else {
-            $receiverUidArr = preg_split("/[\r\n\s,，]+/", $receiverUid);
-            $users = User::query()->whereIn('id', $receiverUidArr)->get(User::$commonFields);
+            $receiverUidArr = preg_split("/[\r\n\s,，]+/", $receiverUid) ?: [];
+            $users = $this->userAccountRepository->listByIds($receiverUidArr, User::$commonFields);
             foreach ($users as $user) {
                 $locale = $user->locale;
                 $subject = SupportLocale::trans($subjectTransKey, $subjectContext, $locale);

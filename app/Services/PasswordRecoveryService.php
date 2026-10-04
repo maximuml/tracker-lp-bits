@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
+use App\Repositories\UserAccountRepository;
 use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
 use App\Support\Captcha;
@@ -32,7 +33,8 @@ class PasswordRecoveryService
         private WebAuthService $authService,
         private SecureTokenService $tokenService,
         private readonly PasswordSetup $passwordSetup,
-        private readonly OutboxService $outboxService = new OutboxService,
+        private readonly UserAccountRepository $userAccountRepository,
+        private readonly OutboxService $outboxService,
     ) {}
 
     /**
@@ -99,10 +101,7 @@ class PasswordRecoveryService
             return null;
         }
 
-        $userExists = User::query()
-            ->where('id', $userId)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->exists();
+        $userExists = $this->userAccountRepository->existsConfirmedById($userId);
 
         return $userExists ? $tokenRow : null;
     }
@@ -121,18 +120,14 @@ class PasswordRecoveryService
                 throw new AuthenticationException(__('legacy/recover.std_invalid_reset_link'));
             }
 
-            $user = User::query()
-                ->where('id', $id)
-                ->where('status', UserStatus::CONFIRMED->value)
-                ->lockForUpdate()
-                ->first(['id', 'username', 'email', 'status']);
+            $user = $this->userAccountRepository->findConfirmedById($id, ['id', 'username', 'email', 'status'], true);
             if (! $user instanceof User) {
                 throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
             }
 
             $this->passwordSetup->validate($password, $passwordConfirmation, (string) $user->username, 'recover');
 
-            $affected = User::query()->where('id', $id)->update([
+            $affected = $this->userAccountRepository->updateById($id, [
                 'secret' => Token::randomHex(),
                 'editsecret' => '',
                 'passhash' => PasswordHasher::hash($password),

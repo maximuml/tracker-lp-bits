@@ -8,6 +8,7 @@ use App\Enums\HitAndRunStatus;
 use App\Models\HitAndRun;
 use App\Models\Snatch;
 use App\Models\User;
+use App\Repositories\HitAndRunLookupRepository;
 use App\Support\Format;
 use App\Support\LegacyDb;
 use App\Support\Locale;
@@ -18,6 +19,10 @@ use Carbon\Carbon;
 
 class HitAndRunStatusService
 {
+    public function __construct(
+        private readonly HitAndRunLookupRepository $hitAndRunRepository,
+    ) {}
+
     /**
      * @return array<int|string, mixed>
      */
@@ -130,10 +135,7 @@ class HitAndRunStatusService
     public function inspectingToReached(HitAndRun $hitAndRun, array $update, string $logPrefix = '', array &$messages = []): bool
     {
         $update['status'] = HitAndRunStatus::REACHED->value;
-        $affectedRows = HitAndRun::query()
-            ->where('id', $hitAndRun->id)
-            ->where('status', HitAndRunStatus::INSPECTING->value)
-            ->update($update);
+        $affectedRows = $this->hitAndRunRepository->updateInspectingTo((int) $hitAndRun->id, $update);
         Logger::writeWithContext((string) ("[{$logPrefix}], ".LegacyDb::lastQuery(false, 'json').", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
         if ($affectedRows != 1) {
             Logger::writeWithContext((string) ($hitAndRun->toJson().", [{$logPrefix}], affectedRows != 1, skip!"), (string) 'notice', (bool) false);
@@ -171,10 +173,7 @@ class HitAndRunStatusService
             'status' => HitAndRunStatus::UNREACHED->value,
             'comment' => $comment,
         ];
-        $affectedRows = HitAndRun::query()
-            ->where('id', $hitAndRun->id)
-            ->where('status', HitAndRunStatus::INSPECTING->value)
-            ->update($update);
+        $affectedRows = $this->hitAndRunRepository->updateInspectingTo((int) $hitAndRun->id, $update);
         Logger::writeWithContext((string) ('[H&R_UNREACHED], '.LegacyDb::lastQuery(false, 'json').", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
         if ($affectedRows != 1) {
             Logger::writeWithContext((string) ($hitAndRun->toJson().', [H&R_UNREACHED], affectedRows != 1, skip!'), (string) 'notice', (bool) false);

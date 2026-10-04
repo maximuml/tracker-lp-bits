@@ -88,4 +88,19 @@ final class ComplainRepository implements ComplainRepositoryInterface
     {
         DB::table('complains')->where('id', $id)->update($data);
     }
+
+    public function getUuidById(int $id): ?string
+    {
+        /** @var string|null */
+        return DB::table('complains')->where('id', $id)->value('uuid');
+    }
+
+    /** @return array<string, mixed>|null */
+    public function findById(int $id): ?array
+    {
+        /** @var array<string, mixed>|null */
+        $row = DB::table('complains')->where('id', $id)->first();
+
+        return $row === null ? null : (array) $row;
+    }
 }

@@ -74,4 +74,6 @@ interface OfferRepositoryInterface
      * @param  array<int>  $ids
      */
     public function deleteMany(array $ids): int;
+
+    public function findOrFailById(int $id): Offer;
 }

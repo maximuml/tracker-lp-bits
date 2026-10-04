@@ -11,15 +11,14 @@ use App\Enums\TorrentApprovalStatus;
 use App\Exceptions\TrackerException;
 use App\Jobs\BuyTorrent;
 use App\Models\Torrent;
+use App\Repositories\AnnounceTorrentRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
-use App\Support\Database;
 use App\Support\Logger;
 use App\Support\RedisGuard;
 use App\Utils\MsgAlert;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -33,28 +32,17 @@ final class TorrentGate
         private readonly TorrentPurchaseRepository $purchaseRepository,
         private readonly UserModerationRepositoryInterface $userModerationRepository,
         private readonly PermissionChecker $permissionChecker,
+        private readonly AnnounceTorrentRepository $announceTorrentRepository,
     ) {}
 
     public function resolve(AnnounceContext $ctx): AnnounceContext
     {
         $infoHashHex = bin2hex($ctx->infoHashBinary());
 
-        $lookupTorrent = static function () use ($ctx) {
-            $tsField = Database::unixTimestampField('added');
-            $torrent = Torrent::query()
-                ->leftJoin('categories', 'torrents.category', '=', 'categories.id')
-                ->toBase()
-                ->select([
-                    'torrents.id', 'torrents.size', 'torrents.owner', 'torrents.sp_state',
-                    'torrents.seeders', 'torrents.leechers', 'torrents.times_completed',
-                    'torrents.banned', 'torrents.hr', 'torrents.approval_status', 'torrents.price',
-                    'torrents.visible', 'torrents.last_action', 'categories.mode',
-                    DB::raw("{$tsField} AS ts"), // @phpstan-ignore argument.type
-                ])
-                ->where('torrents.info_hash', $ctx->infoHashBinary())
-                ->first();
+        $lookupTorrent = function () use ($ctx) {
+            $torrent = $this->announceTorrentRepository->findForAnnounce($ctx->infoHashBinary());
 
-            return $torrent ? (array) $torrent : false;
+            return $torrent ?? false;
         };
 
         $torrentCacheKey = "torrent_hash_{$ctx->infoHashBinary()}_content";

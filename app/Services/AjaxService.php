@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
-use App\Models\Offer;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\ExamUserRepository;
 use App\Repositories\TorrentModerationRepository;
+use App\Repositories\UserAccountRepository;
 use App\Services\Ajax\PasskeyActions;
 use App\Services\Ajax\ShoutboxActions;
 use App\Support\CurrentUser;
@@ -72,6 +73,8 @@ final class AjaxService
         private readonly ShoutboxActions $shoutboxActions,
         private readonly PasskeyActions $passkeyActions,
         private readonly NotificationFeed $notificationFeed,
+        private readonly UserAccountRepository $userAccountRepository,
+        private readonly OfferRepositoryInterface $offerRepository,
     ) {}
 
     /** @param array<string, mixed> $params */
@@ -106,7 +109,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     private function getOffer(array $params): mixed
     {
-        $offer = Offer::query()->findOrFail($params['id']);
+        $offer = $this->offerRepository->findOrFailById((int) $params['id']);
 
         return $offer->toArray();
     }
@@ -169,7 +172,7 @@ final class AjaxService
             throw new \InvalidArgumentException('Name is required');
         }
         $userId = (int) ($CURUSER['id'] ?? 0);
-        $user = User::query()->findOrFail($userId, User::$commonFields);
+        $user = $this->userAccountRepository->findOrFailByIdFields($userId, User::$commonFields);
         $user->createToken($params['name']);
 
         return true;
@@ -183,7 +186,7 @@ final class AjaxService
             throw new \InvalidArgumentException('id is required');
         }
         $userId = (int) ($CURUSER['id'] ?? 0);
-        $user = User::query()->findOrFail($userId, User::$commonFields);
+        $user = $this->userAccountRepository->findOrFailByIdFields($userId, User::$commonFields);
         $user->tokens()->where('id', $params['id'])->delete();
 
         return true;

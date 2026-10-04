@@ -15,6 +15,7 @@ use App\Jobs\BuyTorrent;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
+use App\Repositories\AnnounceTorrentRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Services\Announce\ResponseBuilder;
 use App\Services\Announce\TorrentGate;
@@ -52,6 +53,7 @@ final class TorrentGateTest extends TestCase
             app(TorrentPurchaseRepository::class),
             app(UserModerationRepositoryInterface::class),
             new PermissionChecker,
+            new AnnounceTorrentRepository,
         );
     }
 
@@ -290,7 +292,7 @@ final class TorrentGateTest extends TestCase
         $moderation->shouldReceive('updateDownloadPrivileges')
             ->once()
             ->with(null, $user->id, false, 'fake_announce');
-        $gate = new TorrentGate(app(TorrentPurchaseRepository::class), $moderation, new PermissionChecker);
+        $gate = new TorrentGate(app(TorrentPurchaseRepository::class), $moderation, new PermissionChecker, new AnnounceTorrentRepository);
 
         $ctx = $this->makeCtx($this->makeDto((string) $torrent->info_hash, null, 500), $user);
 
@@ -414,7 +416,7 @@ final class TorrentGateTest extends TestCase
         $moderation->shouldReceive('updateDownloadPrivileges')
             ->once()
             ->with(null, $buyer->id, false, 'announce_paid_torrent_too_many_times');
-        $gate = new TorrentGate($repo, $moderation, new PermissionChecker);
+        $gate = new TorrentGate($repo, $moderation, new PermissionChecker, new AnnounceTorrentRepository);
 
         $ctx = $this->makeCtx($this->makeDto((string) $torrent->info_hash), $buyer);
         $ctx = $ctx->withTorrent($this->torrentRow($torrent));
@@ -440,7 +442,7 @@ final class TorrentGateTest extends TestCase
         /** @var UserModerationRepositoryInterface&Mockery\MockInterface $moderation */
         $moderation = Mockery::mock(UserModerationRepositoryInterface::class);
         $moderation->shouldNotReceive('updateDownloadPrivileges');
-        $gate = new TorrentGate($repo, $moderation, new PermissionChecker);
+        $gate = new TorrentGate($repo, $moderation, new PermissionChecker, new AnnounceTorrentRepository);
 
         $ctx = $this->makeCtx($this->makeDto((string) $torrent->info_hash), $buyer);
         $ctx = $ctx->withTorrent($this->torrentRow($torrent));

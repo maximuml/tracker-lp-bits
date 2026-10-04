@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\OutboxEvent;
-use Illuminate\Support\Facades\DB;
+use App\Repositories\OutboxEventRepository;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Redis;
  */
 final class OutboxDispatcher
 {
-    public function __construct() {}
+    public function __construct(private readonly OutboxEventRepository $outboxEventRepository) {}
 
     /**
      * Dispatch up to $batchSize pending events.
@@ -28,14 +28,7 @@ final class OutboxDispatcher
     {
         $dispatched = 0;
 
-        /** @var list<OutboxEvent> $events */
-        $events = OutboxEvent::query()
-            ->where('status', OutboxEvent::STATUS_PENDING)
-            ->where('available_at', '<=', now())
-            ->orderBy('available_at')
-            ->limit($batchSize)
-            ->lockForUpdate()
-            ->get();
+        $events = $this->outboxEventRepository->listPendingForDispatch($batchSize);
 
         foreach ($events as $event) {
             if ($this->publish($event)) {
@@ -52,14 +45,7 @@ final class OutboxDispatcher
     private function publish(OutboxEvent $event): bool
     {
         // Atomic claim: only proceed if we can transition pending→processing
-        $claimed = OutboxEvent::query()
-            ->where('id', $event->id)
-            ->where('status', OutboxEvent::STATUS_PENDING)
-            ->update([
-                'status' => OutboxEvent::STATUS_PROCESSING,
-                'attempts' => DB::raw('attempts + 1'),
-                'updated_at' => now(),
-            ]);
+        $claimed = $this->outboxEventRepository->claimPending((int) $event->id);
 
         if ($claimed === 0) {
             return false; // Already claimed by another worker
@@ -114,9 +100,7 @@ final class OutboxDispatcher
      */
     public function pendingCount(): int
     {
-        return (int) OutboxEvent::query()
-            ->where('status', OutboxEvent::STATUS_PENDING)
-            ->count();
+        return $this->outboxEventRepository->countPending();
     }
 
     /**
@@ -124,8 +108,6 @@ final class OutboxDispatcher
      */
     public function deadLetterCount(): int
     {
-        return (int) OutboxEvent::query()
-            ->where('status', OutboxEvent::STATUS_DEAD_LETTER)
-            ->count();
+        return $this->outboxEventRepository->countDeadLetter();
     }
 }

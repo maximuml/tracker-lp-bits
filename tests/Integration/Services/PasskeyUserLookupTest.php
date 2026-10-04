@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\Models\User;
+use App\Repositories\AnnounceUserRepository;
 use App\Services\PasskeyUserLookup;
 use App\Support\RedisGuard;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -28,7 +29,7 @@ final class PasskeyUserLookupTest extends TestCase
     {
         parent::setUp();
         RedisGuard::reset();
-        $this->lookup = new PasskeyUserLookup;
+        $this->lookup = new PasskeyUserLookup(new AnnounceUserRepository);
     }
 
     protected function tearDown(): void

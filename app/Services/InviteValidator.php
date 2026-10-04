@@ -8,6 +8,7 @@ use App\Enums\InviteValid;
 use App\Exceptions\AuthenticationException;
 use App\Models\Invite;
 use App\Models\Message;
+use App\Repositories\InviteRepository;
 use App\Support\Cache;
 use App\Support\Locale;
 
@@ -18,6 +19,7 @@ class InviteValidator
 {
     public function __construct(
         private readonly OutboxService $outboxService,
+        private readonly InviteRepository $inviteRepository,
     ) {}
 
     /**
@@ -31,17 +33,14 @@ class InviteValidator
             );
         }
 
-        $invite = Invite::query()
-            ->where('hash', $code)
-            ->where('valid', InviteValid::YES->value)
-            ->first();
+        $invite = $this->inviteRepository->findValidByHash($code);
 
         if (! $invite) {
             throw new AuthenticationException(__('legacy/signup.std_uninvited'));
         }
 
         if ((int) $invite->inviter !== $inviter) {
-            Invite::query()->where('id', $invite->id)->update(['valid' => InviteValid::NO->value]);
+            $this->inviteRepository->markInvalid((int) $invite->id);
             throw new AuthenticationException(Locale::trans('invite.invalid_inviter', [], $langFolder));
         }
 
@@ -50,7 +49,7 @@ class InviteValidator
 
     public function consume(Invite $invite, int $userId, string $email, string $username): void
     {
-        Invite::query()->where('id', $invite->id)->update([
+        $this->inviteRepository->markConsumed((int) $invite->id, [
             'valid' => InviteValid::NO->value,
             'invitee_register_uid' => $userId,
             'invitee_register_email' => $email,

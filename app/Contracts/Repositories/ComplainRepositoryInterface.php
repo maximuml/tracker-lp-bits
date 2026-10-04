@@ -40,4 +40,9 @@ interface ComplainRepositoryInterface
      * @param  array<string, mixed>  $data
      */
     public function updateById(int $id, array $data): void;
+
+    public function getUuidById(int $id): ?string;
+
+    /** @return array<string, mixed>|null */
+    public function findById(int $id): ?array;
 }

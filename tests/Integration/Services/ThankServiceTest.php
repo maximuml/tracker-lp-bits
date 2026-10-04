@@ -39,7 +39,7 @@ final class ThankServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new ThankService;
+        $this->service = app(ThankService::class);
     }
 
     /** @param  array<string, mixed>  $overrides */

@@ -113,4 +113,9 @@ class NewsRepository extends BaseRepository
     {
         return News::query()->with(['user'])->latest('added')->paginate($perPage);
     }
+
+    public function countAddedAfter(string $datetime): int
+    {
+        return News::query()->where('added', '>', $datetime)->count();
+    }
 }

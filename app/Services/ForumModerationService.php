@@ -6,8 +6,6 @@ namespace App\Services;
 
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
-use App\Models\Post;
-use App\Models\Topic;
 use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
@@ -67,7 +65,7 @@ final class ForumModerationService
         $forumid = (int) $request->input('forumid');
         $topicid = (int) $request->query('topicid');
 
-        $topic = Topic::query()->whereKey($topicid)->first();
+        $topic = $this->topicRepository->getTopic((int) $topicid);
         if ($topic === null) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_not_found'));
         }
@@ -109,7 +107,7 @@ final class ForumModerationService
     public function deleteTopic(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $topic = Topic::query()->whereKey($topicid)->first();
+        $topic = $this->topicRepository->getTopic((int) $topicid);
 
         if ($topic === null) {
             return $this->redirectTo('/forums.php');
@@ -152,7 +150,7 @@ final class ForumModerationService
         $postid = (int) $request->input('postid');
         $sure = (int) $request->input('sure', 0);
 
-        $post = Post::query()->whereKey($postid)->first();
+        $post = $this->postLookupRepository->getPost((int) $postid);
         if ($post === null) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_post_not_found'));
         }
@@ -201,7 +199,7 @@ final class ForumModerationService
     public function setLocked(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $topic = Topic::query()->whereKey($topicid)->first();
+        $topic = $this->topicRepository->getTopic((int) $topicid);
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();
@@ -222,7 +220,7 @@ final class ForumModerationService
     public function highlightTopic(Request $request): RedirectResponse
     {
         $topicid = (int) $request->query('topicid');
-        $topic = Topic::query()->whereKey($topicid)->first();
+        $topic = $this->topicRepository->getTopic((int) $topicid);
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();
@@ -253,7 +251,7 @@ final class ForumModerationService
     public function setSticky(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $topic = Topic::query()->whereKey($topicid)->first();
+        $topic = $this->topicRepository->getTopic((int) $topicid);
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();

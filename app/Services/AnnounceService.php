@@ -10,7 +10,6 @@ use App\Exceptions\ClientNotAllowedException;
 use App\Exceptions\TrackerException;
 use App\Models\Peer;
 use App\Models\Snatch;
-use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\AgentAllowRepository;
 use App\Repositories\CleanupRepository;
@@ -246,7 +245,7 @@ class AnnounceService
 
         if ($clicheckRes) {
             if (! $ctx->user['showclienterror']) {
-                User::query()->where('id', $ctx->userId())->update(['showclienterror' => true]);
+                $this->trafficAccountant->markClientError($ctx->userId());
                 RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
             }
             throw TrackerException::failure($clicheckRes);
@@ -300,7 +299,7 @@ class AnnounceService
         if (! empty($torrentUpdate)) {
             $torrentUpdate['visible'] = 1;
             $torrentUpdate['last_action'] = $ctx->dt;
-            Torrent::query()->where('id', $ctx->torrentId())->update($torrentUpdate);
+            $this->trafficAccountant->applyTorrentUpdate($ctx->torrentId(), $torrentUpdate);
             Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_TORRENT], '.Json::encode($torrentUpdate)), (string) 'info', (bool) false);
         }
 
@@ -310,30 +309,7 @@ class AnnounceService
     /** Lock peer, snatch, and user rows to prevent concurrent announce races. */
     private function lockRowsForUpdate(AnnounceContext $ctx): void
     {
-        // Lock the existing peer row if present
-        if ($ctx->self !== null && ! empty($ctx->self['id'])) {
-            Peer::query()
-                ->where('id', (int) $ctx->self['id'])
-                ->lockForUpdate()
-                ->toBase()
-                ->first();
-        }
-
-        // Lock the snatch row if present
-        if (! empty($ctx->snatchInfo) && ! empty($ctx->snatchInfo['id'])) {
-            Snatch::query()
-                ->where('id', (int) $ctx->snatchInfo['id'])
-                ->lockForUpdate()
-                ->toBase()
-                ->first();
-        }
-
-        // Lock the user row to serialize uploaded/downloaded increments
-        User::query()
-            ->where('id', $ctx->userId())
-            ->lockForUpdate()
-            ->toBase()
-            ->first();
+        $this->trafficAccountant->lockRowsForUpdate($ctx->self, is_array($ctx->snatchInfo) ? $ctx->snatchInfo : null, $ctx->userId());
     }
 
     private function applyUserUpdate(AnnounceContext $ctx, PeerLifecycleResult $result): void
@@ -358,7 +334,7 @@ class AnnounceService
         }
 
         if ($ctx->userId() !== 0) {
-            User::query()->where('id', $ctx->userId())->update($userUpdate);
+            $this->trafficAccountant->applyUserUpdate($ctx->userId(), $userUpdate);
             Logger::writeWithContext((string) ('[ANNOUNCE_UPDATE_USER], '.Json::encode($userUpdate)), (string) 'info', (bool) false);
         }
     }

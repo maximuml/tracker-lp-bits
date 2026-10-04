@@ -33,7 +33,7 @@ final class HitAndRunHandlerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->handler = new HitAndRunHandler;
+        $this->handler = app(HitAndRunHandler::class);
     }
 
     /**

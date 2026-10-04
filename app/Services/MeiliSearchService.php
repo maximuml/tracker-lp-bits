@@ -9,6 +9,7 @@ use App\Enums\TorrentApprovalStatus;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Repositories\UserAccountRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Env;
 use App\Support\Json;
@@ -45,6 +46,7 @@ class MeiliSearchService
 
     public function __construct(
         private MeiliSearchFilterService $filterService,
+        private UserAccountRepository $userAccountRepository,
     ) {}
 
     /**
@@ -67,17 +69,14 @@ class MeiliSearchService
         if ($searchArea == self::SEARCH_AREA_OWNER) {
             // Use LIKE to match partial usernames, consistent with the SQL
             // path in TorrentSearchRepository which does username LIKE %term%.
-            $searchOwnerIds = User::query()
-                ->where('username', 'LIKE', '%'.trim($searchQuery).'%')
-                ->pluck('id')
-                ->all();
+            $searchOwnerIds = $this->userAccountRepository->pluckIdsByUsernameLike(trim($searchQuery));
             if (empty($searchOwnerIds)) {
                 return $results;
             }
             $filters[] = 'owner IN ['.implode(',', $searchOwnerIds).']';
         }
         if (! ($user instanceof User)) {
-            $user = User::query()->findOrFail(intval($user));
+            $user = $this->userAccountRepository->findOrFailById(intval($user));
         }
         $filters = array_merge($filters, $this->filterService->getFilters($params, $user));
         $query = $this->getQuery($params);

@@ -9,7 +9,8 @@ use App\Enums\TorrentHr;
 use App\Enums\UserClass as UserClassEnum;
 use App\Events\HitAndRunCreated;
 use App\Models\HitAndRun;
-use App\Models\Snatch;
+use App\Repositories\HitAndRunLookupRepository;
+use App\Repositories\SnatchRepository;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\RedisGuard;
@@ -17,6 +18,11 @@ use Illuminate\Support\Facades\Cache;
 
 final class HitAndRunHandler
 {
+    public function __construct(
+        private readonly HitAndRunLookupRepository $hitAndRunRepository,
+        private readonly SnatchRepository $snatchRepository,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $user
      * @param  array<string, mixed>  $torrent
@@ -59,8 +65,8 @@ final class HitAndRunHandler
         }
 
         $hrCacheKey = HitAndRun::getCacheKey($userId, $torrentId);
-        $lookupHr = static function () use ($userId, $torrentId) {
-            $record = HitAndRun::query()->where('uid', $userId)->where('torrent_id', $torrentId)->first();
+        $lookupHr = function () use ($userId, $torrentId) {
+            $record = $this->hitAndRunRepository->findByUidTorrent($userId, $torrentId);
 
             return $record ? $record->toJson() : false;
         };
@@ -88,13 +94,13 @@ final class HitAndRunHandler
                 'updated_at' => $dt,
             ];
 
-            $affectedRows = HitAndRun::query()->insertOrIgnore($hrRecord);
+            $affectedRows = $this->hitAndRunRepository->insertOrIgnore($hrRecord);
             Logger::writeWithContext((string) "[HR_LOG] user: {$userId}, torrent: {$torrentId}, total downloaded: {$snatchInfo['downloaded']} >= required: {$requiredDownloaded}, [INSERT_H&R], affectedRows: {$affectedRows}", (string) 'info', (bool) false);
 
             if ($affectedRows > 0) {
-                $hitAndRunRecord = HitAndRun::query()->where('uid', $userId)->where('torrent_id', $torrentId)->first();
+                $hitAndRunRecord = $this->hitAndRunRepository->findByUidTorrent($userId, $torrentId);
                 if ($hitAndRunRecord) {
-                    Snatch::query()->where('id', (int) $snatchInfo['id'])->update(['hit_and_run_id' => $hitAndRunRecord->id]);
+                    $this->snatchRepository->linkHitAndRun((int) $snatchInfo['id'], (int) $hitAndRunRecord->id);
                     event(new HitAndRunCreated($hitAndRunRecord));
                 }
             }

@@ -8,6 +8,7 @@ use App\Enums\UserStatus;
 use App\Events\UserUpdated;
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
+use App\Repositories\UserAccountRepository;
 use App\Support\AuthCookie;
 use App\Support\Cache;
 use App\Support\Captcha;
@@ -33,6 +34,7 @@ class EmailConfirmation
         private readonly WebAuthService $authService,
         private readonly PasswordSetup $passwordSetup,
         private readonly SecureTokenService $tokenService,
+        private readonly UserAccountRepository $userAccountRepository,
     ) {}
 
     /**
@@ -40,7 +42,7 @@ class EmailConfirmation
      */
     public function confirm(int $id, string $confirmToken, string $ip): User
     {
-        $user = User::query()->find($id, ['id', 'passhash', 'secret', 'auth_key', 'editsecret', 'status', 'username']);
+        $user = $this->userAccountRepository->findByIdFields($id, ['id', 'passhash', 'secret', 'auth_key', 'editsecret', 'status', 'username']);
 
         if (! $user) {
             abort(404);
@@ -63,7 +65,7 @@ class EmailConfirmation
             abort(404);
         }
 
-        $affected = User::query()->where('id', $id)->where('status', UserStatus::PENDING->value)->update([
+        $affected = $this->userAccountRepository->updateByIdAndStatus($id, UserStatus::PENDING->value, [
             'status' => UserStatus::CONFIRMED->value,
             'editsecret' => '',
         ]);
@@ -108,7 +110,7 @@ class EmailConfirmation
             throw new AuthenticationException(__('legacy/confirm_resend.std_invalid_email_address'));
         }
 
-        $user = User::query()->where('email', $email)->first();
+        $user = $this->userAccountRepository->findByEmail($email);
 
         if (! $user) {
             $this->authService->recordFailedAttempt($ip);
@@ -127,7 +129,7 @@ class EmailConfirmation
 
         $passwordData = $this->passwordSetup->forResend($password);
 
-        $affected = User::query()->where('id', $user->id)->update([
+        $affected = $this->userAccountRepository->updateById((int) $user->id, [
             'passhash' => $passwordData['passhash'],
             'passhash_algo' => $passwordData['passhash_algo'],
             'secret' => $passwordData['secret'],

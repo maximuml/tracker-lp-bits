@@ -7,6 +7,7 @@ use App\Http\Requests\TorrentEditRequest;
 use App\Models\Torrent;
 use App\Repositories\TorrentEditRepository;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -66,7 +67,20 @@ final class TorrentEditControllerTest extends TestCase
         $this->assertSame('http://localhost/userdetails.php?id=7', $response->getTargetUrl());
     }
 
-    public function test_legacy_update_rejects_external_returnto(): void
+    /** @return array<string, array{string}> */
+    public static function externalReturntoProvider(): array
+    {
+        return [
+            'https' => ['https://evil.example.com/'],
+            'uppercase scheme' => ['HTTPS://evil.example.com/'],
+            'protocol-relative' => ['//evil.example.com/'],
+            'backslash host' => ['/\\evil.example.com/'],
+            'javascript' => ['javascript:alert(1)'],
+        ];
+    }
+
+    #[DataProvider('externalReturntoProvider')]
+    public function test_legacy_update_rejects_external_returnto(string $returnto): void
     {
         $torrent = new Torrent;
         $torrent->id = 42;
@@ -81,7 +95,7 @@ final class TorrentEditControllerTest extends TestCase
             'name' => 'Updated torrent',
             'descr' => 'Updated description',
             'type' => 1,
-            'returnto' => 'https://evil.example.com/',
+            'returnto' => $returnto,
         ]);
 
         $response = $controller->legacyUpdate($request, $repository);

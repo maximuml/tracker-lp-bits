@@ -30,7 +30,7 @@ final class LocationServiceTest extends TestCase
         DB::table('locations')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new LocationService;
+        $this->service = new LocationService(new \App\Repositories\LocationRepository);
     }
 
     /** @return array<string, string> */

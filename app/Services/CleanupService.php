@@ -54,6 +54,7 @@ final class CleanupService implements CleanupServiceInterface
         private readonly Tasks $tasks,
         private readonly Globals $globals,
         private readonly CleanupRepository $cleanupRepository,
+        private readonly RequestContext $requestContext,
     ) {}
 
     /**
@@ -111,7 +112,7 @@ final class CleanupService implements CleanupServiceInterface
     public function runAll(bool $forceAll = false, bool $printProgress = false): string|bool
     {
         $now = time();
-        $requestId = RequestContext::instance()->getRequestId();
+        $requestId = $this->requestContext->getRequestId();
         $output = '';
 
         foreach (self::CLASSES as $level => $taskList) {
@@ -229,6 +230,6 @@ final class CleanupService implements CleanupServiceInterface
 
     private function formatProgress(string $message): string
     {
-        return sprintf("[%s] [%s] %s ... done!\n", date('Y-m-d H:i:s'), RequestContext::instance()->getRequestId(), $message);
+        return sprintf("[%s] [%s] %s ... done!\n", date('Y-m-d H:i:s'), $this->requestContext->getRequestId(), $message);
     }
 }

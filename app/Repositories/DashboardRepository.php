@@ -22,6 +22,7 @@ class DashboardRepository extends BaseRepository
     public function __construct(
         private readonly DashboardStatsRepository $statsRepository,
         private readonly LegacyRedisCache $cache,
+        private readonly RequestContext $requestContext,
     ) {}
 
     /** @return  array<string, array<string, mixed>> */
@@ -90,13 +91,13 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' => sprintf('%.3f sec', microtime(true) - RequestContext::instance()->getStartTimestamp()),
+            'value' => sprintf('%.3f sec', microtime(true) - $this->requestContext->getStartTimestamp()),
         ];
         $name = 'db_queries';
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' => RequestContext::instance()->getDbQueryCount() + (int) LegacyDb::lastQuery('COUNT', 'json'),
+            'value' => $this->requestContext->getDbQueryCount() + (int) LegacyDb::lastQuery('COUNT', 'json'),
         ];
         $name = 'redis_io';
         $result[$name] = [

@@ -146,6 +146,11 @@ class AppServiceProvider extends ServiceProvider
         if (! $this->app->bound(LegacyRuntime::class)) {
             $this->app->singleton(LegacyRuntime::class);
         }
+        // Per-request context is managed by RequestContext's own static
+        // boot/flush lifecycle (bootstrap/app.php + ResetNexus) — bind, not
+        // singleton, so every injection resolves the CURRENT instance and a
+        // container-cached copy can never outlive an Octane request.
+        $this->app->bind(RequestContext::class, static fn (): RequestContext => RequestContext::instance());
 
         // W3-07: Repository contracts for the 10 most-used repositories.
         $this->app->bind(CleanupServiceInterface::class, CleanupService::class);

@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use App\Support\PasswordHasher;
 use Illuminate\Console\Command;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Modernization plan step 2.1: report how many users are still on legacy
@@ -32,7 +31,8 @@ final class UsersLegacyHashReportCommand extends Command
 
     public function handle(): int
     {
-        $rows = DB::table('users')
+        $rows = User::query()
+            ->toBase()
             ->selectRaw("COALESCE(NULLIF(passhash_algo, ''), '".PasswordHasher::ALGO_SHA256."') AS algo")
             ->selectRaw('COUNT(*) AS total')
             ->groupBy('algo')
@@ -74,9 +74,9 @@ final class UsersLegacyHashReportCommand extends Command
 
     private function listUsers(string $algo): void
     {
-        $query = DB::table('users')->select(['id', 'username', 'last_login'])->orderBy('id');
+        $query = User::query()->toBase()->select(['id', 'username', 'last_login'])->orderBy('id');
         if ($algo === PasswordHasher::ALGO_SHA256) {
-            $query->where(fn (Builder $q) => $q->where('passhash_algo', $algo)->orWhereNull('passhash_algo')->orWhere('passhash_algo', ''));
+            $query->where(fn ($q) => $q->where('passhash_algo', $algo)->orWhereNull('passhash_algo')->orWhere('passhash_algo', ''));
         } else {
             $query->where('passhash_algo', $algo);
         }

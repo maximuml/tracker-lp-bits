@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\UserStatus;
+use App\Models\Message;
+use App\Models\User;
 use App\Models\UserModifyLog;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
@@ -12,7 +14,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 
 /**
  * W1-07: Asynchronous bulk increment of user fields by class.
@@ -82,7 +83,7 @@ class BulkUserIncrementJob implements ShouldQueue
 
         while (true) {
             $offset = ($page - 1) * $size;
-            $users = DB::table('users')
+            $users = User::query()
                 ->whereIn('class', $this->classIds)
                 ->where('enabled', true)
                 ->where('status', UserStatus::CONFIRMED->value)
@@ -100,7 +101,7 @@ class BulkUserIncrementJob implements ShouldQueue
             }
 
             if (! $this->dryRun) {
-                DB::table('users')->whereIn('id', $idArr)->increment($this->field, (int) $this->amount);
+                User::query()->whereIn('id', $idArr)->increment($this->field, (int) $this->amount);
 
                 if ($this->message['msg'] !== '') {
                     $msgRows = [];
@@ -113,7 +114,7 @@ class BulkUserIncrementJob implements ShouldQueue
                             'msg' => $this->message['msg'],
                         ];
                     }
-                    DB::table('messages')->insert($msgRows);
+                    Message::query()->insert($msgRows);
                     $messagesSent += count($msgRows);
                 }
             }

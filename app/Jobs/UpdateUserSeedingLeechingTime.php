@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Models\Snatch;
+use App\Models\User;
 use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
@@ -13,7 +15,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class UpdateUserSeedingLeechingTime implements ShouldQueue
 {
@@ -94,7 +95,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
             return;
         }
         // 批量取，简单化
-        $res = DB::table('snatched')
+        $res = Snatch::query()
             ->selectRaw('userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum')
             ->whereIn('userid', $userIdArr)
             ->groupBy('userid')
@@ -121,7 +122,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
                 'seed_time_updated_at' => $nowStr,
             ];
         }
-        $result = DB::table('users')->upsert($rows, ['id'], ['seedtime', 'leechtime', 'seed_time_updated_at']);
+        $result = User::query()->upsert($rows, ['id'], ['seedtime', 'leechtime', 'seed_time_updated_at']);
         if ($delIdRedisKey) {
             AppCache::forgetWithLocales($this->idRedisKey);
         }

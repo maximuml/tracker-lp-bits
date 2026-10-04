@@ -9,7 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserAcceptPms;
 use App\Models\Message;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use App\Repositories\FriendsRepository;
 
 /**
  * W1-03: Authorization policy for message ownership and mutations.
@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\DB;
  */
 class MessagePolicy extends BasePolicy
 {
+    public function __construct(private readonly FriendsRepository $friendsRepository) {}
+
     /**
      * Whether the user can view a specific message.
      * Only the sender or receiver may view a message.
@@ -79,17 +81,11 @@ class MessagePolicy extends BasePolicy
 
     private function isBlockedBy(User $recipient, User $sender): bool
     {
-        return DB::table('blocks')
-            ->where('userid', $recipient->id)
-            ->where('blockid', $sender->id)
-            ->exists();
+        return $this->friendsRepository->exists($recipient->id, 'block', $sender->id);
     }
 
     private function isFriendOf(User $recipient, User $sender): bool
     {
-        return DB::table('friends')
-            ->where('userid', $recipient->id)
-            ->where('friendid', $sender->id)
-            ->exists();
+        return $this->friendsRepository->exists($recipient->id, 'friends', $sender->id);
     }
 }

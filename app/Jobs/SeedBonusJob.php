@@ -18,7 +18,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class SeedBonusJob implements ShouldQueue
 {
@@ -102,7 +101,8 @@ class SeedBonusJob implements ShouldQueue
             return;
         }
         $idArr = array_filter(array_map('intval', explode(',', $idStr)), static fn (int $id) => $id > 0);
-        $results = DB::table('users')
+        $results = User::query()
+            ->toBase()
             ->whereIn('id', $idArr)
             ->select(User::$commonFields)
             ->get()
@@ -173,7 +173,7 @@ class SeedBonusJob implements ShouldQueue
                 Logger::writeWithContext((string) "logFile: {$logFile} is not writeable!", (string) 'error', (bool) false);
             }
         }
-        $result = DB::table('users')->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
+        $result = User::query()->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
         if ($delIdRedisKey) {
             AppCache::forgetWithLocales($this->idRedisKey);
         }

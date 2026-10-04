@@ -102,7 +102,7 @@ class IpSearch extends Page implements HasTable
         $total = 0;
         $results = [];
         if (! empty($filters['ip']['ip'])) {
-            $query = DB::table('iplog')
+            $query = IpLog::query()
                 ->leftJoin('users', 'users.id', '=', 'iplog.userid')
                 ->select([
                     'iplog.userid',

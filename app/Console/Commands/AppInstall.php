@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use App\Services\Installer\EnvFileWriter;
 use App\Services\Installer\InstallRequirements;
 use App\Services\Installer\InstallService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -60,7 +60,7 @@ class AppInstall extends Command
         }
 
         // Refuse to clobber an installed database without --force.
-        if (Schema::hasTable('users') && DB::table('users')->count() > 0 && ! $this->option('force')) {
+        if (Schema::hasTable('users') && User::query()->count() > 0 && ! $this->option('force')) {
             $this->error('Database is already installed (users table is not empty). Pass --force to reinstall.');
 
             return self::FAILURE;

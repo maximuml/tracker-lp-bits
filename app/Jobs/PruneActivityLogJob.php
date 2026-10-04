@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Repositories\ActivityLogRepository;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -44,7 +45,7 @@ final class PruneActivityLogJob implements ShouldQueue
         'login_logs' => 'login_logs_archive',
     ];
 
-    public function handle(): void
+    public function handle(ActivityLogRepository $activityLog): void
     {
         foreach (self::RETENTION as $table => $days) {
             if (! DB::getSchemaBuilder()->hasTable($table)) {
@@ -59,9 +60,7 @@ final class PruneActivityLogJob implements ShouldQueue
                 $this->archiveRecords($table, self::ARCHIVE_TABLES[$table], $column, $cutoff->toDateTimeString());
             }
 
-            DB::table($table)
-                ->where($column, '<', $cutoff->toDateTimeString())
-                ->delete();
+            $activityLog->deleteOlderThan($table, $column, $cutoff->toDateTimeString());
         }
     }
 

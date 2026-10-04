@@ -53,7 +53,7 @@ final class UsercpControllerApiTest extends TestCase
         $this->app->instance(UsercpRepositoryInterface::class, $repository);
 
         $request = Request::create('/api/usercp/settings', 'POST', ['parked' => 'no']);
-        $result = $this->app->make(UsercpController::class)->settings($request);
+        $result = $this->app->make(UsercpController::class)->settingsPost($request);
 
         $this->assertSame(0, $result['ret']);
         $this->assertSame($payload, $result['data']);

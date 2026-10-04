@@ -36,7 +36,24 @@ class IndexController extends Controller
 
         $this->indexRepository->touchLastHome((int) $user['id']);
 
-        if ($request->isMethod('post') && SiteConfig::current()->main->showPolls()) {
+        $data = $this->indexPageService->build()->toArray();
+        $this->indexPageService->appendAssets($data['curUser']);
+
+        return view('index.index', $data);
+    }
+
+    public function legacyPost(Request $request): View|Response|RedirectResponse
+    {
+        $user = $this->currentUser->get();
+        if ($user === null) {
+            $qs = $request->getQueryString();
+
+            return redirect('/index.php'.($qs ? '?'.$qs : ''));
+        }
+
+        $this->indexRepository->touchLastHome((int) $user['id']);
+
+        if (SiteConfig::current()->main->showPolls()) {
             return $this->handlePollVote($request);
         }
 

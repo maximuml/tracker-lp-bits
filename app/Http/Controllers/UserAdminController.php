@@ -156,52 +156,68 @@ class UserAdminController extends LegacyController
         $curUser = $this->currentUser->get() ?? [];
         $currentUsername = (string) ($curUser['username'] ?? '');
 
+        return $this->resetPage($request, false, '');
+    }
+
+    public function resetPost(Request $request): View|RedirectResponse|Response
+    {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied, Administrator Only.');
+        }
+
+        $curUser = $this->currentUser->get() ?? [];
+        $currentUsername = (string) ($curUser['username'] ?? '');
+
         $success = false;
         $message = '';
 
-        if ($request->isMethod('post')) {
-            $username = trim((string) request()->post('username'));
-            $newpassword = trim((string) request()->post('newpassword'));
-            $newpasswordagain = trim((string) request()->post('newpasswordagain'));
+        $username = trim((string) request()->post('username'));
+        $newpassword = trim((string) request()->post('newpassword'));
+        $newpasswordagain = trim((string) request()->post('newpasswordagain'));
 
-            if ($username === '' || $newpassword === '' || $newpasswordagain === '') {
-                return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
-            }
-
-            if ($newpassword !== $newpasswordagain) {
-                return $this->legacyAbortResponse('Error', "The passwords didn't match! Must've typoed. Try again.");
-            }
-
-            if (strlen($newpassword) < 6) {
-                return $this->legacyAbortResponse('Error', 'Sorry, password is too short (min is 6 chars)');
-            }
-
-            $user = $this->userRepository->findByUsername($username);
-            if (! $user) {
-                return $this->legacyAbortResponse('Error', "Sorry, that username doesn't exist.");
-            }
-            $arr = $user->toArray();
-
-            if (UserDisplay::currentClass() <= (int) ($arr['class'] ?? 0)) {
-                $log = "Password Reset For {$username} by {$currentUsername} denied: operator class => ".UserDisplay::currentClass().' is not greater than target user => '.($arr['class'] ?? 0);
-                Log::writeWithContext($log);
-                Logger::writeWithContext($log, 'alert', false);
-
-                return $this->legacyAbortResponse('Error', "Sorry, you don't have enough permission to reset this user's password.");
-            }
-
-            $userRep = $this->userRepository;
-            try {
-                $userRep->resetPassword((int) ($arr['id'] ?? 0), $newpassword, $newpasswordagain);
-            } catch (\Exception $e) {
-                return $this->legacyAbortResponse('Error', $e->getMessage());
-            }
-
-            Log::writeWithContext("Password Reset For {$username} by {$currentUsername}");
-            $success = true;
-            $message = "The password of account <b>{$username}</b> is reset, please inform user of this change.";
+        if ($username === '' || $newpassword === '' || $newpasswordagain === '') {
+            return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
         }
 
+        if ($newpassword !== $newpasswordagain) {
+            return $this->legacyAbortResponse('Error', "The passwords didn't match! Must've typoed. Try again.");
+        }
+
+        if (strlen($newpassword) < 6) {
+            return $this->legacyAbortResponse('Error', 'Sorry, password is too short (min is 6 chars)');
+        }
+
+        $user = $this->userRepository->findByUsername($username);
+        if (! $user) {
+            return $this->legacyAbortResponse('Error', "Sorry, that username doesn't exist.");
+        }
+        $arr = $user->toArray();
+
+        if (UserDisplay::currentClass() <= (int) ($arr['class'] ?? 0)) {
+            $log = "Password Reset For {$username} by {$currentUsername} denied: operator class => ".UserDisplay::currentClass().' is not greater than target user => '.($arr['class'] ?? 0);
+            Log::writeWithContext($log);
+            Logger::writeWithContext($log, 'alert', false);
+
+            return $this->legacyAbortResponse('Error', "Sorry, you don't have enough permission to reset this user's password.");
+        }
+
+        $userRep = $this->userRepository;
+        try {
+            $userRep->resetPassword((int) ($arr['id'] ?? 0), $newpassword, $newpasswordagain);
+        } catch (\Exception $e) {
+            return $this->legacyAbortResponse('Error', $e->getMessage());
+        }
+
+        Log::writeWithContext("Password Reset For {$username} by {$currentUsername}");
+        $success = true;
+        $message = "The password of account <b>{$username}</b> is reset, please inform user of this change.";
+
+        return $this->resetPage($request, $success, $message);
+    }
+
+    private function resetPage(Request $request, bool $success, string $message): View|RedirectResponse
+    {
         return $this->legacyPage($request, 'reset', true, [
             'success' => $success,
             'message' => SafeHtml::fromTrustedHtml($message),
@@ -210,6 +226,72 @@ class UserAdminController extends LegacyController
     }
 
     public function selfEnable(Request $request): View|RedirectResponse|Response
+    {
+        $curUser = $this->currentUser->get() ?? [];
+        $currentUserId = (int) ($curUser['id'] ?? 0);
+
+        $title = Locale::trans('self-enable.title', [], null);
+        $unit = Setting::getSelfEnableBonus();
+
+        $viewData = [
+            'title' => $title,
+            'unit' => $unit,
+            'enabled' => (bool) ($curUser['enabled'] ?? false),
+            'bonus' => (float) ($curUser['seedbonus'] ?? 0),
+            'latestBanLog' => null,
+            'elapsedDay' => 0,
+            'total' => 0,
+            'isUserBonusEnough' => false,
+            'insufficientMessage' => '',
+            't' => [
+                'featureDisabled' => Locale::trans('self-enable.feature_disabled', [], null),
+                'statusNormal' => Locale::trans('self-enable.enable_status_normal', [], null),
+                'noBanInfo' => Locale::trans('self-enable.no_ban_info', [], null),
+                'latestBanInfo' => Locale::trans('self-enable.latest_ban_info', [], null),
+                'deductPerDay' => Locale::trans('self-enable.deduct_bonus_per_day', ['unit' => number_format($unit)], null),
+                'deductTotal' => '',
+                'enableDesc' => Locale::trans('self-enable.enable_desc', [], null),
+                'enableButton' => Locale::trans('self-enable.enable_button', [], null),
+            ],
+        ];
+
+        AssetAppender::css('#ban-info td {border: none}', 'header', false);
+
+        if ($unit <= 0) {
+            return $this->legacyPage($request, 'self-enable', true, $viewData);
+        }
+
+        if (($curUser['enabled'] ?? false)) {
+            return $this->legacyPage($request, 'self-enable', true, $viewData);
+        }
+
+        $latestBanLog = $this->userModerationRepository->latestBanLogForUser($currentUserId);
+        if (! $latestBanLog) {
+            $viewData['latestBanLog'] = null;
+
+            return $this->legacyPage($request, 'self-enable', true, $viewData);
+        }
+
+        $latestBanLogCreatedAt = $latestBanLog->created_at;
+        $elapsedDay = $latestBanLogCreatedAt instanceof Carbon
+            ? (int) ceil((time() - $latestBanLogCreatedAt->getTimestamp()) / 86400)
+            : 0;
+        $total = $unit * $elapsedDay;
+        $isUserBonusEnough = (float) ($curUser['seedbonus'] ?? 0) >= $total;
+        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);
+        $viewData['t']['deductTotal'] = Locale::trans('self-enable.deduct_bonus_total', ['days' => number_format($elapsedDay), 'total' => number_format($total)], null);
+
+        $viewData['latestBanLog'] = $latestBanLog;
+        $viewData['elapsedDay'] = $elapsedDay;
+        $viewData['total'] = $total;
+        $viewData['isUserBonusEnough'] = $isUserBonusEnough;
+        $viewData['insufficientMessage'] = $insufficientMessage;
+
+        return $this->legacyPage($request, 'self-enable', true, $viewData);
+
+    }
+
+    public function selfEnablePost(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
@@ -266,7 +348,7 @@ class UserAdminController extends LegacyController
         $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);
         $viewData['t']['deductTotal'] = Locale::trans('self-enable.deduct_bonus_total', ['days' => number_format($elapsedDay), 'total' => number_format($total)], null);
 
-        if ($request->isMethod('post') && $request->post('submit')) {
+        if ($request->post('submit')) {
             if (! $isUserBonusEnough) {
                 $viewData['latestBanLog'] = $latestBanLog;
                 $viewData['elapsedDay'] = $elapsedDay;
@@ -295,7 +377,6 @@ class UserAdminController extends LegacyController
         $viewData['insufficientMessage'] = $insufficientMessage;
 
         return $this->legacyPage($request, 'self-enable', true, $viewData);
-
     }
 
     public function unco(Request $request): View|RedirectResponse|Response
@@ -333,6 +414,11 @@ class UserAdminController extends LegacyController
         ]);
     }
 
+    public function uncoPost(Request $request): View|RedirectResponse|Response
+    {
+        return $this->unco($request);
+    }
+
     public function adduser(Request $request): Response|RedirectResponse|View
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
@@ -340,23 +426,29 @@ class UserAdminController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Access denied.');
         }
 
-        if ($request->isMethod('post')) {
-            $userRep = $this->userRepository;
-            try {
-                $newUser = $userRep->store([
-                    'username' => request()->post('username'),
-                    'email' => request()->post('email'),
-                    'password' => request()->post('password'),
-                    'password_confirmation' => request()->post('password2'),
-                ]);
-            } catch (\Exception $e) {
-                return $this->legacyAbortResponse('ERROR', $e->getMessage());
-            }
+        return $this->legacyPage($request, 'adduser', true);
+    }
 
-            return redirect('userdetails.php?id='.(int) $newUser->id);
+    public function adduserPost(Request $request): Response|RedirectResponse|View
+    {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Access denied.');
         }
 
-        return $this->legacyPage($request, 'adduser', true);
+        $userRep = $this->userRepository;
+        try {
+            $newUser = $userRep->store([
+                'username' => request()->post('username'),
+                'email' => request()->post('email'),
+                'password' => request()->post('password'),
+                'password_confirmation' => request()->post('password2'),
+            ]);
+        } catch (\Exception $e) {
+            return $this->legacyAbortResponse('ERROR', $e->getMessage());
+        }
+
+        return redirect('userdetails.php?id='.(int) $newUser->id);
 
     }
 }

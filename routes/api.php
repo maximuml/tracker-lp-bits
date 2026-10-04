@@ -172,7 +172,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
         Route::get('usercp/settings', [UsercpController::class, 'settings'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
-        Route::post('usercp/settings', [UsercpController::class, 'settings'])
+        Route::post('usercp/settings', [UsercpController::class, 'settingsPost'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USERCP_SETTINGS));
 
         Route::post('usercp/forum', [UsercpController::class, 'forum'])

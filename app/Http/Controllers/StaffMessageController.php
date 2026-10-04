@@ -51,6 +51,11 @@ class StaffMessageController extends LegacyController
         ]);
     }
 
+    public function staffmessPost(Request $request): View|RedirectResponse|Response
+    {
+        return $this->staffmess($request);
+    }
+
     public function takeStaffmess(Request $request): Response|RedirectResponse
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
@@ -105,6 +110,11 @@ class StaffMessageController extends LegacyController
         return $this->legacyPage($request, 'contactstaff', true, [
         ]);
 
+    }
+
+    public function contactstaffPost(Request $request): View|RedirectResponse|Response
+    {
+        return $this->contactstaff($request);
     }
 
     public function takecontact(Request $request): View|RedirectResponse|Response

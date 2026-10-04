@@ -101,7 +101,7 @@ final class StaffModerationControllerTest extends TestCase
         $request = Request::create('/modrules?act=del', 'POST', ['id' => 1, 'sure' => 0]);
         app()->instance('request', $request);
 
-        $response = $controller->modrules($request);
+        $response = $controller->modrulesPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('delete a rule', (string) $response->getContent());
@@ -122,7 +122,7 @@ final class StaffModerationControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->modrules($request);
+        $response = $controller->modrulesPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('modrules.php', $response->getTargetUrl());
@@ -144,7 +144,7 @@ final class StaffModerationControllerTest extends TestCase
         $request = Request::create('/modtask', 'POST', ['action' => 'edituser']);
         app()->instance('request', $request);
 
-        $response = $controller->modtask($request);
+        $response = $controller->modtaskPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
@@ -161,7 +161,7 @@ final class StaffModerationControllerTest extends TestCase
         $request = Request::create('/modtask', 'POST', ['action' => 'invalid']);
         app()->instance('request', $request);
 
-        $response = $controller->modtask($request);
+        $response = $controller->modtaskPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Invalid action', (string) $response->getContent());
@@ -182,7 +182,7 @@ final class StaffModerationControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->modtask($request);
+        $response = $controller->modtaskPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Invalid confirmation status', (string) $response->getContent());
@@ -208,7 +208,7 @@ final class StaffModerationControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->modtask($request);
+        $response = $controller->modtaskPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('unco.php', $response->getTargetUrl());

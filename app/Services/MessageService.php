@@ -102,9 +102,8 @@ class MessageService
         }
 
         if (! Permission::can(PermissionEnum::STAFF_MEMBER, $sender)) {
-            $lastPm = $sender->last_pm;
-            $lastPmTs = $lastPm ? strtotime($lastPm) : false;
-            if ($lastPmTs !== false && $lastPmTs > (time() - 10)) {
+            $lastPmTs = $sender->last_pm?->getTimestamp();
+            if ($lastPmTs !== null && $lastPmTs > (time() - 10)) {
                 $secs = 60 - (time() - $lastPmTs);
                 LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_message_flooding_denied').$secs.__('legacy/takemessage.std_before_sending_pm'));
             }

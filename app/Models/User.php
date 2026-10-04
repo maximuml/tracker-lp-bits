@@ -51,7 +51,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $last_offer
  * @property string|null $forum_access
  * @property string|null $last_staffmsg
- * @property string|null $last_pm
+ * @property Carbon|null $last_pm
  * @property string|null $last_comment
  * @property string|null $last_post
  * @property int|null $last_browse

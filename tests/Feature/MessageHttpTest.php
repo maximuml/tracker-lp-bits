@@ -246,4 +246,40 @@ final class MessageHttpTest extends TestCase
             ])
             ->assertRedirect();
     }
+
+    // ─── Flood check ───────────────────────────────────────────────────
+
+    public function test_takemessage_flood_check_rejects_second_pm_within_window(): void
+    {
+        $sender = User::factory()->create(['class' => 1, 'last_pm' => now()->subSeconds(5)]);
+        $receiver = User::factory()->create(['class' => 1]);
+
+        $this->withNexusCookie($sender)
+            ->post('/takemessage', [
+                'receiver' => (string) $receiver->id,
+                'subject' => 'Test',
+                'body' => 'Second PM',
+            ])
+            ->assertOk()
+            ->assertSee('Message Flooding Not Allowed');
+    }
+
+    public function test_takemessage_flood_check_allows_old_last_pm(): void
+    {
+        $sender = User::factory()->create(['class' => 1, 'last_pm' => now()->subMinutes(5)]);
+        $receiver = User::factory()->create(['class' => 1]);
+
+        $this->withNexusCookie($sender)
+            ->post('/takemessage', [
+                'receiver' => (string) $receiver->id,
+                'subject' => 'Test',
+                'body' => 'Old PM is fine',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('messages', [
+            'sender' => $sender->id,
+            'receiver' => $receiver->id,
+        ]);
+    }
 }

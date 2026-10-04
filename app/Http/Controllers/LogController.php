@@ -66,6 +66,35 @@ class LogController extends LegacyController
         };
     }
 
+    public function legacyPost(Request $request): View|RedirectResponse|Response
+    {
+        if (! Permission::can(PermissionEnum::LOG)) {
+            $logClass = (int) SiteConfig::current()->authority->permission('log', 0);
+
+            return $this->legacyAbortResponse(
+                __('legacy/log.std_sorry'),
+                (__('legacy/log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).__('legacy/log.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => Setting::getSiteName()])->render(),
+                false
+            );
+        }
+
+        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $userId = (int) ($currentUser['id'] ?? 0);
+
+        $action = (string) ($request->input('action', 'dailylog'));
+        $allowed = ['dailylog', 'chronicle', 'news', 'poll'];
+        if (! in_array($action, $allowed, true)) {
+            return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_invalid_action'));
+        }
+
+        return match ($action) {
+            'dailylog' => $this->dailyLog($request),
+            'chronicle' => $this->chroniclePost($request, $userId),
+            'news' => $this->newsLog($request),
+            'poll' => $this->pollLogPost($request),
+        };
+    }
+
     private function dailyLog(Request $request): View|RedirectResponse
     {
         $q = htmlspecialchars(trim((string) ($request->input('query') ?? '')));
@@ -141,7 +170,21 @@ class LogController extends LegacyController
             return $this->chronicleList($request, $q, $canManage, $editItem);
         }
 
-        if ($request->isMethod('post') && $do !== '') {
+        return $this->chronicleList($request, $q, $canManage, null);
+    }
+
+    private function chroniclePost(Request $request, int $userId): View|RedirectResponse|Response
+    {
+        $q = htmlspecialchars(trim((string) ($request->input('query') ?? '')));
+        $canManage = Permission::can(PermissionEnum::CHR_MANAGE);
+
+        $do = (string) ($request->input('do') ?? '');
+
+        if ($do === 'edit') {
+            return $this->chronicle($request, $userId);
+        }
+
+        if ($do !== '') {
             if (! $canManage) {
                 return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
             }
@@ -258,37 +301,17 @@ class LogController extends LegacyController
             if ($pollid <= 0) {
                 return $this->legacyAbortResponse(__('legacy/log.std_error'), ('Invalid poll ID.'));
             }
-            // The actual deletion requires POST to prevent CSRF via GET
-            // (e.g. <img src="/log.php?action=poll&do=delete&pollid=1&sure=1">).
-            // GET with sure=0 shows a confirmation form with a POST button.
-            if (! $request->isMethod('post')) {
-                $sureLinkText = (string) __('legacy/log.std_here');
-                $sureSuffix = (string) __('legacy/log.std_if_sure');
-                $confirm = view('log._delete_poll_confirm', [
-                    'pollid' => $pollid,
-                    'returnto' => $returnto,
-                    'token' => csrf_token(),
-                    'sureLinkText' => $sureLinkText,
-                    'sureSuffix' => $sureSuffix,
-                ])->render();
+            $sureLinkText = (string) __('legacy/log.std_here');
+            $sureSuffix = (string) __('legacy/log.std_if_sure');
+            $confirm = view('log._delete_poll_confirm', [
+                'pollid' => $pollid,
+                'returnto' => $returnto,
+                'token' => csrf_token(),
+                'sureLinkText' => $sureLinkText,
+                'sureSuffix' => $sureSuffix,
+            ])->render();
 
-                return $this->legacyAbortResponse(__('legacy/log.std_delete_poll'), $confirm, false);
-            }
-            if ((int) $request->input('sure', 0) !== 1) {
-                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
-            }
-            $this->logRepository->deletePoll($pollid);
-
-            if ($this->legacyRedisCache !== null) {
-                $this->legacyRedisCache->delete_value('current_poll_content');
-                $this->legacyRedisCache->delete_value('current_poll_result', true);
-            }
-
-            if ($returnto === 'main') {
-                return redirect('/');
-            }
-
-            return redirect('/log.php?action=poll&deleted=1');
+            return $this->legacyAbortResponse(__('legacy/log.std_delete_poll'), $confirm, false);
         }
 
         $pollcount = $this->logRepository->getPollCount();
@@ -335,5 +358,38 @@ class LogController extends LegacyController
             'canPollManage' => Permission::can(PermissionEnum::POLL_MANAGE),
             'title' => __('legacy/log.head_previous_polls'),
         ]);
+    }
+
+    private function pollLogPost(Request $request): View|RedirectResponse|Response
+    {
+        $do = (string) ($request->input('do') ?? '');
+        $pollid = (int) $request->input('pollid', 0);
+        $returnto = htmlspecialchars((string) ($request->input('returnto') ?? ''));
+
+        if ($do === 'delete') {
+            if (! Permission::can(PermissionEnum::POLL_MANAGE)) {
+                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+            }
+            if ($pollid <= 0) {
+                return $this->legacyAbortResponse(__('legacy/log.std_error'), ('Invalid poll ID.'));
+            }
+            if ((int) $request->input('sure', 0) !== 1) {
+                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+            }
+            $this->logRepository->deletePoll($pollid);
+
+            if ($this->legacyRedisCache !== null) {
+                $this->legacyRedisCache->delete_value('current_poll_content');
+                $this->legacyRedisCache->delete_value('current_poll_result', true);
+            }
+
+            if ($returnto === 'main') {
+                return redirect('/');
+            }
+
+            return redirect('/log.php?action=poll&deleted=1');
+        }
+
+        return $this->pollLog($request);
     }
 }

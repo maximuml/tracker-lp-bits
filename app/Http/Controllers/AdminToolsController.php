@@ -65,6 +65,11 @@ class AdminToolsController extends LegacyController
         ]);
     }
 
+    public function userBanLogPost(Request $request): View|RedirectResponse|Response
+    {
+        return $this->userBanLog($request);
+    }
+
     public function clearCache(Request $request): View|RedirectResponse|Response
     {
         if (UserDisplay::currentClass() < (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
@@ -73,18 +78,31 @@ class AdminToolsController extends LegacyController
 
         $done = false;
         $error = '';
-        if ($request->isMethod('post')) {
-            $cachename = (string) $request->input('cachename', '');
-            if ($cachename === '') {
-                $error = 'You must fill in cache name.';
-            } else {
-                $multilang = $request->input('multilang') === 'yes';
-                $cache = $this->legacyRedisCache;
-                if ($cache !== null) {
-                    $cache->delete_value($cachename, $multilang);
-                }
-                $done = true;
+
+        return $this->legacyPage($request, 'clearcache', true, [
+            'done' => $done,
+            'error' => $error,
+        ]);
+    }
+
+    public function clearCachePost(Request $request): View|RedirectResponse|Response
+    {
+        if (UserDisplay::currentClass() < (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
+
+        $done = false;
+        $error = '';
+        $cachename = (string) $request->input('cachename', '');
+        if ($cachename === '') {
+            $error = 'You must fill in cache name.';
+        } else {
+            $multilang = $request->input('multilang') === 'yes';
+            $cache = $this->legacyRedisCache;
+            if ($cache !== null) {
+                $cache->delete_value($cachename, $multilang);
             }
+            $done = true;
         }
 
         return $this->legacyPage($request, 'clearcache', true, [
@@ -101,28 +119,18 @@ class AdminToolsController extends LegacyController
         }
 
         $actionUrl = 'location.php';
-        $perpage = 50;
         $success = false;
         $error = '';
         $editRow = [];
         $mode = 'list';
-        $message = '';
 
         $rangeStartIp = (string) (request()->query('range_start_ip') ?? '');
         $rangeEndIp = (string) (request()->query('range_end_ip') ?? '');
-        $hasRangeFilter = false;
 
         $sure = (string) (request()->query('sure') ?? '');
         $delid = (int) (request()->query('delid') ?? 0);
         if ($sure === 'yes' && $delid > 0) {
-            if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse('Error', 'Permission denied.');
-            }
-            if (Validators::isId($delid)) {
-                $this->locationService->deleteLocation($delid);
-            }
-
-            return $this->legacyAbortResponse('Success', 'Location successfully removed, click <a class=altlink href="'.$actionUrl.'">here</a> to go back.', false);
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
         if ($delid > 0) {
@@ -131,9 +139,59 @@ class AdminToolsController extends LegacyController
 
         $edited = (string) (request()->query('edited') ?? '');
         if ($edited === '1') {
-            if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
+
+        $editid = (int) (request()->query('editid') ?? 0);
+        if ($editid > 0) {
+            $editRow = $this->locationService->findLocation($editid);
+            if (empty($editRow)) {
+                $error = 'Location not found.';
+            } else {
+                $mode = 'edit';
+
+                return $this->legacyPage($request, 'location', true, [
+                    'mode' => $mode,
+                    'editRow' => $editRow,
+                    'actionUrl' => $actionUrl,
+                ]);
             }
+        }
+
+        $add = (string) (request()->query('add') ?? '');
+        if ($add === 'true') {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
+
+        return $this->renderLocationList($request, $success, $error, $rangeStartIp, $rangeEndIp);
+    }
+
+    public function locationPost(Request $request): View|RedirectResponse|Response
+    {
+        $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
+        if (UserDisplay::currentClass() < $sysopClass) {
+            return $this->legacyAbortResponse('Error', 'Access denied.');
+        }
+
+        $actionUrl = 'location.php';
+        $success = false;
+        $error = '';
+
+        $rangeStartIp = (string) (request()->query('range_start_ip') ?? '');
+        $rangeEndIp = (string) (request()->query('range_end_ip') ?? '');
+
+        $sure = (string) (request()->query('sure') ?? '');
+        $delid = (int) (request()->query('delid') ?? 0);
+        if ($sure === 'yes' && $delid > 0) {
+            if (Validators::isId($delid)) {
+                $this->locationService->deleteLocation($delid);
+            }
+
+            return $this->legacyAbortResponse('Success', 'Location successfully removed, click <a class=altlink href="'.$actionUrl.'">here</a> to go back.', false);
+        }
+
+        $edited = (string) (request()->query('edited') ?? '');
+        if ($edited === '1') {
             $id = (int) (request()->query('id') ?? 0);
             $name = (string) request()->query('name');
             $flagpic = (string) request()->query('flagpic');
@@ -166,29 +224,12 @@ class AdminToolsController extends LegacyController
 
                 return $this->legacyAbortResponse('Success!', 'Location has been edited, click <a class=altlink href="'.$actionUrl.'">here</a> to go back', false);
             }
-        }
 
-        $editid = (int) (request()->query('editid') ?? 0);
-        if ($editid > 0) {
-            $editRow = $this->locationService->findLocation($editid);
-            if (empty($editRow)) {
-                $error = 'Location not found.';
-            } else {
-                $mode = 'edit';
-
-                return $this->legacyPage($request, 'location', true, [
-                    'mode' => $mode,
-                    'editRow' => $editRow,
-                    'actionUrl' => $actionUrl,
-                ]);
-            }
+            return $this->renderLocationList($request, $success, $error, $rangeStartIp, $rangeEndIp);
         }
 
         $add = (string) (request()->query('add') ?? '');
         if ($add === 'true') {
-            if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse('Error', 'Permission denied.');
-            }
             $name = (string) request()->query('name');
             $flagpic = (string) request()->query('flagpic');
             $locationMain = (string) request()->query('location_main');
@@ -219,7 +260,19 @@ class AdminToolsController extends LegacyController
                 ]);
                 $success = true;
             }
+
+            return $this->renderLocationList($request, $success, $error, $rangeStartIp, $rangeEndIp);
         }
+
+        return $this->location($request);
+    }
+
+    private function renderLocationList(Request $request, bool $success, string $error, string $rangeStartIp, string $rangeEndIp): View|RedirectResponse
+    {
+        $actionUrl = 'location.php';
+        $perpage = 50;
+        $hasRangeFilter = false;
+        $message = '';
 
         $checkRange = (string) (request()->query('check_range') ?? '');
         if ($checkRange === 'true') {
@@ -253,7 +306,7 @@ class AdminToolsController extends LegacyController
         }
 
         return $this->legacyPage($request, 'location', true, [
-            'mode' => $mode,
+            'mode' => 'list',
             'success' => $success,
             'error' => $error,
             'message' => SafeHtml::fromTrustedHtml($message),
@@ -266,6 +319,11 @@ class AdminToolsController extends LegacyController
             'actionUrl' => $actionUrl,
         ]);
 
+    }
+
+    public function testipPost(Request $request): View|RedirectResponse|Response
+    {
+        return $this->testip($request);
     }
 
     public function testip(Request $request): View|RedirectResponse|Response

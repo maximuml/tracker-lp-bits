@@ -121,7 +121,7 @@ final class LogControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacy($request);
+        $response = $controller->legacyPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
@@ -147,7 +147,7 @@ final class LogControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacy($request);
+        $response = $controller->legacyPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
@@ -174,7 +174,7 @@ final class LogControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacy($request);
+        $response = $controller->legacyPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
@@ -200,7 +200,7 @@ final class LogControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacy($request);
+        $response = $controller->legacyPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
@@ -244,7 +244,7 @@ final class LogControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacy($request);
+        $response = $controller->legacyPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Back off', (string) $response->getContent());

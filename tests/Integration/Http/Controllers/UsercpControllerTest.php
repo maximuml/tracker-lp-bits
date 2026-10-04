@@ -43,7 +43,7 @@ final class UsercpControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $result = $controller->settings($request);
+        $result = $controller->settingsPost($request);
 
         $this->assertSame(0, $result['ret']);
         $this->assertNotEmpty($result['data']);
@@ -217,7 +217,7 @@ final class UsercpControllerTest extends TestCase
             'avatar' => 'not/a/url.jpg',
         ]);
         app()->instance('request', $request);
-        $this->assertSame(0, $controller->settings($request)['ret']);
+        $this->assertSame(0, $controller->settingsPost($request)['ret']);
         $this->assertSame('https://example.com/a.jpg', DB::table('users')->where('id', $user->id)->value('avatar'));
 
         // Empty field + savatar echoing the current URL (what the real form
@@ -227,7 +227,7 @@ final class UsercpControllerTest extends TestCase
             'savatar' => 'https://example.com/a.jpg',
         ]);
         app()->instance('request', $request);
-        $this->assertSame(0, $controller->settings($request)['ret']);
+        $this->assertSame(0, $controller->settingsPost($request)['ret']);
         $this->assertSame('', (string) DB::table('users')->where('id', $user->id)->value('avatar'));
     }
 
@@ -245,7 +245,7 @@ final class UsercpControllerTest extends TestCase
             'savatar' => 'http://localhost/pic/default_avatar.png',
         ]);
         app()->instance('request', $request);
-        $this->assertSame(0, $controller->settings($request)['ret']);
+        $this->assertSame(0, $controller->settingsPost($request)['ret']);
         $this->assertSame('http://localhost/pic/default_avatar.png', DB::table('users')->where('id', $user->id)->value('avatar'));
     }
 }

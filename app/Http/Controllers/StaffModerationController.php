@@ -42,18 +42,24 @@ class StaffModerationController extends LegacyController
 
     public function modtask(Request $request): Response|RedirectResponse
     {
+        $deny = $this->modtaskPreamble();
+        if ($deny !== null) {
+            return $deny;
+        }
+
+        return $this->legacyAbortResponse('Error', 'Invalid action.');
+    }
+
+    public function modtaskPost(Request $request): Response|RedirectResponse
+    {
+        $deny = $this->modtaskPreamble();
+        if ($deny !== null) {
+            return $deny;
+        }
+
         $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($currentUser['id'] ?? 0);
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
-
-        if (! Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO, $this->userDetailRepository->findOrFailById($currentUserId))) {
-            Log::writeWithContext(
-                'User '.($currentUser['username'] ?? '')." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
-                'mod'
-            );
-
-            return $this->legacyAbortResponse('Error', 'Permission denied. For security reason, we logged this action');
-        }
 
         $action = (string) request()->post('action');
 
@@ -376,48 +382,8 @@ class StaffModerationController extends LegacyController
 
         $act = (string) (request()->query('act') ?? 'list');
 
-        if ($act === 'addsect' && $request->isMethod('post')) {
-            $title = (string) request()->post('title');
-            $text = (string) request()->post('text');
-            $language = (int) request()->post('language');
-            $this->ruleRepository->insert([
-                'title' => $title,
-                'text' => $text,
-                'lang_id' => $language,
-            ]);
-            Cache::forgetWithLocales('rules');
-
-            return redirect('modrules.php');
-        }
-
-        if ($act === 'edited' && $request->isMethod('post')) {
-            $id = (int) (request()->post('id') ?? 0);
-            $title = (string) request()->post('title');
-            $text = (string) request()->post('text');
-            $language = (int) request()->post('language');
-            $this->ruleRepository->updateById($id, [
-                'title' => $title,
-                'text' => $text,
-                'lang_id' => $language,
-            ]);
-            Cache::forgetWithLocales('rules');
-
-            return redirect('modrules.php');
-        }
-
         if ($act === 'del') {
-            if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse('Error', 'Permission denied.');
-            }
-            $id = (int) (request()->post('id') ?? 0);
-            $sure = (int) (request()->post('sure') ?? 0);
-            if (! $sure) {
-                return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href="?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
-            }
-            $this->ruleRepository->deleteById($id);
-            Cache::forgetWithLocales('rules');
-
-            return redirect('modrules.php');
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
         if ($act === 'newsect') {
@@ -454,5 +420,75 @@ class StaffModerationController extends LegacyController
             'rows' => $rules,
         ]);
 
+    }
+
+    private function modtaskPreamble(): ?Response
+    {
+        $currentUser = $this->currentUser->get() ?? [];
+        $currentUserId = (int) ($currentUser['id'] ?? 0);
+
+        if (! Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO, $this->userDetailRepository->findOrFailById($currentUserId))) {
+            Log::writeWithContext(
+                'User '.($currentUser['username'] ?? '')." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
+                'mod'
+            );
+
+            return $this->legacyAbortResponse('Error', 'Permission denied. For security reason, we logged this action');
+        }
+
+        return null;
+    }
+
+    public function modrulesPost(Request $request): View|RedirectResponse|Response
+    {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
+        }
+
+        $act = (string) (request()->query('act') ?? 'list');
+
+        if ($act === 'addsect') {
+            $title = (string) request()->post('title');
+            $text = (string) request()->post('text');
+            $language = (int) request()->post('language');
+            $this->ruleRepository->insert([
+                'title' => $title,
+                'text' => $text,
+                'lang_id' => $language,
+            ]);
+            Cache::forgetWithLocales('rules');
+
+            return redirect('modrules.php');
+        }
+
+        if ($act === 'edited') {
+            $id = (int) (request()->post('id') ?? 0);
+            $title = (string) request()->post('title');
+            $text = (string) request()->post('text');
+            $language = (int) request()->post('language');
+            $this->ruleRepository->updateById($id, [
+                'title' => $title,
+                'text' => $text,
+                'lang_id' => $language,
+            ]);
+            Cache::forgetWithLocales('rules');
+
+            return redirect('modrules.php');
+        }
+
+        if ($act === 'del') {
+            $id = (int) (request()->post('id') ?? 0);
+            $sure = (int) (request()->post('sure') ?? 0);
+            if (! $sure) {
+                return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href="?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
+            }
+            $this->ruleRepository->deleteById($id);
+            Cache::forgetWithLocales('rules');
+
+            return redirect('modrules.php');
+        }
+
+        return $this->modrules($request);
     }
 }

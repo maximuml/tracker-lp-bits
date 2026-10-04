@@ -41,30 +41,15 @@ final class SharedGetPostActionTest extends TestCase
     private const BASELINE_URIS = [
         // API
         'api/v1/usercp/settings' => true,
-        // Moderation
-        'modtask' => true,
-        'modrules' => true,
-        'staffmess' => true,
-        'contactstaff' => true,
-        // Admin tools
+        // Filament redirect stubs — GET and POST both only redirect to the
+        // Filament replacement page; nothing left to split.
         'bans' => true,
         'staffbox' => true,
-        'user-ban-log' => true,
-        'clearcache' => true,
         'delacctadmin' => true,
         'massmail' => true,
-        'location' => true,
         'maxlogin' => true,
-        'testip' => true,
-        // User admin
-        'reset' => true,
-        'self-enable' => true,
-        'unco' => true,
-        'adduser' => true,
-        // Legacy pages
-        'log' => true,
-        'index' => true,
-        // Tracker protocol
+        // Tracker protocol: announce/scrape handlers accept GET and POST by
+        // design (clients send whichever they like; identical response path).
         'announce' => true,
         'announce.php' => true,
         'scrape' => true,

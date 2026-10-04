@@ -94,7 +94,7 @@ class ForumResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->using(fn ($record) => app(ForumRepositoryInterface::class)->deleteForum($record->id)),
+                    ->using(fn ($record, ForumRepositoryInterface $rep) => $rep->deleteForum($record->id)),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

@@ -111,13 +111,12 @@ class ExamUserResource extends Resource
                 ViewAction::make(),
             ])
             ->groupedBulkActions([
-                BulkAction::make('Avoid')->action(function (Collection $records) {
+                BulkAction::make('Avoid')->action(function (Collection $records, ExamUserRepository $rep) {
                     $idArr = $records->pluck('id')->toArray();
                     $user = Auth::user();
                     if (! $user instanceof User) {
                         throw new \RuntimeException('Expected an authenticated user.');
                     }
-                    $rep = app(ExamUserRepository::class);
                     $rep->avoidExamUserBulk(['id' => $idArr], $user);
                 })
                     ->deselectRecordsAfterCompletion()
@@ -133,9 +132,8 @@ class ExamUserResource extends Resource
                         Textarea::make('reason')
                             ->label(__('label.reason')),
                     ])
-                    ->action(function (Collection $records, array $data) {
+                    ->action(function (Collection $records, array $data, ExamUserRepository $rep) {
                         $end = Carbon::parse($data['end']);
-                        $rep = app(ExamUserRepository::class);
                         foreach ($records as $record) {
                             if ($end->isAfter($record->begin)) {
                                 $rep->updateExamUserEnd($record, $end, $data['reason'] ?? '');

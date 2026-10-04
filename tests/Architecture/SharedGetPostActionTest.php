@@ -41,16 +41,6 @@ final class SharedGetPostActionTest extends TestCase
     private const BASELINE_URIS = [
         // API
         'api/v1/usercp/settings' => true,
-        // Info pages
-        'faq' => true,
-        // Support
-        'complains' => true,
-        // Friends/messages
-        'friends' => true,
-        // RSS
-        'getrss' => true,
-        // Attendance
-        'attendance' => true,
         // Moderation
         'modtask' => true,
         'modrules' => true,

@@ -91,4 +91,12 @@ class ModerationRepository extends BaseRepository
             ->map(fn ($r) => (array) $r)
             ->all();
     }
+
+    public function deleteDealtWithReportsBefore(string $until): int
+    {
+        return DB::table('reports')
+            ->where('dealtwith', 1)
+            ->where('added', '<', $until)
+            ->delete();
+    }
 }

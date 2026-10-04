@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Cleanup\Tasks;
 
 use App\Enums\UserStatus;
+use App\Models\Invite;
+use App\Models\LoginAttempt;
+use App\Models\RegImage;
 use App\Models\User;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Priority Class 4: delete unconfirmed accounts, old login attempts, invite
@@ -53,7 +55,7 @@ final class StaleAuthCleanupTask implements CleanupTask
         $secs = 12 * 60 * 60;
         $dt = date('Y-m-d H:i:s', time() - $secs);
 
-        DB::table('loginattempts')
+        LoginAttempt::query()
             ->where('banned', false)
             ->where('added', '<', $dt)
             ->delete();
@@ -66,7 +68,7 @@ final class StaleAuthCleanupTask implements CleanupTask
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $nowStr = Carbon::now()->toDateTimeString();
 
-        DB::table('invites')
+        Invite::query()
             ->where(function ($query) use ($dt): void {
                 $query->where('time_invited', '<', $dt)
                     ->whereNotNull('time_invited')
@@ -82,7 +84,7 @@ final class StaleAuthCleanupTask implements CleanupTask
 
     private function deleteRegimages(): void
     {
-        DB::table('regimages')->delete();
+        RegImage::query()->delete();
     }
 
     public function run(): string

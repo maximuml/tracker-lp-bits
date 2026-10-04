@@ -9,7 +9,6 @@ use App\Models\Torrent;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Time;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Priority Class 2 & 3: torrent visibility and sticky position expiration.
@@ -26,7 +25,7 @@ final class TorrentVisibilityTask implements CleanupTask
         $deadtime = Time::deadThreshold((int) SiteConfig::current()->main->anninterthree(3600), time()) - $maxDeadTime;
         $lastActionDeadTime = date('Y-m-d H:i:s', $deadtime);
 
-        DB::table('torrents')
+        Torrent::query()
             ->where('visible', 1)
             ->where('last_action', '<', $lastActionDeadTime)
             ->where('seeders', 0)

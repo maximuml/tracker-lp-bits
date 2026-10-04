@@ -59,4 +59,9 @@ class TopicReadStateRepository extends BaseRepository
     {
         DB::table('readposts')->where('userid', $userId)->delete();
     }
+
+    public function deleteWithLastPostReadBefore(int $lastPostId): int
+    {
+        return DB::table('readposts')->where('lastpostread', '<', $lastPostId)->delete();
+    }
 }

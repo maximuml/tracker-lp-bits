@@ -6,6 +6,7 @@ namespace App\Services\Cleanup\Tasks;
 
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Models\Message;
 use App\Models\User;
 use App\Models\UserBanLog;
 use App\Services\Cleanup\Contracts\CleanupTask;
@@ -15,7 +16,6 @@ use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\UserOps;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Priority Class 4: promote/demote users and ban leech-warning expiries.
@@ -113,7 +113,7 @@ final class UserClassManagementTask implements CleanupTask
 
         User::query()->whereIn('id', $uidArr)->update(['class' => (string) $newclass]);
 
-        DB::table('messages')->insert($messages);
+        Message::query()->insert($messages);
     }
 
     private function demoteUsersToPeasant(): void
@@ -188,7 +188,7 @@ final class UserClassManagementTask implements CleanupTask
             'leechwarnuntil' => $until,
         ]);
 
-        DB::table('messages')->insert($messages);
+        Message::query()->insert($messages);
     }
 
     private function banLeechWarningExpired(): void

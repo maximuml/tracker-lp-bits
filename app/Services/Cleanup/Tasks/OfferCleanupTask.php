@@ -4,17 +4,23 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
+use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\OfferAllowed;
+use App\Models\Comment;
+use App\Models\Offer;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Log;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Priority Class 3: offer pruning.
  */
 final class OfferCleanupTask implements CleanupTask
 {
+    public function __construct(
+        private readonly OfferVoteRepositoryInterface $offerVotes,
+    ) {}
+
     /**
      * Priority Class 3: delete offers that were never voted on and offers that
      * were approved but never uploaded.
@@ -24,7 +30,7 @@ final class OfferCleanupTask implements CleanupTask
         $offerVoteTimeout = (int) SiteConfig::current()->main->offerVoteTimeout(259200);
         if ($offerVoteTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerVoteTimeout);
-            $offerIds = DB::table('offers')
+            $offerIds = Offer::query()
                 ->where('added', '<', $dt)
                 ->where('allowed', '<>', OfferAllowed::ALLOWED->value)
                 ->pluck('id', 'name')
@@ -36,7 +42,7 @@ final class OfferCleanupTask implements CleanupTask
         $offerUploadTimeout = (int) SiteConfig::current()->main->offerUploadTimeout(86400);
         if ($offerUploadTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerUploadTimeout);
-            $offerIds = DB::table('offers')
+            $offerIds = Offer::query()
                 ->where('allowedtime', '<', $dt)
                 ->where('allowed', OfferAllowed::ALLOWED->value)
                 ->pluck('id', 'name')
@@ -63,9 +69,9 @@ final class OfferCleanupTask implements CleanupTask
 
         $ids = array_values($offerIds);
 
-        DB::table('offervotes')->whereIn('offerid', $ids)->delete();
-        DB::table('comments')->whereIn('offer', $ids)->delete();
-        DB::table('offers')->whereIn('id', $ids)->delete();
+        $this->offerVotes->deleteVotesForOffers($ids);
+        Comment::query()->whereIn('offer', $ids)->delete();
+        Offer::query()->whereIn('id', $ids)->delete();
 
         foreach ($offerIds as $name => $id) {
             Log::write("Offer {$id} ({$name}) was deleted by system ({$reason})", 'normal');

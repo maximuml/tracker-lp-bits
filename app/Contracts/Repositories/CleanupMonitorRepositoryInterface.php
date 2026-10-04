@@ -9,4 +9,6 @@ interface CleanupMonitorRepositoryInterface
     public function checkCleanup(): void;
 
     public function checkQueueFailedJobs(): void;
+
+    public function deleteFailedJobsBefore(string $until): int;
 }

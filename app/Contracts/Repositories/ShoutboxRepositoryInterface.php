@@ -89,4 +89,6 @@ interface ShoutboxRepositoryInterface
      * @return bool True when the reaction was added, false when removed.
      */
     public function toggleReaction(int $shoutId, int $userId, string $reaction): bool;
+
+    public function deleteBefore(int $unixTs): int;
 }

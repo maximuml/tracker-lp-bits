@@ -29,7 +29,7 @@ final class MessagePolicyTest extends TestCase
 
     public function test_view_allows_only_sender_or_receiver(): void
     {
-        $sender = User::factory()->create();
+        $sender = User::factory()->create(['class' => 1]);
         $receiver = User::factory()->create();
         $outsider = User::factory()->create();
         $message = new Message(['sender' => $sender->id, 'receiver' => $receiver->id]);
@@ -41,7 +41,7 @@ final class MessagePolicyTest extends TestCase
 
     public function test_delete_inbox_allows_only_receiver(): void
     {
-        $sender = User::factory()->create();
+        $sender = User::factory()->create(['class' => 1]);
         $receiver = User::factory()->create();
         $message = new Message(['sender' => $sender->id, 'receiver' => $receiver->id]);
 
@@ -51,7 +51,7 @@ final class MessagePolicyTest extends TestCase
 
     public function test_delete_sentbox_allows_only_sender(): void
     {
-        $sender = User::factory()->create();
+        $sender = User::factory()->create(['class' => 1]);
         $receiver = User::factory()->create();
         $message = new Message(['sender' => $sender->id, 'receiver' => $receiver->id]);
 
@@ -61,7 +61,7 @@ final class MessagePolicyTest extends TestCase
 
     public function test_forward_allows_only_sender_or_receiver(): void
     {
-        $sender = User::factory()->create();
+        $sender = User::factory()->create(['class' => 1]);
         $receiver = User::factory()->create();
         $outsider = User::factory()->create();
         $message = new Message(['sender' => $sender->id, 'receiver' => $receiver->id]);
@@ -74,23 +74,23 @@ final class MessagePolicyTest extends TestCase
     public function test_send_to_allows_staff_bypass(): void
     {
         $staff = User::factory()->admin()->create();
-        $recipient = User::factory()->create(['acceptpms' => 2, 'parked' => 0]);
+        $recipient = User::factory()->create(['class' => 1, 'acceptpms' => 2, 'parked' => 0]);
 
         $this->assertTrue($this->policy->sendTo($staff, $recipient));
     }
 
     public function test_send_to_denies_parked_recipient(): void
     {
-        $sender = User::factory()->create();
-        $recipient = User::factory()->create(['parked' => 1]);
+        $sender = User::factory()->create(['class' => 1]);
+        $recipient = User::factory()->create(['class' => 1, 'parked' => 1]);
 
         $this->assertFalse($this->policy->sendTo($sender, $recipient));
     }
 
     public function test_send_to_acceptpms_yes_unless_blocked(): void
     {
-        $sender = User::factory()->create();
-        $recipient = User::factory()->create(['acceptpms' => 0, 'parked' => 0]);
+        $sender = User::factory()->create(['class' => 1]);
+        $recipient = User::factory()->create(['class' => 1, 'acceptpms' => 0, 'parked' => 0]);
 
         $this->assertTrue($this->policy->sendTo($sender, $recipient));
 
@@ -101,8 +101,8 @@ final class MessagePolicyTest extends TestCase
 
     public function test_send_to_acceptpms_friends_requires_friendship(): void
     {
-        $sender = User::factory()->create();
-        $recipient = User::factory()->create(['acceptpms' => 1, 'parked' => 0]);
+        $sender = User::factory()->create(['class' => 1]);
+        $recipient = User::factory()->create(['class' => 1, 'acceptpms' => 1, 'parked' => 0]);
 
         $this->assertFalse($this->policy->sendTo($sender, $recipient));
 
@@ -113,8 +113,8 @@ final class MessagePolicyTest extends TestCase
 
     public function test_send_to_acceptpms_no_denies(): void
     {
-        $sender = User::factory()->create();
-        $recipient = User::factory()->create(['acceptpms' => 2, 'parked' => 0]);
+        $sender = User::factory()->create(['class' => 1]);
+        $recipient = User::factory()->create(['class' => 1, 'acceptpms' => 2, 'parked' => 0]);
 
         $this->assertFalse($this->policy->sendTo($sender, $recipient));
     }

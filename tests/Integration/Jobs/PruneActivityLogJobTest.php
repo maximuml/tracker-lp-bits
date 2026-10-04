@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Integration\Jobs;
 
 use App\Jobs\PruneActivityLogJob;
-use App\Repositories\ActivityLogRepository;
 use App\Models\User;
+use App\Repositories\ActivityLogRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;

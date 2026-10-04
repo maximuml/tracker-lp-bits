@@ -44,9 +44,7 @@ class BonusLogResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->records(function (int $page, int $recordsPerPage, array $filters) {
-                return self::listRecords($page, $recordsPerPage, $filters);
-            })
+            ->records(fn (int $page, int $recordsPerPage, array $filters, BonusCalculationRepository $rep) => self::listRecords($rep, $page, $recordsPerPage, $filters))
             ->columns([
                 TextColumn::make('uid')
                     ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state))
@@ -103,9 +101,8 @@ class BonusLogResource extends Resource
      * @param  array<string, mixed>  $filters
      * @return LengthAwarePaginator<int, array<string, mixed>>
      */
-    private static function listRecords(int $page, int $perPage, array $filters = []): LengthAwarePaginator
+    private static function listRecords(BonusCalculationRepository $rep, int $page, int $perPage, array $filters = []): LengthAwarePaginator
     {
-        $rep = app(BonusCalculationRepository::class);
         $category = $filters['category']['value'] ?: BonusLogs::CATEGORY_COMMON;
         $userId = intval($filters['userId']['value'] ?? 0);
         $businessType = intval($filters['businessType']['value'] ?? 0);

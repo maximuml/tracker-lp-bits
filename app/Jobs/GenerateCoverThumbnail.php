@@ -48,11 +48,12 @@ class GenerateCoverThumbnail implements ShouldQueue
             return;
         }
 
-        if (! self::isAllowedUrl($this->sourceUrl)) {
+        $pinnedIp = self::resolveAllowedIp($this->sourceUrl);
+        if ($pinnedIp === null) {
             return;
         }
 
-        $data = self::fetch($this->sourceUrl);
+        $data = self::fetch($this->sourceUrl, $pinnedIp);
         if ($data === null || $data === '') {
             return;
         }
@@ -74,7 +75,7 @@ class GenerateCoverThumbnail implements ShouldQueue
 
         $dir = dirname($this->absolutePath);
         if (! is_dir($dir)) {
-            @mkdir($dir, 0777, true);
+            @mkdir($dir, 0755, true);
         }
 
         @imagejpeg($dst, $this->absolutePath, max(1, min(100, $this->quality)));
@@ -91,45 +92,53 @@ class GenerateCoverThumbnail implements ShouldQueue
      */
     public static function isAllowedUrl(string $url): bool
     {
+        return self::resolveAllowedIp($url) !== null;
+    }
+
+    /**
+     * Validate the URL and return one vetted public IP for its host, which
+     * fetch() pins via CURLOPT_RESOLVE so curl cannot re-resolve the name
+     * to a different (internal) address after the check (DNS rebinding).
+     */
+    private static function resolveAllowedIp(string $url): ?string
+    {
         $parsed = parse_url($url);
         if ($parsed === false) {
-            return false;
+            return null;
         }
 
         $scheme = strtolower($parsed['scheme'] ?? '');
         if (! in_array($scheme, ['http', 'https'], true)) {
-            return false;
+            return null;
         }
 
         $host = $parsed['host'] ?? '';
         if ($host === '') {
-            return false;
+            return null;
         }
 
         // Strip brackets from IPv6 literals: `[::1]` -> `::1`.
         $host = trim($host, '[]');
         if ($host === '') {
-            return false;
+            return null;
         }
 
         // Reject hostname-based localhost / internal names.
         $lowerHost = strtolower($host);
         $blockedNames = ['localhost', 'metadata.google.internal'];
         if (in_array($lowerHost, $blockedNames, true)) {
-            return false;
+            return null;
         }
 
         // Literal IP address (IPv4 or IPv6): reject private/reserved/link-local.
         if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
-            return self::isPublicIp($host);
+            return self::isPublicIp($host) ? $host : null;
         }
 
         // For hostnames, resolve DNS and check all returned IPs.
-        // This prevents trivial DNS-rebinding to internal addresses. A small TTL
-        // window remains, but it closes the most common SSRF vector.
         $records = @dns_get_record($host, DNS_A | DNS_AAAA);
         if ($records !== false) {
-            $found = false;
+            $first = null;
             foreach ($records as $record) {
                 $type = $record['type'] ?? '';
                 if ($type === 'A') {
@@ -144,31 +153,31 @@ class GenerateCoverThumbnail implements ShouldQueue
                     continue;
                 }
 
-                $found = true;
                 if (! self::isPublicIp($ip)) {
-                    return false;
+                    return null;
                 }
+                $first ??= $ip;
             }
 
-            if ($found) {
-                return true;
+            if ($first !== null) {
+                return $first;
             }
         }
 
         // Fallback for environments without dns_get_record support.
         $ipv4s = gethostbynamel($host);
-        if ($ipv4s !== false) {
+        if ($ipv4s !== false && $ipv4s !== []) {
             foreach ($ipv4s as $ip) {
                 if (! self::isPublicIp($ip)) {
-                    return false;
+                    return null;
                 }
             }
 
-            return true;
+            return $ipv4s[0];
         }
 
-        // No resolvable public records; block to avoid DNS-rebinding to internal addresses.
-        return false;
+        // No resolvable public records; block.
+        return null;
     }
 
     /**
@@ -192,19 +201,13 @@ class GenerateCoverThumbnail implements ShouldQueue
     /**
      * Download the remote image with safe cURL options: no redirects,
      * limited protocols, SSL verification enabled, short timeouts, and
-     * a hard cap on response body size.
+     * a hard cap on response body size. The host is pinned to the
+     * already-validated IP; without cURL there is no way to pin, so skip.
      */
-    private static function fetch(string $url): ?string
+    private static function fetch(string $url, string $pinnedIp): ?string
     {
         if (! function_exists('curl_init')) {
-            $ctx = stream_context_create([
-                'http' => ['timeout' => 5, 'follow_location' => 0],
-                'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
-            ]);
-
-            $data = @file_get_contents($url, false, $ctx);
-
-            return $data !== false ? $data : null;
+            return null;
         }
 
         $ch = curl_init($url);
@@ -225,6 +228,10 @@ class GenerateCoverThumbnail implements ShouldQueue
         curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
+        $resolve = self::curlResolveEntry($url, $pinnedIp);
+        if ($resolve !== null) {
+            curl_setopt($ch, CURLOPT_RESOLVE, [$resolve]);
+        }
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($_, $chunk) use (&$buffer, $maxBytes): int {
             $buffer .= $chunk;
             if (strlen($buffer) > $maxBytes) {
@@ -250,5 +257,18 @@ class GenerateCoverThumbnail implements ShouldQueue
         }
 
         return $buffer;
+    }
+
+    private static function curlResolveEntry(string $url, string $ip): ?string
+    {
+        $parsed = parse_url($url);
+        $host = is_array($parsed) ? trim($parsed['host'] ?? '', '[]') : '';
+        if ($host === '' || filter_var($host, FILTER_VALIDATE_IP) !== false) {
+            return null;
+        }
+        $port = $parsed['port'] ?? (strtolower($parsed['scheme'] ?? '') === 'https' ? 443 : 80);
+        $addr = str_contains($ip, ':') ? '['.$ip.']' : $ip;
+
+        return $host.':'.$port.':'.$addr;
     }
 }

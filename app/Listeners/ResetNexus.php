@@ -14,6 +14,7 @@ use App\Support\PageRenderer;
 use App\Support\Permissions;
 use App\Support\RequestContext;
 use App\Support\Settings;
+use App\Support\Style;
 use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Utils\MsgAlert;
@@ -48,6 +49,7 @@ class ResetNexus
         MsgAlert::resetState();
         UserDisplay::resetState();
         Category::resetState();
+        Style::resetState();
         // T-11: Flush the per-request legacy header bag so headers/status
         // set by one request do not leak into the next under Octane.
         $this->legacyHeaderBag->flush();

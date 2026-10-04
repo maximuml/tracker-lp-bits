@@ -26,16 +26,32 @@ final class StyleRepository implements StyleRepositoryInterface
      */
     public static function all(): array
     {
-        if (self::$rows === null) {
-            $rows = [];
-            foreach (DB::table('stylesheets')->orderBy('id')->get() as $row) {
-                $row = (array) $row;
-                $rows[(int) $row['id']] = $row;
-            }
-            self::$rows = $rows;
+        return self::$rows ??= self::queryAll();
+    }
+
+    /**
+     * Fresh read bypassing the per-process memo (and updating it), for
+     * callers revalidating a stale cache.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function fetchAll(): array
+    {
+        return self::$rows = self::queryAll();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private static function queryAll(): array
+    {
+        $rows = [];
+        foreach (DB::table('stylesheets')->orderBy('id')->get() as $row) {
+            $row = (array) $row;
+            $rows[(int) $row['id']] = $row;
         }
 
-        return self::$rows;
+        return $rows;
     }
 
     /**

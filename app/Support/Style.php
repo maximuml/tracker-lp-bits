@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\StyleRepositoryInterface;
-use App\Repositories\StyleRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
@@ -36,19 +35,41 @@ final class Style
      */
     public static function cssRow(mixed $cache, int|string $cssId, int|string $defaultId): ?array
     {
+        $fromCache = false;
         if (self::$stylesheetRows === null) {
             $cached = is_object($cache) && method_exists($cache, 'get_value') ? $cache->get_value('stylesheet_content') : false;
             if ($cached !== false) {
                 self::$stylesheetRows = is_array($cached) ? $cached : [];
+                $fromCache = true;
             } else {
-                self::$stylesheetRows = StyleRepository::all();
+                self::$stylesheetRows = self::styleRepository()->fetchAll();
                 if (is_object($cache) && method_exists($cache, 'cache_value')) {
                     $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
                 }
             }
         }
 
+        // The ~26h 'stylesheet_content' blob can predate a stylesheets-table
+        // write and be missing rows — revalidate once against the DB rather
+        // than silently serving the fallback stylesheet for the whole TTL.
+        // ($fromCache implies first call per process, so this runs at most
+        // once per request.)
+        if ($fromCache && ! array_key_exists((int) $cssId, self::$stylesheetRows)) {
+            self::$stylesheetRows = self::styleRepository()->fetchAll();
+            if (is_object($cache) && method_exists($cache, 'cache_value')) {
+                $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
+            }
+        }
+
         return self::$stylesheetRows[$cssId] ?? self::$stylesheetRows[$defaultId] ?? null;
+    }
+
+    /**
+     * Clear the per-process stylesheet row memo (Octane worker reset).
+     */
+    public static function resetState(): void
+    {
+        self::$stylesheetRows = null;
     }
 
     /**

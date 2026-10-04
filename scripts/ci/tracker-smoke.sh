@@ -12,14 +12,16 @@ PHP=${2:-php}
 UA="qBittorrent/4.5.2"
 
 # shellcheck disable=SC2086
-FIXTURE=$($PHP artisan tinker --execute='
+TINKER_OUT=$($PHP artisan tinker --execute='
+config(["scout.driver" => "null"]);
 $a = App\Models\User::factory()->create();
 $b = App\Models\User::factory()->create();
 $t = App\Models\Torrent::factory()->owner($a)->create();
 echo "FIXTURE ".$a->passkey." ".$b->passkey." ".rawurlencode($t->info_hash).PHP_EOL;
-' | grep '^FIXTURE ' | tr -d '\r')
-read -r _ PASSKEY_A PASSKEY_B INFO_HASH <<<"$FIXTURE"
-[ -n "${INFO_HASH:-}" ] || { echo "FAIL: could not create fixture"; exit 1; }
+' 2>&1 | tr -d '\r') || true
+FIXTURE=$(grep '^FIXTURE ' <<<"$TINKER_OUT" || true)
+read -r _ PASSKEY_A PASSKEY_B INFO_HASH <<<"$FIXTURE" || true
+[ -n "${INFO_HASH:-}" ] || { echo "FAIL: could not create fixture:"; echo "$TINKER_OUT"; exit 1; }
 
 announce() { # passkey peer-id-suffix event
   curl -sS --max-time 10 -H "User-Agent: $UA" \

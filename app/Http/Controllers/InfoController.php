@@ -171,6 +171,11 @@ class InfoController extends LegacyController
         return $this->legacyPage($request, 'donate', false, $data);
     }
 
+    public function donatePost(Request $request): View|RedirectResponse|Response
+    {
+        return $this->donate($request);
+    }
+
     public function donated(Request $request): Response|RedirectResponse|View
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
@@ -178,24 +183,37 @@ class InfoController extends LegacyController
             return $this->legacyAbortResponse('Sorry', 'Permission denied.');
         }
 
-        $error = '';
-        if ($request->isMethod('post')) {
-            $username = trim((string) $request->input('username', ''));
-            $donated = trim((string) $request->input('donated', ''));
-            if ($username === '' || $donated === '') {
-                $error = 'Missing form data.';
-            } else {
-                $user = $this->userRepository->findByUsername($username, ['id']);
-                if (! $user) {
-                    $error = 'Unable to update account.';
-                } else {
-                    $this->userRepository->updateFields((int) $user->id, ['donated' => $donated]);
+        return $this->donatedPage($request, '');
+    }
 
-                    return redirect('/userdetails.php?id='.$user->id);
-                }
+    public function donatedPost(Request $request): Response|RedirectResponse|View
+    {
+        $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
+        if (UserDisplay::currentClass() < $sysopClass) {
+            return $this->legacyAbortResponse('Sorry', 'Permission denied.');
+        }
+
+        $error = '';
+        $username = trim((string) $request->input('username', ''));
+        $donated = trim((string) $request->input('donated', ''));
+        if ($username === '' || $donated === '') {
+            $error = 'Missing form data.';
+        } else {
+            $user = $this->userRepository->findByUsername($username, ['id']);
+            if (! $user) {
+                $error = 'Unable to update account.';
+            } else {
+                $this->userRepository->updateFields((int) $user->id, ['donated' => $donated]);
+
+                return redirect('/userdetails.php?id='.$user->id);
             }
         }
 
+        return $this->donatedPage($request, $error);
+    }
+
+    private function donatedPage(Request $request, string $error): View|RedirectResponse
+    {
         return $this->legacyPage($request, 'donated', true, [
             'error' => $error,
         ]);
@@ -214,16 +232,7 @@ class InfoController extends LegacyController
 
         $delete = (int) $request->input('delete', 0);
         if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
-            if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse('Error', 'Permission denied.');
-            }
-            $name = $this->bitbucketService->getBitbucketName($delete);
-            $ok = $this->bitbucketService->deleteBitbucket($delete, $bucketPath);
-            if (! $ok && $name !== null) {
-                return $this->legacyAbortResponse('Warning', 'Unable to unlink file: '.htmlspecialchars($name).'. You should contact an administrator about this error.', false);
-            }
-
-            return redirect($request->url());
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
         $count = $this->usercpLookupRepository->countBitbucket();
@@ -288,5 +297,29 @@ class InfoController extends LegacyController
             'pagerbottom' => $pagerbottom,
             'isModerator' => $isModerator,
         ]);
+    }
+
+    public function bitbucketlogPost(Request $request): Response|RedirectResponse|View
+    {
+        $currentClass = (int) UserDisplay::currentClass();
+
+        if ($currentClass < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {
+            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+        }
+
+        $bucketPath = public_path('bitbucket');
+
+        $delete = (int) $request->input('delete', 0);
+        if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
+            $name = $this->bitbucketService->getBitbucketName($delete);
+            $ok = $this->bitbucketService->deleteBitbucket($delete, $bucketPath);
+            if (! $ok && $name !== null) {
+                return $this->legacyAbortResponse('Warning', 'Unable to unlink file: '.htmlspecialchars($name).'. You should contact an administrator about this error.', false);
+            }
+
+            return redirect($request->url());
+        }
+
+        return $this->bitbucketlog($request);
     }
 }

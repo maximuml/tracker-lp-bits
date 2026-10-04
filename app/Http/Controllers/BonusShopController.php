@@ -137,23 +137,8 @@ JS;
             'setallnormal' => 1,
         ];
 
-        $messages = [
-            'setallfree' => 'All torrents have been set free..',
-            'setall2up' => 'All torrents have been set 2x up..',
-            'setall2up_free' => 'All torrents have been set 2x up and free..',
-            'setallhalf_down' => 'All torrents have been set half down..',
-            'setall2up_half_down' => 'All torrents have been set half down..',
-            'setallnormal' => 'All torrents have been set normal..',
-        ];
-
         if (isset($stateMap[$action])) {
-            if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse('Error', 'Permission denied.');
-            }
-            Promotion::setGlobalSpecialState($stateMap[$action]);
-            $this->legacyRedisCache?->delete_value('global_promotion_state');
-
-            return $this->legacyAbortResponse('Success', $messages[$action]);
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
         $links = [
@@ -172,5 +157,43 @@ JS;
 
         return $this->legacyAbortResponse('Select action', $message, false);
 
+    }
+
+    public function freeleechPost(Request $request): View|RedirectResponse|Response
+    {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Access denied.');
+        }
+
+        $action = trim((string) (request()->post('action') ?? request()->query('action') ?? 'main'));
+        $action = htmlspecialchars($action);
+
+        $stateMap = [
+            'setallfree' => 2,
+            'setall2up' => 3,
+            'setall2up_free' => 4,
+            'setallhalf_down' => 5,
+            'setall2up_half_down' => 6,
+            'setallnormal' => 1,
+        ];
+
+        $messages = [
+            'setallfree' => 'All torrents have been set free..',
+            'setall2up' => 'All torrents have been set 2x up..',
+            'setall2up_free' => 'All torrents have been set 2x up and free..',
+            'setallhalf_down' => 'All torrents have been set half down..',
+            'setall2up_half_down' => 'All torrents have been set half down..',
+            'setallnormal' => 'All torrents have been set normal..',
+        ];
+
+        if (isset($stateMap[$action])) {
+            Promotion::setGlobalSpecialState($stateMap[$action]);
+            $this->legacyRedisCache?->delete_value('global_promotion_state');
+
+            return $this->legacyAbortResponse('Success', $messages[$action]);
+        }
+
+        return $this->freeleech($request);
     }
 }

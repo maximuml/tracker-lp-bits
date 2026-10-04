@@ -66,32 +66,6 @@ class PollController extends LegacyController
             }
         }
 
-        if ($request->isMethod('post')) {
-            $pollid = (int) $request->input('pollid', 0);
-            $question = htmlspecialchars((string) $request->input('question', ''));
-            $returnto = htmlspecialchars((string) $request->input('returnto', ''));
-
-            $options = [];
-            for ($i = 0; $i <= 19; $i++) {
-                $options["option{$i}"] = htmlspecialchars((string) $request->input("option{$i}", ''));
-            }
-
-            if ($question === '' || $options['option0'] === '' || $options['option1'] === '') {
-                return $this->legacyAbortResponse('Error', 'Missing form data.');
-            }
-
-            $data = array_merge(['question' => $question], $options);
-            $newId = $this->pollRepository->createOrUpdate($data, $pollid > 0 ? $pollid : null);
-
-            if ($returnto === 'main') {
-                return redirect(url('/'));
-            } elseif ($pollid > 0) {
-                return redirect('/log.php?action=poll#'.$newId);
-            }
-
-            return redirect('/');
-        }
-
         $pollAge = null;
         if ($pollid <= 0) {
             $lastPoll = $this->pollRepository->lastPoll();
@@ -118,6 +92,43 @@ class PollController extends LegacyController
                 ? (__('legacy/makepoll.head_edit_poll'))
                 : (__('legacy/makepoll.head_new_poll')),
         ]);
+    }
+
+    public function makepollPost(Request $request): Response|RedirectResponse|View
+    {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
+        }
+
+        $pollid = (int) $request->input('pollid', 0);
+        $question = htmlspecialchars((string) $request->input('question', ''));
+        $returnto = htmlspecialchars((string) $request->input('returnto', ''));
+
+        $options = [];
+        for ($i = 0; $i <= 19; $i++) {
+            $options["option{$i}"] = htmlspecialchars((string) $request->input("option{$i}", ''));
+        }
+
+        if ($question === '' || $options['option0'] === '' || $options['option1'] === '') {
+            return $this->legacyAbortResponse('Error', 'Missing form data.');
+        }
+
+        $data = array_merge(['question' => $question], $options);
+        $newId = $this->pollRepository->createOrUpdate($data, $pollid > 0 ? $pollid : null);
+
+        if ($returnto === 'main') {
+            return redirect(url('/'));
+        } elseif ($pollid > 0) {
+            return redirect('/log.php?action=poll#'.$newId);
+        }
+
+        return redirect('/');
+    }
+
+    public function polloverviewPost(Request $request): View|RedirectResponse|Response
+    {
+        return $this->polloverview($request);
     }
 
     public function polloverview(Request $request): View|RedirectResponse|Response

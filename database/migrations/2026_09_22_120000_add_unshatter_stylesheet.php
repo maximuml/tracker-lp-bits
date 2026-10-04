@@ -41,5 +41,11 @@ return new class extends Migration
         // Accounts already on Unshatter fall back to Classic via
         // Style::cssRow() once the row is gone — no user table rewrite.
         DB::table('stylesheets')->where('uri', 'styles/Unshatter/')->delete();
+
+        try {
+            app(LegacyRedisCache::class)->delete_value('stylesheet_content');
+        } catch (Throwable) {
+            // non-critical: the entry expires on its own
+        }
     }
 };

@@ -72,6 +72,21 @@ final class StyleRepositoryTest extends TestCase
         $this->assertCount(1, $second);
     }
 
+    public function test_fetch_all_bypasses_and_updates_memo(): void
+    {
+        $this->insertStylesheet(1, 'styles/Cached/', 'Cached');
+        $this->repository->all();
+
+        // Insert another row after the memo was primed — fetchAll must
+        // see it (and re-prime the memo for subsequent all() calls).
+        $this->insertStylesheet(2, 'styles/Extra/', 'Extra');
+
+        $fresh = $this->repository->fetchAll();
+
+        $this->assertCount(2, $fresh);
+        $this->assertCount(2, $this->repository->all());
+    }
+
     public function test_row_returns_null_when_not_found(): void
     {
         $this->insertStylesheet(1, 'styles/One/', 'One');

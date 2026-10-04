@@ -157,6 +157,9 @@ jobs:
           done
           echo "State isolation test passed"
 
+      - name: Smoke test tracker announce/scrape
+        run: scripts/ci/tracker-smoke.sh http://127.0.0.1:8000
+
       - name: Stop Octane server
         if: always()
         run: |

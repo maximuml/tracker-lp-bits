@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Exceptions\InsufficientPermissionException;
-use App\Models\Message;
 use App\Models\User;
+use App\Repositories\MessageRepository;
 use App\Repositories\UserAccountRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -25,6 +25,7 @@ final class ModerationService
 {
     public function __construct(
         private readonly UserAccountRepository $userAccountRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -98,7 +99,7 @@ final class ModerationService
             $message['msg'] = Locale::trans('message.download_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
         $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
-            Message::add($message);
+            $this->messageRepository->add($message);
 
             return $targetUser->updateWithModComment($update, $modComment);
         });
@@ -138,7 +139,7 @@ final class ModerationService
             $message['msg'] = Locale::trans('message.upload_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
         $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
-            Message::add($message);
+            $this->messageRepository->add($message);
 
             return $targetUser->updateWithModComment($update, $modComment);
         });
@@ -178,7 +179,7 @@ final class ModerationService
             $message['msg'] = Locale::trans('message.forumpost_enable.body', ['operator' => $operatorUsername], $targetUser->locale);
         }
         $result = DB::transaction(function () use ($targetUser, $update, $modComment, $message) {
-            Message::add($message);
+            $this->messageRepository->add($message);
 
             return $targetUser->updateWithModComment($update, $modComment);
         });
@@ -236,7 +237,7 @@ final class ModerationService
         }
 
         $result = DB::transaction(function () use ($targetUser, $update, $message) {
-            Message::add($message);
+            $this->messageRepository->add($message);
             $modComment = date('Y-m-d').' - Warning updated';
 
             return $targetUser->updateWithModComment($update, $modComment);

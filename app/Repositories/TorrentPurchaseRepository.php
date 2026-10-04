@@ -171,4 +171,18 @@ class TorrentPurchaseRepository extends BaseRepository
     {
         return sprintf('%s:%s:%s', self::BUY_FAIL_CACHE_KEY_PREFIX, $userId, $torrentId);
     }
+
+    /**
+     * Id of the buy row if the user already owns the torrent — the job
+     * replays it to mark the success cache.
+     */
+    public function findBuyLogId(int $uid, int $torrentId): ?int
+    {
+        $buyLog = TorrentBuyLog::query()
+            ->where('uid', $uid)
+            ->where('torrent_id', $torrentId)
+            ->first();
+
+        return $buyLog === null ? null : (int) $buyLog->id;
+    }
 }

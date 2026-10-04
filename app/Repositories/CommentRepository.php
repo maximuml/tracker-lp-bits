@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CommentRepository
@@ -289,5 +290,23 @@ class CommentRepository
     public function deleteForOffers(array $offerIds): int
     {
         return Comment::query()->whereIn('offer', $offerIds)->delete();
+    }
+
+    /**
+     * Comment counts grouped by torrent for the batch refresh job.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @return Collection<int, array{torrent: int, c: int}>
+     */
+    public function countByTorrent(array $torrentIds): Collection
+    {
+        /** @var Collection<int, array{torrent: int, c: int}> */
+        return Comment::query()
+            ->toBase()
+            ->selectRaw('torrent, COUNT(*) AS c')
+            ->whereIn('torrent', $torrentIds)
+            ->groupBy(['torrent'])
+            ->get()
+            ->map(fn ($row) => (array) $row);
     }
 }

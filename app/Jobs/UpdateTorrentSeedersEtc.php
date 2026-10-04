@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Models\Comment;
-use App\Models\Peer;
-use App\Models\Torrent;
+use App\Repositories\CommentRepository;
+use App\Repositories\PeerRepository;
+use App\Repositories\TorrentRepository;
 use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
@@ -69,7 +69,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(PeerRepository $peerRepository, CommentRepository $commentRepository, TorrentRepository $torrentRepository)
     {
         $beginTimestamp = time();
         $logPrefix = sprintf(
@@ -97,34 +97,24 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
         }
         // 批量取，简单化
         $torrents = [];
-        $res = Peer::query()
-            ->toBase()
-            ->selectRaw('torrent, seeder, COUNT(*) AS c')
-            ->whereIn('torrent', $torrentIdArr)
-            ->groupBy(['torrent', 'seeder'])
-            ->get();
+        $res = $peerRepository->countByTorrentSeeder($torrentIdArr);
         if ($res->isEmpty()) {
             Logger::writeWithContext((string) "{$logPrefix}, no data from idStr: {$idStr}", (string) 'error', (bool) false);
 
             return;
         }
         foreach ($res as $row) {
-            if ($row->seeder == 1) {
+            if ($row['seeder'] == 1) {
                 $key = 'seeders';
             } else {
                 $key = 'leechers';
             }
-            $torrents[$row->torrent][$key] = $row->c;
+            $torrents[$row['torrent']][$key] = $row['c'];
         }
 
-        $res = Comment::query()
-            ->toBase()
-            ->selectRaw('torrent, COUNT(*) AS c')
-            ->whereIn('torrent', $torrentIdArr)
-            ->groupBy(['torrent'])
-            ->get();
+        $res = $commentRepository->countByTorrent($torrentIdArr);
         foreach ($res as $row) {
-            $torrents[$row->torrent]['comments'] = $row->c;
+            $torrents[$row['torrent']]['comments'] = $row['c'];
         }
         $rows = [];
         foreach ($torrentIdArr as $id) {
@@ -135,7 +125,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
                 'comments' => $torrents[$id]['comments'] ?? 0,
             ];
         }
-        $result = Torrent::query()->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
+        $result = $torrentRepository->upsertCounters($rows);
         if ($delIdRedisKey) {
             AppCache::forgetWithLocales($this->idRedisKey);
         }

@@ -9,7 +9,7 @@ use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Message;
+use App\Repositories\MessageRepository;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -34,6 +34,7 @@ final class OfferVoteService
         private readonly CurrentUser $currentUser,
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     public function handleVote(Request $request): ?Response
@@ -90,7 +91,7 @@ final class OfferVoteService
                 $timeoutnote = '';
             }
             $this->offerRepository->allowOffer($offerid, $finishtime);
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'subject' => Locale::trans('offer.msg_your_offer_allowed', [], $locale),
                 'receiver' => (int) $offerVotes->userid,
@@ -101,7 +102,7 @@ final class OfferVoteService
         }
         if (($against - $yeah) >= $minoffervotes && $offerVotes->allowed !== OfferAllowed::DENIED) {
             $this->offerRepository->denyOffer($offerid);
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'subject' => Locale::trans('offer.msg_offer_deleted', [], $locale),
                 'receiver' => (int) $offerVotes->userid,

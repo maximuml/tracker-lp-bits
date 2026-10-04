@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Models\Torrent;
+use App\Repositories\TorrentDetailRepository;
 use App\Support\Cache;
 use App\Support\Logger;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,10 +21,7 @@ class ClearTorrentCache implements ShouldQueue
     /**
      * Create the event listener.
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(private readonly TorrentDetailRepository $torrentDetailRepository) {}
 
     /**
      * Handle the event.
@@ -36,7 +33,7 @@ class ClearTorrentCache implements ShouldQueue
             $torrentId = (int) $event->model->getKey();
         }
         if ($torrentId > 0) {
-            $infoHash = (string) Torrent::query()->where('id', $torrentId)->value('info_hash');
+            $infoHash = (string) $this->torrentDetailRepository->valueInfoHash($torrentId);
             Cache::clearTorrent($infoHash);
             Logger::writeWithContext((string) ("success clear torrent: {$torrentId} cache with info_hash: ".rawurlencode($infoHash)), (string) 'info', (bool) false);
         } else {

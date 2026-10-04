@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Models\Snatch;
-use App\Models\User;
+use App\Repositories\SnatchRepository;
+use App\Repositories\UserStatRepository;
 use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
@@ -68,7 +68,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(SnatchRepository $snatchRepository, UserStatRepository $userStatRepository)
     {
         $beginTimestamp = time();
         $logPrefix = sprintf(
@@ -95,11 +95,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
             return;
         }
         // 批量取，简单化
-        $res = Snatch::query()
-            ->selectRaw('userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum')
-            ->whereIn('userid', $userIdArr)
-            ->groupBy('userid')
-            ->get();
+        $res = $snatchRepository->sumTimeByUser($userIdArr);
         if ($res->isEmpty()) {
             Logger::writeWithContext((string) "{$logPrefix}, no data from idStr: {$idStr}", (string) 'error', (bool) false);
 
@@ -122,7 +118,7 @@ class UpdateUserSeedingLeechingTime implements ShouldQueue
                 'seed_time_updated_at' => $nowStr,
             ];
         }
-        $result = User::query()->upsert($rows, ['id'], ['seedtime', 'leechtime', 'seed_time_updated_at']);
+        $result = $userStatRepository->upsertSeedTimes($rows);
         if ($delIdRedisKey) {
             AppCache::forgetWithLocales($this->idRedisKey);
         }

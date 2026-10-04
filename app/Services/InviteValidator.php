@@ -7,8 +7,8 @@ namespace App\Services;
 use App\Enums\InviteValid;
 use App\Exceptions\AuthenticationException;
 use App\Models\Invite;
-use App\Models\Message;
 use App\Repositories\InviteRepository;
+use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\Locale;
 
@@ -20,6 +20,7 @@ class InviteValidator
     public function __construct(
         private readonly OutboxService $outboxService,
         private readonly InviteRepository $inviteRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -74,7 +75,7 @@ class InviteValidator
             .$username
             .Locale::trans('user.msg_has_registered', [], $locale);
 
-        Message::add([
+        $this->messageRepository->add([
             'sender' => null,
             'receiver' => $inviter,
             'subject' => $subject,

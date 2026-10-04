@@ -8,9 +8,9 @@ use App\Auth\Permission;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
-use App\Models\Message;
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
+use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -37,7 +37,7 @@ final class BonusService
 
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository)
+    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository, private readonly MessageRepository $messageRepository)
     {
         $this->bonusRep = $bonusRep;
         $this->bonusCalculationRepository = $bonusCalculationRepository;
@@ -327,7 +327,7 @@ final class BonusService
         if ($message) {
             $msg .= "\n".Locale::trans('bonus.msg_personal_message_from', [], $locale).($curUser['username'] ?? '').Locale::trans('bonus.msg_colon', [], $locale).$message;
         }
-        Message::add([
+        $this->messageRepository->add([
             'sender' => null,
             'subject' => $subject,
             'added' => now(),

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Enums\UserStatus;
 use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserDetailRepository;
+use App\Repositories\UserStatRepository;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -55,7 +55,7 @@ class BulkUserMessageJob implements ShouldQueue
         $this->onQueue('default');
     }
 
-    public function handle(UserDetailRepository $userDetailRepository, MessageRepository $messageRepository): void
+    public function handle(UserDetailRepository $userDetailRepository, MessageRepository $messageRepository, UserStatRepository $userStatRepository): void
     {
         $logPrefix = sprintf(
             'BulkUserMessageJob key=%s classes=%s dryRun=%s',
@@ -78,13 +78,7 @@ class BulkUserMessageJob implements ShouldQueue
 
         while (true) {
             $offset = ($page - 1) * $size;
-            $rows = User::query()
-                ->whereIn('class', $this->classIds)
-                ->where('enabled', true)
-                ->where('status', UserStatus::CONFIRMED->value)
-                ->offset($offset)
-                ->limit($size)
-                ->get(['id']);
+            $rows = $userStatRepository->listActiveUserIdsByClasses($this->classIds, $offset, $size);
 
             if ($rows->isEmpty()) {
                 break;
@@ -95,7 +89,7 @@ class BulkUserMessageJob implements ShouldQueue
                 foreach ($rows as $dat) {
                     $msgRecords[] = [
                         'sender' => $this->senderId,
-                        'receiver' => $dat->id,
+                        'receiver' => $dat,
                         'added' => $added,
                         'subject' => $this->subject,
                         'msg' => $this->body,

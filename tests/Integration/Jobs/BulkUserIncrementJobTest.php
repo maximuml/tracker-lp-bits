@@ -7,6 +7,7 @@ namespace Tests\Integration\Jobs;
 use App\Jobs\BulkUserIncrementJob;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserDetailRepository;
+use App\Repositories\UserStatRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -76,7 +77,7 @@ final class BulkUserIncrementJobTest extends TestCase
             message: ['sender' => null, 'subject' => '', 'msg' => ''],
             dryRun: false,
         );
-        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class), app(UserStatRepository::class));
 
         $this->assertSame(1500, (int) DB::table('users')->where('id', $user1)->value('uploaded'));
         $this->assertSame(2500, (int) DB::table('users')->where('id', $user2)->value('uploaded'));
@@ -97,7 +98,7 @@ final class BulkUserIncrementJobTest extends TestCase
             message: ['sender' => $actor, 'subject' => 'Bonus added', 'msg' => 'You got bonus'],
             dryRun: false,
         );
-        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class), app(UserStatRepository::class));
 
         $this->assertSame(150, (int) DB::table('users')->where('id', $user)->value('seedbonus'));
         $this->assertSame(1, DB::table('messages')->where('receiver', $user)->count());
@@ -120,7 +121,7 @@ final class BulkUserIncrementJobTest extends TestCase
             message: ['sender' => $actor, 'subject' => 'Test', 'msg' => 'Dry run'],
             dryRun: true,
         );
-        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class), app(UserStatRepository::class));
 
         $this->assertSame(1000, (int) DB::table('users')->where('id', $user)->value('uploaded'));
         $this->assertSame(0, DB::table('messages')->where('receiver', $user)->count());
@@ -140,7 +141,7 @@ final class BulkUserIncrementJobTest extends TestCase
             message: ['sender' => null, 'subject' => '', 'msg' => ''],
             dryRun: true,
         );
-        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class), app(UserStatRepository::class));
 
         $this->assertSame(0, DB::table('user_modify_logs')->where('user_id', $actor)->count());
     }
@@ -159,7 +160,7 @@ final class BulkUserIncrementJobTest extends TestCase
             message: ['sender' => null, 'subject' => '', 'msg' => ''],
             dryRun: false,
         );
-        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class), app(UserStatRepository::class));
 
         $this->assertSame(1, DB::table('user_modify_logs')->where('user_id', $actor)->count());
         $log = DB::table('user_modify_logs')->where('user_id', $actor)->first();
@@ -182,10 +183,10 @@ final class BulkUserIncrementJobTest extends TestCase
             dryRun: false,
         );
 
-        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class), app(UserStatRepository::class));
         $this->assertSame(1500, (int) DB::table('users')->where('id', $user)->value('uploaded'));
 
-        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class), app(UserStatRepository::class));
         $this->assertSame(1500, (int) DB::table('users')->where('id', $user)->value('uploaded'));
     }
 
@@ -205,7 +206,7 @@ final class BulkUserIncrementJobTest extends TestCase
             message: ['sender' => null, 'subject' => '', 'msg' => ''],
             dryRun: false,
         );
-        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class), app(UserStatRepository::class));
 
         $this->assertSame(1100, (int) DB::table('users')->where('id', $enabled)->value('uploaded'));
         $this->assertSame(2000, (int) DB::table('users')->where('id', $disabled)->value('uploaded'));

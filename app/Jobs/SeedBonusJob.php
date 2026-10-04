@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\User;
+use App\Repositories\UserStatRepository;
 use App\Support\Bonus;
 use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
@@ -75,7 +76,7 @@ class SeedBonusJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle()
+    public function handle(UserStatRepository $userStatRepository)
     {
         $beginTimestamp = time();
         $logPrefix = sprintf(
@@ -101,13 +102,7 @@ class SeedBonusJob implements ShouldQueue
             return;
         }
         $idArr = array_filter(array_map('intval', explode(',', $idStr)), static fn (int $id) => $id > 0);
-        $results = User::query()
-            ->toBase()
-            ->whereIn('id', $idArr)
-            ->select(User::$commonFields)
-            ->get()
-            ->map(fn ($row) => (array) $row)
-            ->all();
+        $results = $userStatRepository->listStatRowsByIds($idArr, User::$commonFields)->all();
         if (empty($results)) {
             Logger::writeWithContext("$logPrefix, no data from idStr: $idStr", 'error');
 
@@ -173,7 +168,7 @@ class SeedBonusJob implements ShouldQueue
                 Logger::writeWithContext((string) "logFile: {$logFile} is not writeable!", (string) 'error', (bool) false);
             }
         }
-        $result = User::query()->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
+        $result = $userStatRepository->upsertSeedBonus($rows);
         if ($delIdRedisKey) {
             AppCache::forgetWithLocales($this->idRedisKey);
         }

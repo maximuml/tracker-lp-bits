@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Support\Torrent;
 
-use App\Models\Peer;
-use App\Models\Snatch;
+use App\Repositories\PeerRepository;
+use App\Repositories\SnatchRepository;
 
 class TorrentStatus
 {
+    public function __construct(
+        private readonly PeerRepository $peerRepository,
+        private readonly SnatchRepository $snatchRepository,
+    ) {}
+
     /**
      * get torrent seeding or leeching status, download progress of someone
      *
@@ -21,20 +26,10 @@ class TorrentStatus
             return [];
         }
         // seeding or leeching, from peers
-        $peerList = Peer::query()
-            ->where('userid', $uid)
-            ->whereIn('torrent', $torrentIdArr)
-            ->pluck('to_go', 'torrent')
-            ->toArray();
+        $peerList = $this->peerRepository->pluckToGoByUserTorrents($uid, $torrentIdArr);
         // download progress, from snatched
         $snatchedList = [];
-        $res = Snatch::query()
-            ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
-            ->select('snatched.to_go', 'snatched.torrentid', 'torrents.size')
-            ->where('snatched.userid', $uid)
-            ->whereIn('snatched.torrentid', $torrentIdArr)
-            ->toBase()
-            ->get();
+        $res = $this->snatchRepository->listToGoWithSize($uid, $torrentIdArr);
         foreach ($res as $row) {
             $row = (array) $row;
             $id = $row['torrentid'];

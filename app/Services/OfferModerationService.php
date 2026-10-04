@@ -8,7 +8,7 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Message;
+use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Input;
@@ -32,6 +32,7 @@ final class OfferModerationService
         private readonly CurrentUser $currentUser,
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -93,7 +94,7 @@ final class OfferModerationService
         $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
         $allowedtime = date('Y-m-d H:i:s');
 
-        Message::add([
+        $this->messageRepository->add([
             'sender' => null,
             'receiver' => (int) ($arr['userid'] ?? 0),
             'msg' => $msg,
@@ -167,7 +168,7 @@ final class OfferModerationService
             return redirect("/offers.php?id={$offid}&off_details=1");
         }
 
-        Message::add([
+        $this->messageRepository->add([
             'sender' => null,
             'subject' => $subject,
             'receiver' => (int) ($arr['userid'] ?? 0),

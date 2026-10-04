@@ -10,9 +10,9 @@ use App\Enums\UserStatus;
 use App\Events\UserCreated;
 use App\Exceptions\AuthenticationException;
 use App\Models\Invite;
-use App\Models\Message;
 use App\Models\MessageTemplate;
 use App\Models\User;
+use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Locale;
@@ -35,6 +35,7 @@ class RegistrationService
         private InviteValidator $inviteValidator,
         private PasswordSetup $passwordSetup,
         private OutboxService $outboxService,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -231,7 +232,7 @@ class RegistrationService
                 .sprintf(__('legacy/takesignup.msg_you_are_a_member'), SiteConfig::current()->basic->siteName(), SiteConfig::current()->basic->siteName());
         }
 
-        Message::add([
+        $this->messageRepository->add([
             'sender' => null,
             'receiver' => $user->id,
             'subject' => $subject,

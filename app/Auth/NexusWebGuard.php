@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use App\Services\WebAuthService;
 use App\Support\AuthCookie;
@@ -36,6 +37,7 @@ class NexusWebGuard implements StatefulGuard
         UserProvider $provider,
         private readonly WebAuthService $webAuthService,
         private readonly CurrentUser $currentUser,
+        private readonly UserRepositoryInterface $userRepository,
     ) {
         $this->request = $request;
         $this->provider = $provider;
@@ -106,7 +108,7 @@ class NexusWebGuard implements StatefulGuard
             return false;
         }
 
-        $user = User::query()->where('username', $username)->first();
+        $user = $this->userRepository->findByUsername($username);
 
         if (! $user instanceof User) {
             return false;
@@ -139,7 +141,7 @@ class NexusWebGuard implements StatefulGuard
             return false;
         }
 
-        $user = User::query()->where('username', $username)->first();
+        $user = $this->userRepository->findByUsername($username);
 
         if (! $user instanceof User) {
             return false;
@@ -176,7 +178,7 @@ class NexusWebGuard implements StatefulGuard
 
     public function loginUsingId($id, $remember = false): Authenticatable|false
     {
-        $user = User::find($id);
+        $user = $this->userRepository->findById($id);
 
         if (! $user instanceof User) {
             return false;
@@ -189,7 +191,7 @@ class NexusWebGuard implements StatefulGuard
 
     public function onceUsingId($id): Authenticatable|false
     {
-        $user = User::find($id);
+        $user = $this->userRepository->findById($id);
 
         if (! $user instanceof User) {
             return false;

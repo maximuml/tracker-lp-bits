@@ -215,4 +215,24 @@ class UserMetaRepository extends BaseRepository
     {
         Cache::clearUser($user->id, (string) $user->passkey);
     }
+
+    /**
+     * Uids having an active (non-expired) meta row for one key — bulk
+     * variant used by UserDisplay::preload for the rainbow flag.
+     *
+     * @param  array<int, int>  $uids
+     * @return array<int, int>
+     */
+    public function pluckActiveMetaUids(array $uids, string $metaKey): array
+    {
+        return UserMeta::query()
+            ->whereIn('uid', $uids)
+            ->where('meta_key', $metaKey)
+            ->where('status', 0)
+            ->where(function ($query) {
+                $query->whereNull('deadline')->orWhere('deadline', '>=', now());
+            })
+            ->pluck('uid')
+            ->toArray();
+    }
 }

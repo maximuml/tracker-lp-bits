@@ -35,8 +35,12 @@ final class ActorContextRatchetTest extends TestCase
      * Counts are line-based (grep-style): a file line containing at
      * least one match counts as 1, regardless of how many matches
      * appear on that line.
+     *
+     * Bumps: +2 for static-only funnels `UserDisplay::userMetaRepository()`
+     * and `Promotion::torrentDetailRepository()` — the `self::xRepo()`
+     * accessor convention (one `app()` per class, like `X::instance()`).
      */
-    private const BASELINE_APP_CALLS = 68;
+    private const BASELINE_APP_CALLS = 70;
 
     private const BASELINE_GLOBALS_REFS = 2;
 

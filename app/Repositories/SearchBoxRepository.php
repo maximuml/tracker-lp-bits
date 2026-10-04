@@ -274,4 +274,15 @@ class SearchBoxRepository extends BaseRepository implements SearchBoxRepositoryI
 
         return $categories;
     }
+
+    public function findById(int $id): ?SearchBox
+    {
+        /** @var SearchBox|null */
+        return SearchBox::query()->find($id);
+    }
+
+    public function findOrFailById(int $id): SearchBox
+    {
+        return SearchBox::query()->findOrFail($id);
+    }
 }

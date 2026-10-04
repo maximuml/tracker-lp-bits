@@ -58,6 +58,7 @@ use App\Repositories\NotificationFeedRepository;
 use App\Repositories\OfferCommentRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
+use App\Repositories\OutboxEventRepository;
 use App\Repositories\PageLayoutRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\RuleRepository;
@@ -206,7 +207,7 @@ class AppServiceProvider extends ServiceProvider
                 new Collectors\TrackerMetricsCollector($fmt),
                 new Collectors\SearchMetricsCollector($fmt),
                 new Collectors\SseMetricsCollector($fmt),
-                new Collectors\OutboxMetricsCollector($fmt),
+                new Collectors\OutboxMetricsCollector($fmt, $app->make(OutboxEventRepository::class)),
                 new Collectors\AppInfoCollector($fmt),
             ]);
         });

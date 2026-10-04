@@ -8,11 +8,9 @@ use App\Models\Bookmark;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\TorrentDownloadRepository;
-use App\Repositories\TorrentModerationRepository;
-use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
-use App\Services\TorrentPromotionService;
 use App\Services\TorrentStatsService;
+use App\Support\Torrent\TorrentStatus;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -39,10 +37,7 @@ final class TorrentRepositoryTest extends TestCase
         $this->statsService = app(TorrentStatsService::class);
         $this->repository = new TorrentRepository(
             app(TorrentDownloadRepository::class),
-            app(TorrentPurchaseRepository::class),
-            app(TorrentModerationRepository::class),
-            $this->statsService,
-            app(TorrentPromotionService::class),
+            app(TorrentStatus::class),
         );
     }
 

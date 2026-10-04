@@ -52,4 +52,39 @@ class PeerRepository
             ->toBase()
             ->first();
     }
+
+    /**
+     * Peer counts grouped by torrent + seeder flag for the batch
+     * seeders/leechers refresh job.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @return \Illuminate\Support\Collection<int, array{torrent: int, seeder: int, c: int}>
+     */
+    public function countByTorrentSeeder(array $torrentIds): \Illuminate\Support\Collection
+    {
+        /** @var \Illuminate\Support\Collection<int, array{torrent: int, seeder: int, c: int}> */
+        return Peer::query()
+            ->toBase()
+            ->selectRaw('torrent, seeder, COUNT(*) AS c')
+            ->whereIn('torrent', $torrentIds)
+            ->groupBy(['torrent', 'seeder'])
+            ->get()
+            ->map(fn ($row) => (array) $row);
+    }
+
+    /**
+     * Remaining-progress map (`to_go` keyed by torrent id) for one user's
+     * active peers.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @return array<int, mixed>
+     */
+    public function pluckToGoByUserTorrents(int $uid, array $torrentIds): array
+    {
+        return Peer::query()
+            ->where('userid', $uid)
+            ->whereIn('torrent', $torrentIds)
+            ->pluck('to_go', 'torrent')
+            ->toArray();
+    }
 }

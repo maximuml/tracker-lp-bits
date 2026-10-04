@@ -10,6 +10,7 @@ use App\Models\File;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
+use App\Models\TorrentState;
 use App\Models\TorrentTag;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -267,5 +268,23 @@ class TorrentDetailRepository
     public function findArrayById(int $id): ?array
     {
         return Torrent::query()->find($id)?->toArray();
+    }
+
+    /**
+     * Raw info_hash column for cache invalidation on torrent changes.
+     */
+    public function valueInfoHash(int $id): ?string
+    {
+        $value = Torrent::query()->where('id', $id)->value('info_hash');
+
+        return $value === null ? null : (string) $value;
+    }
+
+    /**
+     * Set-all global promotion state (`torrents_state.global_sp_state`).
+     */
+    public function updateGlobalSpState(int $state): int
+    {
+        return TorrentState::query()->update(['global_sp_state' => $state]);
     }
 }

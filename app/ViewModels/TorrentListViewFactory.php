@@ -50,6 +50,7 @@ final class TorrentListViewFactory
         private readonly TorrentModerationRepository $moderationRep,
         private readonly TorrentStatsService $statsService,
         private readonly TagRepositoryInterface $tagRep,
+        private readonly TorrentStatus $torrentStatus,
     ) {}
 
     /**
@@ -66,7 +67,6 @@ final class TorrentListViewFactory
         $waitsystem = $config->main->waitSystem(false) ? 'yes' : 'no';
         $enableTooltip = $config->tweak->enableTooltip(false);
 
-        $torrent = new TorrentStatus;
         $torrentIdArr = $ownerIdArr = [];
         foreach ($rows as $row) {
             $torrentIdArr[] = $row['id'];
@@ -74,7 +74,7 @@ final class TorrentListViewFactory
         }
         UserDisplay::preload($ownerIdArr);
 
-        $seedingStatus = $torrent->listLeechingSeedingStatus($user['id'], $torrentIdArr);
+        $seedingStatus = $this->torrentStatus->listLeechingSeedingStatus($user['id'], $torrentIdArr);
         $tagResult = $this->statsService->getTorrentTagsGrouped($torrentIdArr);
 
         $showCover = false;

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Console\Commands\Users;
 
 use App\Models\User;
+use App\Repositories\UserStatRepository;
 use App\Support\PasswordHasher;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\LazyCollection;
 use Symfony\Component\Console\Helper\Table;
 
 /**
@@ -31,28 +32,13 @@ final class LegacyPasswordReportCommand extends Command
     /** @var string */
     protected $description = 'Report users with legacy password hashes (md5 or sha256)';
 
-    public function handle(): int
+    public function handle(UserStatRepository $userStatRepository): int
     {
-        $query = User::query()
-            ->select(['id', 'username', 'passhash_algo', 'last_login', 'class'])
-            ->whereIn('passhash_algo', [PasswordHasher::ALGO_MD5, PasswordHasher::ALGO_SHA256])
-            ->orWhereNull('passhash_algo');
+        $algo = $this->option('algo') !== null ? (string) $this->option('algo') : null;
+        $days = $this->option('days-since-login') !== null ? (int) $this->option('days-since-login') : null;
 
-        if ($this->option('algo') !== null) {
-            $algo = (string) $this->option('algo');
-            $query->where('passhash_algo', $algo);
-        }
-
-        if ($this->option('days-since-login') !== null) {
-            $days = (int) $this->option('days-since-login');
-            $query->where(function ($q) use ($days): void {
-                $q->whereNull('last_login')
-                    ->orWhere('last_login', '<', now()->subDays($days));
-            });
-        }
-
-        /** @var Collection<int, User> $users */
-        $users = $query->orderBy('passhash_algo')->orderBy('id')->cursor();
+        /** @var LazyCollection<int, User> $users */
+        $users = $userStatRepository->cursorLegacyHashUsers($algo, $days);
 
         $byAlgo = [
             PasswordHasher::ALGO_MD5 => 0,

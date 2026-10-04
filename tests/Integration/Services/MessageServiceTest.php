@@ -63,6 +63,7 @@ final class MessageServiceTest extends TestCase
             app(MessageMailboxService::class),
             new MessageLookupRepository,
             new UserAccountRepository,
+            new MessageRepository,
         );
     }
 
@@ -140,6 +141,7 @@ final class MessageServiceTest extends TestCase
             ),
             new MessageLookupRepository,
             new UserAccountRepository,
+            new MessageRepository,
         );
 
         return $repo;
@@ -186,6 +188,7 @@ final class MessageServiceTest extends TestCase
             app(MessageMailboxService::class),
             new MessageLookupRepository,
             new UserAccountRepository,
+            new MessageRepository,
         );
 
         $this->assertInstanceOf(MessageService::class, $service);

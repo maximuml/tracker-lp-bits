@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\UserStatus;
-use App\Models\Message;
 use App\Models\User;
-use App\Models\UserModifyLog;
+use App\Repositories\MessageRepository;
+use App\Repositories\UserDetailRepository;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -55,7 +55,7 @@ class BulkUserMessageJob implements ShouldQueue
         $this->onQueue('default');
     }
 
-    public function handle(): void
+    public function handle(UserDetailRepository $userDetailRepository, MessageRepository $messageRepository): void
     {
         $logPrefix = sprintf(
             'BulkUserMessageJob key=%s classes=%s dryRun=%s',
@@ -101,7 +101,7 @@ class BulkUserMessageJob implements ShouldQueue
                         'msg' => $this->body,
                     ];
                 }
-                Message::query()->insert($msgRecords);
+                $messageRepository->insertMessages($msgRecords);
                 $messagesSent += count($msgRecords);
             }
 
@@ -109,7 +109,7 @@ class BulkUserMessageJob implements ShouldQueue
         }
 
         if (! $this->dryRun && $this->actorId !== null) {
-            UserModifyLog::query()->insert([
+            $userDetailRepository->insertUserModifyLogs([[
                 'user_id' => $this->actorId,
                 'content' => sprintf(
                     'Bulk staff message to classes [%s], %d recipients (idempotency=%s).',
@@ -119,7 +119,7 @@ class BulkUserMessageJob implements ShouldQueue
                 ),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ]]);
         }
 
         $this->markProcessed();

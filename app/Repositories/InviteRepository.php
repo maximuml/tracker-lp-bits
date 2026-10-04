@@ -153,7 +153,7 @@ class InviteRepository
     }
 
     /**
-     * @param  array<string, mixed>  $rows
+     * @param  array<int, array<string, mixed>>  $rows
      */
     public function insertInvites(array $rows): bool
     {

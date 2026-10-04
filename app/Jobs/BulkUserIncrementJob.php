@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\UserStatus;
-use App\Models\Message;
 use App\Models\User;
-use App\Models\UserModifyLog;
+use App\Repositories\MessageRepository;
+use App\Repositories\UserDetailRepository;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -56,7 +56,7 @@ class BulkUserIncrementJob implements ShouldQueue
         $this->onQueue('default');
     }
 
-    public function handle(): void
+    public function handle(UserDetailRepository $userDetailRepository, MessageRepository $messageRepository): void
     {
         $logPrefix = sprintf(
             'BulkUserIncrementJob key=%s field=%s amount=%d classes=%s dryRun=%s',
@@ -101,7 +101,7 @@ class BulkUserIncrementJob implements ShouldQueue
             }
 
             if (! $this->dryRun) {
-                User::query()->whereIn('id', $idArr)->increment($this->field, (int) $this->amount);
+                $userDetailRepository->incrementFieldForIds($idArr, $this->field, (int) $this->amount);
 
                 if ($this->message['msg'] !== '') {
                     $msgRows = [];
@@ -114,7 +114,7 @@ class BulkUserIncrementJob implements ShouldQueue
                             'msg' => $this->message['msg'],
                         ];
                     }
-                    Message::query()->insert($msgRows);
+                    $messageRepository->insertMessages($msgRows);
                     $messagesSent += count($msgRows);
                 }
             }
@@ -125,7 +125,7 @@ class BulkUserIncrementJob implements ShouldQueue
 
         // Audit trail.
         if (! $this->dryRun && $this->actorId !== null) {
-            UserModifyLog::query()->insert([
+            $userDetailRepository->insertUserModifyLogs([[
                 'user_id' => $this->actorId,
                 'content' => sprintf(
                     'Bulk increment %s by %d for classes [%s] affecting %d users (idempotency=%s).',
@@ -137,7 +137,7 @@ class BulkUserIncrementJob implements ShouldQueue
                 ),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ]]);
         }
 
         $this->markProcessed();

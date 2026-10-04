@@ -271,7 +271,7 @@ class SystemBulkController extends LegacyController
                         'time_invited' => now()->toDateTimeString(),
                     ] + $update;
                     unset($insert['valid']); // already included
-                    $this->inviteRepository->insertInvites($insert);
+                    $this->inviteRepository->insertInvites([$insert]);
                     $this->inviteRepository->decrementInvites($currentUserId);
                 }
             }

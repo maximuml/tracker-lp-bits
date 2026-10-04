@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Integration\Jobs;
 
 use App\Jobs\BulkUserMessageJob;
+use App\Repositories\MessageRepository;
+use App\Repositories\UserDetailRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -74,7 +76,7 @@ final class BulkUserMessageJobTest extends TestCase
             idempotencyKey: 'msg-key-1',
             dryRun: false,
         );
-        $job->handle();
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
 
         $this->assertSame(1, DB::table('messages')->where('receiver', $user1)->count());
         $this->assertSame(1, DB::table('messages')->where('receiver', $user2)->count());
@@ -100,7 +102,7 @@ final class BulkUserMessageJobTest extends TestCase
             idempotencyKey: 'msg-key-dry',
             dryRun: true,
         );
-        $job->handle();
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
 
         $this->assertSame(0, DB::table('messages')->where('receiver', $user)->count());
     }
@@ -119,7 +121,7 @@ final class BulkUserMessageJobTest extends TestCase
             idempotencyKey: 'msg-key-dry-audit',
             dryRun: true,
         );
-        $job->handle();
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
 
         $this->assertSame(0, DB::table('user_modify_logs')->where('user_id', $actor)->count());
     }
@@ -138,7 +140,7 @@ final class BulkUserMessageJobTest extends TestCase
             idempotencyKey: 'msg-key-audit',
             dryRun: false,
         );
-        $job->handle();
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
 
         $this->assertSame(1, DB::table('user_modify_logs')->where('user_id', $actor)->count());
         $log = DB::table('user_modify_logs')->where('user_id', $actor)->first();
@@ -161,10 +163,10 @@ final class BulkUserMessageJobTest extends TestCase
             dryRun: false,
         );
 
-        $job->handle();
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
         $this->assertSame(1, DB::table('messages')->where('receiver', $user)->count());
 
-        $job->handle();
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
         $this->assertSame(1, DB::table('messages')->where('receiver', $user)->count());
     }
 
@@ -184,7 +186,7 @@ final class BulkUserMessageJobTest extends TestCase
             idempotencyKey: 'msg-key-filter',
             dryRun: false,
         );
-        $job->handle();
+        $job->handle(app(UserDetailRepository::class), app(MessageRepository::class));
 
         $this->assertSame(1, DB::table('messages')->where('receiver', $enabled)->count());
         $this->assertSame(0, DB::table('messages')->where('receiver', $disabled)->count());

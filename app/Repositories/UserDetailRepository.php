@@ -172,6 +172,17 @@ class UserDetailRepository
     }
 
     /**
+     * Bulk-increment a numeric column across users (e.g. staff bulk
+     * bonus/uploaded grants).
+     *
+     * @param  array<int, int>  $ids
+     */
+    public function incrementFieldForIds(array $ids, string $field, int $amount): int
+    {
+        return User::query()->whereIn('id', $ids)->increment($field, $amount);
+    }
+
+    /**
      * @param  list<string>  $columns
      */
     public function findByUsername(string $username, array $columns = ['*']): ?User

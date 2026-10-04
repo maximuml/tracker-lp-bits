@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Contracts\Repositories\ToolRepositoryInterface;
-use App\Models\Invite;
+use App\Repositories\InviteRepository;
 use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Carbon\Carbon;
@@ -50,7 +50,7 @@ class GenerateTemporaryInvite implements ShouldQueue
      *
      * @return void
      */
-    public function handle(ToolRepositoryInterface $toolRep)
+    public function handle(ToolRepositoryInterface $toolRep, InviteRepository $inviteRepository)
     {
         $beginTimestamp = microtime(true);
         $idStr = Cache::get($this->idRedisKey);
@@ -81,7 +81,7 @@ class GenerateTemporaryInvite implements ShouldQueue
                     ];
                 }
                 if (! empty($data)) {
-                    Invite::query()->insert($data);
+                    $inviteRepository->insertInvites($data);
                 }
                 Logger::writeWithContext((string) "{$logPrefix}, success add {$this->count} temporary invite ({$this->days} days) to {$uid}", (string) 'info', (bool) false);
             } catch (\Exception $exception) {

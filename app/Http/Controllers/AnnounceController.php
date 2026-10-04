@@ -52,7 +52,7 @@ class AnnounceController extends Controller
     {
         $logDict = $dict;
         unset($logDict['peers'], $logDict['peers6']);
-        Logger::writeWithContext((string) Json::encode($logDict), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) Json::encode($logDict), self::logLevel($dict), false);
 
         return response(
             Bencode::encode($dict),
@@ -62,5 +62,16 @@ class AnnounceController extends Controller
                 'Pragma' => 'no-cache',
             ]
         );
+    }
+
+    /**
+     * Successful responses are per-request noise on a busy tracker; only
+     * failures and warnings are worth an info line.
+     *
+     * @param  array<string, mixed>  $dict
+     */
+    private static function logLevel(array $dict): string
+    {
+        return isset($dict['failure reason']) || isset($dict['warning message']) ? 'info' : 'debug';
     }
 }

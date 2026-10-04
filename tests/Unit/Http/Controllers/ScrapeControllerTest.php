@@ -10,6 +10,7 @@ use App\Http\Controllers\ScrapeController;
 use App\Services\ScrapeService;
 use Illuminate\Http\Request;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Rhilip\Bencode\Bencode;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -102,5 +103,24 @@ final class ScrapeControllerTest extends TestCase
         $response = $controller->scrape($request);
 
         $this->assertSame('no-cache', $response->headers->get('Pragma'));
+    }
+
+    /** @return array<string, array{array<string, mixed>, string}> */
+    public static function logLevelProvider(): array
+    {
+        return [
+            'success' => [['interval' => 1800, 'complete' => 1], 'debug'],
+            'failure' => [['failure reason' => 'Invalid passkey'], 'info'],
+            'warning' => [['interval' => 7200, 'warning message' => 'slow down'], 'info'],
+        ];
+    }
+
+    /** @param array<string, mixed> $dict */
+    #[DataProvider('logLevelProvider')]
+    public function test_response_log_level(array $dict, string $expected): void
+    {
+        $method = new \ReflectionMethod(ScrapeController::class, 'logLevel');
+
+        $this->assertSame($expected, $method->invoke(null, $dict));
     }
 }

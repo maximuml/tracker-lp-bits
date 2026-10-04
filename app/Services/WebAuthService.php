@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
+use App\Models\LoginAttempt;
 use App\Models\User;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\AuthCookie;
@@ -47,7 +48,7 @@ class WebAuthService
 
     public function remainingAttempts(string $ip): int
     {
-        $total = (int) DB::table('loginattempts')
+        $total = (int) LoginAttempt::query()
             ->where('ip', $ip)
             ->sum('attempts');
 
@@ -56,12 +57,12 @@ class WebAuthService
 
     public function assertNotBanned(string $ip): void
     {
-        $total = (int) DB::table('loginattempts')
+        $total = (int) LoginAttempt::query()
             ->where('ip', $ip)
             ->sum('attempts');
 
         if ($total >= self::getMaxLoginAttempts()) {
-            DB::table('loginattempts')
+            LoginAttempt::query()
                 ->where('ip', $ip)
                 ->update(['banned' => true]);
 
@@ -247,16 +248,16 @@ class WebAuthService
 
     public function recordFailedAttempt(string $ip): void
     {
-        $count = (int) DB::table('loginattempts')->where('ip', $ip)->count();
+        $count = (int) LoginAttempt::query()->where('ip', $ip)->count();
 
         if ($count === 0) {
-            DB::table('loginattempts')->insert([
+            LoginAttempt::query()->insert([
                 'ip' => $ip,
                 'added' => now()->toDateTimeString(),
                 'attempts' => 1,
             ]);
         } else {
-            DB::table('loginattempts')
+            LoginAttempt::query()
                 ->where('ip', $ip)
                 ->increment('attempts');
         }

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\ToolCleanupRepository;
 use App\Support\Database;
 use App\Support\Logger;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class ToolCleanupService
 {
+    public function __construct(private readonly ToolCleanupRepository $repository) {}
+
     /** @return  mixed */
     public function removeDuplicateSnatch()
     {
@@ -23,12 +25,7 @@ class ToolCleanupService
         $hitAndRunTableExists = Schema::hasTable($hitAndRunTable);
         $idsField = Database::groupConcatField('id');
         while (true) {
-            $snatchRes = DB::table('snatched')
-                ->select('userid', 'torrentid', DB::raw("$idsField as ids")) // @phpstan-ignore argument.type
-                ->groupBy('userid', 'torrentid')
-                ->havingRaw('count(*) > 1')
-                ->limit($size)
-                ->get();
+            $snatchRes = $this->repository->listDuplicateSnatchGroups($size, $idsField);
             if ($snatchRes->isEmpty()) {
                 break;
             }
@@ -49,29 +46,17 @@ class ToolCleanupService
                 $pairUpdates[] = ['torrent_id' => (int) $torrentId, 'uid' => (int) $userId, 'snatched_id' => (int) $remainId];
             }
             if (! empty($allDeleteIds)) {
-                DB::table('snatched')->whereIn('id', $allDeleteIds)->delete();
+                $this->repository->deleteSnatchedByIds($allDeleteIds);
             }
             if (! empty($pairUpdates)) {
-                $caseParts = [];
-                $whereParts = [];
-                foreach ($pairUpdates as $pair) {
-                    $tid = $pair['torrent_id'];
-                    $uid = $pair['uid'];
-                    $rid = $pair['snatched_id'];
-                    $caseParts[] = "WHEN torrent_id = {$tid} AND uid = {$uid} THEN {$rid}";
-                    $whereParts[] = "(torrent_id = {$tid} AND uid = {$uid})";
-                }
-                $caseSql = 'CASE '.implode(' ', $caseParts).' END';
-                $whereSql = implode(' OR ', $whereParts);
-                $caseExpr = DB::raw($caseSql); // @phpstan-ignore argument.type
                 if ($claimTableExists) {
-                    DB::table($claimTable)->whereRaw($whereSql)->update(['snatched_id' => $caseExpr]); // @phpstan-ignore argument.type
+                    $this->repository->updateSnatchedIdReferences($claimTable, $pairUpdates);
                 }
                 if ($hitAndRunTableExists) {
-                    DB::table($hitAndRunTable)->whereRaw($whereSql)->update(['snatched_id' => $caseExpr]); // @phpstan-ignore argument.type
+                    $this->repository->updateSnatchedIdReferences($hitAndRunTable, $pairUpdates);
                 }
                 if ($stickyPromotionExists) {
-                    DB::table($stickyPromotionParticipatorsTable)->whereRaw($whereSql)->update(['snatched_id' => $caseExpr]); // @phpstan-ignore argument.type
+                    $this->repository->updateSnatchedIdReferences($stickyPromotionParticipatorsTable, $pairUpdates);
                 }
             }
         }
@@ -83,12 +68,7 @@ class ToolCleanupService
         $size = 2000;
         $idsField = Database::groupConcatField('id');
         while (true) {
-            $results = DB::table('peers')
-                ->select('torrent', 'userid', DB::raw("$idsField as ids")) // @phpstan-ignore argument.type
-                ->groupBy('torrent', 'peer_id', 'userid')
-                ->havingRaw('count(*) > 1')
-                ->limit($size)
-                ->get();
+            $results = $this->repository->listDuplicatePeerGroups($size, $idsField);
             if ($results->isEmpty()) {
                 Logger::writeWithContext((string) '[DELETE_DUPLICATED_PEERS], no data', (string) 'info', (bool) false);
                 break;
@@ -108,7 +88,7 @@ class ToolCleanupService
                 }
             }
             if (! empty($allDeleteIds)) {
-                DB::table('peers')->whereIn('id', $allDeleteIds)->delete();
+                $this->repository->deletePeersByIds($allDeleteIds);
             }
         }
     }

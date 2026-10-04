@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Repositories\LocationRepository;
 use App\Services\LocationService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,7 @@ final class LocationServiceTest extends TestCase
         DB::table('locations')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new LocationService;
+        $this->service = new LocationService(new LocationRepository);
     }
 
     /** @return array<string, string> */

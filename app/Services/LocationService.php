@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\LocationRepository;
 use App\Support\Network;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Handles IP location CRUD mutations.
@@ -16,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  */
 final class LocationService
 {
+    public function __construct(private readonly LocationRepository $locationRepository) {}
+
     /**
      * @param  array<string, string>  $data
      */
@@ -31,18 +32,7 @@ final class LocationService
             return false;
         }
 
-        DB::table('locations')->insert([
-            'name' => (string) ($data['name'] ?? ''),
-            'flagpic' => (string) ($data['flagpic'] ?? ''),
-            'location_main' => (string) ($data['location_main'] ?? ''),
-            'location_sub' => (string) ($data['location_sub'] ?? ''),
-            'start_ip' => $startIp,
-            'end_ip' => $endIp,
-            'theory_upspeed' => (string) ($data['theory_upspeed'] ?? ''),
-            'practical_upspeed' => (string) ($data['practical_upspeed'] ?? ''),
-            'theory_downspeed' => (string) ($data['theory_downspeed'] ?? ''),
-            'practical_downspeed' => (string) ($data['practical_downspeed'] ?? ''),
-        ]);
+        $this->locationRepository->insert($this->locationPayload($data, $startIp, $endIp));
 
         return true;
     }
@@ -62,25 +52,14 @@ final class LocationService
             return false;
         }
 
-        DB::table('locations')->where('id', $id)->update([
-            'name' => (string) ($data['name'] ?? ''),
-            'flagpic' => (string) ($data['flagpic'] ?? ''),
-            'location_main' => (string) ($data['location_main'] ?? ''),
-            'location_sub' => (string) ($data['location_sub'] ?? ''),
-            'start_ip' => $startIp,
-            'end_ip' => $endIp,
-            'theory_upspeed' => (string) ($data['theory_upspeed'] ?? ''),
-            'practical_upspeed' => (string) ($data['practical_upspeed'] ?? ''),
-            'theory_downspeed' => (string) ($data['theory_downspeed'] ?? ''),
-            'practical_downspeed' => (string) ($data['practical_downspeed'] ?? ''),
-        ]);
+        $this->locationRepository->updateById($id, $this->locationPayload($data, $startIp, $endIp));
 
         return true;
     }
 
     public function deleteLocation(int $id): void
     {
-        DB::table('locations')->where('id', $id)->delete();
+        $this->locationRepository->deleteById($id);
     }
 
     /**
@@ -91,7 +70,7 @@ final class LocationService
      */
     public function countLocations(?int $rangeStartIp = null, ?int $rangeEndIp = null): int
     {
-        return (int) $this->rangeQuery($rangeStartIp, $rangeEndIp)->count();
+        return (int) $this->locationRepository->newRangeQuery($rangeStartIp, $rangeEndIp)->count();
     }
 
     /**
@@ -99,7 +78,7 @@ final class LocationService
      */
     public function listLocations(int $offset, int $limit, ?int $rangeStartIp = null, ?int $rangeEndIp = null): Collection
     {
-        return $this->rangeQuery($rangeStartIp, $rangeEndIp)
+        return $this->locationRepository->newRangeQuery($rangeStartIp, $rangeEndIp)
             ->orderBy('name')
             ->orderBy('start_ip')
             ->offset($offset)
@@ -107,12 +86,24 @@ final class LocationService
             ->get();
     }
 
-    private function rangeQuery(?int $rangeStartIp, ?int $rangeEndIp): Builder
+    /**
+     * @param  array<string, string>  $data
+     * @return array<string, string>
+     */
+    private function locationPayload(array $data, string $startIp, string $endIp): array
     {
-        return DB::table('locations')
-            ->when($rangeStartIp !== null && $rangeEndIp !== null, function ($query) use ($rangeStartIp, $rangeEndIp) {
-                return $query->whereRaw('INET_ATON(start_ip) <= ? AND INET_ATON(end_ip) >= ?', [$rangeStartIp, $rangeEndIp]);
-            });
+        return [
+            'name' => (string) ($data['name'] ?? ''),
+            'flagpic' => (string) ($data['flagpic'] ?? ''),
+            'location_main' => (string) ($data['location_main'] ?? ''),
+            'location_sub' => (string) ($data['location_sub'] ?? ''),
+            'start_ip' => $startIp,
+            'end_ip' => $endIp,
+            'theory_upspeed' => (string) ($data['theory_upspeed'] ?? ''),
+            'practical_upspeed' => (string) ($data['practical_upspeed'] ?? ''),
+            'theory_downspeed' => (string) ($data['theory_downspeed'] ?? ''),
+            'practical_downspeed' => (string) ($data['practical_downspeed'] ?? ''),
+        ];
     }
 
     /**
@@ -120,8 +111,6 @@ final class LocationService
      */
     public function findLocation(int $id): ?array
     {
-        $row = DB::table('locations')->where('id', $id)->first();
-
-        return $row ? (array) $row : null;
+        return $this->locationRepository->findById($id);
     }
 }

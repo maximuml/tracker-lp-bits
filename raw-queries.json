@@ -76,7 +76,7 @@
         },
         {
             "file": "app/Jobs/PruneActivityLogJob.php",
-            "line": 90,
+            "line": 89,
             "method": "archiveRecords",
             "pattern": "DB::statement",
             "purpose": "Archive expired iplog/login_logs rows into *_archive tables via INSERT ... SELECT with an added archived_at timestamp",

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use App\Support\PasswordHasher;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Modernization plan step 2.1 item 4: flag every user still on a legacy
@@ -34,10 +34,10 @@ final class UsersForceResetLegacyCommand extends Command
 
     public function handle(): int
     {
-        $total = (int) DB::table('users')->count();
+        $total = (int) User::query()->count();
         // Same legacy definition as users:legacy-hash-report —
         // non-argon2id, empty, or NULL algo.
-        $legacyQuery = fn () => DB::table('users')->where(fn ($q) => $q
+        $legacyQuery = fn () => User::query()->where(fn ($q) => $q
             ->where('passhash_algo', '!=', PasswordHasher::ALGO_ARGON2ID)
             ->orWhereNull('passhash_algo')
             ->orWhere('passhash_algo', ''));

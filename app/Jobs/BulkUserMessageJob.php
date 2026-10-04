@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\UserStatus;
+use App\Models\Message;
+use App\Models\User;
 use App\Models\UserModifyLog;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
@@ -12,7 +14,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 
 /**
  * W1-07: Asynchronous bulk staff message to selected user classes.
@@ -77,7 +78,7 @@ class BulkUserMessageJob implements ShouldQueue
 
         while (true) {
             $offset = ($page - 1) * $size;
-            $rows = DB::table('users')
+            $rows = User::query()
                 ->whereIn('class', $this->classIds)
                 ->where('enabled', true)
                 ->where('status', UserStatus::CONFIRMED->value)
@@ -100,7 +101,7 @@ class BulkUserMessageJob implements ShouldQueue
                         'msg' => $this->body,
                     ];
                 }
-                DB::table('messages')->insert($msgRecords);
+                Message::query()->insert($msgRecords);
                 $messagesSent += count($msgRecords);
             }
 

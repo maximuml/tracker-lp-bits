@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Repositories\ActivityLogRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -29,7 +30,7 @@ final class PruneActivityLogCommand extends Command
         'login_logs' => 180,
     ];
 
-    public function handle(): int
+    public function handle(ActivityLogRepository $activityLog): int
     {
         $dryRun = (bool) $this->option('dry-run');
         $onlyTable = $this->option('table');
@@ -53,9 +54,7 @@ final class PruneActivityLogCommand extends Command
             }
 
             $cutoff = now()->subDays($days)->toDateTimeString();
-            $count = DB::table($table)
-                ->where($this->getDateColumn($table), '<', $cutoff)
-                ->count();
+            $count = $activityLog->countOlderThan($table, $this->getDateColumn($table), $cutoff);
 
             if ($count === 0) {
                 $this->info("{$table}: 0 records older than {$days} days (cutoff: {$cutoff})");
@@ -66,9 +65,7 @@ final class PruneActivityLogCommand extends Command
             if ($dryRun) {
                 $this->info("{$table}: would delete {$count} records older than {$days} days (cutoff: {$cutoff}) [dry-run]");
             } else {
-                $deleted = DB::table($table)
-                    ->where($this->getDateColumn($table), '<', $cutoff)
-                    ->delete();
+                $deleted = $activityLog->deleteOlderThan($table, $this->getDateColumn($table), $cutoff);
                 $this->info("{$table}: deleted {$deleted} records older than {$days} days (cutoff: {$cutoff})");
                 $totalDeleted += $deleted;
             }

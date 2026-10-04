@@ -6,6 +6,7 @@ namespace App\Services\Cleanup;
 
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Models\Message;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
@@ -110,7 +111,7 @@ final class UserClassPromotion
             'leechwarnuntil' => null,
         ]);
 
-        DB::table('messages')->insert($messages);
+        Message::query()->insert($messages);
     }
 
     public function promoteUsersByClass(): void
@@ -208,6 +209,6 @@ final class UserClassPromotion
             }
         });
 
-        DB::table('messages')->insert($messages);
+        Message::query()->insert($messages);
     }
 }

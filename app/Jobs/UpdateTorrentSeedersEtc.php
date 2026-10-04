@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Models\Comment;
+use App\Models\Peer;
+use App\Models\Torrent;
 use App\Support\Cache as AppCache;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
@@ -13,7 +16,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class UpdateTorrentSeedersEtc implements ShouldQueue
 {
@@ -95,7 +97,8 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
         }
         // 批量取，简单化
         $torrents = [];
-        $res = DB::table('peers')
+        $res = Peer::query()
+            ->toBase()
             ->selectRaw('torrent, seeder, COUNT(*) AS c')
             ->whereIn('torrent', $torrentIdArr)
             ->groupBy(['torrent', 'seeder'])
@@ -114,7 +117,8 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
             $torrents[$row->torrent][$key] = $row->c;
         }
 
-        $res = DB::table('comments')
+        $res = Comment::query()
+            ->toBase()
             ->selectRaw('torrent, COUNT(*) AS c')
             ->whereIn('torrent', $torrentIdArr)
             ->groupBy(['torrent'])
@@ -131,7 +135,7 @@ class UpdateTorrentSeedersEtc implements ShouldQueue
                 'comments' => $torrents[$id]['comments'] ?? 0,
             ];
         }
-        $result = DB::table('torrents')->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
+        $result = Torrent::query()->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
         if ($delIdRedisKey) {
             AppCache::forgetWithLocales($this->idRedisKey);
         }

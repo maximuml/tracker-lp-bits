@@ -216,6 +216,26 @@ class SearchBox extends NexusModel
         })->orderBy('sort_index', 'desc')->orderBy('id', 'desc')->get();
     }
 
+    /**
+     * Taxonomy item names keyed by id for admin dropdowns.
+     *
+     * @return Collection<int|string, string>
+     */
+    public static function pluckTaxonomyNames(string $table): Collection
+    {
+        return self::query()->from($table)->pluck('name', 'id');
+    }
+
+    /**
+     * Taxonomy item names keyed by id in admin sort order.
+     *
+     * @return Collection<int|string, string>
+     */
+    public static function pluckTaxonomyNamesSorted(string $table): Collection
+    {
+        return self::query()->from($table)->orderBy('sort_index')->orderBy('id')->pluck('name', 'id');
+    }
+
     /** @return  array<int|string, mixed> */
     public static function listModeOptions(): array
     {

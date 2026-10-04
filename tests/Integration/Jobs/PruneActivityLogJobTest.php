@@ -6,6 +6,7 @@ namespace Tests\Integration\Jobs;
 
 use App\Jobs\PruneActivityLogJob;
 use App\Models\User;
+use App\Repositories\ActivityLogRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -45,7 +46,7 @@ final class PruneActivityLogJobTest extends TestCase
             ['log_name' => 'test', 'description' => 'recent record', 'created_at' => $recentDate, 'updated_at' => $recentDate],
         ]);
 
-        (new PruneActivityLogJob)->handle();
+        (new PruneActivityLogJob)->handle(new ActivityLogRepository);
 
         $this->assertSame(1, DB::table('activity_log')->count());
         $this->assertSame('recent record', DB::table('activity_log')->first()->description);
@@ -59,7 +60,7 @@ final class PruneActivityLogJobTest extends TestCase
             ['log_name' => 'test', 'description' => 'keep me', 'created_at' => $recentDate, 'updated_at' => $recentDate],
         ]);
 
-        (new PruneActivityLogJob)->handle();
+        (new PruneActivityLogJob)->handle(new ActivityLogRepository);
 
         $this->assertSame(1, DB::table('activity_log')->count());
     }
@@ -81,7 +82,7 @@ final class PruneActivityLogJobTest extends TestCase
             ['uid' => $user2->id, 'ip' => '127.0.0.2', 'created_at' => $recentDate, 'updated_at' => $recentDate],
         ]);
 
-        (new PruneActivityLogJob)->handle();
+        (new PruneActivityLogJob)->handle(new ActivityLogRepository);
 
         $this->assertSame(1, DB::table('login_logs')->count());
         $this->assertSame('127.0.0.2', DB::table('login_logs')->first()->ip);
@@ -167,7 +168,7 @@ final class PruneActivityLogJobTest extends TestCase
         ]);
         DB::table('login_logs_archive')->delete();
 
-        (new PruneActivityLogJob)->handle();
+        (new PruneActivityLogJob)->handle(new ActivityLogRepository);
 
         // Record deleted from source
         $this->assertSame(0, DB::table('login_logs')->count());
@@ -195,7 +196,7 @@ final class PruneActivityLogJobTest extends TestCase
         ]);
         DB::table('iplog_archive')->delete();
 
-        (new PruneActivityLogJob)->handle();
+        (new PruneActivityLogJob)->handle(new ActivityLogRepository);
 
         // Record deleted from source
         $this->assertSame(0, DB::table('iplog')->where('userid', $user->id)->count());

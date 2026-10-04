@@ -173,8 +173,9 @@ final class UserStatRepository
     {
         $query = User::query()
             ->select(['id', 'username', 'passhash_algo', 'last_login', 'class'])
-            ->whereIn('passhash_algo', [PasswordHasher::ALGO_MD5, PasswordHasher::ALGO_SHA256])
-            ->orWhereNull('passhash_algo');
+            ->where(fn ($q) => $q
+                ->whereIn('passhash_algo', [PasswordHasher::ALGO_MD5, PasswordHasher::ALGO_SHA256])
+                ->orWhereNull('passhash_algo'));
         if ($algo !== null) {
             $query->where('passhash_algo', $algo);
         }

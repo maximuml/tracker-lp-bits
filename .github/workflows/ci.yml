@@ -253,10 +253,11 @@ jobs:
         with:
           files: ./coverage-unit.xml,./coverage-feature.xml
           flags: unit,feature
-          # T-16: Patch coverage target — 60% of new/changed lines must
-          # be covered. Codecov enforces this server-side when configured
-          # in codecov.yml. The token is needed for patch coverage to work.
-          fail_ci_if_error: true
+          # Optional: no CODECOV_TOKEN on this repo, so tokenless uploads
+          # are rate-limited. The authoritative gates are the clover floor
+          # and coverage:ratchet steps below; an upload failure must not
+          # turn the job red.
+          fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Minimum coverage gate (Unit + Integration ≥ 35%)

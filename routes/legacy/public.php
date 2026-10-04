@@ -29,7 +29,6 @@ Route::get('/shoutbox_sse', [ShoutboxController::class, 'shoutboxSse'])->name('s
 
 Route::get('/torrentrss', [TorrentRssController::class, 'torrentrss'])->name('torrentrss.legacy');
 
-Route::get('/page', [UtilityController::class, 'page'])->name('page.legacy');
 Route::get('/tags', [UtilityController::class, 'tags'])->name('tags.legacy');
 Route::get('/suggest', [UtilityController::class, 'suggest'])->name('suggest.legacy');
 Route::get('/opensearch', [UtilityController::class, 'opensearch'])->name('opensearch.legacy');

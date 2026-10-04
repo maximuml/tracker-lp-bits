@@ -174,14 +174,20 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
 /* Latest torrents cover grid (index). Lives here — not in the cached
    section fragment — because the fragment is cached for 120s and a
    per-request CSP nonce inside it goes stale. */
+/* Latest Torrents: horizontal 2:3 cover strip (scrolls on overflow). */
 .lt-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
     gap: 12px;
     margin: 8px 0 16px;
-    align-items: start;
+    align-items: stretch;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
 }
 .lt-grid .lt-card {
+    flex: 0 0 11rem;
+    scroll-snap-align: start;
     border: 1px solid var(--nxm-border, rgba(127,127,127,.35));
     border-radius: 6px;
     overflow: hidden;
@@ -194,7 +200,6 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
     display: block;
     width: 100%;
     aspect-ratio: 2 / 3;
-    max-height: 240px;
     background: rgba(0,0,0,.08);
     overflow: hidden;
 }
@@ -258,9 +263,6 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
 }
 .lt-grid .lt-title a { text-decoration: none; }
 
-@media (max-width: 40rem) {
-    .lt-grid { grid-template-columns: repeat(2, 1fr); }
-}
 .lt-grid .lt-meta {
     margin-top: auto;
     display: flex;
@@ -272,11 +274,8 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
 }
 .lt-grid .lt-seed { color: var(--nxm-success, #2fad2f); font-weight: bold; }
 .lt-grid .lt-leech { color: var(--nxm-danger, #d04848); font-weight: bold; }
-@media (max-width: 700px) {
-    .lt-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 420px) {
-    .lt-grid { grid-template-columns: 1fr; }
+@media (max-width: 40rem) {
+    .lt-grid .lt-card { flex-basis: 8.5rem; }
 }
 
 /* CSP-safe visibility/layout helpers. Inline style="" attributes are

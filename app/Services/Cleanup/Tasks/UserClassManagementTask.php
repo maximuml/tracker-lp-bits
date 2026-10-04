@@ -6,15 +6,15 @@ namespace App\Services\Cleanup\Tasks;
 
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Models\Message;
-use App\Models\User;
-use App\Models\UserBanLog;
+use App\Repositories\MessageRepository;
+use App\Repositories\UserCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Services\Cleanup\UserClassPromotion;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\User;
 use App\Support\UserOps;
 
 /**
@@ -26,6 +26,8 @@ final class UserClassManagementTask implements CleanupTask
     public function __construct(
         private readonly UserClassPromotion $promotion,
         private readonly UserOps $userOps,
+        private readonly UserCleanupRepository $userCleanupRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -68,10 +70,7 @@ final class UserClassManagementTask implements CleanupTask
 
         $newclass = (int) $class - 1;
 
-        $res = User::query()
-            ->where('class', $class)
-            ->whereRaw('uploaded < downloaded * ?', [$deRatio])
-            ->get(['id']);
+        $res = $this->userCleanupRepository->listUserIdsByClassRatioBelow((int) $class, $deRatio);
 
         Logger::writeWithContext((string) ('match user count: '.$res->count()), (string) 'info', (bool) false);
 
@@ -87,8 +86,8 @@ final class UserClassManagementTask implements CleanupTask
         foreach ($res as $arr) {
             $uid = $arr->id;
             $locale = Locale::userLocale($uid);
-            $className = \App\Support\User::getUserClassName($class, false, false, false);
-            $newClassName = \App\Support\User::getUserClassName((string) $newclass, false, false, false);
+            $className = User::getUserClassName($class, false, false, false);
+            $newClassName = User::getUserClassName((string) $newclass, false, false, false);
 
             $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale).$newClassName;
             $msg = Locale::trans('cleanup.msg_demoted_from', [], $locale)
@@ -111,9 +110,9 @@ final class UserClassManagementTask implements CleanupTask
             Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
         }
 
-        User::query()->whereIn('id', $uidArr)->update(['class' => (string) $newclass]);
+        $this->userCleanupRepository->updateWhereInIds($uidArr, ['class' => (string) $newclass]);
 
-        Message::query()->insert($messages);
+        $this->messageRepository->insertMessages($messages);
     }
 
     private function demoteUsersToPeasant(): void
@@ -142,11 +141,11 @@ final class UserClassManagementTask implements CleanupTask
         $until = date('Y-m-d H:i:s', time() + $length);
         $downlimitFloor = $downFloorGb * 1024 * 1024 * 1024;
 
-        $res = User::query()
-            ->where('class', UserClassEnum::USER->value)
-            ->where('downloaded', '>', $downlimitFloor)
-            ->whereRaw('uploaded / downloaded < ?', [$minRatio])
-            ->get(['id']);
+        $res = $this->userCleanupRepository->listUserIdsWithLowRatio(
+            UserClassEnum::USER->value,
+            $downlimitFloor,
+            $minRatio,
+        );
 
         if ($res->isEmpty()) {
             return;
@@ -160,7 +159,7 @@ final class UserClassManagementTask implements CleanupTask
         foreach ($res as $arr) {
             $uid = $arr->id;
             $locale = Locale::userLocale($uid);
-            $peasantName = \App\Support\User::getUserClassName(UserClassEnum::PEASANT->value, false, false, false);
+            $peasantName = User::getUserClassName(UserClassEnum::PEASANT->value, false, false, false);
 
             $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale).$peasantName;
             $msg = Locale::trans('cleanup.msg_must_fix_ratio_within', [], $locale)
@@ -182,26 +181,20 @@ final class UserClassManagementTask implements CleanupTask
             Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
         }
 
-        User::query()->whereIn('id', $uidArr)->update([
+        $this->userCleanupRepository->updateWhereInIds($uidArr, [
             'class' => UserClassEnum::PEASANT->value,
             'leechwarn' => true,
             'leechwarnuntil' => $until,
         ]);
 
-        Message::query()->insert($messages);
+        $this->messageRepository->insertMessages($messages);
     }
 
     private function banLeechWarningExpired(): void
     {
         $dt = date('Y-m-d H:i:s');
 
-        $results = User::query()
-            ->where('class', '<', UserClassEnum::VIP->value)
-            ->where('donor', false)
-            ->where('enabled', true)
-            ->where('leechwarn', true)
-            ->where('leechwarnuntil', '<', $dt)
-            ->get(['id', 'username', 'lang']);
+        $results = $this->userCleanupRepository->listExpiredLeechWarnedUsers($dt, UserClassEnum::VIP->value);
 
         if ($results->isEmpty()) {
             return;
@@ -229,8 +222,8 @@ final class UserClassManagementTask implements CleanupTask
             $this->userOps->logModify($uid, $comment);
         }
 
-        User::query()->whereIn('id', $uidArr)->update(['enabled' => false]);
-        UserBanLog::query()->insert($userBanLogData);
+        $this->userCleanupRepository->disableUsers($uidArr);
+        $this->userCleanupRepository->insertBanLogs($userBanLogData);
 
         Logger::writeWithContext((string) ('ban user: '.implode(', ', $uidArr)), (string) 'info', (bool) false);
 

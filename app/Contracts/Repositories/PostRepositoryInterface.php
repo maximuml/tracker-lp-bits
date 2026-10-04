@@ -57,4 +57,6 @@ interface PostRepositoryInterface
     public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): \Illuminate\Support\Collection;
 
     public function getForumTodayPostCount(int $forumid, string $todayDate): int;
+
+    public function findLastIdAddedBefore(string $before): ?int;
 }

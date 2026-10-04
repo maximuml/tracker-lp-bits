@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Cleanup\Tasks;
 
 use App\Enums\TorrentPosState;
-use App\Models\Torrent;
+use App\Repositories\TorrentCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Time;
@@ -15,6 +15,10 @@ use App\Support\Time;
  */
 final class TorrentVisibilityTask implements CleanupTask
 {
+    public function __construct(
+        private readonly TorrentCleanupRepository $torrentCleanup,
+    ) {}
+
     /**
      * Priority Class 2: mark torrents with no seeders and stale last_action as
      * invisible.
@@ -25,11 +29,7 @@ final class TorrentVisibilityTask implements CleanupTask
         $deadtime = Time::deadThreshold((int) SiteConfig::current()->main->anninterthree(3600), time()) - $maxDeadTime;
         $lastActionDeadTime = date('Y-m-d H:i:s', $deadtime);
 
-        Torrent::query()
-            ->where('visible', 1)
-            ->where('last_action', '<', $lastActionDeadTime)
-            ->where('seeders', 0)
-            ->update(['visible' => 0]);
+        $this->torrentCleanup->markDeadVisibleTorrentsInvisible($lastActionDeadTime);
 
         return "update torrents' visibility";
     }
@@ -41,14 +41,7 @@ final class TorrentVisibilityTask implements CleanupTask
     {
         $toBeExpirePosStates = [TorrentPosState::STICKY_FIRST->value, TorrentPosState::STICKY_SECOND->value];
 
-        Torrent::query()
-            ->whereIn('pos_state', $toBeExpirePosStates)
-            ->whereNotNull('pos_state_until')
-            ->where('pos_state_until', '<', now())
-            ->update([
-                'pos_state' => TorrentPosState::NONE->value,
-                'pos_state_until' => null,
-            ]);
+        $this->torrentCleanup->expireStickyPositions($toBeExpirePosStates, TorrentPosState::NONE->value);
 
         return 'expire torrent pos state';
     }

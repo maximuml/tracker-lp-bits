@@ -124,4 +124,19 @@ class ForumRepository extends BaseRepository implements ForumRepositoryInterface
     {
         return Forum::query()->create($data);
     }
+
+    /**
+     * @return Collection<int, int>
+     */
+    public function listIds(): Collection
+    {
+        return Forum::query()->pluck('id');
+    }
+
+    public function updateCounts(int $forumId, int $postcount, int $topiccount): int
+    {
+        return Forum::query()
+            ->where('id', $forumId)
+            ->update(['postcount' => $postcount, 'topiccount' => $topiccount]);
+    }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
-use App\Models\Peer;
-use App\Models\User;
+use App\Repositories\PeerRepository;
+use App\Repositories\UserCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Time;
@@ -16,6 +16,11 @@ use Carbon\Carbon;
  */
 final class PeerCleanupTask implements CleanupTask
 {
+    public function __construct(
+        private readonly PeerRepository $peerRepository,
+        private readonly UserCleanupRepository $userCleanupRepository,
+    ) {}
+
     /**
      * Priority Class 1: remove peers whose last_action is older than the dead
      * threshold.
@@ -27,7 +32,7 @@ final class PeerCleanupTask implements CleanupTask
             time()
         ));
 
-        Peer::query()->where('last_action', '<', $deadtime)->delete();
+        $this->peerRepository->deleteInactiveBefore($deadtime);
 
         return 'update peer status';
     }
@@ -41,14 +46,7 @@ final class PeerCleanupTask implements CleanupTask
         $interval = (int) SiteConfig::current()->main->autocleanIntervalOne(900);
         $cutoff = Carbon::now()->subSeconds(2 * $interval)->toDateTimeString();
 
-        User::query()
-            ->where('seed_points_updated_at', '<', $cutoff)
-            ->update([
-                'seed_points_per_hour' => 0,
-                'seed_bonus_per_hour' => 0,
-                'seeding_torrent_count' => 0,
-                'seeding_torrent_size' => 0,
-            ]);
+        $this->userCleanupRepository->resetSeedBonusCounters($cutoff);
 
         return 'reset seed bonus counters';
     }

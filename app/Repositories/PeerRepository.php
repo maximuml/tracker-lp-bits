@@ -20,4 +20,9 @@ class PeerRepository
     {
         return Peer::query()->where('torrent', $torrentId)->count();
     }
+
+    public function deleteInactiveBefore(string $deadline): int
+    {
+        return Peer::query()->where('last_action', '<', $deadline)->delete();
+    }
 }

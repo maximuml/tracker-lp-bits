@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Auth\Permission;
 use App\Enums\SitelogSecurityLevel;
+use App\Models\Cheater;
 use App\Models\News;
 use App\Models\Poll;
 use App\Models\PollAnswer;
@@ -224,5 +225,10 @@ class LogRepository
         }
 
         return $counts;
+    }
+
+    public function deleteOldCheaters(string $before): int
+    {
+        return Cheater::query()->where('added', '<', $before)->delete();
     }
 }

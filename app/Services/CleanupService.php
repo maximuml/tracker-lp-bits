@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\CleanupServiceInterface;
-use App\Models\Avp;
+use App\Repositories\AvpRepository;
 use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
 use App\Support\Config\SiteConfig;
@@ -55,6 +55,7 @@ final class CleanupService implements CleanupServiceInterface
         private readonly Globals $globals,
         private readonly CleanupRepository $cleanupRepository,
         private readonly RequestContext $requestContext,
+        private readonly AvpRepository $avpRepository,
     ) {}
 
     /**
@@ -120,10 +121,10 @@ final class CleanupService implements CleanupServiceInterface
             $interval = (int) SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 0);
 
             if (! $forceAll) {
-                $ts = (int) Avp::query()->where('arg', $arg)->value('value_u');
+                $ts = $this->avpRepository->getUIntValue($arg);
 
                 if ($ts === 0) {
-                    Avp::query()->insertOrIgnore(['arg' => $arg, 'value_s' => '', 'value_u' => $now]);
+                    $this->avpRepository->insertOrIgnore($arg, $now);
                     Logger::writeWithContext((string) "no value for arg: '{$arg}', return", (string) 'info', (bool) false);
 
                     return false;
@@ -136,10 +137,7 @@ final class CleanupService implements CleanupServiceInterface
                     return $log;
                 }
 
-                $claimed = (int) Avp::query()
-                    ->where('arg', $arg)
-                    ->where('value_u', $ts)
-                    ->update(['value_u' => $now]);
+                $claimed = $this->avpRepository->claimIfValueMatches($arg, $ts, $now);
 
                 if ($claimed === 0) {
                     Logger::writeWithContext((string) "cleanup class {$level} already claimed by another runner", (string) 'info', (bool) false);
@@ -147,7 +145,7 @@ final class CleanupService implements CleanupServiceInterface
                     return false;
                 }
             } else {
-                Avp::query()->updateOrInsert(['arg' => $arg], ['value_s' => '', 'value_u' => $now]);
+                $this->avpRepository->updateOrInsert($arg, $now);
             }
 
             $output = $this->runClass($level, $taskList, $requestId, $output, $printProgress);

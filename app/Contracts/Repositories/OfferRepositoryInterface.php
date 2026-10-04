@@ -59,4 +59,19 @@ interface OfferRepositoryInterface
      * @return \Illuminate\Database\Eloquent\Collection<int, Offer>
      */
     public function listAllowedForUser(int $userId): \Illuminate\Database\Eloquent\Collection;
+
+    /**
+     * @return array<string, int>
+     */
+    public function pluckNotAllowedAddedBefore(string $before): array;
+
+    /**
+     * @return array<string, int>
+     */
+    public function pluckAllowedBefore(string $before): array;
+
+    /**
+     * @param  array<int>  $ids
+     */
+    public function deleteMany(array $ids): int;
 }

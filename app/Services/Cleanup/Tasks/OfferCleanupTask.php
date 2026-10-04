@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
+use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
-use App\Enums\OfferAllowed;
-use App\Models\Comment;
-use App\Models\Offer;
+use App\Repositories\CommentRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Log;
@@ -19,6 +18,8 @@ final class OfferCleanupTask implements CleanupTask
 {
     public function __construct(
         private readonly OfferVoteRepositoryInterface $offerVotes,
+        private readonly OfferRepositoryInterface $offers,
+        private readonly CommentRepository $comments,
     ) {}
 
     /**
@@ -30,11 +31,7 @@ final class OfferCleanupTask implements CleanupTask
         $offerVoteTimeout = (int) SiteConfig::current()->main->offerVoteTimeout(259200);
         if ($offerVoteTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerVoteTimeout);
-            $offerIds = Offer::query()
-                ->where('added', '<', $dt)
-                ->where('allowed', '<>', OfferAllowed::ALLOWED->value)
-                ->pluck('id', 'name')
-                ->all();
+            $offerIds = $this->offers->pluckNotAllowedAddedBefore($dt);
 
             $this->deleteOffers($offerIds, 'vote timeout');
         }
@@ -42,11 +39,7 @@ final class OfferCleanupTask implements CleanupTask
         $offerUploadTimeout = (int) SiteConfig::current()->main->offerUploadTimeout(86400);
         if ($offerUploadTimeout > 0) {
             $dt = date('Y-m-d H:i:s', time() - $offerUploadTimeout);
-            $offerIds = Offer::query()
-                ->where('allowedtime', '<', $dt)
-                ->where('allowed', OfferAllowed::ALLOWED->value)
-                ->pluck('id', 'name')
-                ->all();
+            $offerIds = $this->offers->pluckAllowedBefore($dt);
 
             $this->deleteOffers($offerIds, 'upload timeout');
         }
@@ -59,7 +52,7 @@ final class OfferCleanupTask implements CleanupTask
     // ------------------------------------------------------------------------
 
     /**
-     * @param  array<string, mixed>  $offerIds
+     * @param  array<string, int>  $offerIds
      */
     private function deleteOffers(array $offerIds, string $reason): void
     {
@@ -70,8 +63,8 @@ final class OfferCleanupTask implements CleanupTask
         $ids = array_values($offerIds);
 
         $this->offerVotes->deleteVotesForOffers($ids);
-        Comment::query()->whereIn('offer', $ids)->delete();
-        Offer::query()->whereIn('id', $ids)->delete();
+        $this->comments->deleteForOffers($ids);
+        $this->offers->deleteMany($ids);
 
         foreach ($offerIds as $name => $id) {
             Log::write("Offer {$id} ({$name}) was deleted by system ({$reason})", 'normal');

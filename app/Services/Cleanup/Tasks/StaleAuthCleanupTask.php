@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
-use App\Enums\UserStatus;
-use App\Models\Invite;
-use App\Models\LoginAttempt;
-use App\Models\RegImage;
-use App\Models\User;
+use App\Contracts\Repositories\AuthRepositoryInterface;
+use App\Repositories\InviteRepository;
+use App\Repositories\UserCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use Carbon\Carbon;
@@ -19,6 +17,12 @@ use Carbon\Carbon;
  */
 final class StaleAuthCleanupTask implements CleanupTask
 {
+    public function __construct(
+        private readonly UserCleanupRepository $userCleanupRepository,
+        private readonly AuthRepositoryInterface $authRepository,
+        private readonly InviteRepository $inviteRepository,
+    ) {}
+
     /**
      * Priority Class 4: delete unconfirmed accounts, old login attempts, invite
      * codes and regimage records.
@@ -42,12 +46,7 @@ final class StaleAuthCleanupTask implements CleanupTask
         $signupTimeout = (int) SiteConfig::current()->main->signupTimeout(259200);
         $deadtime = time() - $signupTimeout;
 
-        User::query()
-            ->where('status', UserStatus::PENDING->value)
-            ->whereRaw('added < FROM_UNIXTIME(?)', [$deadtime])
-            ->whereRaw('last_login < FROM_UNIXTIME(?)', [$deadtime])
-            ->whereRaw('last_access < FROM_UNIXTIME(?)', [$deadtime])
-            ->delete();
+        $this->userCleanupRepository->deleteStaleUnconfirmedAccounts($deadtime);
     }
 
     private function deleteOldLoginAttempts(): void
@@ -55,10 +54,7 @@ final class StaleAuthCleanupTask implements CleanupTask
         $secs = 12 * 60 * 60;
         $dt = date('Y-m-d H:i:s', time() - $secs);
 
-        LoginAttempt::query()
-            ->where('banned', false)
-            ->where('added', '<', $dt)
-            ->delete();
+        $this->authRepository->deleteStaleLoginAttempts($dt);
     }
 
     private function deleteOldInviteCodes(): void
@@ -68,23 +64,12 @@ final class StaleAuthCleanupTask implements CleanupTask
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $nowStr = Carbon::now()->toDateTimeString();
 
-        Invite::query()
-            ->where(function ($query) use ($dt): void {
-                $query->where('time_invited', '<', $dt)
-                    ->whereNotNull('time_invited')
-                    ->where('invitee', '!=', '');
-            })
-            ->orWhere(function ($query) use ($nowStr): void {
-                $query->where('invitee', '')
-                    ->whereNotNull('expired_at')
-                    ->where('expired_at', '<', $nowStr);
-            })
-            ->delete();
+        $this->inviteRepository->deleteExpiredCodes($dt, $nowStr);
     }
 
     private function deleteRegimages(): void
     {
-        RegImage::query()->delete();
+        $this->authRepository->deleteRegImages();
     }
 
     public function run(): string

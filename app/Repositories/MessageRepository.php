@@ -296,4 +296,13 @@ class MessageRepository extends BaseRepository
     {
         return Message::query()->insert($rows);
     }
+
+    /**
+     * System messages (sender IS NULL) older than the cutoff — the 180-day
+     * housekeeping sweep.
+     */
+    public function deleteOldSystemMessages(string $before): int
+    {
+        return Message::query()->whereNull('sender')->where('added', '<', $before)->delete();
+    }
 }

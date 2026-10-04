@@ -52,4 +52,8 @@ interface AuthRepositoryInterface
     public function findUserArrayForCookie(int $userId, bool $shouldIgnoreEnabled): ?array;
 
     public function findUserModelForCookie(int $userId, bool $shouldIgnoreEnabled): ?User;
+
+    public function deleteStaleLoginAttempts(string $before): int;
+
+    public function deleteRegImages(): int;
 }

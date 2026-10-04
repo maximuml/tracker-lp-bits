@@ -8,7 +8,6 @@ use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
 use App\Services\CleanupService;
 use App\Support\Globals;
-use App\Support\RequestContext;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -49,10 +48,7 @@ final class CleanupServiceTest extends TestCase
 
     private function service(): CleanupService
     {
-        /** @var Tasks $tasks */
-        $tasks = $this->app->make(Tasks::class);
-
-        return new CleanupService($tasks, $this->app->make(Globals::class), $this->app->make(CleanupRepository::class), $this->app->make(RequestContext::class));
+        return app(CleanupService::class);
     }
 
     private function mockCleanupRepo(): void

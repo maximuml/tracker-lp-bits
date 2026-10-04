@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Cleanup\Tasks;
 
 use App\Contracts\Repositories\CleanupMonitorRepositoryInterface;
-use App\Models\IpLog;
-use App\Models\Message;
-use App\Models\Torrent;
+use App\Repositories\IpLogRepository;
+use App\Repositories\MessageRepository;
+use App\Repositories\TorrentCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
@@ -21,6 +21,9 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
 {
     public function __construct(
         private readonly CleanupMonitorRepositoryInterface $cleanupMonitor,
+        private readonly TorrentCleanupRepository $torrentCleanup,
+        private readonly IpLogRepository $ipLogRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -50,16 +53,7 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
         $until = date('Y-m-d H:i:s', time() - $length);
         $dt = date('Y-m-d H:i:s');
 
-        $res = Torrent::query()
-            ->from('torrents as t')
-            ->leftJoin('users as u', 't.owner', '=', 'u.id')
-            ->where('t.visible', 0)
-            ->where('t.last_action', '<', $until)
-            ->where('t.seeders', 0)
-            ->where('t.leechers', 0)
-            ->select('t.id', 't.name', 't.owner', 'u.id as uid')
-            ->toBase()
-            ->get();
+        $res = $this->torrentCleanup->listDeadTorrentsForDeletion($until);
 
         foreach ($res as $torrent) {
             $arr = (array) $torrent;
@@ -69,7 +63,7 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
             if (! empty($arr['uid'])) {
                 $locale = Locale::userLocale((int) $arr['owner']);
 
-                Message::query()->insert([
+                $this->messageRepository->insertMessages([[
                     'sender' => null,
                     'receiver' => $arr['owner'],
                     'added' => $dt,
@@ -77,7 +71,7 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
                     'msg' => Locale::trans('cleanup.msg_your_torrent', [], $locale)
                         .'[i]'.$arr['name'].'[/i]'
                         .Locale::trans('cleanup.msg_was_deleted_because_dead', [], $locale),
-                ]);
+                ]]);
 
                 Log::write("Torrent {$arr['id']} ({$arr['name']}) is deleted by system because of being dead for a long time.", 'normal');
             }
@@ -89,7 +83,7 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
         $length = 90 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        IpLog::query()->where('access', '<', $until)->delete();
+        $this->ipLogRepository->deleteBefore($until);
     }
 
     private function deleteFailedJobs(): void

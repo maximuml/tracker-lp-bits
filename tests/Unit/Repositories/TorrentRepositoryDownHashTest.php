@@ -2,19 +2,11 @@
 
 namespace Tests\Unit\Repositories;
 
-use App\Repositories\BookmarkRepository;
-use App\Repositories\MeiliSearchRepository;
 use App\Repositories\PeerRepository;
 use App\Repositories\SnatchRepository;
-use App\Repositories\TorrentAjaxRepository;
-use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentDownloadRepository;
-use App\Repositories\TorrentModerationRepository;
-use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
-use App\Services\PermissionChecker;
-use App\Services\TorrentPromotionService;
-use App\Services\TorrentStatsService;
+use App\Support\Torrent\TorrentStatus;
 use Firebase\JWT\JWT;
 use PHPUnit\Framework\TestCase;
 use Tests\Attributes\TestCategory;
@@ -30,34 +22,9 @@ class TorrentRepositoryDownHashTest extends TestCase
     {
         parent::setUp();
         $this->downloadRepository = new TorrentDownloadRepository;
-        $meiliSearchRepository = app(MeiliSearchRepository::class);
         $this->repository = new TorrentRepository(
             $this->downloadRepository,
-            new TorrentPurchaseRepository,
-            new TorrentModerationRepository(
-                $this->downloadRepository,
-                $meiliSearchRepository,
-            ),
-            new TorrentStatsService(
-                new TorrentAjaxRepository(
-                    $meiliSearchRepository,
-                    new TorrentModerationRepository(
-                        $this->downloadRepository,
-                        $meiliSearchRepository,
-                    ),
-                    new PermissionChecker,
-                ),
-                new TorrentDetailRepository,
-                new PeerRepository,
-                new SnatchRepository,
-                new BookmarkRepository,
-            ),
-            new TorrentPromotionService(
-                new TorrentModerationRepository(
-                    $this->downloadRepository,
-                    $meiliSearchRepository,
-                ),
-            ),
+            new TorrentStatus(new PeerRepository, new SnatchRepository),
         );
     }
 

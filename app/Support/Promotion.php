@@ -9,6 +9,7 @@ use App\Enums\TorrentPromotion;
 use App\Enums\UserAppendPromotion;
 use App\Models\Torrent;
 use App\Models\TorrentState;
+use App\Repositories\TorrentDetailRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\ViewModels\Torrent\PromotionBadge;
@@ -374,7 +375,7 @@ final class Promotion
      */
     public static function setGlobalSpecialState(int $state): void
     {
-        TorrentState::query()->update(['global_sp_state' => $state]);
+        self::torrentDetailRepository()->updateGlobalSpState($state);
     }
 
     public static function globalSpecialState(): int
@@ -392,5 +393,10 @@ final class Promotion
         }
 
         return $state;
+    }
+
+    private static function torrentDetailRepository(): TorrentDetailRepository
+    {
+        return app(TorrentDetailRepository::class);
     }
 }

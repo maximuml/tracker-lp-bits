@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\UserMeta;
+use App\Repositories\UserMetaRepository;
 use App\Support\Html\SafeHtml;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
@@ -183,15 +184,7 @@ final class UserDisplay
         }
 
         $rainbowIds = array_flip(
-            UserMeta::query()
-                ->whereIn('uid', $missing)
-                ->where('meta_key', UserMeta::META_KEY_PERSONALIZED_USERNAME)
-                ->where('status', 0)
-                ->where(function ($query) {
-                    $query->whereNull('deadline')->orWhere('deadline', '>=', now());
-                })
-                ->pluck('uid')
-                ->toArray()
+            self::userMetaRepository()->pluckActiveMetaUids($missing, UserMeta::META_KEY_PERSONALIZED_USERNAME)
         );
 
         foreach ($users as $user) {
@@ -385,5 +378,10 @@ final class UserDisplay
     private static function userRepository(): UserRepositoryInterface
     {
         return app(UserRepositoryInterface::class);
+    }
+
+    private static function userMetaRepository(): UserMetaRepository
+    {
+        return app(UserMetaRepository::class);
     }
 }

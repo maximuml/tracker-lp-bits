@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Enums\SnatchFinished;
 use App\Models\Snatch;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 /**
  * snatches table — per-user per-torrent transfer records.
@@ -67,5 +68,39 @@ final class SnatchRepository extends BaseRepository
             ->lockForUpdate()
             ->toBase()
             ->first();
+    }
+
+    /**
+     * Seedtime/leechtime sums grouped by user for the batch refresh job.
+     *
+     * @param  array<int, int>  $userIds
+     * @return \Illuminate\Database\Eloquent\Collection<int, Snatch>
+     */
+    public function sumTimeByUser(array $userIds): \Illuminate\Database\Eloquent\Collection
+    {
+        return Snatch::query()
+            ->selectRaw('userid, sum(seedtime) as seedtime_sum, sum(leechtime) as leechtime_sum')
+            ->whereIn('userid', $userIds)
+            ->groupBy('userid')
+            ->get();
+    }
+
+    /**
+     * Download-progress rows (`to_go` + torrent size) for one user.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @return Collection<int, array{to_go: mixed, torrentid: int, size: mixed}>
+     */
+    public function listToGoWithSize(int $uid, array $torrentIds): Collection
+    {
+        /** @var Collection<int, array{to_go: mixed, torrentid: int, size: mixed}> */
+        return Snatch::query()
+            ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
+            ->select('snatched.to_go', 'snatched.torrentid', 'torrents.size')
+            ->where('snatched.userid', $uid)
+            ->whereIn('snatched.torrentid', $torrentIds)
+            ->toBase()
+            ->get()
+            ->map(fn ($row) => (array) $row);
     }
 }

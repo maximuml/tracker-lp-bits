@@ -10,7 +10,7 @@ use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Message;
+use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\CurrentUser;
 use App\Support\Input;
@@ -35,6 +35,7 @@ final class OfferService
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
         private readonly OfferCommentRepositoryInterface $offerCommentRepository,
         private readonly OfferModerationService $offerModerationService,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     public function handleActionPublic(Request $request): ?RedirectResponse
@@ -206,7 +207,7 @@ final class OfferService
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
             $msg = Locale::trans('offer.msg_your_offer', [], $locale).($num['name'] ?? '').Locale::trans('offer.msg_was_deleted_by', [], $locale)."[url=userdetails.php?id={$userId}]".($curuser['username'] ?? '').'[/url]'.Locale::trans('offer.msg_blank', [], $locale).($reason !== '' ? Locale::trans('offer.msg_reason_is', [], $locale).$reason : '');
 
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => (int) ($num['userid'] ?? 0),
                 'msg' => $msg,

@@ -39,6 +39,7 @@ class TorrentEditController extends Controller
         private readonly HitAndRunRepository $hitAndRunRepository,
         private readonly CurrentUser $currentUser,
         private readonly TorrentDetailRepository $torrentDetailRepository,
+        private readonly CustomField $customField,
     ) {}
 
     public function legacy(Request $request): View|RedirectResponse
@@ -144,7 +145,7 @@ class TorrentEditController extends Controller
             'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
             'taxonomySelect' => SafeHtml::fromTrustedHtml($this->searchBoxSchemaBuilder->renderTaxonomySelect($sectionmode, $row)),
             'tagCheckbox' => SafeHtml::fromTrustedHtml($this->tagRepository->renderCheckbox($sectionmode, (array) $this->torrentDetailRepository->getTagIds($id))),
-            'customFieldsHtml' => SafeHtml::fromTrustedHtml((string) (new CustomField)->renderOnUploadPage($id, $sectionmode)),
+            'customFieldsHtml' => SafeHtml::fromTrustedHtml((string) $this->customField->renderOnUploadPage($id, $sectionmode)),
             'hitAndRunHtml' => SafeHtml::fromTrustedHtml((string) $this->hitAndRunRepository->renderOnUploadPage($row['hr'] ?? 0, $sectionmode)),
             'canEdit' => $canEdit,
             'priceRow' => $priceRow,

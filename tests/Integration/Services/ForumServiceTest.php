@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\ForumRepository;
+use App\Repositories\MessageRepository;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
@@ -142,7 +143,6 @@ final class ForumServiceTest extends TestCase
         return new ForumService(
             $this->app->make(ForumRepository::class),
             $this->app->make(CurrentUser::class),
-            $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
             $this->app->make(TopicPolicy::class),
             $this->app->make(PostPolicy::class),
@@ -150,6 +150,7 @@ final class ForumServiceTest extends TestCase
             $this->app->make(PostRepository::class),
             $this->app->make(PostLookupRepository::class),
             $this->app->make(ForumModerationService::class),
+            $this->app->make(MessageRepository::class),
         );
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Support\Metrics\Collectors;
 
+use App\Repositories\OutboxEventRepository;
 use App\Support\Metrics\Collectors\OutboxMetricsCollector;
 use App\Support\Metrics\PrometheusFormatter;
 use Tests\Attributes\TestCategory;
@@ -14,7 +15,7 @@ final class OutboxMetricsCollectorTest extends TestCase
 {
     public function test_collect_emits_all_outbox_gauges(): void
     {
-        $lines = (new OutboxMetricsCollector(new PrometheusFormatter))->collect();
+        $lines = (new OutboxMetricsCollector(new PrometheusFormatter, app(OutboxEventRepository::class)))->collect();
 
         $this->assertContains('# TYPE nexus_outbox_pending_events gauge', $lines);
         $this->assertContains('# TYPE nexus_outbox_dead_letter_events gauge', $lines);

@@ -8,19 +8,18 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\Message;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
+use App\Repositories\MessageRepository;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
@@ -81,7 +80,6 @@ final class ForumService
     public function __construct(
         private readonly ForumRepositoryInterface $repository,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
@@ -89,6 +87,7 @@ final class ForumService
         private readonly PostRepositoryInterface $postRepository,
         private readonly PostLookupRepository $postLookupRepository,
         private readonly ForumModerationService $moderation,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -173,7 +172,7 @@ final class ForumService
             if ($subject === '') {
                 LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_must_enter_subject'));
             }
-            $maxsubjectlength = (int) ($this->globals->get('maxsubjectlength') ?? 100);
+            $maxsubjectlength = SiteConfig::current()->main->maxSubjectLength();
             if (strlen($subject) > $maxsubjectlength) {
                 LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_subject_limited'));
             }
@@ -243,7 +242,7 @@ final class ForumService
                 $receiver = $postInfo->user;
                 if ($receiver !== null) {
                     $locale = $receiver->locale;
-                    Message::add([
+                    $this->messageRepository->add([
                         'sender' => null,
                         'receiver' => $receiver->id,
                         'subject' => Locale::trans('forum.post.edited_notify_subject', [], $locale),
@@ -300,7 +299,7 @@ final class ForumService
                 $receiver = $topicInfo->user;
                 if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
                     $locale = $receiver->locale;
-                    Message::add([
+                    $this->messageRepository->add([
                         'sender' => null,
                         'receiver' => $receiver->id,
                         'subject' => Locale::trans('forum.topic.replied_notify_subject', [], $locale),
@@ -316,7 +315,7 @@ final class ForumService
                     $receiver = $quotePostInfo->user;
                     if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
                         $locale = $receiver->locale;
-                        Message::add([
+                        $this->messageRepository->add([
                             'sender' => null,
                             'receiver' => $receiver->id,
                             'subject' => Locale::trans('forum.reply.replied_notify_subject', [], $locale),

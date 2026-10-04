@@ -226,4 +226,48 @@ final class UserCleanupRepository extends BaseRepository
             ->where('donor', false)
             ->find($userIds, ['id', 'username', 'lang']);
     }
+
+    /**
+     * Enabled users whose warning has expired — RemoveUserWarning sweep.
+     *
+     * @return EloquentCollection<int, User>
+     */
+    public function listExpiredWarnings(): EloquentCollection
+    {
+        return User::query()
+            ->with('language')
+            ->where('enabled', true)
+            ->where('warned', true)
+            ->where('warneduntil', '<', now())
+            ->get();
+    }
+
+    /**
+     * Users whose VIP status has expired — RemoveUserVipStatus sweep.
+     *
+     * @return EloquentCollection<int, User>
+     */
+    public function listExpiredVips(): EloquentCollection
+    {
+        return User::query()
+            ->with('language')
+            ->where('vip_added', true)
+            ->where('vip_until', '<', now())
+            ->get();
+    }
+
+    /**
+     * Users whose donor status has expired — RemoveUserDonorStatus sweep.
+     *
+     * @return EloquentCollection<int, User>
+     */
+    public function listExpiredDonors(): EloquentCollection
+    {
+        return User::query()
+            ->with('language')
+            ->where('donor', true)
+            ->whereNotNull('donoruntil')
+            ->where('donoruntil', '<', now())
+            ->get();
+    }
 }

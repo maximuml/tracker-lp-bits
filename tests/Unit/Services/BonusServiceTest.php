@@ -6,6 +6,7 @@ namespace Tests\Unit\Services;
 
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
+use App\Repositories\MessageRepository;
 use App\Repositories\SettingRepository;
 use App\Services\BonusService;
 use App\Support\Globals;
@@ -44,7 +45,7 @@ final class BonusServiceTest extends TestCase
         $this->app->instance(SettingRepository::class, $settingsRepo);
         Settings::resetCache();
 
-        return new BonusService($repo, $calcRepo, $this->app->make(Globals::class));
+        return new BonusService($repo, $calcRepo, $this->app->make(MessageRepository::class));
     }
 
     public function test_returns_null_when_action_is_not_exchange(): void

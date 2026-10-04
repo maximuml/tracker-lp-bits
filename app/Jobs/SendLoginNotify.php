@@ -7,6 +7,8 @@ namespace App\Jobs;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Models\LoginLog;
 use App\Models\User;
+use App\Repositories\LoginLogRepository;
+use App\Repositories\UserAccountRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -42,21 +44,17 @@ class SendLoginNotify implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(ToolRepositoryInterface $toolRep): void
+    public function handle(ToolRepositoryInterface $toolRep, UserAccountRepository $userAccountRepository, LoginLogRepository $loginLogRepository): void
     {
         /** @var LoginLog $thisLoginLog */
-        $thisLoginLog = LoginLog::query()->where('id', $this->thisLoginLogId)->firstOrFail();
+        $thisLoginLog = $loginLogRepository->findOrFailById($this->thisLoginLogId);
         $log = 'handling login log: '.$thisLoginLog->toJson();
         if (! $thisLoginLog->country || ! $thisLoginLog->city) {
             Logger::writeWithContext((string) "{$log}, this login log no country or city", (string) 'info', (bool) false);
 
             return;
         }
-        $lastLoginLog = LoginLog::query()
-            ->where('uid', $thisLoginLog->uid)
-            ->where('id', '<', $thisLoginLog->id)
-            ->orderBy('id', 'desc')
-            ->first();
+        $lastLoginLog = $loginLogRepository->findPreviousByUid($thisLoginLog->uid, $thisLoginLog->id);
         if (! $lastLoginLog) {
             Logger::writeWithContext((string) "{$log}, no last login log", (string) 'info', (bool) false);
 
@@ -74,7 +72,7 @@ class SendLoginNotify implements ShouldQueue
             return;
         }
         /** @var User $user */
-        $user = User::query()->where('id', $thisLoginLog->uid)->firstOrFail(User::$commonFields);
+        $user = $userAccountRepository->findOrFailByIdFields($thisLoginLog->uid, User::$commonFields);
         $locale = $user->locale;
         $subject = Locale::trans('message.login_notify.subject', ['site_name' => SiteConfig::current()->basic->siteName()], $locale);
         $body = Locale::trans('message.login_notify.body', ['this_login_time' => $thisLoginLog->created_at, 'this_ip' => $thisLoginLog->ip, 'this_location' => sprintf('%s·%s', $thisLoginLog->city, $thisLoginLog->country), 'last_login_time' => $lastLoginLog->created_at, 'last_ip' => $lastLoginLog->ip, 'last_location' => sprintf('%s·%s', $lastLoginLog->city, $lastLoginLog->country)], $locale);

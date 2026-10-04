@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Enums\BusinessType;
 use App\Enums\TorrentType;
 use App\Events\TorrentCreated;
@@ -14,12 +13,9 @@ use App\Exceptions\TorrentAlreadyExistsException;
 use App\Exceptions\UploadValidationException;
 use App\Models\BonusLogs;
 use App\Models\Category;
-use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Repositories\CategoryRepository;
-use App\Repositories\TorrentRepository;
-use App\Repositories\TorrentUploadRepository;
+use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CustomField;
 use App\Support\Locale;
@@ -39,10 +35,9 @@ class UploadService
     public function __construct(
         private UploadMetadataService $metadataService,
         private UploadFileService $fileService,
-        private TorrentDownloadRepositoryInterface $torrentDownloadRepository,
-        private TorrentUploadRepository $torrentUploadRepository,
-        private CategoryRepository $categoryRepository,
-        private TorrentRepository $torrentRepository,
+        private UploadRepositories $repositories,
+        private CustomField $customField,
+        private MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -62,7 +57,7 @@ class UploadService
         if (empty($request->type)) {
             throw new UploadValidationException(Locale::trans('upload.category_unselected', [], null), 'type');
         }
-        $category = $this->categoryRepository->findById((int) $request->type);
+        $category = $this->repositories->category->findById((int) $request->type);
         if (! $category instanceof Category) {
             throw new UploadValidationException(Locale::trans('upload.invalid_category', [], null), 'type');
         }
@@ -101,7 +96,7 @@ class UploadService
         unset($dict['nodes']); // remove cached peers (Bitcomet & Azareus)
 
         $infoHash = pack('H*', sha1(Bencode::encode($dict['info'])));
-        $existingId = $this->torrentRepository->findIdByInfoHash($infoHash);
+        $existingId = $this->repositories->torrent->findIdByInfoHash($infoHash);
         if ($existingId !== null) {
             throw new TorrentAlreadyExistsException($existingId);
         }
@@ -157,7 +152,7 @@ class UploadService
             'created_at' => $nowStr,
         ];
         $newTorrent = DB::transaction(function () use ($request, $category, $torrentInsert, $extraInsert, $fileListInfo, $subCategoriesAngTags, $dict, $torrentSavePath) {
-            $newTorrent = $this->torrentUploadRepository->createTorrent($torrentInsert);
+            $newTorrent = $this->repositories->torrentUpload->createTorrent($torrentInsert);
             $id = $newTorrent->id;
             $torrentFilePath = "$torrentSavePath/$id.torrent";
             $saveResult = Bencode::dump($torrentFilePath, $dict);
@@ -166,7 +161,7 @@ class UploadService
                 throw new UploadValidationException(Locale::trans('upload.save_torrent_file_failed', [], null), 'file');
             }
             $extraInsert['torrent_id'] = $id;
-            $this->torrentUploadRepository->insertExtra($extraInsert);
+            $this->repositories->torrentUpload->insertExtra($extraInsert);
             $fileInsert = [];
             foreach ($fileListInfo['fileList'] as $fileItem) {
                 $fileInsert[] = [
@@ -175,7 +170,7 @@ class UploadService
                     'size' => $fileItem[1],
                 ];
             }
-            $this->torrentUploadRepository->insertFiles($fileInsert);
+            $this->repositories->torrentUpload->insertFiles($fileInsert);
             if (! empty($subCategoriesAngTags['tags'])) {
                 TorrentTags::insert($id, $subCategoriesAngTags['tags'], (bool) false);
             }
@@ -185,7 +180,7 @@ class UploadService
             return $newTorrent;
         });
         $id = $newTorrent->id;
-        $this->torrentDownloadRepository->addPiecesHashCache($id, $newTorrent->pieces_hash);
+        $this->repositories->torrentDownload->addPiecesHashCache($id, $newTorrent->pieces_hash);
         $this->handleOffer($request, $newTorrent, $user);
         Log::writeWithContext("Torrent $id ($newTorrent->name) was uploaded by $uploaderUsername");
         event(new TorrentCreated($newTorrent));
@@ -222,8 +217,7 @@ class UploadService
         if (empty($data)) {
             return;
         }
-        $field = new CustomField;
-        $field->saveFieldValues($category->mode, $torrentId, $data);
+        $this->customField->saveFieldValues($category->mode, $torrentId, $data);
     }
 
     private function handleOffer(Request $request, Torrent $torrent, User $user): void
@@ -232,11 +226,11 @@ class UploadService
         if ($offerId <= 0) {
             return;
         }
-        if (! $this->torrentUploadRepository->isAllowedOffer($offerId, $user->id)) {
+        if (! $this->repositories->torrentUpload->isAllowedOffer($offerId, $user->id)) {
             return;
         }
 
-        $voterIds = $this->torrentUploadRepository->getOfferVoterIds($offerId, $user->id);
+        $voterIds = $this->repositories->torrentUpload->getOfferVoterIds($offerId, $user->id);
         foreach ($voterIds as $voterId) {
             $locale = Locale::userLocale($voterId);
             $msg = Locale::trans('torrent.msg_offer_you_voted', [], $locale)
@@ -250,7 +244,7 @@ class UploadService
             $subject = Locale::trans('torrent.msg_offer', [], $locale)
                 .$torrent->name
                 .Locale::trans('torrent.msg_was_just_uploaded', [], $locale);
-            Message::add([
+            $this->messageRepository->add([
                 'sender' => null,
                 'subject' => $subject,
                 'receiver' => $voterId,
@@ -258,6 +252,6 @@ class UploadService
                 'msg' => $msg,
             ]);
         }
-        $this->torrentUploadRepository->finalizeOffer($offerId, $user->id);
+        $this->repositories->torrentUpload->finalizeOffer($offerId, $user->id);
     }
 }

@@ -6,8 +6,8 @@ namespace App\Jobs;
 
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Models\Message;
-use App\Models\User;
+use App\Repositories\MessageRepository;
+use App\Repositories\UserCleanupRepository;
 use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
 use App\Support\Events;
@@ -27,13 +27,9 @@ class RemoveUserVipStatus
     /**
      * Execute the job.
      */
-    public function handle(UserDetailRepository $userDetailRepository): void
+    public function handle(UserDetailRepository $userDetailRepository, UserCleanupRepository $userCleanupRepository, MessageRepository $messageRepository): void
     {
-        $users = User::query()
-            ->with('language')
-            ->where('vip_added', true)
-            ->where('vip_until', '<', now())
-            ->get();
+        $users = $userCleanupRepository->listExpiredVips();
         $userModifyLogs = [];
         foreach ($users as $user) {
             $locale = $user->locale;
@@ -63,7 +59,7 @@ class RemoveUserVipStatus
             Cache::clearUser($user->id, '');
             Events::publishModel(ModelEventEnum::USER_UPDATED, $user->id, '');
             if (! empty($message)) {
-                Message::add($message);
+                $messageRepository->add($message);
             }
         }
         if (! empty($userModifyLogs)) {

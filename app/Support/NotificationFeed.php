@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Contracts\Repositories\NotificationFeedRepositoryInterface;
 use App\Contracts\Repositories\ShoutboxRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\StaffMessageRepository;
@@ -47,6 +48,7 @@ final class NotificationFeed
         private readonly ShoutboxRepositoryInterface $shoutboxRepository,
         private readonly NotificationFeedRepositoryInterface $feedRepository,
         private readonly StaffMessageRepository $staffMessageRepository,
+        private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     /**
@@ -391,7 +393,7 @@ final class NotificationFeed
 
     private function userClass(int $userId): int
     {
-        return (int) (User::query()->find($userId, ['class'])->class ?? 0);
+        return (int) $this->userRepository->findById($userId, ['class'])?->class;
     }
 
     private function truncate(string $text, int $length = self::MAX_BODY_LENGTH): string

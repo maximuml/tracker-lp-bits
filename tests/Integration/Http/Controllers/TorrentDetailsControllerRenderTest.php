@@ -8,6 +8,7 @@ use App\Http\Controllers\TorrentDetailsController;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\CurrentUser;
+use App\Support\CustomField;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,7 @@ final class TorrentDetailsControllerRenderTest extends TestCase
         $request = Request::create('/details', 'GET', ['id' => $torrent->id]);
         app()->instance('request', $request);
 
-        $response = $controller->show($request, $torrent->id);
+        $response = $controller->show($request, $torrent->id, app(CustomField::class));
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame(200, $response->getStatusCode());
@@ -56,7 +57,7 @@ final class TorrentDetailsControllerRenderTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->show($request, $torrent->id);
+        $response = $controller->show($request, $torrent->id, app(CustomField::class));
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame(200, $response->getStatusCode());

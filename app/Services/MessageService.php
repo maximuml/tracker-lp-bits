@@ -11,6 +11,7 @@ use App\Models\Message;
 use App\Models\User;
 use App\Policies\MessagePolicy;
 use App\Repositories\MessageLookupRepository;
+use App\Repositories\MessageRepository;
 use App\Repositories\UserAccountRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -38,6 +39,7 @@ class MessageService
         private readonly MessageMailboxService $mailbox,
         private readonly MessageLookupRepository $messageLookupRepository,
         private readonly UserAccountRepository $userAccountRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     public function takeMessage(Request $request): RedirectResponse
@@ -129,7 +131,7 @@ class MessageService
             LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_permission_denied'));
         }
 
-        $message = Message::add([
+        $message = $this->messageRepository->add([
             'sender' => $sender->id,
             'receiver' => $recipient->id,
             'msg' => $body,

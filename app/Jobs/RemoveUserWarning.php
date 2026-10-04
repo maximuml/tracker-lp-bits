@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\ModelEventEnum;
-use App\Models\Message;
-use App\Models\User;
+use App\Repositories\MessageRepository;
+use App\Repositories\UserCleanupRepository;
 use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
 use App\Support\Events;
@@ -26,14 +26,9 @@ class RemoveUserWarning
     /**
      * Execute the job.
      */
-    public function handle(UserDetailRepository $userDetailRepository): void
+    public function handle(UserDetailRepository $userDetailRepository, UserCleanupRepository $userCleanupRepository, MessageRepository $messageRepository): void
     {
-        $users = User::query()
-            ->with('language')
-            ->where('enabled', true)
-            ->where('warned', true)
-            ->where('warneduntil', '<', now())
-            ->get();
+        $users = $userCleanupRepository->listExpiredWarnings();
         $userModifyLogs = [];
         foreach ($users as $user) {
             $locale = $user->locale;
@@ -51,7 +46,7 @@ class RemoveUserWarning
             Events::publishModel(ModelEventEnum::USER_UPDATED, $user->id, '');
             $subject = Locale::trans('cleanup.msg_warning_removed', [], $locale);
             $msg = Locale::trans('cleanup.msg_your_warning_removed', [], $locale);
-            Message::add([
+            $messageRepository->add([
                 'sender' => null,
                 'receiver' => $user->id,
                 'added' => now(),

@@ -93,7 +93,7 @@ class NexusWebUserProvider implements UserProvider
             return false;
         }
 
-        $currentVersion = User::query()->where('id', $user->id)->value('auth_version');
+        $currentVersion = $this->authRepository->getAuthVersion((int) $user->id);
 
         return $payload['auth_version'] !== null
             && $currentVersion !== null

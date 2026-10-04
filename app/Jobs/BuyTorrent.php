@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Models\TorrentBuyLog;
 use App\Repositories\BonusRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Support\Logger;
@@ -65,15 +64,12 @@ class BuyTorrent implements ShouldBeUnique, ShouldQueue
         $userId = $this->userId;
         $torrentId = $this->torrentId;
 
-        $buyLog = TorrentBuyLog::query()
-            ->where('uid', $userId)
-            ->where('torrent_id', $torrentId)
-            ->first();
+        $buyLogId = $purchaseRep->findBuyLogId($userId, $torrentId);
 
-        if ($buyLog) {
+        if ($buyLogId !== null) {
             // 标记购买成功
             Logger::writeWithContext((string) "{$logPrefix}, already bought", (string) 'info', (bool) false);
-            $purchaseRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);
+            $purchaseRep->addBuySuccessCache($userId, $torrentId, $buyLogId);
 
             return;
         }

@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\User;
+use App\Repositories\TokenRepository;
 use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\RequestContext;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class DeleteExpiredToken extends Command
 {
@@ -43,23 +41,18 @@ class DeleteExpiredToken extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(TokenRepository $tokenRepository)
     {
         $uid = $this->option('uid');
         $days = $this->option('days');
         if (! is_numeric($days)) {
             $days = 60;
         }
-        $query = PersonalAccessToken::query()->where('tokenable_type', User::class);
-        if ($uid) {
-            $query->where('tokenable_id', $uid);
-        }
         $log = sprintf('uid: %s, days: %s', $uid, $days);
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
-        $query->where('last_used_at', '<', Carbon::now()->subDays((int) $days));
-        $result = $query->delete();
+        $result = $tokenRepository->deleteExpiredPersonalAccessTokens($uid !== null ? (int) $uid : null, (int) $days);
         $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);

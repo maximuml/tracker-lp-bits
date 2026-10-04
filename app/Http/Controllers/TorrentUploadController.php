@@ -45,6 +45,7 @@ class TorrentUploadController extends Controller
         private TagRepositoryInterface $tagRepository,
         private HitAndRunRepository $hitAndRunRepository,
         private CurrentUser $currentUser,
+        private CustomField $customField,
     ) {}
 
     public function create(Request $request): View|RedirectResponse
@@ -151,7 +152,7 @@ class TorrentUploadController extends Controller
         $oldHr = $request->old("hr.{$browsecatmode}", $request->old('hr', ''));
 
         $oldCustomFields = $request->old("custom_fields.{$browsecatmode}", []);
-        $customField = new CustomField;
+        $customField = $this->customField;
 
         return view('torrents.upload', [
             'uploadErrorList' => $uploadErrorList,

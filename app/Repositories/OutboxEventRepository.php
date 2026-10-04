@@ -56,4 +56,31 @@ final class OutboxEventRepository
             ->where('status', OutboxEvent::STATUS_DEAD_LETTER)
             ->count();
     }
+
+    /**
+     * Single-pass aggregate for /metrics: pending/dead-letter counts,
+     * oldest pending age, average dispatch latency.
+     *
+     * @return array{pending: int|string|null, dead_letter: int|string|null, oldest_pending: string|null, avg_latency: int|float|string|null}|null
+     */
+    public function collectStatusStats(): ?array
+    {
+        $row = OutboxEvent::query()->toBase()
+            ->selectRaw(
+                'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending, '.
+                'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as dead_letter, '.
+                'MIN(CASE WHEN status = ? THEN created_at END) as oldest_pending, '.
+                'AVG(CASE WHEN status = ? AND completed_at IS NOT NULL THEN TIMESTAMPDIFF(SECOND, created_at, completed_at) END) as avg_latency',
+            )
+            ->addBinding([
+                OutboxEvent::STATUS_PENDING,
+                OutboxEvent::STATUS_DEAD_LETTER,
+                OutboxEvent::STATUS_PENDING,
+                OutboxEvent::STATUS_COMPLETED,
+            ], 'select')
+            ->first();
+
+        /** @var array{pending: int|string|null, dead_letter: int|string|null, oldest_pending: string|null, avg_latency: int|float|string|null}|null */
+        return $row === null ? null : (array) $row;
+    }
 }

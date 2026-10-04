@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\User;
+use App\Repositories\UserStatRepository;
 use App\Support\PasswordHasher;
 use Illuminate\Console\Command;
 
@@ -29,15 +29,9 @@ final class UsersLegacyHashReportCommand extends Command
 
     private const LIST_LIMIT = 100;
 
-    public function handle(): int
+    public function handle(UserStatRepository $userStatRepository): int
     {
-        $rows = User::query()
-            ->toBase()
-            ->selectRaw("COALESCE(NULLIF(passhash_algo, ''), '".PasswordHasher::ALGO_SHA256."') AS algo")
-            ->selectRaw('COUNT(*) AS total')
-            ->groupBy('algo')
-            ->orderByDesc('total')
-            ->get();
+        $rows = $userStatRepository->listLegacyHashAlgoCounts();
 
         $total = (int) $rows->sum('total');
         $legacy = (int) $rows->where('algo', '!=', PasswordHasher::ALGO_ARGON2ID)->sum('total');
@@ -45,9 +39,9 @@ final class UsersLegacyHashReportCommand extends Command
         $this->table(
             ['passhash_algo', 'users', '%'],
             $rows->map(fn ($row) => [
-                (string) $row->algo,
-                (int) $row->total,
-                $total > 0 ? number_format((int) $row->total * 100 / $total, 2) : '0.00',
+                (string) $row['algo'],
+                (int) $row['total'],
+                $total > 0 ? number_format((int) $row['total'] * 100 / $total, 2) : '0.00',
             ])->all()
         );
 
@@ -66,27 +60,20 @@ final class UsersLegacyHashReportCommand extends Command
 
         $listAlgo = $this->option('list');
         if (is_string($listAlgo) && $listAlgo !== '') {
-            $this->listUsers($listAlgo);
+            $this->listUsers($listAlgo, $userStatRepository);
         }
 
         return self::SUCCESS;
     }
 
-    private function listUsers(string $algo): void
+    private function listUsers(string $algo, UserStatRepository $userStatRepository): void
     {
-        $query = User::query()->toBase()->select(['id', 'username', 'last_login'])->orderBy('id');
-        if ($algo === PasswordHasher::ALGO_SHA256) {
-            $query->where(fn ($q) => $q->where('passhash_algo', $algo)->orWhereNull('passhash_algo')->orWhere('passhash_algo', ''));
-        } else {
-            $query->where('passhash_algo', $algo);
-        }
-
-        $count = (clone $query)->count();
-        $users = $query->limit(self::LIST_LIMIT)->get();
+        $count = $userStatRepository->countHashUsers($algo);
+        $users = $userStatRepository->listLegacyHashUsers($algo, self::LIST_LIMIT);
 
         $this->table(
             ['id', 'username', 'last_login'],
-            $users->map(fn ($u) => [$u->id, $u->username, $u->last_login ?? 'never'])->all()
+            $users->map(fn ($u) => [$u['id'], $u['username'], ($u['last_login'] ?? 'never')])->all()
         );
 
         if ($count > self::LIST_LIMIT) {

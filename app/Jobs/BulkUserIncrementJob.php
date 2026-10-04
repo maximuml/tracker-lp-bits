@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Enums\UserStatus;
 use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserDetailRepository;
+use App\Repositories\UserStatRepository;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -56,7 +56,7 @@ class BulkUserIncrementJob implements ShouldQueue
         $this->onQueue('default');
     }
 
-    public function handle(UserDetailRepository $userDetailRepository, MessageRepository $messageRepository): void
+    public function handle(UserDetailRepository $userDetailRepository, MessageRepository $messageRepository, UserStatRepository $userStatRepository): void
     {
         $logPrefix = sprintf(
             'BulkUserIncrementJob key=%s field=%s amount=%d classes=%s dryRun=%s',
@@ -83,22 +83,14 @@ class BulkUserIncrementJob implements ShouldQueue
 
         while (true) {
             $offset = ($page - 1) * $size;
-            $users = User::query()
-                ->whereIn('class', $this->classIds)
-                ->where('enabled', true)
-                ->where('status', UserStatus::CONFIRMED->value)
-                ->offset($offset)
-                ->limit($size)
-                ->get(['id']);
+            $users = $userStatRepository->listActiveUserIdsByClasses($this->classIds, $offset, $size);
 
             if ($users->isEmpty()) {
                 break;
             }
 
             $idArr = [];
-            foreach ($users as $userRow) {
-                $idArr[] = (int) $userRow->id;
-            }
+            $idArr = $users->map(fn ($id) => (int) $id)->all();
 
             if (! $this->dryRun) {
                 $userDetailRepository->incrementFieldForIds($idArr, $this->field, (int) $this->amount);

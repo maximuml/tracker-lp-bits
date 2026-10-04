@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Models\SearchBox;
-use App\Models\TorrentCustomField;
-use App\Models\TorrentCustomFieldValue;
+use App\Repositories\CustomFieldRepository;
+use App\Repositories\SearchBoxRepository;
 use App\Support\Html\SafeHtml;
-use Illuminate\Database\Eloquent\Collection;
 
 class CustomField
 {
+    public function __construct(
+        private readonly CustomFieldRepository $customFieldRepository,
+        private readonly SearchBoxRepository $searchBoxRepository,
+    ) {}
+
     const TYPE_TEXT = 0;
 
     const TYPE_TEXTAREA = 1;
@@ -89,18 +92,14 @@ class CustomField
      */
     public function renderOnUploadPage(int $torrentId, int $searchBoxId, array $overrideValues = []): string
     {
-        $searchBox = SearchBox::query()->find($searchBoxId);
+        $searchBox = $this->searchBoxRepository->findById($searchBoxId);
         if (empty($searchBox)) {
             throw new \RuntimeException("Invalid search box: $searchBoxId");
         }
         $customValues = $this->listTorrentCustomField($torrentId, $searchBoxId);
         $customFieldsRaw = $searchBox->custom_fields;
         $customFieldIds = array_filter(array_map('intval', is_array($customFieldsRaw) ? $customFieldsRaw : explode(',', (string) ($customFieldsRaw ?? ''))));
-        $res = TorrentCustomField::query()
-            ->whereIn('id', $customFieldIds)
-            ->orderBy('priority', 'desc')
-            ->toBase()
-            ->get();
+        $res = $this->customFieldRepository->listFieldsByIdsOrdered($customFieldIds);
         $cspNonce = (string) request()->attributes->get('csp_nonce', '');
         $baseUrl = Url::schemeAndHost(false);
         $html = '';
@@ -178,7 +177,7 @@ class CustomField
         // suppose torrentId is array
         $isArray = is_array($torrentId);
         $torrentIdArr = is_array($torrentId) ? $torrentId : [$torrentId];
-        $searchBox = SearchBox::query()->find($searchBoxId);
+        $searchBox = $this->searchBoxRepository->findById($searchBoxId);
         if (empty($searchBox)) {
             throw new \RuntimeException("Invalid search box: $searchBoxId");
         }
@@ -189,15 +188,7 @@ class CustomField
         }
         $torrentIdArr = array_map('intval', $torrentIdArr);
 
-        $res = TorrentCustomFieldValue::query()
-            ->from('torrents_custom_field_values as v')
-            ->join('torrents_custom_fields as f', 'v.custom_field_id', '=', 'f.id')
-            ->whereIn('v.torrent_id', $torrentIdArr)
-            ->whereIn('f.id', $customFieldIds)
-            ->orderBy('f.priority', 'desc')
-            ->select('f.*', 'v.custom_field_value', 'v.torrent_id')
-            ->toBase()
-            ->get();
+        $res = $this->customFieldRepository->listValuesForTorrents($torrentIdArr, $customFieldIds);
         $values = [];
         $result = [];
         foreach ($res as $row) {
@@ -235,9 +226,9 @@ class CustomField
 
     public function renderOnTorrentDetailsPage(int $torrentId, int $searchBoxId): string
     {
-        $displayName = \App\Support\SearchBox::valueWithContext($searchBoxId, 'custom_fields_display_name');
+        $displayName = SearchBox::valueWithContext($searchBoxId, 'custom_fields_display_name');
         $customFields = $this->listTorrentCustomField($torrentId, $searchBoxId);
-        $mixedRowContent = \App\Support\SearchBox::valueWithContext($searchBoxId, 'custom_fields_display');
+        $mixedRowContent = SearchBox::valueWithContext($searchBoxId, 'custom_fields_display');
         $rowByRowHtml = '';
         $shouldRenderMixRow = false;
         foreach ($customFields as $field) {
@@ -309,30 +300,28 @@ class CustomField
     /** @param  array<int|string, mixed>  $data */
     public function saveFieldValues(int $searchBoxId, int $torrentId, array $data): void
     {
-        $searchBox = SearchBox::query()->findOrFail($searchBoxId);
-        $enabledFields = TorrentCustomField::query()->find($searchBox->custom_fields);
+        $searchBox = $this->searchBoxRepository->findOrFailById($searchBoxId);
+        $enabledFields = $this->customFieldRepository->findFieldsByIds($searchBox->custom_fields);
         $insert = [];
         $now = now();
-        if ($enabledFields instanceof Collection) {
-            foreach ($enabledFields as $field) {
-                if (empty($data[$field->id])) {
-                    if ($field->required) {
-                        //                    throw new \InvalidArgumentException(nexus_trans("nexus.require_argument", ['argument' => $field->label]));
-                        Logger::writeWithContext((string) "Field: {$field->label} required, but empty", (string) 'info', (bool) false);
-                    }
-
-                    continue;
+        foreach ($enabledFields as $field) {
+            if (empty($data[$field->id])) {
+                if ($field->required) {
+                    //                    throw new \InvalidArgumentException(nexus_trans("nexus.require_argument", ['argument' => $field->label]));
+                    Logger::writeWithContext((string) "Field: {$field->label} required, but empty", (string) 'info', (bool) false);
                 }
-                $insert[] = [
-                    'torrent_id' => $torrentId,
-                    'custom_field_id' => $field->id,
-                    'custom_field_value' => is_array($data[$field->id]) ? json_encode($data[$field->id]) : $data[$field->id],
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
+
+                continue;
             }
+            $insert[] = [
+                'torrent_id' => $torrentId,
+                'custom_field_id' => $field->id,
+                'custom_field_value' => is_array($data[$field->id]) ? json_encode($data[$field->id]) : $data[$field->id],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
-        TorrentCustomFieldValue::query()->where('torrent_id', $torrentId)->delete();
-        TorrentCustomFieldValue::query()->insert($insert);
+        $this->customFieldRepository->deleteValuesForTorrent($torrentId);
+        $this->customFieldRepository->insertValues($insert);
     }
 }

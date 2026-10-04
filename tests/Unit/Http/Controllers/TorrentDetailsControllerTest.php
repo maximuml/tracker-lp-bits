@@ -9,6 +9,7 @@ use App\Repositories\SearchBoxSchemaBuilder;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
 use App\Support\Cache\LegacyRedisCache;
+use App\Support\CustomField;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Mockery;
@@ -35,7 +36,7 @@ final class TorrentDetailsControllerTest extends TestCase
 
         $this->expectException(NotFoundHttpException::class);
 
-        $controller->show($request, 0);
+        $controller->show($request, 0, app(CustomField::class));
     }
 
     public function test_show_aborts_for_negative_id(): void
@@ -48,7 +49,7 @@ final class TorrentDetailsControllerTest extends TestCase
 
         $this->expectException(NotFoundHttpException::class);
 
-        $controller->show($request, -1);
+        $controller->show($request, -1, app(CustomField::class));
     }
 
     public function test_show_redirects_guest_to_login(): void
@@ -60,7 +61,7 @@ final class TorrentDetailsControllerTest extends TestCase
         $request = Request::create('/details', 'GET', ['id' => 5]);
         app()->instance('request', $request);
 
-        $response = $controller->show($request, 5);
+        $response = $controller->show($request, 5, app(CustomField::class));
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/login.php', $response->getTargetUrl());
@@ -76,7 +77,7 @@ final class TorrentDetailsControllerTest extends TestCase
         $request = Request::create('/details', 'GET', ['id' => 10, 'hit' => 1]);
         app()->instance('request', $request);
 
-        $response = $controller->show($request, 10);
+        $response = $controller->show($request, 10, app(CustomField::class));
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/login.php', $response->getTargetUrl());

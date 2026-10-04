@@ -67,7 +67,7 @@ class TorrentDetailsController extends Controller
         $this->legacyRedisCache = $legacyRedisCache;
     }
 
-    public function show(Request $request, int $id): View|RedirectResponse|Response
+    public function show(Request $request, int $id, CustomField $customField): View|RedirectResponse|Response
     {
         if ($id <= 0) {
             abort(404);
@@ -132,7 +132,7 @@ class TorrentDetailsController extends Controller
 
         $tagIds = $this->torrentDetailRepository->getTagIds($id);
 
-        $viewData = $this->buildDetailsViewData($id, $row, $currentUser, $denyLog, $hasBuy, $tagIds, $requestFlags);
+        $viewData = $this->buildDetailsViewData($id, $row, $currentUser, $denyLog, $hasBuy, $tagIds, $requestFlags, $customField);
 
         return response()->view('torrent.details', array_merge([
             'id' => $id,
@@ -155,10 +155,8 @@ class TorrentDetailsController extends Controller
      * @param  array<string, mixed>  $requestFlags
      * @return array<string, mixed>
      */
-    private function buildDetailsViewData(int $id, array $row, array $currentUser, ?TorrentOperationLog $denyLog, bool $hasBuy, array $tagIds, array $requestFlags): array
+    private function buildDetailsViewData(int $id, array $row, array $currentUser, ?TorrentOperationLog $denyLog, bool $hasBuy, array $tagIds, array $requestFlags, CustomField $customField): array
     {
-        $customField = new CustomField;
-
         $tagHtml = $this->tagRepository->renderSpan((int) ($row['search_box_id'] ?? 0), $tagIds);
         $downloadUrl = $this->downloadRepository->getDownloadUrl($id, $currentUser);
         $customFieldsHtml = $customField->renderOnTorrentDetailsPage($id, (int) ($row['search_box_id'] ?? 0));

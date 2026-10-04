@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\User;
-use App\Support\PasswordHasher;
+use App\Repositories\UserStatRepository;
 use Illuminate\Console\Command;
 
 /**
@@ -32,17 +31,13 @@ final class UsersForceResetLegacyCommand extends Command
 
     protected $description = 'Flag remaining legacy-hash users for forced password change (step 2.1)';
 
-    public function handle(): int
+    public function handle(UserStatRepository $userStatRepository): int
     {
-        $total = (int) User::query()->count();
+        $total = $userStatRepository->countAll();
         // Same legacy definition as users:legacy-hash-report —
         // non-argon2id, empty, or NULL algo.
-        $legacyQuery = fn () => User::query()->where(fn ($q) => $q
-            ->where('passhash_algo', '!=', PasswordHasher::ALGO_ARGON2ID)
-            ->orWhereNull('passhash_algo')
-            ->orWhere('passhash_algo', ''));
-        $legacy = (int) $legacyQuery()->count();
-        $alreadyFlagged = (int) $legacyQuery()->where('must_change_password', 1)->count();
+        $legacy = $userStatRepository->countLegacyHash();
+        $alreadyFlagged = $userStatRepository->countLegacyHash(flaggedOnly: true);
         $share = $total > 0 ? $legacy * 100 / $total : 0.0;
 
         $this->info(sprintf(
@@ -67,7 +62,7 @@ final class UsersForceResetLegacyCommand extends Command
             return self::SUCCESS;
         }
 
-        $updated = (int) $legacyQuery()->where('must_change_password', '!=', 1)->update(['must_change_password' => 1]);
+        $updated = $userStatRepository->flagLegacyHashUsers();
         $this->info(sprintf('Flagged %d users (must_change_password=1).', $updated));
 
         return self::SUCCESS;

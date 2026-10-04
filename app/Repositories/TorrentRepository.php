@@ -46,6 +46,7 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
 {
     public function __construct(
         private readonly TorrentDownloadRepositoryInterface $downloadRepository,
+        private readonly TorrentStatus $torrentStatus,
     ) {}
 
     /** @var array<int, string> */
@@ -192,8 +193,7 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
             $rewardData = $user->reward_torrent_logs()->whereIn('torrentid', $torrentIdArr)->get()->keyBy('torrentid');
         }
         if ($hasFieldActiveStatus = $apiQueryBuilder->hasIncludeField('active_status')) {
-            $torrentModule = new TorrentStatus;
-            $activeData = $torrentModule->listLeechingSeedingStatus($user->id, $torrentIdArr);
+            $activeData = $this->torrentStatus->listLeechingSeedingStatus($user->id, $torrentIdArr);
         }
         Logger::writeWithContext((string) 'after prepare has data', (string) 'info', (bool) false);
 
@@ -459,5 +459,16 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
             ->where('owner', $ownerId)
             ->where('approval_status', TorrentApprovalStatus::DENY->value)
             ->count();
+    }
+
+    /**
+     * Bulk seeders/leechers/comments counter refresh used by
+     * UpdateTorrentSeedersEtc — upsert keyed on id.
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    public function upsertCounters(array $rows): int
+    {
+        return Torrent::query()->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
     }
 }

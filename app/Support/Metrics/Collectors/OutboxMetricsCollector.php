@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Metrics\Collectors;
 
-use App\Models\OutboxEvent;
+use App\Repositories\OutboxEventRepository;
 use App\Support\Metrics\MetricsCollector;
 use App\Support\Metrics\PrometheusFormatter;
 
@@ -13,7 +13,10 @@ use App\Support\Metrics\PrometheusFormatter;
  */
 final class OutboxMetricsCollector implements MetricsCollector
 {
-    public function __construct(private readonly PrometheusFormatter $fmt) {}
+    public function __construct(
+        private readonly PrometheusFormatter $fmt,
+        private readonly OutboxEventRepository $outboxEventRepository,
+    ) {}
 
     /**
      * @return list<string>
@@ -29,26 +32,13 @@ final class OutboxMetricsCollector implements MetricsCollector
 
         try {
             // Single query for all outbox stats to respect query budget
-            $stats = OutboxEvent::query()->toBase()
-                ->selectRaw(
-                    'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending, '.
-                    'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as dead_letter, '.
-                    'MIN(CASE WHEN status = ? THEN created_at END) as oldest_pending, '.
-                    'AVG(CASE WHEN status = ? AND completed_at IS NOT NULL THEN TIMESTAMPDIFF(SECOND, created_at, completed_at) END) as avg_latency',
-                )
-                ->addBinding([
-                    OutboxEvent::STATUS_PENDING,
-                    OutboxEvent::STATUS_DEAD_LETTER,
-                    OutboxEvent::STATUS_PENDING,
-                    OutboxEvent::STATUS_COMPLETED,
-                ], 'select')
-                ->first();
+            $stats = $this->outboxEventRepository->collectStatusStats();
 
-            $pending = (int) ($stats->pending ?? 0);
-            $deadLetter = (int) ($stats->dead_letter ?? 0);
-            $oldest = $stats?->oldest_pending;
+            $pending = (int) ($stats['pending'] ?? 0);
+            $deadLetter = (int) ($stats['dead_letter'] ?? 0);
+            $oldest = $stats['oldest_pending'] ?? null;
             $age = $oldest !== null ? abs((int) now()->diffInSeconds($oldest)) : 0;
-            $avgLatency = (float) ($stats->avg_latency ?? 0);
+            $avgLatency = (float) ($stats['avg_latency'] ?? 0);
 
             $lines[] = "nexus_outbox_pending_events {$pending}";
             $lines[] = "nexus_outbox_dead_letter_events {$deadLetter}";

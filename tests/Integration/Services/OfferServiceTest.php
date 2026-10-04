@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Repositories\MessageRepository;
 use App\Repositories\OfferCommentRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
@@ -65,7 +66,8 @@ final class OfferServiceTest extends TestCase
             new OfferRepository,
             new OfferVoteRepository,
             new OfferCommentRepository,
-            new OfferModerationService($this->currentUser, new OfferRepository, new OfferVoteRepository),
+            new OfferModerationService($this->currentUser, new OfferRepository, new OfferVoteRepository, new MessageRepository),
+            new MessageRepository,
         );
     }
 

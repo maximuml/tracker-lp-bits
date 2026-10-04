@@ -16,6 +16,7 @@ use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Repositories\TorrentRepository;
 use App\Repositories\TorrentUploadRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Description;
@@ -30,6 +31,7 @@ class UploadMetadataService
     public function __construct(
         private readonly SearchBoxRepositoryInterface $searchBoxRepository,
         private readonly TorrentUploadRepository $torrentUploadRepository,
+        private readonly TorrentRepository $torrentRepository,
     ) {}
 
     /**
@@ -179,9 +181,7 @@ class UploadMetadataService
         }
 
         $uploadDenyApprovalDenyCount = SiteConfig::current()->main->uploadDenyApprovalDenyCount();
-        $approvalDenyCount = Torrent::query()->where('owner', $user->id)
-            ->where('approval_status', TorrentApprovalStatus::DENY->value)
-            ->count();
+        $approvalDenyCount = $this->torrentRepository->countDeniedByOwner((int) $user->id);
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             throw new UploadValidationException(Locale::trans('upload.approval_deny_reach_upper_limit', [], null));
         }

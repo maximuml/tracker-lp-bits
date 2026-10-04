@@ -8,18 +8,19 @@ use App\DTOs\ScrapeRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Models\Torrent;
+use App\Repositories\AnnounceTorrentRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\RedisGuard;
 use App\ValueObjects\InfoHash;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
 class ScrapeService
 {
     public function __construct(
-        private readonly PasskeyUserLookup $passkeyUserLookup = new PasskeyUserLookup,
+        private readonly PasskeyUserLookup $passkeyUserLookup,
+        private readonly AnnounceTorrentRepository $announceTorrentRepository,
     ) {}
 
     /**
@@ -98,20 +99,10 @@ class ScrapeService
     {
         /** @var list<string> $binaries */
         $binaries = array_map(static fn (InfoHash $h) => $h->toBinary(), $infoHashes);
+        /** @var list<string> $hexes */
+        $hexes = array_map(static fn (InfoHash $h) => $h->toHex(), $infoHashes);
 
-        $query = Torrent::query()->select(['info_hash', 'times_completed', 'seeders', 'leechers']);
-
-        if (DB::connection()->getDriverName() === 'pgsql') {
-            $query->where(function ($q) use ($infoHashes) {
-                foreach ($infoHashes as $hash) {
-                    $q->orWhereRaw("info_hash = decode(?, 'hex')", [$hash->toHex()]);
-                }
-            });
-        } else {
-            $query->whereIn('info_hash', $binaries);
-        }
-
-        return $query->get();
+        return $this->announceTorrentRepository->listScrapeRows($binaries, $hexes);
     }
 
     /**

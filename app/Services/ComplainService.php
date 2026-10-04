@@ -6,8 +6,7 @@ namespace App\Services;
 
 use App\Contracts\Repositories\ComplainRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
-use App\Models\Complain;
-use App\Models\User;
+use App\Repositories\UserAccountRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Lock;
@@ -26,6 +25,7 @@ final class ComplainService
     public function __construct(
         private readonly ComplainRepositoryInterface $complainRepository,
         private readonly ToolRepositoryInterface $toolRepository,
+        private readonly UserAccountRepository $userAccountRepository,
         private readonly ?LegacyRedisCache $legacyRedisCache = null,
     ) {}
 
@@ -48,7 +48,7 @@ final class ComplainService
             return null;
         }
 
-        $user = User::query()->where('email', $email)->where('enabled', false)->first();
+        $user = $this->userAccountRepository->findDisabledByEmail($email);
         if (! $user) {
             return null;
         }
@@ -63,7 +63,7 @@ final class ComplainService
 
         $this->clearCountCache();
 
-        return (string) Complain::query()->where('id', $complainId)->value('uuid');
+        return (string) $this->complainRepository->getUuidById($complainId);
     }
 
     /**
@@ -71,7 +71,7 @@ final class ComplainService
      */
     public function replyToComplain(int $complainId, int $userId, string $body, string $clientIp): bool
     {
-        $complain = Complain::query()->find($complainId);
+        $complain = $this->complainRepository->findById($complainId);
         if (! $complain) {
             return false;
         }
@@ -87,11 +87,11 @@ final class ComplainService
         if ($userId > 0) {
             try {
                 $this->toolRepository->sendMail(
-                    $complain->email,
+                    $complain['email'],
                     __('legacy/complains.reply_notify_subject'),
                     view('emails.complain-reply', [
                         'siteName' => SiteConfig::current()->basic->siteName(),
-                        'url' => Url::schemeAndHost(false).'/complains.php?action=view&id='.$complain->uuid,
+                        'url' => Url::schemeAndHost(false).'/complains.php?action=view&id='.$complain['uuid'],
                     ])->render()
                 );
             } catch (\Throwable $exception) {

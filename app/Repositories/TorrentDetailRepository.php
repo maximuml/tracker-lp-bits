@@ -248,4 +248,24 @@ class TorrentDetailRepository
             'userid' => $userId,
         ]);
     }
+
+    /**
+     * torrent_tags rows keyed by torrent id.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @return SupportCollection<int|string, Collection<int, TorrentTag>>
+     */
+    public function listTagsGroupedByTorrent(array $torrentIds): SupportCollection
+    {
+        return TorrentTag::query()->whereIn('torrent_id', $torrentIds)->get()->groupBy('torrent_id');
+    }
+
+    /** Plain-array torrent row for stats/sidecar rendering. */
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function findArrayById(int $id): ?array
+    {
+        return Torrent::query()->find($id)?->toArray();
+    }
 }

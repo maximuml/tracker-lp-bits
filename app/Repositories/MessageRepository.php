@@ -292,6 +292,9 @@ class MessageRepository extends BaseRepository
      *
      * @param  array<int, array<string, mixed>>  $rows
      */
+    /**
+     * @param  array<int, array<int|string, mixed>>  $rows
+     */
     public function insertMessages(array $rows): bool
     {
         return Message::query()->insert($rows);

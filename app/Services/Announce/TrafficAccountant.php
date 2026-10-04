@@ -4,10 +4,21 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
+use App\Repositories\AnnounceTorrentRepository;
+use App\Repositories\AnnounceUserRepository;
+use App\Repositories\PeerRepository;
+use App\Repositories\SnatchRepository;
 use App\Support\TorrentOps;
 
 final class TrafficAccountant
 {
+    public function __construct(
+        private readonly AnnounceUserRepository $users,
+        private readonly AnnounceTorrentRepository $torrents,
+        private readonly SnatchRepository $snatches,
+        private readonly PeerRepository $peers,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $params
      * @param  array<string, mixed>  $torrent
@@ -77,5 +88,58 @@ final class TrafficAccountant
             $uploadedIncrementForUser,
             $downloadedIncrementForUser,
         );
+    }
+
+    /**
+     * Flag a client-check failure on the user row (announce client gate).
+     */
+    public function markClientError(int $userId): void
+    {
+        $this->users->updateById($userId, ['showclienterror' => true]);
+    }
+
+    /**
+     * Persist the announce torrent update (visible + last_action applied by
+     * the caller).
+     *
+     * @param  array<string, mixed>  $fields
+     */
+    public function applyTorrentUpdate(int $torrentId, array $fields): void
+    {
+        $this->torrents->updateById($torrentId, $fields);
+    }
+
+    /**
+     * Persist the announce user update (uploaded/downloaded increments,
+     * may contain DB::raw() expressions).
+     *
+     * @param  array<string, mixed>  $fields
+     */
+    public function applyUserUpdate(int $userId, array $fields): void
+    {
+        $this->users->updateById($userId, $fields);
+    }
+
+    /**
+     * Lock peer, snatch, and user rows to prevent concurrent announce
+     * races — must run inside the caller's transaction.
+     *
+     * @param  array<string, mixed>|null  $self
+     * @param  array<string, mixed>|null  $snatchInfo
+     */
+    public function lockRowsForUpdate(?array $self, ?array $snatchInfo, int $userId): void
+    {
+        // Lock the existing peer row if present
+        if ($self !== null && ! empty($self['id'])) {
+            $this->peers->lockById((int) $self['id']);
+        }
+
+        // Lock the snatch row if present
+        if (! empty($snatchInfo) && ! empty($snatchInfo['id'])) {
+            $this->snatches->lockById((int) $snatchInfo['id']);
+        }
+
+        // Lock the user row to serialize uploaded/downloaded increments
+        $this->users->lockById($userId);
     }
 }

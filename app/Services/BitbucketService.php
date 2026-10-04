@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\BitbucketPublic;
-use App\Models\User;
 use App\Repositories\BitbucketRepository;
+use App\Repositories\UserAccountRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Path;
 use App\Support\Url;
@@ -25,7 +25,10 @@ final class BitbucketService
 
     private const SCALE_WIDTH = 150;
 
-    public function __construct(private readonly BitbucketRepository $bitbucketRepository) {}
+    public function __construct(
+        private readonly BitbucketRepository $bitbucketRepository,
+        private readonly UserAccountRepository $userAccountRepository,
+    ) {}
 
     /**
      * Process an uploaded avatar image: validate, resize, save, and update DB.
@@ -111,7 +114,7 @@ final class BitbucketService
             'public' => $public,
         ]);
 
-        User::query()->where('id', $currentUser['id'])->update(['avatar' => $url]);
+        $this->userAccountRepository->updateById((int) $currentUser['id'], ['avatar' => $url]);
 
         return [
             'url' => $url,

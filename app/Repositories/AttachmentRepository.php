@@ -62,4 +62,12 @@ final class AttachmentRepository implements AttachmentRepositoryInterface
             ->where('added', '>', $now)
             ->count();
     }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    public function insertAttachment(array $attributes): bool
+    {
+        return Attachment::query()->insert($attributes);
+    }
 }

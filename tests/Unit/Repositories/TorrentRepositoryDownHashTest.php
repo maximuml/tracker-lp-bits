@@ -2,7 +2,10 @@
 
 namespace Tests\Unit\Repositories;
 
+use App\Repositories\BookmarkRepository;
 use App\Repositories\MeiliSearchRepository;
+use App\Repositories\PeerRepository;
+use App\Repositories\SnatchRepository;
 use App\Repositories\TorrentAjaxRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentDownloadRepository;
@@ -45,6 +48,9 @@ class TorrentRepositoryDownHashTest extends TestCase
                     new PermissionChecker,
                 ),
                 new TorrentDetailRepository,
+                new PeerRepository,
+                new SnatchRepository,
+                new BookmarkRepository,
             ),
             new TorrentPromotionService(
                 new TorrentModerationRepository(

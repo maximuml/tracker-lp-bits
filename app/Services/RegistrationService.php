@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
-use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserGender;
 use App\Enums\UserStatus;
@@ -31,12 +29,11 @@ class RegistrationService
     private const MAX_USERNAME_LENGTH = 12;
 
     public function __construct(
-        private UsercpLookupRepositoryInterface $usercpLookupRepository,
+        private RegistrationRepositories $repositories,
         private WebAuthService $authService,
         private EmailConfirmation $emailConfirmation,
         private InviteValidator $inviteValidator,
         private PasswordSetup $passwordSetup,
-        private UserModerationRepositoryInterface $userModerationRepository,
         private OutboxService $outboxService,
     ) {}
 
@@ -64,12 +61,12 @@ class RegistrationService
         }
 
         $maxUsers = (int) SiteConfig::current()->main->maxUsers(0);
-        if ($maxUsers > 0 && User::query()->count() >= $maxUsers) {
+        if ($maxUsers > 0 && $this->repositories->userAccount->countUsers() >= $maxUsers) {
             throw new AuthenticationException(__('legacy/functions.std_account_limit_reached'));
         }
 
         $maxIp = (int) SiteConfig::current()->security->maxIp(0);
-        if ($maxIp > 0 && User::query()->where('ip', $ip)->count() > $maxIp) {
+        if ($maxIp > 0 && $this->repositories->userAccount->countByIp($ip) > $maxIp) {
             throw new AuthenticationException(
                 __('legacy/functions.std_the_ip')
                 .htmlspecialchars($ip)
@@ -132,11 +129,11 @@ class RegistrationService
             throw new AuthenticationException(__('legacy/takesignup.std_unqualified'));
         }
 
-        if (User::query()->where('username', $username)->exists()) {
+        if ($this->repositories->userAccount->existsByUsername($username)) {
             throw new AuthenticationException(__('legacy/takesignup.std_username_exists'));
         }
 
-        if (User::query()->where('email', $email)->exists()) {
+        if ($this->repositories->userAccount->existsByEmail($email)) {
             throw new AuthenticationException(
                 __('legacy/takesignup.std_email_address')
                 .$email
@@ -174,9 +171,7 @@ class RegistrationService
             $userData['invited_by'] = (int) $invite->inviter;
         }
 
-        $id = User::query()->insertGetId($userData);
-
-        $user = User::query()->findOrFail($id);
+        $user = $this->repositories->userAccount->createUser($userData);
         $user->makeVisible(['secret']);
 
         event(new UserCreated($user));
@@ -193,16 +188,16 @@ class RegistrationService
         );
 
         $this->sendWelcomeMessage($user);
-        $this->maybeAddTemporaryInvite($id);
+        $this->maybeAddTemporaryInvite((int) $user->id);
 
         if ($isInvite && $invite !== null) {
-            $this->inviteValidator->consume($invite, $id, $email, $username);
+            $this->inviteValidator->consume($invite, (int) $user->id, $email, $username);
         }
 
         // W1-05: Generate a secure confirmation token (CSPRNG + SHA-256 digest)
-        $confirmToken = $this->emailConfirmation->generateConfirmationToken($id, $ip);
+        $confirmToken = $this->emailConfirmation->generateConfirmationToken((int) $user->id, $ip);
 
-        $redirect = $this->resolveSignupRedirect($id, $confirmToken, $user, $verification, $email, $langFolder);
+        $redirect = $this->resolveSignupRedirect((int) $user->id, $confirmToken, $user, $verification, $email, $langFolder);
 
         return ['user' => $user, 'redirect' => $redirect];
     }
@@ -252,7 +247,7 @@ class RegistrationService
             return;
         }
 
-        $this->userModerationRepository->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
+        $this->repositories->userModeration->addTemporaryInvite(null, $userId, 'increment', $tmpInviteCount, 7);
     }
 
     private function resolveSignupRedirect(int $userId, string $confirmToken, User $user, string $verification, string $email, string $langFolder): string
@@ -307,7 +302,7 @@ class RegistrationService
             throw new AuthenticationException(__('legacy/takesignup.std_invalid_gender'));
         }
 
-        if (! $this->usercpLookupRepository->countryExists((int) $country)) {
+        if (! $this->repositories->usercpLookup->countryExists((int) $country)) {
             throw new AuthenticationException(__('legacy/takesignup.std_invalid_gender'));
         }
     }

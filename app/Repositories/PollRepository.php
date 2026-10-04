@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Poll;
+use App\Models\PollAnswer;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Html\SafeHtml;
 use App\Support\UserDisplay;
@@ -155,5 +156,25 @@ class PollRepository
         }
 
         return $map;
+    }
+
+    public function countAll(): int
+    {
+        return Poll::query()->count();
+    }
+
+    /**
+     * Distinct polls the user has voted in (un-voted count = total minus
+     * this).
+     */
+    public function countPollIdsVotedBy(int $userId): int
+    {
+        /** @var object{counts: int|string}|null */
+        $row = PollAnswer::query()
+            ->where('userid', $userId)
+            ->selectRaw('count(distinct(pollid)) as counts')
+            ->first();
+
+        return (int) ($row->counts ?? 0);
     }
 }

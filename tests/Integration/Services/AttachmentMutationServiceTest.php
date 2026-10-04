@@ -123,7 +123,7 @@ final class AttachmentMutationServiceTest extends TestCase
     {
         $attach = $this->mockAttachService();
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -142,7 +142,7 @@ final class AttachmentMutationServiceTest extends TestCase
     {
         $attach = $this->mockAttachService();
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -162,7 +162,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $file = $this->makeFile('content', 'txt');
         $file['size'] = 0;
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -182,7 +182,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $file = $this->makeFile('content', 'txt');
         $file['name'] = '';
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -201,7 +201,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService(['count_left' => 0]);
         $file = $this->makeFile('content', 'txt');
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -221,7 +221,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $file = $this->makeFile('content', 'txt');
         $file['size'] = 200;
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -241,7 +241,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $file = $this->makeFile('content', 'txt');
         $file['size'] = 5242880;
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -259,7 +259,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService(['allowed_ext' => ['php']]);
         $file = $this->makeFile('<?php echo 1;', 'php');
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -278,7 +278,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService(['allowed_ext' => ['txt', 'pdf']]);
         $file = $this->makeFile('binary content', 'exe');
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -296,7 +296,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService(['allowed_ext' => ['txt', 'php', 'exe']]);
         $file = $this->makeFile('<?php phpinfo(); ?>', 'txt');
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -315,7 +315,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService();
         $file = $this->makeFile('plain text content', 'txt');
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -335,7 +335,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService();
         $file = $this->makeFile('plain text content', 'txt');
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -354,7 +354,7 @@ final class AttachmentMutationServiceTest extends TestCase
     {
         $attach = $this->mockAttachService(['count_left' => 5]);
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -447,7 +447,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService(['count_left' => 10]);
         $file = $this->makeImageFile(800, 400);
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -488,7 +488,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService();
         $file = $this->makeImageFile(400, 800);
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -513,7 +513,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $this->forgetSettings(['attachment.altthumbwidth', 'attachment.altthumbheight']);
         $attach = $this->mockAttachService();
 
-        $landscape = AttachmentMutationService::processUpload(
+        $landscape = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'yes',
@@ -522,7 +522,7 @@ final class AttachmentMutationServiceTest extends TestCase
         );
         $this->assertSame('', (string) ($landscape['warning']));
 
-        $portrait = AttachmentMutationService::processUpload(
+        $portrait = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'yes',
@@ -547,7 +547,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService();
         $file = $this->makeImageFile(800, 400);
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -568,7 +568,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService();
         $file = $this->makeImageFile(800, 400);
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -591,7 +591,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService();
         $file = $this->makeImageFile(800, 400);
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -612,7 +612,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $file = $this->makeFile(str_repeat('a', 5000), 'txt');
         $file['size'] = 5000;
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -629,7 +629,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $file = $this->makeFile('content', 'txt');
         $file['size'] = 'not-a-number';
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -646,7 +646,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $file = $this->makeFile('plain text content', 'txt');
         $file['name'] = 'notes.TXT';
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -663,7 +663,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $attach = $this->mockAttachService(['allowed_ext' => ['exe', 'txt']]);
         $file = $this->makeFile('plain text content', 'exe');
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',
@@ -679,7 +679,7 @@ final class AttachmentMutationServiceTest extends TestCase
     {
         $attach = $this->mockAttachService();
 
-        $result = AttachmentMutationService::processUpload(
+        $result = app(AttachmentMutationService::class)->processUpload(
             $this->curUser(),
             $attach,
             'no',

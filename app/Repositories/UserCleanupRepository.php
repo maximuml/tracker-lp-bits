@@ -209,4 +209,21 @@ final class UserCleanupRepository extends BaseRepository
     {
         return User::query()->whereIn('id', $ids)->update($attributes);
     }
+
+    /**
+     * Enabled, non-donor users below VIP class eligible for a H&R ban,
+     * hydrated with their language row for localized ban messages.
+     *
+     * @param  array<int, int|string>  $userIds
+     * @return EloquentCollection<int, User>
+     */
+    public function listBanCandidates(array $userIds): EloquentCollection
+    {
+        return User::query()
+            ->with('language')
+            ->where('class', '<', UserClass::VIP->value)
+            ->where('enabled', true)
+            ->where('donor', false)
+            ->find($userIds, ['id', 'username', 'lang']);
+    }
 }

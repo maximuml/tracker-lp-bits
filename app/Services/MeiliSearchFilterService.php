@@ -7,12 +7,19 @@ namespace App\Services;
 use App\Models\Bookmark;
 use App\Models\Category;
 use App\Models\User;
+use App\Repositories\BookmarkRepository;
+use App\Repositories\CategoryRepository;
 use App\Support\Logger;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 
 class MeiliSearchFilterService
 {
+    public function __construct(
+        private readonly CategoryRepository $categoryRepository,
+        private readonly BookmarkRepository $bookmarkRepository,
+    ) {}
+
     /** @var array<int|string, mixed> */
     private static array $queryFieldToTorrentFieldMaps = [
         'cat' => 'category',
@@ -39,7 +46,7 @@ class MeiliSearchFilterService
         $queryString = http_build_query($params);
         // section
         if (! empty($params['mode'])) {
-            $categoryIdArr = Category::query()->whereIn('mode', Arr::wrap($params['mode']))->pluck('id')->toArray();
+            $categoryIdArr = $this->categoryRepository->pluckIdsByModes(Arr::wrap($params['mode']));
         }
         foreach (self::$queryFieldToTorrentFieldMaps as $queryField => $torrentField) {
             if (isset($params[$queryField]) && $params[$queryField] !== '') {
@@ -69,9 +76,7 @@ class MeiliSearchFilterService
             $taxonomies['category'] = $categoryIdArr;
         }
         foreach ($taxonomies as $key => $values) {
-            if (! empty($values)) {
-                $filters[] = sprintf('%s IN [%s]', $key, implode(', ', array_map('intval', $values)));
-            }
+            $filters[] = sprintf('%s IN [%s]', $key, implode(', ', array_map('intval', $values)));
         }
 
         $includeDead = 1;
@@ -97,7 +102,7 @@ class MeiliSearchFilterService
             $includeBookmarked = $matches[1];
         }
         if ($includeBookmarked > 0) {
-            $userBookmarkedTorrentIdStr = Bookmark::query()->where('userid', $user->id)->pluck('torrentid')->implode(',');
+            $userBookmarkedTorrentIdStr = implode(',', $this->bookmarkRepository->pluckTorrentIdsForUser((int) $user->id));
             if ($includeBookmarked == 1) {
                 // only bookmark
                 $filters[] = "id IN [$userBookmarkedTorrentIdStr]";

@@ -6,12 +6,13 @@ namespace App\Services;
 
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Enums\PeerSeeder;
-use App\Enums\SnatchFinished;
-use App\Models\Bookmark;
 use App\Models\Peer;
 use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
+use App\Repositories\BookmarkRepository;
+use App\Repositories\PeerRepository;
+use App\Repositories\SnatchRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Support\Format;
 use App\Support\Strings;
@@ -29,6 +30,9 @@ class TorrentStatsService
     public function __construct(
         private readonly TorrentAjaxRepositoryInterface $torrentAjaxRepository,
         private readonly TorrentDetailRepository $torrentDetailRepository,
+        private readonly PeerRepository $peerRepository,
+        private readonly SnatchRepository $snatchRepository,
+        private readonly BookmarkRepository $bookmarkRepository,
     ) {}
 
     /**
@@ -38,11 +42,7 @@ class TorrentStatsService
     public function listPeers($torrentId)
     {
         $seederList = $leecherList = collect();
-        $peers = Peer::query()
-            ->where('torrent', $torrentId)
-            ->groupBy('peer_id')
-            ->with(['user', 'relative_torrent'])
-            ->get()
+        $peers = $this->peerRepository->listForTorrent($torrentId)
             ->groupBy('seeder');
         $seederGroup = $peers->get(PeerSeeder::YES->value);
         if ($seederGroup instanceof Collection) {
@@ -154,12 +154,7 @@ class TorrentStatsService
      */
     public function listSnatches($torrentId)
     {
-        $snatches = Snatch::query()
-            ->where('torrentid', $torrentId)
-            ->where('finished', SnatchFinished::YES->value)
-            ->with(['user'])
-            ->orderBy('completedat', 'desc')
-            ->paginate();
+        $snatches = $this->snatchRepository->paginateFinishedForTorrent((int) $torrentId);
 
         return $snatches;
     }
@@ -207,7 +202,7 @@ class TorrentStatsService
      */
     public function getTorrentTagsGrouped(array $torrentIds)
     {
-        return TorrentTag::query()->whereIn('torrent_id', $torrentIds)->get()->groupBy('torrent_id');
+        return $this->torrentDetailRepository->listTagsGroupedByTorrent($torrentIds);
     }
 
     /**
@@ -217,7 +212,7 @@ class TorrentStatsService
      */
     public function findForUserValue(int $torrentId): ?array
     {
-        return Torrent::query()->find($torrentId)?->toArray();
+        return $this->torrentDetailRepository->findArrayById((int) $torrentId);
     }
 
     /**
@@ -229,7 +224,7 @@ class TorrentStatsService
      */
     public function getBookmarkTorrentIds(int $userId): array
     {
-        $rows = Bookmark::query()->where('userid', $userId)->pluck('torrentid')->all();
+        $rows = $this->bookmarkRepository->pluckTorrentIdsForUser((int) $userId);
 
         if (empty($rows)) {
             return [0];

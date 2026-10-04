@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\HitAndRunMode;
-use App\Enums\HitAndRunStatus;
-use App\Enums\UserClass as UserClassEnum;
 use App\Events\UserUpdated;
 use App\Models\HitAndRun;
-use App\Models\Message;
-use App\Models\User;
-use App\Models\UserBanLog;
+use App\Repositories\HitAndRunLookupRepository;
+use App\Repositories\MessageRepository;
+use App\Repositories\UserCleanupRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Json;
 use App\Support\LegacyDb;
@@ -25,6 +23,9 @@ class HitAndRunCronjobService
 {
     public function __construct(
         private HitAndRunStatusService $statusService,
+        private HitAndRunLookupRepository $hitAndRunRepository,
+        private UserCleanupRepository $userCleanupRepository,
+        private MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -69,18 +70,7 @@ class HitAndRunCronjobService
 
             return false;
         }
-        $query = HitAndRun::query()
-            ->where('status', HitAndRunStatus::INSPECTING->value)
-            ->with([
-                'torrent' => function ($query) {
-                    $query->select(['id', 'size', 'name', 'category']);
-                },
-                'snatch',
-                'user' => function ($query) {
-                    $query->select(['id', 'username', 'lang', 'class', 'donoruntil', 'enabled', 'notifs']);
-                },
-                'user.language',
-            ]);
+        $query = $this->hitAndRunRepository->inspectingQuery();
         if ($uid !== null) {
             $query->where('uid', $uid);
         }
@@ -194,7 +184,7 @@ class HitAndRunCronjobService
         }
         DB::commit();
         if (! empty($messages)) {
-            Message::query()->insert($messages);
+            $this->messageRepository->insertMessages($messages);
         }
         Logger::writeWithContext((string) '[CRONJOB_UPDATE_HR_DONE]', (string) 'info', (bool) false);
 
@@ -211,28 +201,16 @@ class HitAndRunCronjobService
 
             return;
         }
-        $query = HitAndRun::query()
-            ->selectRaw('count(*) as counts, uid')
-            ->where('status', HitAndRunStatus::UNREACHED->value)
-            ->groupBy('uid')
-            ->havingRaw('count(*) >= ?', [$disableCounts]);
-        if ($setting['diff_in_section']) {
-            $query->whereHas('torrent.basic_category', function (Builder $query) use ($setting) {
-                return $query->where('mode', $setting['search_box_id']);
-            });
-        }
-        $result = $query->get();
+        $result = $this->hitAndRunRepository->listUnreachedCountsAtLeast(
+            (int) $disableCounts,
+            $setting['diff_in_section'] ? (int) $setting['search_box_id'] : null,
+        );
         if ($result->isEmpty()) {
             Logger::writeWithContext((string) ("{$logPrefix}, No user to disable: ".LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
 
             return;
         }
-        $users = User::query()
-            ->with('language')
-            ->where('class', '<', UserClassEnum::VIP->value)
-            ->where('enabled', true)
-            ->where('donor', false)
-            ->find($result->pluck('uid')->toArray(), ['id', 'username', 'lang']);
+        $users = $this->userCleanupRepository->listBanCandidates($result->pluck('uid')->toArray());
         Logger::writeWithContext((string) ("{$logPrefix}, Going to disable user: ".json_encode($users->toArray())), (string) 'info', (bool) false);
         foreach ($users as $user) {
             $locale = $user->locale;
@@ -244,13 +222,13 @@ class HitAndRunCronjobService
                 'subject' => $comment,
                 'msg' => Locale::trans('hr.unreached_disable_message_content', ['ban_user_when_counts_reach' => $disableCounts], $locale),
             ];
-            Message::query()->insert($message);
+            $this->messageRepository->insertMessages([$message]);
             $userBanLog = [
                 'uid' => $user->id,
                 'username' => $user->username,
                 'reason' => $comment,
             ];
-            UserBanLog::query()->insert($userBanLog);
+            $this->userCleanupRepository->insertBanLogs([$userBanLog]);
             event(new UserUpdated($user));
             Logger::writeWithContext((string) ('Disable user: '.Json::encode($userBanLog)), (string) 'info', (bool) false);
         }

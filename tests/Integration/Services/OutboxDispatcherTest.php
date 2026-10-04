@@ -42,7 +42,7 @@ final class OutboxDispatcherTest extends TestCase
                     && str_contains($message, '"event_type":"test.event"');
             });
 
-        $dispatcher = new OutboxDispatcher;
+        $dispatcher = app(OutboxDispatcher::class);
         $count = $dispatcher->dispatch();
 
         $this->assertSame(1, $count);
@@ -55,7 +55,7 @@ final class OutboxDispatcherTest extends TestCase
         $event = $service->record('test', 'test.event', []);
         $event->update(['available_at' => now()->addMinutes(10)]);
 
-        $dispatcher = new OutboxDispatcher;
+        $dispatcher = app(OutboxDispatcher::class);
         $count = $dispatcher->dispatch();
 
         $this->assertSame(0, $count);
@@ -72,7 +72,7 @@ final class OutboxDispatcherTest extends TestCase
             ->once()
             ->andThrow(new \RuntimeException('Redis down'));
 
-        $dispatcher = new OutboxDispatcher;
+        $dispatcher = app(OutboxDispatcher::class);
         $count = $dispatcher->dispatch();
 
         $this->assertSame(0, $count);
@@ -92,7 +92,7 @@ final class OutboxDispatcherTest extends TestCase
             ->once()
             ->andThrow(new \RuntimeException('Persistent failure'));
 
-        $dispatcher = new OutboxDispatcher;
+        $dispatcher = app(OutboxDispatcher::class);
         $dispatcher->dispatch();
 
         $this->assertSame(OutboxEvent::STATUS_DEAD_LETTER, OutboxEvent::first()->status);
@@ -104,7 +104,7 @@ final class OutboxDispatcherTest extends TestCase
         $service->record('test', 'test.event', []);
         $service->record('test', 'test.event2', []);
 
-        $dispatcher = new OutboxDispatcher;
+        $dispatcher = app(OutboxDispatcher::class);
         $this->assertSame(2, $dispatcher->pendingCount());
     }
 
@@ -114,7 +114,7 @@ final class OutboxDispatcherTest extends TestCase
         $event = $service->record('test', 'test.event', []);
         $event->update(['status' => OutboxEvent::STATUS_DEAD_LETTER]);
 
-        $dispatcher = new OutboxDispatcher;
+        $dispatcher = app(OutboxDispatcher::class);
         $this->assertSame(1, $dispatcher->deadLetterCount());
     }
 }

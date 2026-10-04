@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
-use App\Models\LoginAttempt;
 use App\Models\User;
+use App\Repositories\UserAccountRepository;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\AuthCookie;
 use App\Support\Cache;
@@ -24,6 +25,8 @@ class WebAuthService
 {
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
+        private readonly AuthRepositoryInterface $authRepository,
+        private readonly UserAccountRepository $userAccountRepository,
     ) {}
 
     private static function getMaxLoginAttempts(): int
@@ -48,23 +51,17 @@ class WebAuthService
 
     public function remainingAttempts(string $ip): int
     {
-        $total = (int) LoginAttempt::query()
-            ->where('ip', $ip)
-            ->sum('attempts');
+        $total = $this->authRepository->getLoginAttemptsSum($ip);
 
         return max(0, self::getMaxLoginAttempts() - $total);
     }
 
     public function assertNotBanned(string $ip): void
     {
-        $total = (int) LoginAttempt::query()
-            ->where('ip', $ip)
-            ->sum('attempts');
+        $total = $this->authRepository->getLoginAttemptsSum($ip);
 
         if ($total >= self::getMaxLoginAttempts()) {
-            LoginAttempt::query()
-                ->where('ip', $ip)
-                ->update(['banned' => true]);
+            $this->authRepository->banLoginAttempts($ip);
 
             throw new AuthenticationException('Your IP is banned due to too many failed login attempts.');
         }
@@ -126,7 +123,7 @@ class WebAuthService
     private function upgradePasswordHash(int $userId, string $password, bool $forceChange = false): void
     {
         $newHash = PasswordHasher::hash($password);
-        User::query()->where('id', $userId)->update([
+        $this->userAccountRepository->updateById($userId, [
             'passhash' => $newHash,
             'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
             'must_change_password' => $forceChange,
@@ -154,9 +151,7 @@ class WebAuthService
             $this->verifyCaptcha($data);
         }
 
-        $user = User::query()
-            ->where('username', $username)
-            ->first(['id', 'username', 'passhash', 'passhash_algo', 'secret', 'auth_key', 'enabled', 'status', 'two_step_secret', 'lang']);
+        $user = $this->userAccountRepository->findForLogin($username);
 
         if (! $user) {
             $this->recordFailedAttempt($ip);
@@ -199,7 +194,7 @@ class WebAuthService
         }
 
         if (! empty($update)) {
-            User::query()->where('id', $row['id'] ?? 0)->update($update);
+            $this->userAccountRepository->updateById((int) ($row['id'] ?? 0), $update);
         }
 
         $duration = ! empty($data['logout']) && $data['logout'] === 'yes' ? 900 : 0;
@@ -219,7 +214,7 @@ class WebAuthService
 
     public function logoutAllDevices(User $user): void
     {
-        User::query()->where('id', $user->id)->increment('auth_version');
+        $this->userAccountRepository->incrementAuthVersion((int) $user->id);
         Cache::clearUser((int) $user->id, '');
         AuthCookie::clear();
     }
@@ -248,18 +243,6 @@ class WebAuthService
 
     public function recordFailedAttempt(string $ip): void
     {
-        $count = (int) LoginAttempt::query()->where('ip', $ip)->count();
-
-        if ($count === 0) {
-            LoginAttempt::query()->insert([
-                'ip' => $ip,
-                'added' => now()->toDateTimeString(),
-                'attempts' => 1,
-            ]);
-        } else {
-            LoginAttempt::query()
-                ->where('ip', $ip)
-                ->increment('attempts');
-        }
+        $this->authRepository->recordFailedLogin($ip, false);
     }
 }

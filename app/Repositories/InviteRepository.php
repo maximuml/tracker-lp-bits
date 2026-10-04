@@ -180,4 +180,26 @@ class InviteRepository
             })
             ->delete();
     }
+
+    public function markInvalid(int $id): int
+    {
+        return Invite::query()->where('id', $id)->update(['valid' => InviteValid::NO->value]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $fields
+     */
+    public function markConsumed(int $id, array $fields): int
+    {
+        return Invite::query()->where('id', $id)->update($fields);
+    }
+
+    /**
+     * @param  array<int, string>  $hashes
+     * @return Collection<int, Invite>
+     */
+    public function listByHashes(array $hashes): Collection
+    {
+        return Invite::query()->whereIn('hash', $hashes)->get(['id', 'hash']);
+    }
 }

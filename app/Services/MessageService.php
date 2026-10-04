@@ -10,6 +10,8 @@ use App\Enums\UserAcceptPms;
 use App\Models\Message;
 use App\Models\User;
 use App\Policies\MessagePolicy;
+use App\Repositories\MessageLookupRepository;
+use App\Repositories\UserAccountRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
@@ -22,7 +24,6 @@ use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use LogicException;
 
 /**
  * Handles message action mutations (takeMessage, deletemessage) and
@@ -35,6 +36,8 @@ class MessageService
     public function __construct(
         private readonly MessagePolicy $policy,
         private readonly MessageMailboxService $mailbox,
+        private readonly MessageLookupRepository $messageLookupRepository,
+        private readonly UserAccountRepository $userAccountRepository,
     ) {}
 
     public function takeMessage(Request $request): RedirectResponse
@@ -61,12 +64,7 @@ class MessageService
                 LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_invalid_id'));
             }
 
-            $origmsgRecord = Message::query()
-                ->where('id', $origmsg)
-                ->where(function ($query) use ($sender) {
-                    $query->where('receiver', $sender->id)->orWhere('sender', $sender->id);
-                })
-                ->first();
+            $origmsgRecord = $this->messageLookupRepository->findVisibleToUser($origmsg, (int) $sender->id);
 
             if (! $origmsgRecord) {
                 LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_no_permission_forwarding'));
@@ -109,12 +107,9 @@ class MessageService
             }
         }
 
-        $recipient = User::query()->find($receiver);
+        $recipient = $this->userAccountRepository->findByIdFields($receiver, ['*']);
         if (! $recipient) {
             LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_user_not_exist'));
-        }
-        if (! $recipient instanceof User) {
-            throw new LogicException('Expected recipient to be a User instance.');
         }
 
         // W1-03: Use MessagePolicy for authorization checks
@@ -157,7 +152,7 @@ class MessageService
         }
 
         if ($origmsg > 0 && $delete) {
-            $orig = Message::query()->find($origmsg);
+            $orig = $this->messageLookupRepository->findById($origmsg);
             if ($orig && $orig->receiver == $sender->id) {
                 if ($orig->saved === 'no') {
                     $orig->delete();
@@ -187,7 +182,7 @@ class MessageService
         $type = (string) $request->input('type', '');
 
         if ($type === 'in') {
-            $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
+            $msg = $this->messageLookupRepository->findByIdFields($id, ['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || ! $this->policy->deleteInbox($sender, $msg)) {
                 LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_suggested'));
             }
@@ -204,7 +199,7 @@ class MessageService
 
             Cache::clearInboxCount($sender->id);
         } elseif ($type === 'out') {
-            $msg = Message::query()->where('id', $id)->first(['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
+            $msg = $this->messageLookupRepository->findByIdFields($id, ['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || ! $this->policy->deleteSentbox($sender, $msg)) {
                 LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_suggested'));
             }
@@ -286,7 +281,7 @@ class MessageService
                 return redirect('/messages.php');
             }
 
-            $message = Message::query()->find($id);
+            $message = $this->messageLookupRepository->findById($id);
             if (! $message || ! $this->policy->view($user, $message)) {
                 return redirect('/messages.php');
             }

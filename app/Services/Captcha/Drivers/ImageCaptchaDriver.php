@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Captcha\Drivers;
 
-use App\Models\RegImage;
+use App\Repositories\RegImageRepository;
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\LegacyHeaderBag;
@@ -18,7 +18,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     /**
      * @param  array<string, mixed>  $config
      */
-    public function __construct(array $config, private readonly LegacyHeaderBag $headerBag)
+    public function __construct(array $config, private readonly LegacyHeaderBag $headerBag, private readonly RegImageRepository $regImageRepository)
     {
         $this->config = $config;
     }
@@ -62,10 +62,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
             throw new CaptchaValidationException('Missing captcha parameters.');
         }
 
-        $dateline = RegImage::query()
-            ->where('imagehash', $imagehash)
-            ->where('imagestring', $imagestring)
-            ->value('dateline');
+        $dateline = $this->regImageRepository->findDateline($imagehash, $imagestring);
 
         $this->deleteByHash($imagehash);
 
@@ -81,7 +78,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         $random = Strings::randomCode((int) 6);
         $imagehash = hash('xxh128', $random);
         $dateline = time();
-        RegImage::query()->insert([
+        $this->regImageRepository->insert([
             'imagehash' => $imagehash,
             'dateline' => $dateline,
             'imagestring' => $random,
@@ -104,9 +101,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
     public function outputImage(string $imagehash): void
     {
-        $imagestring = (string) (RegImage::query()
-            ->where('imagehash', $imagehash)
-            ->value('imagestring') ?? '');
+        $imagestring = (string) ($this->regImageRepository->findAnswerByHash($imagehash)['imagestring'] ?? '');
 
         if ($imagestring === '') {
             $this->renderFallback();
@@ -175,7 +170,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
             return;
         }
 
-        RegImage::query()->where('imagehash', $imagehash)->delete();
+        $this->regImageRepository->deleteByHash($imagehash);
     }
 
     protected function renderFallback(): void

@@ -140,7 +140,7 @@ class UtilityController extends LegacyController
         return $this->renderAttachment($request, $currentUser, $Attach);
     }
 
-    public function attachmentStore(Request $request): Response
+    public function attachmentStore(Request $request, AttachmentMutationService $attachmentMutationService): Response
     {
         $currentUser = $this->currentUser->get() ?? [];
         $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
@@ -170,7 +170,7 @@ class UtilityController extends LegacyController
                     'type' => $item->getMimeType(),
                     'name' => $item->getClientOriginalName(),
                 ];
-                $result = AttachmentMutationService::processUpload($currentUser, $Attach, $altsize, $callbackFunc, $file);
+                $result = $attachmentMutationService->processUpload($currentUser, $Attach, $altsize, $callbackFunc, $file);
                 if (($result['warning'] ?? '') !== '') {
                     $warnings[] = (string) $result['warning'];
                 }

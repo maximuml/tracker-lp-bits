@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\Message;
 use App\Models\User;
+use App\Repositories\UserAccountRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
@@ -22,6 +23,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class ModerationService
 {
+    public function __construct(
+        private readonly UserAccountRepository $userAccountRepository,
+    ) {}
+
     /**
      * @param  mixed  $operator
      * @param  mixed  $uid
@@ -29,7 +34,7 @@ final class ModerationService
     public function removeLeechWarn($operator, $uid): bool
     {
         $operator = $this->getUser($operator);
-        $user = User::query()->findOrFail((int) $uid, User::$commonFields);
+        $user = $this->userAccountRepository->findOrFailByIdFields((int) $uid, User::$commonFields);
         $this->checkPermission($operator, $user);
         $this->clearCache($user);
         $user->leechwarn = false;
@@ -47,7 +52,7 @@ final class ModerationService
         if (! $operator->canAccessAdmin()) {
             throw new \RuntimeException('No permission.');
         }
-        $user = User::query()->findOrFail((int) $uid, User::$commonFields);
+        $user = $this->userAccountRepository->findOrFailByIdFields((int) $uid, User::$commonFields);
         $this->checkPermission($operator, $user);
         $this->clearCache($user);
         $user->two_step_secret = '';
@@ -288,6 +293,6 @@ final class ModerationService
             $fields = User::$commonFields;
         }
 
-        return User::query()->findOrFail(intval($user), $fields);
+        return $this->userAccountRepository->findOrFailByIdFields(intval($user), $fields);
     }
 }

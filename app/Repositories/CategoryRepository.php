@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Contracts\Repositories\CategoryRepositoryInterface;
+use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -119,5 +120,19 @@ final class CategoryRepository implements CategoryRepositoryInterface
             ->get()
             ->map(fn ($row) => (array) $row)
             ->all();
+    }
+
+    public function findById(int $id): ?Category
+    {
+        return Category::query()->find($id);
+    }
+
+    /**
+     * @param  array<int, int|string>  $modes
+     * @return array<int, int|string>
+     */
+    public function pluckIdsByModes(array $modes): array
+    {
+        return Category::query()->whereIn('mode', $modes)->pluck('id')->toArray();
     }
 }

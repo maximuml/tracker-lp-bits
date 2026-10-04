@@ -36,7 +36,7 @@ class UserModerationRepository extends BaseRepository implements UserModerationR
         private readonly UserModerationAccountCommand $account,
         private readonly UserModerationCommentCommand $comment,
         private readonly UserModerationInviteCommand $invite,
-        private readonly ModerationService $moderationService = new ModerationService,
+        private readonly ModerationService $moderationService,
     ) {}
 
     /**

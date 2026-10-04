@@ -297,6 +297,7 @@ final class ForumServiceTest extends TestCase
 
         // W1-04: handleDeleteTopic now uses Topic model instead of repo
         $topic = Topic::factory()->create();
+        $this->topicRepo->shouldReceive('getTopic')->andReturn($topic);
         $this->postRepo->shouldReceive('countTopicPosts')->with($topic->id)->andReturn(0);
 
         $request = Request::create('/forums.php', 'GET', [
@@ -826,6 +827,7 @@ final class ForumServiceTest extends TestCase
 
         // W1-04: handleDeleteTopic now uses Topic model instead of repo
         $topic = Topic::factory()->create();
+        $this->topicRepo->shouldReceive('getTopic')->andReturn($topic);
         $this->postRepo->shouldReceive('countTopicPosts')->with($topic->id)->andReturn(0);
 
         $request = Request::create('/forums.php', 'GET', [

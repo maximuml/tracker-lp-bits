@@ -201,7 +201,7 @@ final class ForumService
         $date = date('Y-m-d H:i:s');
 
         if ($type !== 'new') {
-            $topicModel = Topic::query()->whereKey($topicid)->first();
+            $topicModel = $this->topicRepository->getTopic((int) $topicid);
             if ($topicModel === null) {
                 return $this->redirectTo('/forums.php');
             }
@@ -221,7 +221,7 @@ final class ForumService
             }
 
             // W1-04: Use PostPolicy for edit authorization
-            $postModel = Post::query()->whereKey($postid)->first();
+            $postModel = $this->postLookupRepository->getPost((int) $postid);
             $authUser = Auth::user();
             if (! $authUser instanceof User || $postModel === null || ! $this->postPolicy->update($authUser, $postModel)) {
                 LegacyResponse::permissionDenied();

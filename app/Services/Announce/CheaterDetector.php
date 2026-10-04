@@ -6,16 +6,20 @@ namespace App\Services\Announce;
 
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
-use App\Models\Cheater;
-use App\Models\User;
-use App\Models\UserBanLog;
+use App\Repositories\LogRepository;
+use App\Repositories\UserAccountRepository;
+use App\Repositories\UserCleanupRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use Illuminate\Support\Facades\DB;
 
 final class CheaterDetector
 {
-    public function __construct() {}
+    public function __construct(
+        private readonly LogRepository $logRepository,
+        private readonly UserAccountRepository $userAccountRepository,
+        private readonly UserCleanupRepository $userCleanupRepository,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $self
@@ -92,7 +96,7 @@ final class CheaterDetector
         if ($uploaded > 1073741824 && $upspeed > ($mustBeCheaterSpeed / $cheaterdetSecurity)) {
             DB::transaction(function () use ($time, $uploaded, $downloaded, $seeders, $leechers, $upspeed, $self, $user, $userId, $torrentId) {
                 $comment = 'User account was automatically disabled by system';
-                Cheater::query()->insert([
+                $this->logRepository->insertCheater([
                     'added' => $time,
                     'userid' => $userId,
                     'torrentid' => $torrentId,
@@ -103,12 +107,12 @@ final class CheaterDetector
                     'leechers' => $leechers,
                     'comment' => $comment,
                 ]);
-                User::query()->where('id', $userId)->update(['enabled' => false]);
-                UserBanLog::query()->insert([
+                $this->userAccountRepository->updateById($userId, ['enabled' => false]);
+                $this->userCleanupRepository->insertBanLogs([[
                     'uid' => $userId,
                     'username' => $user['username'],
                     'reason' => "$comment(Upload speed:".Format::size($upspeed).'/s)',
-                ]);
+                ]]);
             });
 
             throw TrackerException::failure('We believe you\'re trying to cheat. And your account is disabled.');
@@ -148,14 +152,10 @@ final class CheaterDetector
         $secs = 24 * 60 * 60;
         $dt = date('Y-m-d H:i:s', strtotime($time) - $secs);
 
-        $cheaterId = Cheater::query()
-            ->where('userid', $userId)
-            ->where('torrentid', $torrentId)
-            ->where('added', '>', $dt)
-            ->value('id');
+        $cheaterId = $this->logRepository->findRecentCheaterId($userId, $torrentId, $dt);
 
         if (empty($cheaterId)) {
-            Cheater::query()->insert([
+            $this->logRepository->insertCheater([
                 'added' => $time,
                 'userid' => $userId,
                 'torrentid' => $torrentId,
@@ -168,10 +168,7 @@ final class CheaterDetector
                 'comment' => $comment,
             ]);
         } else {
-            Cheater::query()->where('id', $cheaterId)->update([
-                'hit' => DB::raw('hit + 1'),
-                'dealtwith' => 0,
-            ]);
+            $this->logRepository->incrementCheaterHit((int) $cheaterId);
         }
     }
 }

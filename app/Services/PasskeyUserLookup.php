@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\User;
+use App\Repositories\AnnounceUserRepository;
 use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Redis;
  */
 final class PasskeyUserLookup
 {
+    public function __construct(private readonly AnnounceUserRepository $announceUserRepository) {}
+
     private const CACHE_TTL = 3600;
 
     /**
@@ -33,7 +36,7 @@ final class PasskeyUserLookup
             return $cached;
         }
 
-        $user = self::query($passkey);
+        $user = $this->query($passkey);
         if ($user !== []) {
             RedisGuard::attempt(static function () use ($cacheKey, $user, $passkey) {
                 Cache::put($cacheKey, $user, self::CACHE_TTL);
@@ -47,16 +50,16 @@ final class PasskeyUserLookup
     /**
      * @return array<string, mixed>
      */
-    private static function query(string $passkey): array
+    /**
+     * @return array<string, mixed>
+     */
+    private function query(string $passkey): array
     {
-        $user = User::query()
-            ->select([
-                'id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded',
-                'class', 'parked', 'clientselect', 'showclienterror', 'passkey',
-                'donor', 'donoruntil', 'seedbonus', 'tracker_url_id',
-            ])
-            ->where('passkey', $passkey)
-            ->first();
+        $user = $this->announceUserRepository->findByPasskey($passkey, [
+            'id', 'username', 'downloadpos', 'enabled', 'uploaded', 'downloaded',
+            'class', 'parked', 'clientselect', 'showclienterror', 'passkey',
+            'donor', 'donoruntil', 'seedbonus', 'tracker_url_id',
+        ]);
 
         return $user ? $user->toArray() : [];
     }

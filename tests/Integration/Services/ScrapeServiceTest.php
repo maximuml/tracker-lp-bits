@@ -44,7 +44,7 @@ final class ScrapeServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new ScrapeService;
+        $this->service = app(ScrapeService::class);
     }
 
     /** @param  array<string, mixed>  $overrides */

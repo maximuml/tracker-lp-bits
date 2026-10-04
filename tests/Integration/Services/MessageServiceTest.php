@@ -8,7 +8,9 @@ use App\Models\Message;
 use App\Models\User;
 use App\Policies\MessagePolicy;
 use App\Repositories\MailboxRepository;
+use App\Repositories\MessageLookupRepository;
 use App\Repositories\MessageRepository;
+use App\Repositories\UserAccountRepository;
 use App\Services\MessageMailboxService;
 use App\Services\MessageService;
 use App\Support\Globals;
@@ -59,6 +61,8 @@ final class MessageServiceTest extends TestCase
         $this->service = new MessageService(
             app(MessagePolicy::class),
             app(MessageMailboxService::class),
+            new MessageLookupRepository,
+            new UserAccountRepository,
         );
     }
 
@@ -134,6 +138,8 @@ final class MessageServiceTest extends TestCase
                 $repo,
                 app(MailboxRepository::class),
             ),
+            new MessageLookupRepository,
+            new UserAccountRepository,
         );
 
         return $repo;
@@ -178,6 +184,8 @@ final class MessageServiceTest extends TestCase
         $service = new MessageService(
             app(MessagePolicy::class),
             app(MessageMailboxService::class),
+            new MessageLookupRepository,
+            new UserAccountRepository,
         );
 
         $this->assertInstanceOf(MessageService::class, $service);

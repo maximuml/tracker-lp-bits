@@ -82,4 +82,13 @@ class BookmarkRepository extends BaseRepository
     {
         DB::table('bookmarks')->where('id', $id)->delete();
     }
+
+    /**
+     * @return array<int, int>
+     */
+    public function pluckTorrentIdsForUser(int $userId): array
+    {
+        /** @var array<int, int> */
+        return Bookmark::query()->where('userid', $userId)->pluck('torrentid')->all();
+    }
 }

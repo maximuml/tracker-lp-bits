@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\BookmarkFilter;
+use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentVisible;
 use App\Exceptions\NexusException;
 use App\Http\Resources\TorrentResource;
@@ -436,5 +437,27 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
             ->where('torrents.size', '>', $minSize)
             ->groupBy('peers.torrent', 'peers.peer_id', 'peers.userid', 'peers.seeder')
             ->get();
+    }
+
+    /**
+     * Duplicate-upload guard: the torrent id carrying this info hash.
+     */
+    public function findIdByInfoHash(string $infoHash): ?int
+    {
+        /** @var int|string|null */
+        $id = Torrent::query()->where('info_hash', $infoHash)->value('id');
+
+        return $id === null ? null : (int) $id;
+    }
+
+    /**
+     * Denied uploads for an owner — upload-gate quota check.
+     */
+    public function countDeniedByOwner(int $ownerId): int
+    {
+        return Torrent::query()
+            ->where('owner', $ownerId)
+            ->where('approval_status', TorrentApprovalStatus::DENY->value)
+            ->count();
     }
 }

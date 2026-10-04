@@ -19,7 +19,6 @@ namespace App\Models;
 use App\Enums\BusinessType;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
-use Carbon\Carbon;
 
 class BonusLogs extends NexusModel
 {
@@ -132,28 +131,5 @@ class BonusLogs extends NexusModel
     public static function getBonusForBuyChangeUsernameCard(): float
     {
         return SiteConfig::current()->bonus->changeUsernameCard(self::DEFAULT_BONUS_BUY_CHANGE_USERNAME_CARD);
-    }
-
-    /**
-     * @return mixed
-     */
-    public static function add(int $userId, float $old, float $delta, float $new, string $comment, int $businessType)
-    {
-        $enum = BusinessType::fromIntSafe($businessType);
-        if ($enum === null) {
-            throw new \InvalidArgumentException("Invalid business type: $businessType");
-        }
-        $nowStr = Carbon::now()->toDateTimeString();
-
-        return self::query()->create([
-            'business_type' => $businessType,
-            'uid' => $userId,
-            'old_total_value' => $old,
-            'value' => $delta,
-            'new_total_value' => $new,
-            'comment' => sprintf('[%s]%s', $enum->label(), $comment ? " $comment" : ''),
-            'created_at' => $nowStr,
-            'updated_at' => $nowStr,
-        ]);
     }
 }

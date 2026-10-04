@@ -33,6 +33,10 @@ use Illuminate\Support\Facades\DB;
  */
 class TorrentApprovalRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly TorrentOperationLogRepository $operationLogRepository,
+    ) {}
+
     /**
      * @param  mixed  $user
      * @return array<int|string, mixed>
@@ -153,7 +157,7 @@ class TorrentApprovalRepository extends BaseRepository
             $torrent->update($torrentUpdate);
             if (! empty($torrentOperationLog)) {
                 $log .= ', [ADD_TORRENT_OPERATION_LOG]: '.Json::encode($torrentOperationLog);
-                TorrentOperationLog::add($torrentOperationLog, $notifyUser);
+                $this->operationLogRepository->add($torrentOperationLog, $notifyUser);
             }
             Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
         });

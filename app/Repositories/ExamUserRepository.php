@@ -8,7 +8,6 @@ use App\Enums\ExamUserStatus;
 use App\Exceptions\NexusException;
 use App\Models\Exam;
 use App\Models\ExamUser;
-use App\Models\Message;
 use App\Models\User;
 use App\Support\Json;
 use App\Support\Locale;
@@ -29,6 +28,7 @@ class ExamUserRepository extends BaseRepository
     public function __construct(
         private readonly ExamProgressRepository $examProgressRepository,
         private readonly ExamRepository $examRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /** @return list<string> */
@@ -190,7 +190,7 @@ class ExamUserRepository extends BaseRepository
         $oldEndTime = $examUser->end;
         $locale = $examUser->user->locale;
         $examName = $examUser->exam->name;
-        Message::add([
+        $this->messageRepository->add([
             'sender' => null,
             'receiver' => $examUser->uid,
             'added' => now(),

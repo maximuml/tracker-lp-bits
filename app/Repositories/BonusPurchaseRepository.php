@@ -10,7 +10,6 @@ use App\Exceptions\NexusException;
 use App\Models\BonusLogs;
 use App\Models\HitAndRun;
 use App\Models\Invite;
-use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
@@ -36,6 +35,7 @@ class BonusPurchaseRepository extends BaseRepository
         private readonly ToolRepository $toolRepository,
         private readonly UserRepository $userRepository,
         private readonly BonusConsumptionRepository $consumptionRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -227,7 +227,7 @@ class BonusPurchaseRepository extends BaseRepository
                 'subject' => Locale::trans('message.buy_torrent_success.subject', [], $buyerLocale),
                 'msg' => Locale::trans('message.buy_torrent_success.body', ['torrent_name' => $torrent->name, 'bonus' => $requireBonus, 'url' => sprintf('details.php?id=%s&hit=1', $torrent->id)], $buyerLocale),
             ];
-            Message::add($buyTorrentSuccessMessage);
+            $this->messageRepository->add($buyTorrentSuccessMessage);
 
             // T-24: Record purchase completed event in outbox (same transaction)
             $this->outboxService->recordPurchaseCompleted(

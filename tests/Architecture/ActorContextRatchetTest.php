@@ -41,9 +41,11 @@ final class ActorContextRatchetTest extends TestCase
      * accessor convention (one `app()` per class, like `X::instance()`);
      * +1 for Filament form-schema static context (`TorrentCustomFieldForm`
      * resolves CustomField whose ctor now requires repositories — Filament
-     * schemas have no instance hook, same floor as existing Filament sites).
+     * schemas have no instance hook, same floor as existing Filament sites);
+     * +1 for `ActorContext::userRepo()` — static DTO factory keeps the
+     * `self::xRepo()` accessor convention.
      */
-    private const BASELINE_APP_CALLS = 71;
+    private const BASELINE_APP_CALLS = 72;
 
     private const BASELINE_GLOBALS_REFS = 2;
 

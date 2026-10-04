@@ -14,6 +14,7 @@ use App\Models\BonusLogs;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\BonusCalculationRepository;
+use App\Repositories\BonusRepository;
 use App\Repositories\RewardRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\UserListingRepository;
@@ -42,6 +43,7 @@ class BonusHistoryController extends LegacyController
     public function __construct(private readonly TorrentDetailRepository $torrentDetailRepository, private readonly RewardRepository $rewardRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserListingRepository $userListingRepository, private readonly UserRepositoryInterface $userRepository,
         BonusCalculationRepository $bonusCalculationRepository,
         private readonly CurrentUser $currentUser,
+        private readonly BonusRepository $bonusRepository,
     ) {
         $this->bonusCalculationRepository = $bonusCalculationRepository;
     }
@@ -319,10 +321,10 @@ JS;
         $this->torrentDetailRepository->insertMagic($torrentId, $userId, $value);
 
         Bonus::updatePoints('-', (float) $value, $userId);
-        BonusLogs::add($userId, (float) ($curUser['seedbonus'] ?? 0), $value, (float) ($curUser['seedbonus'] ?? 0) - $value, '', BusinessType::REWARD_TORRENT->value);
+        $this->bonusRepository->add($userId, (float) ($curUser['seedbonus'] ?? 0), $value, (float) ($curUser['seedbonus'] ?? 0) - $value, '', BusinessType::REWARD_TORRENT->value);
 
         Bonus::updatePoints('+', (float) $value, (int) $torrentOwner);
-        BonusLogs::add((int) $torrentOwnerInfo['id'], (float) $torrentOwnerInfo['seedbonus'], $value, (float) $torrentOwnerInfo['seedbonus'] + $value, '', BusinessType::TORRENT_BE_REWARD->value);
+        $this->bonusRepository->add((int) $torrentOwnerInfo['id'], (float) $torrentOwnerInfo['seedbonus'], $value, (float) $torrentOwnerInfo['seedbonus'] + $value, '', BusinessType::TORRENT_BE_REWARD->value);
 
         return response()->json(Api::successWithContext('OK', $validated));
 

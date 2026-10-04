@@ -7,7 +7,6 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
-use App\Models\BonusLogs;
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\MessageRepository;
@@ -318,7 +317,7 @@ final class BonusService
         DB::transaction(function () use ($senderId, $useridgift, $points, $aftertaxpoint, $points2, $points2receiver, $usernamegift, $userseedbonus, $senderUsername) {
             $this->bonusRep->consumeUserBonus($senderId, $points, BusinessType::GIFT_TO_SOMEONE->value, $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)));
             $this->bonusRep->incrementUserSeedbonus($useridgift, (float) $aftertaxpoint);
-            BonusLogs::add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.$senderUsername, BusinessType::RECEIVE_GIFT->value);
+            $this->bonusRep->add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.$senderUsername, BusinessType::RECEIVE_GIFT->value);
         });
 
         $locale = Locale::userLocale($useridgift);

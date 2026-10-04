@@ -16,7 +16,6 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Logger;
 use App\Support\Pagination;
-use App\Support\RequestContext;
 use App\Support\SearchBox;
 use App\Support\SearchSuggest;
 use App\Support\UserUpdateBatch;
@@ -41,7 +40,7 @@ class TorrentSearchRepository
      * @param  array<string, mixed>  $query  Query parameters to use instead of $_GET
      * @return array<string, mixed>
      */
-    public function getListingData(array $query = []): array
+    public function getListingData(array $query, string $script): array
     {
         $CURUSER = $this->currentUser->get() ?? [];
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
@@ -57,7 +56,7 @@ class TorrentSearchRepository
         $sources = $media = $codecs = $standards = $processings = $audiocodecs = [];
 
         // check searchbox
-        switch (RequestContext::instance()->getScript()) {
+        switch ($script) {
             case 'torrents':
                 $sectiontype = $browsecatmode;
                 break;

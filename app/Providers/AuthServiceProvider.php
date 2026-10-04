@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Auth\NexusWebGuard;
 use App\Auth\NexusWebUserProvider;
+use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Models\AudioCodec;
 use App\Models\Category;
 use App\Models\Codec;
@@ -73,7 +74,7 @@ class AuthServiceProvider extends ServiceProvider
 
         Auth::extend('nexus-web', function ($app, $name, array $config) {
             // 返回 Illuminate\Contracts\Auth\Guard 的实例 ...
-            $guard = new NexusWebGuard($app['request'], new NexusWebUserProvider, $app->make(WebAuthService::class), $app->make(CurrentUser::class));
+            $guard = new NexusWebGuard($app['request'], new NexusWebUserProvider($app->make(AuthRepositoryInterface::class)), $app->make(WebAuthService::class), $app->make(CurrentUser::class));
             // Built-in drivers get request rebinding from AuthManager;
             // custom guards must register it themselves or they keep
             // reading cookies from a stale request under Octane.

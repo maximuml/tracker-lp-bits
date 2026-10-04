@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
+use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Models\User;
 use App\Support\AuthCookie;
 use App\Support\Cache;
@@ -20,8 +21,9 @@ class NexusWebUserProvider implements UserProvider
      */
     protected $query;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly AuthRepositoryInterface $authRepository,
+    ) {
         $this->query = User::query();
     }
 
@@ -117,7 +119,7 @@ class NexusWebUserProvider implements UserProvider
 
         if ($force || PasswordHasher::needsRehash($algo, $passhash)) {
             $user->makeVisible(['passhash']);
-            User::query()->where('id', $user->id)->update([
+            $this->authRepository->updateLogin((int) $user->id, [
                 'passhash' => PasswordHasher::hash($password),
                 'passhash_algo' => PasswordHasher::ALGO_ARGON2ID,
                 'must_change_password' => $algo !== PasswordHasher::ALGO_ARGON2ID,

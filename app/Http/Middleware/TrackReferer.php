@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Models\RefererHit;
+use App\Repositories\RefererHitRepository;
 use App\Support\Config\SiteConfig;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -20,6 +19,10 @@ use Throwable;
  */
 class TrackReferer
 {
+    public function __construct(
+        private readonly RefererHitRepository $refererHitRepository,
+    ) {}
+
     /** @var list<string> */
     private const EXCLUDED_PATTERNS = [
         'announce*',
@@ -65,7 +68,7 @@ class TrackReferer
         }
 
         try {
-            self::record($host, $request->path());
+            $this->record($host, $request->path());
         } catch (Throwable $e) {
             report($e);
         }
@@ -114,40 +117,8 @@ class TrackReferer
         return false;
     }
 
-    private static function record(string $host, string $path): void
+    private function record(string $host, string $path): void
     {
-        $now = now();
-        $today = $now->toDateString();
-        $path = mb_substr('/'.ltrim($path, '/'), 0, 255);
-
-        $updated = RefererHit::query()
-            ->where('host', $host)
-            ->where('date', $today)
-            ->update([
-                'hits' => DB::raw('hits + 1'),
-                'last_path' => $path,
-                'last_seen_at' => $now,
-            ]);
-
-        if ($updated > 0) {
-            return;
-        }
-
-        try {
-            RefererHit::query()->create([
-                'host' => $host,
-                'date' => $today,
-                'hits' => 1,
-                'last_path' => $path,
-                'first_seen_at' => $now,
-                'last_seen_at' => $now,
-            ]);
-        } catch (Throwable) {
-            // Lost a unique-key race — fold into the existing row instead.
-            RefererHit::query()
-                ->where('host', $host)
-                ->where('date', $today)
-                ->increment('hits');
-        }
+        $this->refererHitRepository->recordHit($host, $path);
     }
 }

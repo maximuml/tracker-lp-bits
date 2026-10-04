@@ -32,7 +32,6 @@ use App\Support\Logger;
 use App\Support\RedisGuard;
 use App\Support\Style;
 use App\Support\Url;
-use App\Support\View as LegacyView;
 use App\ViewModels\TorrentListViewFactory;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Http\JsonResponse;
@@ -301,30 +300,6 @@ class UtilityController extends LegacyController
         $responseStatus = $status !== null && $status >= 100 ? $status : 200;
 
         return response($content, $responseStatus, $headers);
-    }
-
-    public function page(Request $request): Response|RedirectResponse
-    {
-        error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
-
-        $view = $request->input('view');
-        if (! empty($view)) {
-            $view = str_replace('.', '/', trim((string) $view, '/.'));
-            $viewFile = ROOT_PATH."resources/views/$view";
-            if (! str_ends_with($viewFile, '.php')) {
-                $viewFile .= '.php';
-            }
-            if (file_exists($viewFile)) {
-                return response((string) LegacyView::render($viewFile, [], true, ROOT_PATH));
-            }
-            $msg = "viewFile: $viewFile not exists, _REQUEST: ".json_encode($request->all());
-            Logger::writeWithContext($msg, 'error', false);
-            throw new \RuntimeException($msg);
-        }
-
-        $msg = 'require view parameter, _REQUEST: '.json_encode($request->all());
-        Logger::writeWithContext($msg, 'error', false);
-        abort(400, 'require view parameter');
     }
 
     public function tags(Request $request): View|RedirectResponse

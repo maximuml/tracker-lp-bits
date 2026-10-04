@@ -17,7 +17,7 @@ Route::get('/aboutnexus', [RulesController::class, 'aboutNexus'])->name('aboutne
 Route::get('/rules', [RulesController::class, 'rules'])->name('rules.legacy');
 Route::get('/useragreement', [RulesController::class, 'userAgreement'])->name('useragreement.legacy');
 Route::get('/faq', [FaqController::class, 'faq'])->name('faq.legacy');
-Route::post('/faq', [FaqController::class, 'faq'])->middleware('auth.nexus:nexus-web');
+Route::post('/faq', [FaqController::class, 'faqPost'])->middleware('auth.nexus:nexus-web');
 Route::get('/donate', [InfoController::class, 'donate'])->name('donate.legacy');
 Route::post('/donate', [InfoController::class, 'donate'])->middleware('auth.nexus:nexus-web');
 Route::get('/getusertorrentlistajax', [TorrentAjaxController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
@@ -39,7 +39,7 @@ Route::get('/cron', [SystemMaintenanceController::class, 'cron'])->middleware('c
 Route::get('/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
 
 Route::get('/complains', [SupportController::class, 'complains'])->name('complains.legacy');
-Route::post('/complains', [SupportController::class, 'complains']);
+Route::post('/complains', [SupportController::class, 'complainsPost']);
 Route::get('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['auth.nexus:nexus-web', 'throttle:shoutbox'])->name('shoutbox.legacy');
 
 Route::get('/bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');

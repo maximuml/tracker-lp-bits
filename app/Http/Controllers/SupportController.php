@@ -44,10 +44,6 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.complain_not_enabled'));
         }
 
-        if ($request->isMethod('post')) {
-            return $this->handleComplainPost($request, $uid, $isAdmin);
-        }
-
         $action = filter_var((string) ($request->input('action') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         if (empty($action) && $isAdmin) {
             $action = 'list';
@@ -58,6 +54,22 @@ class SupportController extends LegacyController
             'view' => $this->complainView($request, $uid, $isAdmin),
             default => $this->complainCompose($request, $uid),
         };
+    }
+
+    public function complainsPost(Request $request): View|RedirectResponse|Response
+    {
+        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $uid = (int) ($currentUser['id'] ?? 0);
+        $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
+
+        if ($uid > 0 && ! $isAdmin) {
+            return $this->legacyAbortResponse(('Error'), 'Permission denied.');
+        }
+        if (! $isAdmin && ! Setting::getIsComplainEnabled()) {
+            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.complain_not_enabled'));
+        }
+
+        return $this->handleComplainPost($request, $uid, $isAdmin);
     }
 
     private function handleComplainPost(Request $request, int $uid, bool $isAdmin): RedirectResponse|Response

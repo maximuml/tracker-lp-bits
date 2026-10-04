@@ -28,16 +28,17 @@ class RssController extends LegacyController
 
     public function getrss(Request $request): View|RedirectResponse|Response
     {
-        if ($request->isMethod('post')) {
-            return $this->handleGetrssPost($request);
-        }
-
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
             return redirect('/getrss.php');
         }
 
         return $this->legacyPage($request, 'getrss', true, $this->getrssData());
+    }
+
+    public function getrssPost(Request $request): Response|RedirectResponse
+    {
+        return $this->handleGetrssPost($request);
     }
 
     /**

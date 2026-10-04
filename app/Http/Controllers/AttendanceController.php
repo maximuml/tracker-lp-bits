@@ -33,25 +33,47 @@ class AttendanceController extends LegacyController
 
         $uid = (int) ($curUser['id'] ?? 0);
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
+        $attendance = $repository->getAttendance($uid);
 
-        if ($request->isMethod('post')) {
-            if ($captchaEnabled && SiteConfig::current()->security->captchaRequired()) {
-                Captcha::checkCode(
-                    (string) (request()->post('imagehash') ?? ''),
-                    (string) (request()->post('imagestring') ?? ''),
-                    'attendance.php',
-                    false,
-                    true
-                );
-            }
-            $attendance = $repository->attend($uid);
-            if (! $attendance->is_updated) {
-                LegacyResponse::abort(__('legacy/attendance.sorry'), __('legacy/attendance.already_attended'));
-            }
-        } else {
-            $attendance = $repository->getAttendance($uid);
+        return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);
+    }
+
+    public function attendancePost(Request $request, AttendanceRepository $repository): View|RedirectResponse|Response
+    {
+        $curUser = $this->currentUser->get();
+        if ($curUser === null) {
+            return redirect('/attendance.php');
         }
 
+        $uid = (int) ($curUser['id'] ?? 0);
+        $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
+
+        if ($captchaEnabled && SiteConfig::current()->security->captchaRequired()) {
+            Captcha::checkCode(
+                (string) (request()->post('imagehash') ?? ''),
+                (string) (request()->post('imagestring') ?? ''),
+                'attendance.php',
+                false,
+                true
+            );
+        }
+        $attendance = $repository->attend($uid);
+        if (! $attendance->is_updated) {
+            LegacyResponse::abort(__('legacy/attendance.sorry'), __('legacy/attendance.already_attended'));
+        }
+
+        return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);
+    }
+
+    /** @param array<string, mixed> $curUser */
+    private function renderAttendance(
+        Request $request,
+        AttendanceRepository $repository,
+        array $curUser,
+        int $uid,
+        ?Attendance $attendance,
+        bool $captchaEnabled
+    ): View|RedirectResponse {
         if (! $attendance) {
             $attendance = new Attendance([
                 'uid' => $uid,

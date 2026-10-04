@@ -31,33 +31,11 @@ class RecoveryController extends Controller
 
     public function recover(RecoverRequest $request): Response|RedirectResponse
     {
-        if (Auth::guard('nexus-web')->check()) {
-            return Redirect::to('index.php');
+        if ($early = $this->recoverPreamble($request)) {
+            return $early;
         }
 
         $langFolder = $this->resolveLangFolder($request);
-
-        $sitelanguage = (int) $request->query('sitelanguage', 0);
-        if ($sitelanguage > 0) {
-            $folder = Locale::folderForId($sitelanguage, $langFolder);
-            if ($folder !== '') {
-                Locale::setFolderCookie($folder);
-                $query = $request->query();
-                unset($query['sitelanguage']);
-
-                return Redirect::to('/recover'.(empty($query) ? '' : '?'.http_build_query($query)));
-            }
-        }
-
-        if ($request->isMethod('post')) {
-            try {
-                $this->recoveryService->requestReset($request->validated(), Network::clientIp());
-            } catch (AuthenticationException $exception) {
-                return $this->backWithError($request, $exception->getMessage());
-            }
-
-            return Redirect::to('/recover?status=requested');
-        }
 
         $id = (int) $request->query('id', 0);
         $secret = (string) $request->query('secret', '');
@@ -76,6 +54,44 @@ class RecoveryController extends Controller
                 : null,
             $hasResetLink,
         );
+    }
+
+    public function recoverPost(RecoverRequest $request): Response|RedirectResponse
+    {
+        if ($early = $this->recoverPreamble($request)) {
+            return $early;
+        }
+
+        try {
+            $this->recoveryService->requestReset($request->validated(), Network::clientIp());
+        } catch (AuthenticationException $exception) {
+            return $this->backWithError($request, $exception->getMessage());
+        }
+
+        return Redirect::to('/recover?status=requested');
+    }
+
+    private function recoverPreamble(RecoverRequest $request): ?RedirectResponse
+    {
+        if (Auth::guard('nexus-web')->check()) {
+            return Redirect::to('index.php');
+        }
+
+        $langFolder = $this->resolveLangFolder($request);
+
+        $sitelanguage = (int) $request->query('sitelanguage', 0);
+        if ($sitelanguage > 0) {
+            $folder = Locale::folderForId($sitelanguage, $langFolder);
+            if ($folder !== '') {
+                Locale::setFolderCookie($folder);
+                $query = $request->query();
+                unset($query['sitelanguage']);
+
+                return Redirect::to('/recover'.(empty($query) ? '' : '?'.http_build_query($query)));
+            }
+        }
+
+        return null;
     }
 
     public function resetPassword(PasswordResetRequest $request): RedirectResponse

@@ -39,29 +39,17 @@ final class SharedGetPostActionTest extends TestCase
      * @var array<string, true>
      */
     private const BASELINE_URIS = [
-        // Auth
-        'recover' => true,
         // API
         'api/v1/usercp/settings' => true,
-        // Info pages
-        'faq' => true,
         'donate' => true,
         'donated' => true,
         'bitbucketlog' => true,
         'news' => true,
-        // Support
-        'complains' => true,
         // Bonus
         'freeleech' => true,
-        // Friends/messages
-        'friends' => true,
-        // RSS
-        'getrss' => true,
         // Polls
         'makepoll' => true,
         'polloverview' => true,
-        // Attendance
-        'attendance' => true,
         // Moderation
         'modtask' => true,
         'modrules' => true,
@@ -82,9 +70,6 @@ final class SharedGetPostActionTest extends TestCase
         'self-enable' => true,
         'unco' => true,
         'adduser' => true,
-        // FAQ management
-        'faqmanage' => true,
-        'faqactions' => true,
         // Legacy pages
         'log' => true,
         'index' => true,

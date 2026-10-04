@@ -113,6 +113,27 @@ class FriendsController extends LegacyController
         ]);
     }
 
+    public function friendsPost(Request $request): Response|RedirectResponse|View
+    {
+        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $userid = (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
+        if ($userid <= 0 || ! Validators::isId($userid)) {
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_invalid_id')).$userid.'.');
+        }
+
+        $action = (string) ($request->input('action') ?? '');
+
+        if ($action === 'add') {
+            return $this->handleAdd($request, $userid);
+        }
+
+        if ($action === 'delete') {
+            return $this->handleDelete($request, $userid);
+        }
+
+        return $this->friends($request);
+    }
+
     private function handleAdd(Request $request, int $userid): RedirectResponse|Response
     {
         $targetid = $request->input('targetid');

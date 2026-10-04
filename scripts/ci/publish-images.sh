@@ -18,10 +18,25 @@ docker build -f .docker/openresty/Dockerfile \
     $OCI_LABELS \
     -t "${NS}/openresty:sha-${SHORT}" -t "${NS}/openresty:latest" .
 
-docker push "${NS}/php:sha-${SHORT}"
-docker push "${NS}/php:latest"
-docker push "${NS}/openresty:sha-${SHORT}"
-docker push "${NS}/openresty:latest"
+# GHCR blob pushes flake intermittently ("unknown blob", "blob upload
+# invalid", resets) — retry a few times; already-uploaded layers skip
+# instantly on retry so this stays cheap. Same pattern as dex()/gh_retry.
+dpush() {
+    local ref=$1 attempt
+    for attempt in 1 2 3 4; do
+        if docker push "$ref"; then
+            return 0
+        fi
+        echo "::warning::docker push $ref failed (attempt $attempt/4) — retrying"
+        sleep $((attempt * 5))
+    done
+    return 1
+}
+
+dpush "${NS}/php:sha-${SHORT}"
+dpush "${NS}/php:latest"
+dpush "${NS}/openresty:sha-${SHORT}"
+dpush "${NS}/openresty:latest"
 
 # RepoDigests on the local image is populated by `docker push`.
 PHP_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${NS}/php:sha-${SHORT}" | cut -d@ -f2)

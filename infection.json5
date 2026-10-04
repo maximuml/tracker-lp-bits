@@ -20,8 +20,8 @@
     "phpUnit": {
         "configDir": "."
     },
-    "minMsi": 40,
-    "minCoveredMsi": 50,
+    "minMsi": 55,
+    "minCoveredMsi": 55,
     "threads": 4,
     "timeout": 10
 }

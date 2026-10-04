@@ -22,6 +22,7 @@ use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\View\Components\BbcodeEditor;
@@ -170,21 +171,6 @@ class TorrentEditController extends Controller
         $defaultUrl = "details.php?id=$id&edited=1";
         $returl = $request->input('returnto', $defaultUrl);
 
-        return redirect($this->safeReturnUrl((string) $returl, $defaultUrl));
-    }
-
-    private function safeReturnUrl(string $returl, string $defaultUrl): string
-    {
-        $returl = trim($returl);
-        if ($returl === '') {
-            return $defaultUrl;
-        }
-
-        $parsed = parse_url($returl);
-        if (! empty($parsed['scheme']) || ! empty($parsed['host']) || str_starts_with($returl, '//')) {
-            return $defaultUrl;
-        }
-
-        return $returl;
+        return redirect(SafeReturnUrl::filter(trim((string) $returl), $defaultUrl));
     }
 }

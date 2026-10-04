@@ -15,6 +15,7 @@ use App\Services\PermissionChecker;
 use App\Support\Bonus;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\Url;
 use Illuminate\Contracts\View\View;
@@ -114,7 +115,7 @@ class WebCommentController extends Controller
         $headTitle = __('legacy/comment.head_edit_comment_to').$arr['name'];
         $pageTitle = view('components.title-link', ['before' => __('legacy/comment.text_edit_comment_to'), 'url' => $returnUrl, 'text' => $arr['name']])->render();
         $formAction = $this->legacyAction('edit', ['type' => $type, 'cid' => $commentId]);
-        $returnto = $this->safeReturnUrl((string) ($request->headers->get('referer') ?? ''), $returnUrl);
+        $returnto = SafeReturnUrl::filter((string) ($request->headers->get('referer') ?? ''), $returnUrl);
         $body = (string) $arr['text'];
         $composeType = 'edit';
 
@@ -146,7 +147,7 @@ class WebCommentController extends Controller
         $defaultUrl = $this->buildScript($type, (int) $arr['parent_id']);
         $returnto = $request->validated('returnto', '');
 
-        return redirect($this->safeReturnUrl($returnto, $defaultUrl));
+        return redirect(SafeReturnUrl::filter(trim($returnto), $defaultUrl));
     }
 
     public function deleteConfirm(Request $request, int $commentId): View
@@ -204,7 +205,7 @@ class WebCommentController extends Controller
             $returnto = (string) ($request->headers->get('referer') ?? '');
         }
 
-        return redirect($this->safeReturnUrl($returnto, $defaultUrl));
+        return redirect(SafeReturnUrl::filter(trim($returnto), $defaultUrl));
     }
 
     public function original(Request $request, int $commentId): View
@@ -223,7 +224,7 @@ class WebCommentController extends Controller
 
         $parentId = (int) ($arr[$type] ?? 0);
         $defaultUrl = $this->buildScript($type, $parentId);
-        $returnto = $this->safeReturnUrl((string) ($request->headers->get('referer') ?? ''), $defaultUrl);
+        $returnto = SafeReturnUrl::filter((string) ($request->headers->get('referer') ?? ''), $defaultUrl);
 
         return view('comments.original', compact('arr', 'commentId', 'returnto'));
     }
@@ -351,21 +352,6 @@ class WebCommentController extends Controller
         $query = ['action' => $action] + $query;
 
         return 'comment.php?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
-    }
-
-    private function safeReturnUrl(string $returl, string $defaultUrl): string
-    {
-        $returl = trim($returl);
-        if ($returl === '') {
-            return $defaultUrl;
-        }
-
-        $parsed = parse_url($returl);
-        if ($parsed === false || ! empty($parsed['scheme']) || ! empty($parsed['host']) || str_starts_with($returl, '//')) {
-            return $defaultUrl;
-        }
-
-        return $returl;
     }
 
     private function lang(string $key): string

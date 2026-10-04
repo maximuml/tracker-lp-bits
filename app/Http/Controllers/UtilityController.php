@@ -127,8 +127,21 @@ class UtilityController extends LegacyController
         } catch (\Throwable $exception) {
             Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
 
-            return response()->json(Api::failWithContext($exception->getMessage(), $request->only(['action', 'params'])));
+            return response()->json(Api::failWithContext(self::clientSafeMessage($exception), $request->only(['action', 'params'])));
         }
+    }
+
+    /**
+     * Domain exceptions carry user-facing text the legacy JS displays;
+     * infrastructure failures (PDO/QueryException, PHP engine errors) must not leak.
+     */
+    private static function clientSafeMessage(\Throwable $exception): string
+    {
+        if ($exception instanceof \PDOException || $exception instanceof \Error) {
+            return 'Internal error';
+        }
+
+        return $exception->getMessage();
     }
 
     public function attachment(Request $request): Response

@@ -81,6 +81,25 @@ final class UtilityControllerTest extends TestCase
         $this->assertSame(['challenge' => 'test-challenge'], $data['data']);
     }
 
+    public function test_ajax_hides_internal_error_messages(): void
+    {
+        $this->mockLegacyRedisCache();
+        $this->mockCurrentUser(['id' => 1, 'enabled' => true, 'username' => 'testuser']);
+
+        $mockPasskeyRepo = Mockery::mock(UserPasskeyRepository::class);
+        $mockPasskeyRepo->shouldReceive('getGetArgs')->once()->andThrow(new \PDOException('SQLSTATE[42S02] secret_table'));
+        app()->instance(UserPasskeyRepository::class, $mockPasskeyRepo);
+
+        $controller = app(UtilityController::class);
+        $request = Request::create('/ajax', 'GET', ['action' => 'getPasskeyGetArgs']);
+        app()->instance('request', $request);
+
+        $data = $controller->ajax($request)->getData(true);
+
+        $this->assertSame(-1, $data['ret']);
+        $this->assertSame('Internal error', $data['msg']);
+    }
+
     public function test_ajax_returns_error_for_exception(): void
     {
         $this->mockLegacyRedisCache();

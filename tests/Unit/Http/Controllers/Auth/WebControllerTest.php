@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -149,7 +150,20 @@ final class WebControllerTest extends TestCase
         $this->assertStringContainsString('torrents.php', $response->getTargetUrl());
     }
 
-    public function test_login_ignores_external_returnto(): void
+    /** @return array<string, array{string}> */
+    public static function externalReturntoProvider(): array
+    {
+        return [
+            'https' => ['https://evil.com/path'],
+            'uppercase scheme' => ['HTTPS://evil.com/path'],
+            'protocol-relative' => ['//evil.com/path'],
+            'backslash host' => ['/\\evil.com/path'],
+            'javascript' => ['javascript:alert(1)'],
+        ];
+    }
+
+    #[DataProvider('externalReturntoProvider')]
+    public function test_login_ignores_external_returnto(string $returnto): void
     {
         /** @var WebAuthService&Mockery\MockInterface $authService */
         $authService = Mockery::mock(WebAuthService::class);
@@ -164,7 +178,7 @@ final class WebControllerTest extends TestCase
         $request = LoginRequest::create('/login', 'POST', [
             'username' => 'testuser',
             'password' => 'password',
-            'returnto' => 'https://evil.com/path',
+            'returnto' => $returnto,
         ]);
         $request->setContainer(app());
         $request->setRedirector(app('redirect'));
@@ -174,6 +188,7 @@ final class WebControllerTest extends TestCase
 
         $this->assertTrue($response->isRedirect());
         $this->assertStringContainsString('index.php', $response->getTargetUrl());
+        $this->assertStringNotContainsString('evil.com', $response->getTargetUrl());
     }
 
     public function test_login_redirects_back_on_auth_exception(): void

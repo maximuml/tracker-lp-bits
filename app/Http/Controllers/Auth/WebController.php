@@ -15,6 +15,7 @@ use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\Network;
 use Illuminate\Http\RedirectResponse;
@@ -119,8 +120,8 @@ class WebController extends Controller
         }
 
         $returnto = $request->input('returnto', '');
-        if (is_string($returnto) && $returnto !== '' && $this->isLocalUrl($returnto)) {
-            return Redirect::to($returnto);
+        if (is_string($returnto) && $returnto !== '') {
+            return Redirect::to(SafeReturnUrl::filter($returnto, '/index.php'));
         }
 
         return Redirect::to('index.php');
@@ -163,12 +164,5 @@ class WebController extends Controller
         return Redirect::back()
             ->withInput($request->except('password'))
             ->with('error', $message);
-    }
-
-    private function isLocalUrl(string $url): bool
-    {
-        return ! str_starts_with($url, 'http://')
-            && ! str_starts_with($url, 'https://')
-            && ! str_starts_with($url, '//');
     }
 }

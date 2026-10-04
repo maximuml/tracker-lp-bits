@@ -13,6 +13,10 @@ use App\Support\Strings;
 
 final class PeerTableFactory
 {
+    public function __construct(
+        private readonly PermissionChecker $permissionChecker,
+    ) {}
+
     /**
      * @param  array<array<string, mixed>>  $arr
      * @param  array<string, mixed>  $torrent
@@ -31,7 +35,7 @@ final class PeerTableFactory
             $privacy = $privacyData[$e['userid']] ?? '';
             $secs = max(1, $e['la'] - $e['st']);
             $isStrongPrivacy = $privacy === 'strong' || (LegacyYesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
-            $canView = PermissionChecker::instance()->userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
+            $canView = $this->permissionChecker->userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
 
             $uploaded = (float) $e['uploaded'];
             $downloaded = (float) $e['downloaded'];

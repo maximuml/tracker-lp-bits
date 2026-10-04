@@ -7,10 +7,13 @@ namespace App\Services\Captcha;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\Config;
 use App\Support\Config\SiteConfig;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Arr;
 
 class CaptchaManager
 {
+    public function __construct(private readonly Container $container) {}
+
     /** @var array<string, CaptchaDriverInterface> */
     protected array $drivers = [];
 
@@ -86,7 +89,7 @@ class CaptchaManager
             throw new \InvalidArgumentException("Captcha driver class for [$name] is invalid.");
         }
 
-        $driver = new $driverClass($config);
+        $driver = $this->container->make($driverClass, ['config' => $config]);
 
         if (! $driver instanceof CaptchaDriverInterface) {
             throw new \InvalidArgumentException("Captcha driver [$name] must implement ".CaptchaDriverInterface::class);

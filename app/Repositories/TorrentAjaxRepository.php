@@ -30,6 +30,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
     public function __construct(
         private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
         private readonly TorrentModerationRepository $torrentModerationRepository,
+        private readonly PermissionChecker $permissionChecker,
     ) {}
 
     /**
@@ -220,7 +221,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
         }
 
         $enablelocationTweak = SiteConfig::current()->tweak->enableLocation();
-        $showLocationColumn = $enablelocationTweak || ($currentUser !== null && PermissionChecker::instance()->userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
+        $showLocationColumn = $enablelocationTweak || ($currentUser !== null && $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUser->id));
 
         return [
             'torrent' => $torrentArr,
@@ -307,7 +308,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
                     ])
                     ->orderByDesc('torrents.id');
 
-                if ($currentUser === null || ($currentUser->id !== $targetUserId && ! PermissionChecker::instance()->userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUser->id))) {
+                if ($currentUser === null || ($currentUser->id !== $targetUserId && ! $this->permissionChecker->userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUser->id))) {
                     $query->where('torrents.anonymous', 0);
                 }
 

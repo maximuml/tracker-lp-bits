@@ -32,6 +32,7 @@ final class TorrentGate
     public function __construct(
         private readonly TorrentPurchaseRepository $purchaseRepository,
         private readonly UserModerationRepositoryInterface $userModerationRepository,
+        private readonly PermissionChecker $permissionChecker,
     ) {}
 
     public function resolve(AnnounceContext $ctx): AnnounceContext
@@ -73,13 +74,13 @@ final class TorrentGate
 
         $ctx = $ctx->withTorrent($torrent);
 
-        if ($torrent['banned'] && ! PermissionChecker::instance()->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())) {
+        if ($torrent['banned'] && ! $this->permissionChecker->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())) {
             throw TrackerException::failure('torrent banned');
         }
 
         if ($torrent['approval_status'] != TorrentApprovalStatus::ALLOW->value
             && ! SiteConfig::current()->torrent->approvalStatusNoneVisible()
-            && ! PermissionChecker::instance()->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())
+            && ! $this->permissionChecker->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $ctx->userId())
         ) {
             throw TrackerException::failure('torrent review not approved');
         }

@@ -20,8 +20,8 @@ use Illuminate\Support\Facades\Redis;
 class DashboardRepository extends BaseRepository
 {
     public function __construct(
-        private readonly DashboardStatsRepository $statsRepository = new DashboardStatsRepository,
-        private readonly LegacyRedisCache $cache = new LegacyRedisCache,
+        private readonly DashboardStatsRepository $statsRepository,
+        private readonly LegacyRedisCache $cache,
     ) {}
 
     /** @return  array<string, array<string, mixed>> */

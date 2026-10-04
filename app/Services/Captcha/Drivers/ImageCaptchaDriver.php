@@ -18,7 +18,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     /**
      * @param  array<string, mixed>  $config
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config, private readonly LegacyHeaderBag $headerBag)
     {
         $this->config = $config;
     }
@@ -164,7 +164,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         // T-11: Use LegacyHeaderBag instead of SAPI header() to avoid
         // cross-request header leakage under Octane.
-        LegacyHeaderBag::instance()->set('Content-Type', 'image/png');
+        $this->headerBag->set('Content-Type', 'image/png');
         imagepng($im);
         imagedestroy($im);
     }
@@ -182,6 +182,6 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     {
         // T-11: Use LegacyHeaderBag instead of SAPI http_response_code() to
         // avoid cross-request status code leakage under Octane.
-        LegacyHeaderBag::instance()->setStatusCode(404);
+        $this->headerBag->setStatusCode(404);
     }
 }

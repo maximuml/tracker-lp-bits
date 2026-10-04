@@ -9,6 +9,8 @@ use App\Models\Peer;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\DashboardRepository;
+use App\Repositories\DashboardStatsRepository;
+use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -37,7 +39,7 @@ final class DashboardRepositoryTest extends TestCase
         DB::table('users')->delete();
         DB::table('categories')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-        $this->repository = new DashboardRepository;
+        $this->repository = new DashboardRepository(new DashboardStatsRepository, app(LegacyRedisCache::class));
     }
 
     public function test_get_system_info_returns_expected_keys(): void

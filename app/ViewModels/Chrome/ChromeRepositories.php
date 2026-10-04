@@ -8,6 +8,7 @@ use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Repositories\AttendanceRepository;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\StaffMessageRepository;
+use App\Services\PermissionChecker;
 
 /**
  * Repositories the chrome view models need beyond the layout repository the
@@ -23,5 +24,6 @@ final readonly class ChromeRepositories
         public HitAndRunRepository $hitAndRun,
         public StaffMessageRepository $staffMessages,
         public SearchBoxRepositoryInterface $searchBox,
+        public PermissionChecker $permissionChecker,
     ) {}
 }

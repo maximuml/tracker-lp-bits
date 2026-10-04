@@ -5,11 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Torrent;
-use App\Repositories\TorrentSearch\FilterParser;
-use App\Repositories\TorrentSearch\MeiliAdapter;
-use App\Repositories\TorrentSearch\QueryBuilder;
-use App\Repositories\TorrentSearch\SortingBuilder;
-use App\Repositories\TorrentSearch\SqlFallback;
+use App\Repositories\TorrentSearch\SearchEngine;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
@@ -26,11 +22,7 @@ class TorrentSearchRepository
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly TagRepository $tagRepository,
-        private readonly QueryBuilder $queryBuilder,
-        private readonly SortingBuilder $sortingBuilder,
-        private readonly FilterParser $filterParser,
-        private readonly MeiliAdapter $meiliAdapter,
-        private readonly SqlFallback $sqlFallback,
+        private readonly SearchEngine $engine,
         private readonly TorrentListingRepository $listingRepository,
         private readonly LegacyRedisCache $cache,
         private readonly UserUpdateBatch $userUpdateBatch,
@@ -120,14 +112,14 @@ class TorrentSearchRepository
         // sorting by MarkoStamcar
         $allCategoryId = \App\Models\SearchBox::listCategoryId($sectiontype);
 
-        $sorting = $this->sortingBuilder->build($searchParams);
+        $sorting = $this->engine->sortingBuilder->build($searchParams);
         $column = $sorting['column'];
         $ascdesc = $sorting['ascdesc'];
         $linkascdesc = $sorting['linkascdesc'];
         $orderBy = $sorting['orderBy'];
         $pagerlink = $sorting['pagerlink'];
 
-        $filters = $this->filterParser->parse(
+        $filters = $this->engine->filterParser->parse(
             $searchParams,
             $CURUSER,
             $hasSearchParams,
@@ -164,7 +156,7 @@ class TorrentSearchRepository
         $allsec = $filters['allsec'];
         $searchParams = $filters['searchParams'];
 
-        $built = $this->queryBuilder->buildWhere(
+        $built = $this->engine->queryBuilder->buildWhere(
             $searchParams,
             $CURUSER,
             $wherea,
@@ -204,15 +196,15 @@ class TorrentSearchRepository
 
         if ($shouldUseMeili) {
             try {
-                $resultFromSearchRep = $this->meiliAdapter->search($searchParams, $CURUSER['id']);
+                $resultFromSearchRep = $this->engine->meiliAdapter->search($searchParams, $CURUSER['id']);
                 $count = $resultFromSearchRep['total'];
             } catch (\Throwable $e) {
                 Logger::writeWithContext((string) ('MeiliSearch search failed, falling back to SQL: '.$e->getMessage()), (string) 'error', (bool) false);
                 $shouldUseMeili = false;
-                $count = $this->sqlFallback->getCount($listingOptions);
+                $count = $this->engine->sqlFallback->getCount($listingOptions);
             }
         } else {
-            $count = $this->sqlFallback->getCount($listingOptions);
+            $count = $this->engine->sqlFallback->getCount($listingOptions);
         }
         $maxPageSize = 100;
         if (! empty($searchParams['pageSize'])) {
@@ -243,7 +235,7 @@ class TorrentSearchRepository
             $fieldsArr = Torrent::getFieldsForList(true);
             $rows = $shouldUseMeili
                 ? $resultFromSearchRep['list']
-                : $this->sqlFallback->getList(array_merge($listingOptions, [
+                : $this->engine->sqlFallback->getList(array_merge($listingOptions, [
                     'fields' => $fieldsArr,
                     'search_box_id' => $sectiontype,
                     'order_by' => $orderBy,

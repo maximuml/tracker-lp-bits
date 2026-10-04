@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\ForumRepositoryInterface;
-use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Post;
 use App\Models\Topic;
@@ -14,8 +12,6 @@ use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\MessageRepository;
-use App\Repositories\PostLookupRepository;
-use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
@@ -78,14 +74,11 @@ final class ForumService
     }
 
     public function __construct(
-        private readonly ForumRepositoryInterface $repository,
+        private readonly ForumDataRepositories $data,
         private readonly CurrentUser $currentUser,
         private readonly LegacyRedisCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
-        private readonly TopicRepository $topicRepository,
-        private readonly PostRepositoryInterface $postRepository,
-        private readonly PostLookupRepository $postLookupRepository,
         private readonly ForumModerationService $moderation,
         private readonly MessageRepository $messageRepository,
     ) {}
@@ -137,7 +130,7 @@ final class ForumService
 
         switch ($type) {
             case 'new':
-                if (! $this->repository->forumExists($id)) {
+                if (! $this->data->forums->forumExists($id)) {
                     LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_forum_id'));
                 }
                 $forumid = $id;
@@ -145,7 +138,7 @@ final class ForumService
                 break;
 
             case 'reply':
-                $forumid = $this->topicRepository->topicExists($id);
+                $forumid = $this->data->topics->topicExists($id);
                 if ($forumid === null) {
                     LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_bad_topic_id'));
                 }
@@ -153,7 +146,7 @@ final class ForumService
                 break;
 
             case 'edit':
-                $post = $this->postLookupRepository->getPostEditInfo($id);
+                $post = $this->data->postLookup->getPostEditInfo($id);
                 if ($post === null) {
                     return $this->redirectTo('/forums.php');
                 }
@@ -178,7 +171,7 @@ final class ForumService
             }
         }
 
-        $forumRow = $this->repository->getForumRow($forumid);
+        $forumRow = $this->data->forums->getForumRow($forumid);
         if ($forumRow === null) {
             return $this->redirectTo('/forums.php');
         }
@@ -200,7 +193,7 @@ final class ForumService
         $date = date('Y-m-d H:i:s');
 
         if ($type !== 'new') {
-            $topicModel = $this->topicRepository->getTopic((int) $topicid);
+            $topicModel = $this->data->topics->getTopic((int) $topicid);
             if ($topicModel === null) {
                 return $this->redirectTo('/forums.php');
             }
@@ -213,28 +206,28 @@ final class ForumService
         }
 
         if ($type === 'edit') {
-            $postInfo = $this->postLookupRepository->getPostWithUser($postid);
-            $topicInfo = $this->topicRepository->getTopicWithUser($topicid);
+            $postInfo = $this->data->postLookup->getPostWithUser($postid);
+            $topicInfo = $this->data->topics->getTopicWithUser($topicid);
             if ($postInfo === null || $topicInfo === null) {
                 return $this->redirectTo('/forums.php');
             }
 
             // W1-04: Use PostPolicy for edit authorization
-            $postModel = $this->postLookupRepository->getPost((int) $postid);
+            $postModel = $this->data->postLookup->getPost((int) $postid);
             $authUser = Auth::user();
             if (! $authUser instanceof User || $postModel === null || ! $this->postPolicy->update($authUser, $postModel)) {
                 LegacyResponse::permissionDenied();
             }
 
             if ($hassubject) {
-                $this->topicRepository->updateTopicSubject($topicid, $subject);
+                $this->data->topics->updateTopicSubject($topicid, $subject);
                 $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
                 if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
                     $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
                 }
             }
 
-            $this->postRepository->updatePostBody($postid, $body, $date, $userid);
+            $this->data->posts->updatePostBody($postid, $body, $date, $userid);
             $this->cacheDelete('post_'.$postid.'_content');
 
             $postUrl = sprintf('[url=/forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject ?? '');
@@ -272,26 +265,26 @@ final class ForumService
                 Bonus::updatePoints('+', $starttopicBonus, $userid);
             }
 
-            $topicid = $this->topicRepository->createTopic($userid, $forumid, $subject);
+            $topicid = $this->data->topics->createTopic($userid, $forumid, $subject);
             if ($topicid <= 0) {
                 LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_topic_id_returned'));
             }
-            $this->repository->incrementForumTopicCount($forumid);
-            $this->repository->incrementForumPostCount($forumid);
+            $this->data->forums->incrementForumTopicCount($forumid);
+            $this->data->forums->incrementForumPostCount($forumid);
         } else {
             $makepostBonus = SiteConfig::current()->bonus->makePost();
             if ($makepostBonus > 0) {
                 Bonus::updatePoints('+', $makepostBonus, $userid);
             }
-            $this->repository->incrementForumPostCount($forumid);
+            $this->data->forums->incrementForumPostCount($forumid);
         }
 
-        $newPostId = $this->postRepository->createPost($topicid, $userid, $body, $date);
+        $newPostId = $this->data->posts->createPost($topicid, $userid, $body, $date);
         if ($newPostId <= 0) {
             return $this->redirectTo('/forums.php');
         }
 
-        $topicInfo = $this->topicRepository->getTopicWithUser($topicid);
+        $topicInfo = $this->data->topics->getTopicWithUser($topicid);
         $postUrl = sprintf('[url=/forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $newPostId, $newPostId, $topicInfo ? $topicInfo->subject : '');
 
         if ($type === 'reply') {
@@ -310,7 +303,7 @@ final class ForumService
             }
 
             if ($quotepostid > 0) {
-                $quotePostInfo = $this->postLookupRepository->getPostWithUser($quotepostid);
+                $quotePostInfo = $this->data->postLookup->getPostWithUser($quotepostid);
                 if ($quotePostInfo !== null && $quotePostInfo->userid !== $userid) {
                     $receiver = $quotePostInfo->user;
                     if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
@@ -335,12 +328,12 @@ final class ForumService
         $this->cacheDelete('user_'.$userid.'_post_count');
 
         if ($type === 'new') {
-            $this->topicRepository->updateTopicFirstLastPost($topicid, $newPostId);
+            $this->data->topics->updateTopicFirstLastPost($topicid, $newPostId);
         } else {
-            $this->topicRepository->setTopicLastPost($topicid, $newPostId);
+            $this->data->topics->setTopicLastPost($topicid, $newPostId);
         }
 
-        $this->postRepository->updateUserLastPost($userid, $date);
+        $this->data->posts->updateUserLastPost($userid, $date);
 
         $headerstr = '/forums.php?action=viewtopic&topicid='.$topicid;
 

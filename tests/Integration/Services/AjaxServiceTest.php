@@ -16,6 +16,9 @@ use App\Repositories\UserAccountRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Repositories\UserRepository;
+use App\Services\Ajax\AjaxFeatureServices;
+use App\Services\Ajax\AjaxTorrentRepositories;
+use App\Services\Ajax\AjaxUserRepositories;
 use App\Services\Ajax\PasskeyActions;
 use App\Services\Ajax\ShoutboxActions;
 use App\Services\AjaxService;
@@ -129,18 +132,24 @@ final class AjaxServiceTest extends TestCase
         );
 
         $this->service = new AjaxService(
-            $this->attendanceRepo,
-            $this->userRepo,
-            $this->userModerationRepo,
-            $this->torrentModerationRepo,
-            $this->bonusRepo,
-            $this->examRepo,
             $this->currentUser,
-            new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
-            new PasskeyActions($this->passkeyRepo, $this->currentUser),
-            app(NotificationFeed::class),
-            new UserAccountRepository,
-            app(OfferRepositoryInterface::class),
+            new AjaxUserRepositories(
+                $this->attendanceRepo,
+                $this->userRepo,
+                $this->userModerationRepo,
+                $this->examRepo,
+                new UserAccountRepository,
+            ),
+            new AjaxTorrentRepositories(
+                $this->torrentModerationRepo,
+                $this->bonusRepo,
+                app(OfferRepositoryInterface::class),
+            ),
+            new AjaxFeatureServices(
+                new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
+                new PasskeyActions($this->passkeyRepo, $this->currentUser),
+                app(NotificationFeed::class),
+            ),
         );
     }
 
@@ -191,18 +200,24 @@ final class AjaxServiceTest extends TestCase
         );
 
         $this->service = new AjaxService(
-            $this->attendanceRepo,
-            $this->userRepo,
-            $this->userModerationRepo,
-            $this->torrentModerationRepo,
-            $this->bonusRepo,
-            $this->examRepo,
             $this->currentUser,
-            new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
-            new PasskeyActions($this->passkeyRepo, $this->currentUser),
-            app(NotificationFeed::class),
-            new UserAccountRepository,
-            app(OfferRepositoryInterface::class),
+            new AjaxUserRepositories(
+                $this->attendanceRepo,
+                $this->userRepo,
+                $this->userModerationRepo,
+                $this->examRepo,
+                new UserAccountRepository,
+            ),
+            new AjaxTorrentRepositories(
+                $this->torrentModerationRepo,
+                $this->bonusRepo,
+                app(OfferRepositoryInterface::class),
+            ),
+            new AjaxFeatureServices(
+                new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
+                new PasskeyActions($this->passkeyRepo, $this->currentUser),
+                app(NotificationFeed::class),
+            ),
         );
     }
 

@@ -4,19 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\Repositories\OfferRepositoryInterface;
-use App\Contracts\Repositories\UserModerationRepositoryInterface;
-use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\User;
-use App\Repositories\AttendanceRepository;
-use App\Repositories\BonusRepository;
-use App\Repositories\ExamUserRepository;
-use App\Repositories\TorrentModerationRepository;
-use App\Repositories\UserAccountRepository;
+use App\Services\Ajax\AjaxFeatureServices;
+use App\Services\Ajax\AjaxTorrentRepositories;
+use App\Services\Ajax\AjaxUserRepositories;
 use App\Services\Ajax\PasskeyActions;
 use App\Services\Ajax\ShoutboxActions;
 use App\Support\CurrentUser;
-use App\Support\NotificationFeed;
 
 final class AjaxService
 {
@@ -63,26 +57,18 @@ final class AjaxService
     ];
 
     public function __construct(
-        private readonly AttendanceRepository $attendanceRepository,
-        private readonly UserRepositoryInterface $userRepository,
-        private readonly UserModerationRepositoryInterface $userModerationRepository,
-        private readonly TorrentModerationRepository $torrentModerationRepository,
-        private readonly BonusRepository $bonusRepository,
-        private readonly ExamUserRepository $examUserRepository,
         private readonly CurrentUser $currentUser,
-        private readonly ShoutboxActions $shoutboxActions,
-        private readonly PasskeyActions $passkeyActions,
-        private readonly NotificationFeed $notificationFeed,
-        private readonly UserAccountRepository $userAccountRepository,
-        private readonly OfferRepositoryInterface $offerRepository,
+        private readonly AjaxUserRepositories $users,
+        private readonly AjaxTorrentRepositories $torrents,
+        private readonly AjaxFeatureServices $features,
     ) {}
 
     /** @param array<string, mixed> $params */
     public function dispatch(string $action, array $params): mixed
     {
         return match (true) {
-            in_array($action, ShoutboxActions::ACTIONS, true) => $this->shoutboxActions->{$action}($params),
-            in_array($action, PasskeyActions::ACTIONS, true) => $this->passkeyActions->{$action}($params),
+            in_array($action, ShoutboxActions::ACTIONS, true) => $this->features->shoutboxActions->{$action}($params),
+            in_array($action, PasskeyActions::ACTIONS, true) => $this->features->passkeyActions->{$action}($params),
             in_array($action, self::MISC_ACTIONS, true) => $this->{$action}($params),
             default => throw new \InvalidArgumentException("Unknown ajax action: {$action}"),
         };
@@ -92,7 +78,7 @@ final class AjaxService
     private function attendanceRetroactive(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->attendanceRepository;
+        $rep = $this->users->attendance;
 
         return $rep->retroactive($CURUSER['id'], $params['date']);
     }
@@ -101,7 +87,7 @@ final class AjaxService
     private function removeUserLeechWarn(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userModerationRepository;
+        $rep = $this->users->userModeration;
 
         return $rep->removeLeechWarn($CURUSER['id'], $params['uid']);
     }
@@ -109,7 +95,7 @@ final class AjaxService
     /** @param array<string, mixed> $params */
     private function getOffer(array $params): mixed
     {
-        $offer = $this->offerRepository->findOrFailById((int) $params['id']);
+        $offer = $this->torrents->offers->findOrFailById((int) $params['id']);
 
         return $offer->toArray();
     }
@@ -118,7 +104,7 @@ final class AjaxService
     private function approvalModal(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->torrentModerationRepository;
+        $rep = $this->torrents->torrentModeration;
 
         return $rep->buildApprovalModal($CURUSER['id'], (int) $params['torrent_id']);
     }
@@ -132,7 +118,7 @@ final class AjaxService
                 throw new \InvalidArgumentException("Require $field");
             }
         }
-        $rep = $this->torrentModerationRepository;
+        $rep = $this->torrents->torrentModeration;
 
         return $rep->approval($CURUSER['id'], $params);
     }
@@ -141,7 +127,7 @@ final class AjaxService
     private function removeHitAndRun(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->bonusRepository;
+        $rep = $this->torrents->bonus;
 
         return $rep->consumeToCancelHitAndRun($CURUSER['id'], $params['id']);
     }
@@ -150,7 +136,7 @@ final class AjaxService
     private function consumeBenefit(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->userRepository;
+        $rep = $this->users->users;
 
         return $rep->consumeBenefit($CURUSER['id'], $params);
     }
@@ -159,7 +145,7 @@ final class AjaxService
     private function claimTask(array $params): mixed
     {
         $CURUSER = $this->currentUser->get() ?? [];
-        $rep = $this->examUserRepository;
+        $rep = $this->users->examUsers;
 
         return $rep->assignToUser($CURUSER['id'], $params['exam_id']);
     }
@@ -172,7 +158,7 @@ final class AjaxService
             throw new \InvalidArgumentException('Name is required');
         }
         $userId = (int) ($CURUSER['id'] ?? 0);
-        $user = $this->userAccountRepository->findOrFailByIdFields($userId, User::$commonFields);
+        $user = $this->users->userAccount->findOrFailByIdFields($userId, User::$commonFields);
         $user->createToken($params['name']);
 
         return true;
@@ -186,7 +172,7 @@ final class AjaxService
             throw new \InvalidArgumentException('id is required');
         }
         $userId = (int) ($CURUSER['id'] ?? 0);
-        $user = $this->userAccountRepository->findOrFailByIdFields($userId, User::$commonFields);
+        $user = $this->users->userAccount->findOrFailByIdFields($userId, User::$commonFields);
         $user->tokens()->where('id', $params['id'])->delete();
 
         return true;
@@ -205,6 +191,6 @@ final class AjaxService
         ];
         $init = ! empty($params['init']);
 
-        return $this->notificationFeed->since((int) $CURUSER['id'], $cursors, $init);
+        return $this->features->notificationFeed->since((int) $CURUSER['id'], $cursors, $init);
     }
 }

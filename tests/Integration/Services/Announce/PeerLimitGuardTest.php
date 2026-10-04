@@ -158,6 +158,102 @@ final class PeerLimitGuardTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    #[DataProvider('waitWindowProvider')]
+    public function test_wait_window_is_measured_in_hours(int $uploaded, int $hours): void
+    {
+        $this->setSetting('main.waitsystem', 'yes');
+        $this->setSetting('main.maxdlsystem', 'no');
+        $user = $this->makeUser(1, $uploaded, 20 * 1024 ** 3);
+
+        $inside = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW - ($hours * 3600 - 60)));
+        try {
+            $inside->enforceForNewPeer($user, 1);
+            $this->fail("expected warning 60s before the {$hours}h window ends");
+        } catch (TrackerWarningException $e) {
+            $this->assertSame(60, $e->getResponse()['interval']);
+            $this->assertStringContainsString('Your ratio is too low!', $e->getMessage());
+            $this->assertStringContainsString('/faq.php#id46', $e->getMessage());
+        }
+
+        $after = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW - $hours * 3600));
+        $after->enforceForNewPeer($user, 1);
+    }
+
+    /** @return array<string, array{0:int,1:int}> */
+    public static function waitWindowProvider(): array
+    {
+        $g = 1024 ** 3;
+
+        return [
+            'ratio 0 waits 24h' => [0, 24],
+            'ratio 0.4 waits 12h' => [8 * $g, 12],
+            'ratio 0.5 waits 6h' => [10 * $g, 6],
+            'ratio 0.6 waits 3h' => [12 * $g, 3],
+        ];
+    }
+
+    public function test_ratio_0_8_has_no_wait(): void
+    {
+        $this->setSetting('main.waitsystem', 'yes');
+        $this->setSetting('main.maxdlsystem', 'no');
+
+        $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW));
+        $guard->enforceForNewPeer($this->makeUser(1, 16 * 1024 ** 3, 20 * 1024 ** 3), 1);
+        $this->addToAssertionCount(1);
+    }
+
+    public function test_wait_applies_just_above_10_gib_and_class_below_vip(): void
+    {
+        $this->setSetting('main.waitsystem', 'yes');
+        $this->setSetting('main.maxdlsystem', 'no');
+        $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW));
+
+        $guard->enforceForNewPeer($this->makeUser(1, 0, 10 * 1024 ** 3), 1);
+
+        $this->expectException(TrackerWarningException::class);
+        $guard->enforceForNewPeer($this->makeUser((int) UserClassEnum::VIP->value - 1, 0, 10 * 1024 ** 3 + 1), 1);
+    }
+
+    public function test_slot_limit_allows_one_below_max(): void
+    {
+        $this->setSetting('main.waitsystem', 'no');
+        $this->setSetting('main.maxdlsystem', 'yes');
+
+        /** @var User $user */
+        $user = User::factory()->create(['class' => 1]);
+        /** @var Torrent $torrent */
+        $torrent = Torrent::factory()->owner($user)->create(['size' => 10000]);
+        $this->insertLeechingPeer($torrent->id, $user, 0);
+
+        // ratio 0.6 → max 2; one leech in use → allowed.
+        $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent());
+        $guard->enforceForNewPeer($this->makeUser(1, 12 * 1024 ** 3, 20 * 1024 ** 3), $user->id);
+
+        // ratio 0.4 → max 1; same single leech → limit reached.
+        $this->expectException(TrackerException::class);
+        $this->expectExceptionMessage('You may at most download 1 torrents');
+        $guard->enforceForNewPeer($this->makeUser(1, 8 * 1024 ** 3, 20 * 1024 ** 3), $user->id);
+    }
+
+    private function insertLeechingPeer(int $torrentId, User $user, int $i): void
+    {
+        DB::table('peers')->insert([
+            'torrent' => $torrentId,
+            'userid' => $user->id,
+            'peer_id' => '-qB4500-'.str_pad((string) $i, 12, 'x'),
+            'ip' => '10.0.0.'.($i + 10),
+            'port' => 6881,
+            'uploaded' => 0,
+            'downloaded' => 0,
+            'to_go' => 500,
+            'seeder' => 0,
+            'started' => date('Y-m-d H:i:s'),
+            'last_action' => date('Y-m-d H:i:s'),
+            'agent' => 'qBittorrent/4.5.0',
+            'passkey' => $user->passkey,
+        ]);
+    }
+
     #[DataProvider('slotLimitProvider')]
     public function test_enforce_throws_when_slot_limit_reached(int $uploaded, int $downloaded, int $expectedMax): void
     {

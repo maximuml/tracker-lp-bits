@@ -46,6 +46,7 @@ final class PeerLimitGuard
 
         if (SiteConfig::current()->main->waitSystem()) {
             $elapsed = TIMENOW - (int) ($this->torrent['ts'] ?? 0);
+            // Wait window in hours; $elapsed is in seconds.
             $wait = match (true) {
                 $ratio < 0.4 => 24,
                 $ratio < 0.5 => 12,
@@ -54,11 +55,12 @@ final class PeerLimitGuard
                 default => 0,
             };
 
-            if ($elapsed < $wait) {
+            $remaining = $wait * 3600 - $elapsed;
+            if ($remaining > 0) {
                 $faqUrl = Url::schemeAndHost(true).'/faq.php#id46';
                 $this->warn(
-                    'Your ratio is too low! You need to wait '.Format::prettyTimeWithLocale($wait * 3600 - $elapsed).' to start, please read '.$faqUrl.' for details',
-                    $elapsed
+                    'Your ratio is too low! You need to wait '.Format::prettyTimeWithLocale($remaining).' to start, please read '.$faqUrl.' for details',
+                    $remaining
                 );
             }
         }

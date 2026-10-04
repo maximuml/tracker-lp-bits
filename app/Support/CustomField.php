@@ -9,7 +9,6 @@ use App\Models\TorrentCustomField;
 use App\Models\TorrentCustomFieldValue;
 use App\Support\Html\SafeHtml;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 
 class CustomField
 {
@@ -97,9 +96,10 @@ class CustomField
         $customValues = $this->listTorrentCustomField($torrentId, $searchBoxId);
         $customFieldsRaw = $searchBox->custom_fields;
         $customFieldIds = array_filter(array_map('intval', is_array($customFieldsRaw) ? $customFieldsRaw : explode(',', (string) ($customFieldsRaw ?? ''))));
-        $res = DB::table('torrents_custom_fields')
+        $res = TorrentCustomField::query()
             ->whereIn('id', $customFieldIds)
             ->orderBy('priority', 'desc')
+            ->toBase()
             ->get();
         $cspNonce = (string) request()->attributes->get('csp_nonce', '');
         $baseUrl = Url::schemeAndHost(false);
@@ -189,12 +189,14 @@ class CustomField
         }
         $torrentIdArr = array_map('intval', $torrentIdArr);
 
-        $res = DB::table('torrents_custom_field_values as v')
+        $res = TorrentCustomFieldValue::query()
+            ->from('torrents_custom_field_values as v')
             ->join('torrents_custom_fields as f', 'v.custom_field_id', '=', 'f.id')
             ->whereIn('v.torrent_id', $torrentIdArr)
             ->whereIn('f.id', $customFieldIds)
             ->orderBy('f.priority', 'desc')
             ->select('f.*', 'v.custom_field_value', 'v.torrent_id')
+            ->toBase()
             ->get();
         $values = [];
         $result = [];

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\DB;
+use App\Repositories\TorrentListingRepository;
 
 /**
  * Legacy search-suggestion helper extracted from `include/functions.php`.
@@ -29,10 +29,15 @@ final class SearchSuggest
             return;
         }
 
-        DB::table('suggest')->insert([
+        self::torrentListingRepository()->recordSuggestKeyword([
             'keywords' => $preEscaped ? stripslashes($keyword) : $keyword,
             'userid' => $userId,
             'adddate' => date('Y-m-d H:i:s'),
         ]);
+    }
+
+    private static function torrentListingRepository(): TorrentListingRepository
+    {
+        return app(TorrentListingRepository::class);
     }
 }

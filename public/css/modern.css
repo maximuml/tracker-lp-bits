@@ -1958,9 +1958,13 @@ ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
 }
 .bbcode-actions input[type="button"].btn:hover { border-color: var(--nxm-text-dim); }
 
-/* Submit row at the end of the upload form. */
+/* Submit row at the end of the upload form — pinned to the viewport bottom
+   while the form scrolls so the primary action stays reachable. */
 .nx-upload__submit {
     grid-column: 1 / -1;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -61,6 +61,11 @@ class FaqController extends LegacyController
         return response(view('faq.index', ['faqCategories' => $categories])->render());
     }
 
+    public function faqPost(Request $request): Response|RedirectResponse
+    {
+        return $this->faq($request);
+    }
+
     public function faqManage(Request $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
@@ -71,6 +76,11 @@ class FaqController extends LegacyController
         $faqData = $this->infoRepository->faqManageData();
 
         return $this->legacyPage($request, 'faqmanage', true, $faqData);
+    }
+
+    public function faqManagePost(Request $request): View|RedirectResponse|Response
+    {
+        return $this->faqManage($request);
     }
 
     public function faqActions(Request $request): View|RedirectResponse|Response
@@ -84,84 +94,8 @@ class FaqController extends LegacyController
         $redirectBase = Url::absolute($baseUrl);
         $action = (string) (request()->query('action') ?? '');
 
-        if ($action === 'reorder' && $request->isMethod('post')) {
-            $this->infoRepository->reorderFaq((array) request()->post('order'));
-
-            return redirect($redirectBase.'/faqmanage.php');
-        }
-
-        if ($action === 'edititem' && $request->isMethod('post')) {
-            $this->infoRepository->updateFaq((int) request()->post('id'), [
-                'question' => (string) request()->post('question'),
-                'answer' => (string) request()->post('answer'),
-                'flag' => (int) request()->post('flag'),
-                'categ' => (int) request()->post('categ'),
-            ]);
-
-            return redirect($redirectBase.'/faqmanage.php');
-        }
-
-        if ($action === 'editsect' && $request->isMethod('post')) {
-            $this->infoRepository->updateFaq((int) request()->post('id'), [
-                'question' => (string) request()->post('title'),
-                'answer' => '',
-                'flag' => (int) request()->post('flag'),
-                'categ' => 0,
-            ]);
-
-            return redirect($redirectBase.'/faqmanage.php');
-        }
-
         if ($action === 'delete') {
-            if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse('Error', 'Permission denied.');
-            }
-            $id = (int) (request()->query('id') ?? 0);
-            if (request()->query('confirm') === 'yes') {
-                $this->infoRepository->deleteFaq($id);
-
-                return redirect($redirectBase.'/faqmanage.php');
-            }
-
-            return $this->legacyPage($request, 'faqactions', true, [
-                'mode' => 'confirm_delete',
-                'id' => $id,
-            ]);
-        }
-
-        if ($action === 'addnewitem' && $request->isMethod('post')) {
-            $categ = (int) (request()->post('categ') ?? 0);
-            $langId = (int) (request()->post('langid') ?? 0);
-            $max = $this->infoRepository->getFaqMaxOrderAndLinkId(FaqType::ITEM->stringValue(), $langId);
-            $this->infoRepository->insertFaq([
-                'link_id' => $max['maxlinkid'] + 1,
-                'type' => FaqType::ITEM->value,
-                'lang_id' => $langId,
-                'question' => (string) request()->post('question'),
-                'answer' => (string) request()->post('answer'),
-                'flag' => (int) (request()->post('flag') ?? 0),
-                'categ' => $categ,
-                'order' => $max['maxorder'] + 1,
-            ]);
-
-            return redirect($redirectBase.'/faqmanage.php');
-        }
-
-        if ($action === 'addnewsect' && $request->isMethod('post')) {
-            $language = (int) (request()->post('language') ?? 0);
-            $max = $this->infoRepository->getFaqMaxOrderAndLinkId(FaqType::CATEG->stringValue(), $language);
-            $this->infoRepository->insertFaq([
-                'link_id' => $max['maxlinkid'] + 1,
-                'type' => FaqType::CATEG->value,
-                'lang_id' => $language,
-                'question' => (string) request()->post('title'),
-                'answer' => '',
-                'flag' => (int) (request()->post('flag') ?? 0),
-                'categ' => 0,
-                'order' => $max['maxorder'] + 1,
-            ]);
-
-            return redirect($redirectBase.'/faqmanage.php');
+            return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
         if ($action === 'edit') {
@@ -210,5 +144,96 @@ class FaqController extends LegacyController
         }
 
         return redirect($redirectBase.'/faqmanage.php');
+    }
+
+    public function faqActionsPost(Request $request): View|RedirectResponse|Response
+    {
+        $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
+        if (UserDisplay::currentClass() < $administratorClass) {
+            return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
+        }
+
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $redirectBase = Url::absolute($baseUrl);
+        $action = (string) (request()->query('action') ?? '');
+
+        if ($action === 'reorder' && $request->isMethod('post')) {
+            $this->infoRepository->reorderFaq((array) request()->post('order'));
+
+            return redirect($redirectBase.'/faqmanage.php');
+        }
+
+        if ($action === 'edititem' && $request->isMethod('post')) {
+            $this->infoRepository->updateFaq((int) request()->post('id'), [
+                'question' => (string) request()->post('question'),
+                'answer' => (string) request()->post('answer'),
+                'flag' => (int) request()->post('flag'),
+                'categ' => (int) request()->post('categ'),
+            ]);
+
+            return redirect($redirectBase.'/faqmanage.php');
+        }
+
+        if ($action === 'editsect' && $request->isMethod('post')) {
+            $this->infoRepository->updateFaq((int) request()->post('id'), [
+                'question' => (string) request()->post('title'),
+                'answer' => '',
+                'flag' => (int) request()->post('flag'),
+                'categ' => 0,
+            ]);
+
+            return redirect($redirectBase.'/faqmanage.php');
+        }
+
+        if ($action === 'delete') {
+            $id = (int) (request()->query('id') ?? 0);
+            if (request()->query('confirm') === 'yes') {
+                $this->infoRepository->deleteFaq($id);
+
+                return redirect($redirectBase.'/faqmanage.php');
+            }
+
+            return $this->legacyPage($request, 'faqactions', true, [
+                'mode' => 'confirm_delete',
+                'id' => $id,
+            ]);
+        }
+
+        if ($action === 'addnewitem' && $request->isMethod('post')) {
+            $categ = (int) (request()->post('categ') ?? 0);
+            $langId = (int) (request()->post('langid') ?? 0);
+            $max = $this->infoRepository->getFaqMaxOrderAndLinkId(FaqType::ITEM->stringValue(), $langId);
+            $this->infoRepository->insertFaq([
+                'link_id' => $max['maxlinkid'] + 1,
+                'type' => FaqType::ITEM->value,
+                'lang_id' => $langId,
+                'question' => (string) request()->post('question'),
+                'answer' => (string) request()->post('answer'),
+                'flag' => (int) (request()->post('flag') ?? 0),
+                'categ' => $categ,
+                'order' => $max['maxorder'] + 1,
+            ]);
+
+            return redirect($redirectBase.'/faqmanage.php');
+        }
+
+        if ($action === 'addnewsect' && $request->isMethod('post')) {
+            $language = (int) (request()->post('language') ?? 0);
+            $max = $this->infoRepository->getFaqMaxOrderAndLinkId(FaqType::CATEG->stringValue(), $language);
+            $this->infoRepository->insertFaq([
+                'link_id' => $max['maxlinkid'] + 1,
+                'type' => FaqType::CATEG->value,
+                'lang_id' => $language,
+                'question' => (string) request()->post('title'),
+                'answer' => '',
+                'flag' => (int) (request()->post('flag') ?? 0),
+                'categ' => 0,
+                'order' => $max['maxorder'] + 1,
+            ]);
+
+            return redirect($redirectBase.'/faqmanage.php');
+        }
+
+        return $this->faqActions($request);
     }
 }

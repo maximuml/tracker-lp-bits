@@ -70,7 +70,7 @@ Route::post('/confirm_resend', [RegistrationController::class, 'resendConfirmati
 Route::get('/recover', [RecoveryController::class, 'recover'])
     ->middleware('throttle:login')
     ->name('recover');
-Route::post('/recover', [RecoveryController::class, 'recover'])
+Route::post('/recover', [RecoveryController::class, 'recoverPost'])
     ->middleware('throttle:login');
 Route::post('/recover/reset', [RecoveryController::class, 'resetPassword'])
     ->middleware('throttle:login')

@@ -72,7 +72,7 @@ final class RecoveryControllerTest extends TestCase
         $request->setRedirector(app('redirect'));
         $request->validateResolved();
 
-        $response = $controller->recover($request);
+        $response = $controller->recoverPost($request);
 
         $this->assertTrue($response->isRedirect());
         $this->assertStringContainsString('status=requested', $response->getTargetUrl());
@@ -99,7 +99,7 @@ final class RecoveryControllerTest extends TestCase
         $request->setRedirector(app('redirect'));
         $request->validateResolved();
 
-        $response = $controller->recover($request);
+        $response = $controller->recoverPost($request);
 
         $this->assertTrue($response->isRedirect());
         $this->assertSame('Email not found.', $response->getSession()->get('error'));

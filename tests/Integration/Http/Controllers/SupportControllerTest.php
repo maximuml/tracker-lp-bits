@@ -82,7 +82,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('action=view', $response->getTargetUrl());
@@ -102,7 +102,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
@@ -124,7 +124,7 @@ final class SupportControllerTest extends TestCase
         $request->headers->set('referer', '/complains.php?action=view&id='.$uuid);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/complains.php', $response->getTargetUrl());
@@ -142,7 +142,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('empty complain', (string) $response->getContent());
@@ -159,7 +159,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
@@ -175,7 +175,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
@@ -199,7 +199,7 @@ final class SupportControllerTest extends TestCase
         $request->headers->set('referer', '/complains.php?action=view&id=abc');
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/complains.php', $response->getTargetUrl());
@@ -220,7 +220,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Complain not found', (string) $response->getContent());
@@ -243,7 +243,7 @@ final class SupportControllerTest extends TestCase
         $request->headers->set('referer', '/complains.php?action=list');
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/complains.php', $response->getTargetUrl());
@@ -264,7 +264,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('empty complain', (string) $response->getContent());
@@ -285,7 +285,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complains($request);
+        $response = $controller->complainsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('empty complain', (string) $response->getContent());

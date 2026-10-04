@@ -85,7 +85,7 @@ final class RssControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->getrss($request);
+        $response = $controller->getrssPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('must select rows', (string) $response->getContent());

@@ -119,7 +119,7 @@ final class FriendsControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friends($request);
+        $response = $controller->friendsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Invalid ID', (string) $response->getContent());
@@ -138,7 +138,7 @@ final class FriendsControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friends($request);
+        $response = $controller->friendsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Unknown type', (string) $response->getContent());
@@ -163,7 +163,7 @@ final class FriendsControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friends($request);
+        $response = $controller->friendsPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/friends.php?id='.$userId.'#friends', $response->getTargetUrl());
@@ -187,7 +187,7 @@ final class FriendsControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friends($request);
+        $response = $controller->friendsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('already in', (string) $response->getContent());
@@ -212,7 +212,7 @@ final class FriendsControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friends($request);
+        $response = $controller->friendsPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/friends.php?id='.$userId.'#friends', $response->getTargetUrl());
@@ -237,7 +237,7 @@ final class FriendsControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friends($request);
+        $response = $controller->friendsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('No friend found with ID', (string) $response->getContent());
@@ -257,7 +257,7 @@ final class FriendsControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friends($request);
+        $response = $controller->friendsPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('if you are sure', (string) $response->getContent());

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\Torrent;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\Peer;
+use App\Models\Snatch;
 
 class TorrentStatus
 {
@@ -20,18 +21,19 @@ class TorrentStatus
             return [];
         }
         // seeding or leeching, from peers
-        $peerList = DB::table('peers')
+        $peerList = Peer::query()
             ->where('userid', $uid)
             ->whereIn('torrent', $torrentIdArr)
             ->pluck('to_go', 'torrent')
             ->toArray();
         // download progress, from snatched
         $snatchedList = [];
-        $res = DB::table('snatched')
+        $res = Snatch::query()
             ->join('torrents', 'snatched.torrentid', '=', 'torrents.id')
             ->select('snatched.to_go', 'snatched.torrentid', 'torrents.size')
             ->where('snatched.userid', $uid)
             ->whereIn('snatched.torrentid', $torrentIdArr)
+            ->toBase()
             ->get();
         foreach ($res as $row) {
             $row = (array) $row;

@@ -7,7 +7,6 @@ namespace App\Support\Metrics\Collectors;
 use App\Models\OutboxEvent;
 use App\Support\Metrics\MetricsCollector;
 use App\Support\Metrics\PrometheusFormatter;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Outbox metrics (T-24): pending, dead-letter, oldest pending age, avg latency.
@@ -30,7 +29,7 @@ final class OutboxMetricsCollector implements MetricsCollector
 
         try {
             // Single query for all outbox stats to respect query budget
-            $stats = DB::table('outbox_events')
+            $stats = OutboxEvent::query()->toBase()
                 ->selectRaw(
                     'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending, '.
                     'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as dead_letter, '.

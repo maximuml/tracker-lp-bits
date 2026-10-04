@@ -112,6 +112,14 @@ class TorrentListingRepository
             ->get();
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function recordSuggestKeyword(array $data): void
+    {
+        DB::table('suggest')->insert($data);
+    }
+
     public function cleanupSuggest(int $secondsBack = 518400): void
     {
         DB::table('suggest')

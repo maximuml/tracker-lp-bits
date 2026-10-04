@@ -7,7 +7,9 @@ namespace Tests\Unit\Jobs;
 use App\Jobs\GenerateCoverThumbnail;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Tests\Attributes\TestCategory;
 
+#[TestCategory(TestCategory::PURE_UNIT)]
 final class GenerateCoverThumbnailSsrfTest extends TestCase
 {
     /** @return array<string, array{string}> */

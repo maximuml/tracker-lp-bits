@@ -5,27 +5,21 @@ declare(strict_types=1);
 namespace App\Auth;
 
 use App\Contracts\Repositories\AuthRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use App\Support\AuthCookie;
 use App\Support\Cache;
 use App\Support\PasswordHasher;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class NexusWebUserProvider implements UserProvider
 {
-    /**
-     * @var Builder<User>
-     */
-    protected $query;
-
     public function __construct(
         private readonly AuthRepositoryInterface $authRepository,
-    ) {
-        $this->query = User::query();
-    }
+        private readonly UserRepositoryInterface $userRepository,
+    ) {}
 
     /**
      * Retrieve a user by their unique identifier.
@@ -35,9 +29,9 @@ class NexusWebUserProvider implements UserProvider
      */
     public function retrieveById($identifier)
     {
-        $user = $this->query->where('id', $identifier)->first();
+        $user = $this->userRepository->findById((int) $identifier);
 
-        return $user instanceof User ? $user : null;
+        return $user;
     }
 
     /**

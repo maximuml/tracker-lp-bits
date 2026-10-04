@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Models;
+namespace Tests\Integration\Repositories;
 
 use App\Enums\TorrentOperationAction;
-use App\Models\TorrentOperationLog;
+use App\Repositories\TorrentOperationLogRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
- * Unit tests for TorrentOperationLog::add() owner notification.
+ * Unit tests for TorrentOperationLogRepository::add() owner notification.
  *
  * Regression: editing a torrent whose owner no longer exists made
  * notifyUser() insert a messages row with receiver=0, violating the
  * messages_receiver_foreign constraint.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
-final class TorrentOperationLogTest extends TestCase
+final class TorrentOperationLogRepositoryTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -44,7 +44,7 @@ final class TorrentOperationLogTest extends TestCase
         $torrentId = $this->createTorrent(['owner' => 999999]);
         $operatorId = $this->createUser();
 
-        TorrentOperationLog::add([
+        (new TorrentOperationLogRepository)->add([
             'torrent_id' => $torrentId,
             'uid' => $operatorId,
             'action_type' => TorrentOperationAction::EDIT->value,
@@ -60,7 +60,7 @@ final class TorrentOperationLogTest extends TestCase
         $operatorId = $this->createUser(['username' => 'operator_'.uniqid()]);
         $torrentId = $this->createTorrent(['owner' => $ownerId]);
 
-        TorrentOperationLog::add([
+        (new TorrentOperationLogRepository)->add([
             'torrent_id' => $torrentId,
             'uid' => $operatorId,
             'action_type' => TorrentOperationAction::EDIT->value,

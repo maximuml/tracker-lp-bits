@@ -13,7 +13,6 @@ use App\Enums\TorrentPromotion;
 use App\Events\TorrentDeleted;
 use App\Models\Category;
 use App\Models\Torrent;
-use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
@@ -34,7 +33,8 @@ class TorrentModerationRepository extends BaseRepository
     public function __construct(
         private readonly TorrentDownloadRepository $downloadRepository,
         private readonly MeiliSearchRepository $meiliSearchRepository,
-        private readonly TorrentApprovalRepository $approvalRepository = new TorrentApprovalRepository,
+        private readonly TorrentOperationLogRepository $operationLogRepository,
+        private readonly TorrentApprovalRepository $approvalRepository,
     ) {}
 
     /**
@@ -206,7 +206,7 @@ class TorrentModerationRepository extends BaseRepository
             Logger::writeWithContext("delete torrent: $_id", 'error');
             @unlink(Path::resolve("$torrentDir/$_id.torrent", defined('ROOT_PATH') ? (string) ROOT_PATH : ''));
 
-            TorrentOperationLog::add([
+            $this->operationLogRepository->add([
                 'torrent_id' => $_id,
                 'uid' => UserDisplay::currentId(),
                 'action_type' => TorrentOperationAction::DELETE->value,

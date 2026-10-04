@@ -8,7 +8,6 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Exceptions\NexusException;
 use App\Models\Invite;
-use App\Models\Message;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
@@ -23,6 +22,7 @@ final class UserModerationInviteCommand
 {
     public function __construct(
         private readonly ToolRepository $toolRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     public function addTemporaryInvite(?User $operator, User $targetUser, string $action, int $count, ?int $days, ?string $reason = ''): bool
@@ -72,7 +72,7 @@ final class UserModerationInviteCommand
                 Logger::writeWithContext((string) "[DELETE TEMPORARY INVITE] of {$uid}, count: {$count}", (string) 'info', (bool) false);
             }
             if ($operator) {
-                Message::add($message);
+                $this->messageRepository->add($message);
             }
         });
 

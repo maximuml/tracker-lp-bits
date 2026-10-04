@@ -12,8 +12,10 @@ use App\Enums\UserClass;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\MeiliSearchRepository;
+use App\Repositories\TorrentApprovalRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentModerationRepository;
+use App\Repositories\TorrentOperationLogRepository;
 use App\Support\Permissions;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -58,7 +60,7 @@ final class TorrentModerationRepositoryTest extends TestCase
         $meiliMock->shouldReceive('deleteDocuments')->andReturnNull();
 
         /** @phpstan-ignore-next-line */
-        $this->repository = new TorrentModerationRepository($downloadMock, $meiliMock);
+        $this->repository = new TorrentModerationRepository($downloadMock, $meiliMock, new TorrentOperationLogRepository, new TorrentApprovalRepository(new TorrentOperationLogRepository));
     }
 
     protected function tearDown(): void

@@ -14,7 +14,6 @@ use App\Models\Category;
 use App\Models\SearchBox;
 use App\Models\StaffMessage;
 use App\Models\Torrent;
-use App\Models\TorrentOperationLog;
 use App\Policies\TorrentPolicy;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
@@ -33,6 +32,7 @@ class TorrentEditRepository extends BaseRepository
         private UploadRepository $uploadRepository,
         private TorrentPolicy $policy,
         private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
+        private readonly TorrentOperationLogRepository $operationLogRepository,
     ) {}
 
     /**
@@ -194,7 +194,7 @@ class TorrentEditRepository extends BaseRepository
         }
 
         if ($torrentOld->owner != $user->id) {
-            TorrentOperationLog::add([
+            $this->operationLogRepository->add([
                 'torrent_id' => $torrentOld->id,
                 'uid' => $user->id,
                 'action_type' => TorrentOperationAction::EDIT->value,

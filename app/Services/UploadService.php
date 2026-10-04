@@ -11,7 +11,6 @@ use App\Events\TorrentCreated;
 use App\Exceptions\NexusException;
 use App\Exceptions\TorrentAlreadyExistsException;
 use App\Exceptions\UploadValidationException;
-use App\Models\BonusLogs;
 use App\Models\Category;
 use App\Models\Torrent;
 use App\Models\User;
@@ -201,7 +200,7 @@ class UploadService
         if ($delta > 0) {
             $new = $old + $delta;
             $user->increment('seedbonus', $delta);
-            BonusLogs::add($user->id, $old, $delta, $new, "Upload torrent: $torrentId", BusinessType::UPLOAD_TORRENT->value);
+            $this->repositories->bonus->add($user->id, $old, $delta, $new, "Upload torrent: $torrentId", BusinessType::UPLOAD_TORRENT->value);
             Logger::writeWithContext((string) "upload torrent: {$torrentId}, success send reward: {$delta}", (string) 'info', (bool) false);
         } else {
             Logger::writeWithContext((string) "upload torrent: {$torrentId}, no reward", (string) 'info', (bool) false);

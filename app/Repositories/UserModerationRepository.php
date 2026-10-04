@@ -13,7 +13,6 @@ use App\Events\UserEnabled;
 use App\Events\UserUpdated;
 use App\Exceptions\InsufficientPermissionException;
 use App\Exceptions\NexusException;
-use App\Models\Message;
 use App\Models\User;
 use App\Models\UserBanLog;
 use App\Services\ModerationService;
@@ -37,6 +36,7 @@ class UserModerationRepository extends BaseRepository implements UserModerationR
         private readonly UserModerationCommentCommand $comment,
         private readonly UserModerationInviteCommand $invite,
         private readonly ModerationService $moderationService,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     /**
@@ -270,7 +270,7 @@ class UserModerationRepository extends BaseRepository implements UserModerationR
             $modComment = date('Y-m-d').' - '.$message['msg'];
             if ($targetUser->class != $userUpdates['class']) {
                 $targetUser->updateWithModComment($userUpdates, $modComment);
-                Message::add($message);
+                $this->messageRepository->add($message);
             } else {
                 $targetUser->update($userUpdates);
             }

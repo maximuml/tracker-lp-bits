@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTOs\Auth;
 
 use App\Auth\Permission;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass;
 use App\Exceptions\InsufficientPermissionException;
@@ -54,7 +55,7 @@ final readonly class ActorContext
             if ($cached !== null) {
                 $userId = (int) ($cached['id'] ?? 0);
                 if ($userId > 0) {
-                    $user = User::query()->find($userId);
+                    $user = self::userRepo()->findById($userId);
                 }
             }
         }
@@ -158,5 +159,10 @@ final readonly class ActorContext
             'page' => $this->page,
             'passkey' => $this->passkey ?? '',
         ];
+    }
+
+    private static function userRepo(): UserRepositoryInterface
+    {
+        return app(UserRepositoryInterface::class);
     }
 }

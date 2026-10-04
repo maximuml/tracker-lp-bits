@@ -15,9 +15,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\TorrentOperationAction;
-use App\Support\Cache;
 use App\Support\Locale;
-use App\Support\Logger;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -60,48 +58,5 @@ class TorrentOperationLog extends NexusModel
     public function torrent(): BelongsTo
     {
         return $this->belongsTo(Torrent::class, 'torrent_id')->select(Torrent::$commentFields);
-    }
-
-    /**
-     * @param  array<string, mixed>  $params
-     * @param  mixed  $notifyUser
-     * @return mixed
-     */
-    public static function add(array $params, $notifyUser = false)
-    {
-        $log = self::query()->create($params);
-        if ($notifyUser) {
-            self::notifyUser($log);
-        }
-
-        return $log;
-    }
-
-    /**
-     * @return mixed
-     */
-    private static function notifyUser(self $torrentOperationLog)
-    {
-        $actionType = $torrentOperationLog->action_type;
-        $receiver = $torrentOperationLog->torrent->user;
-        if (! $receiver->exists || (int) $receiver->id <= 0) {
-            Logger::writeWithContext((string) "skip notify user: torrent {$torrentOperationLog->torrent_id} has no existing owner", (string) 'info', (bool) false);
-
-            return;
-        }
-        $locale = $receiver->locale;
-        $subject = Locale::trans("torrent.operation_log.{$actionType}.notify_subject", [], $locale);
-        $msg = Locale::trans("torrent.operation_log.{$actionType}.notify_msg", ['torrent_name' => $torrentOperationLog->torrent->name, 'detail_url' => sprintf('details.php?id=%s', $torrentOperationLog->torrent_id), 'operator' => $torrentOperationLog->user->username, 'reason' => $torrentOperationLog->comment], $locale);
-        $message = [
-            'sender' => null,
-            'receiver' => $receiver->id,
-            'subject' => $subject,
-            'msg' => $msg,
-            'added' => now(),
-        ];
-        Message::query()->insert($message);
-        Cache::forgetWithLocales("user_{$receiver->id}_unread_message_count");
-        Cache::forgetWithLocales("user_{$receiver->id}_inbox_count");
-        Logger::writeWithContext((string) "notify user: {$receiver->id}, {$subject}", (string) 'info', (bool) false);
     }
 }

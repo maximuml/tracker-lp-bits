@@ -8,6 +8,7 @@ use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Controllers\BonusHistoryController;
 use App\Repositories\BonusCalculationRepository;
+use App\Repositories\BonusRepository;
 use App\Repositories\RewardRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\UserListingRepository;
@@ -38,6 +39,7 @@ final class BonusHistoryControllerTest extends TestCase
             Mockery::mock(UserRepositoryInterface::class),
             $calculationRepository,
             Mockery::mock(CurrentUser::class),
+            Mockery::mock(BonusRepository::class),
         );
 
         $this->assertInstanceOf(BonusHistoryController::class, $controller);

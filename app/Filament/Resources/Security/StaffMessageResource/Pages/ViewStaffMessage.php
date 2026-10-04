@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Security\StaffMessageResource\Pages;
 
 use App\Filament\Resources\Security\StaffMessageResource;
-use App\Models\Message;
 use App\Models\StaffMessage;
 use App\Models\User;
+use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -18,6 +18,13 @@ use Illuminate\Support\Facades\Auth;
 class ViewStaffMessage extends ViewRecord
 {
     protected static string $resource = StaffMessageResource::class;
+
+    private MessageRepository $messageRepository;
+
+    public function boot(MessageRepository $messageRepository): void
+    {
+        $this->messageRepository = $messageRepository;
+    }
 
     private function getStaffMessageRecord(): StaffMessage
     {
@@ -44,7 +51,7 @@ class ViewStaffMessage extends ViewRecord
                     Textarea::make('body')->label(__('label.staff_message.reply_body'))->rows(4)->required(),
                 ])
                 ->action(function (array $data) use ($record, $user) {
-                    Message::add([
+                    $this->messageRepository->add([
                         'sender' => $user->id,
                         'receiver' => $record->sender,
                         'subject' => $data['subject'],

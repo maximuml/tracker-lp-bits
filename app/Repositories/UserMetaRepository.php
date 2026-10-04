@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Enums\UsernameChangeType;
-use App\Models\Message;
 use App\Models\User;
 use App\Models\UserMeta;
 use App\Support\Cache;
@@ -25,6 +24,10 @@ use Illuminate\Support\Facades\DB;
  */
 class UserMetaRepository extends BaseRepository
 {
+    public function __construct(
+        private readonly MessageRepository $messageRepository,
+    ) {}
+
     /**
      * @param  mixed  $uid
      * @param  mixed  $metaKeys
@@ -200,7 +203,7 @@ class UserMetaRepository extends BaseRepository
         if ($result) {
             $this->clearCache($user);
             if ($notify) {
-                Message::add($message);
+                $this->messageRepository->add($message);
             }
         }
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);

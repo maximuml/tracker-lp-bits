@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\BusinessType;
+use App\Models\BonusLogs;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class BonusRepository extends BaseRepository
@@ -14,6 +17,30 @@ class BonusRepository extends BaseRepository
         private readonly BonusPurchaseRepository $purchaseRepository,
         private readonly BonusConsumptionRepository $consumptionRepository,
     ) {}
+
+    /**
+     * Write a bonus_log row. Mirrors the former `BonusLogs::add()`
+     * static helper.
+     */
+    public function add(int $userId, float $old, float $delta, float $new, string $comment, int $businessType): BonusLogs
+    {
+        $enum = BusinessType::fromIntSafe($businessType);
+        if ($enum === null) {
+            throw new \InvalidArgumentException("Invalid business type: $businessType");
+        }
+        $nowStr = Carbon::now()->toDateTimeString();
+
+        return BonusLogs::query()->create([
+            'business_type' => $businessType,
+            'uid' => $userId,
+            'old_total_value' => $old,
+            'value' => $delta,
+            'new_total_value' => $new,
+            'comment' => sprintf('[%s]%s', $enum->label(), $comment ? " $comment" : ''),
+            'created_at' => $nowStr,
+            'updated_at' => $nowStr,
+        ]);
+    }
 
     /**
      * @return int number of affected rows

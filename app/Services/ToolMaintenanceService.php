@@ -106,7 +106,8 @@ class ToolMaintenanceService
         $result['attendance'] = $attendance ? 0 : 1;
 
         // unread news
-        $count = $this->newsRepository->countAddedAfter($user->last_home ?? '1970-01-01 00:00:00');
+        $lastHome = $user->last_home ?? null;
+        $count = $this->newsRepository->countAddedAfter($lastHome !== null ? (string) $lastHome : '1970-01-01 00:00:00');
         $result['news'] = $count;
 
         // unread messages

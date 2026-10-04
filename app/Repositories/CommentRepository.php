@@ -282,4 +282,12 @@ class CommentRepository
     {
         return Comment::query()->find($id, $columns);
     }
+
+    /**
+     * @param  array<int>  $offerIds
+     */
+    public function deleteForOffers(array $offerIds): int
+    {
+        return Comment::query()->whereIn('offer', $offerIds)->delete();
+    }
 }

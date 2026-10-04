@@ -8,6 +8,7 @@ use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
 use App\Models\Category;
 use App\Models\User;
 use App\Repositories\SearchPageRepository;
+use App\Services\PermissionChecker;
 use App\Support\Permissions;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -69,7 +70,7 @@ final class SearchPageRepositoryTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->repository = new SearchPageRepository(Mockery::mock(MeiliSearchRepositoryInterface::class));
+        $this->repository = new SearchPageRepository(Mockery::mock(MeiliSearchRepositoryInterface::class), new PermissionChecker);
     }
 
     protected function tearDown(): void

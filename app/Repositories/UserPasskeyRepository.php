@@ -19,14 +19,15 @@ use RuntimeException;
 class UserPasskeyRepository extends BaseRepository
 {
     public function __construct(
-        private readonly UserRepository $userRepository = new UserRepository,
+        private readonly RequestContext $requestContext,
+        private readonly UserRepository $userRepository,
     ) {}
 
     /** @return  mixed */
     public function createWebAuthn()
     {
         $formats = ['android-key', 'android-safetynet', 'apple', 'fido-u2f', 'packed', 'tpm', 'none'];
-        $rpId = explode(':', RequestContext::instance()->getRequestHost())[0];
+        $rpId = explode(':', $this->requestContext->getRequestHost())[0];
 
         return new WebAuthn(SiteConfig::current()->basic->siteName(), $rpId, $formats);
     }

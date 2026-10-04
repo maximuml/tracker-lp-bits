@@ -263,4 +263,42 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
             ->orderBy('name')
             ->get();
     }
+
+    /**
+     * id => name map of offers added before $before that were never allowed
+     * (vote-timeout prune set).
+     *
+     * @return array<string, int>
+     */
+    public function pluckNotAllowedAddedBefore(string $before): array
+    {
+        return Offer::query()
+            ->where('added', '<', $before)
+            ->where('allowed', '<>', OfferAllowed::ALLOWED->value)
+            ->pluck('id', 'name')
+            ->all();
+    }
+
+    /**
+     * id => name map of allowed offers whose allowedtime is before $before
+     * (upload-timeout prune set).
+     *
+     * @return array<string, int>
+     */
+    public function pluckAllowedBefore(string $before): array
+    {
+        return Offer::query()
+            ->where('allowedtime', '<', $before)
+            ->where('allowed', OfferAllowed::ALLOWED->value)
+            ->pluck('id', 'name')
+            ->all();
+    }
+
+    /**
+     * @param  array<int>  $ids
+     */
+    public function deleteMany(array $ids): int
+    {
+        return Offer::query()->whereIn('id', $ids)->delete();
+    }
 }

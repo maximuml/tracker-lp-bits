@@ -66,4 +66,11 @@ interface ForumRepositoryInterface
      * @param  array<string, mixed>  $data
      */
     public function create(array $data): Forum;
+
+    /**
+     * @return Collection<int, int>
+     */
+    public function listIds(): Collection;
+
+    public function updateCounts(int $forumId, int $postcount, int $topiccount): int;
 }

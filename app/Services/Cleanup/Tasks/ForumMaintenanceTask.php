@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
-use App\Models\Forum;
-use App\Models\Post;
-use App\Models\Topic;
+use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\Repositories\PostRepository;
+use App\Repositories\TopicMaintenanceRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\DB;
 final class ForumMaintenanceTask implements CleanupTask
 {
     public function __construct(
+        private readonly ForumRepositoryInterface $forums,
+        private readonly TopicMaintenanceRepository $topics,
+        private readonly PostRepository $posts,
         private readonly ?LegacyRedisCache $legacyRedisCache = null,
     ) {}
 
@@ -25,20 +28,13 @@ final class ForumMaintenanceTask implements CleanupTask
      */
     public function updateForumCounts(): string
     {
-        $forumIds = Forum::query()->pluck('id');
+        $forumIds = $this->forums->listIds();
 
         // Get all topics with their forumid in a single query
-        $topics = Topic::query()->whereIn('forumid', $forumIds)->pluck('forumid', 'id');
+        $topics = $this->topics->listForumIdById($forumIds);
 
         // Batch count posts per topic in a single grouped query
-        $postCounts = Post::query()
-            ->select('topicid')
-            ->selectRaw('COUNT(*) as cnt')
-            ->whereIn('topicid', $topics->keys()->all())
-            ->groupBy('topicid')
-            ->toBase()
-            ->get()
-            ->keyBy('topicid');
+        $postCounts = $this->posts->countTopicPostsBatch($topics->keys()->all());
 
         // Compute per-forum totals
         $forumPostCounts = [];
@@ -49,19 +45,15 @@ final class ForumMaintenanceTask implements CleanupTask
         }
 
         foreach ($topics as $topicId => $forumId) {
-            $postCount = $postCounts->get($topicId);
-            if ($postCount !== null) {
-                $forumPostCounts[$forumId] += (int) $postCount->cnt;
-            }
+            $postCount = $postCounts[$topicId] ?? 0;
+            $forumPostCounts[$forumId] += $postCount;
             $forumTopicCounts[$forumId]++;
         }
 
         // Batch forum updates in a single transaction
         DB::transaction(function () use ($forumPostCounts, $forumTopicCounts): void {
             foreach ($forumPostCounts as $forumId => $postcount) {
-                Forum::query()
-                    ->where('id', $forumId)
-                    ->update(['postcount' => $postcount, 'topiccount' => $forumTopicCounts[$forumId]]);
+                $this->forums->updateCounts($forumId, $postcount, $forumTopicCounts[$forumId]);
             }
         });
 

@@ -19,4 +19,9 @@ final class SiteLogRepository implements SiteLogRepositoryInterface
             'uid' => $userId ?? 0,
         ]);
     }
+
+    public function deleteBefore(string $before): int
+    {
+        return SiteLog::query()->where('added', '<', $before)->delete();
+    }
 }

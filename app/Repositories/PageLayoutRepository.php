@@ -24,6 +24,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         private readonly IpLogRepository $ipLogRepository,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly UserUpdateBatch $userUpdateBatch,
+        private readonly RequestContext $requestContext,
         private readonly Menu $menu = new Menu,
     ) {}
 
@@ -144,7 +145,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
             return;
         }
 
-        $script = RequestContext::instance()->getScript();
+        $script = $this->requestContext->getScript();
         if (in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {
             return;
         }

@@ -7,6 +7,8 @@ namespace App\Repositories;
 use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Enums\LoginAttemptType;
 use App\Enums\UserStatus;
+use App\Models\LoginAttempt;
+use App\Models\RegImage;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -131,5 +133,18 @@ class AuthRepository extends BaseRepository implements AuthRepositoryInterface
         $row->checkIsNormal($checkFields);
 
         return $row;
+    }
+
+    public function deleteStaleLoginAttempts(string $before): int
+    {
+        return LoginAttempt::query()
+            ->where('banned', false)
+            ->where('added', '<', $before)
+            ->delete();
+    }
+
+    public function deleteRegImages(): int
+    {
+        return RegImage::query()->delete();
     }
 }

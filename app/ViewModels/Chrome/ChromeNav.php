@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Chrome;
 
-use App\Services\PermissionChecker;
 use App\Support\PageLayoutContext;
 use App\Support\SearchBox;
 use App\Support\Settings;
@@ -20,7 +19,7 @@ final class ChromeNav
     /**
      * @return list<array{key: string, href: string, label: string, selected: bool, attrs: string}>
      */
-    public static function items(PageLayoutContext $context): array
+    public static function items(PageLayoutContext $context, ChromeRepositories $chrome): array
     {
         $script = $context->script !== '' ? $context->script : basename((string) $context->scriptFileName, '.php');
         $user = $context->user;
@@ -55,15 +54,15 @@ final class ChromeNav
             $items[] = ['key' => 'offers', 'href' => 'offers.php', 'label' => __('legacy/functions.text_offers')];
         }
         $items[] = ['key' => 'upload', 'href' => 'upload.php', 'label' => __('legacy/functions.text_upload')];
-        if (PermissionChecker::instance()->userCan('topten', false, $userId)) {
+        if ($chrome->permissionChecker->userCan('topten', false, $userId)) {
             $items[] = ['key' => 'topten', 'href' => 'topten.php', 'label' => __('legacy/functions.text_top_ten')];
         }
-        if (PermissionChecker::instance()->userCan('log', false, $userId)) {
+        if ($chrome->permissionChecker->userCan('log', false, $userId)) {
             $items[] = ['key' => 'log', 'href' => 'log.php', 'label' => __('legacy/functions.text_log')];
         }
         $items[] = ['key' => 'rules', 'href' => 'rules.php', 'label' => __('legacy/functions.text_rules')];
         $items[] = ['key' => 'faq', 'href' => 'faq.php', 'label' => __('legacy/functions.text_faq')];
-        if (PermissionChecker::instance()->userCan('staffmem', false, $userId)) {
+        if ($chrome->permissionChecker->userCan('staffmem', false, $userId)) {
             $items[] = ['key' => 'staff', 'href' => 'staff.php', 'label' => __('legacy/functions.text_staff')];
         }
         $items[] = ['key' => 'contactstaff', 'href' => 'contactstaff.php', 'label' => __('legacy/functions.text_contactstaff')];

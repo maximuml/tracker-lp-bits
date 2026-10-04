@@ -19,6 +19,7 @@ use App\Services\Ajax\ShoutboxActions;
 use App\Services\AjaxService;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
+use App\Support\NotificationFeed;
 use App\Support\Shoutbox;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -135,6 +136,7 @@ final class AjaxServiceTest extends TestCase
             $this->currentUser,
             new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
             new PasskeyActions($this->passkeyRepo, $this->currentUser),
+            app(NotificationFeed::class),
         );
     }
 
@@ -194,6 +196,7 @@ final class AjaxServiceTest extends TestCase
             $this->currentUser,
             new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
             new PasskeyActions($this->passkeyRepo, $this->currentUser),
+            app(NotificationFeed::class),
         );
     }
 

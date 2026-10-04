@@ -6,8 +6,9 @@ namespace App\Services\Cleanup;
 
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Models\Message;
 use App\Models\User;
+use App\Repositories\MessageRepository;
+use App\Repositories\UserCleanupRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
 use App\Support\Locale;
@@ -23,6 +24,8 @@ final class UserClassPromotion
 {
     public function __construct(
         private readonly UserOps $userOps,
+        private readonly UserCleanupRepository $userCleanupRepository,
+        private readonly MessageRepository $messageRepository,
     ) {}
 
     public function promotePeasantsToUsers(): void
@@ -67,15 +70,11 @@ final class UserClassPromotion
         $downlimitFloor = $downFloorGb * 1024 * 1024 * 1024;
         $downlimitRoof = $downRoofGb * 1024 * 1024 * 1024;
 
-        $query = User::query()
-            ->where('class', UserClassEnum::PEASANT->value)
-            ->where('downloaded', '>=', $downlimitFloor);
-
-        if ($downlimitRoof > $downFloorGb) {
-            $query->where('downloaded', '<', $downlimitRoof);
-        }
-
-        $res = $query->whereRaw('uploaded / downloaded >= ?', [$minRatio])->get(['id']);
+        $res = $this->userCleanupRepository->listPeasantIdsWithHighRatio(
+            $downlimitFloor,
+            $downlimitRoof > $downFloorGb ? $downlimitRoof : null,
+            $minRatio,
+        );
 
         if ($res->isEmpty()) {
             return;
@@ -105,13 +104,13 @@ final class UserClassPromotion
             Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
         }
 
-        User::query()->whereIn('id', $uidArr)->update([
+        $this->userCleanupRepository->updateWhereInIds($uidArr, [
             'class' => UserClassEnum::USER->value,
             'leechwarn' => false,
             'leechwarnuntil' => null,
         ]);
 
-        Message::query()->insert($messages);
+        $this->messageRepository->insertMessages($messages);
     }
 
     public function promoteUsersByClass(): void
@@ -156,13 +155,13 @@ final class UserClassPromotion
 
         $oriclass = (int) $class - 1;
 
-        $res = User::query()
-            ->where('class', (string) $oriclass)
-            ->where('downloaded', '>=', $limit)
-            ->where('seed_points', '>=', $minSeedPoints)
-            ->whereRaw('uploaded / downloaded >= ?', [$minRatio])
-            ->where('added', '<', $maxdt)
-            ->get(['id', 'max_class_once']);
+        $res = $this->userCleanupRepository->listPromotionCandidates(
+            $oriclass,
+            $limit,
+            $minSeedPoints,
+            $minRatio,
+            $maxdt,
+        );
 
         Logger::writeWithContext((string) ('match user count: '.$res->count()), (string) 'info', (bool) false);
 
@@ -187,10 +186,10 @@ final class UserClassPromotion
 
                 if ((int) $class <= (int) $arr->max_class_once) {
                     Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s', $uid, $class), (string) 'info', (bool) false);
-                    User::query()->where('id', $uid)->update(['class' => $class]);
+                    $this->userCleanupRepository->updateWhereInIds([$uid], ['class' => $class]);
                 } else {
                     Logger::writeWithContext((string) sprintf('user: %s upgrade to class: %s, and add invites: %s', $uid, $class, $addInvite), (string) 'info', (bool) false);
-                    User::query()->where('id', $uid)->update([
+                    $this->userCleanupRepository->updateWhereInIds([$uid], [
                         'class' => $class,
                         'max_class_once' => $class,
                         'invites' => DB::raw(DB::getQueryGrammar()->wrap('invites').' + '.(int) $addInvite), // @phpstan-ignore argument.type
@@ -209,6 +208,6 @@ final class UserClassPromotion
             }
         });
 
-        Message::query()->insert($messages);
+        $this->messageRepository->insertMessages($messages);
     }
 }

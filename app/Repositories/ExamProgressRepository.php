@@ -27,8 +27,8 @@ use App\Support\Logger;
 class ExamProgressRepository extends BaseRepository
 {
     public function __construct(
-        private readonly ExamProgressCalculatorInterface $examProgressCalculator = new ExamProgressCalculator,
-        private readonly ExamProgressLegacyRepository $legacyRepository = new ExamProgressLegacyRepository,
+        private readonly ExamProgressCalculatorInterface $examProgressCalculator,
+        private readonly ExamProgressLegacyRepository $legacyRepository,
     ) {}
 
     /**

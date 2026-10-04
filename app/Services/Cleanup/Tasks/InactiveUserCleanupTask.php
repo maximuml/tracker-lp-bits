@@ -7,16 +7,15 @@ namespace App\Services\Cleanup\Tasks;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
-use App\Enums\UserStatus;
 use App\Models\User;
-use App\Models\UserBanLog;
-use App\Models\UserModifyLog;
+use App\Repositories\UserCleanupRepository;
+use App\Repositories\UserDetailRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -27,6 +26,8 @@ final class InactiveUserCleanupTask implements CleanupTask
 {
     public function __construct(
         private readonly UserModerationRepositoryInterface $userRepository,
+        private readonly UserCleanupRepository $userCleanupRepository,
+        private readonly UserDetailRepository $userDetailRepository,
     ) {}
 
     /**
@@ -59,17 +60,9 @@ final class InactiveUserCleanupTask implements CleanupTask
         $maxclass = $this->neverDeleteClass();
         $iniupload = SiteConfig::current()->main->iniUpload(0);
 
-        $query = User::query()
-            ->where('parked', 0)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->where('class', '<', $maxclass)
-            ->where('last_access', '<', $dt)
-            ->where('downloaded', 0)
-            ->where(function (Builder $q) use ($iniupload): void {
-                $q->where('uploaded', 0)->orWhere('uploaded', $iniupload);
-            });
+        $results = $this->userCleanupRepository->listInactiveUsers(false, 'last_access', $dt, $maxclass, $iniupload);
 
-        $this->disableUsers($query, 'cleanup.disable_user_no_transfer_alt_last_access_time');
+        $this->disableUsers($results, 'cleanup.disable_user_no_transfer_alt_last_access_time');
     }
 
     private function disableNoTransferByRegisterTime(): void
@@ -84,17 +77,9 @@ final class InactiveUserCleanupTask implements CleanupTask
         $maxclass = $this->neverDeleteClass();
         $iniupload = SiteConfig::current()->main->iniUpload(0);
 
-        $query = User::query()
-            ->where('parked', 0)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->where('class', '<', $maxclass)
-            ->where('added', '<', $dt)
-            ->where('downloaded', 0)
-            ->where(function (Builder $q) use ($iniupload): void {
-                $q->where('uploaded', 0)->orWhere('uploaded', $iniupload);
-            });
+        $results = $this->userCleanupRepository->listInactiveUsers(false, 'added', $dt, $maxclass, $iniupload);
 
-        $this->disableUsers($query, 'cleanup.disable_user_no_transfer_alt_register_time');
+        $this->disableUsers($results, 'cleanup.disable_user_no_transfer_alt_register_time');
     }
 
     private function disableNotParked(): void
@@ -108,13 +93,9 @@ final class InactiveUserCleanupTask implements CleanupTask
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $maxclass = $this->neverDeleteClass();
 
-        $query = User::query()
-            ->where('parked', 0)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->where('class', '<', $maxclass)
-            ->where('last_access', '<', $dt);
+        $results = $this->userCleanupRepository->listInactiveUsers(false, 'last_access', $dt, $maxclass);
 
-        $this->disableUsers($query, 'cleanup.disable_user_not_parked');
+        $this->disableUsers($results, 'cleanup.disable_user_not_parked');
     }
 
     private function disableParked(): void
@@ -128,13 +109,9 @@ final class InactiveUserCleanupTask implements CleanupTask
         $dt = date('Y-m-d H:i:s', time() - $secs);
         $maxclass = $this->neverDeleteParkedClass();
 
-        $query = User::query()
-            ->where('parked', 1)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->where('class', '<', $maxclass)
-            ->where('last_access', '<', $dt);
+        $results = $this->userCleanupRepository->listInactiveUsers(true, 'last_access', $dt, $maxclass);
 
-        $this->disableUsers($query, 'cleanup.disable_user_parked');
+        $this->disableUsers($results, 'cleanup.disable_user_parked');
     }
 
     private function destroyDisabledAccounts(): void
@@ -149,14 +126,9 @@ final class InactiveUserCleanupTask implements CleanupTask
 
         $userRep = $this->userRepository;
 
-        User::query()
-            ->where('enabled', false)
-            ->where('last_access', '<', $dt)
-            ->select(['id', 'username', 'lang'])
-            ->orderBy('id', 'asc')
-            ->chunk(2000, function (Collection $users) use ($userRep): void {
-                $userRep->destroy($users, 'cleanup.destroy_disabled_account');
-            });
+        $this->userCleanupRepository->chunkDisabledUsersBefore($dt, 2000, function (Collection $users) use ($userRep): void {
+            $userRep->destroy($users, 'cleanup.destroy_disabled_account');
+        });
     }
 
     private function neverDeleteClass(): int
@@ -170,11 +142,10 @@ final class InactiveUserCleanupTask implements CleanupTask
     }
 
     /**
-     * @param  Builder<User>  $query
+     * @param  EloquentCollection<int, User>  $results
      */
-    private function disableUsers(Builder $query, string $reasonKey): void
+    private function disableUsers(EloquentCollection $results, string $reasonKey): void
     {
-        $results = $query->where('enabled', true)->get(['id', 'username', 'lang']);
         if ($results->isEmpty()) {
             return;
         }
@@ -215,9 +186,9 @@ final class InactiveUserCleanupTask implements CleanupTask
             return;
         }
 
-        User::query()->whereIn('id', $uidArr)->update(['enabled' => false]);
-        UserBanLog::query()->insert($userBanLogData);
-        UserModifyLog::query()->insert($userModifyLogs);
+        $this->userCleanupRepository->disableUsers($uidArr);
+        $this->userCleanupRepository->insertBanLogs($userBanLogData);
+        $this->userDetailRepository->insertUserModifyLogs($userModifyLogs);
 
         Logger::writeWithContext((string) ("[DISABLE_USER]({$reasonKey}): ".implode(', ', $uidArr)), (string) 'info', (bool) false);
 

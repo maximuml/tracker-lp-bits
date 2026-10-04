@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\StaffMessageRepository;
+use App\Services\PermissionChecker;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Mockery;
@@ -55,7 +56,10 @@ final class MessageRepositoryTest extends TestCase
 
         $this->repository = new MessageRepository;
         $this->mailboxRepository = new MailboxRepository;
-        $this->staffMessageRepository = new StaffMessageRepository(tap(Mockery::mock(ToolRepositoryInterface::class), fn ($m) => $m->shouldReceive('listUserAllPermissions')->andReturn([])));
+        $this->staffMessageRepository = new StaffMessageRepository(
+            tap(Mockery::mock(ToolRepositoryInterface::class), fn ($m) => $m->shouldReceive('listUserAllPermissions')->andReturn([])),
+            new PermissionChecker,
+        );
 
         /** @var User $user */
         $user = User::factory()->create();

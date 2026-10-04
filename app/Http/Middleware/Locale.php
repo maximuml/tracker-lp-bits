@@ -24,6 +24,8 @@ class Locale
         'en' => 'en',
     ];
 
+    public function __construct(private readonly RequestContext $requestContext) {}
+
     /**
      * Handle an incoming request.
      */
@@ -43,7 +45,7 @@ class Locale
         /** @var Response $response */
         $response = $next($request);
         if ($response instanceof Response || $response instanceof JsonResponse) {
-            $response->header('X-Request-Id', RequestContext::instance()->getRequestId())->header('X-Nexusphp-Version', VERSION_NUMBER);
+            $response->header('X-Request-Id', $this->requestContext->getRequestId())->header('X-Nexusphp-Version', VERSION_NUMBER);
         }
 
         return $response;

@@ -9,6 +9,7 @@ use App\Repositories\TorrentSearchRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
+use App\Support\RequestContext;
 use App\Support\UserDisplay;
 use App\ViewModels\TorrentListViewFactory;
 use App\ViewModels\TorrentSearchPanelFactory;
@@ -25,6 +26,7 @@ class TorrentListingController extends Controller
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly TorrentListViewFactory $torrentListFactory,
         private readonly TorrentSearchPanelFactory $searchPanelFactory,
+        private readonly RequestContext $requestContext,
     ) {}
 
     public function index(Request $request): View|RedirectResponse
@@ -41,7 +43,7 @@ class TorrentListingController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        $data = $this->torrentSearchRepository->getListingData($request->query->all());
+        $data = $this->torrentSearchRepository->getListingData($request->query->all(), $this->requestContext->getScript());
         foreach (['pagertop', 'pagerbottom'] as $pagerKey) {
             $data[$pagerKey] = SafeHtml::fromTrustedHtml((string) ($data[$pagerKey] ?? ''));
         }

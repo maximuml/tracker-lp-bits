@@ -66,7 +66,7 @@ final class SiteChromeViewModel
         $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
 
         $userBar = ChromeUserBar::load($context, $repo, $chrome, $skipUserData);
-        $navItems = ChromeNav::items($context);
+        $navItems = ChromeNav::items($context, $chrome);
 
         $alerts = [];
         if ($user !== null && ! empty($user['id']) && ! $skipUserData) {

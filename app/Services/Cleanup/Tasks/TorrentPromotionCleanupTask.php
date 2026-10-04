@@ -7,7 +7,7 @@ namespace App\Services\Cleanup\Tasks;
 use App\Enums\ModelEventEnum;
 use App\Enums\PromotionTimeType;
 use App\Enums\TorrentPromotion;
-use App\Models\Torrent;
+use App\Repositories\TorrentCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
@@ -18,6 +18,10 @@ use App\Support\Log;
  */
 final class TorrentPromotionCleanupTask implements CleanupTask
 {
+    public function __construct(
+        private readonly TorrentCleanupRepository $torrentCleanup,
+    ) {}
+
     /**
      * Priority Class 3: expire time-based global torrent promotions.
      */
@@ -103,17 +107,10 @@ final class TorrentPromotionCleanupTask implements CleanupTask
         ];
         $become = $becomeMap[$targetState];
 
-        $torrents = Torrent::query()
-            ->where('added', '<', $dt)
-            ->where('sp_state', $fromState)
-            ->where('promotion_time_type', PromotionTimeType::GLOBAL->value)
-            ->toBase()
-            ->get(['id', 'name']);
+        $torrents = $this->torrentCleanup->getExpiredGlobalPromotions($dt, $fromState, PromotionTimeType::GLOBAL->value);
 
         if ($torrents->isNotEmpty()) {
-            Torrent::query()
-                ->whereIn('id', $torrents->pluck('id')->all())
-                ->update(['sp_state' => $targetState]);
+            $this->torrentCleanup->setPromotionStateForIds($torrents->pluck('id')->all(), $targetState);
         }
 
         foreach ($torrents as $torrent) {
@@ -131,17 +128,14 @@ final class TorrentPromotionCleanupTask implements CleanupTask
 
     private function expireIndividualPromotions(): void
     {
-        $torrents = Torrent::query()
-            ->where('promotion_time_type', PromotionTimeType::DEADLINE->value)
-            ->where('promotion_until', '<', now())
-            ->get(['id']);
+        $torrents = $this->torrentCleanup->listExpiredDeadlinePromotions(PromotionTimeType::DEADLINE->value);
 
         if ($torrents->isNotEmpty()) {
-            Torrent::query()->whereIn('id', $torrents->pluck('id')->all())->update([
-                'sp_state' => TorrentPromotion::NORMAL->value,
-                'promotion_time_type' => PromotionTimeType::GLOBAL->value,
-                'promotion_until' => null,
-            ]);
+            $this->torrentCleanup->resetDeadlinePromotions(
+                $torrents->pluck('id')->all(),
+                TorrentPromotion::NORMAL->value,
+                PromotionTimeType::GLOBAL->value,
+            );
         }
 
         foreach ($torrents as $torrent) {

@@ -153,7 +153,7 @@ class InviteRepository
     }
 
     /**
-     * @param  array<string, mixed>  $rows
+     * @param  array<int, array<string, mixed>>  $rows
      */
     public function insertInvites(array $rows): bool
     {
@@ -163,5 +163,21 @@ class InviteRepository
     public function decrementInvites(int $inviterId): int
     {
         return User::query()->where('id', $inviterId)->decrement('invites');
+    }
+
+    public function deleteExpiredCodes(string $invitedBefore, string $expiredBefore): int
+    {
+        return Invite::query()
+            ->where(function ($query) use ($invitedBefore): void {
+                $query->where('time_invited', '<', $invitedBefore)
+                    ->whereNotNull('time_invited')
+                    ->where('invitee', '!=', '');
+            })
+            ->orWhere(function ($query) use ($expiredBefore): void {
+                $query->where('invitee', '')
+                    ->whereNotNull('expired_at')
+                    ->where('expired_at', '<', $expiredBefore);
+            })
+            ->delete();
     }
 }

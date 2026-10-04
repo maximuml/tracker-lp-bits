@@ -207,4 +207,14 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             ->where('topics.forumid', $forumid)
             ->count('posts.id');
     }
+
+    public function findLastIdAddedBefore(string $before): ?int
+    {
+        $postId = Post::query()
+            ->where('added', '<', $before)
+            ->orderBy('added', 'desc')
+            ->value('id');
+
+        return $postId === null ? null : (int) $postId;
+    }
 }

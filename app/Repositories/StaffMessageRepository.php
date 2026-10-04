@@ -21,6 +21,7 @@ class StaffMessageRepository extends BaseRepository
 {
     public function __construct(
         private readonly ToolRepositoryInterface $toolRepository,
+        private readonly PermissionChecker $permissionChecker,
     ) {}
 
     const STAFF_MESSAGE_TOTAL_CACHE_KEY = 'staff_message_count';
@@ -47,7 +48,7 @@ class StaffMessageRepository extends BaseRepository
         if ($answered !== null) {
             $query->where('answered', $answered);
         }
-        if (! PermissionChecker::instance()->userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) $uid)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, (int) $uid)) {
             // Not staff member only can see authorized
             $permissions = $this->toolRepository->listUserAllPermissions($uid);
             $query->whereIn('permission', $permissions);

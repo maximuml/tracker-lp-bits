@@ -29,7 +29,7 @@ use Carbon\Carbon;
 class ExamProgressLegacyRepository
 {
     public function __construct(
-        private readonly ExamProgressCalculatorInterface $examProgressCalculator = new ExamProgressCalculator,
+        private readonly ExamProgressCalculatorInterface $examProgressCalculator,
     ) {}
 
     /**

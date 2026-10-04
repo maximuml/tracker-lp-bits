@@ -8,7 +8,7 @@ use App\Enums\ModelEventEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Message;
 use App\Models\User;
-use App\Models\UserModifyLog;
+use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
 use App\Support\Events;
 use App\Support\Locale;
@@ -27,7 +27,7 @@ class RemoveUserVipStatus
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(UserDetailRepository $userDetailRepository): void
     {
         $users = User::query()
             ->with('language')
@@ -67,7 +67,7 @@ class RemoveUserVipStatus
             }
         }
         if (! empty($userModifyLogs)) {
-            UserModifyLog::query()->insert($userModifyLogs);
+            $userDetailRepository->insertUserModifyLogs($userModifyLogs);
         }
         Logger::writeWithContext((string) ("remove VIP status if time's up, success handle user count: ".$users->count()), (string) 'info', (bool) false);
     }

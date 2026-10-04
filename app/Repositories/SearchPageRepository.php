@@ -23,6 +23,7 @@ class SearchPageRepository
 {
     public function __construct(
         private readonly MeiliSearchRepositoryInterface $meiliSearchRepository,
+        private readonly PermissionChecker $permissionChecker,
     ) {}
 
     /**
@@ -44,12 +45,12 @@ class SearchPageRepository
         }
 
         $approvalStatus = null;
-        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! PermissionChecker::instance()->userCan(PermissionEnum::TORRENT_APPROVAL->value, false, $currentUser->id)) {
+        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible() && ! $this->permissionChecker->userCan(PermissionEnum::TORRENT_APPROVAL->value, false, $currentUser->id)) {
             $approvalStatus = TorrentApprovalStatus::ALLOW->value;
         }
 
         $banned = null;
-        if (! PermissionChecker::instance()->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $currentUser->id)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_VIEW_BANNED->value, false, $currentUser->id)) {
             $banned = 0;
         }
 

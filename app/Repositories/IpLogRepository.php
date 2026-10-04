@@ -103,4 +103,9 @@ class IpLogRepository extends BaseRepository
         }
         Logger::writeWithContext((string) sprintf('all done! cost time: %.3f sec.', microtime(true) - $beginTimestamp), (string) 'info', (bool) false);
     }
+
+    public function deleteBefore(string $before): int
+    {
+        return IpLog::query()->where('access', '<', $before)->delete();
+    }
 }

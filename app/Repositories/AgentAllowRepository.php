@@ -324,4 +324,17 @@ class AgentAllowRepository extends BaseRepository
     {
         return AgentAllow::query()->orderBy('id', 'desc')->get();
     }
+
+    /**
+     * @return Collection<int, int>
+     */
+    public function listClientIds(): Collection
+    {
+        return AgentAllow::query()->pluck('id');
+    }
+
+    public function setHits(int $id, int $hits): int
+    {
+        return AgentAllow::query()->where('id', $id)->update(['hits' => $hits]);
+    }
 }

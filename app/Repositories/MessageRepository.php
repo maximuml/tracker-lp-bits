@@ -285,4 +285,24 @@ class MessageRepository extends BaseRepository
 
         return $message;
     }
+
+    /**
+     * Bulk-insert PM rows for mass messaging — deliberately skips the
+     * per-message cache clear and event that `add()` fires.
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    public function insertMessages(array $rows): bool
+    {
+        return Message::query()->insert($rows);
+    }
+
+    /**
+     * System messages (sender IS NULL) older than the cutoff — the 180-day
+     * housekeeping sweep.
+     */
+    public function deleteOldSystemMessages(string $before): int
+    {
+        return Message::query()->whereNull('sender')->where('added', '<', $before)->delete();
+    }
 }

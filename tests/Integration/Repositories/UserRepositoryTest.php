@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\UserMeta;
 use App\Models\UserModifyLog;
 use App\Repositories\UserRepository;
-use App\Services\UserStatsService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
@@ -30,7 +29,7 @@ final class UserRepositoryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new UserRepository(app(UserStatsService::class));
+        $this->repository = app(UserRepository::class);
     }
 
     public function test_get_base_returns_user_with_selected_columns(): void

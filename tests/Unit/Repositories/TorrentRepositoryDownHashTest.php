@@ -9,6 +9,7 @@ use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Repositories\TorrentRepository;
+use App\Services\PermissionChecker;
 use App\Services\TorrentPromotionService;
 use App\Services\TorrentStatsService;
 use Firebase\JWT\JWT;
@@ -41,6 +42,7 @@ class TorrentRepositoryDownHashTest extends TestCase
                         $this->downloadRepository,
                         $meiliSearchRepository,
                     ),
+                    new PermissionChecker,
                 ),
                 new TorrentDetailRepository,
             ),

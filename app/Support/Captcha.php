@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Services\Captcha\CaptchaManager;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Support\Config\SiteConfig;
+use Illuminate\Container\Container;
 
 /**
  * Legacy captcha helpers extracted from `include/functions.php`.
@@ -25,7 +26,7 @@ final class Captcha
     public static function manager(): CaptchaManager
     {
         if (self::$manager === null) {
-            self::$manager = new CaptchaManager;
+            self::$manager = new CaptchaManager(Container::getInstance());
         }
 
         return self::$manager;

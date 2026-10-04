@@ -39,7 +39,7 @@ final class UserPasskeyRepositoryTest extends TestCase
     {
         parent::setUp();
         DB::table('user_passkeys')->delete();
-        $this->repository = new UserPasskeyRepository;
+        $this->repository = app(UserPasskeyRepository::class);
 
         /** @var User $user */
         $user = User::factory()->create();

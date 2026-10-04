@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Services\Announce\ResponseBuilder;
 use App\Services\Announce\TorrentGate;
+use App\Services\PermissionChecker;
 use App\Support\Settings;
 use App\Utils\MsgAlert;
 use App\ValueObjects\InfoHash;
@@ -50,6 +51,7 @@ final class TorrentGateTest extends TestCase
         $this->gate = new TorrentGate(
             app(TorrentPurchaseRepository::class),
             app(UserModerationRepositoryInterface::class),
+            new PermissionChecker,
         );
     }
 
@@ -288,7 +290,7 @@ final class TorrentGateTest extends TestCase
         $moderation->shouldReceive('updateDownloadPrivileges')
             ->once()
             ->with(null, $user->id, false, 'fake_announce');
-        $gate = new TorrentGate(app(TorrentPurchaseRepository::class), $moderation);
+        $gate = new TorrentGate(app(TorrentPurchaseRepository::class), $moderation, new PermissionChecker);
 
         $ctx = $this->makeCtx($this->makeDto((string) $torrent->info_hash, null, 500), $user);
 
@@ -412,7 +414,7 @@ final class TorrentGateTest extends TestCase
         $moderation->shouldReceive('updateDownloadPrivileges')
             ->once()
             ->with(null, $buyer->id, false, 'announce_paid_torrent_too_many_times');
-        $gate = new TorrentGate($repo, $moderation);
+        $gate = new TorrentGate($repo, $moderation, new PermissionChecker);
 
         $ctx = $this->makeCtx($this->makeDto((string) $torrent->info_hash), $buyer);
         $ctx = $ctx->withTorrent($this->torrentRow($torrent));
@@ -438,7 +440,7 @@ final class TorrentGateTest extends TestCase
         /** @var UserModerationRepositoryInterface&Mockery\MockInterface $moderation */
         $moderation = Mockery::mock(UserModerationRepositoryInterface::class);
         $moderation->shouldNotReceive('updateDownloadPrivileges');
-        $gate = new TorrentGate($repo, $moderation);
+        $gate = new TorrentGate($repo, $moderation, new PermissionChecker);
 
         $ctx = $this->makeCtx($this->makeDto((string) $torrent->info_hash), $buyer);
         $ctx = $ctx->withTorrent($this->torrentRow($torrent));

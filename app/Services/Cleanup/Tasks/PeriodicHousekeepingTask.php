@@ -5,17 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Cleanup\Tasks;
 
 use App\Contracts\Repositories\ShoutboxRepositoryInterface;
-use App\Models\AgentAllow;
-use App\Models\Cheater;
-use App\Models\Message;
-use App\Models\Post;
-use App\Models\SiteLog;
-use App\Models\Topic;
-use App\Models\User;
 use App\Repositories\ModerationRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
-use App\Support\Database;
+use App\Services\Cleanup\HousekeepingRepositories;
 
 /**
  * Priority Class 5: cleanup tasks that run every 15 days.
@@ -26,6 +19,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         private readonly ShoutboxRepositoryInterface $shoutbox,
         private readonly TopicReadStateRepository $topicReadState,
         private readonly ModerationRepository $moderation,
+        private readonly HousekeepingRepositories $repos,
     ) {}
 
     /**
@@ -51,11 +45,11 @@ final class PeriodicHousekeepingTask implements CleanupTask
 
     private function updateClientPopularity(): void
     {
-        $clientIds = AgentAllow::query()->pluck('id');
+        $clientIds = $this->repos->agentAllow->listClientIds();
 
         foreach ($clientIds as $clientId) {
-            $count = User::query()->where('clientselect', $clientId)->count();
-            AgentAllow::query()->where('id', $clientId)->update(['hits' => $count]);
+            $count = $this->repos->userCleanup->countByClientselect((int) $clientId);
+            $this->repos->agentAllow->setHits((int) $clientId, $count);
         }
     }
 
@@ -64,7 +58,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        Message::query()->whereNull('sender')->where('added', '<', $until)->delete();
+        $this->repos->messages->deleteOldSystemMessages($until);
     }
 
     private function deleteOldReadPosts(): void
@@ -72,14 +66,11 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        $postId = Post::query()
-            ->where('added', '<', $until)
-            ->orderBy('added', 'desc')
-            ->value('id');
+        $postId = $this->repos->posts->findLastIdAddedBefore($until);
 
         if ($postId) {
-            User::query()->where('last_catchup', '<', $postId)->update(['last_catchup' => $postId]);
-            $this->topicReadState->deleteWithLastPostReadBefore((int) $postId);
+            $this->repos->userCleanup->updateLastCatchupBelow($postId);
+            $this->topicReadState->deleteWithLastPostReadBefore($postId);
         }
     }
 
@@ -88,7 +79,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        Cheater::query()->where('added', '<', $until)->delete();
+        $this->repos->logs->deleteOldCheaters($until);
     }
 
     private function deleteOldShoutbox(): void
@@ -104,21 +95,14 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        SiteLog::query()->where('added', '<', $until)->delete();
+        $this->repos->siteLogs->deleteBefore($until);
     }
 
     private function lockOldTopics(): void
     {
         $length = 365 * 86400;
         $diff = time() - $length;
-        $postAddedField = Database::unixTimestampField('posts.added');
-
-        Topic::query()
-            ->where('sticky', false)
-            ->whereIn('lastpost', function ($query) use ($postAddedField, $diff): void {
-                $query->select('id')->from('posts')->whereRaw("{$postAddedField} < ?", [$diff]);
-            })
-            ->update(['locked' => true]);
+        $this->repos->topics->lockNonStickyTopicsWithLastPostBefore($diff);
     }
 
     private function deleteOldReports(): void

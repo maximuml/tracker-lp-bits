@@ -41,13 +41,7 @@ final class RepositorySizeTest extends TestCase
      * @var array<string, int>
      */
     private const BASELINE_CONSTRUCTOR_DEPS = [
-        'app/Repositories/TorrentSearchRepository.php' => 12,
-        'app/Services/AjaxService.php' => 13,
         'app/Services/AnnounceService.php' => 13, // ADR 0004: pipeline deps, do not merge/split
-        'app/Services/Cleanup/Tasks.php' => 11,
-        'app/Services/ForumIndexService.php' => 9,
-        'app/Services/ForumModerationService.php' => 10,
-        'app/Services/ForumService.php' => 11,
     ];
 
     /**

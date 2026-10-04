@@ -4,17 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup;
 
-use App\Services\Cleanup\Tasks\DeadTorrentAndLogCleanupTask;
-use App\Services\Cleanup\Tasks\ForumMaintenanceTask;
-use App\Services\Cleanup\Tasks\InactiveUserCleanupTask;
-use App\Services\Cleanup\Tasks\OfferCleanupTask;
-use App\Services\Cleanup\Tasks\PeerCleanupTask;
-use App\Services\Cleanup\Tasks\PeriodicHousekeepingTask;
-use App\Services\Cleanup\Tasks\StaleAuthCleanupTask;
-use App\Services\Cleanup\Tasks\TorrentPromotionCleanupTask;
-use App\Services\Cleanup\Tasks\TorrentVisibilityTask;
-use App\Services\Cleanup\Tasks\UserClassManagementTask;
-
 /**
  * Thin coordinator that delegates to individual cleanup task classes.
  *
@@ -26,16 +15,9 @@ use App\Services\Cleanup\Tasks\UserClassManagementTask;
 final class Tasks
 {
     public function __construct(
-        private readonly PeerCleanupTask $peerCleanup,
-        private readonly TorrentVisibilityTask $torrentVisibility,
-        private readonly ForumMaintenanceTask $forumMaintenance,
-        private readonly OfferCleanupTask $offerCleanup,
-        private readonly TorrentPromotionCleanupTask $torrentPromotionCleanup,
-        private readonly StaleAuthCleanupTask $staleAuthCleanup,
-        private readonly InactiveUserCleanupTask $inactiveUserCleanup,
-        private readonly UserClassManagementTask $userClassManagement,
-        private readonly DeadTorrentAndLogCleanupTask $deadTorrentAndLogCleanup,
-        private readonly PeriodicHousekeepingTask $periodicHousekeeping,
+        private readonly TorrentCleanupTasks $torrentTasks,
+        private readonly AccountCleanupTasks $accountTasks,
+        private readonly SiteCleanupTasks $siteTasks,
     ) {}
 
     /**
@@ -44,7 +26,7 @@ final class Tasks
      */
     public function prunePeers(): string
     {
-        return $this->peerCleanup->prunePeers();
+        return $this->torrentTasks->peerCleanup->prunePeers();
     }
 
     /**
@@ -53,7 +35,7 @@ final class Tasks
      */
     public function resetSeedBonusCounters(): string
     {
-        return $this->peerCleanup->resetSeedBonusCounters();
+        return $this->torrentTasks->peerCleanup->resetSeedBonusCounters();
     }
 
     /**
@@ -62,7 +44,7 @@ final class Tasks
      */
     public function updateTorrentVisibility(): string
     {
-        return $this->torrentVisibility->updateTorrentVisibility();
+        return $this->torrentTasks->torrentVisibility->updateTorrentVisibility();
     }
 
     /**
@@ -70,7 +52,7 @@ final class Tasks
      */
     public function updateForumCounts(): string
     {
-        return $this->forumMaintenance->updateForumCounts();
+        return $this->siteTasks->forumMaintenance->updateForumCounts();
     }
 
     /**
@@ -79,7 +61,7 @@ final class Tasks
      */
     public function pruneOffers(): string
     {
-        return $this->offerCleanup->pruneOffers();
+        return $this->siteTasks->offerCleanup->pruneOffers();
     }
 
     /**
@@ -87,7 +69,7 @@ final class Tasks
      */
     public function expireTorrentPromotions(): string
     {
-        return $this->torrentPromotionCleanup->expireTorrentPromotions();
+        return $this->torrentTasks->torrentPromotionCleanup->expireTorrentPromotions();
     }
 
     /**
@@ -95,7 +77,7 @@ final class Tasks
      */
     public function expireTorrentSticky(): string
     {
-        return $this->torrentVisibility->expireTorrentSticky();
+        return $this->torrentTasks->torrentVisibility->expireTorrentSticky();
     }
 
     /**
@@ -104,7 +86,7 @@ final class Tasks
      */
     public function cleanupStaleAuth(): string
     {
-        return $this->staleAuthCleanup->cleanupStaleAuth();
+        return $this->accountTasks->staleAuthCleanup->cleanupStaleAuth();
     }
 
     /**
@@ -112,7 +94,7 @@ final class Tasks
      */
     public function disableInactiveUsers(): string
     {
-        return $this->inactiveUserCleanup->disableInactiveUsers();
+        return $this->accountTasks->inactiveUserCleanup->disableInactiveUsers();
     }
 
     /**
@@ -120,7 +102,7 @@ final class Tasks
      */
     public function manageUserClasses(): string
     {
-        return $this->userClassManagement->manageUserClasses();
+        return $this->accountTasks->userClassManagement->manageUserClasses();
     }
 
     /**
@@ -128,7 +110,7 @@ final class Tasks
      */
     public function cleanupDeadTorrentsAndIpLogs(): string
     {
-        return $this->deadTorrentAndLogCleanup->cleanupDeadTorrentsAndIpLogs();
+        return $this->torrentTasks->deadTorrentAndLogCleanup->cleanupDeadTorrentsAndIpLogs();
     }
 
     /**
@@ -136,6 +118,6 @@ final class Tasks
      */
     public function cleanupClass5(): string
     {
-        return $this->periodicHousekeeping->cleanupClass5();
+        return $this->siteTasks->periodicHousekeeping->cleanupClass5();
     }
 }

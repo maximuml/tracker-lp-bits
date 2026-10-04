@@ -13,6 +13,7 @@ use App\Repositories\MessageRepository;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
+use App\Services\ForumDataRepositories;
 use App\Services\ForumModerationService;
 use App\Services\ForumService;
 use App\Support\Cache\LegacyRedisCache;
@@ -141,14 +142,11 @@ final class ForumServiceTest extends TestCase
     private function service(): ForumService
     {
         return new ForumService(
-            $this->app->make(ForumRepository::class),
+            $this->app->make(ForumDataRepositories::class),
             $this->app->make(CurrentUser::class),
             $this->app->make(LegacyRedisCache::class),
             $this->app->make(TopicPolicy::class),
             $this->app->make(PostPolicy::class),
-            $this->app->make(TopicRepository::class),
-            $this->app->make(PostRepository::class),
-            $this->app->make(PostLookupRepository::class),
             $this->app->make(ForumModerationService::class),
             $this->app->make(MessageRepository::class),
         );

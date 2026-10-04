@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\Repositories\ForumRepositoryInterface;
-use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
-use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicModerationRepository;
-use App\Repositories\TopicRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
@@ -31,14 +27,11 @@ use Illuminate\Support\Facades\Auth;
 final class ForumModerationService
 {
     public function __construct(
-        private readonly ForumRepositoryInterface $repository,
+        private readonly ForumDataRepositories $data,
         private readonly LegacyRedisCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
-        private readonly TopicRepository $topicRepository,
         private readonly TopicModerationRepository $topicModerationRepository,
-        private readonly PostRepositoryInterface $postRepository,
-        private readonly PostLookupRepository $postLookupRepository,
     ) {}
 
     private function cacheDelete(string $key): void
@@ -65,7 +58,7 @@ final class ForumModerationService
         $forumid = (int) $request->input('forumid');
         $topicid = (int) $request->query('topicid');
 
-        $topic = $this->topicRepository->getTopic((int) $topicid);
+        $topic = $this->data->topics->getTopic((int) $topicid);
         if ($topic === null) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_not_found'));
         }
@@ -76,7 +69,7 @@ final class ForumModerationService
             LegacyResponse::permissionDenied();
         }
 
-        $minclasswrite = $this->repository->getForumMinclasswrite($forumid);
+        $minclasswrite = $this->data->forums->getForumMinclasswrite($forumid);
         if ($minclasswrite === null) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_forum_not_found'));
         }
@@ -85,12 +78,12 @@ final class ForumModerationService
             LegacyResponse::permissionDenied();
         }
 
-        $oldForumid = $this->topicRepository->getTopicForumId($topicid);
+        $oldForumid = $this->data->topics->getTopicForumId($topicid);
         if ($oldForumid === null) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_not_found'));
         }
 
-        $postCount = $this->postRepository->countTopicPosts($topicid);
+        $postCount = $this->data->posts->countTopicPosts($topicid);
         $this->topicModerationRepository->moveTopic($topicid, $forumid, $postCount, (int) $oldForumid);
 
         if ($oldForumid !== $forumid) {
@@ -107,7 +100,7 @@ final class ForumModerationService
     public function deleteTopic(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $topic = $this->topicRepository->getTopic((int) $topicid);
+        $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {
             return $this->redirectTo('/forums.php');
@@ -127,7 +120,7 @@ final class ForumModerationService
             LegacyResponse::abort(__('legacy/forums.std_delete_topic'), (__('legacy/forums.std_delete_topic_note')).view('forums._confirm-form', ['action' => 'deletetopic', 'name' => 'topicid', 'value' => $topicid, 'text' => __('legacy/forums.std_here')])->render().__('legacy/forums.std_if_sure'), false);
         }
 
-        $postCount = $this->postRepository->countTopicPosts($topicid);
+        $postCount = $this->data->posts->countTopicPosts($topicid);
         $this->topicModerationRepository->deleteTopic($topicid, $forumid, $postCount);
 
         $todayDate = date('Y-m-d');
@@ -150,7 +143,7 @@ final class ForumModerationService
         $postid = (int) $request->input('postid');
         $sure = (int) $request->input('sure', 0);
 
-        $post = $this->postLookupRepository->getPost((int) $postid);
+        $post = $this->data->postLookup->getPost((int) $postid);
         if ($post === null) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_post_not_found'));
         }
@@ -163,7 +156,7 @@ final class ForumModerationService
 
         $topicid = (int) $post->topicid;
         $targetUserid = (int) $post->userid;
-        $prevPostId = $this->postLookupRepository->getPreviousPostId($topicid, $postid);
+        $prevPostId = $this->data->postLookup->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
             LegacyResponse::abort(__('legacy/forums.std_error'), (__('legacy/forums.std_cannot_delete_post')).view('components.altlink', ['class' => 'altlink', 'url' => "?action=deletetopic&topicid={$topicid}&sure=1", 'text' => __('legacy/forums.std_delete_topic_link')])->render().__('legacy/forums.std_instead'), false);
@@ -174,19 +167,19 @@ final class ForumModerationService
         }
 
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;
-        $forumid = $this->topicRepository->getTopicForumId($topicid) ?? 0;
+        $forumid = $this->data->topics->getTopicForumId($topicid) ?? 0;
         if ($forumid === 0) {
             return $this->redirectTo('/forums.php');
         }
 
-        $this->postRepository->deletePost($postid, $topicid, $forumid);
+        $this->data->posts->deletePost($postid, $topicid, $forumid);
         $this->cacheDelete('user_'.$targetUserid.'_post_count');
         $this->cacheDelete('topic_'.$topicid.'_post_count');
         $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
         if (is_array($cached) && ($cached['lastpost'] ?? null) == $postid) {
             $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
         }
-        $this->topicRepository->updateTopicLastPost($topicid);
+        $this->data->topics->updateTopicLastPost($topicid);
 
         $makepostBonus = SiteConfig::current()->bonus->makePost();
         if ($makepostBonus > 0) {
@@ -199,7 +192,7 @@ final class ForumModerationService
     public function setLocked(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $topic = $this->topicRepository->getTopic((int) $topicid);
+        $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();
@@ -220,7 +213,7 @@ final class ForumModerationService
     public function highlightTopic(Request $request): RedirectResponse
     {
         $topicid = (int) $request->query('topicid');
-        $topic = $this->topicRepository->getTopic((int) $topicid);
+        $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();
@@ -237,7 +230,7 @@ final class ForumModerationService
             $this->topicModerationRepository->updateTopicHighlight($topicid, $color);
         }
 
-        $forumid = $this->topicRepository->getTopicForumId($topicid) ?? 0;
+        $forumid = $this->data->topics->getTopicForumId($topicid) ?? 0;
         if ($forumid > 0) {
             $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
             if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
@@ -251,7 +244,7 @@ final class ForumModerationService
     public function setSticky(Request $request): RedirectResponse
     {
         $topicid = (int) $request->input('topicid');
-        $topic = $this->topicRepository->getTopic((int) $topicid);
+        $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {
             LegacyResponse::permissionDenied();

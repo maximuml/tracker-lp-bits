@@ -70,11 +70,11 @@ Route::get('/userhistory', [InfoController::class, 'userhistory'])->name('userhi
 Route::get('/invite', [InviteController::class, 'invite'])->name('invite.legacy');
 Route::post('/invite', [InviteController::class, 'inviteAction'])->middleware('reject.get.mutations');
 Route::get('/news', [NewsController::class, 'news'])->name('news.legacy');
-Route::post('/news', [NewsController::class, 'news']);
+Route::post('/news', [NewsController::class, 'newsPost']);
 Route::get('/makepoll', [PollController::class, 'makepoll'])->name('makepoll.legacy');
-Route::post('/makepoll', [PollController::class, 'makepoll']);
+Route::post('/makepoll', [PollController::class, 'makepollPost']);
 Route::get('/polloverview', [PollController::class, 'polloverview'])->name('polloverview.legacy');
-Route::post('/polloverview', [PollController::class, 'polloverview']);
+Route::post('/polloverview', [PollController::class, 'polloverviewPost']);
 Route::get('/attendance', [AttendanceController::class, 'attendance'])->name('attendance.legacy');
 Route::post('/attendance', [AttendanceController::class, 'attendancePost']);
 Route::post('/takemessage', [MessageController::class, 'takeMessage'])->middleware('reject.get.mutations')->name('takemessage.legacy');
@@ -151,7 +151,7 @@ Route::get('/clearcache', [AdminToolsController::class, 'clearCache'])->name('cl
 Route::post('/clearcache', [AdminToolsController::class, 'clearCache']);
 Route::post('/fastdelete', [TorrentDeleteController::class, 'fastDelete'])->middleware('reject.get.mutations')->name('fastdelete.legacy');
 Route::get('/donated', [InfoController::class, 'donated'])->name('donated.legacy');
-Route::post('/donated', [InfoController::class, 'donated']);
+Route::post('/donated', [InfoController::class, 'donatedPost']);
 Route::get('/faqmanage', [FaqController::class, 'faqManage'])->name('faqmanage.legacy');
 Route::post('/faqmanage', [FaqController::class, 'faqManagePost']);
 Route::get('/faqactions', [FaqController::class, 'faqActions'])->name('faqactions.legacy');
@@ -186,7 +186,7 @@ Route::get('/uploaders', [BonusHistoryController::class, 'uploaders'])->name('up
 Route::get('/settings', [SettingsController::class, 'settings'])->name('settings.legacy');
 Route::post('/settings', [SettingsController::class, 'settingsAction'])->middleware('reject.get.mutations');
 Route::get('/freeleech', [BonusShopController::class, 'freeleech'])->name('freeleech.legacy');
-Route::post('/freeleech', [BonusShopController::class, 'freeleech']);
+Route::post('/freeleech', [BonusShopController::class, 'freeleechPost']);
 Route::post('/magic', [BonusHistoryController::class, 'magic'])->middleware('reject.get.mutations')->name('magic.legacy');
 // Phase 5.6: delacctadmin/deletedisabled/massmail migrated to Filament SystemActions page
 Route::get('/delacctadmin', fn () => redirect('/nexusphp/system-actions'))->name('delacctadmin.legacy');
@@ -218,7 +218,7 @@ Route::post('/unco', [UserAdminController::class, 'unco']);
 Route::get('/adduser', [UserAdminController::class, 'adduser'])->name('adduser.legacy');
 Route::post('/adduser', [UserAdminController::class, 'adduser']);
 Route::get('/bitbucketlog', [InfoController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
-Route::post('/bitbucketlog', [InfoController::class, 'bitbucketlog']);
+Route::post('/bitbucketlog', [InfoController::class, 'bitbucketlogPost']);
 Route::post('/delete', [TorrentDeleteController::class, 'delete'])->middleware('reject.get.mutations')->name('delete.legacy');
 Route::get('/downloadnotice', [TorrentDownloadController::class, 'downloadnotice'])->name('downloadnotice.legacy');
 Route::post('/downloadnotice', [TorrentDownloadController::class, 'downloadnoticeAction'])->middleware('reject.get.mutations');

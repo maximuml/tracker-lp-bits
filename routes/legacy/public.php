@@ -19,7 +19,7 @@ Route::get('/useragreement', [RulesController::class, 'userAgreement'])->name('u
 Route::get('/faq', [FaqController::class, 'faq'])->name('faq.legacy');
 Route::post('/faq', [FaqController::class, 'faqPost'])->middleware('auth.nexus:nexus-web');
 Route::get('/donate', [InfoController::class, 'donate'])->name('donate.legacy');
-Route::post('/donate', [InfoController::class, 'donate'])->middleware('auth.nexus:nexus-web');
+Route::post('/donate', [InfoController::class, 'donatePost'])->middleware('auth.nexus:nexus-web');
 Route::get('/getusertorrentlistajax', [TorrentAjaxController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
 Route::get('/searchsuggest', [TorrentAjaxController::class, 'searchSuggest'])->name('searchsuggest.legacy');
 Route::post('/ajax', [UtilityController::class, 'ajax'])->middleware(['throttle:ajax', 'reject.get.mutations'])->name('ajax.legacy');

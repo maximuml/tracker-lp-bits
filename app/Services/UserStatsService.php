@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Support\Config\SiteConfig;
-use Illuminate\Support\Facades\DB;
 
 /**
  * User statistics and aggregate query helpers.
@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  */
 final class UserStatsService
 {
+    public function __construct(private readonly TorrentRepositoryInterface $torrentRepository) {}
+
     /**
      * get user seeding/leeching count and size
      *
@@ -26,13 +28,7 @@ final class UserStatsService
     public function listUserSeedingLeechingData(array $userIdArr)
     {
         $minSize = SiteConfig::current()->bonus->minSize(0);
-        $data = DB::table('torrents')
-            ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
-            ->select('peers.userid', 'peers.seeder', 'torrents.size')
-            ->whereIn('peers.userid', $userIdArr)
-            ->where('torrents.size', '>', $minSize)
-            ->groupBy('peers.torrent', 'peers.peer_id', 'peers.userid', 'peers.seeder')
-            ->get();
+        $data = $this->torrentRepository->listSeedingLeechingForUsers($userIdArr, $minSize);
         $result = [];
         foreach ($data as $row) {
             $row = (array) $row;

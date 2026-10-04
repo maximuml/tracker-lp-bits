@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Gate;
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
     public function __construct(
-        private readonly UserStatsService $statsService = new UserStatsService,
+        private readonly UserStatsService $statsService = new UserStatsService(new TorrentRepository(new TorrentDownloadRepository)),
         private readonly UserMetaRepository $metaRepository = new UserMetaRepository,
         private readonly PasskeyGenerator $passkeyGenerator = new PasskeyGenerator,
         private readonly LegacyRuntime $legacyRuntime = new LegacyRuntime,

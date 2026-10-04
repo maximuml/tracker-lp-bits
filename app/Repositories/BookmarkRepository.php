@@ -10,6 +10,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Locale;
 use App\Support\Logger;
+use Illuminate\Support\Facades\DB;
 
 class BookmarkRepository extends BaseRepository
 {
@@ -50,5 +51,35 @@ class BookmarkRepository extends BaseRepository
         $record->delete();
 
         return true;
+    }
+
+    /**
+     * Bookmark row for a user on a torrent.
+     */
+    public function findByUserAndTorrent(int $userId, int $torrentId): ?\stdClass
+    {
+        /** @var \stdClass|null $row */
+        $row = DB::table('bookmarks')
+            ->where('torrentid', $torrentId)
+            ->where('userid', $userId)
+            ->first();
+
+        return $row;
+    }
+
+    /**
+     * @return int the new bookmark id
+     */
+    public function insertForUser(int $userId, int $torrentId): int
+    {
+        return (int) DB::table('bookmarks')->insertGetId([
+            'torrentid' => $torrentId,
+            'userid' => $userId,
+        ]);
+    }
+
+    public function deleteById(int $id): void
+    {
+        DB::table('bookmarks')->where('id', $id)->delete();
     }
 }

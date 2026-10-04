@@ -415,4 +415,26 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
             ->get(['id', 'name', 'added', 'owner'])
             ->keyBy('owner');
     }
+
+    public function existsById(int $id): bool
+    {
+        return Torrent::query()->where('id', $id)->exists();
+    }
+
+    /**
+     * Per-peer seeding/leeching rows for bonus calculation.
+     *
+     * @param  array<int|string, mixed>  $userIds
+     * @return Collection<int, \stdClass>
+     */
+    public function listSeedingLeechingForUsers(array $userIds, int|float $minSize): Collection
+    {
+        return DB::table('torrents')
+            ->leftJoin('peers', 'peers.torrent', '=', 'torrents.id')
+            ->select('peers.userid', 'peers.seeder', 'torrents.size')
+            ->whereIn('peers.userid', $userIds)
+            ->where('torrents.size', '>', $minSize)
+            ->groupBy('peers.torrent', 'peers.peer_id', 'peers.userid', 'peers.seeder')
+            ->get();
+    }
 }

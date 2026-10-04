@@ -41,4 +41,6 @@ interface UsercpLookupRepositoryInterface
      * @return list<\stdClass>
      */
     public function listBitbucket(int $offset, int $limit): array;
+
+    public function countryExists(int $countryId): bool;
 }

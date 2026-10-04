@@ -82,4 +82,14 @@ interface TorrentRepositoryInterface
      * @return Collection<int|string, \stdClass>
      */
     public function listLastTorrentsForOwners(array $ownerIds): Collection;
+
+    public function existsById(int $id): bool;
+
+    /**
+     * Per-peer seeding/leeching rows for bonus calculation.
+     *
+     * @param  array<int|string, mixed>  $userIds
+     * @return Collection<int, \stdClass>
+     */
+    public function listSeedingLeechingForUsers(array $userIds, int|float $minSize): Collection;
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Enums\PeerSeeder;
 use App\Enums\SnatchFinished;
 use App\Models\Bookmark;
@@ -11,10 +12,10 @@ use App\Models\Peer;
 use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
+use App\Repositories\TorrentDetailRepository;
 use App\Support\Format;
 use App\Support\Strings;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Torrent statistics and aggregate query helpers.
@@ -25,6 +26,11 @@ use Illuminate\Support\Facades\DB;
  */
 class TorrentStatsService
 {
+    public function __construct(
+        private readonly TorrentAjaxRepositoryInterface $torrentAjaxRepository,
+        private readonly TorrentDetailRepository $torrentDetailRepository,
+    ) {}
+
     /**
      * @param  mixed  $torrentId
      * @return array<int|string, mixed>
@@ -165,7 +171,7 @@ class TorrentStatsService
      */
     public function getLastComment(int $torrentId): ?array
     {
-        $lastcom = DB::table('comments')->where('torrent', $torrentId)->orderBy('id', 'desc')->first();
+        $lastcom = $this->torrentDetailRepository->getLastComment($torrentId);
 
         return $lastcom ? array_merge((array) $lastcom, array_values((array) $lastcom)) : null;
     }
@@ -183,11 +189,7 @@ class TorrentStatsService
             return [];
         }
 
-        $rows = DB::table('comments')
-            ->whereIn('id', function ($q) use ($torrentIds) {
-                $q->selectRaw('MAX(id)')->from('comments')->whereIn('torrent', $torrentIds)->groupBy('torrent');
-            })
-            ->get();
+        $rows = $this->torrentDetailRepository->listLastCommentsForTorrents($torrentIds);
 
         $map = [];
         foreach ($rows as $lastcom) {
@@ -241,11 +243,7 @@ class TorrentStatsService
      */
     public function getSnatchInfo(int|string $torrentId, int|string $userId): array|false
     {
-        $record = DB::table('snatched')
-            ->where('torrentid', (int) $torrentId)
-            ->where('userid', (int) $userId)
-            ->orderBy('id', 'desc')
-            ->first();
+        $record = $this->torrentAjaxRepository->getLatestSnatchForUser((int) $torrentId, (int) $userId);
 
         return $record ? (array) $record : false;
     }

@@ -6,6 +6,7 @@ namespace Tests\Integration\Services;
 
 use App\Exceptions\AuthenticationException;
 use App\Models\User;
+use App\Repositories\UserDetailRepository;
 use App\Services\PasswordRecoveryService;
 use App\Services\PasswordSetup;
 use App\Services\SecureTokenService;
@@ -57,6 +58,7 @@ final class PasswordRecoveryServiceTest extends TestCase
         $this->authService = $authService;
 
         $this->service = new PasswordRecoveryService(
+            new UserDetailRepository,
             $this->authService,
             app(SecureTokenService::class),
             app(PasswordSetup::class),

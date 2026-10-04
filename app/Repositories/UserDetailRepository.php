@@ -186,4 +186,12 @@ class UserDetailRepository
     {
         return User::query()->where('email', $email)->first($columns);
     }
+
+    /**
+     * Case-sensitive email lookup (BINARY) — recovery/signup duplicate checks.
+     */
+    public function findByEmailBinary(string $email): ?User
+    {
+        return User::query()->whereRaw('BINARY email = ?', [$email])->first();
+    }
 }

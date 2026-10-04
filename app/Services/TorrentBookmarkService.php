@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Repositories\BookmarkRepository;
+use App\Repositories\TorrentDetailRepository;
 use App\Support\Bonus;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Handles torrent bookmark toggle and the legacy "thanks" page action.
@@ -19,6 +21,9 @@ use Illuminate\Support\Facades\DB;
 final class TorrentBookmarkService
 {
     public function __construct(
+        private readonly BookmarkRepository $bookmarkRepository,
+        private readonly TorrentRepositoryInterface $torrentRepository,
+        private readonly TorrentDetailRepository $torrentDetailRepository,
         private readonly ?LegacyRedisCache $legacyRedisCache = null,
     ) {}
 
@@ -31,24 +36,17 @@ final class TorrentBookmarkService
     {
         // Verify the torrent exists before adding a bookmark — prevents
         // orphaned bookmark records for non-existent torrents.
-        $torrentExists = DB::table('torrents')->where('id', $torrentId)->exists();
-        if (! $torrentExists) {
+        if (! $this->torrentRepository->existsById($torrentId)) {
             return 'failed';
         }
 
-        $bookmark = DB::table('bookmarks')
-            ->where('torrentid', $torrentId)
-            ->where('userid', $userId)
-            ->first();
+        $bookmark = $this->bookmarkRepository->findByUserAndTorrent($userId, $torrentId);
 
         if ($bookmark) {
-            DB::table('bookmarks')->where('id', (int) $bookmark->id)->delete();
+            $this->bookmarkRepository->deleteById((int) $bookmark->id);
             $status = 'deleted';
         } else {
-            DB::table('bookmarks')->insertGetId([
-                'torrentid' => $torrentId,
-                'userid' => $userId,
-            ]);
+            $this->bookmarkRepository->insertForUser($userId, $torrentId);
             $status = 'added';
         }
 
@@ -71,23 +69,16 @@ final class TorrentBookmarkService
     {
         $userId = (int) ($currentUser['id'] ?? 0);
 
-        $torrentOwner = (int) DB::table('torrents')->where('id', $torrentId)->value('owner');
+        $torrentOwner = (int) $this->torrentRepository->getOwnerId($torrentId);
         if ($torrentOwner === 0) {
             throw new \RuntimeException('Invalid torrent id!');
         }
 
-        $existing = DB::table('thanks')
-            ->where('torrentid', $torrentId)
-            ->where('userid', $userId)
-            ->count();
-        if ($existing !== 0) {
+        if ($this->torrentDetailRepository->hasThanksRecord($torrentId, $userId)) {
             throw new \RuntimeException('You already said thanks!');
         }
 
-        DB::table('thanks')->insert([
-            'torrentid' => $torrentId,
-            'userid' => $userId,
-        ]);
+        $this->torrentDetailRepository->insertThanks($torrentId, $userId);
 
         $bonusConfig = SiteConfig::current()->bonus;
         $saythanksBonus = $bonusConfig->sayThanks();

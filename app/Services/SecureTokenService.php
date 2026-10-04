@@ -230,4 +230,16 @@ final class SecureTokenService
 
         return hash_equals($token, md5($sec.$email.$sec));
     }
+
+    /**
+     * Revoke all unconsumed tokens for a user in the given token table.
+     */
+    public function revokeUnconsumed(string $table, int $userId): void
+    {
+        DB::table($table)
+            ->where('user_id', $userId)
+            ->whereNull('consumed_at')
+            ->where('revoked', 0)
+            ->update(['revoked' => 1]);
+    }
 }

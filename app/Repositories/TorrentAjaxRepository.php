@@ -399,4 +399,20 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             ->map(fn ($r): array => (array) $r)
             ->all());
     }
+
+    /**
+     * Latest snatched row for a user on a torrent.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getLatestSnatchForUser(int $torrentId, int $userId): ?array
+    {
+        $row = DB::table('snatched')
+            ->where('torrentid', $torrentId)
+            ->where('userid', $userId)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        return $row === null ? null : (array) $row;
+    }
 }

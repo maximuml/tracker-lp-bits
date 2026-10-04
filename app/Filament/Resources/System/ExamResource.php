@@ -183,10 +183,9 @@ class ExamResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make()->using(function ($record) {
-                    $rep = app(ExamRepositoryInterface::class);
-                    $rep->delete($record->id);
-                }),
+                DeleteAction::make()->using(
+                    fn ($record, ExamRepositoryInterface $rep) => $rep->delete($record->id)
+                ),
             ])
             ->toolbarActions([
             ]);

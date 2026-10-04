@@ -82,7 +82,7 @@ class OverForumResource extends Resource
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->using(fn ($record) => app(OverforumRepository::class)->deleteOverforum($record->id)),
+                    ->using(fn ($record, OverforumRepository $rep) => $rep->deleteOverforum($record->id)),
             ])
             ->toolbarActions([
                 DeleteBulkAction::make(),

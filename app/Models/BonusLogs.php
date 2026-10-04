@@ -19,7 +19,6 @@ namespace App\Models;
 use App\Enums\BusinessType;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
-use Carbon\Carbon;
 
 class BonusLogs extends NexusModel
 {

@@ -12,7 +12,6 @@ use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Events;
 use App\Support\Log;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Priority Class 3: expire time-based torrent promotions.
@@ -104,14 +103,15 @@ final class TorrentPromotionCleanupTask implements CleanupTask
         ];
         $become = $becomeMap[$targetState];
 
-        $torrents = DB::table('torrents')
+        $torrents = Torrent::query()
             ->where('added', '<', $dt)
             ->where('sp_state', $fromState)
             ->where('promotion_time_type', PromotionTimeType::GLOBAL->value)
+            ->toBase()
             ->get(['id', 'name']);
 
         if ($torrents->isNotEmpty()) {
-            DB::table('torrents')
+            Torrent::query()
                 ->whereIn('id', $torrents->pluck('id')->all())
                 ->update(['sp_state' => $targetState]);
         }

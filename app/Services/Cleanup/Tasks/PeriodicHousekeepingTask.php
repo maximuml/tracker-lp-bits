@@ -4,15 +4,30 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
+use App\Contracts\Repositories\ShoutboxRepositoryInterface;
+use App\Models\AgentAllow;
+use App\Models\Cheater;
+use App\Models\Message;
+use App\Models\Post;
+use App\Models\SiteLog;
+use App\Models\Topic;
+use App\Models\User;
+use App\Repositories\ModerationRepository;
+use App\Repositories\TopicReadStateRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Database;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Priority Class 5: cleanup tasks that run every 15 days.
  */
 final class PeriodicHousekeepingTask implements CleanupTask
 {
+    public function __construct(
+        private readonly ShoutboxRepositoryInterface $shoutbox,
+        private readonly TopicReadStateRepository $topicReadState,
+        private readonly ModerationRepository $moderation,
+    ) {}
+
     /**
      * Priority Class 5: cleanup tasks that run every 15 days.
      */
@@ -36,11 +51,11 @@ final class PeriodicHousekeepingTask implements CleanupTask
 
     private function updateClientPopularity(): void
     {
-        $clientIds = DB::table('agent_allowed_family')->pluck('id');
+        $clientIds = AgentAllow::query()->pluck('id');
 
         foreach ($clientIds as $clientId) {
-            $count = DB::table('users')->where('clientselect', $clientId)->count();
-            DB::table('agent_allowed_family')->where('id', $clientId)->update(['hits' => $count]);
+            $count = User::query()->where('clientselect', $clientId)->count();
+            AgentAllow::query()->where('id', $clientId)->update(['hits' => $count]);
         }
     }
 
@@ -49,7 +64,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        DB::table('messages')->whereNull('sender')->where('added', '<', $until)->delete();
+        Message::query()->whereNull('sender')->where('added', '<', $until)->delete();
     }
 
     private function deleteOldReadPosts(): void
@@ -57,14 +72,14 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        $postId = DB::table('posts')
+        $postId = Post::query()
             ->where('added', '<', $until)
             ->orderBy('added', 'desc')
             ->value('id');
 
         if ($postId) {
-            DB::table('users')->where('last_catchup', '<', $postId)->update(['last_catchup' => $postId]);
-            DB::table('readposts')->where('lastpostread', '<', $postId)->delete();
+            User::query()->where('last_catchup', '<', $postId)->update(['last_catchup' => $postId]);
+            $this->topicReadState->deleteWithLastPostReadBefore((int) $postId);
         }
     }
 
@@ -73,7 +88,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        DB::table('cheaters')->where('added', '<', $until)->delete();
+        Cheater::query()->where('added', '<', $until)->delete();
     }
 
     private function deleteOldShoutbox(): void
@@ -81,7 +96,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = time() - $length;
 
-        DB::table('shoutbox')->where('date', '<', $until)->delete();
+        $this->shoutbox->deleteBefore($until);
     }
 
     private function deleteOldSiteLog(): void
@@ -89,7 +104,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 180 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        DB::table('sitelog')->where('added', '<', $until)->delete();
+        SiteLog::query()->where('added', '<', $until)->delete();
     }
 
     private function lockOldTopics(): void
@@ -98,7 +113,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $diff = time() - $length;
         $postAddedField = Database::unixTimestampField('posts.added');
 
-        DB::table('topics')
+        Topic::query()
             ->where('sticky', false)
             ->whereIn('lastpost', function ($query) use ($postAddedField, $diff): void {
                 $query->select('id')->from('posts')->whereRaw("{$postAddedField} < ?", [$diff]);
@@ -111,10 +126,7 @@ final class PeriodicHousekeepingTask implements CleanupTask
         $length = 4 * 7 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        DB::table('reports')
-            ->where('dealtwith', 1)
-            ->where('added', '<', $until)
-            ->delete();
+        $this->moderation->deleteDealtWithReportsBefore($until);
     }
 
     public function run(): string

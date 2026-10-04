@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
+use App\Models\Forum;
+use App\Models\Post;
+use App\Models\Topic;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Support\Facades\DB;
@@ -22,16 +25,18 @@ final class ForumMaintenanceTask implements CleanupTask
      */
     public function updateForumCounts(): string
     {
-        $forumIds = DB::table('forums')->pluck('id');
+        $forumIds = Forum::query()->pluck('id');
 
         // Get all topics with their forumid in a single query
-        $topics = DB::table('topics')->whereIn('forumid', $forumIds)->pluck('forumid', 'id');
+        $topics = Topic::query()->whereIn('forumid', $forumIds)->pluck('forumid', 'id');
 
         // Batch count posts per topic in a single grouped query
-        $postCounts = DB::table('posts')
-            ->select('topicid', DB::raw('COUNT(*) as cnt'))
+        $postCounts = Post::query()
+            ->select('topicid')
+            ->selectRaw('COUNT(*) as cnt')
             ->whereIn('topicid', $topics->keys()->all())
             ->groupBy('topicid')
+            ->toBase()
             ->get()
             ->keyBy('topicid');
 
@@ -54,7 +59,7 @@ final class ForumMaintenanceTask implements CleanupTask
         // Batch forum updates in a single transaction
         DB::transaction(function () use ($forumPostCounts, $forumTopicCounts): void {
             foreach ($forumPostCounts as $forumId => $postcount) {
-                DB::table('forums')
+                Forum::query()
                     ->where('id', $forumId)
                     ->update(['postcount' => $postcount, 'topiccount' => $forumTopicCounts[$forumId]]);
             }

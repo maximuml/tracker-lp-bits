@@ -4,18 +4,25 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
+use App\Contracts\Repositories\CleanupMonitorRepositoryInterface;
+use App\Models\IpLog;
+use App\Models\Message;
+use App\Models\Torrent;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\TorrentOps;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Priority Class 4: delete dead torrents, old IP logs, and stale failed jobs.
  */
 final class DeadTorrentAndLogCleanupTask implements CleanupTask
 {
+    public function __construct(
+        private readonly CleanupMonitorRepositoryInterface $cleanupMonitor,
+    ) {}
+
     /**
      * Priority Class 4: delete dead torrents, old IP logs, and stale failed jobs.
      */
@@ -43,13 +50,15 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
         $until = date('Y-m-d H:i:s', time() - $length);
         $dt = date('Y-m-d H:i:s');
 
-        $res = DB::table('torrents as t')
+        $res = Torrent::query()
+            ->from('torrents as t')
             ->leftJoin('users as u', 't.owner', '=', 'u.id')
             ->where('t.visible', 0)
             ->where('t.last_action', '<', $until)
             ->where('t.seeders', 0)
             ->where('t.leechers', 0)
             ->select('t.id', 't.name', 't.owner', 'u.id as uid')
+            ->toBase()
             ->get();
 
         foreach ($res as $torrent) {
@@ -60,7 +69,7 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
             if (! empty($arr['uid'])) {
                 $locale = Locale::userLocale((int) $arr['owner']);
 
-                DB::table('messages')->insert([
+                Message::query()->insert([
                     'sender' => null,
                     'receiver' => $arr['owner'],
                     'added' => $dt,
@@ -80,7 +89,7 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
         $length = 90 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        DB::table('iplog')->where('access', '<', $until)->delete();
+        IpLog::query()->where('access', '<', $until)->delete();
     }
 
     private function deleteFailedJobs(): void
@@ -88,7 +97,7 @@ final class DeadTorrentAndLogCleanupTask implements CleanupTask
         $length = 10 * 86400;
         $until = date('Y-m-d H:i:s', time() - $length);
 
-        DB::table('failed_jobs')->where('failed_at', '<', $until)->delete();
+        $this->cleanupMonitor->deleteFailedJobsBefore($until);
     }
 
     public function run(): string

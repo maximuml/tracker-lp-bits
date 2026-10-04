@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\Repositories\SecureTokenRepository;
 use App\Services\SecureTokenService;
 use PHPUnit\Framework\TestCase;
 use Tests\Attributes\TestCategory;
@@ -21,7 +22,7 @@ final class SecureTokenServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new SecureTokenService;
+        $this->service = new SecureTokenService(new SecureTokenRepository);
     }
 
     public function test_email_change_digest_is_64_char_sha256(): void

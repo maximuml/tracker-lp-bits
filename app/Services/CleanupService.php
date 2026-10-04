@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\CleanupServiceInterface;
+use App\Models\Avp;
 use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
 use App\Support\Config\SiteConfig;
@@ -15,7 +16,6 @@ use App\Support\RequestContext;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -119,10 +119,10 @@ final class CleanupService implements CleanupServiceInterface
             $interval = (int) SiteConfig::current()->main->autocleanInterval($this->intervalName($level), 0);
 
             if (! $forceAll) {
-                $ts = (int) DB::table('avps')->where('arg', $arg)->value('value_u');
+                $ts = (int) Avp::query()->where('arg', $arg)->value('value_u');
 
                 if ($ts === 0) {
-                    DB::table('avps')->insertOrIgnore(['arg' => $arg, 'value_s' => '', 'value_u' => $now]);
+                    Avp::query()->insertOrIgnore(['arg' => $arg, 'value_s' => '', 'value_u' => $now]);
                     Logger::writeWithContext((string) "no value for arg: '{$arg}', return", (string) 'info', (bool) false);
 
                     return false;
@@ -135,7 +135,7 @@ final class CleanupService implements CleanupServiceInterface
                     return $log;
                 }
 
-                $claimed = (int) DB::table('avps')
+                $claimed = (int) Avp::query()
                     ->where('arg', $arg)
                     ->where('value_u', $ts)
                     ->update(['value_u' => $now]);
@@ -146,7 +146,7 @@ final class CleanupService implements CleanupServiceInterface
                     return false;
                 }
             } else {
-                DB::table('avps')->updateOrInsert(['arg' => $arg], ['value_s' => '', 'value_u' => $now]);
+                Avp::query()->updateOrInsert(['arg' => $arg], ['value_s' => '', 'value_u' => $now]);
             }
 
             $output = $this->runClass($level, $taskList, $requestId, $output, $printProgress);

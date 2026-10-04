@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
+use App\Models\Peer;
+use App\Models\User;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
 use App\Support\Time;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Priority Class 1: peer and seed-bonus cleanup.
@@ -26,7 +27,7 @@ final class PeerCleanupTask implements CleanupTask
             time()
         ));
 
-        DB::table('peers')->where('last_action', '<', $deadtime)->delete();
+        Peer::query()->where('last_action', '<', $deadtime)->delete();
 
         return 'update peer status';
     }
@@ -40,7 +41,7 @@ final class PeerCleanupTask implements CleanupTask
         $interval = (int) SiteConfig::current()->main->autocleanIntervalOne(900);
         $cutoff = Carbon::now()->subSeconds(2 * $interval)->toDateTimeString();
 
-        DB::table('users')
+        User::query()
             ->where('seed_points_updated_at', '<', $cutoff)
             ->update([
                 'seed_points_per_hour' => 0,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\SecureTokenRepository;
 use App\Support\Strings;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +29,8 @@ final class SecureTokenService
 
     /** Default expiry in seconds (7 days). */
     public const DEFAULT_EXPIRY = 604800;
+
+    public function __construct(private readonly SecureTokenRepository $tokens) {}
 
     /**
      * Generate a cryptographically secure token.
@@ -67,10 +70,7 @@ final class SecureTokenService
 
         return DB::transaction(function () use ($table, $digest, $extraUpdate): ?array {
             // Lock the row for atomic consumption
-            $row = DB::table($table)
-                ->where('token_digest', $digest)
-                ->lockForUpdate()
-                ->first();
+            $row = $this->tokens->lockByDigest($table, $digest);
 
             if ($row === null) {
                 return null;
@@ -96,13 +96,10 @@ final class SecureTokenService
                 'consumed_at' => now()->toDateTimeString(),
             ], $extraUpdate);
 
-            DB::table($table)
-                ->where('id', $row->id)
-                ->whereNull('consumed_at')
-                ->update($update);
+            $this->tokens->updateByIdWhereUnconsumed($table, (int) $row->id, $update);
 
             // Re-fetch to get the updated consumed_at
-            $updated = DB::table($table)->where('id', $row->id)->first();
+            $updated = $this->tokens->findById($table, (int) $row->id);
 
             return $updated !== null ? (array) $updated : (array) $row;
         });
@@ -122,9 +119,7 @@ final class SecureTokenService
     {
         $digest = $this->digest($token);
 
-        $row = DB::table($table)
-            ->where('token_digest', $digest)
-            ->first();
+        $row = $this->tokens->findByDigest($table, $digest);
 
         if ($row === null) {
             return null;
@@ -158,7 +153,7 @@ final class SecureTokenService
         $digest = $this->digest($token);
         $expiresAt = now()->addSeconds(self::DEFAULT_EXPIRY)->toDateTimeString();
 
-        return (int) DB::table($table)->insertGetId(array_merge([
+        return $this->tokens->insertGetId($table, array_merge([
             'token_digest' => $digest,
             'expires_at' => $expiresAt,
             'consumed_at' => null,
@@ -181,9 +176,7 @@ final class SecureTokenService
      */
     public function verifyLegacy(string $table, string $hashColumn, string $token): ?array
     {
-        $row = DB::table($table)
-            ->where($hashColumn, $token)
-            ->first();
+        $row = $this->tokens->findByColumn($table, $hashColumn, $token);
 
         return $row !== null ? (array) $row : null;
     }
@@ -236,10 +229,6 @@ final class SecureTokenService
      */
     public function revokeUnconsumed(string $table, int $userId): void
     {
-        DB::table($table)
-            ->where('user_id', $userId)
-            ->whereNull('consumed_at')
-            ->where('revoked', 0)
-            ->update(['revoked' => 1]);
+        $this->tokens->revokeUnconsumedForUser($table, $userId);
     }
 }

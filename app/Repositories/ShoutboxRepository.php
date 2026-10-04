@@ -400,4 +400,9 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
 
         return true;
     }
+
+    public function deleteBefore(int $unixTs): int
+    {
+        return DB::table('shoutbox')->where('date', '<', $unixTs)->delete();
+    }
 }

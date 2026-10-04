@@ -67,4 +67,12 @@ final class OfferVoteRepository extends BaseRepository implements OfferVoteRepos
     {
         return DB::table('offervotes')->where('offerid', $offerId)->delete();
     }
+
+    /**
+     * @param  list<int>  $offerIds
+     */
+    public function deleteVotesForOffers(array $offerIds): int
+    {
+        return DB::table('offervotes')->whereIn('offerid', $offerIds)->delete();
+    }
 }

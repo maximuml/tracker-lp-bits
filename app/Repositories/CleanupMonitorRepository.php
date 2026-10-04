@@ -149,4 +149,9 @@ final class CleanupMonitorRepository implements CleanupMonitorRepositoryInterfac
     {
         return \App\Support\Locale::trans('cleanup.alarm_email_body_for_queue_failed_jobs', ['since' => $since, 'count' => $count, 'failed_job_table' => $failedJobTable], $locale);
     }
+
+    public function deleteFailedJobsBefore(string $until): int
+    {
+        return DB::table('failed_jobs')->where('failed_at', '<', $until)->delete();
+    }
 }

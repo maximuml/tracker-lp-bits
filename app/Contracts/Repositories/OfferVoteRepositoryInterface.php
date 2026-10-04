@@ -27,4 +27,9 @@ interface OfferVoteRepositoryInterface
     public function incrementVote(int $offerId, string $column): bool;
 
     public function deleteOfferVotes(int $offerId): int;
+
+    /**
+     * @param  list<int>  $offerIds
+     */
+    public function deleteVotesForOffers(array $offerIds): int;
 }

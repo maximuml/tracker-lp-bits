@@ -29,4 +29,47 @@
     --color-nxm-on-success: var(--nxm-on-success);
     --color-nxm-on-warning: var(--nxm-on-warning);
     --color-nxm-on-danger: var(--nxm-on-danger);
+    --color-nxm-accent-text: var(--nxm-accent-text);
+    --color-nxm-overlay: var(--nxm-overlay);
+    --color-nxm-info-bg: var(--nxm-info-bg);
+    --color-nxm-info-border: var(--nxm-info-border);
+    --color-nxm-success-bg: var(--nxm-success-bg);
+    --color-nxm-success-border: var(--nxm-success-border);
+    --color-nxm-warning-bg: var(--nxm-warning-bg);
+    --color-nxm-warning-border: var(--nxm-warning-border);
+    --color-nxm-danger-bg: var(--nxm-danger-bg);
+    --color-nxm-danger-border: var(--nxm-danger-border);
+}
+
+/* Light defaults for contexts where no theme pack defines --nxm-*
+ * (Classic has no token layer at all). :where() contributes zero
+ * specificity, so real theme definitions (modern.css :root,
+ * Unshatter/theme.css data-theme selectors) always win. */
+:where(:root) {
+    --nxm-bg: #f4f5f7;
+    --nxm-surface: #ffffff;
+    --nxm-surface-alt: #eef1f5;
+    --nxm-text: #1d2733;
+    --nxm-text-dim: #5b6b7c;
+    --nxm-muted: #5b6b7c;
+    --nxm-border: #d8dce3;
+    --nxm-accent: #1f6fd0;
+    --nxm-accent-hover: #1758a8;
+    --nxm-on-accent: #ffffff;
+    --nxm-success: #1e7a1e;
+    --nxm-danger: #c0392b;
+    --nxm-warning: #b95c00;
+    --nxm-on-success: #ffffff;
+    --nxm-on-warning: #ffffff;
+    --nxm-on-danger: #ffffff;
+    --nxm-accent-text: var(--nxm-accent);
+    --nxm-overlay: rgba(20, 25, 33, 0.45);
+    --nxm-info-bg: #eef6fd;
+    --nxm-info-border: #b8daff;
+    --nxm-success-bg: #effaf2;
+    --nxm-success-border: #b7e4c7;
+    --nxm-warning-bg: #fff8e5;
+    --nxm-warning-border: #ffe3a3;
+    --nxm-danger-bg: #fdf0f0;
+    --nxm-danger-border: #f5c2c7;
 }

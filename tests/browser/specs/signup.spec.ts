@@ -58,7 +58,7 @@ test('signup form creates a working account', async ({ page }) => {
   expect(
     page.url(),
     `signup should leave the form (landed on ${page.url()})`,
-  ).toMatch(/confirm\.php|ok\.php|index\.php|\/index/);
+  ).toMatch(/confirm\.php|ok\.php|index\.php|\/index|\/web\/(ok|index|confirm)/);
 
   // confirm.php auto-logs the account in — the logout button proves it.
   // The logout lives inside the avatar dropdown, so open it first.

@@ -91,7 +91,7 @@ test.describe('expanded search panel', () => {
   }) => {
     await page.goto('/torrents.php', { waitUntil: 'networkidle' });
 
-    const toggle = page.locator('[data-klappe="searchboxmain"]');
+    const toggle = page.locator('[aria-controls="ksearchboxmain"]');
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(toggle).toHaveAttribute('aria-controls', 'ksearchboxmain');
 

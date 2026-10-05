@@ -33,7 +33,7 @@ test.describe('UI-06 index page', () => {
 
     test('shoutbox collapses and persists across reload', async ({ page }) => {
         await page.goto('/index.php', { waitUntil: 'networkidle' });
-        const toggle = page.locator('[data-klappe="shoutbox"]');
+        const toggle = page.locator('a[aria-controls="kshoutbox"]');
         const panel = page.locator('#kshoutbox');
         await expect(toggle).toBeVisible();
         await expect(toggle).toHaveAttribute('aria-expanded', 'true');
@@ -53,7 +53,7 @@ test.describe('UI-06 index page', () => {
     test('mentions badge surfaces while collapsed', async ({ page }) => {
         await page.goto('/index.php', { waitUntil: 'networkidle' });
         const panel = page.locator('#kshoutbox');
-        const toggle = page.locator('[data-klappe="shoutbox"]');
+        const toggle = page.locator('a[aria-controls="kshoutbox"]');
         const badge = page.locator('#shoutbox-mentions');
         if (await panel.isHidden()) {
             await toggle.click();

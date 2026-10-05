@@ -22,3 +22,4 @@
 937ef5d5f9f2061d5b5ac8ca0ee704e34aabb9a3:tests/Integration/Services/PasswordRecoveryConcurrencyTest.php:generic-api-key:33
 # Probe string in LegacyRedisCacheIsolationTest is a cache-key sentinel, not a secret
 60783ec0417c6bf30fc646947652550b264c6958:tests/Integration/Support/LegacyRedisCacheIsolationTest.php:generic-api-key:40
+ca1fece396b500c2df433c1c7f96a3a49a8fd79a:tests/Feature/PrivateAttachmentsTest.php:generic-api-key:123

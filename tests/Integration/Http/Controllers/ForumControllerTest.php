@@ -4,8 +4,14 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\ForumController;
 use App\Models\Forum;
+use App\Models\User;
+use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Mockery;
+use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -30,6 +36,31 @@ final class ForumControllerTest extends TestCase
         // The index/show/destroy methods don't use them, so resolve the
         // controller from the container with real dependencies.
         return app(ForumController::class);
+    }
+
+    public function test_legacy_action_redirects_post_mutations_to_rest_endpoints(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        /** @var CurrentUser&MockInterface $currentUser */
+        $currentUser = Mockery::mock(CurrentUser::class);
+        $currentUser->shouldReceive('get')->andReturn(['id' => $user->id]);
+        app()->instance(CurrentUser::class, $currentUser);
+
+        $controller = app(ForumController::class);
+
+        foreach (['post', 'movetopic', 'deletetopic', 'deletepost', 'setlocked', 'hltopic', 'setsticky'] as $action) {
+            $request = Request::create('/forums', 'POST', ['action' => $action]);
+            app()->instance('request', $request);
+
+            $response = $controller->legacyAction($request);
+
+            $this->assertInstanceOf(RedirectResponse::class, $response);
+            $this->assertSame(308, $response->getStatusCode());
+            $this->assertStringEndsWith('/web/forums/'.$action, $response->getTargetUrl());
+        }
     }
 
     public function test_index_returns_all_forums_ordered_by_sort(): void

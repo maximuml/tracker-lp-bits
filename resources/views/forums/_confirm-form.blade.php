@@ -1,1 +1,1 @@
-<form method="post" action="?action={{ $action }}" class="inline">@csrf<input type="hidden" name="{{ $name }}" value="{{ $value }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nxm-linkbtn altlink">{{ $text }}</button></form>
+<form method="post" action="/web/forums/{{ $action }}" class="inline">@csrf<input type="hidden" name="{{ $name }}" value="{{ $value }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nxm-linkbtn altlink">{{ $text }}</button></form>

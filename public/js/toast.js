@@ -212,7 +212,7 @@
             return;
         }
         try {
-            var url = 'shoutbox_sse.php?type=notifications'
+            var url = '/web/shoutbox_sse?type=notifications'
                 + '&last_pm_id=' + encodeURIComponent(getCursor('pm'))
                 + '&last_shout_id=' + encodeURIComponent(getCursor('shout'))
                 + '&last_comment_id=' + encodeURIComponent(getCursor('comment'))

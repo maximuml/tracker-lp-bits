@@ -257,7 +257,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
         }
 
         $pageSize = 100;
-        $href = "getusertorrentlistajax.php?userid={$targetUserId}&type={$type}&";
+        $href = "/web/getusertorrentlistajax?userid={$targetUserId}&type={$type}&";
 
         $query = $this->buildUserTorrentQuery($targetUserId, $type, $currentUser);
         $count = (int) (clone $query)->count();

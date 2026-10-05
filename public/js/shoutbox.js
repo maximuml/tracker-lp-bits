@@ -318,7 +318,7 @@ function shoutScheduleReconnect() {
 
 function shoutConnect() {
     if (!shoutIsLeader || document.hidden) { return; }
-    var url = 'shoutbox_sse.php?type=' + encodeURIComponent(shoutType) + '&last_id=' + encodeURIComponent(shoutLastId);
+    var url = '/web/shoutbox_sse?type=' + encodeURIComponent(shoutType) + '&last_id=' + encodeURIComponent(shoutLastId);
     try {
         shoutboxEventSource = new EventSource(url);
         shoutboxEventSource.onopen = function () { shoutSseFails = 0; };

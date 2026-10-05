@@ -28,7 +28,7 @@ final class CronTokenTest extends TestCase
     public function test_cron_allows_loopback_without_token(): void
     {
         // Test requests come from 127.0.0.1 by default
-        $response = $this->get('/cron');
+        $response = $this->get('/web/cron');
 
         // The cron endpoint runs cleanup — it may return any 200-level
         // response. The key assertion is that it is NOT 403.
@@ -37,7 +37,7 @@ final class CronTokenTest extends TestCase
 
     public function test_cron_blocks_non_loopback_without_token(): void
     {
-        $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/cron');
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/web/cron');
 
         $response->assertStatus(403);
     }
@@ -46,7 +46,7 @@ final class CronTokenTest extends TestCase
     {
         config(['app.cron_token' => 'secret-token-value']);
 
-        $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/cron?token=wrong-token');
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/web/cron?token=wrong-token');
 
         $response->assertStatus(403);
     }
@@ -55,7 +55,7 @@ final class CronTokenTest extends TestCase
     {
         config(['app.cron_token' => 'secret-token-value']);
 
-        $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/cron?token=secret-token-value');
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/web/cron?token=secret-token-value');
 
         $this->assertNotSame(403, $response->status(), 'Request with valid token should not be blocked.');
     }
@@ -64,7 +64,7 @@ final class CronTokenTest extends TestCase
     {
         config(['app.cron_token' => '']);
 
-        $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/cron?token=anything');
+        $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.1'])->get('/web/cron?token=anything');
 
         $response->assertStatus(403);
     }

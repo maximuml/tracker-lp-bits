@@ -482,10 +482,10 @@ class UtilityController extends LegacyController
         template="{$url}/torrentrss.php?search={searchTerms}&amp;rows={count?}&amp;startindex={startIndex?}" />
     <Url type="application/opensearchdescription+xml"
         rel="self"
-        template="{$url}/opensearch.php" />
+        template="{$url}/web/opensearch" />
     <Url type="application/x-suggestions+json"
         rel="suggestions"
-        template="{$url}/searchsuggest.php?q={searchTerms}" />
+        template="{$url}/web/searchsuggest?q={searchTerms}" />
     <Contact>{$siteEmail}</Contact>
     <Tags>Torrents {$projectName}</Tags>
     <LongName>{$siteNameEsc} Torrents Search</LongName>

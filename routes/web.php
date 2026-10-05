@@ -15,24 +15,33 @@ use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\AuthenticateController;
 use App\Http\Controllers\CspReportController;
+use App\Http\Controllers\FaqController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\InfoController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\MyController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\RulesController;
+use App\Http\Controllers\ShoutboxController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\SystemMaintenanceController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ToolController;
+use App\Http\Controllers\TorrentAjaxController;
+use App\Http\Controllers\TorrentBookmarkController;
 use App\Http\Controllers\TorrentController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
+use App\Http\Controllers\TorrentRssController;
 use App\Http\Controllers\TorrentUploadController;
 use App\Http\Controllers\UsercpController;
 use App\Http\Controllers\UserDetailController;
+use App\Http\Controllers\UtilityController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -218,6 +227,34 @@ Route::group(['prefix' => 'web', 'middleware' => ['throttle:legacy']], function 
     Route::post('complains/reply', [SupportController::class, 'complainReplyPost']);
     Route::post('complains/answered', [SupportController::class, 'complainAnsweredPost']);
     Route::post('complains/unanswered', [SupportController::class, 'complainUnansweredPost']);
+});
+
+// Canonical GET URIs for the pages routes/legacy/public.php served at the
+// site root — GET /{name}[.php] now 301-redirects here with the same query
+// string. Guest-facing like the legacy group (per-route gates unchanged);
+// POST twins keep their own dispatcher/308 shims.
+Route::group(['prefix' => 'web', 'middleware' => ['throttle:legacy']], function () {
+    Route::get('aboutnexus', [RulesController::class, 'aboutNexus'])->name('aboutnexus.legacy');
+    Route::get('rules', [RulesController::class, 'rules'])->name('rules.legacy');
+    Route::get('useragreement', [RulesController::class, 'userAgreement'])->name('useragreement.legacy');
+    Route::get('faq', [FaqController::class, 'faq'])->name('faq.legacy');
+    Route::get('donate', [InfoController::class, 'donate'])->name('donate.legacy');
+    Route::get('getusertorrentlistajax', [TorrentAjaxController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
+    Route::get('searchsuggest', [TorrentAjaxController::class, 'searchSuggest'])->name('searchsuggest.legacy');
+    Route::get('image', [UtilityController::class, 'image'])->name('image.legacy');
+    Route::get('shoutbox_sse', [ShoutboxController::class, 'shoutboxSse'])->name('shoutbox_sse.legacy');
+    Route::get('torrentrss', [TorrentRssController::class, 'torrentrss'])->name('torrentrss.legacy');
+    Route::get('tags', [UtilityController::class, 'tags'])->name('tags.legacy');
+    Route::get('suggest', [UtilityController::class, 'suggest'])->name('suggest.legacy');
+    Route::get('opensearch', [UtilityController::class, 'opensearch'])->name('opensearch.legacy');
+    Route::get('confirmemail/{path?}', [UtilityController::class, 'confirmemail'])->where('path', '.*')->name('confirmemail.legacy');
+    Route::get('cron', [SystemMaintenanceController::class, 'cron'])->middleware('cron.token')->name('cron.legacy');
+    Route::get('ok', [UtilityController::class, 'ok'])->name('ok.legacy');
+    Route::get('complains', [SupportController::class, 'complains'])->name('complains.legacy');
+    Route::get('shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['auth.nexus:nexus-web', 'throttle:shoutbox'])->name('shoutbox.legacy');
+    Route::get('bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');
+    Route::get('viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
+    Route::get('viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->middleware('auth.nexus:nexus-web')->name('viewpeerlist.legacy');
 });
 
 // Passkey login v2 — fixed route with HMAC-SHA256, nonce replay protection,

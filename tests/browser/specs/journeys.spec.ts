@@ -45,10 +45,11 @@ test('upload → download → announce as a client → scrape sees the seeder', 
   await page.selectOption('#browsecat', category);
 
   await Promise.all([
-    page.waitForURL(/\/details(\.php)?\?id=\d+&uploaded=1/),
+    page.waitForURL(/\/web\/details\/\d+\?uploaded=1/),
     page.click('#compose [type="submit"]'),
   ]);
-  const torrentId = new URL(page.url()).searchParams.get('id');
+  const torrentId = /\/web\/details\/(\d+)/.exec(new URL(page.url()).pathname)?.[1] ?? null;
+  expect(torrentId, 'upload redirect to expose the torrent id').not.toBeNull();
   await expect(page.locator('body')).toContainText(name);
   await expectCleanPage(page, issues, 'details after upload');
 

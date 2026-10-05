@@ -15,11 +15,6 @@
 
     var form = container.getAttribute('data-form');
     var text = container.getAttribute('data-text');
-    var textareaId = text;
-    var editTbodyId = container.getAttribute('data-edit-id');
-    var previewTbodyId = container.getAttribute('data-preview-id');
-    var btnEditId = container.getAttribute('data-btn-edit-id');
-    var btnPreviewId = container.getAttribute('data-btn-preview-id');
 
     window.b_open = 0;
     window.i_open = 0;
@@ -220,22 +215,4 @@
         }
     };
 
-    window.textBBCodePreview = function () {
-        var poststr = encodeURIComponent(document.getElementById(textareaId).value);
-        ajax.postText('preview.php', 'body=' + poststr).then(function (result) {
-            document.getElementById(editTbodyId).style.display = 'none';
-            var previewEl = document.getElementById(previewTbodyId);
-            previewEl.innerHTML = result;
-            previewEl.style.display = '';
-            document.getElementById(btnPreviewId).style.display = 'none';
-            document.getElementById(btnEditId).style.display = '';
-        });
-    };
-
-    window.textBBCodeEdit = function () {
-        document.getElementById(editTbodyId).style.display = '';
-        document.getElementById(previewTbodyId).style.display = 'none';
-        document.getElementById(btnPreviewId).style.display = '';
-        document.getElementById(btnEditId).style.display = 'none';
-    };
 })();

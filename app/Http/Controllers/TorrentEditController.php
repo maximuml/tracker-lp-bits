@@ -25,7 +25,6 @@ use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyYesNo;
 use App\Support\Locale;
-use App\View\Components\BbcodeEditor;
 use App\ViewModels\Torrent\TorrentEditPickViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -157,7 +156,7 @@ class TorrentEditController extends Controller
             'anonymousChecked' => LegacyYesNo::isYes($row['anonymous'] ?? null),
             'pick' => $pick,
             'showDeleteForm' => $showDeleteForm,
-            'bbcodeEditorHtml' => SafeHtml::fromTrustedHtml(BbcodeEditor::html(['form' => 'edittorrent', 'text' => 'descr', 'content' => (string) ($row['descr'] ?? ''), 'withPreview' => true])),
+            'descrContent' => (string) ($row['descr'] ?? ''),
             'technicalInfoEnabled' => SiteConfig::current()->main->enableTechnicalInfo(),
             'modeClass' => 'mode_'.$sectionmode,
         ]);

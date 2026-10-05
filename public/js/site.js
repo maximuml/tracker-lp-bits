@@ -520,10 +520,6 @@ document.addEventListener('click', function (e) {
             tag_list(action.getAttribute('data-prompt1'), action.getAttribute('data-prompt2'));
         } else if (name === 'winop' && typeof winop === 'function') {
             winop();
-        } else if (name === 'preview' && typeof textBBCodePreview === 'function') {
-            textBBCodePreview();
-        } else if (name === 'edit' && typeof textBBCodeEdit === 'function') {
-            textBBCodeEdit();
         } else {
             handled = false;
         }

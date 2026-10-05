@@ -27,7 +27,6 @@ use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
-use App\View\Components\BbcodeEditor;
 use App\ViewModels\Offer\OfferAllowedBadge;
 use App\ViewModels\Offer\OfferCategoryOption;
 use App\ViewModels\Offer\OfferCommentCell;
@@ -150,7 +149,7 @@ final class OfferPageService
 
         return [
             'typeOptions' => $typeOptions,
-            'bbcodeEditor' => SafeHtml::fromTrustedHtml(BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'withPreview' => true])),
+            'bodyContent' => '',
         ];
     }
 
@@ -268,7 +267,7 @@ final class OfferPageService
             'title' => htmlspecialchars(trim((string) ($num['name'] ?? ''))),
             'catId' => $id2,
             'catOptions' => $catOptions,
-            'bbcodeEditor' => SafeHtml::fromTrustedHtml(BbcodeEditor::html(['form' => 'compose', 'text' => 'body', 'content' => $body, 'withPreview' => true])),
+            'bodyContent' => $body,
         ];
     }
 

@@ -35,19 +35,19 @@ final class ForumHttpTest extends TestCase
 
     public function test_forums_post_action_redirects_unauthenticated_user(): void
     {
-        $this->post('/forums', ['action' => 'post', 'type' => 'new', 'id' => 1, 'body' => 'Test'])
+        $this->post('/web/forums/post', ['type' => 'new', 'id' => 1, 'body' => 'Test'])
             ->assertRedirect();
     }
 
     public function test_forums_movetopic_redirects_unauthenticated_user(): void
     {
-        $this->post('/forums', ['action' => 'movetopic', 'forumid' => 1, 'topicid' => 1])
+        $this->post('/web/forums/movetopic', ['forumid' => 1, 'topicid' => 1])
             ->assertRedirect();
     }
 
     public function test_forums_setlocked_redirects_unauthenticated_user(): void
     {
-        $this->post('/forums', ['action' => 'setlocked', 'topicid' => 1, 'locked' => 1])
+        $this->post('/web/forums/setlocked', ['topicid' => 1, 'locked' => 1])
             ->assertRedirect();
     }
 
@@ -58,8 +58,7 @@ final class ForumHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/forums', [
-                'action' => 'post',
+            ->post('/web/forums/post', [
                 'type' => 'new',
                 'id' => 1,
                 'subject' => 'Test',
@@ -73,8 +72,7 @@ final class ForumHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/forums', [
-                'action' => 'post',
+            ->post('/web/forums/post', [
                 'id' => 1,
                 'body' => 'Test',
                 // type missing
@@ -87,8 +85,7 @@ final class ForumHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/forums', [
-                'action' => 'movetopic',
+            ->post('/web/forums/movetopic', [
                 'topicid' => 1,
                 // forumid missing
             ])
@@ -100,8 +97,7 @@ final class ForumHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/forums', [
-                'action' => 'setlocked',
+            ->post('/web/forums/setlocked', [
                 'locked' => 1,
                 // topicid missing
             ])
@@ -127,8 +123,7 @@ final class ForumHttpTest extends TestCase
         $topic = Topic::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/forums', [
-                'action' => 'setlocked',
+            ->post('/web/forums/setlocked', [
                 'topicid' => (string) $topic->id,
                 'locked' => 1,
             ])
@@ -141,8 +136,7 @@ final class ForumHttpTest extends TestCase
         $topic = Topic::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/forums', [
-                'action' => 'setsticky',
+            ->post('/web/forums/setsticky', [
                 'topicid' => (string) $topic->id,
                 'sticky' => 'yes',
             ])
@@ -156,8 +150,7 @@ final class ForumHttpTest extends TestCase
         $topicId = $topic->id;
 
         $this->withNexusCookie($user)
-            ->post('/forums', [
-                'action' => 'deletetopic',
+            ->post('/web/forums/deletetopic', [
                 'topicid' => (string) $topic->id,
                 'sure' => 1,
             ]);
@@ -172,8 +165,7 @@ final class ForumHttpTest extends TestCase
         $post = Post::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/forums', [
-                'action' => 'deletepost',
+            ->post('/web/forums/deletepost', [
                 'postid' => (string) $post->id,
                 'sure' => 1,
             ])

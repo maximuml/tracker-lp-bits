@@ -1,0 +1,166 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Offer;
+use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Attributes\TestCategory;
+use Tests\TestCase;
+
+/**
+ * The /ajax dispatcher 308-redirects actions that migrated to REST
+ * endpoints (308 preserves method + body, so legacy `{action, params}`
+ * POSTs replay unchanged). These tests pin the redirect targets and the
+ * {ret,msg,data} wire format on the new endpoints.
+ */
+#[TestCategory(TestCategory::HTTP_FEATURE)]
+final class AjaxRestEndpointsTest extends TestCase
+{
+    use DatabaseTransactions;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['app.debug' => false]);
+    }
+
+    private function csrfToken(): string
+    {
+        return Str::random(40);
+    }
+
+    private function asNexusUser(User $user): static
+    {
+        $token = $this->csrfToken();
+
+        return $this->withNexusCookie($user)
+            ->withSession(['_token' => $token])
+            ->withHeader('X-CSRF-TOKEN', $token);
+    }
+
+    /** @return array<string, string> */
+    public static function redirectedActions(): array
+    {
+        return [
+            'attendanceRetroactive' => ['attendanceRetroactive', '/web/attendance/retroactive'],
+            'removeUserLeechWarn' => ['removeUserLeechWarn', '/web/users/leech-warn/remove'],
+            'getOffer' => ['getOffer', '/web/offers/show'],
+            'approvalModal' => ['approvalModal', '/web/torrents/approval-modal'],
+            'approval' => ['approval', '/web/torrent-approval'],
+            'removeHitAndRun' => ['removeHitAndRun', '/web/hit-and-runs/remove'],
+            'consumeBenefit' => ['consumeBenefit', '/web/benefits/consume'],
+            'claimTask' => ['claimTask', '/web/tasks/claim'],
+            'addToken' => ['addToken', '/web/token/add'],
+            'removeToken' => ['removeToken', '/web/token/del'],
+            'getToastNotifications' => ['getToastNotifications', '/web/notifications/feed'],
+        ];
+    }
+
+    /**
+     * Every migrated action 308-redirects to its REST URI.
+     *
+     * @dataProvider redirectedActions
+     */
+    #[DataProvider('redirectedActions')]
+    public function test_ajax_action_308_redirects_to_rest_uri(string $action, string $uri): void
+    {
+        $user = User::factory()->create();
+        $token = $this->csrfToken();
+        $response = $this->asNexusUser($user)
+            ->post('/ajax', ['action' => $action, 'params' => [], '_token' => $token]);
+
+        $response->assertStatus(308);
+        $response->assertRedirect($uri);
+    }
+
+    /**
+     * Redirected `{action, params}` envelopes still work end-to-end: the
+     * client re-POSTs the same body to the target, where the FormRequest
+     * flattens `params` — legacy callers get a normal {ret,msg,data} reply.
+     */
+    public function test_redirected_envelope_reaches_endpoint_and_returns_envelope(): void
+    {
+        $user = User::factory()->create();
+        $token = $this->csrfToken();
+
+        // getOffer needs a real offer row; use the read-only offer flow.
+        $offer = Offer::query()->create([
+            'userid' => $user->id,
+            'name' => 'test-offer',
+            'descr' => 'desc',
+        ]);
+
+        $body = ['action' => 'getOffer', 'params' => ['id' => $offer->id], '_token' => $token];
+
+        $redirect = $this->asNexusUser($user)->post('/ajax', $body);
+        $redirect->assertStatus(308);
+
+        // A 308-compliant client re-POSTs the identical body to Location.
+        // (Laravel's followRedirects() always GETs, so we replay it
+        // ourselves — exactly what fetch/XHR do on 308.)
+        $response = $this->asNexusUser($user)
+            ->post($redirect->headers->get('Location'), $body);
+
+        $response->assertOk();
+        $response->assertJsonPath('ret', 0);
+        $response->assertJsonStructure(['ret', 'msg', 'data']);
+    }
+
+    public function test_offer_show_direct_endpoint_returns_offer(): void
+    {
+        $user = User::factory()->create();
+        $offer = Offer::query()->create([
+            'userid' => $user->id,
+            'name' => 'test-offer-direct',
+            'descr' => 'desc',
+        ]);
+
+        $response = $this->asNexusUser($user)
+            ->post('/web/offers/show', ['id' => $offer->id, '_token' => $this->csrfToken()]);
+
+        $response->assertOk();
+        $response->assertJsonPath('ret', 0);
+        $body = $response->json();
+        $this->assertSame($offer->id, $body['data']['id'] ?? null);
+    }
+
+    public function test_toast_feed_direct_endpoint_returns_cursors(): void
+    {
+        $user = User::factory()->create();
+        $response = $this->asNexusUser($user)
+            ->post('/web/notifications/feed', ['init' => true, '_token' => $this->csrfToken()]);
+
+        $response->assertOk();
+        $response->assertJsonPath('ret', 0);
+        $body = $response->json();
+        $this->assertArrayHasKey('cursors', $body['data'] ?? []);
+    }
+
+    public function test_offer_show_validation_failure_uses_envelope(): void
+    {
+        $user = User::factory()->create();
+        $response = $this->asNexusUser($user)
+            ->post('/web/offers/show', ['_token' => $this->csrfToken()]);
+
+        // Validation failures stay in the legacy {ret!=0,msg} wire format
+        // — not the default 422 shape — so old callers keep working.
+        $response->assertOk();
+        $body = $response->json();
+        $this->assertNotEquals(0, $body['ret']);
+        $this->assertNotEmpty($body['msg']);
+    }
+
+    public function test_endpoints_require_login(): void
+    {
+        $token = $this->csrfToken();
+        $response = $this->withSession(['_token' => $token])
+            ->withHeader('X-CSRF-TOKEN', $token)
+            ->post('/web/offers/show', ['id' => 1, '_token' => $token]);
+
+        // auth.nexus redirects guests away — never a 200 with ret envelope.
+        $response->assertRedirect();
+    }
+}

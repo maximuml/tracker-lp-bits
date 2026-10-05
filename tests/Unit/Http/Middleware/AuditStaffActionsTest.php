@@ -80,6 +80,20 @@ final class AuditStaffActionsTest extends TestCase
         $this->assertTrue(AuditStaffActions::isAuditablePath('ajax', 'approval'));
     }
 
+    public function test_rest_ajax_endpoints_keep_ajax_audit_semantics(): void
+    {
+        // Self-activity endpoints mirror the old AJAX_SKIP_ACTIONS entries.
+        foreach (['web/notifications/feed', 'web/offers/show', 'web/torrents/approval-modal',
+            'web/benefits/consume', 'web/attendance/retroactive'] as $path) {
+            $this->assertFalse(AuditStaffActions::isAuditablePath($path), $path);
+        }
+        // Mutations that were audited via /ajax stay audited under /web/*.
+        foreach (['web/torrent-approval', 'web/token/add', 'web/token/del',
+            'web/users/leech-warn/remove', 'web/hit-and-runs/remove', 'web/tasks/claim'] as $path) {
+            $this->assertTrue(AuditStaffActions::isAuditablePath($path), $path);
+        }
+    }
+
     public function test_get_requests_never_audited(): void
     {
         $response = $this->handle(

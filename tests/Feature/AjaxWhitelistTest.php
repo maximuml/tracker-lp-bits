@@ -31,13 +31,14 @@ final class AjaxWhitelistTest extends TestCase
 
     public function test_whitelisted_action_passes_the_gate(): void
     {
-        // getToastNotifications is in the whitelist and requires login
+        // getPasskeyList is in the whitelist, requires login, and is not
+        // one of the actions migrated to a REST endpoint (those 308).
         $user = User::factory()->create();
         $token = $this->csrfToken();
         $response = $this->withNexusCookie($user)
             ->withSession(['_token' => $token])
             ->withHeader('X-CSRF-TOKEN', $token)
-            ->post('/ajax', ['action' => 'getToastNotifications', '_token' => $token]);
+            ->post('/ajax', ['action' => 'getPasskeyList', '_token' => $token]);
 
         // Should not be a "hacking attempt" rejection (which returns 200
         // with ret=1). The key assertion is that the action is dispatched,
@@ -46,7 +47,7 @@ final class AjaxWhitelistTest extends TestCase
         $response->assertJsonStructure(['ret']);
         // ret=0 means success, ret=1 means error — but NOT "Invalid action"
         $body = $response->json();
-        $this->assertNotEquals('Invalid action: getToastNotifications', $body['msg'] ?? '', 'Whitelisted action should not be rejected.');
+        $this->assertNotEquals('Invalid action: getPasskeyList', $body['msg'] ?? '', 'Whitelisted action should not be rejected.');
     }
 
     public function test_non_whitelisted_action_is_rejected(): void

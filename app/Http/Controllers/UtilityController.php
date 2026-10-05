@@ -26,6 +26,7 @@ use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
+use App\Support\LegacyAjaxRedirects;
 use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
@@ -111,6 +112,14 @@ class UtilityController extends LegacyController
         $passkeyActions = ['getPasskeyGetArgs', 'processPasskeyGet'];
         if (! in_array($action, $passkeyActions, true)) {
             LegacyAuth::requireLoginFromContext();
+        }
+
+        // Migrated actions have their own REST endpoints — 308 redirects
+        // replay method + body, so legacy {action, params} POSTs land there
+        // byte-identically and the target FormRequest flattens the envelope.
+        $redirectUri = LegacyAjaxRedirects::uriFor($action);
+        if ($redirectUri !== null) {
+            return redirect()->to($redirectUri, 308);
         }
 
         if (! in_array($action, AjaxService::ALLOWED_ACTIONS, true)) {

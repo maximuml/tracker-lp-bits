@@ -111,7 +111,10 @@ final class AuditStaffActionsTest extends TestCase
             'web/offers/create', 'web/offers/allow', 'web/offers/finish',
             'web/offers/delete', 'web/offers/edit',
             'web/mybonus/exchange',
-            'web/torrents/flush', 'web/invites/send'] as $path) {
+            'web/torrents/flush', 'web/invites/send',
+            'web/torrents/thanks', 'web/bonus/magic',
+            'web/bonus/freeleech', 'web/user/attendance',
+            'web/reports/create', 'web/attachments/upload'] as $path) {
             $this->assertFalse(AuditStaffActions::isAuditablePath($path), $path);
         }
     }

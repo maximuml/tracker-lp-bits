@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ThanksTorrentRequest;
 use App\Services\TorrentBookmarkService;
 use App\Support\CurrentUser;
 use App\Support\LegacyResponse;
@@ -48,7 +49,16 @@ class TorrentBookmarkController extends LegacyController
         return $this->bookmark($request);
     }
 
-    public function thanks(Request $request): Response|RedirectResponse
+    public function thanks(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/torrents/thanks'.$suffix, 308);
+    }
+
+    public function thanksSubmit(ThanksTorrentRequest $request): Response|RedirectResponse
     {
         if ($this->currentUser->get() === null) {
             return redirect('/thanks.php'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));

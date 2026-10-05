@@ -47,7 +47,15 @@ final class AuditStaffActions
         'web/offers/create', 'web/offers/allow', 'web/offers/finish',
         'web/offers/delete', 'web/offers/edit',
         'web/mybonus/exchange',
-        'web/torrents/flush', 'web/invites/send',
+        'web/torrents/flush',
+        // Renamed legacy user-interaction endpoints (chunk 4) — same
+        // skip policy as their legacy prefixes.
+        'web/torrents/thanks',
+        'web/bonus/magic',
+        'web/bonus/freeleech',
+        'web/user/attendance',
+        'web/reports/create',
+        'web/attachments/upload', 'web/invites/send',
     ];
 
     /** First-segment prefixes where every sub-path is user activity. */

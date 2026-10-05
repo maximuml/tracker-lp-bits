@@ -83,6 +83,16 @@ final class DestructiveActionsRedirectTest extends TestCase
             ['/adduser', '/web/admin/users/add'],
             ['/bitbucketlog', '/web/admin/bitbucket-log'],
             ['/donated', '/web/info/donated'],
+            ['/thanks', '/web/torrents/thanks'],
+            ['/downloadnotice', '/web/torrents/download-notice'],
+            ['/magic', '/web/bonus/magic'],
+            ['/freeleech', '/web/bonus/freeleech'],
+            ['/attendance', '/web/user/attendance'],
+            ['/report', '/web/reports/create'],
+            ['/getrss', '/web/rss/generate'],
+            ['/preview', '/web/preview'],
+            ['/notifications', '/web/notifications/mark-read'],
+            ['/attachment', '/web/attachments/upload'],
         ] as [$uri, $target]) {
             $response = $this->withNexusCookie($user)->post($uri, ['id' => '1']);
             $response->assertStatus(308);

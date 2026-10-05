@@ -46,7 +46,7 @@
 </div>
 @if (! empty($torrentid))
 <div class="p-[10pt]">
-<form action="?" method="post"><p>{{ __('legacy/downloadnotice.text_for_more_information_read')}}<a class="faqlink" href="rules.php" target="_blank">{{ __('legacy/downloadnotice.text_rules')}}</a>{{ __('legacy/downloadnotice.text_and')}}<a class="faqlink" href="faq.php" target="_blank">{{ __('legacy/downloadnotice.text_faq')}}</a><br />
+<form action="/web/torrents/download-notice" method="post">@csrf<p>{{ __('legacy/downloadnotice.text_for_more_information_read')}}<a class="faqlink" href="rules.php" target="_blank">{{ __('legacy/downloadnotice.text_rules')}}</a>{{ __('legacy/downloadnotice.text_and')}}<a class="faqlink" href="faq.php" target="_blank">{{ __('legacy/downloadnotice.text_faq')}}</a><br />
 <input type="hidden" name="id" value="{{ $torrentid }}" />
 <input type="hidden" name="type" value="{{ (string) $type }}" />
 <input type="checkbox" name="hidenotice" id="hidenotice" value="1"@if (! empty($forcecheck)) disabled="disabled"@else checked="checked"@endif /><label for="hidenotice">{{ $noticenexttime }}</label>

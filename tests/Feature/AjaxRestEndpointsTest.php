@@ -61,6 +61,12 @@ final class AjaxRestEndpointsTest extends TestCase
             'shoutboxEdit' => ['shoutboxEdit', '/web/shoutbox/edit'],
             'shoutboxDelete' => ['shoutboxDelete', '/web/shoutbox/delete'],
             'shoutboxReact' => ['shoutboxReact', '/web/shoutbox/react'],
+            'getPasskeyCreateArgs' => ['getPasskeyCreateArgs', '/web/passkey/create-args'],
+            'processPasskeyCreate' => ['processPasskeyCreate', '/web/passkey/create'],
+            'getPasskeyList' => ['getPasskeyList', '/web/passkey/list'],
+            'deletePasskey' => ['deletePasskey', '/web/passkey/delete'],
+            'getPasskeyGetArgs' => ['getPasskeyGetArgs', '/web/passkey/get-args'],
+            'processPasskeyGet' => ['processPasskeyGet', '/web/passkey/get'],
         ];
     }
 
@@ -239,6 +245,31 @@ final class AjaxRestEndpointsTest extends TestCase
             ->post('/web/offers/show', ['id' => 1, '_token' => $token]);
 
         // auth.nexus redirects guests away — never a 200 with ret envelope.
+        $response->assertRedirect();
+    }
+
+    public function test_guest_passkey_endpoints_reachable_without_login(): void
+    {
+        // The login page calls these before the user has a session —
+        // they intentionally live outside auth.nexus. Both return the
+        // {ret,msg,data} envelope (get-args needs a challenge backend,
+        // so ret!=0 is acceptable — 200 is the contract).
+        $token = $this->csrfToken();
+        $response = $this->withSession(['_token' => $token])
+            ->withHeader('X-CSRF-TOKEN', $token)
+            ->post('/web/passkey/get-args', ['_token' => $token]);
+
+        $response->assertOk();
+        $this->assertIsInt($response->json('ret'));
+    }
+
+    public function test_authed_passkey_endpoints_redirect_guests(): void
+    {
+        $token = $this->csrfToken();
+        $response = $this->withSession(['_token' => $token])
+            ->withHeader('X-CSRF-TOKEN', $token)
+            ->post('/web/passkey/list', ['_token' => $token]);
+
         $response->assertRedirect();
     }
 }

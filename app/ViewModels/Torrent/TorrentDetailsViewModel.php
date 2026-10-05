@@ -28,7 +28,6 @@ final class TorrentDetailsViewModel
         public readonly HotMeterRow $hotMeter,
         public readonly PeersRow $peers,
         public readonly ?DenyBanner $denyBanner,
-        public readonly MagicSection $magic,
         public readonly string $uploadTimePrefix,
         public readonly SafeHtml $uploadTime,
         public readonly string $showOrHideTitle,

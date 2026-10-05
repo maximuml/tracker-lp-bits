@@ -30,8 +30,6 @@ use App\Support\UserDisplay;
  */
 final class TorrentDetailsViewFactory
 {
-    private const MAGIC_VISIBLE_GIVERS = 6;
-
     public function __construct(
         private readonly TorrentModerationRepository $moderationRepository,
         private readonly SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
@@ -41,8 +39,6 @@ final class TorrentDetailsViewFactory
      * @param  array<int|string, mixed>  $row
      * @param  array<int|string, mixed>  $currentUser
      * @param  array<string, mixed>  $requestFlags
-     * @param  array<int|string, mixed>  $magicInfo
-     * @param  array<int|string, mixed>  $bonusOptions
      */
     public function build(
         int $id,
@@ -51,8 +47,6 @@ final class TorrentDetailsViewFactory
         ?TorrentOperationLog $denyLog,
         bool $hasBuy,
         array $requestFlags,
-        array $magicInfo,
-        array $bonusOptions,
     ): TorrentDetailsViewModel {
         $isOwner = (int) ($currentUser['id'] ?? 0) === (int) ($row['owner'] ?? 0);
         $owned = Permission::can(PermissionEnum::TORRENT_MANAGE) || $isOwner;
@@ -67,7 +61,6 @@ final class TorrentDetailsViewFactory
             hotMeter: $this->buildHotMeter($id, $row),
             peers: new PeersRow($id, (int) $row['seeders'], (int) $row['leechers']),
             denyBanner: $this->buildDenyBanner($row, $denyLog),
-            magic: $this->buildMagic($id, $currentUser, $isOwner, $magicInfo, $bonusOptions),
             uploadTimePrefix: ($currentUser['timetype'] ?? '') !== 'timealive'
                 ? (string) __('legacy/details.text_at')
                 : (string) __('legacy/details.text_blank'),
@@ -306,90 +299,11 @@ JS, \json_encode($approvalTitle)), 'footer', false);
     }
 
     /**
-     * @param  array<int|string, mixed>  $currentUser
-     * @param  array<int|string, mixed>  $magicInfo
-     * @param  array<int|string, mixed>  $bonusOptions
-     */
-    private function buildMagic(int $id, array $currentUser, bool $isOwner, array $magicInfo, array $bonusOptions): MagicSection
-    {
-        $bonusHas = (float) ($currentUser['seedbonus'] ?? 0);
-        $lowBonus = ! $isOwner && (int) $bonusHas < (int) ($bonusOptions[0] ?? 0);
-
-        $options = [];
-        if (! $isOwner && ! $lowBonus) {
-            foreach ($bonusOptions as $eachTemp) {
-                $eachTemp = (int) $eachTemp;
-                if ($eachTemp > 0 && $eachTemp <= $bonusHas) {
-                    $options[] = $eachTemp;
-                }
-            }
-        }
-
-        $disabledValue = null;
-        if ($lowBonus) {
-            $disabledValue = (string) __('legacy/details.magic_have_no_enough_bonus_value');
-        } elseif ((int) $magicInfo['whether_have_give_value'] !== 0) {
-            $disabledValue = str_replace(
-                'Number',
-                (string) $magicInfo['add_value'],
-                (string) __('legacy/details.magic_value_number')
-            );
-        }
-
-        $giverIds = [];
-        foreach ($magicInfo['givers'] as $giver) {
-            $giverIds[] = (int) ($giver->userid ?? 0);
-        }
-        UserDisplay::preload($giverIds);
-        $givers = [];
-        foreach ($magicInfo['givers'] as $giver) {
-            $givers[] = UserDisplay::username((int) ($giver->userid ?? 0), false, true, true, false, false, true);
-        }
-
-        [$haveGotPre, $haveGotPost] = self::splitNumberPlaceholder((string) __('legacy/details.magic_haveGotBonus'));
-        [$sumGivePre, $sumGivePost] = self::splitNumberPlaceholder((string) __('legacy/details.magic_sum_user_give_number'));
-
-        return new MagicSection(
-            torrentId: $id,
-            options: $options,
-            disabledValue: $disabledValue,
-            givenLabel: (string) __('legacy/details.span_description_have_given'),
-            sumValue: (int) $magicInfo['sum_value'],
-            countUserNumber: (int) $magicInfo['count_user_number'],
-            visibleGivers: array_slice($givers, 0, self::MAGIC_VISIBLE_GIVERS),
-            hiddenGivers: array_slice($givers, self::MAGIC_VISIBLE_GIVERS),
-            currentUser: UserDisplay::username((int) ($currentUser['id'] ?? 0), false, true, true, false, false, true),
-            newestRecordText: (string) __('legacy/details.magic_newest_record'),
-            sumGivePre: $sumGivePre,
-            sumGivePost: $sumGivePost,
-            showAllText: (string) __('legacy/details.magic_show_all_description'),
-            haveGotBonusPre: $haveGotPre,
-            haveGotBonusPost: $haveGotPost,
-        );
-    }
-
-    /**
-     * Legacy lang values may carry `&nbsp;`-style entities; decode to
      * Legacy lang values may carry `&nbsp;`-style entities; decode to
      * plain text so attribute escaping renders them correctly.
      */
     private static function plainTitle(string $key): string
     {
         return html_entity_decode((string) __($key), ENT_QUOTES | ENT_HTML401, 'UTF-8');
-    }
-
-    /**
-     * Split a `Number`-placeholder lang string into pre/post parts so
-     * the placeholder span can live in Blade.
-     *
-     * @return array{0: string, 1: string}
-     */
-    private static function splitNumberPlaceholder(string $value): array
-    {
-        $pos = strpos($value, 'Number');
-
-        return $pos === false
-            ? [$value, '']
-            : [substr($value, 0, $pos), substr($value, $pos + 6)];
     }
 }

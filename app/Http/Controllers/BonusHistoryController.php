@@ -7,20 +7,15 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
-use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\MagicRewardRequest;
 use App\Models\BonusLogs;
-use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\BonusCalculationRepository;
-use App\Repositories\BonusRepository;
-use App\Repositories\RewardRepository;
-use App\Repositories\TorrentDetailRepository;
 use App\Repositories\UserListingRepository;
+use App\Services\MagicRewardService;
 use App\Support\Api;
 use App\Support\AssetAppender;
-use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -33,6 +28,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -40,10 +36,9 @@ class BonusHistoryController extends LegacyController
 {
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(private readonly TorrentDetailRepository $torrentDetailRepository, private readonly RewardRepository $rewardRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserListingRepository $userListingRepository, private readonly UserRepositoryInterface $userRepository,
+    public function __construct(private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserListingRepository $userListingRepository, private readonly UserRepositoryInterface $userRepository,
         BonusCalculationRepository $bonusCalculationRepository,
         private readonly CurrentUser $currentUser,
-        private readonly BonusRepository $bonusRepository,
     ) {
         $this->bonusCalculationRepository = $bonusCalculationRepository;
     }
@@ -278,53 +273,23 @@ JS;
 
     }
 
-    public function magic(MagicRewardRequest $request): JsonResponse|Response
+    public function magic(MagicRewardRequest $request, MagicRewardService $magicRewardService): JsonResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $userId = (int) ($curUser['id'] ?? 0);
         $validated = $request->validated();
         $torrentId = (int) $validated['id'];
         $value = (int) abs((float) $validated['value']);
 
-        if (! in_array($value, Setting::getBonusRewardOptions())) {
-            return response()->json(Api::failWithContext('Invalid value.', $validated));
-        }
-        if ($value > (float) ($curUser['seedbonus'] ?? 0)) {
-            return response()->json(Api::failWithContext('You do not have such bonus!', $validated));
-        }
-
-        $torrentOwner = $this->torrentRepository->getOwnerId((int) $torrentId);
-        if (! $torrentOwner) {
-            return response()->json(Api::failWithContext('Invalid torrent id!', $validated));
-        }
-        if ((int) $torrentOwner === $userId) {
-            return response()->json(Api::failWithContext('You are giving magic to yourself.', $validated));
-        }
-
-        $alreadyMagic = $this->torrentDetailRepository->hasMagicRecord($torrentId, $userId);
-        if ($alreadyMagic) {
-            return response()->json(Api::failWithContext('You already gave the magic value!', $validated));
-        }
-
-        $todayStr = now()->startOfDay();
-        $todayCount = $this->rewardRepository->countSince($userId, $todayStr);
-        $timesLimit = Setting::getBonusRewardTimesLimit();
-        if ($timesLimit > 0 && $todayCount >= $timesLimit) {
-            return response()->json(Api::failWithContext('You already reach times limit!', $validated));
-        }
-
-        $torrentOwnerInfo = $this->userRepository->findById((int) $torrentOwner, User::$commonFields);
-        if (! $torrentOwnerInfo) {
+        $user = Auth::guard('nexus-web')->user();
+        if (! $user instanceof User) {
             return response()->json(Api::failWithContext('Invalid torrent owner!', $validated));
         }
 
-        $this->torrentDetailRepository->insertMagic($torrentId, $userId, $value);
-
-        Bonus::updatePoints('-', (float) $value, $userId);
-        $this->bonusRepository->add($userId, (float) ($curUser['seedbonus'] ?? 0), $value, (float) ($curUser['seedbonus'] ?? 0) - $value, '', BusinessType::REWARD_TORRENT->value);
-
-        Bonus::updatePoints('+', (float) $value, (int) $torrentOwner);
-        $this->bonusRepository->add((int) $torrentOwnerInfo['id'], (float) $torrentOwnerInfo['seedbonus'], $value, (float) $torrentOwnerInfo['seedbonus'] + $value, '', BusinessType::TORRENT_BE_REWARD->value);
+        try {
+            $magicRewardService->give($user, $torrentId, $value);
+        } catch (\LogicException $e) {
+            return response()->json(Api::failWithContext($e->getMessage(), $validated));
+        }
 
         return response()->json(Api::successWithContext('OK', $validated));
 

@@ -114,7 +114,7 @@ final class UsercpHttpTest extends TestCase
         $html = $response->getContent();
         $this->assertIsString($html);
         // Recently-read-topics table uses the semantic component.
-        $this->assertStringContainsString('nx-table', $html);
+        $this->assertStringContainsString('overflow-x-auto', $html);
         // Token management wiring survives the Blade migration.
         $this->assertStringContainsString('id="add-token-box-btn"', $html);
         $this->assertStringContainsString('id="token-form-template"', $html);

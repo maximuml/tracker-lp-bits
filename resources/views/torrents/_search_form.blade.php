@@ -1,7 +1,6 @@
 {{-- Modern torrents search panel (Variant A, ADR 0014). Replaces SearchBox::buildCategoryTable — data arrives in $panelVm. --}}
 <form method="get" name="searchbox" action="?" class="nxm-searchpanel">
-	<div class="nxm-searchpanel__toggle"><button type="button" class="nxm-linklike" data-klappe="searchboxmain" aria-expanded="false" aria-controls="ksearchboxmain"><img class="plus" src="pic/trans.gif" id="picsearchboxmain" alt="" aria-hidden="true" />{{ __('legacy/torrents.text_search_box')}}</button></div>
-	<div id="ksearchboxmain" class="nx-hidden nxm-searchpanel__body">
+	<livewire:search-panel-toggle>
 		<fieldset class="nxm-fieldset">
 			<legend>{{ $panelVm->categoryLabel }}</legend>
 			@foreach ($panelVm->categoryRows as $cells)
@@ -125,5 +124,5 @@
 		</div>
 		@endif
 		<div class="nxm-searchpanel__submit"><input type="submit" class="btn" value="{{ __('legacy/torrents.submit_go')}}" /></div>
-	</div>
+	</livewire:search-panel-toggle>
 </form>

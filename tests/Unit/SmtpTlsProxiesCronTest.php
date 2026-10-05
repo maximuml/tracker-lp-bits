@@ -98,14 +98,14 @@ final class SmtpTlsProxiesCronTest extends TestCase
     {
         $route = null;
         foreach (app('router')->getRoutes() as $r) {
-            if ($r->uri() === 'cron') {
+            if ($r->uri() === 'web/cron') {
                 $route = $r;
                 break;
             }
         }
-        $this->assertNotNull($route, '/cron route must exist');
+        $this->assertNotNull($route, '/web/cron route must exist');
         $middleware = $route->gatherMiddleware();
-        $this->assertContains('cron.token', $middleware, '/cron must be protected by cron.token middleware');
+        $this->assertContains('cron.token', $middleware, '/web/cron must be protected by cron.token middleware');
     }
 
     /**

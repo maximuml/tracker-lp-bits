@@ -1,4 +1,4 @@
-.PHONY: help up down build test test-unit test-integration test-feature test-architecture test-lint migrate-test
+.PHONY: help up down build test test-unit test-integration test-feature test-architecture test-lint migrate-test css css-watch
 
 # Default: show available commands
 help: ## Show this help
@@ -56,3 +56,10 @@ lint: ## Run Pint --test locally
 
 stan: ## Run PHPStan locally
 	docker compose exec -T php vendor/bin/phpstan analyse --no-progress --memory-limit=2G
+
+# --- Frontend ---
+css: ## Build public/css/nxt.css via standalone Tailwind CLI (no Node)
+	./scripts/build-css.sh
+
+css-watch: ## Rebuild nxt.css on every Blade/PHP change
+	./scripts/build-css.sh --watch

@@ -65,6 +65,9 @@ jobs:
       - name: Run PHP syntax lint
         run: bash scripts/ci/php-lint.sh
 
+      - name: Build Tailwind CSS layer
+        run: bash scripts/build-css.sh && test -s public/css/nxt.css
+
       - name: Run Laravel Pint
         run: vendor/bin/pint --test
 

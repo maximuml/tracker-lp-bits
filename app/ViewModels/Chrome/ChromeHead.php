@@ -120,6 +120,13 @@ final class ChromeHead
             'styles/nexus.css'.$cssUpdateDate,
         ], $iconStyles);
 
+        // Tailwind utilities layer (converted components are shared between
+        // chromes — without it they render unstyled on legacy pages). Last
+        // in the cascade; missing on clones that have not run `make css`.
+        if (file_exists(public_path('css/nxt.css'))) {
+            $headStyles[] = 'css/nxt.css';
+        }
+
         $addiCode = Style::addiCode($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
         if ($cspNonce !== '' && $addiCode !== '') {
             $addiCode = (string) preg_replace('/<style(?![^>]*\snonce=)/i', '<style nonce="'.$cspNonce.'"', $addiCode);

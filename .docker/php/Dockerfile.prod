@@ -80,6 +80,20 @@ RUN composer dump-autoload \
     --classmap-authoritative \
     --no-scripts
 
+# ── Stage 2b: Tailwind CSS (standalone CLI — no Node toolchain) ────────────
+FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS css-builder
+
+# curl~=8 satisfies check-supply-chain-pins.sh; the downloaded CLI binary is
+# sha256-verified by build-css.sh regardless of the curl build used to fetch it
+RUN apk add --no-cache 'curl~=8'
+
+WORKDIR /build
+COPY resources/css/ /build/resources/css/
+COPY resources/views/ /build/resources/views/
+COPY app/ /build/app/
+COPY scripts/build-css.sh /build/scripts/build-css.sh
+RUN ./scripts/build-css.sh
+
 # ── Stage 3: Production runtime ────────────────────────────────────────────
 FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS production
 
@@ -138,6 +152,9 @@ COPY --chown=www-data:www-data . /var/www/html
 
 # Copy pre-built vendor from vendor-builder
 COPY --from=vendor-builder --chown=www-data:www-data /app/vendor /var/www/html/vendor
+
+# Copy compiled Tailwind layer (gitignored — built in css-builder stage)
+COPY --from=css-builder --chown=www-data:www-data /build/public/css/nxt.css /var/www/html/public/css/nxt.css
 COPY --from=vendor-builder --chown=www-data:www-data /app/composer.lock /var/www/html/composer.lock
 
 # Ensure writable directories exist (mounted as volumes in prod compose)

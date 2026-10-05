@@ -13,6 +13,17 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - **Queue:** Redis (default), Octane-compatible
 - **Frontend:** Blade templates, legacy NexusPHP themes; Filament ships its
   own assets — there is no Node/Vite build step (removed in step 1.1)
+- **Tailwind layer:** converted Blade components use utility classes from
+  `public/css/nxt.css`, compiled by `scripts/build-css.sh` (standalone
+  Tailwind CLI — still no Node). `make css` builds it, `make css-watch`
+  rebuilds on change; the output is gitignored and built inside
+  `Dockerfile.prod`. Utilities only — no preflight, legacy markup is
+  unaffected. Semantic tokens map via `@theme inline` in
+  `resources/css/nxt.css` (`border-nxm-border`, `bg-nxm-surface`, …)
+- **Interactivity:** Livewire 4 components on public pages (`wire:*`
+  directives do not eval). Plain Alpine `x-data` needs `unsafe-eval`,
+  which the strict public CSP does not allow — do not add `x-data` to
+  legacy-chrome pages; Filament routes already run the relaxed policy
 
 ## Key directories
 

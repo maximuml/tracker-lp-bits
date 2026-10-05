@@ -400,7 +400,6 @@ final class AttachmentMutationServiceTest extends TestCase
             'attachment.savedirectorytype' => 'monthdir',
             'attachment.httpdirectory' => 'attachments',
             'attachment.thumbnailtype' => 'resizebigimg',
-            'attachment.watermarkpos' => 'no',
             'image_hosting.driver' => 'local',
         ]);
     }

@@ -87,10 +87,6 @@ $ATTACHMENT = [
     'thumbquality' => '80',
     'thumbwidth' => '500',
     'thumbheight' => '500',
-    'watermarkpos' => '9',
-    'watermarkwidth' => '300',
-    'watermarkheight' => '300',
-    'watermarkquality' => '85',
     'altthumbwidth' => '180',
     'altthumbheight' => '135',
 ];

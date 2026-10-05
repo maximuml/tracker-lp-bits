@@ -44,10 +44,6 @@ class AttachmentMutationService
         $thumbwidth_attachment = $config->thumbWidth(200);
         $thumbheight_attachment = $config->thumbHeight(200);
         $thumbquality_attachment = $config->thumbQuality(80);
-        $watermarkpos_attachment = $config->watermarkPos('no');
-        $watermarkwidth_attachment = $config->watermarkWidth(100);
-        $watermarkheight_attachment = $config->watermarkHeight(100);
-        $watermarkquality_attachment = $config->watermarkQuality(90);
         $altthumbwidth_attachment = $config->altThumbWidth(100);
         $altthumbheight_attachment = $config->altThumbHeight(100);
 
@@ -57,9 +53,6 @@ class AttachmentMutationService
         $it = 0;
         $orig = false;
         $thumb = false;
-        $resource = false;
-        $wmx = 0;
-        $wmy = 0;
         $location = '';
         $url = '';
         $hasthumb = false;
@@ -147,7 +140,7 @@ class AttachmentMutationService
                     $stop = false;
                     if ($imagesize) {
                         $it = $imagesize[2];
-                        if ($it != 1 || ! $Attach->is_gif_ani($file['tmp_name'])) { // if it is an animation GIF, stop creating thumbnail and adding watermark
+                        if ($it != 1 || ! $Attach->is_gif_ani($file['tmp_name'])) { // if it is an animation GIF, stop creating thumbnail
                             if ($thumbnailtype_attachment != 'no') { // create thumbnail for big image
                                 // determine the size of thumbnail
                                 if ($altsize == 'yes') {
@@ -193,106 +186,7 @@ class AttachmentMutationService
                                     }
                                 }
                             }
-                            $watermarkpos = $watermarkpos_attachment;
-                            if ($watermarkpos != 'no') { // add watermark to image
-                                if ($width > $watermarkwidth_attachment && $height > $watermarkheight_attachment) {
-                                    if ($abandonorig && $thumb) {
-                                        $resource = $thumb;
-                                    } else {
-                                        $resource = imagecreatetruecolor($width, $height);
-                                        if ($resource === false) {
-                                            $warning = (string) __('legacy/attachment.text_invalid_image_file');
-
-                                            return compact('warning', 'script', 'count_left');
-                                        }
-                                        if ($it == 1) {
-                                            $resource_p = @imagecreatefromgif($file['tmp_name']);
-                                        } elseif ($it == 2) {
-                                            $resource_p = @imagecreatefromjpeg($file['tmp_name']);
-                                        } else {
-                                            $resource_p = @imagecreatefrompng($file['tmp_name']);
-                                        }
-                                        if ($resource_p === false) {
-                                            $warning = (string) __('legacy/attachment.text_invalid_image_file');
-
-                                            return compact('warning', 'script', 'count_left');
-                                        }
-                                        imagecopy($resource, $resource_p, 0, 0, 0, 0, $width, $height);
-                                    }
-                                    $watermark = imagecreatefrompng('pic/watermark.png');
-                                    if ($watermark === false) {
-                                        $warning = (string) __('legacy/attachment.text_invalid_image_file');
-
-                                        return compact('warning', 'script', 'count_left');
-                                    }
-                                    $watermark_width = imagesx($watermark);
-                                    $watermark_height = imagesy($watermark);
-                                    // the position of the watermark
-                                    if ($watermarkpos == 'random') {
-                                        $watermarkpos = random_int(1, 9);
-                                    }
-                                    switch ($watermarkpos) {
-                                        case 1:
-                                            $wmx = 5;
-                                            $wmy = 5;
-                                            break;
-
-                                        case 2:
-                                            $wmx = ($width - $watermark_width) / 2;
-                                            $wmy = 5;
-                                            break;
-
-                                        case 3:
-                                            $wmx = $width - $watermark_width - 5;
-                                            $wmy = 5;
-                                            break;
-
-                                        case 4:
-                                            $wmx = 5;
-                                            $wmy = ($height - $watermark_height) / 2;
-                                            break;
-
-                                        case 5:
-                                            $wmx = ($width - $watermark_width) / 2;
-                                            $wmy = ($height - $watermark_height) / 2;
-                                            break;
-
-                                        case 6:
-                                            $wmx = $width - $watermark_width - 5;
-                                            $wmy = ($height - $watermark_height) / 2;
-                                            break;
-
-                                        case 7:
-                                            $wmx = 5;
-                                            $wmy = $height - $watermark_height - 5;
-                                            break;
-
-                                        case 8:
-                                            $wmx = ($width - $watermark_width) / 2;
-                                            $wmy = $height - $watermark_height - 5;
-                                            break;
-
-                                        case 9:
-                                            $wmx = $width - $watermark_width - 5;
-                                            $wmy = $height - $watermark_height - 5;
-                                            break;
-
-                                    }
-
-                                    imagecopy($resource, $watermark, $wmx, $wmy, 0, 0, $watermark_width, $watermark_height);
-                                    if ($it == 1) {
-                                        imagegif($resource, $file_location.'.'.$ext);
-                                    } elseif ($it == 2) {
-                                        imagejpeg($resource, $file_location.'.'.$ext, $watermarkquality_attachment);
-                                    } else {
-                                        imagepng($resource, $file_location.'.'.$ext);
-                                    }
-                                    $filesize = filesize($file_location.'.'.$ext);
-                                    $maycreatethumb = false;
-                                    $abandonorig = true;
-                                }
-                            }
-                            if ($maycreatethumb) { // if no watermark is added, create the thumbnail now for the above resized image.
+                            if ($maycreatethumb) { // create the thumbnail now for the above resized image.
                                 if ($thumb === false) {
                                     $warning = (string) __('legacy/attachment.text_invalid_image_file');
 

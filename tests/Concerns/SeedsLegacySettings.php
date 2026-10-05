@@ -266,10 +266,6 @@ trait SeedsLegacySettings
         'vuprratio_account' => 'account.vuprratio',
         'vutime_account' => 'account.vutime',
         'waitsystem' => 'main.waitsystem',
-        'watermarkheight_attachment' => 'attachment.watermarkheight',
-        'watermarkpos_attachment' => 'attachment.watermarkpos',
-        'watermarkquality_attachment' => 'attachment.watermarkquality',
-        'watermarkwidth_attachment' => 'attachment.watermarkwidth',
         'website_code' => 'code.website',
         'where_tweak' => 'tweak.where',
     ];

@@ -71,26 +71,6 @@ final class AttachmentConfig extends Config
         return $this->int('thumbquality', $default);
     }
 
-    public function watermarkPos(string $default = 'no'): string
-    {
-        return $this->string('watermarkpos', $default);
-    }
-
-    public function watermarkWidth(int $default = 100): int
-    {
-        return $this->int('watermarkwidth', $default);
-    }
-
-    public function watermarkHeight(int $default = 100): int
-    {
-        return $this->int('watermarkheight', $default);
-    }
-
-    public function watermarkQuality(int $default = 90): int
-    {
-        return $this->int('watermarkquality', $default);
-    }
-
     public function altThumbWidth(int $default = 100): int
     {
         return $this->int('altthumbwidth', $default);

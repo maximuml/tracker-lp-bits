@@ -48,6 +48,7 @@ final class DocsConsistencyTest extends TestCase
         'storage/app',
         'storage/debugbar',
         'public/hot',
+        'public/css',
     ];
 
     public function test_key_directories_exist(): void

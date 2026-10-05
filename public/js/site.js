@@ -324,26 +324,6 @@ function SmileIT(smile,form,text){
    el.focus();
 }
 
-// preview.js
-
-function preview(obj) {
-	var poststr = encodeURIComponent( document.getElementById("body").value );
-	ajax.postText('preview.php','body='+poststr).then(function(result){
-	document.getElementById("previewouter").innerHTML=result;
-	document.getElementById("previewouter").style.display = 'block';
-	document.getElementById("editorouter").style.display = 'none';
-	document.getElementById("unpreviewbutton").style.display = 'block';
-	document.getElementById("previewbutton").style.display = 'none';
-	});
-}
-
-function unpreview(obj){
-	document.getElementById("previewouter").style.display = 'none';
-	document.getElementById("editorouter").style.display = 'block';
-	document.getElementById("unpreviewbutton").style.display = 'none';
-	document.getElementById("previewbutton").style.display = 'block';
-}
-
 // java_klappe.js — only klappe_news survives: delegated data-klappe
 // emitters all render the plus/minus icon variant.
 
@@ -618,15 +598,6 @@ document.addEventListener('click', function (e) {
             handled = false;
         }
         if (handled) { e.preventDefault(); }
-        return;
-    }
-
-    var toggle = target.closest('[data-preview-toggle]');
-    if (toggle) {
-        var mode = toggle.getAttribute('data-preview-toggle');
-        if (mode === 'preview' && typeof preview === 'function') { preview(toggle.parentNode); }
-        if (mode === 'unpreview' && typeof unpreview === 'function') { unpreview(toggle.parentNode); }
-        e.preventDefault();
         return;
     }
 

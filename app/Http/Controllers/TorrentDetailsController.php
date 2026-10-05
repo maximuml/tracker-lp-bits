@@ -8,7 +8,6 @@ use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\TorrentApprovalStatus;
-use App\Models\Setting;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Models\User;
@@ -204,13 +203,10 @@ class TorrentDetailsController extends Controller
         }
 
         $descr = $rawDescr !== '' ? Format::formatComment($rawDescr) : '';
-        $bonusOptions = Setting::getBonusRewardOptions();
-
         $showDescription = ! LegacyYesNo::isNo($currentUser['showdescription'] ?? null) && $descr !== '';
 
-        $magicInfo = $this->torrentDetailRepository->getMagicInfo($id, (int) $currentUser['id']);
         $details = $this->detailsViewFactory->build(
-            $id, $row, $currentUser, $denyLog, $hasBuy, $requestFlags, $magicInfo, $bonusOptions
+            $id, $row, $currentUser, $denyLog, $hasBuy, $requestFlags
         );
         $commentPagerTop = '';
         $commentPagerBottom = '';

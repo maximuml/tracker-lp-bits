@@ -401,26 +401,6 @@ function unpreview(obj){
 	document.getElementById("previewbutton").style.display = 'block';
 }
 
-function saveMagicValue(torrentid,value)
-{
-    nativePost("magic.php", {"value": value, "id": torrentid}, function(res) {
-        if (res.ret !== 0) {
-            alert(res.msg)
-            return
-        }
-        document.getElementById("magic_add").value += value;
-        document.getElementById("magic_add").style.display = '';
-        document.getElementById("listNumber").style.display = 'none';
-        document.getElementById("current_user_magic").style.display = '';
-        var sumAll = document.getElementById("spanSumAll").innerHTML;
-        document.getElementById("spanSumAll").innerHTML = sumAll*1 + value;
-        if(document.getElementById("count_user_spa")){
-            var userAll = document.getElementById("count_user_spa").innerHTML;
-            document.getElementById("count_user_spa").innerHTML = userAll*1 + 1;
-        }
-    })
-}
-
 // java_klappe.js — only klappe_news survives: delegated data-klappe
 // emitters all render the plus/minus icon variant.
 
@@ -829,23 +809,6 @@ document.addEventListener('click', function (e) {
     var setlistBtn = target.closest('#setlistLookupBtn');
     if (setlistBtn && typeof lookupSetlist === 'function') {
         lookupSetlist();
-        return;
-    }
-
-    var magicItem = target.closest('li[data-magic-value]');
-    if (magicItem && typeof saveMagicValue === 'function') {
-        saveMagicValue(parseInt(magicItem.getAttribute('data-torrent-id'), 10), parseInt(magicItem.getAttribute('data-magic-value'), 10));
-        return;
-    }
-
-    var showAll = target.closest('#magic_show_all');
-    if (showAll) {
-        var other = document.getElementById('other_user_list');
-        var ellipsis = document.getElementById('ellipsis');
-        if (other) { other.classList.remove('nx-hidden'); }
-        if (ellipsis) { ellipsis.classList.add('nx-hidden'); }
-        showAll.classList.add('nx-hidden');
-        e.preventDefault();
         return;
     }
 

@@ -83,7 +83,9 @@ RUN composer dump-autoload \
 # ── Stage 2b: Tailwind CSS (standalone CLI — no Node toolchain) ────────────
 FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS css-builder
 
-RUN apk add --no-cache curl
+# curl~=8 satisfies check-supply-chain-pins.sh; the downloaded CLI binary is
+# sha256-verified by build-css.sh regardless of the curl build used to fetch it
+RUN apk add --no-cache 'curl~=8'
 
 WORKDIR /build
 COPY resources/css/ /build/resources/css/

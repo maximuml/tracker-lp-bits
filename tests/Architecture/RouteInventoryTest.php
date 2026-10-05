@@ -63,6 +63,10 @@ final class RouteInventoryTest extends TestCase
         // captcha + per-IP/per-email locks on 'new', secret-uuid match on
         // guest 'reply', staff-only on 'answered'/'unanswered'
         'complains' => true,
+        'web/complains/new' => true,
+        'web/complains/reply' => true,
+        'web/complains/answered' => true,
+        'web/complains/unanswered' => true,
         // CSP violation reports — browser beacon, fires without session
         // context; CSRF-exempt and throttled, writes only to the log
         'csp-report' => true,
@@ -164,10 +168,10 @@ final class RouteInventoryTest extends TestCase
         // +6 passkey REST endpoints (4 authed + 2 guest login assertions).
         // +5 friends/news page-POST endpoints (FormRequest validated).
         $this->assertLessThanOrEqual(
-            174,
+            182, // 182: +8 complains/log page-POST endpoints
             $currentCount,
             sprintf(
-                'App mutation route count increased from baseline 169 to %d. '.
+                'App mutation route count increased from baseline to %d. '.
                 'Consider whether new mutation routes need FormRequest validation.',
                 $currentCount,
             ),

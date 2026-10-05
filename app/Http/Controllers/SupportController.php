@@ -8,6 +8,9 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\ComplainRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\ComplainNewRequest;
+use App\Http\Requests\ComplainReplyRequest;
+use App\Http\Requests\ComplainToggleRequest;
 use App\Models\Setting;
 use App\Services\ComplainService;
 use App\Support\Captcha;
@@ -56,10 +59,61 @@ class SupportController extends LegacyController
         };
     }
 
-    public function complainsPost(Request $request): View|RedirectResponse|Response
+    public function complainsPost(Request $request): RedirectResponse|Response
+    {
+        if (($abort = $this->complainsGate()) !== null) {
+            return $abort;
+        }
+
+        return $this->handleComplainPost($request);
+    }
+
+    public function complainNewPost(ComplainNewRequest $request): RedirectResponse|Response
+    {
+        if (($abort = $this->complainsGate()) !== null) {
+            return $abort;
+        }
+
+        return $this->complainNew($request);
+    }
+
+    public function complainReplyPost(ComplainReplyRequest $request): RedirectResponse|Response
+    {
+        if (($abort = $this->complainsGate()) !== null) {
+            return $abort;
+        }
+
+        return $this->complainReply($request, $this->complainsUid());
+    }
+
+    public function complainAnsweredPost(ComplainToggleRequest $request): RedirectResponse|Response
+    {
+        if (($abort = $this->complainsGate()) !== null) {
+            return $abort;
+        }
+
+        return $this->complainToggle($request, Permission::can(PermissionEnum::STAFF_MEMBER), 'answered');
+    }
+
+    public function complainUnansweredPost(ComplainToggleRequest $request): RedirectResponse|Response
+    {
+        if (($abort = $this->complainsGate()) !== null) {
+            return $abort;
+        }
+
+        return $this->complainToggle($request, Permission::can(PermissionEnum::STAFF_MEMBER), 'unanswered');
+    }
+
+    private function complainsUid(): int
     {
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $uid = (int) ($currentUser['id'] ?? 0);
+
+        return (int) ($currentUser['id'] ?? 0);
+    }
+
+    private function complainsGate(): ?Response
+    {
+        $uid = $this->complainsUid();
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
 
         if ($uid > 0 && ! $isAdmin) {
@@ -69,17 +123,22 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.complain_not_enabled'));
         }
 
-        return $this->handleComplainPost($request, $uid, $isAdmin);
+        return null;
     }
 
-    private function handleComplainPost(Request $request, int $uid, bool $isAdmin): RedirectResponse|Response
+    private function handleComplainPost(Request $request): RedirectResponse|Response
     {
         $action = filter_var((string) ($request->input('action') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        // Legacy callers can carry params in the URL — forward the query
+        // string so the target endpoint still sees them.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
 
         return match ($action) {
-            'new' => $this->complainNew($request),
-            'reply' => $this->complainReply($request, $uid),
-            'answered', 'unanswered' => $this->complainToggle($request, $isAdmin, $action),
+            'new' => redirect()->to('/web/complains/new'.$suffix, 308),
+            'reply' => redirect()->to('/web/complains/reply'.$suffix, 308),
+            'answered' => redirect()->to('/web/complains/answered'.$suffix, 308),
+            'unanswered' => redirect()->to('/web/complains/unanswered'.$suffix, 308),
             default => $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Permission denied.'),
         };
     }

@@ -6,6 +6,10 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\ChronicleAddRequest;
+use App\Http\Requests\ChronicleDeleteRequest;
+use App\Http\Requests\ChronicleUpdateRequest;
+use App\Http\Requests\PollDeleteRequest;
 use App\Models\Setting;
 use App\Repositories\LogRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -39,14 +43,8 @@ class LogController extends LegacyController
 
     public function legacy(Request $request): View|RedirectResponse|Response
     {
-        if (! Permission::can(PermissionEnum::LOG)) {
-            $logClass = (int) SiteConfig::current()->authority->permission('log', 0);
-
-            return $this->legacyAbortResponse(
-                __('legacy/log.std_sorry'),
-                (__('legacy/log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).__('legacy/log.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => Setting::getSiteName()])->render(),
-                false
-            );
+        if (($abort = $this->logAccessGate()) !== null) {
+            return $abort;
         }
 
         $currentUser = (array) ($this->currentUser->get() ?? []);
@@ -68,14 +66,8 @@ class LogController extends LegacyController
 
     public function legacyPost(Request $request): View|RedirectResponse|Response
     {
-        if (! Permission::can(PermissionEnum::LOG)) {
-            $logClass = (int) SiteConfig::current()->authority->permission('log', 0);
-
-            return $this->legacyAbortResponse(
-                __('legacy/log.std_sorry'),
-                (__('legacy/log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).__('legacy/log.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => Setting::getSiteName()])->render(),
-                false
-            );
+        if (($abort = $this->logAccessGate()) !== null) {
+            return $abort;
         }
 
         $currentUser = (array) ($this->currentUser->get() ?? []);
@@ -189,40 +181,129 @@ class LogController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
             }
 
-            if ($do === 'add') {
-                $txt = (string) ($request->input('txt') ?? '');
-                if ($txt !== '') {
-                    $this->logRepository->addChronicle($userId, $txt);
-                }
+            // Legacy forms can carry params in the URL (?do=del&id=N) —
+            // forward the query string so the target endpoint sees them.
+            $qs = $request->getQueryString();
+            $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
 
-                return redirect('/log.php?action=chronicle');
+            if ($do === 'add') {
+                return redirect()->to('/web/log/chronicle/add'.$suffix, 308);
             }
 
             if ($do === 'update') {
-                $id = (int) $request->input('id', 0);
-                $txt = (string) ($request->input('txt') ?? '');
-                if ($id <= 0) {
-                    return redirect('/log.php?action=chronicle');
-                }
-                if ($txt !== '') {
-                    $this->logRepository->updateChronicle($id, $txt);
-                }
-
-                return redirect('/log.php?action=chronicle');
+                return redirect()->to('/web/log/chronicle/update'.$suffix, 308);
             }
 
             if ($do === 'del') {
-                $id = (int) $request->input('id', 0);
-                if ($id <= 0) {
-                    return redirect('/log.php?action=chronicle');
-                }
-                $this->logRepository->deleteChronicle($id);
-
-                return redirect('/log.php?action=chronicle');
+                return redirect()->to('/web/log/chronicle/delete'.$suffix, 308);
             }
         }
 
         return $this->chronicleList($request, $q, $canManage, null);
+    }
+
+    public function chronicleAddPost(ChronicleAddRequest $request): RedirectResponse|Response
+    {
+        if (($abort = $this->logManageGate(PermissionEnum::CHR_MANAGE)) !== null) {
+            return $abort;
+        }
+
+        $txt = (string) ($request->input('txt') ?? '');
+        if ($txt !== '') {
+            $currentUser = (array) ($this->currentUser->get() ?? []);
+            $this->logRepository->addChronicle((int) ($currentUser['id'] ?? 0), $txt);
+        }
+
+        return redirect('/log.php?action=chronicle');
+    }
+
+    public function chronicleUpdatePost(ChronicleUpdateRequest $request): RedirectResponse|Response
+    {
+        if (($abort = $this->logManageGate(PermissionEnum::CHR_MANAGE)) !== null) {
+            return $abort;
+        }
+
+        $id = (int) $request->input('id', 0);
+        $txt = (string) ($request->input('txt') ?? '');
+        if ($id <= 0) {
+            return redirect('/log.php?action=chronicle');
+        }
+        if ($txt !== '') {
+            $this->logRepository->updateChronicle($id, $txt);
+        }
+
+        return redirect('/log.php?action=chronicle');
+    }
+
+    public function chronicleDeletePost(ChronicleDeleteRequest $request): RedirectResponse|Response
+    {
+        if (($abort = $this->logManageGate(PermissionEnum::CHR_MANAGE)) !== null) {
+            return $abort;
+        }
+
+        $id = (int) $request->input('id', 0);
+        if ($id <= 0) {
+            return redirect('/log.php?action=chronicle');
+        }
+        $this->logRepository->deleteChronicle($id);
+
+        return redirect('/log.php?action=chronicle');
+    }
+
+    public function pollDeletePost(PollDeleteRequest $request): RedirectResponse|Response
+    {
+        if (($abort = $this->logManageGate(PermissionEnum::POLL_MANAGE)) !== null) {
+            return $abort;
+        }
+
+        $pollid = (int) $request->input('pollid', 0);
+        $returnto = htmlspecialchars((string) ($request->input('returnto') ?? ''));
+        if ($pollid <= 0) {
+            return $this->legacyAbortResponse(__('legacy/log.std_error'), ('Invalid poll ID.'));
+        }
+        if ((int) $request->input('sure', 0) !== 1) {
+            return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+        }
+        $this->logRepository->deletePoll($pollid);
+
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('current_poll_content');
+            $this->legacyRedisCache->delete_value('current_poll_result', true);
+        }
+
+        if ($returnto === 'main') {
+            return redirect('/');
+        }
+
+        return redirect('/log.php?action=poll&deleted=1');
+    }
+
+    private function logAccessGate(): ?Response
+    {
+        if (Permission::can(PermissionEnum::LOG)) {
+            return null;
+        }
+
+        $logClass = (int) SiteConfig::current()->authority->permission('log', 0);
+
+        return $this->legacyAbortResponse(
+            __('legacy/log.std_sorry'),
+            (__('legacy/log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).__('legacy/log.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => Setting::getSiteName()])->render(),
+            false
+        );
+    }
+
+    private function logManageGate(PermissionEnum $permission): ?Response
+    {
+        if (($abort = $this->logAccessGate()) !== null) {
+            return $abort;
+        }
+
+        if (! Permission::can($permission)) {
+            return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+        }
+
+        return null;
     }
 
     /**
@@ -363,31 +444,18 @@ class LogController extends LegacyController
     private function pollLogPost(Request $request): View|RedirectResponse|Response
     {
         $do = (string) ($request->input('do') ?? '');
-        $pollid = (int) $request->input('pollid', 0);
-        $returnto = htmlspecialchars((string) ($request->input('returnto') ?? ''));
 
         if ($do === 'delete') {
             if (! Permission::can(PermissionEnum::POLL_MANAGE)) {
                 return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
             }
-            if ($pollid <= 0) {
-                return $this->legacyAbortResponse(__('legacy/log.std_error'), ('Invalid poll ID.'));
-            }
-            if ((int) $request->input('sure', 0) !== 1) {
-                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
-            }
-            $this->logRepository->deletePoll($pollid);
 
-            if ($this->legacyRedisCache !== null) {
-                $this->legacyRedisCache->delete_value('current_poll_content');
-                $this->legacyRedisCache->delete_value('current_poll_result', true);
-            }
+            // The confirm form carries pollid/returnto in the URL — forward
+            // the query string so the target endpoint still sees them.
+            $qs = $request->getQueryString();
+            $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
 
-            if ($returnto === 'main') {
-                return redirect('/');
-            }
-
-            return redirect('/log.php?action=poll&deleted=1');
+            return redirect()->to('/web/log/poll/delete'.$suffix, 308);
         }
 
         return $this->pollLog($request);

@@ -18,8 +18,10 @@ use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\TorrentController;
@@ -145,6 +147,10 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('news/add', [NewsController::class, 'newsAdd']);
     Route::post('news/edit', [NewsController::class, 'newsEdit']);
     Route::post('news/delete', [NewsController::class, 'newsDelete']);
+    Route::post('log/chronicle/add', [LogController::class, 'chronicleAddPost']);
+    Route::post('log/chronicle/update', [LogController::class, 'chronicleUpdatePost']);
+    Route::post('log/chronicle/delete', [LogController::class, 'chronicleDeletePost']);
+    Route::post('log/poll/delete', [LogController::class, 'pollDeletePost']);
 
     // REST endpoints for the actions the /ajax dispatcher used to route by
     // `action` string — POST /ajax {action: X} now 308-redirects here with
@@ -178,6 +184,17 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
 Route::group(['prefix' => 'web', 'middleware' => ['throttle:ajax']], function () {
     Route::post('passkey/get-args', [AjaxPasskeyController::class, 'getArgs']);
     Route::post('passkey/get', [AjaxPasskeyController::class, 'processGet']);
+});
+
+// Complaint channel actions — guest-facing by design (appeals from banned
+// accounts); per-action gates inside SupportController: captcha + per-IP
+// locks on 'new', secret-uuid match on guest 'reply', staff-only toggles.
+// POST /complains.php?action=X 308-redirects here with the same body.
+Route::group(['prefix' => 'web', 'middleware' => ['throttle:legacy']], function () {
+    Route::post('complains/new', [SupportController::class, 'complainNewPost']);
+    Route::post('complains/reply', [SupportController::class, 'complainReplyPost']);
+    Route::post('complains/answered', [SupportController::class, 'complainAnsweredPost']);
+    Route::post('complains/unanswered', [SupportController::class, 'complainUnansweredPost']);
 });
 
 // Passkey login v2 — fixed route with HMAC-SHA256, nonce replay protection,

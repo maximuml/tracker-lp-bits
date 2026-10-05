@@ -6,7 +6,6 @@ namespace App\Support;
 
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
-use App\ViewModels\Comment\CommentTableFactory;
 
 /**
  * Legacy BBCode formatter extracted from `include/functions.php`.
@@ -226,21 +225,5 @@ final class Comment
         }
 
         return $s;
-    }
-
-    /**
-     * Render the legacy comment table HTML for a list of comment rows.
-     *
-     * Mirrors `commenttable()` from `include/functions.php`; markup lives
-     * in `resources/views/comments/table.blade.php`.
-     */
-    /**
-     * @param  array<int, array<string, mixed>>  $rows
-     */
-    public static function table(array $rows, string $type, int|string $parentId, bool $review = false): string
-    {
-        $vm = app(CommentTableFactory::class)->build($rows, $type, $parentId);
-
-        return view('comments.table', ['vm' => $vm])->render();
     }
 }

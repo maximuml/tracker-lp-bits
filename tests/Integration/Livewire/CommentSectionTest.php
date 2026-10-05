@@ -76,4 +76,46 @@ final class CommentSectionTest extends TestCase
 
         $this->assertSame(0, DB::table('comments')->where('torrent', $torrent->id)->count());
     }
+
+    public function test_offer_render_lists_comments(): void
+    {
+        $user = User::factory()->create();
+        $offerId = $this->insertOffer((int) $user->id);
+        Comment::factory()->create(['offer' => $offerId, 'user' => $user->id, 'text' => 'offer livewire check']);
+
+        Livewire::test(CommentSection::class, ['parentId' => $offerId, 'type' => 'offer'])
+            ->assertSee('offer livewire check')
+            ->assertOk();
+    }
+
+    public function test_offer_post_creates_comment(): void
+    {
+        $user = User::factory()->create();
+        $offerId = $this->insertOffer((int) $user->id);
+        $this->actingAs($user, 'nexus-web');
+
+        Livewire::test(CommentSection::class, ['parentId' => $offerId, 'type' => 'offer'])
+            ->set('text', 'offer comment via livewire')
+            ->call('post')
+            ->assertSet('text', '')
+            ->assertSet('status', '');
+
+        $this->assertDatabaseHas('comments', ['offer' => $offerId, 'text' => 'offer comment via livewire']);
+    }
+
+    private function insertOffer(int $userId): int
+    {
+        return (int) DB::table('offers')->insertGetId([
+            'userid' => $userId,
+            'name' => 'Test Offer',
+            'descr' => 'A test offer description',
+            'added' => now()->toDateTimeString(),
+            'allowedtime' => now()->toDateTimeString(),
+            'yeah' => 0,
+            'against' => 0,
+            'category' => 1,
+            'comments' => 0,
+            'allowed' => 1,
+        ]);
+    }
 }

@@ -27,7 +27,7 @@ final class OfferDetailsViewModel
         public readonly bool $showEditDelete,
         public readonly SafeHtml $description,
         public readonly int $commentCount,
-        public readonly SafeHtml $commentsHtml,
-        public readonly SafeHtml $quickReply,
+        public readonly SafeHtml $pagerTop,
+        public readonly SafeHtml $pagerBottom,
     ) {}
 }

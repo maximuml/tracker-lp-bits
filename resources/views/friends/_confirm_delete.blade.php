@@ -1,1 +1,1 @@
-<a href="?id={{ $userid }}&action=delete&type={{ $type }}&targetid={{ $targetid }}&sure=1"><b>{{ $sureLinkText }}</b></a>{{ $sureSuffix }}
+<form method="post" action="/web/friends/delete" class="inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="{{ $type }}" /><input type="hidden" name="targetid" value="{{ $targetid }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="altlink"><b>{{ $sureLinkText }}</b></button></form>{{ $sureSuffix }}

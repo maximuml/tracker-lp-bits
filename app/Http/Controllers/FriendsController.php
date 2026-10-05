@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\FriendAddRequest;
+use App\Http\Requests\FriendDeleteRequest;
 use App\Repositories\FriendsRepository;
 use App\Support\Avatar;
 use App\Support\CurrentUser;
@@ -115,23 +117,43 @@ class FriendsController extends LegacyController
 
     public function friendsPost(Request $request): Response|RedirectResponse|View
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $userid = (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
+        // Old POST /friends.php?action=X callers land on the dedicated
+        // endpoints — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return match ((string) ($request->input('action') ?? '')) {
+            'add' => redirect()->to('/web/friends/add'.$suffix, 308),
+            'delete' => redirect()->to('/web/friends/delete'.$suffix, 308),
+            default => $this->friends($request),
+        };
+    }
+
+    public function friendAdd(FriendAddRequest $request): RedirectResponse|Response
+    {
+        $userid = $this->listOwnerId($request);
         if ($userid <= 0 || ! Validators::isId($userid)) {
             return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_invalid_id')).$userid.'.');
         }
 
-        $action = (string) ($request->input('action') ?? '');
+        return $this->handleAdd($request, $userid);
+    }
 
-        if ($action === 'add') {
-            return $this->handleAdd($request, $userid);
+    public function friendDelete(FriendDeleteRequest $request): RedirectResponse|Response
+    {
+        $userid = $this->listOwnerId($request);
+        if ($userid <= 0 || ! Validators::isId($userid)) {
+            return $this->legacyAbortResponse(__('legacy/friends.std_error'), (__('legacy/friends.std_invalid_id')).$userid.'.');
         }
 
-        if ($action === 'delete') {
-            return $this->handleDelete($request, $userid);
-        }
+        return $this->handleDelete($request, $userid);
+    }
 
-        return $this->friends($request);
+    private function listOwnerId(Request $request): int
+    {
+        $currentUser = (array) ($this->currentUser->get() ?? []);
+
+        return (int) ($request->input('id') ?? $currentUser['id'] ?? 0);
     }
 
     private function handleAdd(Request $request, int $userid): RedirectResponse|Response

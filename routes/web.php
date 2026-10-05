@@ -16,8 +16,10 @@ use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\AuthenticateController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MetricsController;
+use App\Http\Controllers\NewsController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\TorrentController;
@@ -134,6 +136,15 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('torrent-approval', [TorrentController::class, 'approval']);
     Route::post('token/add', [TokenController::class, 'addToken']);
     Route::post('token/del', [TokenController::class, 'delToken']);
+
+    // REST endpoints for the actions the page POST dispatchers used to
+    // route by `action` param — POST /{friends,news}.php?action=X now
+    // 308-redirects here with the same body.
+    Route::post('friends/add', [FriendsController::class, 'friendAdd']);
+    Route::post('friends/delete', [FriendsController::class, 'friendDelete']);
+    Route::post('news/add', [NewsController::class, 'newsAdd']);
+    Route::post('news/edit', [NewsController::class, 'newsEdit']);
+    Route::post('news/delete', [NewsController::class, 'newsDelete']);
 
     // REST endpoints for the actions the /ajax dispatcher used to route by
     // `action` string — POST /ajax {action: X} now 308-redirects here with

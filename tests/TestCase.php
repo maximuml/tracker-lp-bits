@@ -10,6 +10,7 @@ use App\Support\Permissions;
 use App\Support\Settings;
 use App\Support\UserDisplay;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Cache;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -45,6 +46,23 @@ abstract class TestCase extends BaseTestCase
         // must not leak into the next one.
         Permissions::resetState();
         UserDisplay::resetState();
+
+        // And the shared Redis-backed caches: the unit/feature databases
+        // reuse the same uid space, so a `user_{id}_content` row or primed
+        // settings blob cached by an earlier phpunit invocation in the same
+        // job survives into the next one. Flush once per process so each
+        // invocation's cache state matches its own database.
+        self::flushSharedTestCacheOnce();
+    }
+
+    private static function flushSharedTestCacheOnce(): void
+    {
+        static $flushed = false;
+        if ($flushed) {
+            return;
+        }
+        $flushed = true;
+        Cache::flush();
     }
 
     /**

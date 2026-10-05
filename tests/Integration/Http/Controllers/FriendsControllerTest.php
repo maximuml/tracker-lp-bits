@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\FriendsController;
+use App\Http\Requests\FriendAddRequest;
+use App\Http\Requests\FriendDeleteRequest;
 use App\Models\User;
 use App\Repositories\FriendsRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -111,15 +113,14 @@ final class FriendsControllerTest extends TestCase
         $userId = $this->mockCurrentUserWithDefaults();
 
         $controller = app(FriendsController::class);
-        $request = Request::create('/friends', 'POST', [
+        $request = FriendAddRequest::create('/web/friends/delete', 'POST', [
             'id' => $userId,
-            'action' => 'add',
             'targetid' => 0,
             'type' => 'friend',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friendsPost($request);
+        $response = $controller->friendAdd($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Invalid ID', (string) $response->getContent());
@@ -130,15 +131,14 @@ final class FriendsControllerTest extends TestCase
         $userId = $this->mockCurrentUserWithDefaults();
 
         $controller = app(FriendsController::class);
-        $request = Request::create('/friends', 'POST', [
+        $request = FriendAddRequest::create('/web/friends/delete', 'POST', [
             'id' => $userId,
-            'action' => 'add',
             'targetid' => 5,
             'type' => 'unknown',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friendsPost($request);
+        $response = $controller->friendAdd($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Unknown type', (string) $response->getContent());
@@ -155,15 +155,14 @@ final class FriendsControllerTest extends TestCase
         app()->instance(FriendsRepository::class, $repo);
 
         $controller = app(FriendsController::class);
-        $request = Request::create('/friends', 'POST', [
+        $request = FriendAddRequest::create('/web/friends/delete', 'POST', [
             'id' => $userId,
-            'action' => 'add',
             'targetid' => 5,
             'type' => 'friend',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friendsPost($request);
+        $response = $controller->friendAdd($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/friends.php?id='.$userId.'#friends', $response->getTargetUrl());
@@ -179,15 +178,14 @@ final class FriendsControllerTest extends TestCase
         app()->instance(FriendsRepository::class, $repo);
 
         $controller = app(FriendsController::class);
-        $request = Request::create('/friends', 'POST', [
+        $request = FriendAddRequest::create('/web/friends/delete', 'POST', [
             'id' => $userId,
-            'action' => 'add',
             'targetid' => 5,
             'type' => 'friend',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friendsPost($request);
+        $response = $controller->friendAdd($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('already in', (string) $response->getContent());
@@ -203,16 +201,15 @@ final class FriendsControllerTest extends TestCase
         app()->instance(FriendsRepository::class, $repo);
 
         $controller = app(FriendsController::class);
-        $request = Request::create('/friends', 'POST', [
+        $request = FriendDeleteRequest::create('/web/friends/delete', 'POST', [
             'id' => $userId,
-            'action' => 'delete',
             'targetid' => 5,
             'type' => 'friend',
             'sure' => 1,
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friendsPost($request);
+        $response = $controller->friendDelete($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/friends.php?id='.$userId.'#friends', $response->getTargetUrl());
@@ -228,16 +225,15 @@ final class FriendsControllerTest extends TestCase
         app()->instance(FriendsRepository::class, $repo);
 
         $controller = app(FriendsController::class);
-        $request = Request::create('/friends', 'POST', [
+        $request = FriendDeleteRequest::create('/web/friends/delete', 'POST', [
             'id' => $userId,
-            'action' => 'delete',
             'targetid' => 5,
             'type' => 'friend',
             'sure' => 1,
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friendsPost($request);
+        $response = $controller->friendDelete($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('No friend found with ID', (string) $response->getContent());
@@ -248,19 +244,67 @@ final class FriendsControllerTest extends TestCase
         $userId = $this->mockCurrentUserWithDefaults();
 
         $controller = app(FriendsController::class);
-        $request = Request::create('/friends', 'POST', [
+        $request = FriendDeleteRequest::create('/web/friends/delete', 'POST', [
             'id' => $userId,
-            'action' => 'delete',
             'targetid' => 5,
             'type' => 'friend',
             'sure' => 0,
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->friendsPost($request);
+        $response = $controller->friendDelete($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('if you are sure', (string) $response->getContent());
+    }
+
+    public function test_friends_post_redirects_add_to_rest_endpoint(): void
+    {
+        $controller = app(FriendsController::class);
+        $request = Request::create('/friends', 'POST', [
+            'action' => 'add',
+            'targetid' => 5,
+            'type' => 'friend',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->friendsPost($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringEndsWith('/web/friends/add', $response->getTargetUrl());
+    }
+
+    public function test_friends_post_redirects_delete_to_rest_endpoint(): void
+    {
+        $controller = app(FriendsController::class);
+        $request = Request::create('/friends', 'POST', [
+            'action' => 'delete',
+            'targetid' => 5,
+            'type' => 'friend',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->friendsPost($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringEndsWith('/web/friends/delete', $response->getTargetUrl());
+    }
+
+    public function test_friends_post_redirect_forwards_query_params(): void
+    {
+        $controller = app(FriendsController::class);
+        $request = Request::create('/friends?action=delete&id=7&targetid=5&type=friend', 'POST');
+        app()->instance('request', $request);
+
+        $response = $controller->friendsPost($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('targetid=5', $response->getTargetUrl());
+        $this->assertStringContainsString('id=7', $response->getTargetUrl());
+        $this->assertStringStartsWith('http://localhost/web/friends/delete?', $response->getTargetUrl());
     }
 
     /**

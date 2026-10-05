@@ -28,7 +28,7 @@ class AttendanceController extends LegacyController
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
-            return redirect('/attendance.php');
+            return redirect('/web/attendance');
         }
 
         $uid = (int) ($curUser['id'] ?? 0);
@@ -42,7 +42,7 @@ class AttendanceController extends LegacyController
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
-            return redirect('/attendance.php');
+            return redirect('/web/attendance');
         }
 
         $uid = (int) ($curUser['id'] ?? 0);
@@ -52,7 +52,7 @@ class AttendanceController extends LegacyController
             Captcha::checkCode(
                 (string) (request()->post('imagehash') ?? ''),
                 (string) (request()->post('imagestring') ?? ''),
-                'attendance.php',
+                '/web/attendance',
                 false,
                 true
             );
@@ -150,7 +150,7 @@ function retroactive(dateStr) {
     if (!window.confirm(confirmText + dateStr + ' ?')) {
         return
     }
-    nativePost('ajax.php', {params: {date: dateStr}, action: 'attendanceRetroactive'}, function (response) {
+    nativePost('/web/attendance/retroactive', {date: dateStr}, function (response) {
         if (response.ret != 0) {
             alert(response.msg)
         } else {

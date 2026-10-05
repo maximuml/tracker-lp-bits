@@ -111,7 +111,7 @@ class SettingsController extends LegacyController
     {
         $currentUser = $this->currentUser->get();
         if ($currentUser === null) {
-            return redirect('/settings.php');
+            return redirect('/web/settings');
         }
 
         if (UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
@@ -127,7 +127,7 @@ class SettingsController extends LegacyController
         $data = [
             'action' => $action,
             'currentUser' => (array) $currentUser,
-            'scriptName' => '/settings.php',
+            'scriptName' => '/web/settings',
         ];
 
         $sectionMap = [
@@ -195,7 +195,7 @@ class SettingsController extends LegacyController
     {
         $currentUser = $this->currentUser->get();
         if ($currentUser === null) {
-            return redirect('/settings.php');
+            return redirect('/web/settings');
         }
 
         if (UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
@@ -205,10 +205,10 @@ class SettingsController extends LegacyController
         $action = (string) ($request->post('action') ?? '');
         $sectionActions = ['basicsettings', 'mainsettings', 'smtpsettings', 'securitysettings', 'authoritysettings', 'tweaksettings', 'bonussettings', 'accountsettings', 'torrentsettings', 'attachmentsettings', 'codesettings', 'miscsettings'];
         if (in_array($action, $sectionActions, true)) {
-            return redirect("/settings.php?action=$action");
+            return redirect("/web/settings?action=$action");
         }
 
-        return $this->handleSave($request) ?? redirect('/settings.php');
+        return $this->handleSave($request) ?? redirect('/web/settings');
     }
 
     private function handleSave(Request $request): RedirectResponse|Response|null
@@ -354,7 +354,7 @@ class SettingsController extends LegacyController
         $sectionLabel = ucfirst($section);
         Log::writeWithContext("Tracker {$sectionLabel} settings updated by {$username}. {$actiontime}", 'mod');
 
-        return redirect('/settings.php?action='.$section.'settings');
+        return redirect('/web/settings?action='.$section.'settings');
     }
 
     /** @return array<int, string> */

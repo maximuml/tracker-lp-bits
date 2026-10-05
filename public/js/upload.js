@@ -5,8 +5,7 @@ if (uploadOfferSelect) {
         if (id == 0) {
             return;
         }
-        var params = { action: "getOffer", params: { id: id } };
-        nativePost("ajax.php", params, function (response) {
+        nativePost("/web/offers/show", { id: id }, function (response) {
             if (response.ret != 0) {
                 alert(response.msg);
                 return;

@@ -34,7 +34,7 @@ class EditMailboxesRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect('/messages.php?action=editmailboxes')->withErrors($validator)->withInput()
+            redirect('/web/messages?action=editmailboxes')->withErrors($validator)->withInput()
         );
     }
 }

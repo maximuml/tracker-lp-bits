@@ -65,7 +65,7 @@ class OfferController extends LegacyController
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/offers.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/offers'.($qs ? '?'.$qs : ''));
         }
 
         if ($request->isMethod('post')) {

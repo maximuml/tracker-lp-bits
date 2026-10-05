@@ -125,7 +125,7 @@ final class StaffModerationControllerTest extends TestCase
         $response = $controller->modrulesPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('modrules.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/modrules', $response->getTargetUrl());
     }
 
     public function test_modtask_denies_access_for_non_staff_user(): void
@@ -211,7 +211,7 @@ final class StaffModerationControllerTest extends TestCase
         $response = $controller->modtaskPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('unco.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/unco', $response->getTargetUrl());
         $this->assertStringContainsString('status=1', $response->getTargetUrl());
     }
 

@@ -51,7 +51,7 @@ class TorrentBookmarkController extends LegacyController
     public function thanks(Request $request): Response|RedirectResponse
     {
         if ($this->currentUser->get() === null) {
-            return redirect('/thanks.php'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
+            return redirect('/thanks'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
         }
 
         $curUser = $this->currentUser->get();

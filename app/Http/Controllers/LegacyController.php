@@ -22,7 +22,7 @@ abstract class LegacyController extends Controller
         if ($auth && CurrentUser::instance()->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
+            return redirect('/'.$page.($qs ? '?'.$qs : ''));
         }
 
         /** @var view-string $viewName */
@@ -41,7 +41,7 @@ abstract class LegacyController extends Controller
         if ($auth && CurrentUser::instance()->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
+            return redirect('/'.$page.($qs ? '?'.$qs : ''));
         }
 
         /** @var view-string $viewName */
@@ -74,7 +74,7 @@ abstract class LegacyController extends Controller
         if ($auth && CurrentUser::instance()->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/'.$page.'.php'.($qs ? '?'.$qs : ''));
+            return redirect('/'.$page.($qs ? '?'.$qs : ''));
         }
 
         /** @var view-string $viewName */

@@ -68,7 +68,7 @@ final class TorrentsModernPageTest extends TestCase
         $this->assertStringContainsString('data-nx="data"', $html);
         $this->assertStringContainsString('colhead', $html);
         $this->assertStringContainsString('nxm-nameblock', $html);
-        $this->assertStringContainsString('details.php?id='.$torrent->id, $html);
+        $this->assertStringContainsString('/web/details/'.$torrent->id, $html);
         $this->assertStringContainsString('Structural Marker Torrent', $html);
     }
 

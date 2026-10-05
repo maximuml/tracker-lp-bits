@@ -73,12 +73,12 @@ final class TorrentBookmarkControllerTest extends TestCase
     public function test_thanks_redirects_guest_to_login(): void
     {
         $controller = app(TorrentBookmarkController::class);
-        $request = Request::create('/thanks.php', 'GET');
+        $request = Request::create('/thanks', 'GET');
         app()->instance('request', $request);
 
         $response = $controller->thanks($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/thanks.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/thanks', $response->getTargetUrl());
     }
 }

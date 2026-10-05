@@ -80,12 +80,9 @@ document.querySelectorAll('.claim').forEach(function (btn) {
         var id = this.getAttribute('data-id')
         layer.confirm({$confirmBuyJs}, function (index) {
             layer.close(index)
-            var params = {
-                action: "claimTask",
-                params: {exam_id: id}
-            }
+            var params = {exam_id: id}
             console.log(params)
-            nativePost('ajax.php', params, function(response) {
+            nativePost('/web/tasks/claim', params, function(response) {
                 console.log(response)
                 if (response.ret != 0) {
                     layer.alert(response.msg)
@@ -152,7 +149,7 @@ JS;
 
         $message = '';
         foreach ($links as $key => $label) {
-            $message .= 'Click <a class=altlink href=freeleech.php?action='.$key.'>here</a> to '.$label.'..<br />';
+            $message .= 'Click <a class=altlink href=/web/freeleech?action='.$key.'>here</a> to '.$label.'..<br />';
         }
 
         return $this->legacyAbortResponse('Select action', $message, false);

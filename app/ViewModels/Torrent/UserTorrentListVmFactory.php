@@ -91,13 +91,13 @@ final class UserTorrentListVmFactory
             $categoryIcon = null;
             if (isset($arr['category'])) {
                 $catData = Category::iconData($arr['category']);
-                $categoryIcon = new CategoryIcon($catData['iconClass'], $catData['name'], 'torrents.php?allsec=1&cat='.$arr['category']);
+                $categoryIcon = new CategoryIcon($catData['iconClass'], $catData['name'], '/web/torrents?allsec=1&cat='.$arr['category']);
             }
 
             $vmRows[] = new UserTorrentRow(
                 rowClass: Promotion::rowClassWithContext((int) $arr['sp_state'], '', $arr),
                 categoryIcon: $categoryIcon,
-                nameUrl: 'details.php?id='.$arr['torrent'].'&hit=1',
+                nameUrl: '/web/details/'.$arr['torrent'].'?hit=1',
                 nameTitle: $nameTitle,
                 displayName: $displayName,
                 isBanned: LegacyYesNo::isYes($arr['banned'] ?? null),

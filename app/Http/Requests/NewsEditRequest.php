@@ -7,7 +7,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * POST /web/news/edit — replaces legacy POST /news.php with action=edit.
+ * POST /web/news/edit — replaces legacy POST /web/news with action=edit.
  * `newsid` may still arrive as a query param of the form action URL.
  */
 class NewsEditRequest extends FormRequest

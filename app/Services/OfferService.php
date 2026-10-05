@@ -47,7 +47,7 @@ final class OfferService
         }
 
         if (! $request->isMethod('post')) {
-            return redirect('/offers.php');
+            return redirect('/web/offers');
         }
 
         if ($action === 'new_offer') {
@@ -131,7 +131,7 @@ final class OfferService
         $descr = $pic.$descrmain;
 
         if ($this->offerRepository->offerNameExists($name)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_offer_exists').view('components.altlink', ['class' => 'altlink', 'url' => 'offers.php', 'text' => __('legacy/offers.text_view_all_offers')])->render(), false);
+            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_offer_exists').view('components.altlink', ['class' => 'altlink', 'url' => '/web/offers', 'text' => __('legacy/offers.text_view_all_offers')])->render(), false);
         }
 
         $id = $this->offerRepository->createOffer([
@@ -154,7 +154,7 @@ final class OfferService
         Cache::clearStaffMessage();
         Log::writeWithContext("offer {$name} was added by ".($curuser['username'] ?? ''), 'normal');
 
-        return redirect("/offers.php?id={$id}&off_details=1");
+        return redirect("/web/offers?id={$id}&off_details=1");
     }
 
     public function handleDelete(Request $request): RedirectResponse
@@ -197,7 +197,7 @@ final class OfferService
         if ($userId !== (int) ($num['userid'] ?? 0)) {
             $locale = Locale::userLocale((int) ($num['userid'] ?? 0));
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
-            $msg = Locale::trans('offer.msg_your_offer', [], $locale).($num['name'] ?? '').Locale::trans('offer.msg_was_deleted_by', [], $locale)."[url=userdetails.php?id={$userId}]".($curuser['username'] ?? '').'[/url]'.Locale::trans('offer.msg_blank', [], $locale).($reason !== '' ? Locale::trans('offer.msg_reason_is', [], $locale).$reason : '');
+            $msg = Locale::trans('offer.msg_your_offer', [], $locale).($num['name'] ?? '').Locale::trans('offer.msg_was_deleted_by', [], $locale)."[url=/userdetails?id={$userId}]".($curuser['username'] ?? '').'[/url]'.Locale::trans('offer.msg_blank', [], $locale).($reason !== '' ? Locale::trans('offer.msg_reason_is', [], $locale).$reason : '');
 
             $this->messageRepository->add([
                 'sender' => null,
@@ -210,7 +210,7 @@ final class OfferService
 
         Log::writeWithContext('Offer: '.$offerId.' ('.($num['name'] ?? '').') was deleted by '.($curuser['username'] ?? '').($reason !== '' ? " ({$reason})" : ''), 'normal');
 
-        return redirect('/offers.php');
+        return redirect('/web/offers');
     }
 
     public function handleEdit(Request $request): RedirectResponse
@@ -259,6 +259,6 @@ final class OfferService
             'descr' => $descr,
         ]);
 
-        return redirect("/offers.php?id={$id}&off_details=1");
+        return redirect("/web/offers?id={$id}&off_details=1");
     }
 }

@@ -45,7 +45,7 @@ final class BbcodeEditor extends Component
     ) {
         $this->quickSmilies = self::QUICK_SMILIES;
         $this->enableAttach = SiteConfig::current()->attachment->enableAttach();
-        $this->attachUrl = Url::schemeAndHost().'/attachment.php';
+        $this->attachUrl = Url::schemeAndHost().'/web/attachment';
     }
 
     public function render(): View

@@ -88,7 +88,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
 
         $response = $this->get("/web/confirmemail/{$user->id}/{$token}/".urlencode($newEmail));
 
-        $response->assertRedirect('/usercp.php?action=security&type=saved');
+        $response->assertRedirect('/usercp?action=security&type=saved');
         $user->refresh();
         $this->assertSame($newEmail, $user->email);
         $this->assertSame('', (string) $user->editsecret);
@@ -131,7 +131,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
 
         $response = $this->get("/web/confirmemail/{$user->id}/{$md5}/".urlencode($legacyEmail));
 
-        $response->assertRedirect('/usercp.php?action=security&type=saved');
+        $response->assertRedirect('/usercp?action=security&type=saved');
         $user->refresh();
         $this->assertSame($legacyEmail, $user->email);
         $this->assertSame('', (string) $user->editsecret);

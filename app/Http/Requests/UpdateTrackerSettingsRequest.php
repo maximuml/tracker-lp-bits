@@ -54,7 +54,7 @@ class UpdateTrackerSettingsRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect('/usercp.php?action=tracker')->withErrors($validator)->withInput()
+            redirect('/usercp?action=tracker')->withErrors($validator)->withInput()
         );
     }
 }

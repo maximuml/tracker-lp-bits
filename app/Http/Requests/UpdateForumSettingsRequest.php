@@ -35,7 +35,7 @@ class UpdateForumSettingsRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect('/usercp.php?action=forum')->withErrors($validator)->withInput()
+            redirect('/usercp?action=forum')->withErrors($validator)->withInput()
         );
     }
 }

@@ -96,7 +96,7 @@ function meiliAutoFetch(query)
     meiliAutoQuery = query;
     var xhr = new XMLHttpRequest();
     meiliAutoXhr = xhr;
-    xhr.open('GET', 'autocomplete_torrents.php?q=' + encodeURIComponent(query), true);
+    xhr.open('GET', '/web/autocomplete_torrents?q=' + encodeURIComponent(query), true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (meiliAutoXhr === xhr) {

@@ -205,7 +205,7 @@ final class SystemBulkControllerTest extends TestCase
         ]);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/increment-bulk.php?sent=1&type=seedbonus', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/increment-bulk?sent=1&type=seedbonus', $response->getTargetUrl());
         Queue::assertPushed(BulkUserIncrementJob::class, 1);
     }
 
@@ -224,7 +224,7 @@ final class SystemBulkControllerTest extends TestCase
         ]);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/increment-bulk.php?sent=1&type=tmp_invites', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/increment-bulk?sent=1&type=tmp_invites', $response->getTargetUrl());
         Queue::assertPushed(BulkUserMessageJob::class, 1);
     }
 
@@ -296,7 +296,7 @@ final class SystemBulkControllerTest extends TestCase
         $response = $this->callTakeupdate(['delreport' => $reportIds, 'setdealt' => 1]);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/reports.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/reports', $response->getTargetUrl());
         foreach ($reportIds as $id) {
             $this->assertDatabaseHas('reports', ['id' => $id, 'dealtwith' => 1, 'dealtby' => $user->id]);
         }
@@ -433,7 +433,7 @@ final class SystemBulkControllerTest extends TestCase
         ]);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/invite.php?id='.$user->id.'&sent=1', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/invite?id='.$user->id.'&sent=1', $response->getTargetUrl());
         // SMTP is disabled in the test settings, so the mail is not sent and
         // the invitee is not marked on the hash.
         Queue::assertNotPushed(SendLegacyMail::class);

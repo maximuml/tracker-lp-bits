@@ -71,7 +71,7 @@ class UserDetailController extends Controller
         }
 
         if ($this->currentUser->get() === null) {
-            return redirect('/userdetails.php?'.$request->getQueryString());
+            return redirect('/userdetails?'.$request->getQueryString());
         }
 
         $user = $this->userDetailRepository->getUser($id);
@@ -239,8 +239,8 @@ document.getElementById('remove-leech-warn').addEventListener('click', function 
     if (!window.confirm(%s)) {
         return
     }
-    var params = {action: 'removeUserLeechWarn', params: {uid: this.getAttribute('data-uid')}}
-    nativePost('ajax.php', params, function (response) {
+    var params = {uid: this.getAttribute('data-uid')}
+    nativePost('/web/users/leech-warn/remove', params, function (response) {
         console.log(response)
         if (response.ret == 0) {
             location.reload()
@@ -344,8 +344,7 @@ document.getElementById('{$triggerId}').addEventListener("click", function () {
         yes: function () {
             var form = document.getElementById('layer-form-{$metaKey}')
             var params = serializeForm(form)
-            params.action = 'consumeBenefit'
-            nativePost('ajax.php', params, function (response) {
+            nativePost('/web/benefits/consume', params, function (response) {
                 console.log(response)
                 if (response.ret != 0) {
                     layer.alert(response.msg)

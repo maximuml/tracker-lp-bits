@@ -36,7 +36,7 @@ class SettingsUrlNormalizationTest extends TestCase
             'announce_url' => 'https://announce.example.com/announce.php',
         ]);
 
-        $response->assertRedirect('/settings.php?action=basicsettings');
+        $response->assertRedirect('/web/settings?action=basicsettings');
         $this->assertSame('http://example.com', DB::table('settings')->where('name', 'basic.BASEURL')->value('value'));
         $this->assertSame('https://announce.example.com/announce.php', DB::table('settings')->where('name', 'basic.announce_url')->value('value'));
     }

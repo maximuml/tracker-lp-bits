@@ -49,7 +49,7 @@ class TorrentUploadController extends Controller
     {
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
+            return redirect('/login?returnto='.urlencode($request->fullUrl()));
         }
 
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
@@ -186,7 +186,7 @@ class TorrentUploadController extends Controller
         try {
             $torrent = $repository->upload($request);
         } catch (TorrentAlreadyExistsException $e) {
-            return redirect('details.php?id='.$e->getTorrentId().'&existed=1');
+            return redirect('/web/details/'.$e->getTorrentId().'?existed=1');
         } catch (UploadValidationException $e) {
             throw ValidationException::withMessages([
                 $e->field() ?? 'upload' => $e->getMessage(),
@@ -197,7 +197,7 @@ class TorrentUploadController extends Controller
             ])->redirectTo('/upload');
         }
 
-        return redirect('details.php?id='.$torrent->id.'&uploaded=1');
+        return redirect('/web/details/'.$torrent->id.'?uploaded=1');
     }
 
     /**

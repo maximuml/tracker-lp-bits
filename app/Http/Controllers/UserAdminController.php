@@ -101,7 +101,7 @@ class UserAdminController extends LegacyController
         $perPage = 50;
         $filters = ['search' => $search, 'class' => $class, 'country' => $country, 'letter' => $letter];
         $count = $this->userListingRepository->countUsers($filters);
-        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perPage, $count, 'users.php?'.$q.($q ? '&' : ''));
+        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perPage, $count, '/web/users?'.$q.($q ? '&' : ''));
         $userRows = $this->userListingRepository->listUsers($filters, (int) $offset, $perPage);
 
         UserDisplay::preload(array_values(array_map(fn ($arr) => (int) $arr['id'], $userRows)));
@@ -368,7 +368,7 @@ class UserAdminController extends LegacyController
                 $this->userModerationRepository->enableUser($operator, $currentUserId, $title);
             }
 
-            return redirect('index.php');
+            return redirect('/web/index');
         }
         $viewData['latestBanLog'] = $latestBanLog;
         $viewData['elapsedDay'] = $elapsedDay;
@@ -384,7 +384,7 @@ class UserAdminController extends LegacyController
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/unco.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/unco'.($qs ? '?'.$qs : ''));
         }
 
         if (UserDisplay::currentClass() < UC_MODERATOR) {
@@ -448,7 +448,7 @@ class UserAdminController extends LegacyController
             return $this->legacyAbortResponse('ERROR', $e->getMessage());
         }
 
-        return redirect('userdetails.php?id='.(int) $newUser->id);
+        return redirect('/userdetails?id='.(int) $newUser->id);
 
     }
 }

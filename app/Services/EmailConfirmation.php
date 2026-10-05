@@ -149,7 +149,7 @@ class EmailConfirmation
 
         $this->sendConfirmationEmail((string) $user->username, $email, (int) $user->id, $confirmToken, $ip, $langFolder);
 
-        return 'ok.php?type=signup&email='.rawurlencode($email);
+        return '/web/ok?type=signup&email='.rawurlencode($email);
     }
 
     /**
@@ -225,8 +225,8 @@ class EmailConfirmation
         string $langFolder,
     ): void {
         $baseUrl = Url::siteBase();
-        $confirmUrl = $baseUrl.'/confirm.php?id='.$userId.'&secret='.$confirmToken;
-        $resendUrl = $baseUrl.'/confirm_resend.php';
+        $confirmUrl = $baseUrl.'/confirm?id='.$userId.'&secret='.$confirmToken;
+        $resendUrl = $baseUrl.'/confirm_resend';
         $siteName = SiteConfig::current()->basic->siteName();
         $reportEmail = SiteConfig::current()->main->reportEmail('');
 

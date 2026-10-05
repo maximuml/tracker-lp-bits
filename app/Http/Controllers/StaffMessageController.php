@@ -102,7 +102,7 @@ class StaffMessageController extends LegacyController
             dryRun: $dryRun,
         );
 
-        return redirect('staffmess.php?sent=1');
+        return redirect('/web/staffmess?sent=1');
     }
 
     public function contactstaff(Request $request): View|RedirectResponse|Response

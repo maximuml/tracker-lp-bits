@@ -172,7 +172,7 @@ final class PeerLimitGuardTest extends TestCase
         } catch (TrackerWarningException $e) {
             $this->assertSame(60, $e->getResponse()['interval']);
             $this->assertStringContainsString('Your ratio is too low!', $e->getMessage());
-            $this->assertStringContainsString('/faq.php#id46', $e->getMessage());
+            $this->assertStringContainsString('/web/faq#id46', $e->getMessage());
         }
 
         $after = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW - $hours * 3600));

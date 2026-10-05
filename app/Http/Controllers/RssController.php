@@ -30,7 +30,7 @@ class RssController extends LegacyController
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
-            return redirect('/getrss.php');
+            return redirect('/web/getrss');
         }
 
         return $this->legacyPage($request, 'getrss', true, $this->getrssData());
@@ -97,7 +97,7 @@ class RssController extends LegacyController
             }
         }
 
-        $data['categoriesTable'] = $this->searchCategoryTableFactory->create($browsecatmode, 'yes', 'torrents.php?allsec=1&', '', 3, '', ['section_name' => true]);
+        $data['categoriesTable'] = $this->searchCategoryTableFactory->create($browsecatmode, 'yes', '/web/torrents?allsec=1&', '', 3, '', ['section_name' => true]);
         $data['paidTorrentEnabled'] = SiteConfig::current()->torrent->paidTorrentEnabled();
         $data['allowed_showrows'] = ['10', '50'];
         $data['stickyTypes'] = [
@@ -113,7 +113,7 @@ class RssController extends LegacyController
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
-            return redirect('/getrss.php');
+            return redirect('/web/getrss');
         }
 
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
@@ -204,7 +204,7 @@ class RssController extends LegacyController
             $addinclbm = '&inclbookmarked='.$inclbookmarked;
         }
 
-        $link = Url::absolute($baseUrl).'/torrentrss.php?'.http_build_query($query).$addinclbm;
+        $link = Url::absolute($baseUrl).'/web/torrentrss?'.http_build_query($query).$addinclbm;
         $msg = (__('legacy/getrss.std_use_following_url'))."\n".$link."\n\n"
             .(__('legacy/getrss.std_utorrent_feed_url'))."\n".$link.'&linktype=dl'.$addinclbm;
 

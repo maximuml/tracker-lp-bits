@@ -331,7 +331,7 @@ final class ForumListingService
         }
 
         if ($hits > 0) {
-            [, , , $offset, $perpage, $page] = Pagination::pager($topicsperpage, $hits, 'forums.php?action=search&keywords='.rawurlencode($keywords).'&');
+            [, , , $offset, $perpage, $page] = Pagination::pager($topicsperpage, $hits, '/forums?action=search&keywords='.rawurlencode($keywords).'&');
             $rows = $this->postRepository->searchForumPosts($keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
             $pages = (int) max(1, (int) ceil($hits / max(1, (int) $perpage)));
 

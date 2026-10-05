@@ -59,7 +59,7 @@ final class RequirePasswordChange
                 ], 403);
             }
 
-            return redirect('/usercp.php?action=security');
+            return redirect('/usercp?action=security');
         }
 
         return $next($request);

@@ -36,7 +36,7 @@ final class ToptenControllerTest extends TestCase
         $response = $controller->legacy($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('/topten.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/topten', $response->getTargetUrl());
     }
 
     public function test_legacy_denies_without_permission(): void

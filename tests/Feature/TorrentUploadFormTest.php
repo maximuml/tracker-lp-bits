@@ -196,7 +196,7 @@ final class TorrentUploadFormTest extends TestCase
 
         $this->assertNotNull($torrent);
         $this->assertSame('Meta Name Release 2026', $torrent->name);
-        $response->assertRedirect('details.php?id='.$torrent->id.'&uploaded=1');
+        $response->assertRedirect('/web/details/'.$torrent->id.'?uploaded=1');
     }
 
     public function test_rerender_restores_every_control_kind(): void

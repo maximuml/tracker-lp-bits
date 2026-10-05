@@ -171,7 +171,7 @@ class PasswordRecoveryService
         $baseUrl = Url::siteBase();
         $siteName = SiteConfig::current()->basic->siteName();
 
-        $resetUrl = $baseUrl.'/recover.php?id='.$userId.'&secret='.$hash;
+        $resetUrl = $baseUrl.'/recover?id='.$userId.'&secret='.$hash;
 
         $body = view('emails.password-reset', [
             'email' => $email,
@@ -213,7 +213,7 @@ class PasswordRecoveryService
 
         $body = view('emails.password-changed', [
             'username' => (string) $user->username,
-            'loginUrl' => $baseUrl.'/login.php',
+            'loginUrl' => $baseUrl.'/login',
             'siteName' => $siteName,
         ])->render();
 

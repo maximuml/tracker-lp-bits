@@ -156,7 +156,7 @@ class LogController extends LegacyController
             $id = (int) $request->input('id', 0);
             $editItem = $id > 0 ? $this->logRepository->getChronicleById($id) : null;
             if ($editItem === null) {
-                return redirect('/log.php?action=chronicle');
+                return redirect('/web/log?action=chronicle');
             }
 
             return $this->chronicleList($request, $q, $canManage, $editItem);
@@ -214,7 +214,7 @@ class LogController extends LegacyController
             $this->logRepository->addChronicle((int) ($currentUser['id'] ?? 0), $txt);
         }
 
-        return redirect('/log.php?action=chronicle');
+        return redirect('/web/log?action=chronicle');
     }
 
     public function chronicleUpdatePost(ChronicleUpdateRequest $request): RedirectResponse|Response
@@ -226,13 +226,13 @@ class LogController extends LegacyController
         $id = (int) $request->input('id', 0);
         $txt = (string) ($request->input('txt') ?? '');
         if ($id <= 0) {
-            return redirect('/log.php?action=chronicle');
+            return redirect('/web/log?action=chronicle');
         }
         if ($txt !== '') {
             $this->logRepository->updateChronicle($id, $txt);
         }
 
-        return redirect('/log.php?action=chronicle');
+        return redirect('/web/log?action=chronicle');
     }
 
     public function chronicleDeletePost(ChronicleDeleteRequest $request): RedirectResponse|Response
@@ -243,11 +243,11 @@ class LogController extends LegacyController
 
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
-            return redirect('/log.php?action=chronicle');
+            return redirect('/web/log?action=chronicle');
         }
         $this->logRepository->deleteChronicle($id);
 
-        return redirect('/log.php?action=chronicle');
+        return redirect('/web/log?action=chronicle');
     }
 
     public function pollDeletePost(PollDeleteRequest $request): RedirectResponse|Response
@@ -275,7 +275,7 @@ class LogController extends LegacyController
             return redirect('/');
         }
 
-        return redirect('/log.php?action=poll&deleted=1');
+        return redirect('/web/log?action=poll&deleted=1');
     }
 
     private function logAccessGate(): ?Response

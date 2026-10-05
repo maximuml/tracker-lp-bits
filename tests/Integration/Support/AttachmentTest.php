@@ -79,7 +79,7 @@ final class AttachmentTest extends TestCase
         );
 
         $this->assertStringContainsString('pic/attachicons/torrent.gif', $html);
-        $this->assertStringContainsString('getattachment.php?id=3&amp;dlkey=abc', $html);
+        $this->assertStringContainsString('/web/getattachment?id=3&amp;dlkey=abc', $html);
         $this->assertStringContainsString('file.torrent', $html);
         $this->assertStringContainsString('5 MB', $html);
     }

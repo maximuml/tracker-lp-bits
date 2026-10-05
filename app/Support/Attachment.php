@@ -79,7 +79,7 @@ final class Attachment
     ): string {
         $icon = self::iconForFileType((string) ($row['filetype'] ?? ''));
         $downloadCount = number_format((int) ($row['downloads'] ?? 0));
-        $href = "getattachment.php?id=$id&dlkey=$dlkey";
+        $href = "/web/getattachment?id=$id&dlkey=$dlkey";
 
         return trim(view('support._attach-file', [
             'icon' => SafeHtml::fromTrustedHtml($icon),

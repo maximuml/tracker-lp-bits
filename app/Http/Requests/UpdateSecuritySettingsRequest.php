@@ -37,7 +37,7 @@ class UpdateSecuritySettingsRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect('/usercp.php?action=security')->withErrors($validator)->withInput()
+            redirect('/usercp?action=security')->withErrors($validator)->withInput()
         );
     }
 }

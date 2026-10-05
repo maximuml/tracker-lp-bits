@@ -7,7 +7,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * POST /web/news/add — replaces legacy POST /news.php with action=add.
+ * POST /web/news/add — replaces legacy POST /web/news with action=add.
  * Empty body/subject surface the legacy error pages, so they stay nullable
  * here and the controller keeps the domain checks.
  */

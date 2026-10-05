@@ -22,7 +22,7 @@ final class MyControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_bonus_redirects_to_mybonus_php_for_guest(): void
+    public function test_bonus_redirects_to_mybonus_for_guest(): void
     {
         $this->mockCurrentUser(null);
 
@@ -33,7 +33,7 @@ final class MyControllerTest extends TestCase
         $response = $controller->bonus($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/mybonus.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/mybonus', $response->getTargetUrl());
     }
 
     public function test_bonus_returns_view_for_authenticated_user(): void
@@ -55,7 +55,7 @@ final class MyControllerTest extends TestCase
         $this->assertInstanceOf(View::class, $response);
     }
 
-    public function test_hr_redirects_to_myhr_php_for_guest(): void
+    public function test_hr_redirects_to_myhr_for_guest(): void
     {
         $this->mockCurrentUser(null);
 
@@ -66,7 +66,7 @@ final class MyControllerTest extends TestCase
         $response = $controller->hr($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/myhr.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/myhr', $response->getTargetUrl());
     }
 
     /**

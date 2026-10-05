@@ -256,7 +256,7 @@ class WebCommentController extends Controller
     {
         $query = ['action' => $action] + $query;
 
-        return 'comment.php?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        return '/comment?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 
     private function lang(string $key): string

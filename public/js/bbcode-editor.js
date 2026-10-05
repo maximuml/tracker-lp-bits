@@ -183,7 +183,7 @@
     };
 
     window.winop = function () {
-        window.open("moresmilies.php?form=" + encodeURIComponent(form) + "&text=" + encodeURIComponent(text), "mywin", "height=500,width=500,resizable=no,scrollbars=yes");
+        window.open("/web/moresmilies?form=" + encodeURIComponent(form) + "&text=" + encodeURIComponent(text), "mywin", "height=500,width=500,resizable=no,scrollbars=yes");
     };
 
     window.simpletag = function (thetag) {

@@ -60,7 +60,7 @@ final class TorrentDownloadRepositoryTest extends TestCase
 
         $url = $this->repository->getDownloadUrl(42, $user);
 
-        $this->assertStringContainsString('download.php?downhash=', $url);
+        $this->assertStringContainsString('download?downhash=', $url);
         $this->assertStringContainsString($user->id.'.', $url);
     }
 

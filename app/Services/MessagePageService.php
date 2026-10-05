@@ -316,7 +316,7 @@ class MessagePageService
                 $sender = (string) (__('legacy/messages.text_system'));
             } else {
                 $sender = UserDisplay::username((int) ($message['sender'] ?? 0));
-                $replyHref = 'sendmessage.php?receiver='.(int) ($message['sender'] ?? 0).'&replyto='.$pmId;
+                $replyHref = '/web/sendmessage?receiver='.(int) ($message['sender'] ?? 0).'&replyto='.$pmId;
             }
         }
 

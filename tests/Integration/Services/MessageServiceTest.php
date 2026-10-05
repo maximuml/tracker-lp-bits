@@ -380,7 +380,7 @@ final class MessageServiceTest extends TestCase
         $result = $this->callService(fn () => $this->service->takeMessage($request));
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('messages.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/messages', $result->getTargetUrl());
     }
 
     // ─── deletemessage ────────────────────────────────────────────────
@@ -527,7 +527,7 @@ final class MessageServiceTest extends TestCase
         $result = $this->service->handleMessagesActionPublic($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('messages.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/messages', $result->getTargetUrl());
     }
 
     public function test_handle_messages_action_moveordel_redirects_for_non_post(): void
@@ -542,7 +542,7 @@ final class MessageServiceTest extends TestCase
         $result = $this->service->handleMessagesActionPublic($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('messages.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/messages', $result->getTargetUrl());
     }
 
     public function test_handle_messages_action_editmailboxes2_redirects_for_non_post(): void
@@ -557,7 +557,7 @@ final class MessageServiceTest extends TestCase
         $result = $this->service->handleMessagesActionPublic($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('messages.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/messages', $result->getTargetUrl());
     }
 
     public function test_handle_messages_action_deletemessage_redirects_for_non_post(): void
@@ -572,7 +572,7 @@ final class MessageServiceTest extends TestCase
         $result = $this->service->handleMessagesActionPublic($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('messages.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/messages', $result->getTargetUrl());
     }
 
     public function test_handle_messages_action_viewmessage_returns_null_for_valid_message(): void

@@ -40,7 +40,7 @@ class TorrentOperationLogRepository extends BaseRepository
         }
         $locale = $receiver->locale;
         $subject = Locale::trans("torrent.operation_log.{$actionType}.notify_subject", [], $locale);
-        $msg = Locale::trans("torrent.operation_log.{$actionType}.notify_msg", ['torrent_name' => $torrentOperationLog->torrent->name, 'detail_url' => sprintf('details.php?id=%s', $torrentOperationLog->torrent_id), 'operator' => $torrentOperationLog->user->username, 'reason' => $torrentOperationLog->comment], $locale);
+        $msg = Locale::trans("torrent.operation_log.{$actionType}.notify_msg", ['torrent_name' => $torrentOperationLog->torrent->name, 'detail_url' => sprintf('/web/details/%s', $torrentOperationLog->torrent_id), 'operator' => $torrentOperationLog->user->username, 'reason' => $torrentOperationLog->comment], $locale);
         $message = [
             'sender' => null,
             'receiver' => $receiver->id,

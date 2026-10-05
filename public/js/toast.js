@@ -283,7 +283,7 @@
                 formData.append('params[' + key + ']', params[key]);
             }
         }
-        return fetch('ajax.php', {
+        return fetch('/ajax', {
             method: 'POST',
             body: formData,
             headers: { 'X-Requested-With': 'XMLHttpRequest' },

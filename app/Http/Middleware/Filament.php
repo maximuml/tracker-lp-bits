@@ -18,7 +18,7 @@ class Filament extends Authenticate
      */
     protected function redirectTo($request): ?string
     {
-        return Url::schemeAndHost(false).'/login.php';
+        return Url::schemeAndHost(false).'/login';
     }
 
     /**

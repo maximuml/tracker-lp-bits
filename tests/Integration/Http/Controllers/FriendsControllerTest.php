@@ -66,7 +66,7 @@ final class FriendsControllerTest extends TestCase
         $this->assertStringContainsString('Invalid ID', (string) $response->getContent());
     }
 
-    public function test_friends_redirects_guest_with_valid_id_to_friends_php(): void
+    public function test_friends_redirects_guest_with_valid_id_to_friends(): void
     {
         $this->mockCurrentUser(null);
 
@@ -77,7 +77,7 @@ final class FriendsControllerTest extends TestCase
         $response = $controller->friends($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/friends.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/friends', $response->getTargetUrl());
     }
 
     public function test_friends_add_rejects_get_request(): void
@@ -165,7 +165,7 @@ final class FriendsControllerTest extends TestCase
         $response = $controller->friendAdd($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/friends.php?id='.$userId.'#friends', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/friends?id='.$userId.'#friends', $response->getTargetUrl());
     }
 
     public function test_friends_add_rejects_already_existing_friend(): void
@@ -212,7 +212,7 @@ final class FriendsControllerTest extends TestCase
         $response = $controller->friendDelete($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/friends.php?id='.$userId.'#friends', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/friends?id='.$userId.'#friends', $response->getTargetUrl());
     }
 
     public function test_friends_delete_returns_error_when_not_found(): void

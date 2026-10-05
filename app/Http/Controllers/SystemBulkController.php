@@ -224,7 +224,7 @@ class SystemBulkController extends LegacyController
 
             $siteName = Setting::getSiteName();
             $title = $siteName.__('legacy/takeinvite.mail_tilte');
-            $signupUrl = Url::schemeAndHost(Url::isSecure())."/signup.php?type=invite&invitenumber=$hash";
+            $signupUrl = Url::schemeAndHost(Url::isSecure())."/signup?type=invite&invitenumber=$hash";
             $reportMail = SiteConfig::current()->main->reportEmail();
             $inviteTimeout = (string) SiteConfig::current()->main->inviteTimeout();
 
@@ -279,7 +279,7 @@ class SystemBulkController extends LegacyController
             $lock->release();
         }
 
-        return redirect('/invite.php?id='.$currentUserId.'&sent=1');
+        return redirect('/web/invite?id='.$currentUserId.'&sent=1');
     }
 
     public function takeupdate(Request $request): Response|RedirectResponse
@@ -316,7 +316,7 @@ class SystemBulkController extends LegacyController
             $this->legacyRedisCache?->delete_value('staff_report_count', true);
         }
 
-        return redirect('/reports.php');
+        return redirect('/web/reports');
     }
 
     public function incrementBulk(Request $request): View|RedirectResponse|Response
@@ -325,7 +325,7 @@ class SystemBulkController extends LegacyController
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/increment-bulk.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/increment-bulk'.($qs ? '?'.$qs : ''));
         }
 
         if (UserDisplay::currentClass() < UC_SYSOP) {
@@ -485,6 +485,6 @@ class SystemBulkController extends LegacyController
             );
         }
 
-        return redirect('/increment-bulk.php?sent=1&type='.$type);
+        return redirect('/web/increment-bulk?sent=1&type='.$type);
     }
 }

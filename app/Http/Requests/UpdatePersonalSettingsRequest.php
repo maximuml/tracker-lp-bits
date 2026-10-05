@@ -40,7 +40,7 @@ class UpdatePersonalSettingsRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect('/usercp.php?action=personal')->withErrors($validator)->withInput()
+            redirect('/usercp?action=personal')->withErrors($validator)->withInput()
         );
     }
 }

@@ -123,7 +123,7 @@ final class CommentService
 
     public function buildScript(string $type, int $parentId): string
     {
-        $script = Comment::TYPE_MAPS[$type]['target_script'] ?? 'details.php?id=%s';
+        $script = Comment::TYPE_MAPS[$type]['target_script'] ?? '/web/details/%s';
 
         return sprintf($script, $parentId);
     }

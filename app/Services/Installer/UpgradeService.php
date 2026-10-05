@@ -78,7 +78,7 @@ final class UpgradeService
 
         // custom field menu
         $this->addMenu('adminpanel', [
-            ['name' => 'Custom Field Manage', 'url' => 'fields.php', 'info' => 'Manage custom fields'],
+            ['name' => 'Custom Field Manage', 'url' => '/fields', 'info' => 'Manage custom fields'],
         ], $log);
 
         // since beta8
@@ -145,8 +145,8 @@ final class UpgradeService
 
         // @since 1.6.3 — add usersearch.php and unco.php
         $this->addMenu('modpanel', [
-            ['name' => 'Search user', 'url' => 'usersearch.php', 'info' => 'Search user'],
-            ['name' => 'Confirm user', 'url' => 'unco.php', 'info' => 'Confirm user to complete registration'],
+            ['name' => 'Search user', 'url' => '/web/usersearch', 'info' => 'Search user'],
+            ['name' => 'Confirm user', 'url' => '/web/unco', 'info' => 'Confirm user to complete registration'],
         ], $log);
 
         // @since 1.7.0 — add attendance_card to users
@@ -159,7 +159,7 @@ final class UpgradeService
 
         // @since 1.7.12
         $this->addMenu('sysoppanel', [
-            ['name' => 'Add Bonus/Attend card/Invite/upload', 'url' => 'increment-bulk.php', 'info' => 'Add Bonus/Attend card/Invite/upload to certain classes'],
+            ['name' => 'Add Bonus/Attend card/Invite/upload', 'url' => '/web/increment-bulk', 'info' => 'Add Bonus/Attend card/Invite/upload to certain classes'],
         ], $log);
         $this->removeMenu(['amountupload.php', 'amountattendancecard.php', 'amountbonus.php', 'deletedisabled.php'], $log);
 

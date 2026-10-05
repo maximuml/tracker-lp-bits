@@ -245,11 +245,11 @@ class TorrentRssController extends LegacyController
                 }
             }
 
-            $itemurl = $baseUrl.'/details.php?id='.(int) ($row['id'] ?? 0);
+            $itemurl = $baseUrl.'/web/details/'.(int) ($row['id'] ?? 0);
             if ($dllink) {
                 $itemdlurl = $this->downloadRepository->getDownloadUrl((int) ($row['id'] ?? 0), $rssUser);
             } else {
-                $itemdlurl = $baseUrl.'/download.php?id='.(int) ($row['id'] ?? 0);
+                $itemdlurl = $baseUrl.'/download?id='.(int) ($row['id'] ?? 0);
             }
 
             $title = '';
@@ -271,7 +271,7 @@ class TorrentRssController extends LegacyController
                 'author' => $author,
                 'categoryId' => (int) ($row['category'] ?? 0),
                 'categoryName' => (string) ($row['category_name'] ?? ''),
-                'commentsUrl' => new HtmlString($baseUrl.'/details.php?id='.(int) ($row['id'] ?? 0).'&cmtpage=0#startcomments'),
+                'commentsUrl' => new HtmlString($baseUrl.'/web/details/'.(int) ($row['id'] ?? 0).'?cmtpage=0#startcomments'),
                 'downloadUrl' => $itemdlurl,
                 'size' => (int) ($row['size'] ?? 0),
                 'guid' => preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))),

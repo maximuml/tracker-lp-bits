@@ -466,7 +466,7 @@ final class NotificationFeedTest extends TestCase
             }
         }
         $this->assertNotNull($reply);
-        $this->assertSame('forums.php?action=viewtopic&topicid='.$topicId.'&page=last', $reply['url']);
+        $this->assertSame('/forums?action=viewtopic&topicid='.$topicId.'&page=last', $reply['url']);
     }
 
     public function test_topic_reply_hidden_when_forum_above_user_class(): void

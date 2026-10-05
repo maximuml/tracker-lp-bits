@@ -200,7 +200,7 @@ final class IndexPageService
                 UserDisplay::preload($torrents->map(fn ($t) => (int) $t->owner)->all());
                 $items = [];
                 foreach ($torrents as $torrent) {
-                    $detailsUrl = 'details.php?id='.(int) $torrent->id.'&hit=1';
+                    $detailsUrl = '/web/details/'.(int) $torrent->id.'?hit=1';
                     $rawCover = trim((string) ($torrent->cover ?? ''));
                     $thumbUrl = $rawCover !== '' ? $this->coverThumb->urlWithContext((string) $rawCover, (int) 240, (int) 360, (int) 82) : '';
                     $typeLabel = trim((string) ($torrent->basic_category->name ?? ''));

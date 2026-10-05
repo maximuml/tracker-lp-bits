@@ -50,7 +50,7 @@ class ForumController extends LegacyController
     public function legacy(Request $request): View|Response|RedirectResponse
     {
         if ($this->currentUser->get() === null) {
-            return redirect('/forums.php?'.$request->getQueryString());
+            return redirect('/forums?'.$request->getQueryString());
         }
 
         $result = $this->service->legacy($request);
@@ -66,7 +66,7 @@ class ForumController extends LegacyController
     public function legacyAction(Request $request): Response|RedirectResponse
     {
         if ($this->currentUser->get() === null) {
-            return redirect('/forums.php?'.$request->getQueryString());
+            return redirect('/forums?'.$request->getQueryString());
         }
 
         $action = (string) $request->input('action', '');
@@ -137,7 +137,7 @@ class ForumController extends LegacyController
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/forums.php'.($qs !== null && $qs !== '' ? '?'.$qs : ''));
+            return redirect('/forums'.($qs !== null && $qs !== '' ? '?'.$qs : ''));
         }
 
         return null;
@@ -148,7 +148,7 @@ class ForumController extends LegacyController
         $perpage = 20;
         $count = $this->commentRepository->countLatest();
 
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, 'latestcomments.php?');
+        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, '/web/latestcomments?');
         $rows = $this->commentRepository->getLatest($perpage, $offset);
 
         $userIds = array_filter(array_unique(array_column($rows, 'user')));
@@ -166,9 +166,9 @@ class ForumController extends LegacyController
             $parentId = (int) ($row['parent_id'] ?? 0);
             $parentUrl = '';
             if ($parentType === 'torrent' && $parentId > 0) {
-                $parentUrl = "details.php?id={$parentId}&hit=1#cid{$commentId}";
+                $parentUrl = "/web/details/{$parentId}?hit=1#cid{$commentId}";
             } elseif ($parentType === 'offer' && $parentId > 0) {
-                $parentUrl = "offers.php?id={$parentId}&off_details=1#cid{$commentId}";
+                $parentUrl = "/web/offers?id={$parentId}&off_details=1#cid{$commentId}";
             }
             $row['parentUrl'] = $parentUrl;
             $avatar = $showAvatars ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';

@@ -57,7 +57,7 @@ final class TorrentDownloadControllerTest extends TestCase
         $response = $controller->download($request, app(TorrentDownloadRepository::class));
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/login.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/login', $response->getTargetUrl());
         $this->assertStringContainsString('returnto=', $response->getTargetUrl());
     }
 
@@ -103,7 +103,7 @@ final class TorrentDownloadControllerTest extends TestCase
         $controller->download($request, app(TorrentDownloadRepository::class));
     }
 
-    public function test_downloadnotice_redirects_guest_to_downloadnotice_php(): void
+    public function test_downloadnotice_redirects_guest_to_downloadnotice(): void
     {
         $this->mockCurrentUser(null);
         app()->bind(LegacyRedisCache::class, fn () => null);
@@ -115,7 +115,7 @@ final class TorrentDownloadControllerTest extends TestCase
         $response = $controller->downloadnotice($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/downloadnotice.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/downloadnotice', $response->getTargetUrl());
     }
 
     public function test_downloadnotice_post_returns_error_for_missing_torrentid(): void

@@ -36,7 +36,7 @@ final class RssControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_getrss_redirects_guest_to_getrss_php_on_get(): void
+    public function test_getrss_redirects_guest_to_getrss_on_get(): void
     {
         $this->mockCurrentUser(null);
         app()->bind(LegacyRedisCache::class, fn () => null);
@@ -48,10 +48,10 @@ final class RssControllerTest extends TestCase
         $response = $controller->getrss($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/getrss.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/getrss', $response->getTargetUrl());
     }
 
-    public function test_getrss_redirects_guest_to_getrss_php_on_post(): void
+    public function test_getrss_redirects_guest_to_getrss_on_post(): void
     {
         $this->mockCurrentUser(null);
         app()->bind(LegacyRedisCache::class, fn () => null);
@@ -65,7 +65,7 @@ final class RssControllerTest extends TestCase
         $response = $controller->getrss($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/getrss.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/getrss', $response->getTargetUrl());
     }
 
     public function test_getrss_post_returns_error_for_invalid_showrows(): void

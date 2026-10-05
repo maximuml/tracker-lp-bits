@@ -125,7 +125,7 @@ class ShoutboxController extends LegacyController
         $total = (int) ($result['total'] ?? 0);
         $totalPages = $perPage > 0 ? (int) ceil($total / $perPage) : 0;
         $paginationBase = $totalPages > 1
-            ? 'shoutbox_history.php?'.http_build_query(array_filter($filters, fn ($v) => $v !== '')).'&page='
+            ? '/web/shoutbox_history?'.http_build_query(array_filter($filters, fn ($v) => $v !== '')).'&page='
             : '';
 
         return $this->legacyPage($request, 'shoutbox_history', true, [

@@ -85,7 +85,7 @@ final class OfferModerationService
         }
 
         $curuser = $this->curUser();
-        $url = Url::absolute($this->baseUrl())."/offers.php?id={$offid}&off_details=1";
+        $url = Url::absolute($this->baseUrl())."/web/offers?id={$offid}&off_details=1";
         $msg = ($curuser['username'] ?? '').Locale::trans('offer.msg_has_allowed', [], $locale)."[b][url={$url}]".($arr['name'] ?? '').'[/url][/b]. '.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
         $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
         $allowedtime = date('Y-m-d H:i:s');
@@ -101,7 +101,7 @@ final class OfferModerationService
         $this->offerRepository->allowOffer($offid, $allowedtime);
         Log::writeWithContext(($curuser['username'] ?? '').' allowed offer '.($arr['name'] ?? ''), 'normal');
 
-        return redirect("/offers.php?id={$offid}&off_details=1");
+        return redirect("/web/offers?id={$offid}&off_details=1");
     }
 
     public function handleFinish(Request $request): RedirectResponse
@@ -135,11 +135,11 @@ final class OfferModerationService
         $no = (int) $voteCounts['against'];
 
         if ($yes === 0 && $no === 0) {
-            $this->abort(__('legacy/offers.std_sorry'), __('legacy/offers.std_no_votes_yet').view('offers._details_link', ['url' => "offers.php?id={$offid}&off_details=1"])->render(), false);
+            $this->abort(__('legacy/offers.std_sorry'), __('legacy/offers.std_no_votes_yet').view('offers._details_link', ['url' => "/web/offers?id={$offid}&off_details=1"])->render(), false);
         }
 
         $finishvotetime = date('Y-m-d H:i:s');
-        $url = Url::absolute($this->baseUrl())."/offers.php?id={$offid}&off_details=1";
+        $url = Url::absolute($this->baseUrl())."/web/offers?id={$offid}&off_details=1";
 
         if (($yes - $no) >= $minoffervotes) {
             if ($offeruptimeout) {
@@ -157,7 +157,7 @@ final class OfferModerationService
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
             $this->offerRepository->denyOffer($offid);
         } else {
-            return redirect("/offers.php?id={$offid}&off_details=1");
+            return redirect("/web/offers?id={$offid}&off_details=1");
         }
 
         $this->messageRepository->add([
@@ -171,6 +171,6 @@ final class OfferModerationService
         $curuser = $this->curUser();
         Log::writeWithContext(($curuser['username'] ?? '').' closed poll '.($arr['name'] ?? ''), 'normal');
 
-        return redirect("/offers.php?id={$offid}&off_details=1");
+        return redirect("/web/offers?id={$offid}&off_details=1");
     }
 }

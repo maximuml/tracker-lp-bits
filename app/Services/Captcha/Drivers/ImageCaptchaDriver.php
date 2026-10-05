@@ -43,7 +43,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         return view('components.captcha.image', [
             'grid' => ($context['layout'] ?? '') === 'grid',
             'imageLabel' => $imageLabel,
-            'imageUrl' => sprintf('image.php?action=regimage&imagehash=%s&secret=%s', $imagehash, $secret),
+            'imageUrl' => sprintf('/web/image?action=regimage&imagehash=%s&secret=%s', $imagehash, $secret),
             'codeLabel' => $codeLabel,
             'imagehash' => $imagehash,
         ])->render();

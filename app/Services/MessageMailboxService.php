@@ -52,7 +52,7 @@ final class MessageMailboxService
                 LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_cannot_mark_messages'));
             }
 
-            return redirect("/messages.php?action=viewmailbox&box={$pmBox}");
+            return redirect("/web/messages?action=viewmailbox&box={$pmBox}");
         }
 
         if ($request->has('move')) {
@@ -67,7 +67,7 @@ final class MessageMailboxService
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
 
-            return redirect("/messages.php?action=viewmailbox&box={$pmBox}");
+            return redirect("/web/messages?action=viewmailbox&box={$pmBox}");
         }
 
         if ($request->has('delete')) {
@@ -85,7 +85,7 @@ final class MessageMailboxService
                 LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_cannot_delete_messages'));
             }
 
-            return redirect('/messages.php?action=viewmailbox');
+            return redirect('/web/messages?action=viewmailbox');
         }
         LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_action'));
     }
@@ -107,7 +107,7 @@ final class MessageMailboxService
                 $request->input('new3'),
             ]);
 
-            return redirect('/messages.php?action=editmailboxes');
+            return redirect('/web/messages?action=editmailboxes');
         }
 
         if ($action2 === 'edit') {
@@ -124,7 +124,7 @@ final class MessageMailboxService
                 }
             }
 
-            return redirect('/messages.php?action=editmailboxes');
+            return redirect('/web/messages?action=editmailboxes');
         }
 
         LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_action'));
@@ -146,6 +146,6 @@ final class MessageMailboxService
         Cache::clearInboxCount($userId);
         Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
 
-        return redirect('/messages.php?action=viewmailbox&id='.(int) ($message['location'] ?? 0));
+        return redirect('/web/messages?action=viewmailbox&id='.(int) ($message['location'] ?? 0));
     }
 }

@@ -171,7 +171,7 @@ final class TorrentDetailsViewFactory
                 $downloadLabel = (string) __('legacy/details.text_download_torrent');
             }
             $actions[] = new TorrentAction(
-                url: "download.php?id={$id}",
+                url: "/download?id={$id}",
                 title: self::plainTitle('legacy/details.title_download_torrent'),
                 iconClass: 'dt_download',
                 iconAlt: 'download',
@@ -180,7 +180,7 @@ final class TorrentDetailsViewFactory
         }
 
         if ($owned) {
-            $editUrl = "edit.php?id={$id}";
+            $editUrl = "/edit?id={$id}";
             if ($returnto !== '') {
                 $editUrl .= '&returnto='.rawurlencode($returnto);
             }
@@ -235,7 +235,7 @@ JS, \json_encode($approvalTitle)), 'footer', false);
         }
 
         $actions[] = new TorrentAction(
-            url: "report.php?torrent={$id}",
+            url: "/web/report?torrent={$id}",
             title: self::plainTitle('legacy/details.title_report_torrent'),
             iconClass: 'dt_report',
             iconAlt: 'report',

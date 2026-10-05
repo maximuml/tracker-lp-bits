@@ -90,7 +90,7 @@ class TorrentAjaxController extends LegacyController
     {
         $torrentId = (int) $request->input('id', 0);
         if ($torrentId <= 0) {
-            return redirect('/torrents.php');
+            return redirect('/web/torrents');
         }
 
         $data = $this->torrentAjaxRepository->snatchList($torrentId);

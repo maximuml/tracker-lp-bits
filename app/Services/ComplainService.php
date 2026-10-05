@@ -91,7 +91,7 @@ final class ComplainService
                     __('legacy/complains.reply_notify_subject'),
                     view('emails.complain-reply', [
                         'siteName' => SiteConfig::current()->basic->siteName(),
-                        'url' => Url::schemeAndHost(false).'/complains.php?action=view&id='.$complain['uuid'],
+                        'url' => Url::schemeAndHost(false).'/web/complains?action=view&id='.$complain['uuid'],
                     ])->render()
                 );
             } catch (\Throwable $exception) {

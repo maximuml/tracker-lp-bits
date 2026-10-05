@@ -40,7 +40,7 @@ final class InfoControllerTest extends TestCase
         $response = $controller->userhistory($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/userhistory.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/userhistory', $response->getTargetUrl());
     }
 
     public function test_userhistory_redirects_guest_preserving_query_string(): void
@@ -54,7 +54,7 @@ final class InfoControllerTest extends TestCase
         $response = $controller->userhistory($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/userhistory.php?id=5', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/userhistory?id=5', $response->getTargetUrl());
     }
 
     public function test_donated_denies_access_for_guest(): void

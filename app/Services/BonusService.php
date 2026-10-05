@@ -54,7 +54,7 @@ final class BonusService
         }
 
         if (! $request->isMethod('post')) {
-            return redirect('/mybonus.php');
+            return redirect('/web/mybonus');
         }
 
         return $this->handleExchange($request, $allBonus, $curUser, $lockText);
@@ -154,7 +154,7 @@ final class BonusService
 
     private function redirect(string $baseUrl, string $do): RedirectResponse
     {
-        return redirect(Url::absolute($baseUrl)."/mybonus.php?do={$do}");
+        return redirect(Url::absolute($baseUrl)."/web/mybonus?do={$do}");
     }
 
     /**

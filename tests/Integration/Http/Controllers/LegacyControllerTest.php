@@ -43,17 +43,17 @@ final class LegacyControllerTest extends TestCase
 
     public function test_legacy_page_redirects_guests_to_php_url(): void
     {
-        $response = $this->controller()->page(Request::create('/mypage.php?a=1', 'GET'), 'mypage');
+        $response = $this->controller()->page(Request::create('/mypage?a=1', 'GET'), 'mypage');
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertSame('http://localhost/mypage.php?a=1', $response->getTargetUrl());
+        $this->assertSame('http://localhost/mypage?a=1', $response->getTargetUrl());
     }
 
     public function test_legacy_page_redirects_guests_without_query_string(): void
     {
-        $response = $this->controller()->page(Request::create('/mypage.php', 'GET'), 'mypage');
+        $response = $this->controller()->page(Request::create('/mypage', 'GET'), 'mypage');
 
-        $this->assertSame('http://localhost/mypage.php', $response->getTargetUrl());
+        $this->assertSame('http://localhost/mypage', $response->getTargetUrl());
     }
 
     public function test_legacy_page_returns_view_for_public_page(): void
@@ -61,24 +61,24 @@ final class LegacyControllerTest extends TestCase
         $view = $this->fakeView();
         View::shouldReceive('make')->once()->with('mypage.index', ['k' => 'v'])->andReturn($view);
 
-        $response = $this->controller()->page(Request::create('/mypage.php', 'GET'), 'mypage', false, ['k' => 'v']);
+        $response = $this->controller()->page(Request::create('/mypage', 'GET'), 'mypage', false, ['k' => 'v']);
 
         $this->assertSame($view, $response);
     }
 
     public function test_legacy_page_with_redirect_redirects_guests(): void
     {
-        $response = $this->controller()->pageWithRedirect(Request::create('/mypage.php?b=2', 'GET'), 'mypage');
+        $response = $this->controller()->pageWithRedirect(Request::create('/mypage?b=2', 'GET'), 'mypage');
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertSame('http://localhost/mypage.php?b=2', $response->getTargetUrl());
+        $this->assertSame('http://localhost/mypage?b=2', $response->getTargetUrl());
     }
 
     public function test_legacy_page_with_redirect_returns_rendered_content(): void
     {
         View::shouldReceive('make')->once()->andReturn($this->fakeView('rendered body'));
 
-        $response = $this->controller()->pageWithRedirect(Request::create('/mypage.php', 'GET'), 'mypage', false);
+        $response = $this->controller()->pageWithRedirect(Request::create('/mypage', 'GET'), 'mypage', false);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame('rendered body', $response->getContent());
@@ -89,7 +89,7 @@ final class LegacyControllerTest extends TestCase
         View::shouldReceive('make')->once()->andReturn($this->fakeView('unused'));
         app(LegacyHeaderBag::class)->set('Location', '/target.php');
 
-        $response = $this->controller()->pageWithRedirect(Request::create('/mypage.php', 'GET'), 'mypage', false);
+        $response = $this->controller()->pageWithRedirect(Request::create('/mypage', 'GET'), 'mypage', false);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame('http://localhost/target.php', $response->getTargetUrl());
@@ -103,7 +103,7 @@ final class LegacyControllerTest extends TestCase
         $headerBag->set('Location', '/target.php');
         $headerBag->setStatusCode(301);
 
-        $response = $this->controller()->pageWithRedirect(Request::create('/mypage.php', 'GET'), 'mypage', false);
+        $response = $this->controller()->pageWithRedirect(Request::create('/mypage', 'GET'), 'mypage', false);
 
         $this->assertSame(301, $response->getStatusCode());
         $headerBag->remove('Location');
@@ -112,10 +112,10 @@ final class LegacyControllerTest extends TestCase
 
     public function test_legacy_page_raw_redirects_guests(): void
     {
-        $response = $this->controller()->pageRaw(Request::create('/mypage.php?c=3', 'GET'), 'mypage');
+        $response = $this->controller()->pageRaw(Request::create('/mypage?c=3', 'GET'), 'mypage');
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertSame('http://localhost/mypage.php?c=3', $response->getTargetUrl());
+        $this->assertSame('http://localhost/mypage?c=3', $response->getTargetUrl());
     }
 
     public function test_legacy_page_raw_returns_content_with_headers(): void
@@ -125,7 +125,7 @@ final class LegacyControllerTest extends TestCase
         $headerBag->set('X-Legacy', 'yes');
         $headerBag->setStatusCode(201);
 
-        $response = $this->controller()->pageRaw(Request::create('/mypage.php', 'GET'), 'mypage', false);
+        $response = $this->controller()->pageRaw(Request::create('/mypage', 'GET'), 'mypage', false);
 
         $this->assertSame('raw body', $response->getContent());
         $this->assertSame(201, $response->getStatusCode());
@@ -136,7 +136,7 @@ final class LegacyControllerTest extends TestCase
     {
         View::shouldReceive('make')->once()->andReturn($this->fakeView('body'));
 
-        $response = $this->controller()->pageRaw(Request::create('/mypage.php', 'GET'), 'mypage', false);
+        $response = $this->controller()->pageRaw(Request::create('/mypage', 'GET'), 'mypage', false);
 
         $this->assertSame(200, $response->getStatusCode());
     }
@@ -146,7 +146,7 @@ final class LegacyControllerTest extends TestCase
         View::shouldReceive('make')->once()->andReturn($this->fakeView('unused'));
         app(LegacyHeaderBag::class)->set('Location', '/elsewhere.php');
 
-        $response = $this->controller()->pageRaw(Request::create('/mypage.php', 'GET'), 'mypage', false);
+        $response = $this->controller()->pageRaw(Request::create('/mypage', 'GET'), 'mypage', false);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame('http://localhost/elsewhere.php', $response->getTargetUrl());
@@ -166,7 +166,7 @@ final class LegacyControllerTest extends TestCase
         $view = $this->fakeView();
         View::shouldReceive('make')->once()->with('mypage.index', [])->andReturn($view);
 
-        $response = $this->controller()->page(Request::create('/mypage.php', 'GET'), 'mypage', true);
+        $response = $this->controller()->page(Request::create('/mypage', 'GET'), 'mypage', true);
 
         $this->assertSame($view, $response);
     }

@@ -39,7 +39,7 @@ function shoutboxPost(action, params, onSuccess) {
     };
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'ajax.php', true);
+    xhr.open('POST', '/ajax', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     var csrfMeta = document.querySelector('meta[name="csrf-token"]');

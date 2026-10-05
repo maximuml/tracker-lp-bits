@@ -29,7 +29,7 @@ final class AdminToolsControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_user_ban_log_redirects_guest_to_user_ban_log_php(): void
+    public function test_user_ban_log_redirects_guest_to_user_ban_log(): void
     {
         $this->mockCurrentUser(null);
 
@@ -40,7 +40,7 @@ final class AdminToolsControllerTest extends TestCase
         $response = $controller->userBanLog($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/user-ban-log.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/user-ban-log', $response->getTargetUrl());
     }
 
     public function test_user_ban_log_redirects_guest_preserving_query_string(): void
@@ -54,7 +54,7 @@ final class AdminToolsControllerTest extends TestCase
         $response = $controller->userBanLog($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/user-ban-log.php?q=spam', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/user-ban-log?q=spam', $response->getTargetUrl());
     }
 
     public function test_clear_cache_denies_access_for_guest(): void

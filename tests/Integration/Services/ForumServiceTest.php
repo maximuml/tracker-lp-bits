@@ -428,7 +428,7 @@ final class ForumServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('forums.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/forums', $result->getTargetUrl());
     }
 
     public function test_handle_post_aborts_when_subject_empty_for_new_topic(): void
@@ -524,7 +524,7 @@ final class ForumServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('forums.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/forums', $result->getTargetUrl());
     }
 
     public function test_handle_post_redirects_when_forum_row_not_found(): void
@@ -548,7 +548,7 @@ final class ForumServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('forums.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/forums', $result->getTargetUrl());
     }
 
     public function test_handle_post_permission_denied_when_class_too_low(): void
@@ -680,7 +680,7 @@ final class ForumServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('forums.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/forums', $result->getTargetUrl());
     }
 
     public function test_handle_post_flood_check_outputs_error_when_posting_too_fast(): void
@@ -792,7 +792,7 @@ final class ForumServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('forums.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/forums', $result->getTargetUrl());
     }
 
     // ─── handleDeleteTopic ────────────────────────────────────────────
@@ -814,7 +814,7 @@ final class ForumServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('forums.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/forums', $result->getTargetUrl());
     }
 
     public function test_delete_topic_permission_denied_for_unauthenticated(): void

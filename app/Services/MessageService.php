@@ -85,11 +85,11 @@ class MessageService
             $locale = Locale::userLocale($receiver);
             $origSenderName = (int) $origmsgRecord->sender === 0
                 ? Locale::trans('message.msg_system', [], $locale)
-                : '[url=userdetails.php?id='.$origmsgRecord->sender.']'.UserDisplay::plainUsername($origmsgRecord->sender).'[/url]';
+                : '[url=/userdetails?id='.$origmsgRecord->sender.']'.UserDisplay::plainUsername($origmsgRecord->sender).'[/url]';
 
             $body = '-------- '.Locale::trans('message.msg_original_message_from', [], $locale).$origSenderName." --------\n"
                 .$origmsgRecord->msg."\n\n"
-                .($body ? '-------- [url=userdetails.php?id='.$sender->id.']'.$sender->username.'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n".$body : '');
+                .($body ? '-------- [url=/userdetails?id='.$sender->id.']'.$sender->username.'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n".$body : '');
         } else {
             $receiver = (int) $request->input('receiver', 0);
             if ($receiver <= 0 || ($origmsg > 0 && ! Validators::isId($origmsg))) {
@@ -164,7 +164,7 @@ class MessageService
             }
         }
 
-        $redirect = SafeReturnUrl::filter($returnto, '/messages.php');
+        $redirect = SafeReturnUrl::filter($returnto, '/web/messages');
 
         return redirect($redirect);
     }
@@ -221,7 +221,7 @@ class MessageService
             LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_unknown_pm_type'));
         }
 
-        $redirect = $type === 'out' ? 'messages.php?out=1' : 'messages.php';
+        $redirect = $type === 'out' ? '/web/messages?out=1' : '/web/messages';
 
         return redirect($redirect);
     }
@@ -237,7 +237,7 @@ class MessageService
         if ($baseUrl === '') {
             $baseUrl = Url::schemeAndHost();
         }
-        $messageUrl = $baseUrl.'/messages.php?action=viewmessage&id='.$messageId;
+        $messageUrl = $baseUrl.'/web/messages?action=viewmessage&id='.$messageId;
 
         $title = $siteName.' '.Locale::trans('message.mail_received_pm_from', [], $locale).$sender->username.'!';
         $body = view('emails.new-pm', [
@@ -295,12 +295,12 @@ class MessageService
             $id = (int) $request->input('id', 0);
             $user = Auth::user();
             if ($id <= 0 || ! $user instanceof User) {
-                return redirect('/messages.php');
+                return redirect('/web/messages');
             }
 
             $message = $this->messageLookupRepository->findById($id);
             if (! $message || ! $this->policy->view($user, $message)) {
-                return redirect('/messages.php');
+                return redirect('/web/messages');
             }
 
             return null;
@@ -308,7 +308,7 @@ class MessageService
 
         if ($action === 'moveordel') {
             if (! $request->isMethod('post')) {
-                return redirect('/messages.php');
+                return redirect('/web/messages');
             }
 
             return $this->mailbox->handleMoveOrDel($request);
@@ -316,7 +316,7 @@ class MessageService
 
         if ($action === 'editmailboxes2') {
             if (! $request->isMethod('post')) {
-                return redirect('/messages.php');
+                return redirect('/web/messages');
             }
 
             return $this->mailbox->handleEditMailboxes($request);
@@ -324,7 +324,7 @@ class MessageService
 
         if ($action === 'deletemessage') {
             if (! $request->isMethod('post')) {
-                return redirect('/messages.php');
+                return redirect('/web/messages');
             }
 
             return $this->mailbox->handleDeleteMessage($request);

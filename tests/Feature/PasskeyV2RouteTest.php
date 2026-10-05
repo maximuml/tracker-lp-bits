@@ -97,7 +97,7 @@ final class PasskeyV2RouteTest extends TestCase
 
         $response = $this->post('/auth/passkey', $this->buildPayload($user->passkey));
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         // setcookie() does not reach the TestResponse — the observable
         // side effect of a successful login is last_login + a login log.
         $this->assertNotNull($user->fresh()->last_login);
@@ -132,7 +132,7 @@ final class PasskeyV2RouteTest extends TestCase
 
         $response = $this->post('/auth/passkey', $this->buildPayload($user->passkey));
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertNull($user->fresh()->last_login);
     }
 
@@ -146,7 +146,7 @@ final class PasskeyV2RouteTest extends TestCase
 
         $response = $this->post('/auth/passkey', $this->buildPayload($user->passkey));
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertNull($user->fresh()->last_login);
     }
 
@@ -297,7 +297,7 @@ final class PasskeyV2RouteTest extends TestCase
             'signature' => $signature,
         ]);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertNotNull($user->fresh()->last_login);
     }
 

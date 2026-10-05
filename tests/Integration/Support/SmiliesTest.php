@@ -51,7 +51,7 @@ final class SmiliesTest extends TestCase
     public function test_quick_row_wraps_in_centered_div(): void
     {
         $result = Smilies::quickRow('myform', 'myta');
-        $this->assertStringStartsWith('<div class="nx-center">', $result);
+        $this->assertStringStartsWith('<div class="text-center">', $result);
         $this->assertStringEndsWith('</div>', $result);
     }
 

@@ -18,10 +18,10 @@
 @foreach ($tagItems ?? [] as $item)
     <p class=sub><b>{{ $item['name'] }}</b></p>
     <table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/tags.text_tags') }}</caption>
-    <tr class="nx-va-top"><td class="nx-w-25p">{{ __('legacy/tags.text_description')}}</td><td>{{ $item['description'] }}
-    <tr class="nx-va-top"><td>{{ __('legacy/tags.text_syntax')}}</td><td><tt>{{ $item['syntax'] }}</tt>
-    <tr class="nx-va-top"><td>{{ __('legacy/tags.text_example')}}</td><td><tt>{{ $item['example'] }}</tt>
-    <tr class="nx-va-top"><td>{{ __('legacy/tags.text_result')}}</td><td>{{ $item['result'] }}
+    <tr class="align-top"><td class="w-[25%]">{{ __('legacy/tags.text_description')}}</td><td>{{ $item['description'] }}
+    <tr class="align-top"><td>{{ __('legacy/tags.text_syntax')}}</td><td><tt>{{ $item['syntax'] }}</tt>
+    <tr class="align-top"><td>{{ __('legacy/tags.text_example')}}</td><td><tt>{{ $item['example'] }}</tt>
+    <tr class="align-top"><td>{{ __('legacy/tags.text_result')}}</td><td>{{ $item['result'] }}
     @if ($item['remarks'] !== '')
         <tr><td>{{ __('legacy/tags.text_remarks')}}</td><td>{{ $item['remarks'] }}
     @endif

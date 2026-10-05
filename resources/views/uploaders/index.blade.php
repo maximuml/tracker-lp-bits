@@ -4,7 +4,7 @@
 
 @section('content')
 <div>
-<h1 class="nx-center">{{ __('legacy/uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
+<h1 class="text-center">{{ __('legacy/uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
 
 <div>
 <form method="get" action="?">
@@ -20,16 +20,16 @@
 </div>
 
 @if (empty($rows))
-<p class="nx-center">{{ __('legacy/uploaders.text_no_uploaders_yet')}}</p>
+<p class="text-center">{{ __('legacy/uploaders.text_no_uploaders_yet')}}</p>
 @else
 <div>
-<table data-nx="data" class="nx-w-97 nx-mx-auto"><caption class="nx-sr-only">{{ __('legacy/uploaders.text_uploaders')}}</caption>
+<table data-nx="data" class="w-[97%] mx-auto"><caption class="nx-sr-only">{{ __('legacy/uploaders.text_uploaders')}}</caption>
 <tr>
-    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_username')}}</th>
-    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_torrents_size')}}</th>
-    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_torrents_num')}}</th>
-    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_last_upload_time')}}</th>
-    <th class="colhead" scope="col">{{ __('legacy/uploaders.col_last_upload')}}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_username')}}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_torrents_size')}}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_torrents_num')}}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_last_upload_time')}}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_last_upload')}}</th>
 </tr>
 @foreach ($rows as $row)
 <tr>

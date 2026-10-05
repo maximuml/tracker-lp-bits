@@ -19,12 +19,12 @@
     @foreach ($friendsList as $friend)
         <div>
         <div class="nx-fcard nx-main">
-        <div class="nx-center">
+        <div class="text-center">
         <div><img width="75" src="{{ $friend['avatarSrc'] }}"></div>
-        </div><div class="nx-grow">
-        <div class="nx-row nx-main">
-        <div class="nx-embedded nx-w-80">{{ $friend['usernameHtml'] }} ({{ $friend['titleHtml'] }})<br /><br />{{ __('legacy/friends.text_last_seen_on') }}<x-time :value="$friend['lastSeen']" /></div>
-        <div class="nx-embedded nx-w-20"><a href="friends.php?id={{ $userid }}&action=delete&type=friend&targetid={{ $friend['id'] }}">{{ __('legacy/friends.text_remove_from_friends') }}</a><br /><br /><a href="sendmessage.php?receiver={{ $friend['id'] }}">{{ __('legacy/friends.text_send_pm') }}</a></div>
+        </div><div class="grow">
+        <div class="flex items-start nx-main">
+        <div class="nx-embedded w-[80%]">{{ $friend['usernameHtml'] }} ({{ $friend['titleHtml'] }})<br /><br />{{ __('legacy/friends.text_last_seen_on') }}<x-time :value="$friend['lastSeen']" /></div>
+        <div class="nx-embedded w-[20%]"><a href="friends.php?id={{ $userid }}&action=delete&type=friend&targetid={{ $friend['id'] }}">{{ __('legacy/friends.text_remove_from_friends') }}</a><br /><br /><a href="sendmessage.php?receiver={{ $friend['id'] }}">{{ __('legacy/friends.text_send_pm') }}</a></div>
         </div>
         </div>
         </div>

@@ -5,10 +5,10 @@
 <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_firstline_support') }}</caption>
     <tr>
         <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_language')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_language')}}</b></td>
         <td class="embedded"><b>{{ __('legacy/staff.text_support_for')}}</b></td>
     </tr>
     <tr><td class="embedded" colspan=6><hr color="#4040c0"></td></tr>
@@ -28,9 +28,9 @@
 <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_movie_critics') }}</caption>
     <tr>
         <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
         <td class="embedded"><b>{{ __('legacy/staff.text_responsible_for')}}</b></td>
     </tr>
     <tr><td class="embedded" colspan=5><hr color="#4040c0"></td></tr>
@@ -50,9 +50,9 @@
 <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_forum_moderators') }}</caption>
     <tr>
         <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
         <td class="embedded"><b>{{ __('legacy/staff.text_forums')}}</b></td>
     </tr>
     <tr><td class="embedded" colspan=5><hr color="#4040c0"></td></tr>
@@ -72,13 +72,13 @@
 <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_general_staff') }}</caption>
     @foreach ($staffRows as $row)
         @if (isset($row['header']))
-            @if (! $loop->first)<tr height=15><td class="embedded nx-align-right" colspan=5>&nbsp;</td></tr>@endif
-            <tr height=15><td class="embedded nx-align-right" colspan=5>{{ $row['class_name'] ?? '' }}</td></tr>
+            @if (! $loop->first)<tr height=15><td class="embedded text-right" colspan=5>&nbsp;</td></tr>@endif
+            <tr height=15><td class="embedded text-right" colspan=5>{{ $row['class_name'] ?? '' }}</td></tr>
             <tr>
                 <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-                <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-                <td class="embedded nx-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-                <td class="embedded nx-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+                <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+                <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+                <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
                 <td class="embedded"><b>{{ __('legacy/staff.text_duties')}}</b></td>
             </tr>
             <tr height=15><td class="embedded" colspan=5><hr color="#4040c0"></td></tr>
@@ -99,9 +99,9 @@
 <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/staff.text_vip') }}</caption>
     <tr>
         <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-        <td class="embedded nx-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+        <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
         <td class="embedded"><b>{{ __('legacy/staff.text_reason')}}</b></td>
     </tr>
     <tr><td class="embedded" colspan=5><hr color="#4040c0"></td></tr>

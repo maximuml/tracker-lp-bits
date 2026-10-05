@@ -24,7 +24,7 @@ li div.list span.icon {color:#009;padding: 2px;}
 li span.title {font-weight: bold;}
 
 </style>
-<div class="nx-center"><h1>{{ $torrentName ?? '' }}</h1>
+<div class="text-center"><h1>{{ $torrentName ?? '' }}</h1>
 <div class="nx-box nx-box--750">
 <ul id='torrent-structure'>
 {{ $structureHtml ?? '' }}

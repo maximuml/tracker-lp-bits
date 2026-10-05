@@ -14,7 +14,7 @@
     <form method="post" action="attendance.php" class="nx-inline-block">
     <div class="nx-fgrid nx-fgrid--flat">
     {{ $captchaHtml ?? '' }}
-    <div class="nx-ffull nx-center"><input type="submit" value="{{ __('legacy/attendance.attend_button')}}" class="btn" /></div>
+    <div class="nx-ffull text-center"><input type="submit" value="{{ __('legacy/attendance.attend_button')}}" class="btn" /></div>
     </div>
     </form>
     </div>

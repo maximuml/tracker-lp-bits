@@ -11,7 +11,7 @@
 
 @if ($mode === 'dailylog')
     <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_search_log')}}</caption>
-        <tr><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.text_search_log')}}</th></tr>
+        <tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('legacy/log.text_search_log')}}</th></tr>
         <tr><td class="toolbox">
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}">
@@ -30,15 +30,15 @@
         <b>{{ __('legacy/log.text_log_empty') }}</b><br />
     @else
         <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_daily_log')}}</caption>
-        <tr><th class="colhead" scope="col"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('legacy/log.title_time_added')}}" /></th><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.col_event')}}</th>
+        <tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('legacy/log.title_time_added')}}" /></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('legacy/log.col_event')}}</th>
         @if ($canConfidentialLog)
-            <th class="colhead nx-align-left" scope="col">{{ __('legacy/log.col_user')}}</th>
+            <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('legacy/log.col_user')}}</th>
         @endif
         </tr>
         @foreach ($logRows as $arr)
-            <tr><td class="rowfollow nowrap nx-center">{{ $arr['dateHtml'] ?? '' }}</td><td class="rowfollow"><span class="{{ $arr['colorClass'] ?? '' }}">{{ $arr['txt'] ?? '' }}</span></td>
+            <tr><td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center">{{ $arr['dateHtml'] ?? '' }}</td><td class="align-top px-2.5 py-1.5"><span class="{{ $arr['colorClass'] ?? '' }}">{{ $arr['txt'] ?? '' }}</span></td>
             @if ($canConfidentialLog)
-                <td class="rowfollow">{{ $arr['usernameHtml'] ?? '' }}</td>
+                <td class="align-top px-2.5 py-1.5">{{ $arr['usernameHtml'] ?? '' }}</td>
             @endif
             </tr>
         @endforeach
@@ -49,7 +49,7 @@
 
 @elseif ($mode === 'chronicle')
     <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_search_chronicle')}}</caption>
-        <tr><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.text_search_chronicle')}}</th></tr>
+        <tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('legacy/log.text_search_chronicle')}}</th></tr>
         <tr><td class="toolbox">
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}">
@@ -59,7 +59,7 @@
     </table><br />
     @if ($canManage)
         <table data-nx="data"><caption class="nx-sr-only">{{ ! empty($editItem) ? __('legacy/log.text_edit_chronicle') : __('legacy/log.text_add_chronicle') }}</caption>
-            <tr><th class="colhead nx-align-left" scope="col">{{ ! empty($editItem) ? (__('legacy/log.text_edit_chronicle')) : (__('legacy/log.text_add_chronicle')) }}</th></tr>
+            <tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ ! empty($editItem) ? (__('legacy/log.text_edit_chronicle')) : (__('legacy/log.text_add_chronicle')) }}</th></tr>
             <tr><td class="toolbox">
                 <form method="post" action="">
                     <textarea name="txt" rows="3">{{ ! empty($editItem) ? ($editItem['txt'] ?? '') : (__('legacy/log.text_add_chronicle')) }}</textarea>
@@ -76,9 +76,9 @@
         <b>{{ __('legacy/log.text_chronicle_empty') }}</b><br />
     @else
         <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_chronicle')}}</caption>
-        <tr><th class="colhead" scope="col">{{ __('legacy/log.col_date')}}</th><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.col_event')}}</th>@if ($canManage)<th class="colhead" scope="col">{{ __('legacy/log.col_modify')}}</th>@endif</tr>
+        <tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/log.col_date')}}</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('legacy/log.col_event')}}</th>@if ($canManage)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/log.col_modify')}}</th>@endif</tr>
         @foreach ($chronicleRows as $arr)
-            <tr><td class="rowfollow nx-center"><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class="rowfollow">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td class="nx-center nx-nowrap"><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
+            <tr><td class="align-top px-2.5 py-1.5 text-center"><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td class="text-center whitespace-nowrap"><b><a href="?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('legacy/log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="?action=chronicle&do=del" class="inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link">{{ __('legacy/log.text_delete')}}</button></form></b></td>@endif</tr>
         @endforeach
         </table>
         {{ $pagerbottom ?? '' }}
@@ -87,7 +87,7 @@
 
 @elseif ($mode === 'news')
     <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_search_news')}}</caption>
-        <tr><th class="colhead nx-align-left" scope="col">{{ __('legacy/log.text_search_news')}}</th></tr>
+        <tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('legacy/log.text_search_news')}}</th></tr>
         <tr><td class="toolbox">
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}">
@@ -105,7 +105,7 @@
     @else
         @foreach ($newsRows as $arr)
             <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_news')}}</caption>
-            <tr><td class="rowhead nx-w-10p">{{ __('legacy/log.col_title')}}</td><td class="rowfollow">{{ $arr['title'] ?? '' }}</td></tr><tr><td class="rowhead nx-w-10p">{{ __('legacy/log.col_date')}}</td><td class="rowfollow">{{ $arr['dateHtml'] ?? '' }}</td></tr><tr><td class="rowhead nx-w-10p">{{ __('legacy/log.col_body')}}</td><td class="rowfollow">{{ $arr['bodyHtml'] ?? '' }}</td></tr>
+            <tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim w-[10%]">{{ __('legacy/log.col_title')}}</td><td class="align-top px-2.5 py-1.5">{{ $arr['title'] ?? '' }}</td></tr><tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim w-[10%]">{{ __('legacy/log.col_date')}}</td><td class="align-top px-2.5 py-1.5">{{ $arr['dateHtml'] ?? '' }}</td></tr><tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim w-[10%]">{{ __('legacy/log.col_body')}}</td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td></tr>
             </table><br />
         @endforeach
         {{ $pagerbottom ?? '' }}
@@ -114,9 +114,9 @@
 
 @elseif ($mode === 'poll')
     <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/log.text_previous_polls')}}</caption>
-        <tr><th class="colhead" scope="col">{{ __('legacy/log.text_previous_polls')}}</th></tr>
+        <tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/log.text_previous_polls')}}</th></tr>
     @foreach ($pollData as $item)
-        <tr><td class="nx-center">
+        <tr><td class="text-center">
         <p class=sub>{{ $item['added'] ?? '' }}
         @if ($canPollManage)
             - [<a href="makepoll.php?action=edit&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ __('legacy/log.text_edit')}}</b></a>]
@@ -124,13 +124,13 @@
         @endif
         <a name="{{ (int) ($item['poll']['id'] ?? 0) }}"></a></p>
         <div class="nx-main nx-box">
-        <p class="nx-center"><b>{{ $item['poll']['question'] ?? '' }}</b></p>
+        <p class="text-center"><b>{{ $item['poll']['question'] ?? '' }}</b></p>
         <div class="nx-main">
         @foreach ($item['options'] ?? [] as $opt)
-            <div class="nx-row"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="unsltbar" src="pic/trans.gif" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
+            <div class="flex items-start"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="unsltbar" src="pic/trans.gif" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
         @endforeach
         </div>
-        <p class="nx-center">{{ __('legacy/log.text_votes')}}{{ $item['totalVotes'] ?? '0' }}</p>
+        <p class="text-center">{{ __('legacy/log.text_votes')}}{{ $item['totalVotes'] ?? '0' }}</p>
         </div><br /><br />
         </td></tr>
     @endforeach

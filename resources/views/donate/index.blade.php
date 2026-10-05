@@ -13,21 +13,21 @@
     <section class="nx-idx-card">
     <h1>{{ __('legacy/donate.text_donate') }}</h1>
     <div>
-        <div class="nx-text">{{ __('legacy/donate.text_donation_note') }}</div>
+        <div class="p-[10pt]">{{ __('legacy/donate.text_donation_note') }}</div>
         @if ($showCustom)
-            <div class="nx-text">{{ \App\Support\Format::formatComment($custom) }}</div>
+            <div class="p-[10pt]">{{ \App\Support\Format::formatComment($custom) }}</div>
         @endif
         @if ($showPaypal || $crypto !== [])
-            <div class="nx-row">
+            <div class="flex items-start">
                 @if ($showPaypal)
-                    <div class="nx-text nx-grow">
+                    <div class="p-[10pt] grow">
                         <b>{{ __('legacy/donate.text_donate_with_paypal') }}</b><br /><br />
                         {{ __('legacy/donate.text_donate_paypal_note') }} <br />{{ __('legacy/donate.text_donate_paypal_note_two') }} <br />{{ __('legacy/donate.text_donate_paypal_note_three') }}
                         <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
                             <input type="hidden" name="cmd" value="_xclick">
                             <input type="hidden" name="business" value="{{ $paypal }}">
                             <input type="hidden" name="item_name" value="Donation to {{ $SITENAME }}">
-                            <p class="nx-center">
+                            <p class="text-center">
                                 <br />
                                 {{ __('legacy/donate.text_select_donation_amount') }}<br />
                                 <select name="amount">
@@ -46,7 +46,7 @@
                             <input type="hidden" name="currency_code" value="USD">
                             <input type="hidden" name="return" value="{{ $baseUrl }}/donate.php?do=thanks">
                             <input type="hidden" name="cancel_return" value="{{ $baseUrl }}/donate.php">
-                            <p class="nx-center">
+                            <p class="text-center">
                                 <input type="image" src="pic/paypalbutton.gif" name="I1" alt="Make payments with PayPal">
                                 <br /><br />
                             </p>
@@ -54,7 +54,7 @@
                     </div>
                 @endif
                 @if ($crypto !== [])
-                    <div class="nx-text nx-grow">
+                    <div class="p-[10pt] grow">
                         <b>{{ __('legacy/donate.text_donate_with_crypto') }}</b><br /><br />
                         {{ __('legacy/donate.text_donate_crypto_note') }}<br /><br />
                         @foreach ($crypto as $wallet)
@@ -67,7 +67,7 @@
                 @endif
             </div>
         @endif
-        <div class="nx-text">
+        <div class="p-[10pt]">
             {{ __('legacy/donate.text_after_donation_note_one') }}
             <a href="sendmessage.php?receiver={{ $accountantId }}"><span class="striking"><b>{{ __('legacy/donate.text_send_us') }}</b></span></a>
             {{ __('legacy/donate.text_after_donation_note_two') }} <b>{{ __('legacy/donate.text_transaction_information') }}</b>{{ __('legacy/donate.text_after_donation_note_two_end') }}

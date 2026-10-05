@@ -10,7 +10,7 @@
     <input type="hidden" name="returnto" value="{{ $returnto }}">
 @endif
 <x-compose :title="$frameTitle ?? $title" :type="$replyto ? 'reply' : 'new'" :body="$body" :has-subject="true" :subject="$subject">
-<tr><td class="toolbox nx-center" colspan="2">
+<tr><td class="toolbox text-center" colspan="2">
 @if ($replyto)
     <input type="checkbox" name="delete" value="yes"{{ $deleteChecked }}> {{ __('legacy/sendmessage.checkbox_delete_message_replying_to')}}
     <input type="hidden" name="origmsg" value="{{ $replyto }}">

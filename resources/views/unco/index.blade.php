@@ -8,15 +8,15 @@
     <table data-nx="data"><caption class="nx-sr-only">Unconfirmed Users</caption>
         @if ($status ?? '')
             <tr>
-                <td class="rowhead" colspan="5"><span class="nx-color-red nx-size-1">The User account has been updated!</span></td>
+                <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim" colspan="5"><span class="text-nxm-danger text-[10px]">The User account has been updated!</span></td>
             </tr>
         @endif
         <tr>
-            <td class="rowhead nx-center">Name</td>
-            <td class="rowhead nx-center">eMail</td>
-            <td class="rowhead nx-center">Added</td>
-            <td class="rowhead nx-center">Set Status</td>
-            <td class="rowhead nx-center">Confirm</td>
+            <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim text-center">Name</td>
+            <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim text-center">eMail</td>
+            <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim text-center">Added</td>
+            <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim text-center">Set Status</td>
+            <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim text-center">Confirm</td>
         </tr>
         @foreach ($rows as $row)
             <tr>
@@ -24,15 +24,15 @@
                     <input type="hidden" name="action" value="confirmuser">
                     <input type="hidden" name="userid" value="{{ $row['id'] }}">
                     <td><a href="userdetails.php?id={{ $row['id'] }}">{{ $row['username'] }}</a></td>
-                    <td class="nx-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['email'] }}</td>
-                    <td class="nx-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['added'] }}</td>
-                    <td class="nx-center">
+                    <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['email'] }}</td>
+                    <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['added'] }}</td>
+                    <td class="text-center">
                         <select name="confirm">
                             <option value="pending">pending</option>
                             <option value="confirmed">confirmed</option>
                         </select>
                     </td>
-                    <td class="nx-center"><input type="submit" value="-Go-"></td>
+                    <td class="text-center"><input type="submit" value="-Go-"></td>
                 </form>
             </tr>
         @endforeach

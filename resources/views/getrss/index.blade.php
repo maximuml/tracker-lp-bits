@@ -3,10 +3,10 @@
 @section('title', __('legacy/getrss.head_rss_feeds'))
 
 @section('content')
-<h1 class="nx-center">{{ __('legacy/getrss.text_rss_feeds') }}</h1>
+<h1 class="text-center">{{ __('legacy/getrss.text_rss_feeds') }}</h1>
 <form method="post" action="getrss.php">
 @csrf
-<div class="nx-fgrid nx-fgrid--flat nx-w-97">
+<div class="nx-fgrid nx-fgrid--flat w-[97%]">
 <div class="nx-fhead">{{ __('legacy/getrss.row_categories_to_retrieve') }}
 </div>
 <div class="nx-fcell">
@@ -44,7 +44,7 @@
 <option value="{{ $showrow }}">{{ $showrow }}</option>
 @endforeach
 </select></div>
-<div class="nx-ffull nx-center">
+<div class="nx-ffull text-center">
 <input type="submit" value="{{ __('legacy/getrss.submit_generatte_rss_link') }}" />
 </div>
 </div>

@@ -3,7 +3,7 @@
 @section('title', \App\Support\Locale::trans('search.global_search', [], null))
 
 @section('content')
-<div class="nx-main nx-embedded nx-w-97">
+<div class="nx-main nx-embedded w-[97%]">
 @if (! empty($hasResults))
     {{ $pagertop ?? '' }}
     @include('torrents._table')

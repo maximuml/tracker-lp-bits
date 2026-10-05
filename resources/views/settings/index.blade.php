@@ -3,10 +3,10 @@
 @section('title', __('legacy/settings.head_website_settings'))
 
 @section('content')
-<h1 class="nx-center"><a class="faqlink" href="{{ $scriptName }}">{{ __('legacy/settings.text_website_settings') ?? 'Website Settings' }}</a></h1>
+<h1 class="text-center"><a class="faqlink" href="{{ $scriptName }}">{{ __('legacy/settings.text_website_settings') ?? 'Website Settings' }}</a></h1>
 <div class="nx-fgrid nx-fgrid--pad10">
 <div class="nx-ffull nx-fbanner">
-<span class="nx-color-white">{{ __('legacy/settings.text_configuration_file_saving_note') ?? 'Settings are stored in the database.' }}</span>
+<span class="text-white">{{ __('legacy/settings.text_configuration_file_saving_note') ?? 'Settings are stored in the database.' }}</span>
 </td></tr>
 
 @if ($action === 'showmenu')
@@ -23,7 +23,7 @@
         'attachmentsettings' => ['row_attachment_settings', 'submit_attachment_settings', 'text_attachment_settings_note'],
         'miscsettings' => ['row_misc_settings', 'submit_misc_settings', 'text_misc_settings_note'],
     ] as $act => [$row, $btn, $note])
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.'.$row) }}</div><div class="nx-fcell">
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.'.$row) }}</div><div class="nx-fcell">
         <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="{{ $act }}">@csrf
         <input type="submit" value="{{ __('legacy/settings.'.$btn) }}"> {{ __('legacy/settings.'.$note) }}
         </form>
@@ -149,13 +149,13 @@
         :selected="$config['smtptype'] ?? 'default'"
         :break="true" />
     <tbody id="smtp_advanced"@if(($config['smtptype'] ?? 'default') !== 'advanced') class="nx-hidden"@endif>
-    <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_setting_for_advanced_type') ?? 'Advanced' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_setting_for_advanced_type') ?? 'Advanced' }}</b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_host')" name="smtp_host" :value="$config['smtp_host'] ?? 'localhost'" :note="__('legacy/settings.text_smtp_host_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_port')" name="smtp_port" :value="$config['smtp_port'] ?? 25" :note="__('legacy/settings.text_smtp_port_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_sendmail_from')" name="smtp_from" :value="$config['smtp_from'] ?? ''" :note="__('legacy/settings.text_smtp_sendmail_from_note')" />
     </tbody>
     <tbody id="smtp_external"@if(($config['smtptype'] ?? 'default') !== 'external') class="nx-hidden"@endif>
-    <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_setting_for_external_type') ?? 'External' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_setting_for_external_type') ?? 'External' }}</b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_outgoing_mail_address')" name="smtpaddress" :value="$config['smtpaddress'] ?? ''" :note="__('legacy/settings.text_outgoing_mail_address_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_outgoing_mail_port')" name="smtpport" :value="$config['smtpport'] ?? ''" :note="__('legacy/settings.text_outgoing_mail_port_note')" />
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_outgoing_mail_encryption')"
@@ -163,7 +163,7 @@
         :options="['' => 'none', 'tls' => 'tls', 'ssl' => 'ssl']"
         :selected="(string)($config['encryption'] ?? '')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_smtp_account_name')" name="accountname" :value="$config['accountname'] ?? ''" :note="__('legacy/settings.text_smtp_account_name_note')" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_smtp_account_password') ?? 'Password' }}</div><div class="nx-fcell"><input type=password name=accountpassword value="{{ (string)($config['accountpassword'] ?? '') }}"> <b>{{ __('legacy/settings.text_smtp_account_password_note') }}</b> {{ __('legacy/settings.text_smtp_account_password_note_end') }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_smtp_account_password') ?? 'Password' }}</div><div class="nx-fcell"><input type=password name=accountpassword value="{{ (string)($config['accountpassword'] ?? '') }}"> <b>{{ __('legacy/settings.text_smtp_account_password_note') }}</b> {{ __('legacy/settings.text_smtp_account_password_note_end') }}</div>
     </tbody>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
@@ -201,7 +201,7 @@
         :note="__('legacy/settings.text_guest_visit_value_static_page')" />
     </tbody>
     <tbody id="tbody_custom_content"@if(($config['guest_visit_type'] ?? '') !== 'custom_content') class="nx-hidden"@endif>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_guest_visit_value_custom_content') ?? 'Custom content' }}</div><div class="nx-fcell"><x-bbcode-editor form="securitysettings_form" text="guest_visit_value_custom_content" :content="$config['guest_visit_value_custom_content'] ?? ''" /></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_guest_visit_value_custom_content') ?? 'Custom content' }}</div><div class="nx-fcell"><x-bbcode-editor form="securitysettings_form" text="guest_visit_value_custom_content" :content="$config['guest_visit_value_custom_content'] ?? ''" /></div>
     </tbody>
     <tbody id="tbody_redirect"@if(($config['guest_visit_type'] ?? '') !== 'redirect') class="nx-hidden"@endif>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_guest_visit_value_redirect')" name="guest_visit_value_redirect" :value="$config['guest_visit_value_redirect'] ?? ''" />
@@ -221,7 +221,7 @@
         <br><label><input type="radio" name="login_secret_regenerate" value="no"@if (! empty($config['login_secret'])) checked @endif>{{ __('legacy/settings.text_login_secret_regenerate_no') ?? 'No' }}</label>
         <br><label><input type="radio" name="login_secret_regenerate" value="yes"@if (empty($config['login_secret'])) checked @endif>{{ __('legacy/settings.text_login_secret_regenerate_yes') ?? 'Yes' }}</label>
     </x-settings-row>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_login_secret_lifetime') ?? 'Secret lifetime' }}</div><div class="nx-fcell"><input type="text" name="login_secret_lifetime" value="{{ (string)($config['login_secret_lifetime'] ?? '') }}">{{ __('legacy/settings.text_login_secret_lifetime_unit') ?? ' min' }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_login_secret_lifetime') ?? 'Secret lifetime' }}</div><div class="nx-fcell"><input type="text" name="login_secret_lifetime" value="{{ (string)($config['login_secret_lifetime'] ?? '') }}">{{ __('legacy/settings.text_login_secret_lifetime_unit') ?? ' min' }}</div>
     </tbody>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
@@ -298,9 +298,9 @@
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_tooltip')" name="enabletooltip" :value="$config['enabletooltip'] ?? 'no'" :note="__('legacy/settings.text_enable_tooltip_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_title_keywords')" name="titlekeywords" :value="$config['titlekeywords'] ?? ''" :note="__('legacy/settings.text_title_keywords_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_meta_keywords')" name="metakeywords" :value="$config['metakeywords'] ?? ''" :note="__('legacy/settings.text_meta_keywords_note')" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_meta_description') ?? 'Meta description' }}</div><div class="nx-fcell"><textarea cols="100" rows="5" name='metadescription'>{{ (string)($config['metadescription'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_meta_description_note') ?? '' }}</div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_web_analytics_code') ?? 'Analytics code' }}</div><div class="nx-fcell"><textarea cols="100" rows="5" name='analyticscode'>{{ (string)($config['analyticscode'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_web_analytics_code_note') }} <br /><b>{{ __('legacy/settings.text_note') }}</b>: {{ __('legacy/settings.text_web_analytics_code_note_end') }}</div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_see_sql_debug') ?? 'SQL debug' }}</div><div class="nx-fcell"><input type='checkbox' name='enablesqldebug' value='yes'@if (($config['enablesqldebug'] ?? 'no') === 'yes') checked @endif>{{ __('legacy/settings.text_allow') ?? 'Allow' }}{{ \App\Support\UserClass::classSelectWithContext('sqldebug', \App\Enums\UserClass::STAFFLEADER->value, $config['sqldebug'] ?? \App\Enums\UserClass::MODERATOR->value) }}{{ __('legacy/settings.text_see_sql_list') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::SYSOP->value, false, true, true) }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_meta_description') ?? 'Meta description' }}</div><div class="nx-fcell"><textarea cols="100" rows="5" name='metadescription'>{{ (string)($config['metadescription'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_meta_description_note') ?? '' }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_web_analytics_code') ?? 'Analytics code' }}</div><div class="nx-fcell"><textarea cols="100" rows="5" name='analyticscode'>{{ (string)($config['analyticscode'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_web_analytics_code_note') }} <br /><b>{{ __('legacy/settings.text_note') }}</b>: {{ __('legacy/settings.text_web_analytics_code_note_end') }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_see_sql_debug') ?? 'SQL debug' }}</div><div class="nx-fcell"><input type='checkbox' name='enablesqldebug' value='yes'@if (($config['enablesqldebug'] ?? 'no') === 'yes') checked @endif>{{ __('legacy/settings.text_allow') ?? 'Allow' }}{{ \App\Support\UserClass::classSelectWithContext('sqldebug', \App\Enums\UserClass::STAFFLEADER->value, $config['sqldebug'] ?? \App\Enums\UserClass::MODERATOR->value) }}{{ __('legacy/settings.text_see_sql_list') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::SYSOP->value, false, true, true) }}</div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_tracker_founded_date')" name="datefounded" :value="$config['datefounded'] ?? '2007-12-24'" :note="__('legacy/settings.text_tracker_founded_date_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_css_date')" name="cssdate" :value="$config['cssdate'] ?? ''" :note="__('legacy/settings.text_css_date')" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
@@ -308,13 +308,13 @@
 
 @elseif ($action === 'bonussettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_bonus">@csrf
-    <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_bonus_by_seeding') ?? 'Bonus by seeding' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_bonus_by_seeding') ?? 'Bonus by seeding' }}</b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_min_size')" name="min_size" :value="$config['min_size'] ?? 0" :note="__('legacy/settings.text_bonus_mini_size').' '.(__('legacy/settings.text_bonus_mini_size_help'))" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_donor_gets_double')" name="donortimes" :value="$config['donortimes'] ?? 2" :note="__('legacy/settings.text_donor_gets').' '.(__('legacy/settings.text_times_as_many'))" />
     <x-settings-row layout="grid" :label="__('legacy/settings.row_basic_seeding_bonus')">
         {{ __('legacy/settings.text_user_would_get') ?? '' }}<input type="text" name="perseeding" value="{{ (string)($config['perseeding'] ?? 1) }}">{{ __('legacy/settings.text_bonus_points') ?? '' }}<input type="text" name="maxseeding" value="{{ (string)($config['maxseeding'] ?? 7) }}">{{ __('legacy/settings.text_torrents_default') ?? '' }}
     </x-settings-row>
-    <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_misc_ways_get_bonus') ?? 'Misc bonus' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_misc_ways_get_bonus') ?? 'Misc bonus' }}</b></div>
     @foreach ([
         ['uploadtorrent', 'row_uploading_torrent', 15, 'text_uploading_torrent_note'],
         ['starttopic', 'row_starting_topic', 2, 'text_starting_topic_note'],
@@ -330,7 +330,7 @@
     <x-settings-row layout="grid" :label="__('legacy/settings.row_saying_thanks')">
         {{ __('legacy/settings.text_giver_and_receiver_get') ?? '' }}<input type="text" name="saythanks" value="{{ (string)($config['saythanks'] ?? 0.5) }}">{{ __('legacy/settings.text_saying_thanks_and') ?? '' }}<input type="text" name="receivethanks" value="{{ (string)($config['receivethanks'] ?? 0) }}">{{ __('legacy/settings.text_saying_thanks_default') ?? '' }}
     </x-settings-row>
-    <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_things_cost_bonus') ?? 'Things that cost bonus' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_things_cost_bonus') ?? 'Things that cost bonus' }}</b></div>
     @foreach ([
         ['onegbupload', 'row_one_gb_credit', 300, 'text_one_gb_credit_note'],
         ['fivegbupload', 'row_five_gb_credit', 800, 'text_five_gb_credit_note'],
@@ -356,26 +356,31 @@
     <x-settings-row layout="grid" :label="__('legacy/settings.row_bonus_gift_tax')">
         {{ __('legacy/settings.text_system_charges') ?? '' }}<input type="text" name="basictax" value="{{ (string)($config['basictax'] ?? 5) }}">{{ __('legacy/settings.text_bonus_points_plus') ?? '' }}<input type="text" name="taxpercentage" value="{{ (string)($config['taxpercentage'] ?? 10) }}">{{ __('legacy/settings.text_bonus_gift_tax_note') ?? '' }}<br />{{ __('legacy/settings.text_bonus_gift_tax_note_tail') ?? '' }}
     </x-settings-row>
-    <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_attendance_get_bonus') ?? 'Attendance bonus' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_attendance_get_bonus') ?? 'Attendance bonus' }}</b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_initial_reward')" name="attendance_initial" :value="$config['attendance_initial'] ?? 0" />
     <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_continuous_increment')" name="attendance_step" :value="$config['attendance_step'] ?? 0" />
     <x-settings-text layout="grid" :label="__('legacy/settings.text_attendance_reward_limit')" name="attendance_max" :value="$config['attendance_max'] ?? 0" />
     <x-settings-row layout="grid" :label="__('legacy/settings.text_attendance_continuous')">
-        <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/settings.text_website_settings') ?? 'Website Settings' }}</caption>
-            <tr><th class="colhead" scope="col">{{ __('legacy/settings.text_attendance_continuous_days') ?? 'Days' }}</th><th class="colhead" scope="col">{{ __('legacy/settings.text_attendance_continuous_days_additional_reward') ?? 'Reward' }}</th><th class="colhead" scope="col">{{ __('legacy/settings.text_attendance_continuous_days_action') ?? 'Action' }}</th></tr>
+        <x-data-table :caption="__('legacy/settings.text_website_settings') ?? 'Website Settings'" captionHidden>
+<x-slot:head>
+<thead>
+<tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/settings.text_attendance_continuous_days') ?? 'Days' }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/settings.text_attendance_continuous_days_additional_reward') ?? 'Reward' }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/settings.text_attendance_continuous_days_action') ?? 'Action' }}</th></tr>
+</thead>
+</x-slot:head>
+
             @foreach (($attendance_continuous ?? []) as $days => $value)
             <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value="{{ $days }}"> {{ __('legacy/settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value="{{ $value }}"> {{ __('legacy/settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-delrow">{{ __('legacy/settings.text_attendance_continuous_item_action_remove') ?? 'Remove' }}</a></td></tr>
             @endforeach
             <tr><td colspan="3">{{ __('legacy/settings.text_attendance_continuous_add_rules') ?? '' }}</td></tr>
             <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value=""> {{ __('legacy/settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value=""> {{ __('legacy/settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-newrow">{{ __('legacy/settings.text_attendance_continuous_item_action_add') ?? 'Add' }}</a></td></tr>
-        </table>
+        </x-data-table>
     </x-settings-row>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 
 @elseif ($action === 'accountsettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_account">@csrf
-    <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_delete_inactive_accounts') ?? 'Delete inactive' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_delete_inactive_accounts') ?? 'Delete inactive' }}</b></div>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_never_delete')">
         {{ \App\Support\UserClass::classSelectWithContext('neverdelete', \App\Enums\UserClass::VIP->value, $config['neverdelete'] ?? 0) }}{{ __('legacy/settings.text_never_delete') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::VETERAN_USER->value, false, true, true) }}
     </x-settings-row>
@@ -386,7 +391,7 @@
     <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_unpacked')" name="deleteunpacked" :value="$config['deleteunpacked'] ?? 150" :note="__('legacy/settings.text_delete_unpacked_note_two')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_delete_no_transfer')" name="deletenotransfer" :value="$config['deletenotransfer'] ?? 60" :note="__('legacy/settings.text_delete_transfer_note_two')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_destroy_disabled')" name="destroy_disabled" :value="$config['destroy_disabled'] ?? 500" :note="__('legacy/settings.text_destroy_disabled_note_two')" />
-    <div class="nx-ffull nx-center"><b>{{ __('legacy/settings.text_user_promotion_demotion') ?? 'Promotion/Demotion' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_user_promotion_demotion') ?? 'Promotion/Demotion' }}</b></div>
     @foreach ([
         [\App\Enums\UserClass::POWER_USER->value, 'pu', 4, 50, 1.05, 0.95, 1],
         [\App\Enums\UserClass::ELITE_USER->value, 'eu', 8, 120, 1.55, 1.45, 0],
@@ -423,10 +428,10 @@
         :options="collect($nfoViewStyles ?? [])->mapWithKeys(fn ($info, $style) => [(string)$style => $info['text'] ?? $style])->all()"
         :selected="(string)($config['nfo_view_style_default'] ?? 0)" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_paid_torrent_enabled')" name="paid_torrent_enabled" :value="$config['paid_torrent_enabled'] ?? 'no'" :note="__('legacy/settings.text_paid_torrent_enabled_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_tax_factor') ?? 'Tax factor' }}</div><div class="nx-fcell"><input type='number' name=tax_factor value="{{ (string)($config['tax_factor'] ?? 0) }}"> {{ __('legacy/settings.text_tax_factor_note') ?? '' }}</div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_max_price') ?? 'Max price' }}</div><div class="nx-fcell"><input type='number' name=max_price value="{{ (string)($config['max_price'] ?? 0) }}"> {{ __('legacy/settings.text_max_price_note') ?? '' }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_tax_factor') ?? 'Tax factor' }}</div><div class="nx-fcell"><input type='number' name=tax_factor value="{{ (string)($config['tax_factor'] ?? 0) }}"> {{ __('legacy/settings.text_tax_factor_note') ?? '' }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_max_price') ?? 'Max price' }}</div><div class="nx-fcell"><input type='number' name=max_price value="{{ (string)($config['max_price'] ?? 0) }}"> {{ __('legacy/settings.text_max_price_note') ?? '' }}</div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_reward_bonus_options')" name="reward_bonus_options" :value="$config['reward_bonus_options'] ?? ''" :note="__('legacy/settings.text_reward_bonus_options_note')" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_reward_times_limit') ?? 'Reward limit' }}</div><div class="nx-fcell"><input type='number' name=reward_times_limit value="{{ (string)($config['reward_times_limit'] ?? 0) }}"> {{ __('legacy/settings.text_reward_times_limit_note') ?? '' }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_reward_times_limit') ?? 'Reward limit' }}</div><div class="nx-fcell"><input type='number' name=reward_times_limit value="{{ (string)($config['reward_times_limit'] ?? 0) }}"> {{ __('legacy/settings.text_reward_times_limit_note') ?? '' }}</div>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_random_promotion')">
         {{ __('legacy/settings.text_random_promotion_note_one') ?? '' }}
         <ul>
@@ -502,8 +507,8 @@
         :note="__('legacy/settings.text_image_thumbnail_note')"
         :break="true" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_thumbnail_quality')" name="thumbquality" :value="$config['thumbquality'] ?? 80" :note="__('legacy/settings.text_thumbnail_quality_note')" />
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_thumbnail_size') ?? 'Thumb size' }}</div><div class="nx-fcell"><input type='text' name="thumbwidth" value="{{ (string)($config['thumbwidth'] ?? 500) }}"> * <input type='text' name="thumbheight" value="{{ (string)($config['thumbheight'] ?? 500) }}"> {{ __('legacy/settings.text_thumbnail_size_note') ?? '' }}</div>
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_alternative_thumbnail_size') ?? 'Alt thumb size' }}</div><div class="nx-fcell"><input type='text' name="altthumbwidth" value="{{ (string)($config['altthumbwidth'] ?? 180) }}"> * <input type='text' name="altthumbheight" value="{{ (string)($config['altthumbheight'] ?? 135) }}"> {{ __('legacy/settings.text_alternative_thumbnail_size_note') ?? '' }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_thumbnail_size') ?? 'Thumb size' }}</div><div class="nx-fcell"><input type='text' name="thumbwidth" value="{{ (string)($config['thumbwidth'] ?? 500) }}"> * <input type='text' name="thumbheight" value="{{ (string)($config['thumbheight'] ?? 500) }}"> {{ __('legacy/settings.text_thumbnail_size_note') ?? '' }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_alternative_thumbnail_size') ?? 'Alt thumb size' }}</div><div class="nx-fcell"><input type='text' name="altthumbwidth" value="{{ (string)($config['altthumbwidth'] ?? 180) }}"> * <input type='text' name="altthumbheight" value="{{ (string)($config['altthumbheight'] ?? 135) }}"> {{ __('legacy/settings.text_alternative_thumbnail_size_note') ?? '' }}</div>
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>
 
@@ -518,7 +523,7 @@
 
 @elseif ($action === 'miscsettings')
     <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_misc">@csrf
-    <div class="nx-fhead nx-nowrap">{{ __('legacy/settings.row_misc_donation_custom') ?? 'Donation custom' }}</div><div class="nx-fcell"><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_donation_custom_note') }}&nbsp;<b><a href="tags.php" target="_blank">{{ __('legacy/settings.text_bbcode_tag') }}</a></b></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_misc_donation_custom') ?? 'Donation custom' }}</div><div class="nx-fcell"><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_donation_custom_note') }}&nbsp;<b><a href="tags.php" target="_blank">{{ __('legacy/settings.text_bbcode_tag') }}</a></b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('legacy/settings.text_protected_forum')" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>

@@ -16,7 +16,7 @@
     <caption class="nx-sr-only">User ban log</caption>
     <thead><tr>
         @foreach ($header as $label)
-            <th class="colhead" scope="col">{{ $label }}</th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $label }}</th>
         @endforeach
     </tr></thead>
     <tbody>

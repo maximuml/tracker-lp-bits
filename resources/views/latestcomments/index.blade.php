@@ -7,22 +7,22 @@
     <x-std-message heading="Sorry" :text="__('legacy/functions.text_no_comments')" :htmlstrip="false" />
 @else
     {{ $pagertop }}
-    <h1 class="nx-center">{{ __('legacy/functions.text_latest_comments')}}</h1>
+    <h1 class="text-center">{{ __('legacy/functions.text_latest_comments')}}</h1>
     @foreach ($rows as $row)
         <div>
             <div id="cid{{ $row['id'] }}" class="nx-embedded">
                         #{{ $row['id'] }}&nbsp;&nbsp;
-                        <span class="nx-color-gray">{{ __('legacy/functions.text_by')}}</span>
+                        <span class="text-nxm-text-dim">{{ __('legacy/functions.text_by')}}</span>
                         {{ $row['usernameHtml'] ?? '' }}
-                        &nbsp;&nbsp;<span class="nx-color-gray">{{ __('legacy/functions.text_at')}}</span>
+                        &nbsp;&nbsp;<span class="text-nxm-text-dim">{{ __('legacy/functions.text_at')}}</span>
                         {{ $row['timeHtml'] ?? '' }}
-                        @if(($row['parentUrl'] ?? '') !== '') <span class="nx-color-gray">on</span> <a href="{{ $row['parentUrl'] }}">{{ $row['parent_name'] ?? '' }}</a>@endif
+                        @if(($row['parentUrl'] ?? '') !== '') <span class="text-nxm-text-dim">on</span> <a href="{{ $row['parentUrl'] }}">{{ $row['parent_name'] ?? '' }}</a>@endif
             </div>
-            <div class="nx-main nx-row">
-                <div class="nx-w-150">
+            <div class="nx-main flex items-start">
+                <div class="flex-[0_0_150px]">
                         {{ $row['avatarHtml'] ?? '' }}
                 </div>
-                <div class="nx-grow nx-cell-5 word-break-all">
+                <div class="grow p-[5px] break-all">
                         <br />
                         {{ $row['commentHtml'] ?? '' }}
                 </div>

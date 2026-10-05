@@ -20,7 +20,7 @@
     @if ($warning)
         <span class="striking">{{ $warning }}</span>
     @else
-        <b>{{ __('legacy/attachment.text_left')}}</b><span class="nx-color-red">{{ $count_left }}</span>{{ __('legacy/attachment.text_of')}}{{ $count_limit }}&nbsp;&nbsp;<b>{{ __('legacy/attachment.text_size_limit')}}</b>{{ \App\Support\Format::size($size_limit) }}&nbsp;&nbsp;<b>{{ __('legacy/attachment.text_file_extensions')}}</b>
+        <b>{{ __('legacy/attachment.text_left')}}</b><span class="text-nxm-danger">{{ $count_left }}</span>{{ __('legacy/attachment.text_of')}}{{ $count_limit }}&nbsp;&nbsp;<b>{{ __('legacy/attachment.text_size_limit')}}</b>{{ \App\Support\Format::size($size_limit) }}&nbsp;&nbsp;<b>{{ __('legacy/attachment.text_file_extensions')}}</b>
         <span title="{{ $allowedextsblock }}"><i>{{ __('legacy/attachment.text_mouse_over_here')}}</i></span>
     @endif
     </div>

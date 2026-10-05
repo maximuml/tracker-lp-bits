@@ -1,6 +1,6 @@
 @if ($forums !== null)
-<h1 class="nx-center">{{ $forums->siteName }}&nbsp;{{ __('legacy/forums.text_forums') }}</h1>
-<p class="nx-center">
+<h1 class="text-center">{{ $forums->siteName }}&nbsp;{{ __('legacy/forums.text_forums') }}</h1>
+<p class="text-center">
     <a href="?action=search"><b>{{ __('legacy/forums.text_search') }}</b></a> |
     <a href="?action=viewunread"><b>{{ __('legacy/forums.text_view_unread') }}</b></a> |
     <a href="?catchup=1"><b>{{ __('legacy/forums.text_catch_up') }}</b></a>

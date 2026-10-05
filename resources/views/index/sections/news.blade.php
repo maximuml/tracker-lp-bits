@@ -8,7 +8,7 @@
 @if(count($news->items) === 0)
 <x-empty-state :title="__('legacy/index.text_no_news')" />
 @else
-<div class="nx-text"><div>
+<div class="p-[10pt]"><div>
 @foreach($news->items as $newsItem)
     @if($loop->first)
         <a href="#" data-klappe="a{{ $newsItem->id }}"><img class="minus" src="pic/trans.gif" id="pica{{ $newsItem->id }}" alt="Show/Hide" title="{{ $news->showHideTitle }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem->added)) }} - <b>{{ $newsItem->title }}</b></a>
@@ -18,7 +18,7 @@
         <div id="ka{{ $newsItem->id }}" class="nx-hidden"> {{ \App\Support\Format::formatComment($newsItem->body, 0) }} </div>
     @endif
     &nbsp; [<a class="faqlink" href="news.php?action=edit&amp;newsid={{ $newsItem->id }}"><b>{{ $news->editLabel }}</b></a>]
-    <form method="post" action="/news" class="nx-inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="newsid" value="{{ $newsItem->id }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $news->deleteLabel }}</b></button></form>
+    <form method="post" action="/news" class="inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="newsid" value="{{ $newsItem->id }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $news->deleteLabel }}</b></button></form>
 @endforeach
 </div></div>
 @endif

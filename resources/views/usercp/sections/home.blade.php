@@ -71,9 +71,9 @@
 @foreach ($home->readTopics as $topic)
 <tr>
     <td><a href="forums.php?action=viewtopic&amp;topicid={{ $topic->id }}"><b>{{ $topic->subject }}</b></a></td>
-    <td class="nx-center">{{ $topic->replies }}/{{ $topic->views }}</td>
-    <td class="nx-center">{{ $topic->author }}</td>
-    <td class="nx-center nx-nowrap">@if ($topic->lastPostAdded !== null)<x-time :value="$topic->lastPostAdded" /> | @endif{{ $topic->lastPostUsername }}</td>
+    <td class="text-center">{{ $topic->replies }}/{{ $topic->views }}</td>
+    <td class="text-center">{{ $topic->author }}</td>
+    <td class="text-center whitespace-nowrap">@if ($topic->lastPostAdded !== null)<x-time :value="$topic->lastPostAdded" /> | @endif{{ $topic->lastPostUsername }}</td>
 </tr>
 @endforeach
 </x-data-table>

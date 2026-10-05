@@ -37,7 +37,7 @@ document.addEventListener('click', function (e) {
     <div><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form ?? '' }}" data-smile-text="{{ $text ?? '' }}"><img src="pic/smilies/{{ $i }}.gif" alt="[em{{ $i }}]" ></a></div>
 @endfor
 </div>
-<div class="nx-center">
+<div class="text-center">
  <a href="#" data-window-close>{{ __('legacy/moresmilies.text_close') }}</a>
 </div>
 </body>

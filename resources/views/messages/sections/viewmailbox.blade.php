@@ -2,7 +2,7 @@
 
 <div>
 <div class="nx-colhead">{{ __('legacy/messages.col_search_message') }}</div>
-<div class="nx-center nx-cell-5">@include('messages.sections._jump_to')</div>
+<div class="text-center p-[5px]">@include('messages.sections._jump_to')</div>
 </div>
 
 @if (! $viewmailbox['hasMessages'])

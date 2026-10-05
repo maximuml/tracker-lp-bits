@@ -1,7 +1,7 @@
 @props(['row'])
 <tr>
-    <td class="rowfollow">
-        <div class="nx-forum-row">
+    <td>
+        <div class="flex items-start gap-2">
             <img class="{{ $row->stateIcon()[0] }}" src="pic/trans.gif" alt="{{ $row->stateIcon()[1] }}" title="{{ $row->stateIcon()[2] }}" />
             <div>
                 @if ($row->sticky)
@@ -21,7 +21,7 @@
             </div>
         </div>
     </td>
-    <td class="rowfollow nx-center">{{ $row->author }}<br />@if ($row->firstAddedRecent)<span class="new small">{{ $row->firstAdded }}</span>@else<span class="nx-dim small">{{ $row->firstAdded }}</span>@endif</td>
-    <td class="rowfollow nx-center">{{ $row->replies }} / <span class="nx-dim">{{ number_format($row->views) }}</span></td>
-    <td class="rowfollow nx-nowrap nx-center"><x-time :value="$row->lastPostAt" /><br />{{ $row->lastPoster }}</td>
+    <td class="text-center">{{ $row->author }}<br />@if ($row->firstAddedRecent)<span class="new small">{{ $row->firstAdded }}</span>@else<span class="text-nxm-text-dim small">{{ $row->firstAdded }}</span>@endif</td>
+    <td class="text-center">{{ $row->replies }} / <span class="text-nxm-text-dim">{{ number_format($row->views) }}</span></td>
+    <td class="whitespace-nowrap text-center"><x-time :value="$row->lastPostAt" /><br />{{ $row->lastPoster }}</td>
 </tr>

@@ -8,11 +8,11 @@
 <p><b>{{ __('legacy/userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)
 @if ($isFriend)
-<p>(<form method="post" action="friends.php" class="nx-inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_friends') ?? '' }}</button></form>)</p>
+<p>(<form method="post" action="friends.php" class="inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_friends') ?? '' }}</button></form>)</p>
 @elseif ($currentUserBlockedTarget)
-<p>(<form method="post" action="friends.php" class="nx-inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</p>
+<p>(<form method="post" action="friends.php" class="inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</p>
 @else
-<p>(<form method="post" action="friends.php" class="nx-inline">@csrf<input type="hidden" name="action" value="add" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="friends.php" class="nx-inline">@csrf<input type="hidden" name="action" value="add" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_blocks') ?? '' }}</button></form>)</p>
+<p>(<form method="post" action="friends.php" class="inline">@csrf<input type="hidden" name="action" value="add" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="friends.php" class="inline">@csrf<input type="hidden" name="action" value="add" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_blocks') ?? '' }}</button></form>)</p>
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
@@ -87,13 +87,13 @@
 <x-user.details-toggle :label="__('legacy/userdetails.row_incomplete_torrents')" type="incomplete" block="ka4" imgId="pica4" klappe="a4" :userId="$user['id']" :title="__('legacy/userdetails.title_show_or_hide')" :linkText="__('legacy/userdetails.text_show_or_hide')" />
 @endif
 @if (! empty($user['info']))
-<tr><td colspan="2" class="text">{{ \App\Support\Format::formatComment($user['info'], false) }}</td></tr>
+<tr><td colspan="2" class="p-[10pt]">{{ \App\Support\Format::formatComment($user['info'], false) }}</td></tr>
 @endif
 @else
-<tr><td colspan="2" class="text"><span class="nx-color-blue">{{ __('legacy/userdetails.text_public_access_denied') ?? '' }}{{ $user['username'] }}{{ __('legacy/userdetails.text_user_wants_privacy') ?? '' }}</span></td></tr>
+<tr><td colspan="2" class="p-[10pt]"><span class="text-[#0000ff]">{{ __('legacy/userdetails.text_public_access_denied') ?? '' }}{{ $user['username'] }}{{ __('legacy/userdetails.text_user_wants_privacy') ?? '' }}</span></td></tr>
 @endif
 @if (! $isOwner)
-<tr><td colspan="2" class="nx-center">@if ($showPmButton)<a href="sendmessage.php?receiver={{ $user['id'] }}"><img class="f_pm" src="pic/trans.gif" alt="PM" title="{{ __('legacy/userdetails.title_send_pm') ?? '' }}" /></a>@endif<a href="report.php?user={{ $user['id'] }}"><img class="f_report" src="pic/trans.gif" alt="Report" title="{{ __('legacy/userdetails.title_report_user') ?? '' }}" /></a></td></tr>
+<tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="sendmessage.php?receiver={{ $user['id'] }}"><img class="f_pm" src="pic/trans.gif" alt="PM" title="{{ __('legacy/userdetails.title_send_pm') ?? '' }}" /></a>@endif<a href="report.php?user={{ $user['id'] }}"><img class="f_report" src="pic/trans.gif" alt="Report" title="{{ __('legacy/userdetails.title_report_user') ?? '' }}" /></a></td></tr>
 @endif
 </table>
 
@@ -124,16 +124,16 @@
 <x-settings-row :label="__('legacy/userdetails.row_comment')"><textarea cols="60" rows="6" name="modcomment" placeholder="{{ $modcomment }}"></textarea></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_seeding_karma')"><textarea cols="60" rows="6" name="bonuscomment" readonly="readonly">{{ $bonuscomment }}</textarea></x-settings-row>
 @endif
-<tr><td class="rowhead">{{ __('legacy/userdetails.row_warning_system') }}<br /><br />{{ __('legacy/userdetails.row_warning_system_note') }}</td><td class="rowfollow"><table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/userdetails.row_warning_system') }}</caption><tr><td class="rowfollow">@if ($warned)<input name="warned" value="yes" type="radio" checked="checked" />{{ __('legacy/userdetails.radio_yes') ?? '' }}<input name="warned" value="no" type="radio" />{{ __('legacy/userdetails.radio_no') ?? '' }}@else{{ __('legacy/userdetails.text_not_warned') ?? '' }}@endif</td>
+<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/userdetails.row_warning_system') }}<br /><br />{{ __('legacy/userdetails.row_warning_system_note') }}</td><td class="align-top px-2.5 py-1.5"><table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/userdetails.row_warning_system') }}</caption><tr><td class="align-top px-2.5 py-1.5">@if ($warned)<input name="warned" value="yes" type="radio" checked="checked" />{{ __('legacy/userdetails.radio_yes') ?? '' }}<input name="warned" value="no" type="radio" />{{ __('legacy/userdetails.radio_no') ?? '' }}@else{{ __('legacy/userdetails.text_not_warned') ?? '' }}@endif</td>
 @if ($warned)
 @if ($warnedUntilPretty === null)
-<td class="rowfollow nx-center">{{ __('legacy/userdetails.text_arbitrary_duration') ?? '' }}</td>
+<td class="align-top px-2.5 py-1.5 text-center">{{ __('legacy/userdetails.text_arbitrary_duration') ?? '' }}</td>
 @else
-<td class="rowfollow">{{ __('legacy/userdetails.text_until') ?? '' }}{{ $user['warneduntil'] }}<br />({{ $warnedUntilPretty }}{{ __('legacy/userdetails.text_to_go') ?? '' }})</td>
+<td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_until') ?? '' }}{{ $user['warneduntil'] }}<br />({{ $warnedUntilPretty }}{{ __('legacy/userdetails.text_to_go') ?? '' }})</td>
 @endif
 </tr>
 @else
-<td class="rowfollow">{{ __('legacy/userdetails.text_warn_for') ?? '' }}<select name="warnlength">
+<td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_warn_for') ?? '' }}<select name="warnlength">
 <option value="0">------</option>
 <option value="1">1 {{ __('legacy/userdetails.text_week') ?? '' }}</option>
 <option value="2">2 {{ __('legacy/userdetails.text_weeks') ?? '' }}</option>
@@ -141,22 +141,22 @@
 <option value="8">8 {{ __('legacy/userdetails.text_weeks') ?? '' }}</option>
 <option value="255">{{ __('legacy/userdetails.text_unlimited') ?? '' }}</option>
 </select></td></tr>
-<tr><td class="rowfollow">{{ __('legacy/userdetails.text_reason_of_warning') ?? '' }}</td><td class="rowfollow"><input type="text" size="60" name="warnpm" /></td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_reason_of_warning') ?? '' }}</td><td class="align-top px-2.5 py-1.5"><input type="text" size="60" name="warnpm" /></td></tr>
 @endif
-<tr><td class="rowfollow">{{ __('legacy/userdetails.text_times_warned') ?? '' }}</td><td class="rowfollow">{{ $user['timeswarned'] }}</td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_times_warned') ?? '' }}</td><td class="align-top px-2.5 py-1.5">{{ $user['timeswarned'] }}</td></tr>
 @if ((int) $user['timeswarned'] === 0)
-<tr><td class="rowfollow">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td class="rowfollow">{{ __('legacy/userdetails.text_not_warned_note') ?? '' }}</td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_not_warned_note') ?? '' }}</td></tr>
 @else
 @if (($user['warnedby'] ?? '') === 'System')
-<tr><td class="rowfollow">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td class="rowfollow"> {{ $user['lastwarned'] }} .({{ __('legacy/userdetails.text_until') ?? '' }}{{ $elapsedLastWarn }})   <br />[{{ __('legacy/userdetails.text_by_system') ?? '' }}]</td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td class="align-top px-2.5 py-1.5"> {{ $user['lastwarned'] }} .({{ __('legacy/userdetails.text_until') ?? '' }}{{ $elapsedLastWarn }})   <br />[{{ __('legacy/userdetails.text_by_system') ?? '' }}]</td></tr>
 @endif
-<tr><td class="rowfollow">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td class="rowfollow"> {{ $user['lastwarned'] }} ({{ $elapsedLastWarn }}{{ __('legacy/userdetails.text_ago') ?? '' }})   @if (($user['warnedby'] ?? '') !== 'System'){{ $warnedByHtml }}@else<br />[{{ __('legacy/userdetails.text_by_system') ?? '' }}]@endif</td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_last_warning') ?? '' }}</td><td class="align-top px-2.5 py-1.5"> {{ $user['lastwarned'] }} ({{ $elapsedLastWarn }}{{ __('legacy/userdetails.text_ago') ?? '' }})   @if (($user['warnedby'] ?? '') !== 'System'){{ $warnedByHtml }}@else<br />[{{ __('legacy/userdetails.text_by_system') ?? '' }}]@endif</td></tr>
 @endif
-<tr><td class="rowfollow">{{ __('legacy/userdetails.row_auto_warning') ?? '' }}<br /><i>({{ __('legacy/userdetails.text_low_ratio') ?? '' }})</i></td>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.row_auto_warning') ?? '' }}<br /><i>({{ __('legacy/userdetails.text_low_ratio') ?? '' }})</i></td>
 @if ($leechwarn)
-<td class="rowfollow"><span class="nx-color-red">{{ __('legacy/userdetails.text_leech_warned') ?? '' }}</span> {{ __('legacy/userdetails.text_until') ?? '' }}{{ $user['leechwarnuntil'] }}<br />({{ $leechwarnUntilPretty }}{{ __('legacy/userdetails.text_to_go') ?? '' }})&nbsp;<input id="remove-leech-warn" type="button" class="btn" value="Remove" data-uid="{{ $user['id'] }}" /></td></tr>
+<td class="align-top px-2.5 py-1.5"><span class="text-nxm-danger">{{ __('legacy/userdetails.text_leech_warned') ?? '' }}</span> {{ __('legacy/userdetails.text_until') ?? '' }}{{ $user['leechwarnuntil'] }}<br />({{ $leechwarnUntilPretty }}{{ __('legacy/userdetails.text_to_go') ?? '' }})&nbsp;<input id="remove-leech-warn" type="button" class="btn" value="Remove" data-uid="{{ $user['id'] }}" /></td></tr>
 @else
-<td class="rowfollow">{{ __('legacy/userdetails.text_not_warned') ?? '' }}</td></tr>
+<td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_not_warned') ?? '' }}</td></tr>
 @endif
 </table></td></tr>
 <x-settings-row :label="__('legacy/userdetails.row_forum_post_possible')"><x-user.radio-yesno name="forumpost" :yes="\App\Support\LegacyYesNo::isYes($user['forumpost'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['forumpost'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
@@ -167,7 +167,7 @@
 <x-settings-row :label="__('legacy/userdetails.row_change_email')"><input type="text" size="80" name="email" value="{{ $user['email'] }}" /></x-settings-row>
 @endif
 <x-settings-row :label="__('legacy/userdetails.row_passkey')"><input name="resetkey" value="yes" type="checkbox" />{{ __('legacy/userdetails.checkbox_reset_passkey') ?? '' }}</x-settings-row>
-<tr><td class="toolbox nx-center" colspan="2"><input type="submit" class="btn" value="{{ __('legacy/userdetails.submit_okay') ?? '' }}" /></td></tr>
+<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="btn" value="{{ __('legacy/userdetails.submit_okay') ?? '' }}" /></td></tr>
 </table>
 </form>
 </x-frame>

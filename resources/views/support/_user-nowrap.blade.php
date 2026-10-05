@@ -1,2 +1,2 @@
 @props(['inner'])
-<span class="nowrap">{{ $inner }}</span>
+<span class="whitespace-nowrap">{{ $inner }}</span>

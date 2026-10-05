@@ -41,4 +41,7 @@
 @foreach (\App\Support\AssetAppender::getAppendFootersSafe() as $html)
 {{ $html }}
 @endforeach
+{{-- livewire.js carries the bundled Alpine: x-data works on any element
+     once it boots; auto-injection stays off on pages with no components. --}}
+@livewireScripts
 </body></html>

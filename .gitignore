@@ -58,3 +58,5 @@ tests/browser/.auth/
 tests/browser/test-results/
 tests/browser/playwright-report/
 tests/browser/screenshots/
+/bin/
+/public/css/nxt.css

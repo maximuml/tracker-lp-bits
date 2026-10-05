@@ -25,6 +25,13 @@
      so its palette overrides win the cascade. --}}
 <link rel="stylesheet" href="{{ $chrome->head->packThemeUrl }}" type="text/css" />
 @endif
+@if(file_exists(public_path('css/nxt.css')))
+{{-- Tailwind utilities layer for converted components; last in the cascade
+     so utility classes beat theme styles. Missing on clones that have not
+     run `make css` yet — guarded instead of 404ing. --}}
+<link rel="stylesheet" href="css/nxt.css" type="text/css" />
+@endif
+@livewireStyles
 @if($chrome->head->cspNonce !== '')
 {{-- CSP nonce bridge: vendored libs (nx-zoom) inject <style> elements at
      runtime; stamp the request nonce on them so nonce-strict

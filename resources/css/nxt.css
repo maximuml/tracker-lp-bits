@@ -1,0 +1,32 @@
+/*
+ * Tailwind layer for converted Blade components (utilities only — no
+ * preflight/reset so unconverted legacy markup is unaffected).
+ * Build with `make css` (scripts/build-css.sh, standalone CLI, no Node).
+ */
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+@source "../../resources/views/**/*.blade.php";
+@source "../../app/**/*.php";
+
+/* Map the ADR-0019 semantic tokens into the Tailwind palette so
+ * `border-nxm-border`, `bg-nxm-surface` etc. track the active theme
+ * (dark/light flips happen inside --nxm-* at runtime). */
+@theme inline {
+    --color-nxm-bg: var(--nxm-bg);
+    --color-nxm-surface: var(--nxm-surface);
+    --color-nxm-surface-alt: var(--nxm-surface-alt);
+    --color-nxm-text: var(--nxm-text);
+    --color-nxm-text-dim: var(--nxm-text-dim);
+    --color-nxm-muted: var(--nxm-muted);
+    --color-nxm-border: var(--nxm-border);
+    --color-nxm-accent: var(--nxm-accent);
+    --color-nxm-accent-hover: var(--nxm-accent-hover);
+    --color-nxm-on-accent: var(--nxm-on-accent);
+    --color-nxm-success: var(--nxm-success);
+    --color-nxm-danger: var(--nxm-danger);
+    --color-nxm-warning: var(--nxm-warning);
+    --color-nxm-on-success: var(--nxm-on-success);
+    --color-nxm-on-warning: var(--nxm-on-warning);
+    --color-nxm-on-danger: var(--nxm-on-danger);
+}

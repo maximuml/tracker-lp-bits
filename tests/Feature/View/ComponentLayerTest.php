@@ -34,7 +34,7 @@ final class ComponentLayerTest extends TestCase
 
         $this->assertStringContainsString('A &lt;b&gt;bold&lt;/b&gt; title', $html);
         $this->assertStringNotContainsString('<b>bold</b>', $html);
-        $this->assertStringContainsString('nx-page-header__title', $html);
+        $this->assertStringContainsString('text-lg font-bold', $html);
     }
 
     public function test_page_header_renders_trusted_html_title(): void
@@ -131,7 +131,7 @@ final class ComponentLayerTest extends TestCase
         $html = $this->render('<x-button type="submit" variant="primary">Save</x-button>');
         $this->assertStringContainsString('<button', $html);
         $this->assertStringContainsString('type="submit"', $html);
-        $this->assertStringContainsString('nx-btn--primary', $html);
+        $this->assertStringContainsString('bg-nxm-accent', $html);
 
         $html = $this->render('<x-button href="/next">Go</x-button>');
         $this->assertStringContainsString('<a', $html);
@@ -556,7 +556,7 @@ final class ComponentLayerTest extends TestCase
         );
 
         $this->assertStringContainsString('role="alert"', $html);
-        $this->assertStringContainsString('nx-error-summary__title', $html);
+        $this->assertStringContainsString('border-l-4', $html);
         $this->assertStringContainsString('Name is &lt;b&gt;required&lt;/b&gt;', $html);
         $this->assertStringContainsString('href="#email-field"', $html);
     }
@@ -582,7 +582,7 @@ final class ComponentLayerTest extends TestCase
 
         $this->assertStringContainsString('role="status"', $html);
         $this->assertStringContainsString('aria-hidden="true"', $html);
-        $this->assertStringContainsString('nx-loading__spinner', $html);
+        $this->assertStringContainsString('animate-spin', $html);
     }
 
     public function test_loading_state_escapes_custom_label(): void
@@ -608,7 +608,7 @@ final class ComponentLayerTest extends TestCase
         $this->assertStringContainsString('aria-haspopup="menu"', $html);
         $this->assertStringContainsString('role="menu"', $html);
         $this->assertStringContainsString('role="menuitem"', $html);
-        $this->assertStringContainsString('nx-action-menu__item--danger', $html);
+        $this->assertStringContainsString('text-nxm-danger', $html);
         $this->assertStringContainsString('aria-hidden="true"', $html); // caret is decorative
     }
 

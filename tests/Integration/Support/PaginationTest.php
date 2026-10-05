@@ -46,13 +46,13 @@ final class PaginationTest extends TestCase
     public function test_render_first_page_prev_is_disabled(): void
     {
         $result = Pagination::render(10, 50, '/list.php?', 0, 5, self::LABELS);
-        $this->assertStringContainsString('<span class="nx-pagination__link nx-pagination__link--disabled">&lsaquo; Prev</span>', $result[0]);
+        $this->assertStringContainsString('<span class="inline-block border border-nxm-border px-2 py-0.5 text-nxm-text-dim">&lsaquo; Prev</span>', $result[0]);
     }
 
     public function test_render_last_page_next_is_disabled(): void
     {
         $result = Pagination::render(10, 50, '/list.php?', 4, 5, self::LABELS);
-        $this->assertStringContainsString('<span class="nx-pagination__link nx-pagination__link--disabled">Next &rsaquo;</span>', $result[0]);
+        $this->assertStringContainsString('<span class="inline-block border border-nxm-border px-2 py-0.5 text-nxm-text-dim">Next &rsaquo;</span>', $result[0]);
     }
 
     public function test_render_mid_page_has_both_links(): void
@@ -78,14 +78,14 @@ final class PaginationTest extends TestCase
     {
         $result = Pagination::render(10, 30, '/list.php?', 1, 3, self::LABELS);
         // Page 1 (0-indexed) covers items "11 - 20" and is the current page button
-        $this->assertStringContainsString('nx-pagination__link--current', $result[0]);
+        $this->assertStringContainsString('bg-nxm-accent', $result[0]);
         $this->assertStringContainsString('aria-current="page" title="11 - 20">2</span>', $result[0]);
     }
 
     public function test_render_pagertop_has_nexus_pagination_class(): void
     {
         $result = Pagination::render(10, 30, '/list.php?', 0, 3, self::LABELS);
-        $this->assertStringContainsString('class="nexus-pagination nx-pagination nx-center"', $result[0]);
+        $this->assertStringContainsString('class="my-2.5 text-center"', $result[0]);
     }
 
     public function test_render_pager_top_and_bottom_are_identical(): void

@@ -1,4 +1,3 @@
-@if($polls->show)
 <section class="nx-idx-card">
 <h2>{{ $polls->title }}
     @if($polls->canManage)
@@ -29,13 +28,12 @@
         <p class="text-center"><a href="log.php?action=poll">{{ $polls->previousPollsLabel }}</a></p>
     @endif
 @else
-    <form method="post" action="/index">
-    <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+    <form wire:submit="vote">
     @foreach($polls->options as $i => $option)
-        <label><input type="radio" name="choice" value="{{ $i }}">{{ $option }}</label><br />
+        <label><input type="radio" name="choice" value="{{ $i }}" wire:model.number="choice">{{ $option }}</label><br />
     @endforeach
     <br />
-    <label><input type="radio" name="choice" value="255">{{ $polls->blankVoteLabel }}</label><br />
+    <label><input type="radio" name="choice" value="255" wire:model.number="choice">{{ $polls->blankVoteLabel }}</label><br />
     <p class="text-center"><input type="submit" class="btn" value="{{ $polls->submitVoteLabel }}" /></p>
     </form>
 @endif
@@ -43,4 +41,3 @@
 </div>
 @endif
 </section>
-@endif

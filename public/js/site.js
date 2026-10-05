@@ -484,23 +484,6 @@ document.getElementById("name").value=noext;
 }
 
 // in userdetails.php
-function getusertorrentlistajax(userid, type, blockid)
-{
-var block=document.getElementById(blockid);
-if (!block) { return true; }
-if (block.innerHTML=="" && !block.getAttribute('data-utl-loading')){
-block.setAttribute('data-utl-loading','1');
-ajax.fetchText('getusertorrentlistajax.php?userid='+userid+'&type='+type).then(function(infoblock){
-block.innerHTML=infoblock;
-block.removeAttribute('data-utl-loading');
-}).catch(function(){
-block.removeAttribute('data-utl-loading');
-});
-}
-return true;
-}
-
-// in userdetails.php
 function enabledel(msg){
 document.deluser.submit.disabled=document.deluser.submit.checked;
 alert (msg);
@@ -652,18 +635,6 @@ document.addEventListener('click', function (e) {
     var newRow = target.closest('a.js-newrow');
     if (newRow && typeof NewRow === 'function') {
         NewRow(newRow, newRow.getAttribute('data-newrow') === 'before');
-        e.preventDefault();
-        return;
-    }
-
-    var utlLink = target.closest('a[data-utl]');
-    if (utlLink) {
-        if (typeof getusertorrentlistajax === 'function') {
-            getusertorrentlistajax(utlLink.getAttribute('data-utl-user'), utlLink.getAttribute('data-utl'), utlLink.getAttribute('data-utl-block'));
-        }
-        if (utlLink.hasAttribute('data-klappe') && typeof klappe_news === 'function') {
-            klappe_news(utlLink.getAttribute('data-klappe'));
-        }
         e.preventDefault();
         return;
     }

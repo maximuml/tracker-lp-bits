@@ -120,7 +120,7 @@ final class PrivateAttachmentsTest extends TestCase
      */
     public function test_getattachment_with_nonexistent_dlkey_returns_404(): void
     {
-        $response = $this->get('/web/getattachment?id=99999&dlkey=nonexistentkey1234567890123456');
+        $response = $this->get('/web/getattachment?id=99999&dlkey=nonexistent');
         // 401/302 if auth fails first, 404 if auth passes but record not found
         $this->assertContains($response->status(), [404, 401, 302]);
     }

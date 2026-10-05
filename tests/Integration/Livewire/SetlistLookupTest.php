@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Livewire;
 
+use App\Livewire\BbcodeEditor;
 use App\Livewire\SetlistLookup;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -66,7 +67,7 @@ final class SetlistLookupTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user, 'nexus-web');
 
-        Livewire::test(\App\Livewire\BbcodeEditor::class, ['form' => 'upload', 'text' => 'descr', 'content' => 'existing text'])
+        Livewire::test(BbcodeEditor::class, ['form' => 'upload', 'text' => 'descr', 'content' => 'existing text'])
             ->dispatch('setlist-append', form: 'upload', text: 'descr', content: '01 - First Song')
             ->assertSet('body', "existing text\n\n01 - First Song")
             ->assertSet('previewMode', false)
@@ -78,7 +79,7 @@ final class SetlistLookupTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user, 'nexus-web');
 
-        Livewire::test(\App\Livewire\BbcodeEditor::class, ['form' => 'compose', 'text' => 'body', 'content' => 'pm body'])
+        Livewire::test(BbcodeEditor::class, ['form' => 'compose', 'text' => 'body', 'content' => 'pm body'])
             ->dispatch('setlist-append', form: 'upload', text: 'descr', content: '01 - First Song')
             ->assertSet('body', 'pm body')
             ->assertOk();

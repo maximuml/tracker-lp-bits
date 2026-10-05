@@ -56,6 +56,11 @@ final class AjaxRestEndpointsTest extends TestCase
             'addToken' => ['addToken', '/web/token/add'],
             'removeToken' => ['removeToken', '/web/token/del'],
             'getToastNotifications' => ['getToastNotifications', '/web/notifications/feed'],
+            'clearShoutBox' => ['clearShoutBox', '/web/shoutbox/clear'],
+            'shoutboxPost' => ['shoutboxPost', '/web/shoutbox/post'],
+            'shoutboxEdit' => ['shoutboxEdit', '/web/shoutbox/edit'],
+            'shoutboxDelete' => ['shoutboxDelete', '/web/shoutbox/delete'],
+            'shoutboxReact' => ['shoutboxReact', '/web/shoutbox/react'],
         ];
     }
 
@@ -151,6 +156,38 @@ final class AjaxRestEndpointsTest extends TestCase
         $body = $response->json();
         $this->assertNotEquals(0, $body['ret']);
         $this->assertNotEmpty($body['msg']);
+    }
+
+    public function test_shoutbox_post_through_redirect_posts_message(): void
+    {
+        $user = User::factory()->create();
+        $token = $this->csrfToken();
+        $body = ['action' => 'shoutboxPost', 'params' => ['text' => 'rest endpoint shout'], '_token' => $token];
+
+        $redirect = $this->asNexusUser($user)->post('/ajax', $body);
+        $redirect->assertStatus(308);
+
+        $response = $this->asNexusUser($user)
+            ->post($redirect->headers->get('Location'), $body);
+
+        $response->assertOk();
+        $response->assertJsonPath('ret', 0);
+        $this->assertDatabaseHas('shoutbox', [
+            'userid' => $user->id,
+            'text' => 'rest endpoint shout',
+        ]);
+    }
+
+    public function test_shoutbox_post_validation_failure_uses_envelope(): void
+    {
+        $user = User::factory()->create();
+        $response = $this->asNexusUser($user)
+            ->post('/web/shoutbox/post', ['text' => str_repeat('x', 2001), '_token' => $this->csrfToken()]);
+
+        $response->assertOk();
+        $body = $response->json();
+        $this->assertNotEquals(0, $body['ret']);
+        $this->assertSame('Message too long', $body['msg']);
     }
 
     public function test_endpoints_require_login(): void

@@ -32,6 +32,7 @@ final class AuditStaffActions
         // mirrors AJAX_SKIP_ACTIONS so the audit decision stays identical.
         'web/notifications/feed', 'web/offers/show', 'web/torrents/approval-modal',
         'web/benefits/consume', 'web/attendance/retroactive',
+        'web/shoutbox/post', 'web/shoutbox/react',
     ];
 
     /** First-segment prefixes where every sub-path is user activity. */

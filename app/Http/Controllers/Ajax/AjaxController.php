@@ -25,7 +25,10 @@ abstract class AjaxController extends Controller
         } catch (\Throwable $exception) {
             Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
 
-            return response()->json(Api::failWithContext(self::clientSafeMessage($exception)));
+            return response()->json(Api::failWithContext(
+                self::clientSafeMessage($exception),
+                request()->only(['action', 'params']),
+            ));
         }
     }
 

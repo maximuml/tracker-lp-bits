@@ -1,5 +1,6 @@
-<form id="compose" method="post" name="compose" action="?id={{ $edit_offer['id'] }}&amp;take_off_edit=1">
+<form id="compose" method="post" name="compose" action="/web/offers/edit">
 @csrf
+<input type="hidden" name="id" value="{{ $edit_offer['id'] }}" />
 <div class="nx-fgrid nx-fgrid--flat w-[97%]">
 <div class="nx-ffull nx-colhead text-center">{{ __('legacy/offers.text_edit_offer')}}</div>
 <div class="nx-fhead">{{ __('legacy/offers.row_type')}}<span class="text-nxm-danger">*</span></div><div class="nx-fcell"><select name="category">

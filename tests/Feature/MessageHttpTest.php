@@ -49,9 +49,32 @@ final class MessageHttpTest extends TestCase
 
     public function test_messages_action_redirects_unauthenticated_user(): void
     {
-        $this->post('/messages', [
-            'action' => 'moveordel',
-        ])->assertRedirect();
+        $this->post('/web/messages/move-or-delete')
+            ->assertRedirect();
+    }
+
+    public function test_legacy_post_dispatchers_redirect_to_rest_endpoints(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([
+            ['/messages', ['action' => 'moveordel'], '/web/messages/move-or-delete'],
+            ['/messages', ['action' => 'editmailboxes2'], '/web/messages/mailboxes'],
+            ['/messages', ['action' => 'deletemessage'], '/web/messages/delete'],
+            ['/offers', ['new_offer' => '1'], '/web/offers/create'],
+            ['/offers', ['allow_offer' => '1'], '/web/offers/allow'],
+            ['/offers', ['finish_offer' => '1'], '/web/offers/finish'],
+            ['/offers', ['del_offer' => '1'], '/web/offers/delete'],
+            ['/offers', ['take_off_edit' => '1'], '/web/offers/edit'],
+        ] as [$uri, $data, $target]) {
+            $response = $this->withNexusCookie($user)->post($uri, $data);
+            $response->assertStatus(308);
+            $this->assertStringEndsWith($target, (string) $response->headers->get('Location'));
+        }
+
+        $response = $this->withNexusCookie($user)->post('/mybonus?action=exchange');
+        $response->assertStatus(308);
+        $this->assertStringContainsString('/web/mybonus/exchange', (string) $response->headers->get('Location'));
     }
 
     // ─── FormRequest validation ────────────────────────────────────────
@@ -239,8 +262,7 @@ final class MessageHttpTest extends TestCase
         $message = Message::factory()->between($sender, $receiver)->create(['unread' => true]);
 
         $this->withNexusCookie($receiver)
-            ->post('/messages', [
-                'action' => 'moveordel',
+            ->post('/web/messages/move-or-delete', [
                 'markread' => '1',
                 'messages' => [$message->id],
             ])

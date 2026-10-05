@@ -19,8 +19,11 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MetricsController;
+use App\Http\Controllers\MyController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\OfferController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ToolController;
@@ -162,6 +165,15 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('usercp/forum', [UsercpController::class, 'saveForum']);
     Route::post('usercp/tracker', [UsercpController::class, 'saveTracker']);
     Route::post('usercp/security/confirm', [UsercpController::class, 'confirmSecurity']);
+    Route::post('messages/move-or-delete', [MessageController::class, 'moveOrDelete']);
+    Route::post('messages/mailboxes', [MessageController::class, 'editMailboxes']);
+    Route::post('messages/delete', [MessageController::class, 'deleteMailboxMessage']);
+    Route::post('offers/create', [OfferController::class, 'store']);
+    Route::post('offers/allow', [OfferController::class, 'allow']);
+    Route::post('offers/finish', [OfferController::class, 'finish']);
+    Route::post('offers/delete', [OfferController::class, 'destroy']);
+    Route::post('offers/edit', [OfferController::class, 'update']);
+    Route::post('mybonus/exchange', [MyController::class, 'exchangeBonus']);
 
     // REST endpoints for the actions the /ajax dispatcher used to route by
     // `action` string — POST /ajax {action: X} now 308-redirects here with

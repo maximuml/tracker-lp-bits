@@ -59,10 +59,6 @@ final class OfferModerationService
             $this->abort(__('legacy/offers.std_access_denied'), __('legacy/offers.std_mans_job'));
         }
 
-        if ((int) $request->input('allow_offer') !== 1) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
-        }
-
         $offid = (int) $request->input('offerid');
         if (! Validators::isId($offid)) {
             $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
@@ -112,10 +108,6 @@ final class OfferModerationService
     {
         if (! Permission::can(PermissionEnum::OFFER_MANAGE)) {
             $this->abort(__('legacy/offers.std_access_denied'), __('legacy/offers.std_have_no_permission'));
-        }
-
-        if ((int) $request->input('finish_offer') !== 1) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
 
         $offid = (int) $request->input('finish');

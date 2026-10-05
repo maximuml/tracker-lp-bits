@@ -64,7 +64,7 @@ final class BonusService
      * @param  array<int, array<string, mixed>>  $allBonus
      * @param  array<string, mixed>  $curUser
      */
-    private function handleExchange(Request $request, array $allBonus, array $curUser, string $lockText): ?RedirectResponse
+    public function handleExchange(Request $request, array $allBonus, array $curUser, string $lockText): ?RedirectResponse
     {
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
         $bonusgiftBonus = SiteConfig::current()->bonus->bonusGift() ? 'yes' : 'no';

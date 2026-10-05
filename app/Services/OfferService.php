@@ -93,13 +93,9 @@ final class OfferService
         LegacyResponse::abort($heading, $text, $htmlstrip);
     }
 
-    private function handleCreate(Request $request): RedirectResponse
+    public function handleCreate(Request $request): RedirectResponse
     {
         Permission::assertCan(PermissionEnum::ADD_OFFER);
-
-        if ((int) $request->input('new_offer') !== 1) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
-        }
 
         $curuser = $this->curUser();
         $userId = (int) ($curuser['id'] ?? 0);
@@ -161,12 +157,8 @@ final class OfferService
         return redirect("/offers.php?id={$id}&off_details=1");
     }
 
-    private function handleDelete(Request $request): RedirectResponse
+    public function handleDelete(Request $request): RedirectResponse
     {
-        if ((int) $request->input('del_offer') !== 1) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
-        }
-
         $offerId = (int) $request->input('id');
         if (! Validators::isId($offerId)) {
             $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
@@ -194,7 +186,7 @@ final class OfferService
         }
 
         if ($sure === 0) {
-            $this->abort(__('legacy/offers.std_delete_offer'), __('legacy/offers.std_delete_offer_note').view('offers.delete-confirm-form', ['url' => "offers.php?id={$offerId}&del_offer=1&sure=1"])->render(), false);
+            $this->abort(__('legacy/offers.std_delete_offer'), __('legacy/offers.std_delete_offer_note').view('offers.delete-confirm-form', ['url' => "/web/offers/delete?id={$offerId}&sure=1"])->render(), false);
         }
 
         $reason = (string) $request->input('reason');
@@ -221,12 +213,8 @@ final class OfferService
         return redirect('/offers.php');
     }
 
-    private function handleEdit(Request $request): RedirectResponse
+    public function handleEdit(Request $request): RedirectResponse
     {
-        if ((int) $request->input('take_off_edit') !== 1) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
-        }
-
         $id = (int) $request->input('id');
         if (! Validators::isId($id)) {
             $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));

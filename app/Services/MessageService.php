@@ -269,6 +269,21 @@ class MessageService
         return $this->handleMessagesAction($request);
     }
 
+    public function moveOrDelete(Request $request): RedirectResponse
+    {
+        return $this->mailbox->handleMoveOrDel($request);
+    }
+
+    public function editMailboxes(Request $request): RedirectResponse
+    {
+        return $this->mailbox->handleEditMailboxes($request);
+    }
+
+    public function deleteMailboxMessage(Request $request): RedirectResponse
+    {
+        return $this->mailbox->handleDeleteMessage($request);
+    }
+
     private function handleMessagesAction(Request $request): ?RedirectResponse
     {
         $action = (string) $request->input('action', '');

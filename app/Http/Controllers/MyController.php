@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\HitAndRunStatus;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\ExchangeBonusRequest;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
@@ -71,19 +72,31 @@ class MyController extends Controller
             return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
         }
 
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+        if ($request->query('action') === 'exchange') {
+            return redirect()->to('/web/mybonus/exchange'.$suffix, 308);
+        }
+
+        return redirect('/mybonus.php');
+    }
+
+    public function exchangeBonus(ExchangeBonusRequest $request): RedirectResponse
+    {
+        if ($this->currentUser->get() === null) {
+            return redirect('/mybonus.php');
+        }
+
         $data = $this->bonusPageService->build($request)->toArray();
 
-        $actionRedirect = $this->bonusService->handleExchangeActionPublic(
+        $response = $this->bonusService->handleExchange(
             $request,
             $data['allBonus'],
             $data['curUser'],
             $data['lockText']
         );
-        if ($actionRedirect instanceof RedirectResponse) {
-            return $actionRedirect;
-        }
 
-        return redirect('/mybonus.php');
+        return $response instanceof RedirectResponse ? $response : redirect('/mybonus.php');
     }
 
     public function hr(Request $request): View|RedirectResponse

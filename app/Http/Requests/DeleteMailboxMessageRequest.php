@@ -9,10 +9,11 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 /**
- * POST /web/messages/move-or-delete — replaces legacy POST /messages.php
- * with action=moveordel (mark-read / move / delete mailbox rows).
+ * POST /web/messages/delete — replaces legacy POST /messages.php with
+ * action=deletemessage (mailbox single-message delete; distinct from
+ * POST /deletemessage.php which carries the type=in|out semantics).
  */
-class MoveOrDeleteMessageRequest extends FormRequest
+class DeleteMailboxMessageRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -24,12 +25,6 @@ class MoveOrDeleteMessageRequest extends FormRequest
     {
         return [
             'id' => 'nullable|integer|min:0',
-            'box' => 'nullable|integer|min:0',
-            'messages' => 'nullable|array',
-            'messages.*' => 'integer|min:1',
-            'markread' => 'nullable|string',
-            'move' => 'nullable|string',
-            'delete' => 'nullable|string',
         ];
     }
 

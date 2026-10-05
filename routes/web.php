@@ -6,6 +6,7 @@ use App\Http\Controllers\Ajax\HitAndRunAjaxController as AjaxHitAndRunController
 use App\Http\Controllers\Ajax\ModerationAjaxController as AjaxModerationController;
 use App\Http\Controllers\Ajax\NotificationAjaxController as AjaxNotificationController;
 use App\Http\Controllers\Ajax\OfferAjaxController as AjaxOfferController;
+use App\Http\Controllers\Ajax\ShoutboxAjaxController as AjaxShoutboxController;
 use App\Http\Controllers\Ajax\TaskAjaxController as AjaxTaskController;
 use App\Http\Controllers\Ajax\TorrentApprovalAjaxController as AjaxTorrentApprovalController;
 use App\Http\Controllers\Auth\RecoveryController;
@@ -147,6 +148,11 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
         Route::post('benefits/consume', [AjaxBenefitController::class, 'consume']);
         Route::post('tasks/claim', [AjaxTaskController::class, 'claim']);
         Route::post('notifications/feed', [AjaxNotificationController::class, 'feed']);
+        Route::post('shoutbox/clear', [AjaxShoutboxController::class, 'clear']);
+        Route::post('shoutbox/post', [AjaxShoutboxController::class, 'post']);
+        Route::post('shoutbox/edit', [AjaxShoutboxController::class, 'edit']);
+        Route::post('shoutbox/delete', [AjaxShoutboxController::class, 'delete']);
+        Route::post('shoutbox/react', [AjaxShoutboxController::class, 'react']);
     });
 });
 

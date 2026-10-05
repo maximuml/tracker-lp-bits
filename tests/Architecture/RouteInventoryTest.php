@@ -153,11 +153,13 @@ final class RouteInventoryTest extends TestCase
 
         // Baseline captured on 2026-09-07; +1 for POST /api/v1/logout-all
         // (SEC-04) — token revocation action with no request payload.
+        // Recaptured 2026-10-05 at the real count (was stale by +3) + 5
+        // shoutbox REST endpoints — all carry FormRequest validation.
         $this->assertLessThanOrEqual(
-            161,
+            163,
             $currentCount,
             sprintf(
-                'App mutation route count increased from baseline 161 to %d. '.
+                'App mutation route count increased from baseline 163 to %d. '.
                 'Consider whether new mutation routes need FormRequest validation.',
                 $currentCount,
             ),

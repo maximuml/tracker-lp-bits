@@ -27,6 +27,11 @@ final class LegacyAjaxRedirects
         'addToken' => '/web/token/add',
         'removeToken' => '/web/token/del',
         'getToastNotifications' => '/web/notifications/feed',
+        'clearShoutBox' => '/web/shoutbox/clear',
+        'shoutboxPost' => '/web/shoutbox/post',
+        'shoutboxEdit' => '/web/shoutbox/edit',
+        'shoutboxDelete' => '/web/shoutbox/delete',
+        'shoutboxReact' => '/web/shoutbox/react',
     ];
 
     public static function uriFor(string $action): ?string

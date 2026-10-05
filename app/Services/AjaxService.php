@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Services\Ajax\AjaxFeatureServices;
 use App\Services\Ajax\PasskeyActions;
-use App\Services\Ajax\ShoutboxActions;
 
 final class AjaxService
 {
@@ -26,7 +25,6 @@ final class AjaxService
      * @var array<int, string>
      */
     public const ALLOWED_ACTIONS = [
-        ...ShoutboxActions::ACTIONS,
         ...PasskeyActions::ACTIONS,
     ];
 
@@ -38,7 +36,6 @@ final class AjaxService
     public function dispatch(string $action, array $params): mixed
     {
         return match (true) {
-            in_array($action, ShoutboxActions::ACTIONS, true) => $this->features->shoutboxActions->{$action}($params),
             in_array($action, PasskeyActions::ACTIONS, true) => $this->features->passkeyActions->{$action}($params),
             default => throw new \InvalidArgumentException("Unknown ajax action: {$action}"),
         };

@@ -15,12 +15,10 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserTimeType;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Category;
-use App\Support\Comment;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Globals;
-use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -213,17 +211,10 @@ final class OfferPageService
         // Comments section
         $commentCount = $this->offerCommentRepository->countComments($id);
 
-        $commentsHtml = '';
         $pagerTop = '';
         $pagerBottom = '';
         if ($commentCount) {
-            [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager(10, $commentCount, "offers.php?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
-            $commentRows = $this->offerCommentRepository->getComments($id, (int) $offset, (int) $perpage);
-            $allrows = [];
-            foreach ($commentRows as $commentObj) {
-                $allrows[] = $commentObj->toArray();
-            }
-            $commentsHtml = $pagerTop.Comment::table($allrows, 'offer', $id).$pagerBottom;
+            [$pagerTop, $pagerBottom] = Pagination::pager(10, $commentCount, "offers.php?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
         }
 
         return new OfferDetailsViewModel(
@@ -241,8 +232,8 @@ final class OfferPageService
             showEditDelete: $userId === (int) ($num['userid'] ?? 0) || Permission::can(PermissionEnum::OFFER_MANAGE),
             description: SafeHtml::fromTrustedHtml($description),
             commentCount: $commentCount,
-            commentsHtml: SafeHtml::fromTrustedHtml($commentsHtml),
-            quickReply: SafeHtml::fromTrustedHtml(Html::quickReply('comment', 'body', (string) (__('legacy/offers.submit_add_comment')))),
+            pagerTop: SafeHtml::fromTrustedHtml($pagerTop),
+            pagerBottom: SafeHtml::fromTrustedHtml($pagerBottom),
         );
     }
 

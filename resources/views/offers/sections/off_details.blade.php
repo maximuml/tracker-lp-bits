@@ -22,8 +22,11 @@
 @if (! $off_details->commentCount)
 <h1 id="startcomments" class="text-center">{{ __('legacy/offers.text_no_comments') }}</h1>
 @else
-{{ $off_details->commentsHtml }}
+{{ $off_details->pagerTop }}
 @endif
-<div class="text text-center"><b>{{ __('legacy/offers.text_quick_comment') }}</b><br /><br /><form id="compose" name="comment" method="post" action="comment.php?action=add&amp;type=offer" ><input type="hidden" name="pid" value="{{ $off_details->id }}" /><br />{{ $off_details->quickReply }}</form></div>
+<livewire:comment-section :parent-id="$off_details->id" type="offer" />
+@if ($off_details->commentCount)
+{{ $off_details->pagerBottom }}
+@endif
 <p class="text-center"><a class="index" href="comment.php?action=add&amp;pid={{ $off_details->id }}&amp;type=offer">{{ __('legacy/offers.text_add_comment') }}</a></p>
 @endif

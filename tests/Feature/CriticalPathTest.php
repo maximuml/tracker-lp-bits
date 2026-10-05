@@ -240,7 +240,7 @@ class CriticalPathTest extends TestCase
 
         $this->assertSame(302, $signup['status'], "Signup returned unexpected status: {$signup['status']}\n{$signup['body']}");
         $this->assertNotEmpty($signup['redirect_url'], 'Signup did not redirect to confirmation URL');
-        $this->assertStringContainsString('confirm.php', $signup['redirect_url'], 'Signup redirect target is not confirm.php');
+        $this->assertStringContainsString('/confirm?id=', $signup['redirect_url'], 'Signup redirect target is not /confirm');
 
         // 2. Confirm account (and login)
         $confirm = $this->request('GET', '/'.ltrim((string) parse_url($signup['redirect_url'], PHP_URL_PATH), '/').'?'.(string) parse_url($signup['redirect_url'], PHP_URL_QUERY), [], true);

@@ -63,7 +63,7 @@ final class ModernPagesChromeTest extends TestCase
             ?? Category::factory()->mode($browseMode)->create();
         $torrent = Torrent::factory()->owner($user)->category($category->id)->create();
 
-        $response = $this->withNexusCookie($user)->get('/details?id='.$torrent->id);
+        $response = $this->withNexusCookie($user)->get('/web/details/'.$torrent->id);
 
         $response->assertOk();
         $html = (string) $response->getContent();

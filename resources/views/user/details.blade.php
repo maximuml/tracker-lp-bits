@@ -80,11 +80,11 @@
 <x-settings-row-small :label="__('legacy/userdetails.text_bonus_table')">{{ $bonusTableHtml }}</x-settings-row-small>
 @endif
 @if (! empty($user['ip']) && ($canViewTorrentHistory || $isOwner))
-<x-user.details-toggle :label="__('legacy/userdetails.row_uploaded_torrents')" type="uploaded" block="ka" imgId="pica" klappe="a" :userId="$user['id']" :title="__('legacy/userdetails.title_show_or_hide')" :linkText="__('legacy/userdetails.text_show_or_hide')" />
-<x-user.details-toggle :label="__('legacy/userdetails.row_current_seeding')" type="seeding" block="ka1" imgId="pica1" klappe="a1" :userId="$user['id']" :title="__('legacy/userdetails.title_show_or_hide')" :linkText="__('legacy/userdetails.text_show_or_hide')" />
-<x-user.details-toggle :label="__('legacy/userdetails.row_current_leeching')" type="leeching" block="ka2" imgId="pica2" klappe="a2" :userId="$user['id']" :title="__('legacy/userdetails.title_show_or_hide')" :linkText="__('legacy/userdetails.text_show_or_hide')" />
-<x-user.details-toggle :label="__('legacy/userdetails.row_completed_torrents')" type="completed" block="ka3" imgId="pica3" klappe="a3" :userId="$user['id']" :title="__('legacy/userdetails.title_show_or_hide')" :linkText="__('legacy/userdetails.text_show_or_hide')" />
-<x-user.details-toggle :label="__('legacy/userdetails.row_incomplete_torrents')" type="incomplete" block="ka4" imgId="pica4" klappe="a4" :userId="$user['id']" :title="__('legacy/userdetails.title_show_or_hide')" :linkText="__('legacy/userdetails.text_show_or_hide')" />
+<livewire:user-torrent-list :user-id="$user['id']" type="uploaded" :label="__('legacy/userdetails.row_uploaded_torrents')" :title="__('legacy/userdetails.title_show_or_hide')" :link-text="__('legacy/userdetails.text_show_or_hide')" />
+<livewire:user-torrent-list :user-id="$user['id']" type="seeding" :label="__('legacy/userdetails.row_current_seeding')" :title="__('legacy/userdetails.title_show_or_hide')" :link-text="__('legacy/userdetails.text_show_or_hide')" />
+<livewire:user-torrent-list :user-id="$user['id']" type="leeching" :label="__('legacy/userdetails.row_current_leeching')" :title="__('legacy/userdetails.title_show_or_hide')" :link-text="__('legacy/userdetails.text_show_or_hide')" />
+<livewire:user-torrent-list :user-id="$user['id']" type="completed" :label="__('legacy/userdetails.row_completed_torrents')" :title="__('legacy/userdetails.title_show_or_hide')" :link-text="__('legacy/userdetails.text_show_or_hide')" />
+<livewire:user-torrent-list :user-id="$user['id']" type="incomplete" :label="__('legacy/userdetails.row_incomplete_torrents')" :title="__('legacy/userdetails.title_show_or_hide')" :link-text="__('legacy/userdetails.text_show_or_hide')" />
 @endif
 @if (! empty($user['info']))
 <tr><td colspan="2" class="p-[10pt]">{{ \App\Support\Format::formatComment($user['info'], false) }}</td></tr>

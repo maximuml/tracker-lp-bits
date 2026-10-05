@@ -319,24 +319,6 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
     }
 
     /**
-     * @param  mixed  $name
-     * @param  mixed  $value
-     * @param  mixed  $noteText
-     * @param  mixed  $btnText
-     * @param  mixed  $btnId
-     */
-    public function buildUploadFieldInput($name, $value, $noteText, $btnText, $btnId = ''): string
-    {
-        return view('upload._field_input', [
-            'name' => $name,
-            'value' => $value,
-            'noteText' => $noteText,
-            'btnText' => (string) $btnText,
-            'btnId' => (string) $btnId,
-        ])->render();
-    }
-
-    /**
      * @param  array<string, mixed>  $fields
      */
     public function updateFields(int $id, array $fields): void

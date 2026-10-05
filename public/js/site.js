@@ -495,46 +495,6 @@ function DelRow(anchor){
 
 
 
-// setlist lookup from torrent name on upload.php
-function lookupSetlist() {
-    var nameInput = document.getElementById('name');
-    if (!nameInput) return;
-    var name = nameInput.value.trim();
-    if (!name) {
-        alert('Enter the torrent name first.');
-        return;
-    }
-    var btn = document.getElementById('setlistLookupBtn');
-    if (btn) {
-        btn.value = 'Loading...';
-        btn.disabled = true;
-    }
-    ajax.fetchText('setlist_lookup.php?name=' + encodeURIComponent(name)).then(function (response) {
-        if (btn) {
-            btn.value = 'Fill setlist';
-            btn.disabled = false;
-        }
-        try {
-            var data = JSON.parse(response);
-            if (data.success && data.text) {
-                var descr = document.getElementById('descr');
-                if (descr) {
-                    descr.value = (descr.value ? descr.value + "\n\n" : "") + data.text;
-                }
-            } else {
-                alert(data.error || 'Setlist not found.');
-            }
-        } catch (e) {
-            alert('Setlist lookup failed.');
-        }
-    }).catch(function () {
-        if (btn) {
-            btn.value = 'Fill setlist';
-            btn.disabled = false;
-        }
-        alert('Setlist lookup failed.');
-    });
-}
 
 // CSP-safe delegated bindings for legacy bbcode editor controls.
 // Inline on*= handlers and javascript: URLs are blocked by the nonce-based
@@ -648,12 +608,6 @@ document.addEventListener('click', function (e) {
     var orderBtn = target.closest('#order');
     if (orderBtn && typeof dropmenu === 'function') {
         dropmenu(orderBtn);
-        return;
-    }
-
-    var setlistBtn = target.closest('#setlistLookupBtn');
-    if (setlistBtn && typeof lookupSetlist === 'function') {
-        lookupSetlist();
         return;
     }
 

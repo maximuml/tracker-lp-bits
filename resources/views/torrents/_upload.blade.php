@@ -43,7 +43,7 @@
 					</x-settings-row>
 				@else
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_torrent_name')">
-						{{ $nameInputHtml ?? '' }}
+						<livewire:setlist-lookup :name="$nameValue ?? ''" :invalid="$nameInvalid ?? false" />
 						@error('name')<div class="nx-field__error" id="name-error" role="alert">{{ $message }}</div>@enderror
 					</x-settings-row>
 				@endif
@@ -56,7 +56,7 @@
 				@endif
 
 				<div class="nx-fsection">{{ __('legacy/upload.section_description') }}<span class="text-nxm-danger">*</span></div>
-				<div class="nx-ffull">{{ $descrEditorHtml ?? '' }}@error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror</div>
+				<div class="nx-ffull"><livewire:bbcode-editor form="upload" text="descr" :content="$descrContent ?? ''" :invalid="$descrInvalid ?? false" described-by="descr-error" :label="__('legacy/upload.section_description')" />@error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror</div>
 				<div class="nx-fsection">{{ __('legacy/upload.section_media') }}</div>
 
 				@if ($enableTechnicalInfo)

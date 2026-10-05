@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
-use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentPosState;
 use App\Exceptions\NexusException;
@@ -29,7 +28,6 @@ use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Path;
 use App\Support\Tracker;
-use App\View\Components\BbcodeEditor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -40,7 +38,6 @@ use Illuminate\Validation\ValidationException;
 class TorrentUploadController extends Controller
 {
     public function __construct(private readonly OfferRepositoryInterface $offerRepository,
-        private TorrentRepositoryInterface $torrentRepository,
         private SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
         private TagRepositoryInterface $tagRepository,
         private HitAndRunRepository $hitAndRunRepository,
@@ -122,13 +119,10 @@ class TorrentUploadController extends Controller
             }
         }
 
-        $nameInputHtml = $this->torrentRepository->buildUploadFieldInput(
-            'name',
-            $this->oldScalar($request, 'name'),
-            SafeHtml::fromUntrustedHtml(__('legacy/upload.text_torrent_name_note')),
-            __('legacy/upload.fill_setlist'),
-            'setlistLookupBtn',
-        );
+        $nameValue = $this->oldScalar($request, 'name');
+        $nameInvalid = $fieldHasError('name');
+        $descrContent = $this->oldScalar($request, 'descr');
+        $descrInvalid = $fieldHasError('descr');
 
         $priceEnabled = Permission::can(PermissionEnum::TORRENT_SET_PRICE) && $torrentConfig->paidTorrentEnabled();
         $pricePlaceholder = $priceEnabled && $torrentConfig->maxPrice() > 0
@@ -163,22 +157,16 @@ class TorrentUploadController extends Controller
             'cats' => Category::listByModeWithContext($browsecatmode),
             'trackerUrl' => Tracker::schemaAndHost((int) ($currentUser['tracker_url_id'] ?? 0), true),
             'torrentDirWritable' => is_writable(Path::resolve(SiteConfig::current()->main->torrentDir(), ROOT_PATH)),
-            'nameInputHtml' => SafeHtml::fromTrustedHtml($nameInputHtml),
+            'nameValue' => $nameValue,
+            'nameInvalid' => $nameInvalid,
             'priceLabel' => Locale::trans('label.torrent.price', [], null),
             'priceEnabled' => $priceEnabled,
             'priceValue' => $this->oldScalar($request, 'price'),
             'pricePlaceholder' => $pricePlaceholder,
             'priceInvalid' => $fieldHasError('price'),
             'priceHelp' => Locale::trans('label.torrent.price_help', ['tax_factor' => $torrentConfig->taxFactor() * 100 .'%'], null),
-            'descrEditorHtml' => SafeHtml::fromTrustedHtml(BbcodeEditor::html([
-                'form' => 'upload',
-                'text' => 'descr',
-                'label' => __('legacy/upload.section_description'),
-                'content' => $this->oldScalar($request, 'descr'),
-                'withPreview' => true,
-                'invalid' => $fieldHasError('descr'),
-                'describedBy' => 'descr-error',
-            ])),
+            'descrContent' => $descrContent,
+            'descrInvalid' => $descrInvalid,
             'enableTechnicalInfo' => SiteConfig::current()->main->enableTechnicalInfo(),
             'taxonomySelectHtml' => SafeHtml::fromTrustedHtml($this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode, $taxonomyValues)),
             'customFieldsHtml' => SafeHtml::fromTrustedHtml($customField->renderOnUploadPage(0, $browsecatmode, is_array($oldCustomFields) ? $oldCustomFields : [])),

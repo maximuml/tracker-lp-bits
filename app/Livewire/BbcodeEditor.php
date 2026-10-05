@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
@@ -52,6 +53,16 @@ final class BbcodeEditor extends Component
 
     public function unpreview(): void
     {
+        $this->previewMode = false;
+    }
+
+    #[On('setlist-append')]
+    public function appendSetlist(string $form, string $text, string $content): void
+    {
+        if ($form !== $this->form || $text !== $this->text) {
+            return;
+        }
+        $this->body = trim($this->body) === '' ? $content : $this->body."\n\n".$content;
         $this->previewMode = false;
     }
 

@@ -95,7 +95,7 @@
 		<div class="nxm-searchline">
 			<label for="searchinput">{{ __('legacy/torrents.text_search')}}</label>
 			<input id="searchinput" name="search" type="text" value="{{ $searchstr_ori }}" autocomplete="off" />
-			<script src="js/meili_autocomplete.js" type="text/javascript"></script>
+			<script src="{{ \App\Support\AssetAppender::versionedSrc('js/meili_autocomplete.js') }}" type="text/javascript"></script>
 			<span>{{ __('legacy/torrents.text_in')}}</span>
 			<select name="search_area" aria-label="{{ __('legacy/torrents.label_search_area') }}">
 				<option value="0">{{ __('legacy/torrents.select_title')}}</option>

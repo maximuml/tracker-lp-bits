@@ -17,19 +17,19 @@
 <link rel="search" type="application/opensearchdescription+xml" title="{{ $chrome->siteName }} Torrents" href="opensearch.php" />
 <link rel="alternate" type="application/rss+xml" title="Latest Torrents" href="torrentrss.php" />
 @foreach($chrome->head->headStyles as $href)
-<link rel="stylesheet" href="{{ $href }}" type="text/css" />
+<link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc($href) }}" type="text/css" />
 @endforeach
-<link rel="stylesheet" href="css/modern.css" type="text/css" />
+<link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/modern.css') }}" type="text/css" />
 @if($chrome->head->packThemeUrl !== null)
 {{-- Non-Classic stylesheet pack (e.g. Unshatter): loaded after modern.css
      so its palette overrides win the cascade. --}}
-<link rel="stylesheet" href="{{ $chrome->head->packThemeUrl }}" type="text/css" />
+<link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc($chrome->head->packThemeUrl) }}" type="text/css" />
 @endif
 @if(file_exists(public_path('css/nxt.css')))
 {{-- Tailwind utilities layer for converted components; last in the cascade
      so utility classes beat theme styles. Missing on clones that have not
      run `make css` yet — guarded instead of 404ing. --}}
-<link rel="stylesheet" href="css/nxt.css" type="text/css" />
+<link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/nxt.css') }}" type="text/css" />
 @endif
 @livewireStyles
 @if($chrome->head->cspNonce !== '')
@@ -66,7 +66,7 @@
         alert: {btnAlign: 'c', title: 'Info', btn: ['OK', 'Cancel']}
     }
 </script>
-<script type="text/javascript" src="js/nx-layer.js"></script>
+<script type="text/javascript" src="{{ \App\Support\AssetAppender::versionedSrc('js/nx-layer.js') }}"></script>
 @endif
 @foreach (\App\Support\AssetAppender::getAppendHeadersSafe() as $html)
 {{ $html }}

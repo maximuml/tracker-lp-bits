@@ -64,6 +64,7 @@ final class EscapedHtmlHelpersTest extends TestCase
         'Strings::addS' => true,
         'Locale::trans' => true,
         'Avatar::forUser' => true,
+        'AssetAppender::versionedSrc' => true,
     ];
 
     /**

@@ -13,7 +13,6 @@ use App\Models\TorrentOperationLog;
 use App\Models\User;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentPurchaseRepository;
-use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -219,10 +218,6 @@ class TorrentDetailsController extends Controller
                     10, $commentCount, "details.php?id=$id&cmtpage=1&", ['lastpagedefault' => 1], 'page'
                 );
             }
-        }
-
-        if ($requestFlags['dllist'] ?? false) {
-            AssetAppender::js(sprintf('viewpeerlist(%s)', (int) $row['id']), 'footer', false);
         }
 
         return [

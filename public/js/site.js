@@ -315,63 +315,6 @@ var list = document.getElementById(obj.id + 'list');
 if (list) { list.classList.toggle('nx-hidden'); }
 }
 
-//viewfilelist.js
-
-function viewfilelist(torrentid)
-{
-var filelist=document.getElementById("filelist");
-if (!filelist) { return; }
-filelist.innerHTML='<i>Loading...</i>';
-document.getElementById("showfl").style.display = 'none';
-document.getElementById("hidefl").style.display = 'block';
-ajax.fetchText('viewfilelist.php?id='+torrentid).then(function(result){
-showlist(result);
-}).catch(function(){
-filelist.innerHTML="";
-document.getElementById("hidefl").style.display = 'none';
-document.getElementById("showfl").style.display = 'block';
-});
-}
-
-function showlist(filelist)
-{
-document.getElementById("filelist").innerHTML=filelist;
-}
-
-function hidefilelist()
-{
-document.getElementById("hidefl").style.display = 'none';
-document.getElementById("showfl").style.display = 'block';
-document.getElementById("filelist").innerHTML="";
-}
-
-//viewpeerlist.js
-
-function viewpeerlist(torrentid)
-{
-var peerlist=document.getElementById("peerlist");
-if (!peerlist) { return; }
-peerlist.innerHTML='<i>Loading...</i>';
-document.getElementById("showpeer").style.display = 'none';
-document.getElementById("hidepeer").style.display = 'block';
-document.getElementById("peercount").style.display = 'none';
-ajax.fetchText('viewpeerlist.php?id='+torrentid).then(function(list){
-peerlist.innerHTML=list;
-}).catch(function(){
-peerlist.innerHTML="";
-document.getElementById("hidepeer").style.display = 'none';
-document.getElementById("showpeer").style.display = 'block';
-document.getElementById("peercount").style.display = 'block';
-});
-}
-function hidepeerlist()
-{
-document.getElementById("hidepeer").style.display = 'none';
-document.getElementById("peerlist").innerHTML="";
-document.getElementById("showpeer").style.display = 'block';
-document.getElementById("peercount").style.display = 'block';
-}
-
 // smileit.js
 
 function SmileIT(smile,form,text){
@@ -803,30 +746,6 @@ document.addEventListener('click', function (e) {
     if (infoToggle) {
         var ul = infoToggle.parentNode && infoToggle.parentNode.nextElementSibling;
         if (ul) { ul.classList.toggle('nx-hidden'); }
-        e.preventDefault();
-        return;
-    }
-
-    var fileListLink = target.closest('a[data-filelist]');
-    if (fileListLink) {
-        var tid = parseInt(fileListLink.getAttribute('data-filelist'), 10);
-        if (fileListLink.getAttribute('data-filelist-mode') === 'hide' && typeof hidefilelist === 'function') {
-            hidefilelist();
-        } else if (typeof viewfilelist === 'function') {
-            viewfilelist(tid);
-        }
-        e.preventDefault();
-        return;
-    }
-
-    var peerListLink = target.closest('a[data-peerlist]');
-    if (peerListLink) {
-        var pid = parseInt(peerListLink.getAttribute('data-peerlist'), 10);
-        if (peerListLink.getAttribute('data-peerlist-mode') === 'hide' && typeof hidepeerlist === 'function') {
-            hidepeerlist();
-        } else if (typeof viewpeerlist === 'function') {
-            viewpeerlist(pid);
-        }
         e.preventDefault();
         return;
     }

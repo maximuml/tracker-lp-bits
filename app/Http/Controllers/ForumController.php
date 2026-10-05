@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\DTOs\Forum\StoreForumDto;
 use App\DTOs\Forum\UpdateForumDto;
+use App\Http\Requests\ForumDeletePostRequest;
+use App\Http\Requests\ForumDeleteTopicRequest;
 use App\Http\Requests\ForumMoveTopicRequest;
 use App\Http\Requests\ForumPostRequest;
 use App\Http\Requests\ForumTopicActionRequest;
@@ -67,22 +69,24 @@ class ForumController extends LegacyController
             return redirect('/forums.php?'.$request->getQueryString());
         }
 
-        // W1-04: Validate POST mutations by action type before delegating
         $action = (string) $request->input('action', '');
-        $rules = match ($action) {
-            'post' => (new ForumPostRequest)->rules(),
-            'movetopic' => (new ForumMoveTopicRequest)->rules(),
-            'setlocked', 'setsticky', 'hltopic' => (new ForumTopicActionRequest)->rules(),
-            default => [],
-        };
+        // Forms can carry params in the URL (?action=hltopic&topicid=N) —
+        // forward the query string so the target endpoint still sees them.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
 
-        if ($rules !== []) {
-            // W2-02: validate only the subset of request fields that have rules.
-            // This keeps the dynamic rule selection while avoiding $request->all().
-            $validator = validator($request->only(array_keys($rules)), $rules);
-            if ($validator->fails()) {
-                return redirect('/forums');
-            }
+        $target = match ($action) {
+            'post' => '/web/forums/post',
+            'movetopic' => '/web/forums/movetopic',
+            'deletetopic' => '/web/forums/deletetopic',
+            'deletepost' => '/web/forums/deletepost',
+            'setlocked' => '/web/forums/setlocked',
+            'hltopic' => '/web/forums/hltopic',
+            'setsticky' => '/web/forums/setsticky',
+            default => null,
+        };
+        if ($target !== null) {
+            return redirect()->to($target.$suffix, 308);
         }
 
         $result = $this->service->legacy($request);
@@ -91,6 +95,52 @@ class ForumController extends LegacyController
         }
 
         return redirect('/forums');
+    }
+
+    public function post(ForumPostRequest $request): Response|RedirectResponse
+    {
+        return $this->forumsGate($request) ?? $this->service->post($request);
+    }
+
+    public function moveTopic(ForumMoveTopicRequest $request): Response|RedirectResponse
+    {
+        return $this->forumsGate($request) ?? $this->service->moveTopic($request);
+    }
+
+    public function deleteTopic(ForumDeleteTopicRequest $request): Response|RedirectResponse
+    {
+        return $this->forumsGate($request) ?? $this->service->deleteTopic($request);
+    }
+
+    public function deletePost(ForumDeletePostRequest $request): Response|RedirectResponse
+    {
+        return $this->forumsGate($request) ?? $this->service->deletePost($request);
+    }
+
+    public function setLocked(ForumTopicActionRequest $request): Response|RedirectResponse
+    {
+        return $this->forumsGate($request) ?? $this->service->setLocked($request);
+    }
+
+    public function highlightTopic(ForumTopicActionRequest $request): Response|RedirectResponse
+    {
+        return $this->forumsGate($request) ?? $this->service->highlightTopic($request);
+    }
+
+    public function setSticky(ForumTopicActionRequest $request): Response|RedirectResponse
+    {
+        return $this->forumsGate($request) ?? $this->service->setSticky($request);
+    }
+
+    private function forumsGate(Request $request): ?RedirectResponse
+    {
+        if ($this->currentUser->get() === null) {
+            $qs = $request->getQueryString();
+
+            return redirect('/forums.php'.($qs !== null && $qs !== '' ? '?'.$qs : ''));
+        }
+
+        return null;
     }
 
     public function latestcomments(Request $request): View|RedirectResponse|Response

@@ -73,6 +73,41 @@ final class ForumService
         return [];
     }
 
+    public function post(Request $request): RedirectResponse
+    {
+        return $this->handlePost($request);
+    }
+
+    public function moveTopic(Request $request): RedirectResponse
+    {
+        return $this->moderation->moveTopic($request);
+    }
+
+    public function deleteTopic(Request $request): RedirectResponse
+    {
+        return $this->moderation->deleteTopic($request);
+    }
+
+    public function deletePost(Request $request): RedirectResponse
+    {
+        return $this->moderation->deletePost($request);
+    }
+
+    public function setLocked(Request $request): RedirectResponse
+    {
+        return $this->moderation->setLocked($request);
+    }
+
+    public function highlightTopic(Request $request): RedirectResponse
+    {
+        return $this->moderation->highlightTopic($request);
+    }
+
+    public function setSticky(Request $request): RedirectResponse
+    {
+        return $this->moderation->setSticky($request);
+    }
+
     public function __construct(
         private readonly ForumDataRepositories $data,
         private readonly CurrentUser $currentUser,

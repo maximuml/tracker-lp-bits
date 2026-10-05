@@ -39,6 +39,7 @@
     --color-nxm-warning-border: var(--nxm-warning-border);
     --color-nxm-danger-bg: var(--nxm-danger-bg);
     --color-nxm-danger-border: var(--nxm-danger-border);
+    --color-nxm-panel-bg: var(--nxm-panel-bg);
 }
 
 /* Light defaults for contexts where no theme pack defines --nxm-*
@@ -72,4 +73,5 @@
     --nxm-warning-border: #ffe3a3;
     --nxm-danger-bg: #fdf0f0;
     --nxm-danger-border: #f5c2c7;
+    --nxm-panel-bg: #F5F4EA;
 }

@@ -33,24 +33,23 @@
 
 {{ $pagertop ?? '' }}
 
-<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/users.text_users') }}</caption>
-<tr>
-    <th class="colhead nx-align-left" scope="col">{{ __('legacy/users.col_user_name')}}</th>
-    <th class="colhead" scope="col">{{ __('legacy/users.col_registered')}}</th>
-    <th class="colhead" scope="col">{{ __('legacy/users.col_last_access')}}</th>
-    <th class="colhead nx-align-left" scope="col">{{ __('legacy/users.col_class')}}</th>
-    <th class="colhead" scope="col">{{ __('legacy/users.col_country')}}</th>
-</tr>
+<x-data-table :caption="__('legacy/users.text_users')" :caption-hidden="true" :headers="[
+    __('legacy/users.col_user_name'),
+    __('legacy/users.col_registered'),
+    __('legacy/users.col_last_access'),
+    __('legacy/users.col_class'),
+    __('legacy/users.col_country'),
+]">
 @foreach ($rows as $row)
 <tr>
     <td>{{ $row['username_html'] }}</td>
     <td>{{ $row['addedFormatted'] }}</td>
     <td>{{ $row['lastAccessFormatted'] }}</td>
     <td>{{ $row['class_name'] }}</td>
-    <td class="nx-center">@if ($row['country'] > 0)<img src="pic/flag/{{ $row['country_flagpic'] }}" alt="{{ $row['country_name'] }}">@else---@endif</td>
+    <td class="text-center">@if ($row['country'] > 0)<img src="pic/flag/{{ $row['country_flagpic'] }}" alt="{{ $row['country_name'] }}">@else---@endif</td>
 </tr>
 @endforeach
-</table>
+</x-data-table>
 
 {{ $pagerbottom ?? '' }}
 @endsection

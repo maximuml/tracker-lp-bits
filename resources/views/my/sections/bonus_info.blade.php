@@ -4,9 +4,9 @@
      The text_bonus_formula_* / text_howto_get_karma_* lang strings carry
      their own markup (li/img/ul boundaries), so they render via
      SafeHtml::fromUntrustedHtml. --}}
-<div class="nx-panel">
-<div class="nx-colhead nx-panel__head"><span class="big">{{ __('legacy/mybonus.text_what_is_karma') }}</span></div>
-<div class="text nx-panel__body">
+<div class="mx-auto w-[97%] bg-nxm-panel-bg">
+<div class="nx-colhead p-1 text-center"><span class="big">{{ __('legacy/mybonus.text_what_is_karma') }}</span></div>
+<div class="text p-[3px]">
 <h1>{{ __('legacy/mybonus.text_get_by_seeding') }}</h1>
 <ul>
 @if ($info->perseedingBonus > 0)
@@ -20,8 +20,8 @@
 <li>{{ __('legacy/mybonus.text_donors_always_get') }}{{ $info->donortimesBonus }}{{ __('legacy/mybonus.text_times_of_bonus') }}</li>
 @endif
 </ul>
-<div class="nx-center">{{ __('legacy/mybonus.text_you_are_currently_getting') }}{{ $info->currentSeedBonus }}{{ __('legacy/mybonus.text_point') }}{{ \App\Support\Strings::addS((float) $info->currentSeedBonus) }}{{ __('legacy/mybonus.text_per_hour') }} (A = {{ $info->aFactor }})</div>
-<div class="nx-loadbar"><span class="nx-loadbar__bg"><img class="{{ $info->loadbarClass }}" src="pic/trans.gif" alt="{{ $info->percentLabel }}%" /></span></div>
+<div class="text-center">{{ __('legacy/mybonus.text_you_are_currently_getting') }}{{ $info->currentSeedBonus }}{{ __('legacy/mybonus.text_point') }}{{ \App\Support\Strings::addS((float) $info->currentSeedBonus) }}{{ __('legacy/mybonus.text_per_hour') }} (A = {{ $info->aFactor }})</div>
+<div class="mx-auto w-[400px]"><span class="block h-[15px] rounded-[3px] bg-nxm-surface-alt"><img class="{{ $info->loadbarClass }}" src="pic/trans.gif" alt="{{ $info->percentLabel }}%" /></span></div>
 @if ($info->officialAdditionFactor !== null)
 <h1>{{ __('legacy/mybonus.text_get_by_seeding_official') }}</h1>
 <ul>

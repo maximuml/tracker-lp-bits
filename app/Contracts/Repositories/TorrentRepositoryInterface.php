@@ -29,15 +29,6 @@ interface TorrentRepositoryInterface
     public function getSearchBox(?int $id = null);
 
     /**
-     * @param  mixed  $name
-     * @param  mixed  $value
-     * @param  mixed  $noteText
-     * @param  mixed  $btnText
-     * @param  mixed  $btnId
-     */
-    public function buildUploadFieldInput($name, $value, $noteText, $btnText, $btnId = ''): string;
-
-    /**
      * @param  list<string>  $columns
      */
     public function findById(int $id, array $columns = ['*']): ?Torrent;

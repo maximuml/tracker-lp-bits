@@ -1,5 +1,13 @@
 <?php
 
+use App\Http\Controllers\Ajax\AttendanceAjaxController as AjaxAttendanceController;
+use App\Http\Controllers\Ajax\BenefitAjaxController as AjaxBenefitController;
+use App\Http\Controllers\Ajax\HitAndRunAjaxController as AjaxHitAndRunController;
+use App\Http\Controllers\Ajax\ModerationAjaxController as AjaxModerationController;
+use App\Http\Controllers\Ajax\NotificationAjaxController as AjaxNotificationController;
+use App\Http\Controllers\Ajax\OfferAjaxController as AjaxOfferController;
+use App\Http\Controllers\Ajax\TaskAjaxController as AjaxTaskController;
+use App\Http\Controllers\Ajax\TorrentApprovalAjaxController as AjaxTorrentApprovalController;
 use App\Http\Controllers\Auth\RecoveryController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
@@ -124,6 +132,22 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('torrent-approval', [TorrentController::class, 'approval']);
     Route::post('token/add', [TokenController::class, 'addToken']);
     Route::post('token/del', [TokenController::class, 'delToken']);
+
+    // REST endpoints for the actions the /ajax dispatcher used to route by
+    // `action` string — POST /ajax {action: X} now 308-redirects here with
+    // the same {action, params} body (FormRequests flatten the envelope).
+    Route::middleware('throttle:ajax')->group(function () {
+        Route::post('attendance/retroactive', [AjaxAttendanceController::class, 'retroactive']);
+        Route::post('users/leech-warn/remove', [AjaxModerationController::class, 'removeLeechWarn']);
+        // POST-only like the old /ajax route (GET /ajax was rejected) —
+        // the 308 redirect replays the original POST body unchanged.
+        Route::post('offers/show', [AjaxOfferController::class, 'show']);
+        Route::post('torrents/approval-modal', [AjaxTorrentApprovalController::class, 'modal']);
+        Route::post('hit-and-runs/remove', [AjaxHitAndRunController::class, 'remove']);
+        Route::post('benefits/consume', [AjaxBenefitController::class, 'consume']);
+        Route::post('tasks/claim', [AjaxTaskController::class, 'claim']);
+        Route::post('notifications/feed', [AjaxNotificationController::class, 'feed']);
+    });
 });
 
 // Passkey login v2 — fixed route with HMAC-SHA256, nonce replay protection,

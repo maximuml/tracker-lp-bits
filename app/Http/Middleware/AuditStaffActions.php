@@ -28,6 +28,10 @@ final class AuditStaffActions
         'index', 'details', 'offers', 'upload', 'getrss',
         'viewmessage', 'idea', 'opinion', 'funbox', 'viewnfo',
         'userdetails', 'search', 'poll',
+        // REST endpoints that replaced self-activity /ajax actions —
+        // mirrors AJAX_SKIP_ACTIONS so the audit decision stays identical.
+        'web/notifications/feed', 'web/offers/show', 'web/torrents/approval-modal',
+        'web/benefits/consume', 'web/attendance/retroactive',
     ];
 
     /** First-segment prefixes where every sub-path is user activity. */

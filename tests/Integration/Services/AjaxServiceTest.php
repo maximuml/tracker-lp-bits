@@ -4,21 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
-use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
-use App\Repositories\AttendanceRepository;
-use App\Repositories\BonusRepository;
-use App\Repositories\ExamUserRepository;
 use App\Repositories\ShoutboxRepository;
-use App\Repositories\TorrentModerationRepository;
-use App\Repositories\UserAccountRepository;
-use App\Repositories\UserModerationRepository;
 use App\Repositories\UserPasskeyRepository;
-use App\Repositories\UserRepository;
 use App\Services\Ajax\AjaxFeatureServices;
-use App\Services\Ajax\AjaxTorrentRepositories;
-use App\Services\Ajax\AjaxUserRepositories;
 use App\Services\Ajax\PasskeyActions;
 use App\Services\Ajax\ShoutboxActions;
 use App\Services\AjaxService;
@@ -26,7 +16,6 @@ use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\NotificationFeed;
 use App\Support\Shoutbox;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -38,11 +27,10 @@ use Tests\TestCase;
 /**
  * Unit tests for AjaxService.
  *
- * Covers the ALLOWED_ACTIONS whitelist, getOffer (found / not found),
- * approval validation, shoutbox validation (post / edit / delete / react),
- * clearShoutBox permission, addToken / removeToken validation, and
- * repository-delegated actions (claimTask, getPasskeyList,
- * attendanceRetroactive).
+ * Covers the ALLOWED_ACTIONS whitelist, dispatch routing for the two
+ * remaining action groups (shoutbox, passkey) and their validation.
+ * The actions migrated to REST endpoints are covered end-to-end by
+ * AjaxRestEndpointsTest (redirect + envelope contract).
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AjaxServiceTest extends TestCase
@@ -50,24 +38,6 @@ final class AjaxServiceTest extends TestCase
     use DatabaseTransactions;
 
     private AjaxService $service;
-
-    /** @var AttendanceRepository&MockInterface */
-    private AttendanceRepository $attendanceRepo;
-
-    /** @var UserRepository&MockInterface */
-    private UserRepository $userRepo;
-
-    /** @var TorrentModerationRepository&MockInterface */
-    private TorrentModerationRepository $torrentModerationRepo;
-
-    /** @var BonusRepository&MockInterface */
-    private BonusRepository $bonusRepo;
-
-    /** @var ExamUserRepository&MockInterface */
-    private ExamUserRepository $examRepo;
-
-    /** @var UserModerationRepository&MockInterface */
-    private UserModerationRepository $userModerationRepo;
 
     /** @var UserPasskeyRepository&MockInterface */
     private UserPasskeyRepository $passkeyRepo;
@@ -83,34 +53,8 @@ final class AjaxServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('shoutbox')->delete();
         DB::table('shoutbox_reactions')->delete();
-        DB::table('offers')->delete();
         DB::table('users')->delete();
-        DB::table('personal_access_tokens')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-
-        /** @var AttendanceRepository&MockInterface $attendanceRepo */
-        $attendanceRepo = Mockery::mock(AttendanceRepository::class);
-        $this->attendanceRepo = $attendanceRepo;
-
-        /** @var UserRepository&MockInterface $userRepo */
-        $userRepo = Mockery::mock(UserRepository::class);
-        $this->userRepo = $userRepo;
-
-        /** @var TorrentModerationRepository&MockInterface $torrentModerationRepo */
-        $torrentModerationRepo = Mockery::mock(TorrentModerationRepository::class);
-        $this->torrentModerationRepo = $torrentModerationRepo;
-
-        /** @var BonusRepository&MockInterface $bonusRepo */
-        $bonusRepo = Mockery::mock(BonusRepository::class);
-        $this->bonusRepo = $bonusRepo;
-
-        /** @var ExamUserRepository&MockInterface $examRepo */
-        $examRepo = Mockery::mock(ExamUserRepository::class);
-        $this->examRepo = $examRepo;
-
-        /** @var UserModerationRepository&MockInterface $userModerationRepo */
-        $userModerationRepo = Mockery::mock(UserModerationRepository::class);
-        $this->userModerationRepo = $userModerationRepo;
 
         /** @var UserPasskeyRepository&MockInterface $passkeyRepo */
         $passkeyRepo = Mockery::mock(UserPasskeyRepository::class);
@@ -131,32 +75,24 @@ final class AjaxServiceTest extends TestCase
             user: null,
         );
 
-        $this->service = new AjaxService(
-            $this->currentUser,
-            new AjaxUserRepositories(
-                $this->attendanceRepo,
-                $this->userRepo,
-                $this->userModerationRepo,
-                $this->examRepo,
-                new UserAccountRepository,
-            ),
-            new AjaxTorrentRepositories(
-                $this->torrentModerationRepo,
-                $this->bonusRepo,
-                app(OfferRepositoryInterface::class),
-            ),
-            new AjaxFeatureServices(
-                new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
-                new PasskeyActions($this->passkeyRepo, $this->currentUser),
-                app(NotificationFeed::class),
-            ),
-        );
+        $this->service = $this->makeService();
     }
 
     protected function tearDown(): void
     {
         Mockery::close();
         parent::tearDown();
+    }
+
+    private function makeService(): AjaxService
+    {
+        return new AjaxService(
+            new AjaxFeatureServices(
+                new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
+                new PasskeyActions($this->passkeyRepo, $this->currentUser),
+                app(NotificationFeed::class),
+            ),
+        );
     }
 
     /** @param array<string, mixed> $overrides */
@@ -199,51 +135,16 @@ final class AjaxServiceTest extends TestCase
             user: null,
         );
 
-        $this->service = new AjaxService(
-            $this->currentUser,
-            new AjaxUserRepositories(
-                $this->attendanceRepo,
-                $this->userRepo,
-                $this->userModerationRepo,
-                $this->examRepo,
-                new UserAccountRepository,
-            ),
-            new AjaxTorrentRepositories(
-                $this->torrentModerationRepo,
-                $this->bonusRepo,
-                app(OfferRepositoryInterface::class),
-            ),
-            new AjaxFeatureServices(
-                new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
-                new PasskeyActions($this->passkeyRepo, $this->currentUser),
-                app(NotificationFeed::class),
-            ),
-        );
-    }
-
-    private function insertOffer(int $userId): int
-    {
-        return (int) DB::table('offers')->insertGetId([
-            'userid' => $userId,
-            'name' => 'Test Offer',
-            'descr' => 'Test description',
-            'added' => now()->toDateTimeString(),
-            'category' => 1,
-            'allowed' => 1,
-            'yeah' => 0,
-            'against' => 0,
-            'comments' => 0,
-        ]);
+        $this->service = $this->makeService();
     }
 
     // --- ALLOWED_ACTIONS ---
 
     public function test_allowed_actions_contains_expected_entries(): void
     {
-        $this->assertContains('claimTask', AjaxService::ALLOWED_ACTIONS);
         $this->assertContains('deletePasskey', AjaxService::ALLOWED_ACTIONS);
-        $this->assertContains('getOffer', AjaxService::ALLOWED_ACTIONS);
         $this->assertContains('shoutboxPost', AjaxService::ALLOWED_ACTIONS);
+        $this->assertContains('clearShoutBox', AjaxService::ALLOWED_ACTIONS);
     }
 
     public function test_allowed_actions_does_not_contain_arbitrary_method(): void
@@ -257,66 +158,6 @@ final class AjaxServiceTest extends TestCase
         $this->expectExceptionMessage('Unknown ajax action');
 
         $this->service->dispatch('nonExistentAction', []);
-    }
-
-    // --- getOffer ---
-
-    public function test_get_offer_returns_array_for_existing_offer(): void
-    {
-        $userId = $this->createUser();
-        $offerId = $this->insertOffer($userId);
-
-        $result = $this->service->dispatch('getOffer', ['id' => $offerId]);
-
-        $this->assertIsArray($result);
-        $this->assertSame($offerId, (int) $result['id']);
-        $this->assertSame('Test Offer', $result['name']);
-    }
-
-    public function test_get_offer_throws_for_nonexistent_offer(): void
-    {
-        $this->expectException(ModelNotFoundException::class);
-
-        $this->service->dispatch('getOffer', ['id' => 99999]);
-    }
-
-    // --- approval ---
-
-    public function test_approval_throws_when_torrent_id_missing(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Require torrent_id');
-
-        $this->service->dispatch('approval', ['approval_status' => 'approved']);
-    }
-
-    public function test_approval_throws_when_approval_status_missing(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Require approval_status');
-
-        $this->service->dispatch('approval', ['torrent_id' => 1]);
-    }
-
-    public function test_approval_delegates_to_torrent_repository(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->torrentModerationRepo->shouldReceive('approval')
-            ->with($userId, ['torrent_id' => 1, 'approval_status' => 'approved'])
-            ->once()
-            ->andReturn(['status' => 'ok']);
-
-        $result = $this->service->dispatch('approval', ['torrent_id' => 1, 'approval_status' => 'approved']);
-
-        $this->assertSame(['status' => 'ok'], $result);
     }
 
     // --- shoutboxPost ---
@@ -440,76 +281,7 @@ final class AjaxServiceTest extends TestCase
         $this->service->dispatch('clearShoutBox', []);
     }
 
-    // --- addToken ---
-
-    public function test_add_token_throws_for_empty_name(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Name is required');
-
-        $this->service->dispatch('addToken', ['name' => '']);
-    }
-
-    public function test_add_token_succeeds_with_valid_name(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $result = $this->service->dispatch('addToken', ['name' => 'My API Token']);
-
-        $this->assertTrue($result);
-        $this->assertSame(1, DB::table('personal_access_tokens')->count());
-    }
-
-    // --- removeToken ---
-
-    public function test_remove_token_throws_for_empty_id(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('id is required');
-
-        $this->service->dispatch('removeToken', ['id' => '']);
-    }
-
-    public function test_remove_token_succeeds_for_existing_token(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        // Create a token first
-        $this->service->dispatch('addToken', ['name' => 'Test Token']);
-        $tokenId = (int) DB::table('personal_access_tokens')->value('id');
-
-        $result = $this->service->dispatch('removeToken', ['id' => $tokenId]);
-
-        $this->assertTrue($result);
-        $this->assertSame(0, DB::table('personal_access_tokens')->count());
-    }
-
-    // --- claimTask ---
-
-    public function test_claim_task_delegates_to_exam_repository(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->examRepo->shouldReceive('assignToUser')
-            ->with($userId, 3)
-            ->once()
-            ->andReturn(true);
-
-        $result = $this->service->dispatch('claimTask', ['exam_id' => 3]);
-
-        $this->assertTrue($result);
-    }
-
-    // --- getPasskeyList ---
+    // --- passkey actions ---
 
     public function test_get_passkey_list_delegates_to_passkey_repository(): void
     {
@@ -527,25 +299,6 @@ final class AjaxServiceTest extends TestCase
         $this->assertSame($expectedList, $result);
     }
 
-    // --- attendanceRetroactive ---
-
-    public function test_attendance_retroactive_delegates_to_attendance_repository(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->attendanceRepo->shouldReceive('retroactive')
-            ->with($userId, '2024-01-15')
-            ->once()
-            ->andReturn(true);
-
-        $result = $this->service->dispatch('attendanceRetroactive', ['date' => '2024-01-15']);
-
-        $this->assertTrue($result);
-    }
-
-    // --- getPasskeyCreateArgs ---
-
     public function test_get_passkey_create_args_delegates_to_passkey_repository(): void
     {
         $userId = $this->createUser();
@@ -561,8 +314,6 @@ final class AjaxServiceTest extends TestCase
 
         $this->assertSame($expectedArgs, $result);
     }
-
-    // --- deletePasskey ---
 
     public function test_delete_passkey_delegates_to_passkey_repository(): void
     {

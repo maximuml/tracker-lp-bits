@@ -55,7 +55,11 @@ final class AuditStaffActions
         'web/bonus/freeleech',
         'web/user/attendance',
         'web/reports/create',
-        'web/attachments/upload', 'web/invites/send',
+        'web/attachments/upload',
+        // staffmess/contactstaff page POSTs are user-self too (same as
+        // their legacy prefixes and the send endpoints).
+        'web/staffmess/submit',
+        'web/contactstaff/submit', 'web/invites/send',
     ];
 
     /** First-segment prefixes where every sub-path is user activity. */

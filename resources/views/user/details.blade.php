@@ -99,7 +99,7 @@
 
 @if ($canManageBasic && (int) $user['class'] < $currentClass)
 <x-frame :caption="__('legacy/userdetails.text_edit_user')" :center="false">
-<form method="post" action="modtask.php">
+<form method="post" action="/web/staff/modtask">@csrf
 <input type="hidden" name="action" value="edituser" />
 <input type="hidden" name="userid" value="{{ $id }}" />
 <input type="hidden" name="returnto" value="userdetails.php?id={{ $id }}" />

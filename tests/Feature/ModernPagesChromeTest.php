@@ -68,7 +68,7 @@ final class ModernPagesChromeTest extends TestCase
         $response->assertOk();
         $html = (string) $response->getContent();
         $this->assertModernChrome($html);
-        $this->assertStringContainsString('data-nx="data"', $html);
+        $this->assertStringContainsString('overflow-x-auto', $html);
         $this->assertStringContainsString('download.php?id='.$torrent->id, $html);
     }
 }

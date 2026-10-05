@@ -47,6 +47,7 @@ final class AuditStaffActions
         'web/offers/create', 'web/offers/allow', 'web/offers/finish',
         'web/offers/delete', 'web/offers/edit',
         'web/mybonus/exchange',
+        'web/torrents/flush', 'web/invites/send',
     ];
 
     /** First-segment prefixes where every sub-path is user activity. */

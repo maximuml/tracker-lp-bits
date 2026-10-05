@@ -57,4 +57,24 @@ final class DestructiveActionsRedirectTest extends TestCase
         $response->assertStatus(302);
         $response->assertRedirect('/nexusphp/security/login-attempts');
     }
+
+    public function test_legacy_take_uris_redirect_to_rest_endpoints(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([
+            ['/takeflush', '/web/torrents/flush'],
+            ['/takereseed', '/web/torrents/reseed'],
+            ['/fastdelete', '/web/torrents/fast-delete'],
+            ['/delete', '/web/torrents/delete'],
+            ['/takeinvite', '/web/invites/send'],
+            ['/takeamountupload', '/web/system/amount-upload'],
+            ['/takeupdate', '/web/system/update'],
+            ['/take-increment-bulk', '/web/system/increment-bulk'],
+        ] as [$uri, $target]) {
+            $response = $this->withNexusCookie($user)->post($uri, ['id' => '1']);
+            $response->assertStatus(308);
+            $this->assertStringEndsWith($target, (string) $response->headers->get('Location'));
+        }
+    }
 }

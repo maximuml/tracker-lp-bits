@@ -11,7 +11,7 @@
 @endif
 
 @if ($type == 'new')
-    <form method=post action=takeinvite.php?id={{ (string) $id }}>
+    <form method=post action="/web/invites/send?id={{ (string) $id }}">@csrf
     <div class="nx-fgrid">
     <div class="nx-ffull text-center"><b>{{ __('legacy/invite.text_invite_someone')}}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ __('legacy/invite.text_invitation')}}{{ $_s }}{{ __('legacy/invite.text_left')}} + {{ sprintf(__('legacy/invite.text_temporary_left'), count($temporaryInvites)) }})</b></div>
     <div class="nx-fhead whitespace-nowrap">{{ __('legacy/invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><span class="small">{{ __('legacy/invite.text_email_address_note') }}</span></div>

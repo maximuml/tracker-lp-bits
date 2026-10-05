@@ -56,21 +56,6 @@ final class TypedConfigTest extends TestCase
         $this->assertSame(90, $config->thumbQuality(80));
     }
 
-    public function test_attachment_config_watermark(): void
-    {
-        $config = new AttachmentConfig([
-            'watermarkpos' => 'bottom-right',
-            'watermarkwidth' => 150,
-            'watermarkheight' => 120,
-            'watermarkquality' => 95,
-        ]);
-
-        $this->assertSame('bottom-right', $config->watermarkPos('no'));
-        $this->assertSame(150, $config->watermarkWidth(100));
-        $this->assertSame(120, $config->watermarkHeight(100));
-        $this->assertSame(95, $config->watermarkQuality(90));
-    }
-
     public function test_attachment_config_alt_thumb(): void
     {
         $config = new AttachmentConfig([

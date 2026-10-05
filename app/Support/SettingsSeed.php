@@ -211,10 +211,6 @@ final class SettingsSeed
         $globals->set('thumbquality_attachment', $ATTACHMENT['thumbquality']);
         $globals->set('thumbwidth_attachment', $ATTACHMENT['thumbwidth']);
         $globals->set('thumbheight_attachment', $ATTACHMENT['thumbheight']);
-        $globals->set('watermarkpos_attachment', $ATTACHMENT['watermarkpos']);
-        $globals->set('watermarkwidth_attachment', $ATTACHMENT['watermarkwidth']);
-        $globals->set('watermarkheight_attachment', $ATTACHMENT['watermarkheight']);
-        $globals->set('watermarkquality_attachment', $ATTACHMENT['watermarkquality']);
         $globals->set('altthumbwidth_attachment', $ATTACHMENT['altthumbwidth']);
         $globals->set('altthumbheight_attachment', $ATTACHMENT['altthumbheight']);
 

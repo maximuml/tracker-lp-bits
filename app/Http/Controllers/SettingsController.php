@@ -103,7 +103,7 @@ class SettingsController extends LegacyController
             'download_support_passkey', 'approval_status_icon_enabled', 'approval_status_none_visible',
             'nfo_view_style_default', 'tax_factor', 'max_price', 'paid_torrent_enabled', 'reward_bonus_options', 'reward_times_limit',
         ],
-        'attachment' => ['enableattach', 'classone', 'countone', 'sizeone', 'extone', 'classtwo', 'counttwo', 'sizetwo', 'exttwo', 'classthree', 'countthree', 'sizethree', 'extthree', 'classfour', 'countfour', 'sizefour', 'extfour', 'savedirectory', 'httpdirectory', 'savedirectorytype', 'thumbnailtype', 'thumbquality', 'thumbwidth', 'thumbheight', 'watermarkpos', 'watermarkwidth', 'watermarkheight', 'watermarkquality', 'altthumbwidth', 'altthumbheight'],
+        'attachment' => ['enableattach', 'classone', 'countone', 'sizeone', 'extone', 'classtwo', 'counttwo', 'sizetwo', 'exttwo', 'classthree', 'countthree', 'sizethree', 'extthree', 'classfour', 'countfour', 'sizefour', 'extfour', 'savedirectory', 'httpdirectory', 'savedirectorytype', 'thumbnailtype', 'thumbquality', 'thumbwidth', 'thumbheight', 'altthumbwidth', 'altthumbheight'],
         'misc' => ['donation_custom', 'protected_forum'],
     ];
 

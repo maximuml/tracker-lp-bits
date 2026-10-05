@@ -16,6 +16,7 @@ parameters:
         - app/Http
         - app/Jobs
         - app/Listeners
+        - app/Livewire
         - app/Logging
         - app/Models
         - app/Observers

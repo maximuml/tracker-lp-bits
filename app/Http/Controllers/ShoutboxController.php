@@ -13,7 +13,6 @@ use App\Enums\UserTheme;
 use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyYesNo;
 use App\Support\NotificationFeed;
 use App\Support\Shoutbox;
 use App\Support\SseEventId;
@@ -85,7 +84,7 @@ class ShoutboxController extends LegacyController
         UserDisplay::preload(array_values($userIds));
 
         $isStaff = $actor->can(PermissionEnum::SB_MANAGE);
-        $items = $this->decorateShoutRows($rows, $currentUser, $currentUserId, $isStaff, $reactionData);
+        $items = Shoutbox::decorateRows($rows, $currentUser, $currentUserId, $isStaff, $reactionData);
 
         $content = view('shoutbox.index', [
             'isAjax' => $isAjax,
@@ -99,117 +98,6 @@ class ShoutboxController extends LegacyController
         ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);
-    }
-
-    /**
-     * @param  iterable<int, mixed>  $rows
-     * @param  array<string, mixed>  $currentUser
-     * @param  array<string, mixed>  $reactionData
-     * @return list<array<string, mixed>>
-     */
-    private function decorateShoutRows(iterable $rows, array $currentUser, int $currentUserId, bool $isStaff, array $reactionData): array
-    {
-        $reactionCounts = (array) ($reactionData['counts'] ?? []);
-        $reactionMine = (array) ($reactionData['mine'] ?? []);
-        $reactionUsers = (array) ($reactionData['users'] ?? []);
-        $showAvatars = LegacyYesNo::isYes($currentUser['avatars'] ?? null);
-        $tooltipAvatar = (string) (__('legacy/shoutbox.tooltip_avatar'));
-        $tooltipReply = (string) (__('legacy/shoutbox.tooltip_nick_reply'));
-        $labelMore = (string) (__('legacy/shoutbox.shout_show_more'));
-        $labelLess = (string) (__('legacy/shoutbox.shout_show_less'));
-        $groupWindowSec = 120;
-
-        $items = [];
-        $prevUserId = 0;
-        $prevDate = 0;
-        foreach ($rows as $row) {
-            $arr = (array) $row;
-            $currUserId = (int) ($arr['userid'] ?? 0);
-            $currDate = (int) ($arr['date'] ?? 0);
-            $shoutId = (int) ($arr['id'] ?? 0);
-            $isContinuation = $currUserId > 0
-                && $currUserId === $prevUserId
-                && $prevDate > 0
-                && abs($prevDate - $currDate) <= $groupWindowSec;
-
-            $editedTime = '';
-            if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-                $editedTime = SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) $arr['edited_at'], true));
-            }
-
-            $avatarUrl = 'pic/default_avatar.png';
-            $nickReplyName = '';
-            if ($currUserId > 0) {
-                $username = UserDisplay::username($currUserId, false, true, true, true, false, false, '', true);
-                $userRow = UserDisplay::row($currUserId);
-                $userRow = is_array($userRow) ? $userRow : [];
-                $nickReplyName = trim((string) ($userRow['username'] ?? ''));
-                $classBadge = Shoutbox::classBadge((int) ($userRow['class'] ?? 0));
-                if ($showAvatars) {
-                    $rawAvatar = trim((string) ($userRow['avatar'] ?? ''));
-                    if ($rawAvatar !== '') {
-                        $avatarUrl = $rawAvatar;
-                    }
-                }
-                if ($nickReplyName !== '' && $currentUserId > 0) {
-                    $username = (string) preg_replace(
-                        '#href="[^"]*userdetails\.php\?id=\d+"#',
-                        'href="#" class="shout-nick-reply" data-nick="'.htmlspecialchars($nickReplyName, ENT_QUOTES).'" title="'.htmlspecialchars($tooltipReply, ENT_QUOTES).'"',
-                        (string) $username,
-                        1
-                    );
-                }
-            } else {
-                $username = (string) (__('legacy/shoutbox.text_guest'));
-                $classBadge = '';
-            }
-
-            $mentionsMe = false;
-            $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
-            $isLong = mb_strlen(strip_tags((string) $message)) > 280;
-
-            $rowClasses = ['shoutrow'];
-            if ($mentionsMe) {
-                $rowClasses[] = 'shoutrow-mentions-me';
-            }
-            if ($isContinuation) {
-                $rowClasses[] = 'shout-row-grouped';
-                $username = '';
-                $classBadge = '';
-            }
-
-            $items[] = [
-                'rowClass' => implode(' ', $rowClasses),
-                'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime($currDate, true)),
-                'actions' => SafeHtml::fromTrustedHtml(Shoutbox::renderActions($arr, $currentUserId, $isStaff)),
-                'avatarUrl' => $avatarUrl,
-                'avatarUserId' => $currUserId,
-                'avatarTooltip' => $tooltipAvatar,
-                'avatarSpacer' => $isContinuation,
-                'classBadge' => SafeHtml::fromTrustedHtml($classBadge),
-                'username' => SafeHtml::fromTrustedHtml($username),
-                'isGuest' => $currUserId <= 0,
-                'reactions' => SafeHtml::fromTrustedHtml(Shoutbox::renderReactions(
-                    $shoutId,
-                    $currentUserId,
-                    is_array($reactionCounts[$shoutId] ?? null) ? $reactionCounts[$shoutId] : [],
-                    is_array($reactionMine[$shoutId] ?? null) ? array_values($reactionMine[$shoutId]) : [],
-                    is_array($reactionUsers[$shoutId] ?? null) ? $reactionUsers[$shoutId] : []
-                )),
-                'msgId' => $shoutId,
-                'msgLong' => $isLong,
-                'msgRaw' => (string) ($arr['text'] ?? ''),
-                'msgFormatted' => SafeHtml::fromTrustedHtml($message),
-                'editedTime' => $editedTime,
-                'labelMore' => $labelMore,
-                'labelLess' => $labelLess,
-            ];
-
-            $prevUserId = $currUserId;
-            $prevDate = $currDate;
-        }
-
-        return $items;
     }
 
     public function shoutboxHistory(Request $request): View|RedirectResponse

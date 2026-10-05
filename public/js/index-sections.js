@@ -10,7 +10,12 @@
                     if (response.ret != 0) {
                         layer.alert(response.msg, {title: 'Info', btn: ['OK', 'Cancel'], btnAlign: 'c'});
                     } else {
-                        document.getElementById('iframe-shout-box').src = 'shoutbox.php?type=shoutbox';
+                        var iframe = document.getElementById('iframe-shout-box');
+                        if (iframe) {
+                            iframe.src = 'shoutbox.php?type=shoutbox';
+                        } else if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
+                            window.Livewire.dispatch('shout-refresh');
+                        }
                     }
                 });
             });

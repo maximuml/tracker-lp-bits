@@ -68,7 +68,7 @@ final class IndexPageService
         $canLog = Permission::can(PermissionEnum::LOG);
 
         $news = $this->buildNews($canNewsManage);
-        $shoutbox = $this->buildShoutbox($canSbManage, (int) ($curUser['id'] ?? 0));
+        $shoutbox = $this->buildShoutbox($canSbManage, $curUser);
         $forumPosts = $this->buildForumPosts($curUser);
         $latestTorrents = $this->buildLatestTorrents();
         $topUploaders = $this->buildTopUploaders();
@@ -125,7 +125,10 @@ final class IndexPageService
         );
     }
 
-    private function buildShoutbox(bool $canManage, int $userId): IndexShoutboxSection
+    /**
+     * @param  array<string, mixed>  $curUser
+     */
+    private function buildShoutbox(bool $canManage, array $curUser): IndexShoutboxSection
     {
         $show = SiteConfig::current()->main->showShoutbox();
 
@@ -133,7 +136,7 @@ final class IndexPageService
             return new IndexShoutboxSection;
         }
 
-        $csrf = Shoutbox::csrfToken($userId);
+        $csrf = Shoutbox::csrfToken((int) ($curUser['id'] ?? 0));
         AssetAppender::js("var SHOUT_CSRF = '".addslashes($csrf)."';", 'footer', false);
 
         return new IndexShoutboxSection(
@@ -150,6 +153,7 @@ final class IndexPageService
             submitLabel: __('legacy/index.sumbit_shout'),
             clearButtonLabel: __('legacy/index.submit_clear'),
             showHideTitle: __('legacy/index.title_show_or_hide'),
+            refreshSeconds: (int) ($curUser['sbrefresh'] ?? 120),
         );
     }
 

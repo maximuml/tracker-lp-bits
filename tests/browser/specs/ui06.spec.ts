@@ -66,23 +66,22 @@ test.describe('UI-06 index page', () => {
         await expect(panel).toBeHidden();
         await expect(badge).toBeHidden();
 
-        // Deliver a mention row into the iframe DOM and fire 'load' — the
-        // exact signal the parent listens to. A live reload depends on the
-        // iframe's SSE/poll timing and is not deterministic; the contract
-        // under test is "badge = new .shoutrow-mentions-me rows since
-        // collapse".
-        await page.locator('#iframe-shout-box').evaluate((el: HTMLIFrameElement) => {
-            const doc = el.contentDocument;
-            if (!doc) {
-                return;
-            }
-            const tr = doc.createElement('tr');
-            const td = doc.createElement('td');
+        // Deliver a mention row into the panel DOM and broadcast 'refresh' —
+        // the shoutbox list is a Livewire component now, so rows morph inside
+        // #kshoutbox and the parent scan is triggered by the broadcast/scan
+        // timer. The contract under test is "badge = new .shoutrow-mentions-me
+        // rows since collapse".
+        await page.locator('#kshoutbox').evaluate((panel: HTMLElement) => {
+            const tbody = panel.querySelector('tbody') || panel;
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
             td.className = 'shoutrow shoutrow-mentions-me';
             td.textContent = 'ui06 e2e mention';
             tr.appendChild(td);
-            (doc.querySelector('#shoutbox-content') || doc.body).appendChild(tr);
-            el.dispatchEvent(new Event('load'));
+            tbody.appendChild(tr);
+            if (typeof BroadcastChannel !== 'undefined') {
+                new BroadcastChannel('nx-shout-shoutbox').postMessage('refresh');
+            }
         });
         await expect(badge).toBeVisible({ timeout: 10000 });
         await expect(badge).toContainText('mention');

@@ -25,5 +25,6 @@ final readonly class IndexShoutboxSection
         public string $submitLabel = '',
         public string $clearButtonLabel = '',
         public string $showHideTitle = '',
+        public int $refreshSeconds = 0,
     ) {}
 }

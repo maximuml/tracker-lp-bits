@@ -106,7 +106,13 @@ function shoutboxLink(form, field) {
     } else {
         ta.value += ins;
     }
+    shoutboxNotify(ta);
     ta.focus();
+}
+
+function shoutboxNotify(ta) {
+    // wire:model only syncs on a real input event — DOM-level writes must re-fire it.
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function shoutboxInsertAt(ta, before, after) {
@@ -124,6 +130,23 @@ function shoutboxInsertAt(ta, before, after) {
     } else {
         ta.value += before + after;
     }
+    shoutboxNotify(ta);
+}
+
+function shoutReply(nick) {
+    try {
+        var input = document.forms && document.forms['shbox'] && document.forms['shbox'].shbox_text;
+        if (!input) { return false; }
+        var prefix = '@' + nick + ', ';
+        var val = input.value || '';
+        if (val.indexOf(prefix) !== 0) {
+            input.value = prefix + val;
+            shoutboxNotify(input);
+        }
+        input.focus();
+        try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+    } catch (e) {}
+    return false;
 }
 
 function shoutboxToggleEmoji(form, field) {
@@ -149,8 +172,8 @@ function shoutboxEdit(id) {
 
     var html = '<span class="shoutbox-editing">' +
         '<input type="text" id="shout-edit-text-' + id + '" value="' + shoutboxEscapeHtml(text) + '" />' +
-        '<button type="button" class="btn" onclick="shoutboxSaveEdit(' + id + ')">Save</button>' +
-        '<button type="button" class="btn" onclick="shoutboxCancelEdit(' + id + ')">Cancel</button>' +
+        '<button type="button" class="btn" data-shout-save="' + id + '">Save</button>' +
+        '<button type="button" class="btn" data-shout-cancel="' + id + '">Cancel</button>' +
         '</span>';
     row.innerHTML = html;
     var input = document.getElementById('shout-edit-text-' + id);
@@ -206,9 +229,13 @@ function shoutboxRefresh() {
     var c = document.getElementById('shoutbox-content');
     if (c && typeof shoutPoll === 'function') {
         shoutPoll();
-    } else {
-        window.location.reload();
+        return;
     }
+    if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
+        window.Livewire.dispatch('shout-refresh');
+        return;
+    }
+    window.location.reload();
 }
 
 var shoutboxEventSource = null;
@@ -448,6 +475,19 @@ document.addEventListener('click', function (e) {
         e.preventDefault();
         return;
     }
+
+    var saveBtn = t.closest('button[data-shout-save]');
+    if (saveBtn) {
+        if (typeof shoutboxSaveEdit === 'function') { shoutboxSaveEdit(parseInt(saveBtn.getAttribute('data-shout-save'), 10)); }
+        e.preventDefault();
+        return;
+    }
+    var cancelBtn = t.closest('button[data-shout-cancel]');
+    if (cancelBtn) {
+        if (typeof shoutboxCancelEdit === 'function') { shoutboxCancelEdit(parseInt(cancelBtn.getAttribute('data-shout-cancel'), 10)); }
+        e.preventDefault();
+        return;
+    }
 });
 
 // Index-page collapse runs on the shared klappe mechanism (same as news):
@@ -458,10 +498,9 @@ document.addEventListener('click', function (e) {
 (function () {
     if (window.self !== window.top) { return; }
 
-    var iframe = document.getElementById('iframe-shout-box');
     var panel = document.getElementById('kshoutbox');
     var badge = document.getElementById('shoutbox-mentions');
-    if (!iframe || !panel || !badge) { return; }
+    if (!panel || !badge) { return; }
 
     var mentionBaseline = -1;
 
@@ -470,12 +509,7 @@ document.addEventListener('click', function (e) {
     }
 
     function shoutMentionCount() {
-        try {
-            var doc = iframe.contentDocument;
-            return doc ? doc.querySelectorAll('.shoutrow-mentions-me').length : 0;
-        } catch (e) {
-            return 0;
-        }
+        return panel.querySelectorAll('.shoutrow-mentions-me').length;
     }
 
     function shoutCollapseScan() {
@@ -510,7 +544,6 @@ document.addEventListener('click', function (e) {
         });
         observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
     }
-    iframe.addEventListener('load', shoutCollapseScan);
 
     // New shouts arrive inside the iframe via shoutPoll() DOM updates — no
     // iframe 'load' event fires. The iframe broadcasts 'refresh' on this

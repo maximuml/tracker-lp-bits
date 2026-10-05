@@ -375,8 +375,10 @@ document.getElementById("peercount").style.display = 'block';
 // smileit.js
 
 function SmileIT(smile,form,text){
-   document.forms[form].elements[text].value = document.forms[form].elements[text].value+" "+smile+" ";
-   document.forms[form].elements[text].focus();
+   var el = document.forms[form].elements[text];
+   el.value = el.value+" "+smile+" ";
+   el.dispatchEvent(new Event('input', { bubbles: true }));
+   el.focus();
 }
 
 // saythanks.js
@@ -1685,23 +1687,6 @@ document.addEventListener('DOMContentLoaded', function () {
             ? (btn.getAttribute('data-label-show') || 'Show')
             : (btn.getAttribute('data-label-hide') || 'Hide');
     });
-})();
-
-/* index shoutbox: grow the same-origin iframe to fit its message list
-   (was a fixed 180px strip regardless of content). */
-(function () {
-    var frame = document.getElementById('iframe-shout-box');
-    if (!frame) { return; }
-    function size() {
-        try {
-            var doc = frame.contentDocument;
-            var c = doc ? doc.getElementById('shoutbox-content') : null;
-            var h = c ? c.scrollHeight + 4 : 0;
-            frame.style.height = Math.max(120, Math.min(h, 600)) + 'px';
-        } catch (e) {}
-    }
-    frame.addEventListener('load', size);
-    setInterval(size, 2000);
 })();
 
 /* E5 — FAQ accordion: filter items by search box, auto-open hash target. */

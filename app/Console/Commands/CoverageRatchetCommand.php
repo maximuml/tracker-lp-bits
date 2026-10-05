@@ -63,6 +63,7 @@ final class CoverageRatchetCommand extends Command
         'app/Http/Controllers' => 15.0,
         'app/Jobs' => 20.0,
         'app/Listeners' => 0.0,
+        'app/Livewire' => 0.0,
         'app/Logging' => 0.0,
         'app/Models' => 20.0,
         'app/Observers' => 0.0,

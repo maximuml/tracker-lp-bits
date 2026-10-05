@@ -10,15 +10,7 @@
 @else
 <div class="p-[10pt]"><div>
 @foreach($news->items as $newsItem)
-    @if($loop->first)
-        <a href="#" data-klappe="a{{ $newsItem->id }}"><img class="minus" src="pic/trans.gif" id="pica{{ $newsItem->id }}" alt="Show/Hide" title="{{ $news->showHideTitle }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem->added)) }} - <b>{{ $newsItem->title }}</b></a>
-        <div id="ka{{ $newsItem->id }}"> {{ \App\Support\Format::formatComment($newsItem->body, 0) }} </div>
-    @else
-        <a href="#" data-klappe="a{{ $newsItem->id }}"><br /><img class="plus" src="pic/trans.gif" id="pica{{ $newsItem->id }}" alt="Show/Hide" title="{{ $news->showHideTitle }}" />&nbsp;{{ date('Y.m.d', strtotime($newsItem->added)) }} - <b>{{ $newsItem->title }}</b></a>
-        <div id="ka{{ $newsItem->id }}" class="nx-hidden"> {{ \App\Support\Format::formatComment($newsItem->body, 0) }} </div>
-    @endif
-    &nbsp; [<a class="faqlink" href="news.php?action=edit&amp;newsid={{ $newsItem->id }}"><b>{{ $news->editLabel }}</b></a>]
-    <form method="post" action="/news" class="inline">@csrf<input type="hidden" name="action" value="delete" /><input type="hidden" name="newsid" value="{{ $newsItem->id }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $news->deleteLabel }}</b></button></form>
+    <livewire:news-item :item-id="$newsItem->id" :added="$newsItem->added" :title="$newsItem->title" :body="$newsItem->body" :edit-label="$news->editLabel" :delete-label="$news->deleteLabel" :show-hide-title="$news->showHideTitle" :leading-break="! $loop->first" :open="$loop->first" :key="'news-item-'.$newsItem->id" />
 @endforeach
 </div></div>
 @endif

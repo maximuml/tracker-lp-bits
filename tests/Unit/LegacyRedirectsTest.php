@@ -29,10 +29,10 @@ final class LegacyRedirectsTest extends TestCase
         $conf = file_get_contents(base_path('.docker/openresty/sites/app.conf.template'));
         $this->assertStringContainsString('return 301 /login', $conf, 'nginx must redirect /login.php');
         $this->assertStringContainsString('return 301 /signup', $conf, 'nginx must redirect /signup.php');
-        $this->assertStringContainsString('return 301 /torrents', $conf, 'nginx must redirect /torrents.php');
+        $this->assertStringContainsString('return 301 /web/torrents', $conf, 'nginx must redirect /torrents.php');
         $this->assertStringContainsString('return 301 /forums', $conf, 'nginx must redirect /forums.php');
-        $this->assertStringContainsString('return 301 /faq', $conf, 'nginx must redirect /faq.php');
-        $this->assertStringContainsString('return 301 /rules', $conf, 'nginx must redirect /rules.php');
+        $this->assertStringContainsString('return 301 /web/faq', $conf, 'nginx must redirect /faq.php');
+        $this->assertStringContainsString('return 301 /web/rules', $conf, 'nginx must redirect /rules.php');
     }
 
     /**

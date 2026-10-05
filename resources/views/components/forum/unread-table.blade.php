@@ -1,5 +1,5 @@
 @props(['list'])
-<h1 class="text-center"><a class="faqlink" href="forums.php">{{ $list->siteName }}&nbsp;{{ __('legacy/forums.text_forums') }}</a>--&gt;{{ __('legacy/forums.text_topics_with_unread_posts') }}</h1>
+<h1 class="text-center"><a class="faqlink" href="/forums">{{ $list->siteName }}&nbsp;{{ __('legacy/forums.text_forums') }}</a>--&gt;{{ __('legacy/forums.text_topics_with_unread_posts') }}</h1>
 @if ($list->topics !== [])
     <x-data-table :caption="__('legacy/forums.text_topics_with_unread_posts')" captionHidden>
         <x-slot:head>

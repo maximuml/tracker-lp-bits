@@ -8,7 +8,7 @@
 @endforeach</select>
 </div>
 <div class="nx-fhead">{{ __('legacy/offers.row_title')}}<span class="text-nxm-danger">*</span></div><div class="nx-fcell"><input type="text" name="name" value="{{ $edit_offer['title'] }}" /></div>
-<div class="nx-fhead">{{ __('legacy/offers.row_post_or_photo')}}</div><div class="nx-fcell"><input type="text" name="picture" value='' /><br />{{ __('legacy/offers.text_link_to_picture') }} <a href="tags.php" title="What is Tag?">{{ __('legacy/offers.text_tag') }}</a> {{ __('legacy/offers.text_link_to_picture_end') }}</div>
+<div class="nx-fhead">{{ __('legacy/offers.row_post_or_photo')}}</div><div class="nx-fcell"><input type="text" name="picture" value='' /><br />{{ __('legacy/offers.text_link_to_picture') }} <a href="/web/tags" title="What is Tag?">{{ __('legacy/offers.text_tag') }}</a> {{ __('legacy/offers.text_link_to_picture_end') }}</div>
 <div class="nx-fhead"><b>{{ __('legacy/offers.row_description')}}<span class="text-nxm-danger">*</span></b></div><div class="nx-fcell">
 <livewire:bbcode-editor form="compose" text="body" :content="$edit_offer['bodyContent'] ?? ''" />
 </div>

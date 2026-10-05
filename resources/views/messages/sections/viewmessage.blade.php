@@ -6,7 +6,7 @@
 			@if ($viewmessage['replyHref'] ?? null)
 				<a class="nx-postbtn" href="{{ $viewmessage['replyHref'] }}">{{ __('legacy/messages.text_reply') }}</a>
 			@endif
-			<a class="nx-postbtn" href="messages.php?action=forward&amp;id={{ $viewmessage['pmId'] }}">{{ __('legacy/messages.text_forward_pm') }}</a>
+			<a class="nx-postbtn" href="/web/messages?action=forward&amp;id={{ $viewmessage['pmId'] }}">{{ __('legacy/messages.text_forward_pm') }}</a>
 			@if (! $viewmessage['isSender'])
 			<form action="/web/messages/move-or-delete" method="post" class="inline">@csrf<input type="hidden" name="id" value="{{ $viewmessage['pmId'] }}"><input class="nx-postbtn" type="submit" name="move" value="{{ __('legacy/messages.submit_move_to') }}"><select name="box" aria-label="{{ __('legacy/messages.submit_move_to') }}"><option value="1">{{ __('legacy/messages.text_inbox') }}</option>
 			@foreach ($viewmessage['moveBoxes'] ?? [] as $opt)

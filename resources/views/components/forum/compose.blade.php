@@ -23,4 +23,4 @@
         </div>
     </x-frame>
 </form>
-<p class="text-center"><a href="tags.php" target="_blank">{{ __('legacy/functions.text_tags') }}</a> | <a href="smilies.php" target="_blank">{{ __('legacy/functions.text_smilies') }}</a></p>
+<p class="text-center"><a href="/web/tags" target="_blank">{{ __('legacy/functions.text_tags') }}</a> | <a href="/web/smilies" target="_blank">{{ __('legacy/functions.text_smilies') }}</a></p>

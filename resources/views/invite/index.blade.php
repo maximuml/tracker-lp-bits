@@ -5,7 +5,7 @@
 @section('content')
 <div class="nx-main nx-embedded">
 
-<h1 class="text-center"><a href="invite.php?id={{ $id }}">{{ $user['username'] ?? '' }}{{ __('legacy/invite.text_invite_system')}}</a></h1>
+<h1 class="text-center"><a href="/web/invite?id={{ $id }}">{{ $user['username'] ?? '' }}{{ __('legacy/invite.text_invite_system')}}</a></h1>
 @if ($sent == 1)
     <p class="text-center"><span class="text-nxm-danger">{{ __('legacy/invite.text_invite_code_sent') }}<br /></span></p>
 @endif
@@ -30,7 +30,7 @@
     <li{{ $menuSelected == 'sent' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=sent">{{ __('legacy/invite.text_sent_invites_status')}}</a></li>
     <li{{ $menuSelected == 'tmp' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=tmp">{{ __('legacy/invite.text_tmp_status')}}</a></li>
     @if (($CURUSER['id'] ?? 0) == $id)
-        </ul><form method=post action=invite.php?id={{ (string) $id }}&type=new><input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
+        </ul><form method=post action=/web/invite?id={{ (string) $id }}&type=new><input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
     @else
         </ul></div>
     @endif
@@ -98,7 +98,7 @@
                     <td class="align-top px-2.5 py-1.5">{{ number_format(floatval($arr['seed_points_per_hour']) * $haremAdditionFactor, 3) }}</td>
                 @endif
                     <td class="align-top px-2.5 py-1.5">{{ $arr['last_announce_at'] }}</td>
-                    <td class="align-top px-2.5 py-1.5">@if (($arr['status'] ?? '') === 'confirmed')<a href=userdetails.php?id={{ (int) $arr['id'] }}><span class="nx-color-1f7309">{{ __('legacy/invite.text_confirmed') }}</span></a>@else<a href=checkuser.php?id={{ (int) $arr['id'] }}><span class="nx-color-ca0226">{{ __('legacy/invite.text_pending') }}</span></a>@endif</td>
+                    <td class="align-top px-2.5 py-1.5">@if (($arr['status'] ?? '') === 'confirmed')<a href=user/web/details/{{ (int) $arr['id'] }}><span class="nx-color-1f7309">{{ __('legacy/invite.text_confirmed') }}</span></a>@else<a href=/checkuser?id={{ (int) $arr['id'] }}><span class="nx-color-ca0226">{{ __('legacy/invite.text_pending') }}</span></a>@endif</td>
                     @if ($canConfirm)
                         <td class="align-top px-2.5 py-1.5">
                         @if ($arr['status'] == 'pending')
@@ -137,12 +137,12 @@
             @foreach ($sentTmpRows as $arr1)
                 <tr>
                 <td class="align-top px-2.5 py-1.5">{{ $arr1['invitee'] }}</td>
-                <td class="align-top px-2.5 py-1.5">{{ $arr1['hash'] }}@if ($arr1['hashValid'] ?? false)&nbsp;<a href="signup.php?type=invite&invitenumber={{ $arr1['hash'] }}" title="{{ __('legacy/invite.signup_link_help') }}" target="_blank"><small>[{{ __('legacy/invite.signup_link') }}]</small></a>@endif</td>
+                <td class="align-top px-2.5 py-1.5">{{ $arr1['hash'] }}@if ($arr1['hashValid'] ?? false)&nbsp;<a href="/signup?type=invite&invitenumber={{ $arr1['hash'] }}" title="{{ __('legacy/invite.signup_link_help') }}" target="_blank"><small>[{{ __('legacy/invite.signup_link') }}]</small></a>@endif</td>
                 <td class="align-top px-2.5 py-1.5">{{ $arr1['time_invited'] }}</td>
                 @if ($menuSelected == 'sent')
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['validText'] ?? '' }}</td>
                 @endif
-                <td class="align-top px-2.5 py-1.5">@if (! ($arr1['hashValid'] ?? false))<a href=userdetails.php?id={{ (int) $arr1['invitee_register_uid'] }}><span class="nx-color-1f7309">{{ $arr1['invitee_register_username'] }}</span></a>@endif</td>
+                <td class="align-top px-2.5 py-1.5">@if (! ($arr1['hashValid'] ?? false))<a href=user/web/details/{{ (int) $arr1['invitee_register_uid'] }}><span class="nx-color-1f7309">{{ $arr1['invitee_register_username'] }}</span></a>@endif</td>
                 @if ($menuSelected == 'tmp')
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['expired_at'] }}</td>
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['created_at'] }}</td>

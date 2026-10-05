@@ -24,7 +24,7 @@
         </div><div class="grow">
         <div class="flex items-start nx-main">
         <div class="nx-embedded w-[80%]">{{ $friend['usernameHtml'] }} ({{ $friend['titleHtml'] }})<br /><br />{{ __('legacy/friends.text_last_seen_on') }}<x-time :value="$friend['lastSeen']" /></div>
-        <div class="nx-embedded w-[20%]"><form method="post" action="/web/friends/delete" class="inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $friend['id'] }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/friends.text_remove_from_friends') }}</button></form><br /><br /><a href="sendmessage.php?receiver={{ $friend['id'] }}">{{ __('legacy/friends.text_send_pm') }}</a></div>
+        <div class="nx-embedded w-[20%]"><form method="post" action="/web/friends/delete" class="inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $friend['id'] }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/friends.text_remove_from_friends') }}</button></form><br /><br /><a href="/web/sendmessage?receiver={{ $friend['id'] }}">{{ __('legacy/friends.text_send_pm') }}</a></div>
         </div>
         </div>
         </div>
@@ -49,6 +49,6 @@
 
 </div>
 @if ($canViewUserList)
-    <p><a href=users.php><b>{{ __('legacy/friends.text_find_user')}}</b></a></p>
+    <p><a href=/web/users><b>{{ __('legacy/friends.text_find_user')}}</b></a></p>
 @endif
 @endsection

@@ -363,9 +363,9 @@ final class UsercpPageServiceTest extends TestCase
         // Time::format() markup in SafeHtml inside a {{ }} string).
         $this->assertStringContainsString('<time datetime=', $html);
         // Invitations/karma/comments rows render link markup in Blade.
-        $this->assertStringContainsString('invite.php?id='.$this->userId, $html);
-        $this->assertStringContainsString('mybonus.php', $html);
-        $this->assertStringContainsString('userhistory.php?action=viewcomments', $html);
+        $this->assertStringContainsString('/web/invite?id='.$this->userId, $html);
+        $this->assertStringContainsString('/web/mybonus', $html);
+        $this->assertStringContainsString('/web/userhistory?action=viewcomments', $html);
         // Token create form lives in a <template>; the JS reads innerHTML.
         $this->assertStringContainsString('id="token-form-template"', $html);
         $this->assertStringContainsString('id="add-token-box-btn"', $html);

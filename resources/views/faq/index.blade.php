@@ -6,8 +6,8 @@
 <h1 class="nx-sr-only">{{ __('legacy/faq.head_faq') }}</h1>
 @if (! empty($faqCategories))
     <x-frame :caption="__('legacy/faq.text_welcome_to').$SITENAME.' - '.$SLOGAN" :center="false">
-    {{ __('legacy/faq.text_welcome_content_one') }} <a class="faqlink" href="contactstaff.php">{{ __('legacy/faq.text_contact') }}</a> {{ __('legacy/faq.text_welcome_content_one_end') }}<br /><br />{{ __('legacy/faq.text_welcome_content_one_two') }}
-    {{ sprintf(__('legacy/faq.text_welcome_content_two'), $SITENAME) }} <a class="faqlink" href="rules.php">{{ __('legacy/faq.text_rules') }}</a>{{ __('legacy/faq.text_welcome_content_two_two') }}<br /><br />{{ sprintf(__('legacy/faq.text_welcome_content_two_three'), $SITENAME) }} <a class="faqlink" href="useragreement.php">{{ __('legacy/faq.text_user_agreement') }}</a>.
+    {{ __('legacy/faq.text_welcome_content_one') }} <a class="faqlink" href="/web/contactstaff">{{ __('legacy/faq.text_contact') }}</a> {{ __('legacy/faq.text_welcome_content_one_end') }}<br /><br />{{ __('legacy/faq.text_welcome_content_one_two') }}
+    {{ sprintf(__('legacy/faq.text_welcome_content_two'), $SITENAME) }} <a class="faqlink" href="/web/rules">{{ __('legacy/faq.text_rules') }}</a>{{ __('legacy/faq.text_welcome_content_two_two') }}<br /><br />{{ sprintf(__('legacy/faq.text_welcome_content_two_three'), $SITENAME) }} <a class="faqlink" href="/web/useragreement">{{ __('legacy/faq.text_user_agreement') }}</a>.
     </x-frame>
 
     <x-frame :center="false"><x-slot:caption><span id="top">{{ __('legacy/faq.text_contents') }}</span></x-slot>

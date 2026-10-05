@@ -11,7 +11,7 @@
         </thead>
     </x-slot:head>
 @foreach($forumPosts->items as $postsx)
-<tr><td><a href="forums.php?action=viewtopic&amp;topicid={{ $postsx->tid }}&amp;page=p{{ $postsx->pid }}#pid{{ $postsx->pid }}"><b>{{ $postsx->subject }}</b></a><br />{{ $forumPosts->textIn }}<a href="forums.php?action=viewforum&amp;forumid={{ $postsx->forumid }}">{{ $postsx->name }}</a></td><td class="text-center">{{ $postsx->views }}</td><td class="text-center">{{ \App\Support\UserDisplay::username($postsx->userpost) }}</td><td><x-time :value="$postsx->added" /></td></tr>
+<tr><td><a href="/forums?action=viewtopic&amp;topicid={{ $postsx->tid }}&amp;page=p{{ $postsx->pid }}#pid{{ $postsx->pid }}"><b>{{ $postsx->subject }}</b></a><br />{{ $forumPosts->textIn }}<a href="/forums?action=viewforum&amp;forumid={{ $postsx->forumid }}">{{ $postsx->name }}</a></td><td class="text-center">{{ $postsx->views }}</td><td class="text-center">{{ \App\Support\UserDisplay::username($postsx->userpost) }}</td><td><x-time :value="$postsx->added" /></td></tr>
 @endforeach
 </x-data-table>
 @endif

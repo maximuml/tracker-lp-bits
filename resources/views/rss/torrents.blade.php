@@ -24,7 +24,7 @@
             <link>{{ $item['url'] }}</link>
             <description><![CDATA[{{ $item['content'] }}]]></description>
             <author>{{ $item['author'] }}&#64;{{ $httpHost }} ({{ $item['author'] }})</author>
-            <category domain="{{ $baseUrl }}/torrents.php?cat={{ $item['categoryId'] }}">{{ $item['categoryName'] }}</category>
+            <category domain="{{ $baseUrl }}/web/torrents?cat={{ $item['categoryId'] }}">{{ $item['categoryName'] }}</category>
             <comments><![CDATA[{{ $item['commentsUrl'] }}]]></comments>
             <enclosure url="{{ $item['downloadUrl'] }}" length="{{ $item['size'] }}" type="application/x-bittorrent" />
             <guid isPermaLink="false">{{ $item['guid'] }}</guid>

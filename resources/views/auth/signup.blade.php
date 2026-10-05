@@ -92,11 +92,11 @@
             <span class="nx-field__label">{{ __('legacy/signup.row_verification')}}</span>
             <span class="nx-auth__checkline">
                 <label><input type="checkbox" name="rulesverify" value="yes" @checked(old('rulesverify') === 'yes') />{{ __('legacy/signup.checkbox_read_rules') }}</label>
-                <a href="rules.php">{{ __('legacy/signup.text_rules') }}</a> {{ __('legacy/signup.checkbox_read_rules_end') }}
+                <a href="/web/rules">{{ __('legacy/signup.text_rules') }}</a> {{ __('legacy/signup.checkbox_read_rules_end') }}
             </span>
             <span class="nx-auth__checkline">
                 <label><input type="checkbox" name="faqverify" value="yes" @checked(old('faqverify') === 'yes') />{{ __('legacy/signup.checkbox_read_faq') }}</label>
-                <a href="faq.php">{{ __('legacy/signup.text_faq') }}</a> {{ __('legacy/signup.checkbox_read_faq_end') }}
+                <a href="/web/faq">{{ __('legacy/signup.text_faq') }}</a> {{ __('legacy/signup.checkbox_read_faq_end') }}
             </span>
             <label class="nx-auth__checkline"><input type="checkbox" name="ageverify" value="yes" @checked(old('ageverify') === 'yes') />{{ __('legacy/signup.checkbox_age') }}</label>
         </div>

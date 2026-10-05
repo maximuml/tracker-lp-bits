@@ -22,7 +22,7 @@
   <option value="{{ $url }}">{{ $name }}</option>
   @endforeach
   </select><input type="text" name="avatar" value="{{ $personal->avatar }}"><br />
-{{ __('legacy/usercp.text_avatar_note') }}@if ($personal->enableBitbucket){{ __('legacy/usercp.text_bitbucket_note') }}<a class="faqlink" href="bitbucket-upload.php">{{ __('legacy/usercp.text_bitbucket') }}</a>.@endif</x-settings-row-small>
-<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_info')"><textarea name="info" rows="10">{{ $personal->info }}</textarea><br />{{ __('legacy/usercp.text_info_note') }}<a class="faqlink" href="tags.php" target="_new">{{ __('legacy/usercp.text_bb_codes') }}</a>.</x-settings-row-small>
+{{ __('legacy/usercp.text_avatar_note') }}@if ($personal->enableBitbucket){{ __('legacy/usercp.text_bitbucket_note') }}<a class="faqlink" href="/web/bitbucket-upload">{{ __('legacy/usercp.text_bitbucket') }}</a>.@endif</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_info')"><textarea name="info" rows="10">{{ $personal->info }}</textarea><br />{{ __('legacy/usercp.text_info_note') }}<a class="faqlink" href="/web/tags" target="_new">{{ __('legacy/usercp.text_bb_codes') }}</a>.</x-settings-row-small>
 <div class="nx-fhead">{{ __('legacy/usercp.row_save_settings')}}</div><div class="nx-fcell"><input type=submit value="{{ __('legacy/usercp.submit_save_settings')}}"></div>
 </div></form>

@@ -27,7 +27,7 @@
 
 <x-data-table :caption="$details->title->name" captionHidden class="w-[97%] nxm-kv">
 @if ($details->downloadAllowed)
-<tr><td class="w-[1%] whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/details.row_download') }}</td><td class="align-top px-2.5 py-1.5"><a class="index" href="download.php?id={{ $torrentId }}">{{ ($torrentNamePrefix ?? '').'.'.$details->saveAs }}.torrent</a>&nbsp;&nbsp;<livewire:bookmark-icon :torrent-id="$torrentId" />&nbsp;&nbsp;&nbsp;{{ __('legacy/details.row_upped_by') }}&nbsp;@if ($details->owner->anonymous)<i>{{ __('legacy/details.text_anonymous') }}</i>@if ($details->owner->showUsername) ({{ $details->owner->username }})@endif@elseif ($details->owner->username !== null){{ $details->owner->username }}@else<i></i>@endif{{ $details->uploadTimePrefix }}{{ $details->uploadTime }}</td></tr>
+<tr><td class="w-[1%] whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/details.row_download') }}</td><td class="align-top px-2.5 py-1.5"><a class="index" href="/download?id={{ $torrentId }}">{{ ($torrentNamePrefix ?? '').'.'.$details->saveAs }}.torrent</a>&nbsp;&nbsp;<livewire:bookmark-icon :torrent-id="$torrentId" />&nbsp;&nbsp;&nbsp;{{ __('legacy/details.row_upped_by') }}&nbsp;@if ($details->owner->anonymous)<i>{{ __('legacy/details.text_anonymous') }}</i>@if ($details->owner->showUsername) ({{ $details->owner->username }})@endif@elseif ($details->owner->username !== null){{ $details->owner->username }}@else<i></i>@endif{{ $details->uploadTimePrefix }}{{ $details->uploadTime }}</td></tr>
 @else
 <x-settings-row :label="__('legacy/details.row_download')">{{ __('legacy/details.text_downloading_not_allowed') ?? '' }}</x-settings-row>
 @endif
@@ -53,14 +53,14 @@
 @if ($showDescription)
 <livewire:descr-row :descr-raw="$descrRaw" :show-or-hide-title="$details->showOrHideTitle" />
 @endif
-<x-settings-row :label="__('legacy/details.row_torrent_info')"><div class="nxm-detail-cells">@if ($details->info->numFiles !== null)<div><b>{{ __('legacy/details.text_num_files') }}</b>{{ $details->info->numFiles }}{{ __('legacy/details.text_files') }}<br /></div>@endif<div><b>{{ __('legacy/details.row_info_hash') }}:</b>&nbsp;{{ $details->info->infoHash }}</div>@if ($details->info->showStructure)<div><b>{{ __('legacy/details.text_torrent_structure') }}</b><a href="torrent_info.php?id={{ $details->info->torrentId }}">{{ __('legacy/details.text_torrent_info_note') }}</a></div>@endif</div><livewire:torrent-file-list :torrent-id="$details->info->torrentId" /></x-settings-row>
-<x-settings-row :label="__('legacy/details.row_hot_meter')"><div class="nxm-detail-cells"><div><b>{{ __('legacy/details.text_views') }}</b>{{ $details->hotMeter->views }}</div><div><b>{{ __('legacy/details.text_hits') }}</b>{{ $details->hotMeter->hits }}</div><div><b>{{ __('legacy/details.text_snatched') }}</b><a href="viewsnatches.php?id={{ $details->hotMeter->torrentId }}"><b>{{ $details->hotMeter->timesCompleted }}{{ $details->hotMeter->snatchesPre }}</b>{{ $details->hotMeter->snatchesPost }}</a></div><div><b>{{ $details->hotMeter->lastSeederLabel }}</b>{{ $details->hotMeter->lastSeeder }}</div></div></x-settings-row>
+<x-settings-row :label="__('legacy/details.row_torrent_info')"><div class="nxm-detail-cells">@if ($details->info->numFiles !== null)<div><b>{{ __('legacy/details.text_num_files') }}</b>{{ $details->info->numFiles }}{{ __('legacy/details.text_files') }}<br /></div>@endif<div><b>{{ __('legacy/details.row_info_hash') }}:</b>&nbsp;{{ $details->info->infoHash }}</div>@if ($details->info->showStructure)<div><b>{{ __('legacy/details.text_torrent_structure') }}</b><a href="/web/torrent_info?id={{ $details->info->torrentId }}">{{ __('legacy/details.text_torrent_info_note') }}</a></div>@endif</div><livewire:torrent-file-list :torrent-id="$details->info->torrentId" /></x-settings-row>
+<x-settings-row :label="__('legacy/details.row_hot_meter')"><div class="nxm-detail-cells"><div><b>{{ __('legacy/details.text_views') }}</b>{{ $details->hotMeter->views }}</div><div><b>{{ __('legacy/details.text_hits') }}</b>{{ $details->hotMeter->hits }}</div><div><b>{{ __('legacy/details.text_snatched') }}</b><a href="/web/viewsnatches?id={{ $details->hotMeter->torrentId }}"><b>{{ $details->hotMeter->timesCompleted }}{{ $details->hotMeter->snatchesPre }}</b>{{ $details->hotMeter->snatchesPost }}</a></div><div><b>{{ $details->hotMeter->lastSeederLabel }}</b>{{ $details->hotMeter->lastSeeder }}</div></div></x-settings-row>
 <livewire:peer-list :torrent-id="$details->peers->torrentId" :seeders="$details->peers->seeders" :leechers="$details->peers->leechers" :open-on-load="$requestFlags['dllist'] ?? false" />
 <x-settings-row :label="__('legacy/details.magic_value_award')"><livewire:magic-section :torrent-id="$torrentId" /></x-settings-row>
 <x-settings-row :label="__('legacy/details.row_thanks_by')"><livewire:thanks-section :torrent-id="$torrentId" /></x-settings-row>
 </x-data-table>
 @else
-<h1 id="top">{{ __('legacy/details.text_comments_for') ?? '' }}<a href="details.php?id={{ $torrentId }}">{{ $torrentRow['name'] }}</a></h1>
+<h1 id="top">{{ __('legacy/details.text_comments_for') ?? '' }}<a href="/web/details/{{ $torrentId }}">{{ $torrentRow['name'] }}</a></h1>
 @endif
 
 @include('torrent._comments')

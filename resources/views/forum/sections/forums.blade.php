@@ -5,7 +5,7 @@
     <a href="?action=viewunread"><b>{{ __('legacy/forums.text_view_unread') }}</b></a> |
     <a href="?catchup=1"><b>{{ __('legacy/forums.text_catch_up') }}</b></a>
     @if ($forums->canManageForums)
-        | <a href="forummanage.php"><b>{{ __('legacy/forums.text_forum_manager') }}</b></a>
+        | <a href="/forummanage"><b>{{ __('legacy/forums.text_forum_manager') }}</b></a>
     @endif
 </p>
 <x-forum.index-table :sections="$forums->sections" />

@@ -3,7 +3,7 @@
     <a href="#" wire:click.prevent="toggle" aria-expanded="{{ $open ? 'true' : 'false' }}" aria-controls="kshoutbox"><img class="{{ $open ? 'minus' : 'plus' }}" src="pic/trans.gif" alt="Show/Hide" title="{{ $showHideTitle }}" /></a>
     {{ $cardTitle }} - <span class="small">{{ $autoRefreshLabel }}</span>
     <span class="striking" id="countdown" wire:ignore>{{ $refreshSeconds }}</span><span class="small">{{ $secondsLabel }}</span>
-    - <a href="shoutbox_history.php" class="small">{{ $historyLabel }}</a>
+    - <a href="/web/shoutbox_history" class="small">{{ $historyLabel }}</a>
     @if($canManage)
         - <span class="small" id="clear-shout-box" data-confirm="{{ $clearConfirm }}" wire:ignore>[<a class="altlink" href="#"><b>{{ $clearLabel }}</b></a>]</span>
     @endif

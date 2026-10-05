@@ -20,10 +20,10 @@
         </tr>
         @foreach ($rows as $row)
             <tr>
-                <form method="post" action="modtask.php">
+                <form method="post" action="/web/modtask">
                     <input type="hidden" name="action" value="confirmuser">
                     <input type="hidden" name="userid" value="{{ $row['id'] }}">
-                    <td><a href="userdetails.php?id={{ $row['id'] }}">{{ $row['username'] }}</a></td>
+                    <td><a href="user/web/details/{{ $row['id'] }}">{{ $row['username'] }}</a></td>
                     <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['email'] }}</td>
                     <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['added'] }}</td>
                     <td class="text-center">

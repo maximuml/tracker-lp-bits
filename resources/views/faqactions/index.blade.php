@@ -8,7 +8,7 @@
     @if (empty($arr))
         <p>Invalid id</p>
     @elseif (($arr['type'] ?? '') === 'item')
-        <form method="post" action="faqactions.php?action=edititem">
+        <form method="post" action="/web/faqactions?action=edititem">
             @csrf
             <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
             <div class="nx-fcell">ID:</div><div class="nx-fcell">{{ (int) $arr['id'] }} <input type="hidden" name="id" value="{{ (int) $arr['id'] }}" /></div>
@@ -33,7 +33,7 @@
             </div>
         </form>
     @elseif (($arr['type'] ?? '') === 'categ')
-        <form method="post" action="faqactions.php?action=editsect">
+        <form method="post" action="/web/faqactions?action=editsect">
             @csrf
             <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
             <div class="nx-fcell">ID:</div><div class="nx-fcell">{{ (int) $arr['id'] }} <input type="hidden" name="id" value="{{ (int) $arr['id'] }}" /></div>
@@ -52,11 +52,11 @@
 @elseif (($mode ?? '') === 'confirm_delete')
     <h1 class="text-center">Confirmation required</h1>
     <div class="nx-box w-[97%] mx-auto text-center">
-    Please click <a href="faqactions.php?action=delete&id={{ (int) ($id ?? 0) }}&confirm=yes">here</a> to confirm.
+    Please click <a href="/web/faqactions?action=delete&id={{ (int) ($id ?? 0) }}&confirm=yes">here</a> to confirm.
     </div>
 @elseif (($mode ?? '') === 'additem')
     <h1 class="text-center">Add Item</h1>
-    <form method="post" action="faqactions.php?action=addnewitem">
+    <form method="post" action="/web/faqactions?action=addnewitem">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
         <div class="nx-fcell">Question:</div><div class="nx-fcell"><input type="text" name="question" value="" /></div>
@@ -76,7 +76,7 @@
     </form>
 @elseif (($mode ?? '') === 'addsection')
     <h1 class="text-center">Add Section</h1>
-    <form method="post" action="faqactions.php?action=addnewsect">
+    <form method="post" action="/web/faqactions?action=addnewsect">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
         <div class="nx-fcell">Title:</div><div class="nx-fcell"><input type="text" name="title" value="" /></div>

@@ -30,12 +30,12 @@
         </div>
     </td>
     @if ($row->waitText !== null)
-    <td class="rowfollow nowrap nxm-td-wait">@if ($row->waitClass !== null)<a href="faq.php#id46"><span class="{{ $row->waitClass }}">{{ $row->waitText }}</span></a>@else{{ $row->waitText }}@endif</td>
+    <td class="rowfollow nowrap nxm-td-wait">@if ($row->waitClass !== null)<a href="/web/faq#id46"><span class="{{ $row->waitClass }}">{{ $row->waitText }}</span></a>@else{{ $row->waitText }}@endif</td>
     @endif
     @if ($listVm->showComments)
     <td class="rowfollow nxm-td-comments" data-label="{{ 'Com' }}">
         @if ($row->comments === 0)
-            <a href="comment.php?action=add&amp;pid={{ $row->id }}&amp;type=torrent" title="{{ __('legacy/functions.title_add_comments') }}">0</a>
+            <a href="/comment/add?amp;pid={{ $row->id }}&amp;type=torrent" title="{{ __('legacy/functions.title_add_comments') }}">0</a>
         @else
             <b><a href="{{ $row->commentsUrl }}"@if ($row->lastCommentTooltipId) data-domtt-src="{{ $row->lastCommentTooltipId }}"@endif>@if ($row->commentIsNew)<span class="new">@endif{{ $row->comments }}@if ($row->commentIsNew)</span>@endif</a></b>
         @endif

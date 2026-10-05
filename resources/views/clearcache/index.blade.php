@@ -11,7 +11,7 @@
     <p class="text-center"><span class="striking">{{ $error }}</span></p>
 @endif
 
-<form method="post" action="clearcache.php">
+<form method="post" action="/web/clearcache">
 @csrf
 <div class="nx-fgrid">
     <div class="nx-fhead">Cache name</div><div class="nx-fcell"><input type="text" name="cachename" size="40"></div>

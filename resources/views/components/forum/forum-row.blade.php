@@ -21,7 +21,7 @@
         @if ($row->moderators !== null)
             {{ $row->moderators }}
         @else
-            <a href="contactstaff.php"><i>{{ __('legacy/forums.text_apply_now') }}</i></a>
+            <a href="/web/contactstaff"><i>{{ __('legacy/forums.text_apply_now') }}</i></a>
         @endif
     </td>
 </tr>

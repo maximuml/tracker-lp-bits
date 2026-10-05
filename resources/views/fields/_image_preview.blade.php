@@ -1,4 +1,4 @@
-<iframe id="{{ $iframeId }}" title="{{ 'Image preview' }}" src="{{ $baseUrl }}/attachment.php?callback_func={{ $callbackFunc }}" class="nx-attach-preview"></iframe><input id="{{ $inputId }}" type="text" name="{{ $name }}" value="{{ $value }}"><div id="{{ $previewBoxId }}">{{ $previewHtml }}</div><script @if ($cspNonce !== '')nonce="{{ $cspNonce }}"@endif>
+<iframe id="{{ $iframeId }}" title="{{ 'Image preview' }}" src="{{ $baseUrl }}/web/attachment?callback_func={{ $callbackFunc }}" class="nx-attach-preview"></iframe><input id="{{ $inputId }}" type="text" name="{{ $name }}" value="{{ $value }}"><div id="{{ $previewBoxId }}">{{ $previewHtml }}</div><script @if ($cspNonce !== '')nonce="{{ $cspNonce }}"@endif>
     function {{ $callbackFunc }}(delkey, url)
     {
         var previewBox = document.getElementById('{{ $previewBoxId }}')

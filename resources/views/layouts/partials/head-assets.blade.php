@@ -20,8 +20,8 @@
 <meta name="generator" content="{{ PROJECTNAME }}" />
 <title>{{ $chrome->head->title }}</title>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-<link rel="search" type="application/opensearchdescription+xml" title="{{ $chrome->siteName }} Torrents" href="opensearch.php" />
-<link rel="alternate" type="application/rss+xml" title="Latest Torrents" href="torrentrss.php" />
+<link rel="search" type="application/opensearchdescription+xml" title="{{ $chrome->siteName }} Torrents" href="/web/opensearch" />
+<link rel="alternate" type="application/rss+xml" title="Latest Torrents" href="/web/torrentrss" />
 @foreach($chrome->head->headStyles as $href)
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc($href) }}" type="text/css" />
 @endforeach

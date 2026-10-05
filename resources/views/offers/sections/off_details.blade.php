@@ -13,12 +13,12 @@
 @if ($off_details->allowedNote !== '')
 <tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/offers.row_offer_allowed')}}</td><td class="align-top px-2.5 py-1.5">{{ $off_details->allowedNote }}</td></tr>
 @endif
-<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/offers.row_action')}}</td><td class="align-top px-2.5 py-1.5">@if ($off_details->showEditDelete)<a href="?id={{ $off_details->id }}&amp;edit_offer=1"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><span class="small">{{ __('legacy/offers.text_edit_offer') }}</span></b></a>&nbsp;|&nbsp;<a href="?id={{ $off_details->id }}&amp;del_offer=1&amp;sure=0"><img class="dt_delete" src="pic/trans.gif" alt="delete" />&nbsp;<b><span class="small">{{ __('legacy/offers.text_delete_offer') }}</span></b></a>&nbsp;|&nbsp;@endif<a href="report.php?reportofferid={{ $off_details->id }}"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><span class="small">{{ __('legacy/offers.report_offer') }}</span></b></a></td></tr>
+<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/offers.row_action')}}</td><td class="align-top px-2.5 py-1.5">@if ($off_details->showEditDelete)<a href="?id={{ $off_details->id }}&amp;edit_offer=1"><img class="dt_edit" src="pic/trans.gif" alt="edit" />&nbsp;<b><span class="small">{{ __('legacy/offers.text_edit_offer') }}</span></b></a>&nbsp;|&nbsp;<a href="?id={{ $off_details->id }}&amp;del_offer=1&amp;sure=0"><img class="dt_delete" src="pic/trans.gif" alt="delete" />&nbsp;<b><span class="small">{{ __('legacy/offers.text_delete_offer') }}</span></b></a>&nbsp;|&nbsp;@endif<a href="/web/report?reportofferid={{ $off_details->id }}"><img class="dt_report" src="pic/trans.gif" alt="report" />&nbsp;<b><span class="small">{{ __('legacy/offers.report_offer') }}</span></b></a></td></tr>
 @if ((string) $off_details->description !== '')
 <tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/offers.row_description')}}</td><td class="align-top px-2.5 py-1.5">{{ $off_details->description }}</td></tr>
 @endif
 </x-data-table>
-<p class="text-center"><a class="index" href="comment.php?action=add&amp;pid={{ $off_details->id }}&amp;type=offer">{{ __('legacy/offers.text_add_comment') }}</a></p>
+<p class="text-center"><a class="index" href="/comment/add?amp;pid={{ $off_details->id }}&amp;type=offer">{{ __('legacy/offers.text_add_comment') }}</a></p>
 @if (! $off_details->commentCount)
 <h1 id="startcomments" class="text-center">{{ __('legacy/offers.text_no_comments') }}</h1>
 @else
@@ -28,5 +28,5 @@
 @if ($off_details->commentCount)
 {{ $off_details->pagerBottom }}
 @endif
-<p class="text-center"><a class="index" href="comment.php?action=add&amp;pid={{ $off_details->id }}&amp;type=offer">{{ __('legacy/offers.text_add_comment') }}</a></p>
+<p class="text-center"><a class="index" href="/comment/add?amp;pid={{ $off_details->id }}&amp;type=offer">{{ __('legacy/offers.text_add_comment') }}</a></p>
 @endif

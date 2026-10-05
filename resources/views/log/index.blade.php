@@ -112,7 +112,7 @@
         <tr><td class="text-center">
         <p class=sub>{{ $item['added'] ?? '' }}
         @if ($canPollManage)
-            - [<a href="makepoll.php?action=edit&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ __('legacy/log.text_edit')}}</b></a>]
+            - [<a href="/web/makepoll?action=edit&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ __('legacy/log.text_edit')}}</b></a>]
             - [<a href="?action=poll&do=delete&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ __('legacy/log.text_delete')}}</b></a>]
         @endif
         <a name="{{ (int) ($item['poll']['id'] ?? 0) }}"></a></p>

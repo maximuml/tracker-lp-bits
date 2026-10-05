@@ -47,7 +47,7 @@ function schedulePoll() {
 	pollTimer = setTimeout(shoutPoll, SHOUT_REFRESH * 1000);
 }
 function shoutPoll() {
-	var url = 'shoutbox.php?type=' + encodeURIComponent(SHOUT_TYPE) + '&ajax=1&_=' + Date.now();
+	var url = '/web/shoutbox?type=' + encodeURIComponent(SHOUT_TYPE) + '&ajax=1&_=' + Date.now();
 	try {
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET', url, true);

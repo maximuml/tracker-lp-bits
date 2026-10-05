@@ -1,1 +1,1 @@
-<b>{{ __('legacy/functions.text_warning') }}</b>{{ __('legacy/functions.text_website_offline_warning') }}<a href="settings.php">{{ __('legacy/functions.text_here') }}</a>{{ __('legacy/functions.text_to_change_settings') }}
+<b>{{ __('legacy/functions.text_warning') }}</b>{{ __('legacy/functions.text_website_offline_warning') }}<a href="/web/settings">{{ __('legacy/functions.text_here') }}</a>{{ __('legacy/functions.text_to_change_settings') }}

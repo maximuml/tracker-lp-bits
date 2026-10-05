@@ -9,7 +9,7 @@
 <div class="nx-msgsplit">
 	<div class="nx-msgsplit__list">
 	@foreach ($viewmailbox['rows'] ?? [] as $row)
-		<a class="nx-mail nx-mail--compact{{ $row['unread'] ? ' nx-mail--unread' : '' }}{{ $row['id'] === $viewmessage['pmId'] ? ' nx-mail--active' : '' }}" href="messages.php?action=viewmessage&amp;id={{ $row['id'] }}">
+		<a class="nx-mail nx-mail--compact{{ $row['unread'] ? ' nx-mail--unread' : '' }}{{ $row['id'] === $viewmessage['pmId'] ? ' nx-mail--active' : '' }}" href="/web/messages?action=viewmessage&amp;id={{ $row['id'] }}">
 			<span class="nx-mail__dot"></span>
 			<span class="nx-mail__main"><span class="nx-mail__subject">{{ $row['subject'] }}</span><span class="nx-mail__sub">{{ $row['username'] ?? '' }} &middot; {{ $row['added'] ?? '' }}</span></span>
 		</a>

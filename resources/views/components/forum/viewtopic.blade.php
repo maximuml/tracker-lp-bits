@@ -1,8 +1,8 @@
 @props(['topic'])
 <nav class="nx-crumbs" aria-label="breadcrumbs">
-    <a href="index.php">{{ $topic->sitename }}</a>
+    <a href="/web/index">{{ $topic->sitename }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
-    <a href="forums.php">{{ trim(__('legacy/forums.text_forums')) }}</a>
+    <a href="/forums">{{ trim(__('legacy/forums.text_forums')) }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
     <a href="?action=viewforum&amp;forumid={{ $topic->forumid }}">{{ $topic->forumname }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>

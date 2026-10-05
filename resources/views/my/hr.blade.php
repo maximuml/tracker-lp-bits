@@ -26,7 +26,7 @@
     @foreach ($list as $row)
     <tr>
         <td class="whitespace-nowrap text-center">{{ $row->id }}</td>
-        <td><a href='details.php?id={{ $row->torrent_id }}'>{{ optional($row->torrent)->name }}</a></td>
+        <td><a href='/web/details/{{ $row->torrent_id }}'>{{ optional($row->torrent)->name }}</a></td>
         <td class="whitespace-nowrap text-center">{{ \App\Support\Format::size($row->snatch->uploaded) }}</td>
         <td class="whitespace-nowrap text-center">{{ \App\Support\Format::size($row->snatch->downloaded) }}</td>
         <td class="whitespace-nowrap text-center">{{ \App\Support\Ratio::hr($row->snatch->uploaded, $row->snatch->downloaded) }}</td>

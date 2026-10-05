@@ -1,4 +1,4 @@
         <td class=embedded>{{ $row['username_html'] ?? '' }}</td>
         <td class=embedded><img width=24 height=15 src="pic/flag/{{ $row['flag_pic'] ?? '' }}" title="{{ $row['flag_name'] ?? '' }}"></td>
         <td class=embedded>@if ($row['is_online'] ?? false)<img class="button_online" src="pic/trans.gif" alt="online" title="{{ __('legacy/staff.title_online') }}" />@else<img class="button_offline" src="pic/trans.gif" alt="offline" title="{{ __('legacy/staff.title_offline') }}" />@endif</td>
-        <td class=embedded><a href=sendmessage.php?receiver={{ (int) ($row['id'] ?? 0) }} title="{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/staff.title_send_pm')) }}"><img class="button_pm" src="pic/trans.gif" alt="pm" /></a></td>
+        <td class=embedded><a href=/web/sendmessage?receiver={{ (int) ($row['id'] ?? 0) }} title="{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/staff.title_send_pm')) }}"><img class="button_pm" src="pic/trans.gif" alt="pm" /></a></td>

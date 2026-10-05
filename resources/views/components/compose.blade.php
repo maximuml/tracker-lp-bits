@@ -8,4 +8,4 @@
 <div class="nx-ffull text-center"><input id="qr" type="submit" class="btn" value="{{ __('legacy/functions.submit_submit') }}" /></div>
 </div>
 </x-frame>
-<p class="text-center"><a href="tags.php" target="_blank">{{ __('legacy/functions.text_tags') }}</a> | <a href="smilies.php" target="_blank">{{ __('legacy/functions.text_smilies') }}</a></p>
+<p class="text-center"><a href="/web/tags" target="_blank">{{ __('legacy/functions.text_tags') }}</a> | <a href="/web/smilies" target="_blank">{{ __('legacy/functions.text_smilies') }}</a></p>

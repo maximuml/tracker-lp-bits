@@ -9,7 +9,7 @@
     <x-data-table :caption="__('legacy/polloverview.text_polls_overview')" captionHidden><x-slot:head><thead><tr>
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('legacy/polloverview.col_id')}}</nobr></th><th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('legacy/polloverview.col_added')}}</nobr></th><th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('legacy/polloverview.col_question')}}</nobr></th></tr></thead></x-slot:head>
 
-    <tr><td class="text-center"><a href="polloverview.php?id={{ (int) ($poll['id'] ?? 0) }}">{{ (int) ($poll['id'] ?? 0) }}</a></td><td>{{ $pollAdded ?? '' }}</td><td><a href="polloverview.php?id={{ (int) ($poll['id'] ?? 0) }}">{{ $poll['question'] ?? '' }}</a></td></tr>
+    <tr><td class="text-center"><a href="/web/polloverview?id={{ (int) ($poll['id'] ?? 0) }}">{{ (int) ($poll['id'] ?? 0) }}</a></td><td>{{ $pollAdded ?? '' }}</td><td><a href="/web/polloverview?id={{ (int) ($poll['id'] ?? 0) }}">{{ $poll['question'] ?? '' }}</a></td></tr>
     </x-data-table>
 
     <h1 class="text-center">{{ __('legacy/polloverview.text_poll_question')}}</h1><br />
@@ -39,7 +39,7 @@
     <x-data-table :caption="__('legacy/polloverview.text_polls_overview')" captionHidden><x-slot:head><thead><tr>
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('legacy/polloverview.col_id')}}</nobr></th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/polloverview.col_added')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('legacy/polloverview.col_question')}}</nobr></th></tr></thead></x-slot:head>
     @foreach ($polls as $pollRow)
-        <tr><td class="text-center"><a href="polloverview.php?id={{ $pollRow['id'] }}">{{ $pollRow['id'] }}</a></td><td>{{ $pollRow['addedHtml'] ?? '' }}</td><td><a href="polloverview.php?id={{ $pollRow['id'] }}">{{ $pollRow['question'] }}</a></td></tr>
+        <tr><td class="text-center"><a href="/web/polloverview?id={{ $pollRow['id'] }}">{{ $pollRow['id'] }}</a></td><td>{{ $pollRow['addedHtml'] ?? '' }}</td><td><a href="/web/polloverview?id={{ $pollRow['id'] }}">{{ $pollRow['question'] }}</a></td></tr>
     @endforeach
     </x-data-table>
 @endif

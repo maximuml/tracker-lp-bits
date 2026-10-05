@@ -4,7 +4,7 @@
 
 @section('content')
 <h1>Add user</h1>
-<form method=post action=adduser.php>
+<form method=post action=/web/adduser>
 <div class="nx-fgrid">
 <div class="nx-fhead">User name</div><div class="nx-fcell"><input type=text name=username size=40></div>
 <div class="nx-fhead">Password</div><div class="nx-fcell"><input type=password name=password size=40></div>

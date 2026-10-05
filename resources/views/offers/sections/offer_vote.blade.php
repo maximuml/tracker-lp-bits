@@ -1,4 +1,4 @@
-<h1 class="text-center">{{ __('legacy/offers.text_vote_results_for')}} <a href="offers.php?id={{ $offer_vote['offerId'] }}&off_details=1"><b>{{ $offer_vote['offerName'] }}</b></a></h1>
+<h1 class="text-center">{{ __('legacy/offers.text_vote_results_for')}} <a href="/web/offers?id={{ $offer_vote['offerId'] }}&off_details=1"><b>{{ $offer_vote['offerName'] }}</b></a></h1>
 @if (! $offer_vote['hasVotes'])
 <p class="text-center"><b>{{ $offer_vote['noVotesNote'] }}</b></p>
 @else

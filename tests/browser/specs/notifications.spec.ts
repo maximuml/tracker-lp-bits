@@ -193,8 +193,12 @@ test('badge, pagination, links and watermark-aware mark-all-read', async ({
   await page.screenshot({ path: join(SHOTS, '02-panel-first-page.png') });
 
   while (await panel.locator('.nx-notif-more button').isVisible()) {
-    await panel.locator('.nx-notif-more button').click();
-    await page.waitForResponse((r) => r.url().includes('notifications?offset='));
+    // force: the button node is removed and re-appended after each fetch —
+    // actionability's stability check can otherwise never settle.
+    await Promise.all([
+      page.waitForResponse((r) => r.url().includes('notifications?offset=')),
+      panel.locator('.nx-notif-more button').click({ force: true }),
+    ]);
   }
   await expect(items).toHaveCount(total);
   const domUrls = await items.evaluateAll((els) =>

@@ -1,9 +1,9 @@
-<div class="nx-field">
-    <label class="nx-field__label" for="{{ $fieldId }}">
-        {{ $label }}@if ($required)<span class="nx-field__required" aria-hidden="true">*</span>@endif
+<div class="mb-3">
+    <label class="mb-1 block font-bold" for="{{ $fieldId }}">
+        {{ $label }}@if ($required)<span class="text-nxm-danger" aria-hidden="true">*</span>@endif
     </label>
     <input
-        {{ $attributes->merge(['class' => 'nx-field__input']) }}
+        {{ $attributes->merge(['class' => 'box-border w-full rounded-[3px] border border-nxm-border px-1.5 py-1 aria-invalid:border-nxm-danger focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-nxm-accent']) }}
         type="{{ $type }}"
         id="{{ $fieldId }}"
         name="{{ $name }}"
@@ -13,9 +13,9 @@
         @if ($describedBy !== []) aria-describedby="{{ implode(' ', $describedBy) }}" @endif
     >
     @if ($hasError)
-        <p class="nx-field__error" id="{{ $fieldId }}-error">{{ $error }}</p>
+        <p class="mt-1 text-xs text-nxm-danger" id="{{ $fieldId }}-error">{{ $error }}</p>
     @endif
     @if ($hasHelp)
-        <p class="nx-field__help" id="{{ $fieldId }}-help">{{ $help }}</p>
+        <p class="mt-1 text-xs text-nxm-text-dim" id="{{ $fieldId }}-help">{{ $help }}</p>
     @endif
 </div>

@@ -84,7 +84,7 @@ final class TorrentUploadFormTest extends TestCase
         $page->assertSee('aria-describedby="descr-error"', false);
         $page->assertSee('id="descr-error"', false);
         $page->assertSee('selected', false);
-        $page->assertSee('nx-alert--error', false);
+        $page->assertSee('bg-nxm-danger-bg', false);
         $page->assertSee(__('legacy/upload.reselect_file_note'), false);
         $page->assertDontSee('/error?error=', false);
     }
@@ -234,7 +234,7 @@ final class TorrentUploadFormTest extends TestCase
         $page->assertSee('value="15"', false);
         $page->assertSee('value="2030-01-01T00:00"', false);
         $page->assertSee('checked', false);
-        $page->assertSee('nx-alert--error', false);
+        $page->assertSee('bg-nxm-danger-bg', false);
     }
 
     public function test_upload_form_includes_csrf_token(): void

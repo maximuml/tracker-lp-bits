@@ -162,8 +162,9 @@ final class RouteInventoryTest extends TestCase
         // Recaptured 2026-10-05 at the real count (was stale by +3) + 5
         // shoutbox REST endpoints — all carry FormRequest validation.
         // +6 passkey REST endpoints (4 authed + 2 guest login assertions).
+        // +5 friends/news page-POST endpoints (FormRequest validated).
         $this->assertLessThanOrEqual(
-            169,
+            174,
             $currentCount,
             sprintf(
                 'App mutation route count increased from baseline 169 to %d. '.

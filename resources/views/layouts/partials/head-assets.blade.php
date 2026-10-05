@@ -2,6 +2,12 @@
 <html lang="{{ $chrome->head->locale }}" data-theme="{{ $chrome->head->theme }}" data-fontsize="{{ $chrome->head->fontSize }}">
 <head>
 <meta charset="utf-8" />
+@if(request()->is('web/*'))
+{{-- Pages rendered inline at nested /web/* URLs (aborts, confirm forms on
+     POST endpoints) would resolve relative asset/link URLs under /web/…
+     and 404 — pin resolution to the site root. --}}
+<base href="{{ url('/') }}/" />
+@endif
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="csrf-token" content="{{ csrf_token() }}" />
 {{ $chrome->head->inlineHeadHtml }}

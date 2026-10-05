@@ -412,7 +412,7 @@ final class ForumComposeServiceTest extends TestCase
         $this->assertStringContainsString('name="type" value="new"', $html);
         $this->assertStringContainsString('name="subject"', $html);
         $this->assertStringContainsString('bbcode-editor', $html);
-        $this->assertStringContainsString('id="previewbutton"', $html);
+        $this->assertStringContainsString('wire:name="bbcode-editor"', $html);
         $this->assertStringContainsString('Test Forum', $html);
     }
 }

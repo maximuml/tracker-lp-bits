@@ -38,7 +38,9 @@ final class SecurityHeadersTest extends TestCase
         // policy, and allowing them would cause color-contrast regressions.
         $this->assertStringContainsString("style-src 'self' 'nonce-", $csp);
         $this->assertStringNotContainsString("style-src 'self' 'unsafe-inline'", $csp);
-        $this->assertStringNotContainsString("'unsafe-eval'", $csp);
+        // unsafe-eval is required: Livewire evaluates wire:* expressions via
+        // new Function() — nonce-strict script-src leaves every wire:click dead.
+        $this->assertStringContainsString("'unsafe-eval'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
         $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
         $this->assertStringNotContainsString('https://fonts.googleapis.com', $csp);

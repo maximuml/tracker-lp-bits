@@ -9,7 +9,7 @@ use App\Enums\UserClass;
 use App\Livewire\UserTorrentList;
 use App\Models\User;
 use App\Repositories\TorrentModerationRepository;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
 use Tests\Categories\TestCategory;
 use Tests\TestCase;
@@ -17,7 +17,7 @@ use Tests\TestCase;
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UserTorrentListTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     private function cannedListData(): array
     {

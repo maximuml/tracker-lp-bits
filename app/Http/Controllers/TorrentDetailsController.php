@@ -16,12 +16,10 @@ use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentPurchaseRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\LegacyRedisCache;
-use App\Support\Comment;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
 use App\Support\Format;
-use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyYesNo;
 use App\Support\Logger;
@@ -218,25 +216,16 @@ class TorrentDetailsController extends Controller
         );
         $commentPagerTop = '';
         $commentPagerBottom = '';
-        $commentsTableHtml = '';
         $commentCount = 0;
-        if (! LegacyYesNo::isNo($currentUser['showcomment'] ?? null)) {
+        $commentsEnabled = ! LegacyYesNo::isNo($currentUser['showcomment'] ?? null);
+        if ($commentsEnabled) {
             $commentCount = $this->torrentDetailRepository->getCommentCount($id);
             if ($commentCount > 0) {
-                [$commentPagerTop, $commentPagerBottom, , $commentOffset, $commentRpp] = Pagination::pager(
+                [$commentPagerTop, $commentPagerBottom] = Pagination::pager(
                     10, $commentCount, "details.php?id=$id&cmtpage=1&", ['lastpagedefault' => 1], 'page'
-                );
-                $commentsTableHtml = Comment::table(
-                    array_values(array_map(
-                        fn ($comment) => (array) $comment,
-                        $this->torrentDetailRepository->getComments($id, (int) $commentOffset, (int) $commentRpp)
-                    )),
-                    'torrent',
-                    $id
                 );
             }
         }
-        $quickReplyHtml = Html::quickReply('comment', 'body', (string) (__('legacy/details.submit_add_comment')));
 
         if ($requestFlags['dllist'] ?? false) {
             AssetAppender::js(sprintf('viewpeerlist(%s)', (int) $row['id']), 'footer', false);
@@ -255,8 +244,7 @@ class TorrentDetailsController extends Controller
             'commentCount' => $commentCount,
             'commentPagerTop' => $commentPagerTop instanceof SafeHtml ? $commentPagerTop : SafeHtml::fromTrustedHtml($commentPagerTop),
             'commentPagerBottom' => $commentPagerBottom instanceof SafeHtml ? $commentPagerBottom : SafeHtml::fromTrustedHtml($commentPagerBottom),
-            'commentsTableHtml' => SafeHtml::fromTrustedHtml($commentsTableHtml),
-            'quickReplyHtml' => SafeHtml::fromTrustedHtml($quickReplyHtml),
+            'commentsEnabled' => $commentsEnabled,
         ];
     }
 }

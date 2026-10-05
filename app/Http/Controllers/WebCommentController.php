@@ -4,31 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
-use App\Models\Comment;
 use App\Models\User;
 use App\Repositories\CommentRepository;
-use App\Repositories\MessageRepository;
+use App\Services\CommentService;
 use App\Services\PermissionChecker;
-use App\Support\Bonus;
-use App\Support\Cache;
-use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
-use App\Support\Locale;
-use App\Support\Url;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 
 class WebCommentController extends Controller
 {
     private CommentRepository $commentRepository;
 
-    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository, private readonly TorrentRepositoryInterface $torrentRepository, CommentRepository $commentRepository)
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly CommentService $commentService, CommentRepository $commentRepository)
     {
         $this->commentRepository = $commentRepository;
     }
@@ -38,7 +30,7 @@ class WebCommentController extends Controller
         $type = $this->type($request);
         $parentId = $this->parentId($request);
 
-        $this->authorizeComment($type, $parentId);
+        $this->commentService->authorizeComment($this->currentUser(), $type, $parentId);
 
         $parent = $this->commentRepository->getParent($parentId, $type);
         if (! $parent) {
@@ -80,18 +72,7 @@ class WebCommentController extends Controller
 
         $user = $this->currentUser();
 
-        $this->authorizeComment($type, $parentId);
-        $this->assertNotFlood($user);
-
-        $parent = $this->commentRepository->getParent($parentId, $type);
-        if (! $parent) {
-            abort(404, __('legacy/comment.std_no_torrent_id'));
-        }
-
-        $newId = $this->commentRepository->create($parentId, $type, $body, (int) $user->id);
-        $this->deleteCache($type, $parentId);
-        $this->sendCommentPm($type, $parentId, (int) $parent['owner'], (string) $parent['name'], (int) $user->id);
-        $this->applyBonus('+', (int) $user->id);
+        $newId = $this->commentService->post($user, $type, $parentId, $body);
 
         return redirect($this->buildScript($type, $parentId).'#'.$newId);
     }
@@ -142,7 +123,7 @@ class WebCommentController extends Controller
         }
 
         $this->commentRepository->update($commentId, $body, (int) $user->id);
-        $this->deleteCache($type, (int) $arr['parent_id']);
+        $this->commentService->deleteCache($type, (int) $arr['parent_id']);
 
         $defaultUrl = $this->buildScript($type, (int) $arr['parent_id']);
         $returnto = $request->validated('returnto', '');
@@ -195,9 +176,9 @@ class WebCommentController extends Controller
         $userPostId = (int) $arr['user'];
 
         if ($this->commentRepository->delete($commentId, $type, $parentId)) {
-            $this->deleteCache($type, $parentId);
+            $this->commentService->deleteCache($type, $parentId);
         }
-        $this->applyBonus('-', $userPostId);
+        $this->commentService->applyBonus('-', $userPostId);
 
         $defaultUrl = $this->buildScript($type, $parentId);
         $returnto = (string) $request->input('returnto', '');
@@ -259,91 +240,15 @@ class WebCommentController extends Controller
         return $pid;
     }
 
-    private function authorizeComment(string $type, int $parentId): void
-    {
-        $user = $this->currentUser();
-        if ($user->parked) {
-            abort(403, __('legacy/comment.std_permission_denied'));
-        }
-
-        if ($type === 'torrent') {
-            $torrent = $this->torrentRepository->findById((int) $parentId);
-            if (! $torrent) {
-                abort(404, __('legacy/comment.std_no_torrent_id'));
-            }
-            Gate::authorize('comment', $torrent);
-        }
-    }
-
-    private function assertNotFlood(User $user): void
-    {
-        if ($this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
-            return;
-        }
-
-        $lastComment = $user->last_comment;
-        if ($lastComment === null || $lastComment === '') {
-            return;
-        }
-
-        $ts = strtotime((string) $lastComment);
-        if ($ts === false || $ts <= (TIMENOW - 10)) {
-            return;
-        }
-
-        $secs = 10 - (TIMENOW - $ts);
-        abort(403, __('legacy/comment.std_comment_flooding_denied').$secs.__('legacy/comment.std_before_posting_another'));
-    }
-
     /** @param array<int|string, mixed> $quote */
     private function buildQuote(array $quote): string
     {
         return '[quote='.(string) ($quote['username'] ?? '').']'.(string) ($quote['text'] ?? '').'[/quote]';
     }
 
-    private function deleteCache(string $type, int $parentId): void
-    {
-        Cache::forgetWithLocales($type.'_'.$parentId.'_last_comment_content');
-    }
-
-    private function applyBonus(string $sign, int $userId): void
-    {
-        $points = SiteConfig::current()->bonus->addComment();
-        if ($points != 0) {
-            Bonus::updatePoints($sign, $points, $userId);
-        }
-    }
-
-    private function sendCommentPm(string $type, int $parentId, int $ownerId, string $name, int $commenterId): void
-    {
-        if ($ownerId === $commenterId) {
-            return;
-        }
-
-        if (! $this->commentRepository->getCommentPmSetting($ownerId)) {
-            return;
-        }
-
-        $locale = Locale::userLocale($ownerId);
-        $subject = Locale::trans('comment.msg_new_comment', [], $locale);
-        $messageKey = 'comment.msg_'.$type.'_receive_comment';
-        $message = Locale::trans($messageKey, [], $locale)
-            .' [url='.Url::siteBase().'/'.$this->buildScript($type, $parentId).'] '.$name.'[/url].';
-
-        $this->messageRepository->add([
-            'sender' => null,
-            'receiver' => $ownerId,
-            'subject' => $subject,
-            'added' => now(),
-            'msg' => $message,
-        ]);
-    }
-
     private function buildScript(string $type, int $parentId): string
     {
-        $script = Comment::TYPE_MAPS[$type]['target_script'] ?? 'details.php?id=%s';
-
-        return sprintf($script, $parentId);
+        return $this->commentService->buildScript($type, $parentId);
     }
 
     /** @param array<string, mixed> $query */

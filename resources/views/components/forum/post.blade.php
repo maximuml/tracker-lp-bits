@@ -3,9 +3,9 @@
     <header class="nx-post__head">
         <div class="nx-post__meta">
             <a href="{{ $post->anchorUrl }}">#{{ $post->id }}</a>
-            <span class="nx-dim">{{ __('legacy/forums.text_by') }}</span> {{ $post->by }}
-            <span class="nx-dim">{{ __('legacy/forums.text_at') }}</span> <x-time :value="$post->addedRaw" />
-            <span class="nx-dim">|</span>
+            <span class="text-nxm-text-dim">{{ __('legacy/forums.text_by') }}</span> {{ $post->by }}
+            <span class="text-nxm-text-dim">{{ __('legacy/forums.text_at') }}</span> <x-time :value="$post->addedRaw" />
+            <span class="text-nxm-text-dim">|</span>
             <a href="{{ $post->authorToggleUrl }}">{{ $post->authorToggleLabel }}</a>
         </div>
         <span class="nx-post__num">

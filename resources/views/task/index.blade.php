@@ -8,23 +8,23 @@
 <table data-nx="data"><caption class="nx-sr-only">{{ $title }}</caption>
 <thead>
 <tr>
-    <th class="colhead" scope="col">{{ $columnNameLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnIndexLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnBeginTimeLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnEndTimeLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnTargetUserLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnSuccessRewardLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnFailDeductLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnClaimedUserCountLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnDescLabel }}</th>
-    <th class="colhead" scope="col">{{ $columnClaimLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnNameLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnIndexLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnBeginTimeLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnEndTimeLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnTargetUserLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnSuccessRewardLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnFailDeductLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnClaimedUserCountLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnDescLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnClaimLabel }}</th>
 </tr>
 </thead>
 <tbody>
 @foreach ($rows as $row)
 <tr>
-    <td class="nowrap"><strong>{{ $row['name'] }}</strong></td>
-    <td class="nowrap">{{ $row['indexFormatted'] }}</td>
+    <td class="whitespace-nowrap"><strong>{{ $row['name'] }}</strong></td>
+    <td class="whitespace-nowrap">{{ $row['indexFormatted'] }}</td>
     <td>{{ $row['beginForUser'] }}</td>
     <td>{{ $row['endForUser'] }}</td>
     <td>{{ $row['filterFormatted'] }}</td>

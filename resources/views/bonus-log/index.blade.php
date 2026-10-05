@@ -3,7 +3,7 @@
 @section('title', $title)
 
 @section('content')
-<h1 class="nx-center">{{ $title }}<a href="userdetails.php?id={{ (int) $uid }}"><b>&nbsp;{{ $username }}</b></a></h1>
+<h1 class="text-center">{{ $title }}<a href="userdetails.php?id={{ (int) $uid }}"><b>&nbsp;{{ $username }}</b></a></h1>
 
 <div>
     <form id="filterForm" action="{{ $requestUri }}" method="get">
@@ -28,25 +28,30 @@
     </form>
 </div>
 
-<table data-nx="data" id='bonus-log-table'><caption class="nx-sr-only">{{ $title }}</caption>
+<x-data-table :caption="$title" captionHidden id='bonus-log-table'>
+<x-slot:head>
+<thead>
 <tr>
-    <th class="colhead nx-align-left" scope="col">{{ $columnBusinessTypeLabel }}</th>
-    <th class="colhead nx-align-left" scope="col">{{ $columnOldTotalLabel }}</th>
-    <th class="colhead nx-align-left" scope="col">{{ $columnValueLabel }}</th>
-    <th class="colhead nx-align-left" scope="col">{{ $columnNewTotalLabel }}</th>
-    <th class="colhead nx-align-left" scope="col">{{ $columnCommentLabel }}</th>
-    <th class="colhead nx-align-left" scope="col">{{ $columnCreatedAtLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ $columnBusinessTypeLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ $columnOldTotalLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ $columnValueLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ $columnNewTotalLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ $columnCommentLabel }}</th>
+    <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ $columnCreatedAtLabel }}</th>
 </tr>
+</thead>
+</x-slot:head>
+
 @foreach ($rows as $row)
 <tr>
-    <td class='rowfollow nowrap'>{{ $row['businessTypeText'] }}</td>
-    <td class='rowfollow nowrap'>{{ $row['old_formatted'] }}</td>
-    <td class='rowfollow nowrap'>{{ $row['value_formatted'] }}</td>
-    <td class='rowfollow nowrap'>{{ $row['new_formatted'] }}</td>
-    <td class='rowfollow nowrap'>{{ $row['comment'] }}</td>
-    <td class='rowfollow nowrap'>{{ $row['created_at'] }}</td>
+    <td class='align-top px-2.5 py-1.5 whitespace-nowrap'>{{ $row['businessTypeText'] }}</td>
+    <td class='align-top px-2.5 py-1.5 whitespace-nowrap'>{{ $row['old_formatted'] }}</td>
+    <td class='align-top px-2.5 py-1.5 whitespace-nowrap'>{{ $row['value_formatted'] }}</td>
+    <td class='align-top px-2.5 py-1.5 whitespace-nowrap'>{{ $row['new_formatted'] }}</td>
+    <td class='align-top px-2.5 py-1.5 whitespace-nowrap'>{{ $row['comment'] }}</td>
+    <td class='align-top px-2.5 py-1.5 whitespace-nowrap'>{{ $row['created_at'] }}</td>
 </tr>
 @endforeach
-</table>
+</x-data-table>
 {{ $pagerbottom ?? '' }}
 @endsection

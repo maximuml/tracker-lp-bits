@@ -3,7 +3,7 @@
 <form method=post action=usercp.php id="{{ $forum->formId }}"><input type=hidden name=action value=forum><input type=hidden name=type value=save>
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($type === 'saved')
-<div class="nx-ffull nx-center"><span class="nx-color-red"><b>{{ __('legacy/usercp.text_saved')}}</b></span></div>
+<div class="nx-ffull text-center"><span class="text-nxm-danger"><b>{{ __('legacy/usercp.text_saved')}}</b></span></div>
 @endif
 <x-settings-text layout="grid" :label="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.row_topics_per_page'))" name="topicsperpage" :value="$forum->topicsPerPage" :size="10" :note="__('legacy/usercp.text_zero_equals_default')" />
 <x-settings-text layout="grid" :label="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.row_posts_per_page'))" name="postsperpage" :value="$forum->postsPerPage" :size="10" :note="__('legacy/usercp.text_zero_equals_default')" />

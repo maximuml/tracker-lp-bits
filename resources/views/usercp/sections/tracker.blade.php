@@ -3,7 +3,7 @@
 <form method=post action=usercp.php id="{{ $tracker->formId }}"><input type=hidden name=action value=tracker><input type=hidden name=type value=save>
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($type === 'saved')
-<div class="nx-ffull nx-center"><span class="nx-color-red"><b>{{ __('legacy/usercp.text_saved')}}</b></span></div>
+<div class="nx-ffull text-center"><span class="text-nxm-danger"><b>{{ __('legacy/usercp.text_saved')}}</b></span></div>
 @endif
 @if ($tracker->showEmailNotify)
 <x-settings-row-small layout="grid" :label="\App\Support\Html\SafeHtml::fromUntrustedHtml(__('legacy/usercp.row_email_notification'))"><input type="checkbox" name="pmnotif"@if ($tracker->pmnotif) checked @endif value="yes"> {{ __('legacy/usercp.checkbox_notification_received_pm') }}<br />

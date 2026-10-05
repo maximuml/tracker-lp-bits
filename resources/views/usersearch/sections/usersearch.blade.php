@@ -22,7 +22,7 @@
 	respectively, as well as linking to the history page.
 	</div></div><br /><br />
 @else
-<p class="nx-center">(<a href="{{ $requestUri }}?h=1">Instructions</a>)
+<p class="text-center">(<a href="{{ $requestUri }}?h=1">Instructions</a>)
 &nbsp;-&nbsp;(<a href="{{ $requestUri }}">Reset</a>)</p>
 @endif
 
@@ -106,7 +106,7 @@
 <div class="nx-fcell {{ $form['dip_hl'] ?? '' }}"><input name="dip" type="checkbox" value="1" {{ $form['dip'] ? 'checked' : '' }}></div>
 </div>
 <div class="nx-grouprow">
-<div class="nx-ffull nx-center"><input name="submit" type=submit class=btn></div>
+<div class="nx-ffull text-center"><input name="submit" type=submit class=btn></div>
 </div>
 </div>
 <br /><br />

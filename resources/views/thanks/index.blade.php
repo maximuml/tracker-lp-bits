@@ -4,5 +4,5 @@
 
 @section('content')
 <x-std-message heading="Thanks" :text="\App\Support\Html\SafeHtml::fromUntrustedHtml($message ?? '')" :htmlstrip="false" />
-<p class="nx-center"><a href='details.php?id={{ $torrentid ?? 0 }}'>Back to torrent</a></p>
+<p class="text-center"><a href='details.php?id={{ $torrentid ?? 0 }}'>Back to torrent</a></p>
 @endsection

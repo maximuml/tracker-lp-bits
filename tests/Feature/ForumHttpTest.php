@@ -211,8 +211,8 @@ final class ForumHttpTest extends TestCase
 
         $response->assertOk();
         $html = (string) $response->getContent();
-        $this->assertStringContainsString('nx-forum-table', $html);
-        $this->assertStringContainsString('data-nx="data"', $html);
+        $this->assertStringContainsString('overflow-x-auto', $html);
+        $this->assertStringContainsString('border-collapse', $html);
         $this->assertStringContainsString('Component render topic', $html);
         $this->assertStringContainsString('action=viewtopic', $html);
     }
@@ -233,7 +233,7 @@ final class ForumHttpTest extends TestCase
 
         $response->assertOk();
         $html = (string) $response->getContent();
-        $this->assertStringContainsString('nx-forum-table', $html);
+        $this->assertStringContainsString('overflow-x-auto', $html);
         $this->assertStringContainsString('Unread component topic', $html);
         $this->assertStringContainsString('name="catchup"', $html);
     }
@@ -256,7 +256,7 @@ final class ForumHttpTest extends TestCase
 
         $response->assertOk();
         $html = (string) $response->getContent();
-        $this->assertStringContainsString('nx-forum-table', $html);
+        $this->assertStringContainsString('overflow-x-auto', $html);
         $this->assertStringContainsString('page=p', $html);
         $this->assertStringContainsString('#pid', $html);
     }

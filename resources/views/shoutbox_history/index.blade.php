@@ -8,13 +8,13 @@
 <section class="nx-idx-card">
 <h2>{{ __('legacy/shoutbox.text_history_title')}}</h2>
 <form action="shoutbox_history.php" method="get">
-<div class="nx-row">
-<div class="nx-cell-5">{{ __('legacy/shoutbox.text_username')}}</div><div class="nx-cell-5"><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></div>
-<div class="nx-cell-5">{{ __('legacy/shoutbox.text_from')}}</div><div class="nx-cell-5"><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></div>
-<div class="nx-cell-5">{{ __('legacy/shoutbox.text_to')}}</div><div class="nx-cell-5"><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></div></div>
-<div class="nx-row">
-<div class="nx-cell-5">{{ __('legacy/shoutbox.text_search')}}</div><div class="nx-cell-5"><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></div>
-<div class="nx-cell-5"><input type="submit" class="btn" value="{{ __('legacy/shoutbox.text_filter')}}" /></div></div>
+<div class="flex items-start">
+<div class="p-[5px]">{{ __('legacy/shoutbox.text_username')}}</div><div class="p-[5px]"><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></div>
+<div class="p-[5px]">{{ __('legacy/shoutbox.text_from')}}</div><div class="p-[5px]"><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></div>
+<div class="p-[5px]">{{ __('legacy/shoutbox.text_to')}}</div><div class="p-[5px]"><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></div></div>
+<div class="flex items-start">
+<div class="p-[5px]">{{ __('legacy/shoutbox.text_search')}}</div><div class="p-[5px]"><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></div>
+<div class="p-[5px]"><input type="submit" class="btn" value="{{ __('legacy/shoutbox.text_filter')}}" /></div></div>
 </form>
 </section>
 

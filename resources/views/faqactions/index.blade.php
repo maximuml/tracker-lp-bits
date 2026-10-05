@@ -4,7 +4,7 @@
 
 @section('content')
 @if (($mode ?? '') === 'edit')
-    <h1 class="nx-center">Edit Section or Item</h1>
+    <h1 class="text-center">Edit Section or Item</h1>
     @if (empty($arr))
         <p>Invalid id</p>
     @elseif (($arr['type'] ?? '') === 'item')
@@ -29,7 +29,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="nx-ffull nx-center"><input type="submit" name="edit" value="Edit"></div>
+            <div class="nx-ffull text-center"><input type="submit" name="edit" value="Edit"></div>
             </div>
         </form>
     @elseif (($arr['type'] ?? '') === 'categ')
@@ -45,17 +45,17 @@
                     <option value="1"@if (($arr['flag'] ?? -1) == 1) selected="selected"@endif>Normal</option>
                 </select>
             </div>
-            <div class="nx-ffull nx-center"><input type="submit" name="edit" value="Edit"></div>
+            <div class="nx-ffull text-center"><input type="submit" name="edit" value="Edit"></div>
             </div>
         </form>
     @endif
 @elseif (($mode ?? '') === 'confirm_delete')
-    <h1 class="nx-center">Confirmation required</h1>
-    <div class="nx-box nx-w-97 nx-mx-auto nx-center">
+    <h1 class="text-center">Confirmation required</h1>
+    <div class="nx-box w-[97%] mx-auto text-center">
     Please click <a href="faqactions.php?action=delete&id={{ (int) ($id ?? 0) }}&confirm=yes">here</a> to confirm.
     </div>
 @elseif (($mode ?? '') === 'additem')
-    <h1 class="nx-center">Add Item</h1>
+    <h1 class="text-center">Add Item</h1>
     <form method="post" action="faqactions.php?action=addnewitem">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
@@ -71,11 +71,11 @@
         </div>
         <input type="hidden" name="categ" value="{{ (int) ($inid ?? 0) }}">
         <input type="hidden" name="langid" value="{{ (int) ($langid ?? 0) }}">
-        <div class="nx-ffull nx-center"><input type="submit" value="Add"></div>
+        <div class="nx-ffull text-center"><input type="submit" value="Add"></div>
         </div>
     </form>
 @elseif (($mode ?? '') === 'addsection')
-    <h1 class="nx-center">Add Section</h1>
+    <h1 class="text-center">Add Section</h1>
     <form method="post" action="faqactions.php?action=addnewsect">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
@@ -93,7 +93,7 @@
                 <option value="1" selected="selected">Normal</option>
             </select>
         </div>
-        <div class="nx-ffull nx-center"><input type="submit" name="edit" value="Add"></div>
+        <div class="nx-ffull text-center"><input type="submit" name="edit" value="Add"></div>
         </div>
     </form>
 @endif

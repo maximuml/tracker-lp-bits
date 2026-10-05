@@ -9,8 +9,8 @@
 <div class="nx-stats">
 <details class="nx-stats__details">
 <summary><img class="plus nx-stats__sign" src="pic/trans.gif" alt="" /><span class="nx-stats__title">{{ $stats->title }}</span></summary>
-<div class="nx-text nx-center">
-<table data-nx="data" class="main nx-mx-auto"><caption class="nx-sr-only">{{ $stats->title }}</caption>
+<div class="p-[10pt] text-center">
+<x-data-table :caption="$stats->title" captionHidden class="main mx-auto">
 <tr>
 <td>{{ $stats->labels['rowUsersActiveToday'] }}</td><td>{{ $stats->userStats['activeToday'] }}</td>
 <td>{{ $stats->labels['rowUsersActiveThisWeek'] }}</td><td>{{ $stats->userStats['activeThisWeek'] }}</td>
@@ -31,7 +31,7 @@
 <td>{{ $stats->userStats['maleLabel'] }}</td><td>{{ $stats->userStats['male'] }}</td>
 <td>{{ $stats->userStats['femaleLabel'] }}</td><td>{{ $stats->userStats['female'] }}</td>
 </tr>
-<tr><td colspan="4" class="rowhead">&nbsp;</td></tr>
+<tr><td colspan="4" class="bg-nxm-surface-alt">&nbsp;</td></tr>
 <tr>
 <td>{{ $stats->labels['rowTorrents'] }}</td><td>{{ $stats->torrentStats['torrents'] }}</td>
 <td>{{ $stats->labels['rowDeadTorrents'] }}</td><td>{{ $stats->torrentStats['dead'] }}</td>
@@ -56,7 +56,7 @@
 <td>{{ $stats->labels['rowTotalDownloaded'] }}</td><td>{{ $stats->torrentStats['totalDownloaded'] }}</td>
 <td>{{ $stats->labels['rowTotalData'] }}</td><td>{{ $stats->torrentStats['totalData'] }}</td>
 </tr>
-<tr><td colspan="4" class="rowhead">&nbsp;</td></tr>
+<tr><td colspan="4" class="bg-nxm-surface-alt">&nbsp;</td></tr>
 @foreach (array_chunk($stats->classStats, 2) as $pair)
 <tr>
 <td>{{ $pair[0]->label }}@if($pair[0]->icon !== null) <img class="{{ $pair[0]->icon }}" src="pic/trans.gif" alt="{{ $pair[0]->icon }}" />@endif</td><td>{{ $pair[0]->value }}</td>
@@ -67,7 +67,7 @@
 @endif
 </tr>
 @endforeach
-</table>
+</x-data-table>
 </div>
 </details>
 <table data-nx="data" class="main nx-stats-strip">

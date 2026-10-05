@@ -13,7 +13,7 @@ Total Images Stored: {{ $count ?? 0 }}
     <table data-nx="data"><caption class="nx-sr-only">BitBucket Log</caption>
     @foreach ($items as $item)
         <tr>
-        <td><div class="nx-center"><a href="{{ $item['url'] }}"><img src="{{ $item['url'] }}" class="bitbucket-shot"></a></div>
+        <td><div class="text-center"><a href="{{ $item['url'] }}"><img src="{{ $item['url'] }}" class="bitbucket-shot"></a></div>
         Uploaded by: {{ $item['usernameHtml'] }}<br />
         (#{{ $item['id'] }}) Filename: {{ $item['name'] }} ({{ $item['width'] }}&nbsp;x&nbsp;{{ $item['height'] }})
         @if ($isModerator ?? false)

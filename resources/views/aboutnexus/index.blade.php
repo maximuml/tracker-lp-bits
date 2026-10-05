@@ -32,15 +32,15 @@
 <br /><br />
 <table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['translation'] }}</caption>
     <tr>
-        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_flag')}}</th>
-        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_language')}}</th>
-        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_state')}}</th>
+        <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_flag')}}</th>
+        <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_language')}}</th>
+        <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_state')}}</th>
     </tr>
     @foreach ($languages as $row)
         <tr>
-            <td class="rowfollow"><img width="24" height="15" src="pic/flag/{{ $row['flagpic'] }}" alt="{{ $row['lang_name'] }}" title="{{ $row['lang_name'] }}" /></td>
-            <td class="rowfollow">{{ $row['lang_name'] }}</td>
-            <td class="rowfollow">{{ $row['trans_state'] }}</td>
+            <td class="align-top px-2.5 py-1.5"><img width="24" height="15" src="pic/flag/{{ $row['flagpic'] }}" alt="{{ $row['lang_name'] }}" title="{{ $row['lang_name'] }}" /></td>
+            <td class="align-top px-2.5 py-1.5">{{ $row['lang_name'] }}</td>
+            <td class="align-top px-2.5 py-1.5">{{ $row['trans_state'] }}</td>
         </tr>
     @endforeach
 </table>
@@ -53,15 +53,15 @@
 <br /><br />
 <table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['stylesheet'] }}</caption>
     <tr>
-        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_name')}}</th>
-        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_designer')}}</th>
-        <th class="colhead" scope="col">{{ __('legacy/aboutnexus.text_comment')}}</th>
+        <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_name')}}</th>
+        <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_designer')}}</th>
+        <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_comment')}}</th>
     </tr>
     @foreach ($stylesheets as $row)
         <tr>
-            <td class="rowfollow">{{ $row['name'] }}</td>
-            <td class="rowfollow">{{ $row['designer'] }}</td>
-            <td class="rowfollow">{{ $row['comment'] }}</td>
+            <td class="align-top px-2.5 py-1.5">{{ $row['name'] }}</td>
+            <td class="align-top px-2.5 py-1.5">{{ $row['designer'] }}</td>
+            <td class="align-top px-2.5 py-1.5">{{ $row['comment'] }}</td>
         </tr>
     @endforeach
 </table>

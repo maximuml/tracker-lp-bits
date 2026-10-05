@@ -22,23 +22,25 @@
 </div>
 @if ($search->searched && $search->hits > 0)
     <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" label="Pagination top" />
-    <table data-nx="data" class="nx-forum-table"><caption class="nx-sr-only">{{ __('legacy/forums.head_forum_search') }}</caption>
-        <tbody>
-        <tr>
-            <th class="colhead nx-center" scope="col">{{ __('legacy/forums.col_post') }}</th>
-            <th class="colhead nx-forum-table__name" scope="col">{{ __('legacy/forums.col_topic') }}</th>
-            <th class="colhead" scope="col">{{ __('legacy/forums.col_forum') }}</th>
-            <th class="colhead nx-nowrap" scope="col">{{ __('legacy/forums.col_posted_by') }}</th>
-        </tr>
+    <x-data-table :caption="__('legacy/forums.head_forum_search')" captionHidden>
+        <x-slot:head>
+            <thead>
+                <tr>
+                    <th class="text-center" scope="col">{{ __('legacy/forums.col_post') }}</th>
+                    <th class="w-[99%]" scope="col">{{ __('legacy/forums.col_topic') }}</th>
+                    <th scope="col">{{ __('legacy/forums.col_forum') }}</th>
+                    <th class="whitespace-nowrap" scope="col">{{ __('legacy/forums.col_posted_by') }}</th>
+                </tr>
+            </thead>
+        </x-slot:head>
         @foreach ($search->results as $row)
             <tr>
-                <td class="rowfollow nx-center">{{ $row->postId }}</td>
-                <td class="rowfollow"><a href="{{ $search->resultUrl($row->topicId, $row->postId) }}">@if ($row->hlcolor > 0)<b class="nx-hl-{{ $row->hlcolor }}">{{ $row->subject }}</b>@else{{ $row->subject }}@endif</a></td>
-                <td class="rowfollow nx-nowrap"><a href="?action=viewforum&amp;forumid={{ $row->forumId }}"><b>{{ $row->forumName }}</b></a></td>
-                <td class="rowfollow nx-nowrap"><x-time :value="$row->added" />&nbsp;|&nbsp;{{ $row->poster }}</td>
+                <td class="text-center">{{ $row->postId }}</td>
+                <td><a href="{{ $search->resultUrl($row->topicId, $row->postId) }}">@if ($row->hlcolor > 0)<b class="nx-hl-{{ $row->hlcolor }}">{{ $row->subject }}</b>@else{{ $row->subject }}@endif</a></td>
+                <td class="whitespace-nowrap"><a href="?action=viewforum&amp;forumid={{ $row->forumId }}"><b>{{ $row->forumName }}</b></a></td>
+                <td class="whitespace-nowrap"><x-time :value="$row->added" />&nbsp;|&nbsp;{{ $row->poster }}</td>
             </tr>
         @endforeach
-        </tbody>
-    </table>
+    </x-data-table>
     <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" label="Pagination bottom" />
 @endif

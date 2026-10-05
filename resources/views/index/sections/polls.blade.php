@@ -15,18 +15,18 @@
 <x-empty-state :title="__('legacy/index.std_no_poll')" />
 @endif
 @if($polls->exists)
-<div class="nx-text nx-center">
+<div class="p-[10pt] text-center">
 <div class="nx-main nx-box nx-box--59">
-<p class="nx-center"><b>{{ $polls->question }}</b></p>
+<p class="text-center"><b>{{ $polls->question }}</b></p>
 @if($polls->hasVoted)
     <div class="nx-main">
     @foreach($polls->bars as $bar)
-        <div class="nx-row"><div class="nx-embedded nx-nowrap">{{ $bar->option }}&nbsp;&nbsp;</div><div class="nx-embedded nx-nowrap nx-grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="{{ $bar->selected ? 'sltbar' : 'unsltbar' }}" src="pic/trans.gif" alt="" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ $bar->percent }}%</div></div>
+        <div class="flex items-start"><div class="nx-embedded whitespace-nowrap">{{ $bar->option }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="{{ $bar->selected ? 'sltbar' : 'unsltbar' }}" src="pic/trans.gif" alt="" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ $bar->percent }}%</div></div>
     @endforeach
     </div>
-    <p class="nx-center">{{ $polls->votesLabel }} {{ $polls->totalVotes }}</p>
+    <p class="text-center">{{ $polls->votesLabel }} {{ $polls->totalVotes }}</p>
     @if($polls->canLog)
-        <p class="nx-center"><a href="log.php?action=poll">{{ $polls->previousPollsLabel }}</a></p>
+        <p class="text-center"><a href="log.php?action=poll">{{ $polls->previousPollsLabel }}</a></p>
     @endif
 @else
     <form method="post" action="/index">
@@ -36,7 +36,7 @@
     @endforeach
     <br />
     <label><input type="radio" name="choice" value="255">{{ $polls->blankVoteLabel }}</label><br />
-    <p class="nx-center"><input type="submit" class="btn" value="{{ $polls->submitVoteLabel }}" /></p>
+    <p class="text-center"><input type="submit" class="btn" value="{{ $polls->submitVoteLabel }}" /></p>
     </form>
 @endif
 </div>

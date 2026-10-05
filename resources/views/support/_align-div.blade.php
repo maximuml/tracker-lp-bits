@@ -1,2 +1,2 @@
 @props(['align', 'text'])
-<div class="nx-align-{{ $align }}">{{ $text }}</div>
+<div class="text-{{ $align }}">{{ $text }}</div>

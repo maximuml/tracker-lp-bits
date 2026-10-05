@@ -1,7 +1,7 @@
 	<form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
 			@csrf
 			<div class="nx-fgrid">
-					<div class="nx-ffull nx-center nx-upload__note">{{ __('legacy/upload.text_red_star_required') }}<span class="nx-color-red">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</div>
+					<div class="nx-ffull text-center nx-upload__note">{{ __('legacy/upload.text_red_star_required') }}<span class="text-nxm-danger">*</span>{{ __('legacy/upload.text_red_star_required_end') }}</div>
 					<div class="nx-fsection">{{ __('legacy/upload.section_file') }}</div>
 					<x-settings-row layout="grid" :label="__('legacy/upload.row_announce_url')">
 						<span class="nx-copyfield">
@@ -27,7 +27,7 @@
 					</div>
 				@endif
 				<x-settings-row layout="grid">
-					<x-slot:label>{{ __('legacy/upload.row_torrent_file') }}<span class="nx-color-red">*</span></x-slot:label>
+					<x-slot:label>{{ __('legacy/upload.row_torrent_file') }}<span class="text-nxm-danger">*</span></x-slot:label>
 					<input type="file" class="file" id="torrent" name="file" aria-label="{{ __('legacy/upload.row_torrent_file') }}" required @error('file') aria-invalid="true" aria-describedby="file-error"@enderror />
 					@error('file')<div class="nx-field__error" id="file-error" role="alert">{{ $message }}</div>@enderror
 					@if ($errors->any())
@@ -55,12 +55,12 @@
 					</x-settings-row>
 				@endif
 
-				<div class="nx-fsection">{{ __('legacy/upload.section_description') }}<span class="nx-color-red">*</span></div>
+				<div class="nx-fsection">{{ __('legacy/upload.section_description') }}<span class="text-nxm-danger">*</span></div>
 				<div class="nx-ffull">{{ $descrEditorHtml ?? '' }}@error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror</div>
 				<div class="nx-fsection">{{ __('legacy/upload.section_media') }}</div>
 
 				@if ($enableTechnicalInfo)
-					<div class="nx-fhead nx-nowrap">{{ __('legacy/functions.text_technical_info') }}</div>
+					<div class="nx-fhead whitespace-nowrap">{{ __('legacy/functions.text_technical_info') }}</div>
 					<div class="nx-ffull">
 						<textarea name="technical_info" id="technical_info" rows="8" aria-label="{{ __('legacy/functions.text_technical_info') }}"@error('technical_info') aria-invalid="true" aria-describedby="technical_info-error"@enderror>{{ old('technical_info') }}</textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}
 						@error('technical_info')<div class="nx-field__error" id="technical_info-error" role="alert">{{ $message }}</div>@enderror
@@ -68,7 +68,7 @@
 				@endif
 
 				<x-settings-row layout="grid">
-					<x-slot:label>{{ __('legacy/upload.row_type') }}<span class="nx-color-red">*</span></x-slot:label>
+					<x-slot:label>{{ __('legacy/upload.row_type') }}<span class="text-nxm-danger">*</span></x-slot:label>
 					<select name="type" id="browsecat" data-mode="{{ $browsecatmode }}" aria-label="{{ __('legacy/upload.row_type') }}" required @error('type') aria-invalid="true" aria-describedby="type-error"@enderror>
 						<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 						@foreach ($cats as $row)
@@ -101,7 +101,7 @@
 				<div class="nx-fsection">{{ __('legacy/upload.section_publish') }}</div>
 				@if (! empty($offerRows))
 					<x-settings-row layout="grid">
-						<x-slot:label>{{ __('legacy/upload.row_your_offer') }}@if (! $uploadFreely)<span class="nx-color-red">*</span>@endif</x-slot:label>
+						<x-slot:label>{{ __('legacy/upload.row_your_offer') }}@if (! $uploadFreely)<span class="text-nxm-danger">*</span>@endif</x-slot:label>
 						<select name="offer" id="offer"@error('offer') aria-invalid="true" aria-describedby="offer-error"@enderror>
 							<option value="0">{{ __('legacy/upload.select_choose_one') ?? '' }}</option>
 							@foreach ($offerRows as $offerrow)

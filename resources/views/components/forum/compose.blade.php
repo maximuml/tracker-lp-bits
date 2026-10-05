@@ -10,7 +10,7 @@
     <input type="hidden" name="id" value="{{ $vm->hiddenId }}" />
     <input type="hidden" name="type" value="{{ $vm->hiddenType }}" />
     @if (! $vm->titleHtml->isEmpty())
-    <h1 class="nx-center">{{ $vm->titleHtml }}</h1>
+    <h1 class="text-center">{{ $vm->titleHtml }}</h1>
     @endif
     <x-frame :caption="$vm->frameCaption()" :center="true">
         <div class="nx-fgrid nx-fgrid--flat">
@@ -20,10 +20,10 @@
             @endif
             <div class="nx-fhead"><label for="body">{{ __('legacy/functions.row_body') }}</label></div>
             <div class="nx-fcell"><span class="nx-hidden" id="previewouter"></span><div id="editorouter"><x-bbcode-editor form="compose" text="body" :content="$vm->body" :invalid="isset($errors) && $errors->has('body')" :described-by="isset($errors) && $errors->has('body') ? 'compose-body-error' : ''" />@if (isset($errors) && $errors->has('body'))<p class="nx-field__error" id="compose-body-error">{{ $errors->first('body') }}</p>@endif</div></div>
-            <div class="nx-ffull nx-center"><input id="qr" type="submit" class="btn" value="{{ __('legacy/functions.submit_submit') }}" />
+            <div class="nx-ffull text-center"><input id="qr" type="submit" class="btn" value="{{ __('legacy/functions.submit_submit') }}" />
                 <input type="button" class="btn2" name="previewbutton" id="previewbutton" value="{{ __('legacy/functions.submit_preview') }}" data-preview-toggle="preview" />
                 <input type="button" class="btn2 nx-hidden" name="unpreviewbutton" id="unpreviewbutton" value="{{ __('legacy/functions.submit_edit') }}" data-preview-toggle="unpreview" /></div>
         </div>
     </x-frame>
 </form>
-<p class="nx-center"><a href="tags.php" target="_blank">{{ __('legacy/functions.text_tags') }}</a> | <a href="smilies.php" target="_blank">{{ __('legacy/functions.text_smilies') }}</a></p>
+<p class="text-center"><a href="tags.php" target="_blank">{{ __('legacy/functions.text_tags') }}</a> | <a href="smilies.php" target="_blank">{{ __('legacy/functions.text_smilies') }}</a></p>

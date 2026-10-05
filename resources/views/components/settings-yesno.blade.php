@@ -1,10 +1,10 @@
 @props(['layout' => 'tr', 'label', 'name', 'value' => 'yes', 'note' => null, 'yesLabel' => 'Yes', 'noLabel' => 'No'])
 @if ($layout === 'grid')
-<div class="nx-fhead nx-nowrap">{{ $label }}</div>
+<div class="nx-fhead whitespace-nowrap">{{ $label }}</div>
 <div class="nx-fcell">
 @else
 <tr>
-    <td class="rowhead nowrap nx-va-top nx-align-right">{{ $label }}</td>
+    <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ $label }}</td>
     <td>
 @endif
         <input type="radio" id="{{ $name }}yes" name="{{ $name }}"@if ($value === 'yes') checked @endif value="yes"> <label for="{{ $name }}yes">{{ $yesLabel }}</label>

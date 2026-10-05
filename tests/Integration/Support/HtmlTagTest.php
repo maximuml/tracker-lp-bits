@@ -252,8 +252,8 @@ class HtmlTagTest extends TestCase
     {
         // Legacy `tr()` default branch: htmlspecialchars + `\n` → `<br />\n`.
         $this->assertSame(
-            '<tr><td class="rowhead nowrap nx-va-top nx-align-right">Label</td>'
-            .'<td class="rowfollow nx-va-top">a &amp; b<br />'."\n".'c</td></tr>',
+            '<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">Label</td>'
+            .'<td class="align-top px-2.5 py-1.5">a &amp; b<br />'."\n".'c</td></tr>',
             Html::settingsRow('Label', "a & b\nc"),
         );
     }
@@ -264,8 +264,8 @@ class HtmlTagTest extends TestCase
         // (radio buttons, `<input>` markup). Pass-through with no
         // escape and no `<br />` substitution.
         $this->assertSame(
-            '<tr><td class="rowhead nowrap nx-va-top nx-align-right">L</td>'
-            .'<td class="rowfollow nx-va-top"><input name="x" value="y"/></td></tr>',
+            '<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">L</td>'
+            .'<td class="align-top px-2.5 py-1.5"><input name="x" value="y"/></td></tr>',
             Html::settingsRow('L', '<input name="x" value="y"/>', escape: false),
         );
     }
@@ -276,8 +276,8 @@ class HtmlTagTest extends TestCase
         // lang strings that may contain a literal `<font color>` or
         // `&nbsp;` — those must reach the browser unescaped.
         $this->assertSame(
-            '<tr><td class="rowhead nowrap nx-va-top nx-align-right">Name<font color="red">*</font></td>'
-            .'<td class="rowfollow nx-va-top">value</td></tr>',
+            '<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">Name<font color="red">*</font></td>'
+            .'<td class="align-top px-2.5 py-1.5">value</td></tr>',
             Html::settingsRow('Name<font color="red">*</font>', 'value', escape: false),
         );
     }
@@ -288,8 +288,8 @@ class HtmlTagTest extends TestCase
         // `relation="X"` AND `class="X"` on the `<tr>`. The dual
         // attribute drives row-show/hide JS in `settings.php`.
         $this->assertSame(
-            '<tr relation="mode_1" class="mode_1"><td class="rowhead nowrap nx-va-top nx-align-right">L</td>'
-            .'<td class="rowfollow nx-va-top">v</td></tr>',
+            '<tr relation="mode_1" class="mode_1"><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">L</td>'
+            .'<td class="align-top px-2.5 py-1.5">v</td></tr>',
             Html::settingsRow('L', 'v', relation: 'mode_1'),
         );
     }
@@ -328,8 +328,8 @@ class HtmlTagTest extends TestCase
         // call sites pass pre-built `<select>` blocks where embedded
         // newlines are syntactic, not line breaks.
         $this->assertSame(
-            '<tr><td class="rowhead nowrap nx-va-top nx-align-right nx-w-1p">L</td>'
-            .'<td class="rowfollow nx-va-top nx-w-99p">a &amp; b'."\n".'c</td></tr>',
+            '<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim w-[1%]">L</td>'
+            .'<td class="align-top px-2.5 py-1.5 w-[99%]">a &amp; b'."\n".'c</td></tr>',
             Html::settingsRowSmall('L', "a & b\nc"),
         );
     }
@@ -337,8 +337,8 @@ class HtmlTagTest extends TestCase
     public function test_settings_row_small_carries_width_classes(): void
     {
         $row = Html::settingsRowSmall('L', 'v');
-        $this->assertStringContainsString('nx-w-1p', $row);
-        $this->assertStringContainsString('nx-w-99p', $row);
+        $this->assertStringContainsString('w-[1%]', $row);
+        $this->assertStringContainsString('w-[99%]', $row);
     }
 
     public function test_settings_row_small_relation_uses_single_attribute_with_spaces(): void
@@ -367,7 +367,7 @@ class HtmlTagTest extends TestCase
     public function test_settings_cells_emits_two_bare_tds(): void
     {
         $this->assertSame(
-            '<td class="rowhead">Label</td><td class="rowfollow">value</td>',
+            '<td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">Label</td><td class="align-top px-2.5 py-1.5">value</td>',
             Html::settingsCells('Label', 'value'),
         );
     }
@@ -377,7 +377,7 @@ class HtmlTagTest extends TestCase
         // Legacy `twotd()` is the inner half of an open `<tr>` row
         // built elsewhere (e.g. `public/index.php` stats panel).
         $cells = Html::settingsCells('L', 'v');
-        $this->assertStringStartsWith('<td class="rowhead">', $cells);
+        $this->assertStringStartsWith('<td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">', $cells);
         $this->assertStringNotContainsString('<tr', $cells);
         $this->assertStringNotContainsString('</tr>', $cells);
     }
@@ -391,7 +391,7 @@ class HtmlTagTest extends TestCase
         // always emitted verbatim, no matter what the legacy caller
         // passed for `$nosec`.
         $this->assertSame(
-            '<td class="rowhead"><b>L</b></td><td class="rowfollow">a & b</td>',
+            '<td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim"><b>L</b></td><td class="align-top px-2.5 py-1.5">a & b</td>',
             Html::settingsCells('<b>L</b>', 'a & b'),
         );
     }
@@ -461,7 +461,7 @@ class HtmlTagTest extends TestCase
 
         $this->assertSame(
             '<table data-nx="data">'
-            .'<thead><tr><th class="colhead" scope="col">Name</th><th class="colhead" scope="col">Age</th></tr></thead>'
+            .'<thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">Name</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Age</th></tr></thead>'
             .'<tbody>'
             .'<tr><td class="">Alice</td><td class="">30</td></tr>'
             .'<tr><td class="">Bob</td><td class="">25</td></tr>'
@@ -501,8 +501,8 @@ class HtmlTagTest extends TestCase
         );
 
         $this->assertStringContainsString('<td class="colfollow">v</td>', $output);
-        // header cells stay colhead regardless of the option.
-        $this->assertStringContainsString('<th class="colhead" scope="col">X</th>', $output);
+        // header cells stay surface-alt regardless of the option.
+        $this->assertStringContainsString('<th class="bg-nxm-surface-alt font-semibold" scope="col">X</th>', $output);
     }
 
     public function test_build_table_escapes_markup_for_xss_safety(): void
@@ -514,7 +514,7 @@ class HtmlTagTest extends TestCase
             [['c' => '<i>v</i>']],
         );
 
-        $this->assertStringContainsString('<th class="colhead" scope="col">&lt;b&gt;H&lt;/b&gt;</th>', $output);
+        $this->assertStringContainsString('<th class="bg-nxm-surface-alt font-semibold" scope="col">&lt;b&gt;H&lt;/b&gt;</th>', $output);
         $this->assertStringContainsString('<td class="">&lt;i&gt;v&lt;/i&gt;</td>', $output);
     }
 

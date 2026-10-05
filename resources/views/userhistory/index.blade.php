@@ -20,9 +20,9 @@
         @if ($item['isNew']) &nbsp;<b>(<span class="new">{{ __('legacy/userhistory.text_new')}}</span>)</b>@endif
         </p>
         <br />
-        <table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/userhistory.text_posts_history_for')}}{{ $subject }}</caption>
-        <tr class="nx-va-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
-        </table>
+        <x-data-table :caption="__('legacy/userhistory.text_posts_history_for') . $subject" captionHidden class="main">
+        <tr class="align-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
+        </x-data-table>
         <br />
     @endforeach
     </x-frame>
@@ -46,9 +46,9 @@
         &nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_comment') }}&nbsp;</b>#<a href=details.php?id={{ $item['torrentid'] }}&tocomm=1&hit=1{{ $item['pageUrl'] }}>{{ $item['commentid'] }}</a>
         </p>
         <br />
-        <table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/userhistory.text_comments_history_for')}}{{ $subject }}</caption>
-        <tr class="nx-va-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
-        </table>
+        <x-data-table :caption="__('legacy/userhistory.text_comments_history_for') . $subject" captionHidden class="main">
+        <tr class="align-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
+        </x-data-table>
         <br />
     @endforeach
     </x-frame>

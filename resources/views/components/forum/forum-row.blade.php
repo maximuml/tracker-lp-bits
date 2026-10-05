@@ -1,23 +1,23 @@
 @props(['row'])
 <tr>
-    <td class="rowfollow">
-        <div class="nx-forum-row">
+    <td>
+        <div class="flex items-start gap-2">
             <img class="{{ $row->hasUnread ? 'unlockednew' : 'unlocked' }}" src="pic/trans.gif"
                  alt="{{ $row->hasUnread ? 'unread' : 'read' }}"
                  title="{{ $row->hasUnread ? __('legacy/forums.title_unread') : __('legacy/forums.title_read') }}" />
             <div>
                 <a href="?action=viewforum&amp;forumid={{ $row->id }}"><b class="big">{{ $row->name }}</b></a>
                 @if ($row->postsToday > 0)
-                    <span class="nx-forum-row__today">({{ __('legacy/forums.text_today') }}<b class="new">{{ $row->postsToday }}</b>)</span>
+                    <span class="ml-1.5">({{ __('legacy/forums.text_today') }}<b class="new">{{ $row->postsToday }}</b>)</span>
                 @endif
                 <br />{{ $row->description }}
             </div>
         </div>
     </td>
-    <td class="rowfollow nx-center">{{ number_format($row->topicCount) }}</td>
-    <td class="rowfollow nx-center">{{ number_format($row->postCount) }}</td>
-    <td class="rowfollow nx-nowrap"><x-forum.last-post :post="$row->lastPost" /></td>
-    <td class="rowfollow">
+    <td class="text-center">{{ number_format($row->topicCount) }}</td>
+    <td class="text-center">{{ number_format($row->postCount) }}</td>
+    <td class="whitespace-nowrap"><x-forum.last-post :post="$row->lastPost" /></td>
+    <td>
         @if ($row->moderators !== null)
             {{ $row->moderators }}
         @else

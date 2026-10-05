@@ -85,7 +85,7 @@ class CoreTrackerTest extends TestCase
         Torrent::factory()->owner($user)->category($category->id)->create();
 
         $this->withNexusCookie($user)
-            ->get('/torrents')
+            ->get('/web/torrents')
             ->assertStatus(200)
             ->assertSee('Torrents');
     }
@@ -96,7 +96,7 @@ class CoreTrackerTest extends TestCase
         $torrent = Torrent::factory()->owner($user)->create();
 
         $this->withNexusCookie($user)
-            ->get('/details/'.$torrent->id)
+            ->get('/web/details/'.$torrent->id)
             ->assertStatus(200)
             ->assertSee($torrent->name);
     }
@@ -107,11 +107,11 @@ class CoreTrackerTest extends TestCase
         $torrent = Torrent::factory()->owner($user)->create();
 
         $this->withNexusCookie($user)
-            ->get('/details/'.$torrent->id)
+            ->get('/web/details/'.$torrent->id)
             ->assertStatus(200);
 
         $this->withNexusCookie($user)
-            ->get('/details/'.$torrent->id)
+            ->get('/web/details/'.$torrent->id)
             ->assertStatus(200)
             ->assertSee($torrent->name);
     }

@@ -209,6 +209,12 @@ final class LegacyUrlRewriter
         $server['REQUEST_METHOD'] = $request->getMethod();
         $server['SCRIPT_NAME'] = '/index.php';
         $server['SCRIPT_FILENAME'] = public_path('index.php');
+        $requestPath = (string) (parse_url($requestUri, PHP_URL_PATH) ?: '');
+        if (preg_match('#^/web/([a-zA-Z0-9_-]+)#', $requestPath, $m) === 1) {
+            $server['LEGACY_PAGE_SCRIPT'] = $m[1];
+        } elseif (isset($server['LEGACY_PAGE_SCRIPT'])) {
+            unset($server['LEGACY_PAGE_SCRIPT']);
+        }
         if (isset($server['PATH_INFO'])) {
             unset($server['PATH_INFO']);
         }

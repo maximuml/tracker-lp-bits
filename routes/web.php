@@ -10,33 +10,47 @@ use App\Http\Controllers\Ajax\PasskeyAjaxController as AjaxPasskeyController;
 use App\Http\Controllers\Ajax\ShoutboxAjaxController as AjaxShoutboxController;
 use App\Http\Controllers\Ajax\TaskAjaxController as AjaxTaskController;
 use App\Http\Controllers\Ajax\TorrentApprovalAjaxController as AjaxTorrentApprovalController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\RecoveryController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\WebController as AuthWebController;
 use App\Http\Controllers\AuthenticateController;
+use App\Http\Controllers\BitbucketUploadController;
+use App\Http\Controllers\BonusHistoryController;
+use App\Http\Controllers\BonusShopController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\IndexController;
 use App\Http\Controllers\InfoController;
+use App\Http\Controllers\InviteController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MetricsController;
+use App\Http\Controllers\ModerationController;
 use App\Http\Controllers\MyController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OfferController;
+use App\Http\Controllers\PollController;
+use App\Http\Controllers\RssController;
 use App\Http\Controllers\RulesController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShoutboxController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\SystemMaintenanceController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ToolController;
+use App\Http\Controllers\ToptenController;
 use App\Http\Controllers\TorrentAjaxController;
 use App\Http\Controllers\TorrentBookmarkController;
 use App\Http\Controllers\TorrentController;
+use App\Http\Controllers\TorrentDetailsController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
+use App\Http\Controllers\TorrentListingController;
 use App\Http\Controllers\TorrentRssController;
 use App\Http\Controllers\TorrentUploadController;
 use App\Http\Controllers\UsercpController;
@@ -56,11 +70,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return redirect('/index');
+    return redirect('/web/index');
 });
 
 Route::get('/nexus', function () {
-    return redirect('/index');
+    return redirect('/web/index');
 });
 
 Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
@@ -208,6 +222,49 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
         Route::post('passkey/list', [AjaxPasskeyController::class, 'list']);
         Route::post('passkey/delete', [AjaxPasskeyController::class, 'delete']);
     });
+
+    // Canonical GET URIs for the pages routes/legacy/auth.php served at the
+    // site root — GET /{name}[.php] now 301-redirects here with the same
+    // query string. Route names are unchanged (they move with the URI).
+    Route::get('upload', [TorrentUploadController::class, 'create'])->middleware('throttle:upload')->name('torrents.upload');
+    Route::get('bitbucket-upload', [BitbucketUploadController::class, 'create'])->middleware('throttle:upload')->name('bitbucket.upload');
+    Route::get('offers', [OfferController::class, 'legacy'])->name('offers.legacy');
+    Route::get('torrents', [TorrentListingController::class, 'index'])->middleware('throttle:torrents')->name('torrents.index');
+    Route::get('details/{id}', [TorrentDetailsController::class, 'show'])->where('id', '[0-9]+')->name('torrent.details');
+    Route::get('mybonus', [MyController::class, 'bonus'])->name('my.bonus');
+    Route::get('myhr', [MyController::class, 'hr'])->name('my.hr');
+    Route::get('topten', [ToptenController::class, 'legacy'])->name('topten.legacy');
+    Route::get('log', [LogController::class, 'legacy'])->name('log.legacy');
+    Route::get('index', [IndexController::class, 'legacy'])->name('index.legacy');
+    Route::get('friends', [FriendsController::class, 'friends'])->name('friends.legacy');
+    Route::get('messages', [MessageController::class, 'messages'])->name('messages.legacy');
+    Route::get('getrss', [RssController::class, 'getrss'])->name('getrss.legacy');
+    Route::get('sendmessage', [MessageController::class, 'sendmessage'])->name('sendmessage.legacy');
+    Route::get('userhistory', [InfoController::class, 'userhistory'])->name('userhistory.legacy');
+    Route::get('invite', [InviteController::class, 'invite'])->name('invite.legacy');
+    Route::get('news', [NewsController::class, 'news'])->name('news.legacy');
+    Route::get('makepoll', [PollController::class, 'makepoll'])->name('makepoll.legacy');
+    Route::get('polloverview', [PollController::class, 'polloverview'])->name('polloverview.legacy');
+    Route::get('attendance', [AttendanceController::class, 'attendance'])->name('attendance.legacy');
+    Route::get('report', [ModerationController::class, 'report'])->name('report.legacy');
+    Route::get('reports', [ModerationController::class, 'reports'])->name('reports.legacy');
+    Route::get('search', [UtilityController::class, 'search'])->name('search.legacy');
+    Route::get('usersearch', [UtilityController::class, 'usersearch'])->name('usersearch.legacy');
+    Route::get('autocomplete_torrents', [TorrentAjaxController::class, 'autocompleteTorrents'])->name('autocomplete_torrents.legacy');
+    Route::get('shoutbox_history', [ShoutboxController::class, 'shoutboxHistory'])->name('shoutbox_history.legacy');
+    Route::get('notifications', [NotificationController::class, 'index'])->middleware('throttle:notifications')->name('notifications.legacy');
+    Route::get('latestcomments', [ForumController::class, 'latestcomments'])->name('latestcomments.legacy');
+    Route::get('bonus-log', [BonusHistoryController::class, 'bonusLog'])->name('bonus-log.legacy');
+    Route::get('task', [BonusShopController::class, 'task'])->name('task.legacy');
+    Route::get('uploaders', [BonusHistoryController::class, 'uploaders'])->name('uploaders.legacy');
+    Route::get('settings', [SettingsController::class, 'settings'])->name('settings.legacy');
+    Route::get('freeleech', [BonusShopController::class, 'freeleech'])->name('freeleech.legacy');
+    Route::get('preview', [UtilityController::class, 'preview'])->name('preview.legacy');
+    Route::get('moresmilies', [UtilityController::class, 'moresmilies'])->name('moresmilies.legacy');
+    Route::get('smilies', [UtilityController::class, 'smilies'])->name('smilies.legacy');
+    Route::get('downloadnotice', [TorrentDownloadController::class, 'downloadnotice'])->name('downloadnotice.legacy');
+    Route::get('attachment', [UtilityController::class, 'attachment'])->middleware('throttle:attachment')->name('attachment.legacy');
+    Route::get('getattachment', [UtilityController::class, 'getattachment'])->middleware('throttle:attachment')->name('getattachment.legacy');
 });
 
 // Passkey assertion endpoints called by the login page — guest-facing,

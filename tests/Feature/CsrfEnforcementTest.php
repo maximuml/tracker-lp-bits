@@ -198,7 +198,7 @@ final class CsrfEnforcementTest extends TestCase
     {
         // Poll delete via GET must NOT delete — it should show a
         // confirmation form with a POST button instead.
-        $response = $this->get('/log?action=poll&do=delete&pollid=1&sure=1');
+        $response = $this->get('/web/log?action=poll&do=delete&pollid=1&sure=1');
 
         // Should not be a redirect to /log.php?action=poll&deleted=1
         // (which would indicate the poll was deleted via GET).

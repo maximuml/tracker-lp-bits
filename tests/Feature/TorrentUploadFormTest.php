@@ -75,7 +75,7 @@ final class TorrentUploadFormTest extends TestCase
             ])
             ->assertRedirect('/upload');
 
-        $page = $this->withNexusCookie($user)->get('/upload');
+        $page = $this->withNexusCookie($user)->get('/web/upload');
 
         $page->assertOk();
         $page->assertSee('value="Restored Title"', false);
@@ -227,7 +227,7 @@ final class TorrentUploadFormTest extends TestCase
             ])
             ->assertRedirect('/upload');
 
-        $page = $this->withNexusCookie($user)->get('/upload');
+        $page = $this->withNexusCookie($user)->get('/web/upload');
 
         $page->assertOk();
         $page->assertSee('value="Full Restore Title"', false);
@@ -241,7 +241,7 @@ final class TorrentUploadFormTest extends TestCase
     {
         $user = User::factory()->admin()->create();
 
-        $page = $this->withNexusCookie($user)->get('/upload');
+        $page = $this->withNexusCookie($user)->get('/web/upload');
 
         $page->assertOk();
         $page->assertSee('name="_token"', false);

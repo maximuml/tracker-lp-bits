@@ -24,7 +24,7 @@ final class TorrentsModernPageTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->withNexusCookie($user)->get('/torrents');
+        $response = $this->withNexusCookie($user)->get('/web/torrents');
 
         $response->assertOk();
         $html = (string) $response->getContent();
@@ -60,7 +60,7 @@ final class TorrentsModernPageTest extends TestCase
         // cat= pins the category filter deterministically — the default
         // listing is cached under 'category_list_mode_*' in Redis and may
         // be stale within a single test process.
-        $response = $this->withNexusCookie($user)->get('/torrents?cat=1');
+        $response = $this->withNexusCookie($user)->get('/web/torrents?cat=1');
         $response->assertOk();
         $html = (string) $response->getContent();
 
@@ -77,7 +77,7 @@ final class TorrentsModernPageTest extends TestCase
         $user = User::factory()->create();
 
         // A search string that matches nothing forces the empty branch.
-        $response = $this->withNexusCookie($user)->get('/torrents?search='.rawurlencode('zzz-no-such-torrent-marker'));
+        $response = $this->withNexusCookie($user)->get('/web/torrents?search='.rawurlencode('zzz-no-such-torrent-marker'));
         $response->assertOk();
         $html = (string) $response->getContent();
 

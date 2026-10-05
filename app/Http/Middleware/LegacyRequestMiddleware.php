@@ -93,6 +93,12 @@ final class LegacyRequestMiddleware
         $scriptName = (string) $request->server->get('SCRIPT_NAME', '');
         $script = preg_replace('/\.php$/', '', basename($scriptName)) ?? '';
         $script = preg_replace('/[^a-zA-Z0-9_-]/', '', $script) ?? '';
+        if ($script === 'index' || $script === '') {
+            $pageScript = $request->server->get('LEGACY_PAGE_SCRIPT');
+            if (is_string($pageScript) && $pageScript !== '') {
+                return (string) (preg_replace('/[^a-zA-Z0-9_-]/', '', $pageScript) ?? 'index');
+            }
+        }
 
         return $script === '' ? 'index' : $script;
     }

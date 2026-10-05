@@ -32,7 +32,10 @@ abstract class AjaxFormRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            response()->json(Api::failWithContext($validator->errors()->first()))
+            response()->json(Api::failWithContext(
+                $validator->errors()->first(),
+                $this->only(['action', 'params']),
+            ))
         );
     }
 }

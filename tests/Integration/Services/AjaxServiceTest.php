@@ -6,16 +6,12 @@ namespace Tests\Integration\Services;
 
 use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
-use App\Repositories\ShoutboxRepository;
 use App\Repositories\UserPasskeyRepository;
 use App\Services\Ajax\AjaxFeatureServices;
 use App\Services\Ajax\PasskeyActions;
-use App\Services\Ajax\ShoutboxActions;
 use App\Services\AjaxService;
-use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\NotificationFeed;
-use App\Support\Shoutbox;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -27,10 +23,10 @@ use Tests\TestCase;
 /**
  * Unit tests for AjaxService.
  *
- * Covers the ALLOWED_ACTIONS whitelist, dispatch routing for the two
- * remaining action groups (shoutbox, passkey) and their validation.
- * The actions migrated to REST endpoints are covered end-to-end by
- * AjaxRestEndpointsTest (redirect + envelope contract).
+ * Covers the ALLOWED_ACTIONS whitelist and dispatch routing for the
+ * remaining passkey action group. The shoutbox group migrated to REST
+ * endpoints and is covered end-to-end by AjaxRestEndpointsTest
+ * (redirect pins + envelope contract).
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class AjaxServiceTest extends TestCase
@@ -51,8 +47,6 @@ final class AjaxServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::table('shoutbox')->delete();
-        DB::table('shoutbox_reactions')->delete();
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
@@ -88,7 +82,6 @@ final class AjaxServiceTest extends TestCase
     {
         return new AjaxService(
             new AjaxFeatureServices(
-                new ShoutboxActions(new ShoutboxService(new ShoutboxRepository), $this->actorContext),
                 new PasskeyActions($this->passkeyRepo, $this->currentUser),
                 app(NotificationFeed::class),
             ),
@@ -143,13 +136,18 @@ final class AjaxServiceTest extends TestCase
     public function test_allowed_actions_contains_expected_entries(): void
     {
         $this->assertContains('deletePasskey', AjaxService::ALLOWED_ACTIONS);
-        $this->assertContains('shoutboxPost', AjaxService::ALLOWED_ACTIONS);
-        $this->assertContains('clearShoutBox', AjaxService::ALLOWED_ACTIONS);
+        $this->assertContains('getPasskeyList', AjaxService::ALLOWED_ACTIONS);
     }
 
     public function test_allowed_actions_does_not_contain_arbitrary_method(): void
     {
         $this->assertNotContains('nonExistentAction', AjaxService::ALLOWED_ACTIONS);
+    }
+
+    public function test_allowed_actions_excludes_migrated_groups(): void
+    {
+        $this->assertNotContains('shoutboxPost', AjaxService::ALLOWED_ACTIONS);
+        $this->assertNotContains('clearShoutBox', AjaxService::ALLOWED_ACTIONS);
     }
 
     public function test_dispatch_throws_for_unknown_action(): void
@@ -158,127 +156,6 @@ final class AjaxServiceTest extends TestCase
         $this->expectExceptionMessage('Unknown ajax action');
 
         $this->service->dispatch('nonExistentAction', []);
-    }
-
-    // --- shoutboxPost ---
-
-    public function test_shoutbox_post_throws_for_empty_text(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Message cannot be empty');
-
-        $this->service->dispatch('shoutboxPost', ['text' => '   ']);
-    }
-
-    public function test_shoutbox_post_throws_for_too_long_text(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Message too long');
-
-        $this->service->dispatch('shoutboxPost', ['text' => str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1)]);
-    }
-
-    public function test_shoutbox_post_succeeds_with_valid_text(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $result = $this->service->dispatch('shoutboxPost', ['text' => 'Hello world']);
-
-        $this->assertTrue($result);
-        $this->assertSame(1, DB::table('shoutbox')->count());
-    }
-
-    // --- shoutboxEdit ---
-
-    public function test_shoutbox_edit_throws_for_invalid_id(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid input');
-
-        $this->service->dispatch('shoutboxEdit', ['id' => 0, 'text' => 'Hello']);
-    }
-
-    public function test_shoutbox_edit_throws_for_empty_text(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid input');
-
-        $this->service->dispatch('shoutboxEdit', ['id' => 1, 'text' => '   ']);
-    }
-
-    public function test_shoutbox_edit_throws_for_too_long_text(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Message too long');
-
-        $this->service->dispatch('shoutboxEdit', ['id' => 1, 'text' => str_repeat('x', Shoutbox::MAX_MESSAGE_LENGTH + 1)]);
-    }
-
-    // --- shoutboxDelete ---
-
-    public function test_shoutbox_delete_throws_for_invalid_id(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid input');
-
-        $this->service->dispatch('shoutboxDelete', ['id' => 0]);
-    }
-
-    public function test_shoutbox_delete_throws_for_negative_id(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        $this->expectException(\InvalidArgumentException::class);
-
-        $this->service->dispatch('shoutboxDelete', ['id' => -1]);
-    }
-
-    // --- shoutboxReact ---
-
-    public function test_shoutbox_react_throws_for_null_result(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        // Nonexistent message id → toggleReaction returns null
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid reaction or reacting too often');
-
-        $this->service->dispatch('shoutboxReact', ['id' => 99999, 'reaction' => 'invalid']);
-    }
-
-    // --- clearShoutBox ---
-
-    public function test_clear_shout_box_throws_when_no_permission(): void
-    {
-        $userId = $this->createUser();
-        $this->authenticateUser($userId);
-
-        // Non-admin user → clearAll returns false → RuntimeException
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('No permission');
-
-        $this->service->dispatch('clearShoutBox', []);
     }
 
     // --- passkey actions ---

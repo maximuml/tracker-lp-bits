@@ -190,6 +190,47 @@ final class AjaxRestEndpointsTest extends TestCase
         $this->assertSame('Message too long', $body['msg']);
     }
 
+    /** @return array<string, array{0: string, 1: array<string, mixed>, 2: string}> */
+    public static function shoutboxFailures(): array
+    {
+        return [
+            'post blank' => ['/web/shoutbox/post', ['text' => '   '], 'Message cannot be empty'],
+            'edit blank text' => ['/web/shoutbox/edit', ['id' => 1, 'text' => '   '], 'The text field is required.'],
+            'react bad emoji' => ['/web/shoutbox/react', ['id' => 1, 'reaction' => 'nope'], 'Invalid reaction or reacting too often'],
+            'clear no permission' => ['/web/shoutbox/clear', [], 'No permission'],
+        ];
+    }
+
+    /**
+     * Domain failures keep the legacy error strings the shoutbox.js
+     * callers alert() — pinned after the failWithContext msg fix.
+     *
+     * @dataProvider shoutboxFailures
+     */
+    #[DataProvider('shoutboxFailures')]
+    public function test_shoutbox_endpoint_error_messages(string $uri, array $body, string $expectedMsg): void
+    {
+        $user = User::factory()->create();
+        $body['_token'] = $this->csrfToken();
+        $response = $this->asNexusUser($user)->post($uri, $body);
+
+        $response->assertOk();
+        $response->assertJsonPath('msg', $expectedMsg);
+        $this->assertNotEquals(0, $response->json('ret'));
+    }
+
+    public function test_shoutbox_formrequest_failure_uses_envelope(): void
+    {
+        $user = User::factory()->create();
+        $response = $this->asNexusUser($user)
+            ->post('/web/shoutbox/delete', ['_token' => $this->csrfToken()]);
+
+        $response->assertOk();
+        $body = $response->json();
+        $this->assertNotEquals(0, $body['ret']);
+        $this->assertNotEmpty($body['msg']);
+    }
+
     public function test_endpoints_require_login(): void
     {
         $token = $this->csrfToken();

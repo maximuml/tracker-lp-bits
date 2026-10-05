@@ -49,7 +49,7 @@ Route::post('/offers', [OfferController::class, 'legacyAction'])->middleware('re
 $get301('/torrents', '/web/torrents');
 Route::get('/details/{id}', fn (Request $request) => redirect()->to(
     '/web/details/'.$request->route('id')
-        .($request->getQueryString() !== null && $request->getQueryString() !== '' ? '?'.$request->getQueryString() : ''),
+        .(($qs = http_build_query($request->query->all())) !== '' ? '?'.$qs : ''),
     301,
 ))->where('id', '[0-9]+');
 $get301('/mybonus', '/web/mybonus');

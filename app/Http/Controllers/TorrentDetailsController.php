@@ -123,7 +123,7 @@ class TorrentDetailsController extends Controller
 
         $headers = [];
         if ($requestFlags['uploaded']) {
-            $headers['Refresh'] = "1; url=download.php?id={$id}";
+            $headers['Refresh'] = "1; url=/download?id={$id}";
         }
 
         $tagIds = $this->torrentDetailRepository->getTagIds($id);

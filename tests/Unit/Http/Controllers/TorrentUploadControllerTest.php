@@ -41,7 +41,7 @@ final class TorrentUploadControllerTest extends TestCase
         $response = $controller->legacyStore($request, $repository);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('details.php?id=42&uploaded=1', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/details/42?uploaded=1', $response->getTargetUrl());
     }
 
     public function test_legacy_store_redirects_to_existing_torrent(): void
@@ -62,6 +62,6 @@ final class TorrentUploadControllerTest extends TestCase
         $response = $controller->legacyStore($request, $repository);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('details.php?id=99&existed=1', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/details/99?existed=1', $response->getTargetUrl());
     }
 }

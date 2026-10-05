@@ -36,8 +36,8 @@ final class WebControllerTest extends TestCase
         $guard = Mockery::mock();
         $guard->shouldReceive('check')->once()->andReturn(true);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
-        Redirect::shouldReceive('intended')->with('index.php')->once()->andReturn(
-            new RedirectResponse('index.php')
+        Redirect::shouldReceive('intended')->with('/web/index')->once()->andReturn(
+            new RedirectResponse('/web/index')
         );
 
         $controller = new WebController($authService, Mockery::mock(UserPasskeyRepository::class));
@@ -120,7 +120,7 @@ final class WebControllerTest extends TestCase
         $response = $controller->login($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('index.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/index', $response->getTargetUrl());
     }
 
     public function test_login_redirects_to_returnto_when_local_url(): void
@@ -187,7 +187,7 @@ final class WebControllerTest extends TestCase
         $response = $controller->login($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('index.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/index', $response->getTargetUrl());
         $this->assertStringNotContainsString('evil.com', $response->getTargetUrl());
     }
 

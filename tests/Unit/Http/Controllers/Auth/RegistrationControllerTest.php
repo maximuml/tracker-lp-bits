@@ -41,8 +41,8 @@ final class RegistrationControllerTest extends TestCase
         $guard = Mockery::mock();
         $guard->shouldReceive('check')->once()->andReturn(true);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
-        Redirect::shouldReceive('to')->with('index.php')->once()->andReturn(
-            new RedirectResponse('index.php')
+        Redirect::shouldReceive('to')->with('/web/index')->once()->andReturn(
+            new RedirectResponse('/web/index')
         );
 
         $controller = new RegistrationController(Mockery::mock(UsercpLookupRepositoryInterface::class), Mockery::mock(InviteRepository::class), $registrationService, $authService);
@@ -72,8 +72,8 @@ final class RegistrationControllerTest extends TestCase
             ->once()
             ->andReturn($user);
 
-        Redirect::shouldReceive('to')->with('ok.php?type=confirm')->once()->andReturn(
-            new RedirectResponse('ok.php?type=confirm')
+        Redirect::shouldReceive('to')->with('/web/ok?type=confirm')->once()->andReturn(
+            new RedirectResponse('/web/ok?type=confirm')
         );
 
         $controller = new RegistrationController(Mockery::mock(UsercpLookupRepositoryInterface::class), Mockery::mock(InviteRepository::class), $registrationService, $authService);
@@ -82,7 +82,7 @@ final class RegistrationControllerTest extends TestCase
         $response = $controller->confirm($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('ok.php?type=confirm', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/ok?type=confirm', $response->getTargetUrl());
     }
 
     public function test_confirm_redirects_to_confirmed_on_exception(): void
@@ -96,8 +96,8 @@ final class RegistrationControllerTest extends TestCase
             ->once()
             ->andThrow(new AuthenticationException('Invalid secret.'));
 
-        Redirect::shouldReceive('to')->with('ok.php?type=confirmed')->once()->andReturn(
-            new RedirectResponse('ok.php?type=confirmed')
+        Redirect::shouldReceive('to')->with('/web/ok?type=confirmed')->once()->andReturn(
+            new RedirectResponse('/web/ok?type=confirmed')
         );
 
         $controller = new RegistrationController(Mockery::mock(UsercpLookupRepositoryInterface::class), Mockery::mock(InviteRepository::class), $registrationService, $authService);
@@ -106,7 +106,7 @@ final class RegistrationControllerTest extends TestCase
         $response = $controller->confirm($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('ok.php?type=confirmed', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/ok?type=confirmed', $response->getTargetUrl());
     }
 
     public function test_confirm_redirects_to_confirmed_for_non_pending_status(): void
@@ -118,7 +118,7 @@ final class RegistrationControllerTest extends TestCase
 
         // With the UserStatus enum cast, the defensive branch for unknown
         // statuses is now unreachable — the cast throws before the check.
-        // A confirmed user falls through to the ok.php?type=confirm path.
+        // A confirmed user falls through to the /web/ok?type=confirm path.
         $user = new User;
         $user->status = UserStatus::CONFIRMED;
 
@@ -126,8 +126,8 @@ final class RegistrationControllerTest extends TestCase
             ->once()
             ->andReturn($user);
 
-        Redirect::shouldReceive('to')->with('ok.php?type=confirm')->once()->andReturn(
-            new RedirectResponse('ok.php?type=confirm')
+        Redirect::shouldReceive('to')->with('/web/ok?type=confirm')->once()->andReturn(
+            new RedirectResponse('/web/ok?type=confirm')
         );
 
         $controller = new RegistrationController(Mockery::mock(UsercpLookupRepositoryInterface::class), Mockery::mock(InviteRepository::class), $registrationService, $authService);
@@ -136,7 +136,7 @@ final class RegistrationControllerTest extends TestCase
         $response = $controller->confirm($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('ok.php?type=confirm', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/ok?type=confirm', $response->getTargetUrl());
     }
 
     public function test_resend_confirmation_redirects_when_already_authenticated(): void
@@ -149,8 +149,8 @@ final class RegistrationControllerTest extends TestCase
         $guard = Mockery::mock();
         $guard->shouldReceive('check')->once()->andReturn(true);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
-        Redirect::shouldReceive('to')->with('index.php')->once()->andReturn(
-            new RedirectResponse('index.php')
+        Redirect::shouldReceive('to')->with('/web/index')->once()->andReturn(
+            new RedirectResponse('/web/index')
         );
 
         $controller = new RegistrationController(Mockery::mock(UsercpLookupRepositoryInterface::class), Mockery::mock(InviteRepository::class), $registrationService, $authService);

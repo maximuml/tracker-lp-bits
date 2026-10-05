@@ -32,7 +32,7 @@ final class TorrentDeleteControllerTest extends TestCase
         $response = $controller->fastDelete($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('fastdelete.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/fastdelete', $response->getTargetUrl());
     }
 
     public function test_delete_redirects_when_not_authenticated(): void
@@ -46,6 +46,6 @@ final class TorrentDeleteControllerTest extends TestCase
         $response = $controller->delete($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('delete.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/delete', $response->getTargetUrl());
     }
 }

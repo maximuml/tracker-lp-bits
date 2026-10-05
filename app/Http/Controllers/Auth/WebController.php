@@ -102,7 +102,7 @@ class WebController extends Controller
     public function login(LoginRequest $request): RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::intended('index.php');
+            return Redirect::intended('/web/index');
         }
 
         $ip = Network::clientIp();

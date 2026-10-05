@@ -14,7 +14,9 @@
 {{ $latestTorrents->html }}
 @endif
 @include('index.sections.top_uploaders')
-@include('index.sections.polls')
+@if($polls->show)
+<livewire:index-poll />
+@endif
 @include('index.sections.stats')
 @include('index.sections.disclaimer')
 @include('index.sections.browser_note')

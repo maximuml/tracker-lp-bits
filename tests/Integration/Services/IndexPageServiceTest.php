@@ -20,6 +20,7 @@ use App\ViewModels\Index\IndexLatestTorrentsSection;
 use App\ViewModels\Index\IndexNewsItem;
 use App\ViewModels\Index\IndexNewsSection;
 use App\ViewModels\Index\IndexPollsSection;
+use App\ViewModels\Index\IndexPollsSectionFactory;
 use App\ViewModels\Index\IndexShoutboxSection;
 use App\ViewModels\Index\IndexStatsSection;
 use App\ViewModels\Index\IndexTopUploadersSection;
@@ -78,6 +79,7 @@ final class IndexPageServiceTest extends TestCase
             $this->currentUser,
             $this->cache,
             $this->indexRepository,
+            new IndexPollsSectionFactory($this->cache, $this->indexRepository),
         );
     }
 
@@ -190,6 +192,7 @@ final class IndexPageServiceTest extends TestCase
             $this->currentUser,
             $this->cache,
             $this->indexRepository,
+            new IndexPollsSectionFactory($this->cache, $this->indexRepository),
         );
 
         $this->assertInstanceOf(IndexPageService::class, $service);

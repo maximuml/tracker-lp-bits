@@ -209,10 +209,8 @@ class TorrentDetailsController extends Controller
         $showDescription = ! LegacyYesNo::isNo($currentUser['showdescription'] ?? null) && $descr !== '';
 
         $magicInfo = $this->torrentDetailRepository->getMagicInfo($id, (int) $currentUser['id']);
-        $thanksInfo = $this->torrentDetailRepository->getThanksInfo($id, (int) $currentUser['id']);
-
         $details = $this->detailsViewFactory->build(
-            $id, $row, $currentUser, $denyLog, $hasBuy, $requestFlags, $magicInfo, $thanksInfo, $bonusOptions
+            $id, $row, $currentUser, $denyLog, $hasBuy, $requestFlags, $magicInfo, $bonusOptions
         );
         $commentPagerTop = '';
         $commentPagerBottom = '';

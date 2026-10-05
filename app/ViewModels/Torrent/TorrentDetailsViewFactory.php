@@ -42,7 +42,6 @@ final class TorrentDetailsViewFactory
      * @param  array<int|string, mixed>  $currentUser
      * @param  array<string, mixed>  $requestFlags
      * @param  array<int|string, mixed>  $magicInfo
-     * @param  array<int|string, mixed>  $thanksInfo
      * @param  array<int|string, mixed>  $bonusOptions
      */
     public function build(
@@ -53,7 +52,6 @@ final class TorrentDetailsViewFactory
         bool $hasBuy,
         array $requestFlags,
         array $magicInfo,
-        array $thanksInfo,
         array $bonusOptions,
     ): TorrentDetailsViewModel {
         $isOwner = (int) ($currentUser['id'] ?? 0) === (int) ($row['owner'] ?? 0);
@@ -70,7 +68,6 @@ final class TorrentDetailsViewFactory
             peers: new PeersRow($id, (int) $row['seeders'], (int) $row['leechers']),
             denyBanner: $this->buildDenyBanner($row, $denyLog),
             magic: $this->buildMagic($id, $currentUser, $isOwner, $magicInfo, $bonusOptions),
-            thanks: $this->buildThanks($id, $currentUser, $thanksInfo),
             uploadTimePrefix: ($currentUser['timetype'] ?? '') !== 'timealive'
                 ? (string) __('legacy/details.text_at')
                 : (string) __('legacy/details.text_blank'),
@@ -372,50 +369,7 @@ JS, \json_encode($approvalTitle)), 'footer', false);
     }
 
     /**
-     * @param  array<int|string, mixed>  $currentUser
-     * @param  array<int|string, mixed>  $thanksInfo
-     */
-    private function buildThanks(int $id, array $currentUser, array $thanksInfo): ThanksSection
-    {
-        $hasThanked = (bool) $thanksInfo['has_thanked'];
-        $currentUserHtml = UserDisplay::username((int) ($currentUser['id'] ?? 0), false, true, true, false, false, true);
-
-        $thanksUserIds = [];
-        foreach ($thanksInfo['thanks'] as $t) {
-            $thanksUserIds[] = (int) ($t->userid ?? 0);
-        }
-        UserDisplay::preload($thanksUserIds);
-        $thanksBy = [];
-        foreach ($thanksInfo['thanks'] as $t) {
-            if ((int) $t->userid !== (int) $currentUser['id']) {
-                $thanksBy[] = UserDisplay::username((int) $t->userid, false, true, true, false, false, true);
-            }
-        }
-        if ($hasThanked) {
-            array_unshift($thanksBy, $currentUserHtml);
-        }
-
-        $thanksAll = count($thanksInfo['thanks']);
-        $andMore = $thanksAll < $thanksInfo['count']
-            ? (string) __('legacy/details.text_and_more').$thanksInfo['count'].(string) __('legacy/details.text_users_in_total')
-            : '';
-
-        return new ThanksSection(
-            torrentId: $id,
-            hasThanked: $hasThanked,
-            buttonLabel: (string) __($hasThanked
-                ? 'legacy/details.submit_you_said_thanks'
-                : 'legacy/details.submit_say_thanks'),
-            addedLabel: (string) __('legacy/details.text_thanks_added'),
-            thanksBy: $thanksBy,
-            noThanks: $thanksAll === 0,
-            noThanksLabel: (string) __('legacy/details.text_no_thanks_added'),
-            andMore: $andMore,
-            currentUser: $currentUserHtml,
-        );
-    }
-
-    /**
+     * Legacy lang values may carry `&nbsp;`-style entities; decode to
      * Legacy lang values may carry `&nbsp;`-style entities; decode to
      * plain text so attribute escaping renders them correctly.
      */

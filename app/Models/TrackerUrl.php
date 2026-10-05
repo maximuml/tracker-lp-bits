@@ -41,6 +41,7 @@ class TrackerUrl extends NexusModel
             }
             self::saveUrlCache();
         });
+        static::deleted(static fn () => self::saveUrlCache());
         static::saving(function (TrackerUrl $model) {
             if ($model->is_default == 1) {
                 $model->enabled = 1;
@@ -55,7 +56,7 @@ class TrackerUrl extends NexusModel
         if ($redis === null) {
             return;
         }
-        $redis->unlink(self::TRACKER_URL_CACHE_KEY);
+        $redis->unlink(self::TRACKER_URL_CACHE_KEY, self::TRACKER_URL_DEFAULT_CACHE_KEY);
         $list = self::listAll();
         $first = $list->first();
         $hasDefault = false;

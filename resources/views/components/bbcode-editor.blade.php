@@ -4,10 +4,8 @@
      Toolbar controls keep their name attributes — legacy code addresses them
      via document.forms[form][name]. --}}
 <div class="bbcode-editor" data-bbcode-editor
-     data-form="{{ $form }}" data-text="{{ $text }}"
-     data-edit-id="{{ $editId }}" data-preview-id="{{ $previewId }}"
-     data-btn-edit-id="{{ $btnEditId }}" data-btn-preview-id="{{ $btnPreviewId }}">
-    <div id="{{ $editId }}" class="bbcode-edit">
+     data-form="{{ $form }}" data-text="{{ $text }}">
+    <div class="bbcode-edit">
         <div class="bbcode-toolbar">
             <span class="bbcode-group">
             <input class="bbcode-btn bbcode-btn-b" type="button" name="b" value="B" data-bbcode-action="simpletag" data-bbcode-tag="b" />
@@ -115,11 +113,4 @@
             </div>
         </div>
     </div>
-    @if ($withPreview)
-        <div id="{{ $previewId }}" class="bbcode-preview"></div>
-        <div class="bbcode-actions">
-            <input id="{{ $btnPreviewId }}" type="button" class="btn" value="{{ __('legacy/functions.submit_preview')}}" data-bbcode-action="preview" />
-            <input id="{{ $btnEditId }}" type="button" class="btn nx-hidden" value="{{ __('legacy/functions.submit_edit')}}" data-bbcode-action="edit" />
-        </div>
-    @endif
 </div>

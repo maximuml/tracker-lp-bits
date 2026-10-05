@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\View;
 
 use App\Support\Html\SafeHtml;
-use App\View\Components\BbcodeEditor;
 use App\View\Components\FormField;
 use App\View\Components\Pagination;
 use Illuminate\Support\Facades\Blade;
@@ -467,7 +466,7 @@ final class ComponentLayerTest extends TestCase
         $this->assertStringContainsString('data-bbcode-editor', $html);
         $this->assertStringContainsString('data-form="compose"', $html);
         $this->assertStringContainsString('data-text="body"', $html);
-        $this->assertStringContainsString('data-edit-id="compose-body-edit"', $html);
+        $this->assertStringContainsString('class="bbcode-edit"', $html);
         $this->assertStringContainsString('name="body"', $html);
         $this->assertStringContainsString('name="tagcount"', $html);
         $this->assertStringContainsString('data-bbcode-action="simpletag"', $html);
@@ -485,23 +484,12 @@ final class ComponentLayerTest extends TestCase
         $this->assertStringContainsString('&lt;/textarea&gt;', $html);
     }
 
-    public function test_bbcode_editor_preview_only_when_requested(): void
+    public function test_bbcode_editor_emits_no_js_preview_controls(): void
     {
-        $without = $this->render('<x-bbcode-editor form="compose" text="body" />');
-        $with = $this->render('<x-bbcode-editor form="compose" text="body" :with-preview="true" />');
+        $html = $this->render('<x-bbcode-editor form="compose" text="body" />');
 
-        $this->assertStringNotContainsString('data-bbcode-action="preview"', $without);
-        $this->assertStringContainsString('data-bbcode-action="preview"', $with);
-        $this->assertStringContainsString('data-bbcode-action="edit"', $with);
-    }
-
-    public function test_bbcode_editor_html_helper_renders_same_markup(): void
-    {
-        $html = BbcodeEditor::html(['form' => 'upload', 'text' => 'descr', 'withPreview' => true]);
-
-        $this->assertStringContainsString('data-form="upload"', $html);
-        $this->assertStringContainsString('data-text="descr"', $html);
-        $this->assertStringContainsString('upload-descr-preview', $html);
+        $this->assertStringNotContainsString('data-bbcode-action="preview"', $html);
+        $this->assertStringNotContainsString('data-bbcode-action="edit"', $html);
     }
 
     // --- x-datetime-input ------------------------------------------------

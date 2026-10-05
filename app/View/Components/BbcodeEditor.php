@@ -19,21 +19,13 @@ use Illuminate\View\Component;
  * listeners in public/js/common.js dispatch the data-bbcode-action /
  * data-bbcode-alterfont / data-smile attributes rendered here.
  *
- * PHP call sites that need the markup as a string use ::html(); Blade
- * views use <x-bbcode-editor>.
+ * Blade views use <x-bbcode-editor> (or <livewire:bbcode-editor> when the
+ * preview toggle should work server-side).
  */
 final class BbcodeEditor extends Component
 {
     /** @var list<int> */
     private const QUICK_SMILIES = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 16, 17, 19, 20, 21, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 39, 40, 41];
-
-    public readonly string $editId;
-
-    public readonly string $previewId;
-
-    public readonly string $btnEditId;
-
-    public readonly string $btnPreviewId;
 
     /** @var list<int> */
     public readonly array $quickSmilies;
@@ -46,16 +38,11 @@ final class BbcodeEditor extends Component
         public readonly string $form = '',
         public readonly string $text = '',
         public readonly string $content = '',
-        public readonly bool $withPreview = false,
         public readonly bool $invalid = false,
         public readonly string $describedBy = '',
         public readonly string $label = '',
         public readonly string $wireModel = '',
     ) {
-        $this->editId = "$form-$text-edit";
-        $this->previewId = "$form-$text-preview";
-        $this->btnEditId = "$form-$text-btn-edit";
-        $this->btnPreviewId = "$form-$text-btn-preview";
         $this->quickSmilies = self::QUICK_SMILIES;
         $this->enableAttach = SiteConfig::current()->attachment->enableAttach();
         $this->attachUrl = Url::schemeAndHost().'/attachment.php';
@@ -66,18 +53,5 @@ final class BbcodeEditor extends Component
         AssetAppender::js('js/bbcode-editor.js', 'footer', true, 'bbcode-editor');
 
         return view('components.bbcode-editor');
-    }
-
-    /**
-     * Render the editor to an HTML string for legacy call sites that
-     * concatenate markup into view data.
-     *
-     * @param  array{form: string, text: string, content?: string, withPreview?: bool, invalid?: bool, describedBy?: string, label?: string}  $props
-     */
-    public static function html(array $props): string
-    {
-        $component = self::resolve($props);
-
-        return $component->render()->with($component->data())->render();
     }
 }

@@ -18,7 +18,7 @@
 @if ($priceRow !== null)
 <x-settings-row layout="grid" :label="\App\Support\Locale::trans('label.torrent.price', [], null)"><input type="number" min="0" name="price" value="{{ $priceRow['value'] }}" placeholder="{{ $priceRow['placeholder'] }}" />&nbsp;&nbsp;{{ $priceRow['help'] }}</x-settings-row>
 @endif
-<div class="nx-fhead">{{ __('legacy/edit.row_description') }}<span class="text-nxm-danger">*</span></div><div class="nx-fcell">{{ $bbcodeEditorHtml }}</div>
+<div class="nx-fhead">{{ __('legacy/edit.row_description') }}<span class="text-nxm-danger">*</span></div><div class="nx-fcell"><livewire:bbcode-editor form="edittorrent" text="descr" :content="$descrContent ?? ''" /></div>
 @if ($technicalInfoEnabled)
 <x-settings-row layout="grid" :label="__('legacy/functions.text_technical_info')"><textarea name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}</x-settings-row>
 @endif

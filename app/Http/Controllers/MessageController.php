@@ -11,6 +11,7 @@ use App\DTOs\Message\StoreMessageDto;
 use App\DTOs\Message\UpdateMessageDto;
 use App\Http\Requests\DeleteMailboxMessageRequest;
 use App\Http\Requests\DeleteMessageRequest;
+use App\Http\Requests\DeleteTypedMessageRequest;
 use App\Http\Requests\EditMailboxesRequest;
 use App\Http\Requests\MoveOrDeleteMessageRequest;
 use App\Http\Requests\StoreMessageRequest;
@@ -162,13 +163,34 @@ class MessageController extends LegacyController
         ]);
     }
 
-    public function takeMessage(StoreMessageRequest $request): Response|RedirectResponse
+    public function takeMessage(StoreMessageRequest $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the validated body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/messages/send'.$suffix, 308);
+    }
+
+    public function send(StoreMessageRequest $request): Response|RedirectResponse
     {
         return $this->legacyService->takeMessage($request);
     }
 
-    public function deletemessage(DeleteMessageRequest $request): Response|RedirectResponse
+    public function deletemessage(DeleteMessageRequest $request): RedirectResponse
     {
+        // Renamed endpoint — 308 replays the validated body unchanged;
+        // the mailbox side moves into the URI.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/messages/delete/'.$request->input('type').$suffix, 308);
+    }
+
+    public function deleteTyped(DeleteTypedMessageRequest $request, string $type): Response|RedirectResponse
+    {
+        $request->merge(['type' => $type]);
+
         return $this->legacyService->deletemessage($request);
     }
 

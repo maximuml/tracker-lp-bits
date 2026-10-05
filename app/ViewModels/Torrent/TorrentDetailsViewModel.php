@@ -29,7 +29,6 @@ final class TorrentDetailsViewModel
         public readonly PeersRow $peers,
         public readonly ?DenyBanner $denyBanner,
         public readonly MagicSection $magic,
-        public readonly ThanksSection $thanks,
         public readonly string $uploadTimePrefix,
         public readonly SafeHtml $uploadTime,
         public readonly string $showOrHideTitle,

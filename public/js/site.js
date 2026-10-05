@@ -381,17 +381,6 @@ function SmileIT(smile,form,text){
    el.focus();
 }
 
-// saythanks.js
-
-function saythanks(torrentid)
-{
-ajax.postText('thanks.php','id='+torrentid).then(function(){
-document.getElementById("thanksbutton").innerHTML = document.getElementById("thanksadded").innerHTML;
-document.getElementById("nothanks").innerHTML = "";
-document.getElementById("addcuruser").innerHTML = document.getElementById("curuser").innerHTML;
-}).catch(function(){});
-}
-
 // preview.js
 
 function preview(obj) {
@@ -857,12 +846,6 @@ document.addEventListener('click', function (e) {
         if (ellipsis) { ellipsis.classList.add('nx-hidden'); }
         showAll.classList.add('nx-hidden');
         e.preventDefault();
-        return;
-    }
-
-    var thanksBtn = target.closest('#saythanks');
-    if (thanksBtn && typeof saythanks === 'function') {
-        saythanks(parseInt(thanksBtn.getAttribute('data-torrent-id'), 10));
         return;
     }
 

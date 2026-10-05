@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\PersistsKlappe;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -13,6 +14,8 @@ use Livewire\Component;
  */
 final class NewsItem extends Component
 {
+    use PersistsKlappe;
+
     public int $itemId = 0;
 
     public string $added = '';
@@ -50,12 +53,13 @@ final class NewsItem extends Component
         $this->deleteLabel = $deleteLabel;
         $this->showHideTitle = $showHideTitle;
         $this->leadingBreak = $leadingBreak;
-        $this->open = $open;
+        $this->open = $this->klappeInitial('a'.$itemId, $open);
     }
 
     public function toggle(): void
     {
         $this->open = ! $this->open;
+        $this->klappePersist('a'.$this->itemId, $this->open);
     }
 
     public function render(): View

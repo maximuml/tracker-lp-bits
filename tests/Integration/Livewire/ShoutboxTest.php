@@ -48,6 +48,22 @@ final class ShoutboxTest extends TestCase
         return $this->actor(0);
     }
 
+    /** @return array<string, mixed> */
+    private function mountParams(bool $canManage = false): array
+    {
+        return [
+            'cardTitle' => 'Shoutbox',
+            'autoRefreshLabel' => 'Auto refresh',
+            'refreshSeconds' => '120',
+            'secondsLabel' => 'seconds',
+            'historyLabel' => 'History',
+            'canManage' => $canManage,
+            'clearConfirm' => 'Sure?',
+            'clearLabel' => 'Clear',
+            'showHideTitle' => 'Show/Hide',
+        ];
+    }
+
     private function insertMessage(int $userId, string $text = 'Hello'): int
     {
         return (int) DB::table('shoutbox')->insertGetId([
@@ -63,7 +79,7 @@ final class ShoutboxTest extends TestCase
         $this->insertMessage(1, 'livewire render check');
         app()->instance(ActorContext::class, $this->actor(1));
 
-        Livewire::test(Shoutbox::class)
+        Livewire::test(Shoutbox::class, $this->mountParams())
             ->assertSee('livewire render check')
             ->assertOk();
     }
@@ -72,7 +88,7 @@ final class ShoutboxTest extends TestCase
     {
         app()->instance(ActorContext::class, $this->actor(1));
 
-        Livewire::test(Shoutbox::class)
+        Livewire::test(Shoutbox::class, $this->mountParams())
             ->set('text', 'hello from livewire')
             ->call('send')
             ->assertSet('text', '')
@@ -85,7 +101,7 @@ final class ShoutboxTest extends TestCase
     {
         app()->instance(ActorContext::class, $this->actor(1));
 
-        Livewire::test(Shoutbox::class)
+        Livewire::test(Shoutbox::class, $this->mountParams())
             ->set('text', '   ')
             ->call('send');
 
@@ -96,10 +112,36 @@ final class ShoutboxTest extends TestCase
     {
         app()->instance(ActorContext::class, $this->guestActor());
 
-        Livewire::test(Shoutbox::class)
+        Livewire::test(Shoutbox::class, $this->mountParams())
             ->set('text', 'guest shout')
             ->call('send');
 
         $this->assertSame(0, DB::table('shoutbox')->count());
+    }
+
+    public function test_toggle_collapses_and_expands_the_card(): void
+    {
+        app()->instance(ActorContext::class, $this->actor(1));
+
+        Livewire::test(Shoutbox::class, $this->mountParams())
+            ->assertSee('class="minus"', false)
+            ->call('toggle')
+            ->assertSet('open', false)
+            ->assertSee('class="plus"', false)
+            ->assertSee('nx-hidden')
+            ->call('toggle')
+            ->assertSet('open', true)
+            ->assertDontSee('kshoutbox" class="p-[10pt] nx-hidden');
+    }
+
+    public function test_expand_event_opens_a_collapsed_card(): void
+    {
+        app()->instance(ActorContext::class, $this->actor(1));
+
+        Livewire::test(Shoutbox::class, $this->mountParams())
+            ->call('toggle')
+            ->assertSet('open', false)
+            ->dispatch('shoutbox-expand')
+            ->assertSet('open', true);
     }
 }

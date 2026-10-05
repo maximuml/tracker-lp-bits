@@ -186,14 +186,15 @@ test.describe('compose form', () => {
     expect(bodyFocused, 'Tab from subject should reach body').toBe(true);
     await page.keyboard.type('a11y spec body');
 
-    await page.locator('#previewbutton').focus();
+    await page.getByRole('button', { name: 'Preview' }).focus();
     await page.keyboard.press('Enter');
-    await expect(page.locator('#previewouter')).toBeVisible();
-    await expect(page.locator('#unpreviewbutton')).toBeVisible();
+    await expect(
+      page.locator('.nx-box:not(.text-center):has-text("a11y spec body")'),
+    ).toBeVisible();
 
-    await page.locator('#unpreviewbutton').focus();
+    await page.getByRole('button', { name: 'Edit' }).focus();
     await page.keyboard.press('Enter');
-    await expect(page.locator('#editorouter')).toBeVisible();
+    await expect(page.locator('textarea#body')).toBeVisible();
 
     // The submit control is reachable and enabled from the keyboard.
     const submit = page.locator('#qr');

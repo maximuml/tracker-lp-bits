@@ -50,6 +50,7 @@ final class BbcodeEditor extends Component
         public readonly bool $invalid = false,
         public readonly string $describedBy = '',
         public readonly string $label = '',
+        public readonly string $wireModel = '',
     ) {
         $this->editId = "$form-$text-edit";
         $this->previewId = "$form-$text-preview";

@@ -56,12 +56,16 @@ final class SecurityHeaders
         // 'unsafe-inline'): legacy JS toggles visibility via element.style,
         // and a strict policy silently breaks show/hide controls. Style
         // attributes cannot execute script — script-src stays nonce-strict.
+        // 'unsafe-eval' is allowed on legacy routes too: Livewire evaluates
+        // wire:* expressions via new Function() — without it every wire:click
+        // on public pages throws EvalError and no request fires. Script tags
+        // still need the nonce (or 'self'), so inline XSS stays blocked.
         $styleSrc = $isFilament
             ? "style-src 'self' 'unsafe-inline'"
             : "style-src 'self' 'nonce-{$nonce}'; style-src-elem 'self' 'nonce-{$nonce}'; style-src-attr 'unsafe-inline'";
         $scriptSrc = $isFilament
             ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
-            : "script-src 'self' 'nonce-{$nonce}' https://challenges.cloudflare.com";
+            : "script-src 'self' 'unsafe-eval' 'nonce-{$nonce}' https://challenges.cloudflare.com";
 
         // Violation reporting: report-uri covers Firefox/legacy agents,
         // report-to + Reporting-Endpoints covers the Reporting API (Chrome).

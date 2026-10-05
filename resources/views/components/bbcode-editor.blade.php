@@ -104,7 +104,7 @@
             <iframe src="{{ $attachUrl }}" class="bbcode-attach" title="{{ 'Attachments' }}"></iframe>
         @endif
         <div class="bbcode-body">
-            <textarea class="bbcode" cols="100" name="{{ $text }}" id="{{ $text }}" rows="20" aria-label="{{ $label !== '' ? $label : $text }}" data-ctrlenter="compose:qr"@if ($invalid) aria-invalid="true"@if ($describedBy !== '') aria-describedby="{{ $describedBy }}"@endif @endif>{{ $content }}</textarea>
+            <textarea class="bbcode" cols="100" name="{{ $text }}" id="{{ $text }}" rows="20" aria-label="{{ $label !== '' ? $label : $text }}" data-ctrlenter="compose:qr"@if ($invalid) aria-invalid="true"@if ($describedBy !== '') aria-describedby="{{ $describedBy }}"@endif @endif @if ($wireModel !== '') wire:model="{{ $wireModel }}"@endif>{{ $content }}</textarea>
             <div class="bbcode-smilies-wrap">
                 <div class="bbcode-smilies">
                     @foreach ($quickSmilies as $smily)

@@ -33,7 +33,7 @@ final class AuthPagesRenderAssetsTest extends TestCase
         $html = (string) $response->getContent();
 
         $this->assertStringContainsString(
-            '<script type="text/javascript" src="js/auth-form.js"></script>',
+            '<script type="text/javascript" src="js/auth-form.js?v=',
             $html,
             'auth-form.js must be a real <script> tag — the signup submit handler lives there',
         );
@@ -52,7 +52,7 @@ final class AuthPagesRenderAssetsTest extends TestCase
         $html = (string) $response->getContent();
 
         $this->assertStringContainsString(
-            '<script type="text/javascript" src="js/passkey.js"></script>',
+            '<script type="text/javascript" src="js/passkey.js?v=',
             $html,
             'passkey.js must be a real <script> tag — passkey login depends on it',
         );

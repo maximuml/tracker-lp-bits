@@ -47,6 +47,25 @@ final class AssetAppender
     }
 
     /**
+     * Append a ?v=<filemtime> cache-buster to a local asset path so a
+     * deploy picks up changed JS/CSS instead of serving heuristic-cached
+     * copies. External URLs and files that do not exist pass through
+     * untouched.
+     */
+    public static function versionedSrc(string $src): string
+    {
+        if (str_contains($src, '://') || str_contains($src, '?')) {
+            return $src;
+        }
+        $path = public_path(ltrim($src, '/'));
+        if (! is_file($path)) {
+            return $src;
+        }
+
+        return $src.'?v='.filemtime($path);
+    }
+
+    /**
      * Get the CSP nonce from the current request, or empty string if unavailable.
      */
     private static function cspNonce(): string

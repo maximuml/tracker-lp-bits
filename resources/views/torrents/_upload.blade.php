@@ -132,4 +132,4 @@
 				<div class="nx-upload__submit"><span>{{ __('legacy/upload.text_read_rules') ?? '' }}</span> <input id="qr" type="submit" class="btn" value="{{ __('legacy/upload.submit_upload') ?? '' }}" /></div>
 		</div>
 	</form>
-<script src="js/upload.js" type="text/javascript"></script>
+<script src="{{ \App\Support\AssetAppender::versionedSrc('js/upload.js') }}" type="text/javascript"></script>

@@ -45,6 +45,12 @@ final class RouteInventoryTest extends TestCase
         // (passkey actions are guest-facing, the rest get a JSON 401 via
         // LegacyAuth::requireLoginFromContext)
         'ajax' => true,
+        // Login-page passkey assertions — guest-facing by design (they
+        // run before the user has a session; the WebAuthn challenge +
+        // signature IS the credential). The other passkey endpoints sit
+        // behind auth.nexus in the /web group.
+        'web/passkey/get-args' => true,
+        'web/passkey/get' => true,
         // Tracker protocol — uses passkey, not session/token guard
         'announce' => true,
         'announce.php' => true,

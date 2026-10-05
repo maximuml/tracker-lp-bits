@@ -13,7 +13,6 @@ use App\Models\Setting;
 use App\Repositories\SearchPageRepository;
 use App\Repositories\TorrentListingRepository;
 use App\Repositories\UsercpSecurityCommand;
-use App\Services\AjaxService;
 use App\Services\AttachmentMutationService;
 use App\Services\SecureTokenService;
 use App\Services\UsersearchPageService;
@@ -57,7 +56,6 @@ class UtilityController extends LegacyController
 
     public function __construct(private readonly AttachmentRepositoryInterface $attachmentRepository, private readonly TorrentListingRepository $torrentListingRepository, private readonly UsercpSecurityCommand $usercpSecurityCommand, private readonly UserRepositoryInterface $userRepository,
         UsersearchPageService $usersearchPageService,
-        private readonly AjaxService $ajaxService,
         SearchPageRepository $searchPageRepository,
         CurrentUser $currentUser,
         ?LegacyRedisCache $legacyRedisCache,
@@ -107,50 +105,27 @@ class UtilityController extends LegacyController
         }
 
         $action = (string) $request->input('action', '');
-        $params = $request->input('params', []);
 
-        $passkeyActions = ['getPasskeyGetArgs', 'processPasskeyGet'];
-        if (! in_array($action, $passkeyActions, true)) {
+        // The two login-page passkey assertions ran pre-auth in the old
+        // dispatcher — their REST endpoints are guest-facing too.
+        $guestActions = ['getPasskeyGetArgs', 'processPasskeyGet'];
+        if (! in_array($action, $guestActions, true)) {
             LegacyAuth::requireLoginFromContext();
         }
 
-        // Migrated actions have their own REST endpoints — 308 redirects
-        // replay method + body, so legacy {action, params} POSTs land there
-        // byte-identically and the target FormRequest flattens the envelope.
+        // Every action migrated to its own REST endpoint — 308 redirects
+        // replay method + body, so legacy {action, params} POSTs land
+        // there byte-identically and the target FormRequest flattens
+        // the envelope.
         $redirectUri = LegacyAjaxRedirects::uriFor($action);
         if ($redirectUri !== null) {
             return redirect()->to($redirectUri, 308);
         }
 
-        if (! in_array($action, AjaxService::ALLOWED_ACTIONS, true)) {
-            $currentUser = $this->currentUser->get() ?? [];
-            Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
+        $currentUser = $this->currentUser->get() ?? [];
+        Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
 
-            return response()->json(Api::call(1, "Invalid action: {$action}", $request->only(['action', 'params'])));
-        }
-
-        try {
-            $result = $this->ajaxService->dispatch($action, $params);
-
-            return response()->json(Api::successWithContext($result));
-        } catch (\Throwable $exception) {
-            Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
-
-            return response()->json(Api::failWithContext(self::clientSafeMessage($exception), $request->only(['action', 'params'])));
-        }
-    }
-
-    /**
-     * Domain exceptions carry user-facing text the legacy JS displays;
-     * infrastructure failures (PDO/QueryException, PHP engine errors) must not leak.
-     */
-    private static function clientSafeMessage(\Throwable $exception): string
-    {
-        if ($exception instanceof \PDOException || $exception instanceof \Error) {
-            return 'Internal error';
-        }
-
-        return $exception->getMessage();
+        return response()->json(Api::call(1, "Invalid action: {$action}", $request->only(['action', 'params'])));
     }
 
     public function attachment(Request $request): Response

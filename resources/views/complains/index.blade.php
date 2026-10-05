@@ -87,20 +87,19 @@
     @if (! empty($complain['answered']) && (int) $complain['answered'] !== 0)
         <p class="text-center">{{ __('legacy/complains.text_closed') ?? 'This complain has been closed.' }}</p>
     @else
-        <br /><br /><div class="nx-box text-center"><b>{{ __('legacy/complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action=""><input type="hidden" name="action" value="reply" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $complain['uuid'] ?? '' }}" /><br />
+        <br /><br /><div class="nx-box text-center"><b>{{ __('legacy/complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action="/web/complains/reply"><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $complain['uuid'] ?? '' }}" /><br />
         {{ $replyBoxHtml }}
         </form></div>
     @endif
 
     @if ($isAdmin)
-        <form action="" method="post"><input type="hidden" name="action" value="{{ ! empty($complain['answered']) ? 'unanswered' : 'answered' }}" /><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button>{{ ! empty($complain['answered']) ? (__('legacy/complains.text_unanswer_it')) : (__('legacy/complains.text_answer_it')) }}</button></form>
+        <form action="{{ ! empty($complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post"><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button>{{ ! empty($complain['answered']) ? (__('legacy/complains.text_unanswer_it')) : (__('legacy/complains.text_answer_it')) }}</button></form>
     @endif
 
 @else
     <section class="nx-idx-card">
     <h2>{{ __('legacy/complains.text_new_complain') ?? 'New complain' }}</h2>
-    <form action="" method="post">
-        <input type="hidden" name="action" value="new" />
+    <form action="/web/complains/new" method="post">
         <div class="nx-fgrid nx-fgrid--flat">
             <div class="nx-fhead">{{ __('legacy/complains.text_new_email') ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" autocomplete="email" /></div>
             <div class="nx-fhead">{{ __('legacy/complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('legacy/complains.text_new_body_placeholder') ?? '' }}"></textarea></div>

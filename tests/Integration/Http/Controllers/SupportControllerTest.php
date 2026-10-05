@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\SupportController;
+use App\Http\Requests\ComplainNewRequest;
+use App\Http\Requests\ComplainReplyRequest;
+use App\Http\Requests\ComplainToggleRequest;
 use App\Models\User;
 use App\Repositories\ToolRepository;
 use App\Support\Cache\LegacyRedisCache;
@@ -73,8 +76,7 @@ final class SupportControllerTest extends TestCase
         ]);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'new',
+        $request = ComplainNewRequest::create('/web/complains/new', 'POST', [
             'email' => 'test@example.com',
             'body' => 'Help',
             'imagehash' => 'guestcaptcha',
@@ -82,7 +84,7 @@ final class SupportControllerTest extends TestCase
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainNewPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('action=view', $response->getTargetUrl());
@@ -94,15 +96,14 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUser(null);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'reply',
+        $request = ComplainReplyRequest::create('/web/complains/reply', 'POST', [
             'id' => $complainId,
             'uuid' => 'wrong-uuid',
             'body' => 'Guest reply',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainReplyPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
@@ -115,8 +116,7 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUser(null);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'reply',
+        $request = ComplainReplyRequest::create('/web/complains/reply', 'POST', [
             'id' => $complainId,
             'uuid' => $uuid,
             'body' => 'Guest reply',
@@ -124,7 +124,7 @@ final class SupportControllerTest extends TestCase
         $request->headers->set('referer', '/complains.php?action=view&id='.$uuid);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainReplyPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/complains.php', $response->getTargetUrl());
@@ -135,14 +135,13 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUser(null);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'reply',
+        $request = ComplainReplyRequest::create('/web/complains/reply', 'POST', [
             'id' => 0,
             'body' => '',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainReplyPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('empty complain', (string) $response->getContent());
@@ -153,13 +152,12 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUser(null);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'answered',
+        $request = ComplainToggleRequest::create('/web/complains/answered', 'POST', [
             'id' => 1,
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainAnsweredPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
@@ -191,15 +189,14 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, 14);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'reply',
+        $request = ComplainReplyRequest::create('/web/complains/reply', 'POST', [
             'id' => $complainId,
             'body' => 'Reply body',
         ]);
         $request->headers->set('referer', '/complains.php?action=view&id=abc');
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainReplyPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/complains.php', $response->getTargetUrl());
@@ -213,14 +210,13 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, 14);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'reply',
+        $request = ComplainReplyRequest::create('/web/complains/reply', 'POST', [
             'id' => 999,
             'body' => 'Reply body',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainReplyPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Complain not found', (string) $response->getContent());
@@ -236,14 +232,13 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, 14);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'answered',
+        $request = ComplainToggleRequest::create('/web/complains/answered', 'POST', [
             'id' => $complainId,
         ]);
         $request->headers->set('referer', '/complains.php?action=list');
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainAnsweredPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/complains.php', $response->getTargetUrl());
@@ -257,14 +252,13 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, 14);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'reply',
+        $request = ComplainReplyRequest::create('/web/complains/reply', 'POST', [
             'id' => 0,
             'body' => 'Reply body',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainReplyPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('empty complain', (string) $response->getContent());
@@ -278,17 +272,49 @@ final class SupportControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, 14);
 
         $controller = app(SupportController::class);
-        $request = Request::create('/complains', 'POST', [
-            'action' => 'reply',
+        $request = ComplainReplyRequest::create('/web/complains/reply', 'POST', [
             'id' => 5,
             'body' => '',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->complainReplyPost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('empty complain', (string) $response->getContent());
+    }
+
+    public function test_complains_post_redirects_new_to_rest_endpoint(): void
+    {
+        $this->mockCurrentUser(null);
+
+        $controller = app(SupportController::class);
+        $request = Request::create('/complains', 'POST', ['action' => 'new']);
+        app()->instance('request', $request);
+
+        $response = $controller->complainsPost($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringEndsWith('/web/complains/new', $response->getTargetUrl());
+    }
+
+    public function test_complains_post_redirects_reply_and_toggle_to_rest_endpoints(): void
+    {
+        $this->mockCurrentUser(null);
+
+        $controller = app(SupportController::class);
+
+        foreach (['reply' => 'reply', 'answered' => 'answered', 'unanswered' => 'unanswered'] as $action => $verb) {
+            $request = Request::create('/complains', 'POST', ['action' => $action]);
+            app()->instance('request', $request);
+
+            $response = $controller->complainsPost($request);
+
+            $this->assertInstanceOf(RedirectResponse::class, $response);
+            $this->assertSame(308, $response->getStatusCode());
+            $this->assertStringEndsWith('/web/complains/'.$verb, $response->getTargetUrl());
+        }
     }
 
     private function insertComplain(string $email = 'test@test.com', string $uuid = 'test-uuid-123'): int

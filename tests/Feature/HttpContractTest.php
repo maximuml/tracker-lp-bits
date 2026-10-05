@@ -74,6 +74,10 @@ final class HttpContractTest extends TestCase
         // captcha + per-IP/per-email locks on 'new', secret-uuid match on
         // guest 'reply', staff-only on 'answered'/'unanswered'
         'complains',
+        'web/complains/new',
+        'web/complains/reply',
+        'web/complains/answered',
+        'web/complains/unanswered',
     ];
 
     /**

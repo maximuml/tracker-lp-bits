@@ -6,6 +6,10 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Enums\UserClass;
 use App\Http\Controllers\LogController;
+use App\Http\Requests\ChronicleAddRequest;
+use App\Http\Requests\ChronicleDeleteRequest;
+use App\Http\Requests\ChronicleUpdateRequest;
+use App\Http\Requests\PollDeleteRequest;
 use App\Models\User;
 use App\Repositories\LogRepository;
 use App\Repositories\ToolRepository;
@@ -114,14 +118,12 @@ final class LogControllerTest extends TestCase
         app()->instance(LogRepository::class, $logRepository);
 
         $controller = app(LogController::class);
-        $request = Request::create('/log', 'POST', [
-            'action' => 'chronicle',
-            'do' => 'add',
+        $request = ChronicleAddRequest::create('/web/log/chronicle/add', 'POST', [
             'txt' => 'test entry',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacyPost($request);
+        $response = $controller->chronicleAddPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
@@ -140,14 +142,12 @@ final class LogControllerTest extends TestCase
         app()->instance(LogRepository::class, $logRepository);
 
         $controller = app(LogController::class);
-        $request = Request::create('/log', 'POST', [
-            'action' => 'chronicle',
-            'do' => 'add',
+        $request = ChronicleAddRequest::create('/web/log/chronicle/add', 'POST', [
             'txt' => '',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacyPost($request);
+        $response = $controller->chronicleAddPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
@@ -166,15 +166,13 @@ final class LogControllerTest extends TestCase
         app()->instance(LogRepository::class, $logRepository);
 
         $controller = app(LogController::class);
-        $request = Request::create('/log', 'POST', [
-            'action' => 'chronicle',
-            'do' => 'update',
+        $request = ChronicleUpdateRequest::create('/web/log/chronicle/update', 'POST', [
             'id' => 0,
             'txt' => 'updated text',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacyPost($request);
+        $response = $controller->chronicleUpdatePost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
@@ -193,14 +191,12 @@ final class LogControllerTest extends TestCase
         app()->instance(LogRepository::class, $logRepository);
 
         $controller = app(LogController::class);
-        $request = Request::create('/log', 'POST', [
-            'action' => 'chronicle',
-            'do' => 'del',
+        $request = ChronicleDeleteRequest::create('/web/log/chronicle/delete', 'POST', [
             'id' => 0,
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacyPost($request);
+        $response = $controller->chronicleDeletePost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
@@ -236,15 +232,13 @@ final class LogControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, UserClass::STAFFLEADER->value);
 
         $controller = app(LogController::class);
-        $request = Request::create('/log', 'POST', [
-            'action' => 'poll',
-            'do' => 'delete',
+        $request = PollDeleteRequest::create('/web/log/poll/delete', 'POST', [
             'pollid' => 1,
             'sure' => 0,
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->legacyPost($request);
+        $response = $controller->pollDeletePost($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Back off', (string) $response->getContent());
@@ -295,6 +289,49 @@ final class LogControllerTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Back off', (string) $response->getContent());
+    }
+
+    public function test_legacy_post_redirects_chronicle_mutations_to_rest_endpoints(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+        $this->actingAs($user);
+        $this->mockCurrentUserWithDefaults($user->id, UserClass::STAFFLEADER->value);
+
+        $controller = app(LogController::class);
+
+        foreach (['add' => 'add', 'update' => 'update', 'del' => 'delete'] as $do => $verb) {
+            $request = Request::create('/log', 'POST', [
+                'action' => 'chronicle',
+                'do' => $do,
+            ]);
+            app()->instance('request', $request);
+
+            $response = $controller->legacyPost($request);
+
+            $this->assertInstanceOf(RedirectResponse::class, $response);
+            $this->assertSame(308, $response->getStatusCode());
+            $this->assertStringEndsWith('/web/log/chronicle/'.$verb, $response->getTargetUrl());
+        }
+    }
+
+    public function test_legacy_post_redirects_poll_delete_to_rest_endpoint(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+        $this->actingAs($user);
+        $this->mockCurrentUserWithDefaults($user->id, UserClass::STAFFLEADER->value);
+
+        $controller = app(LogController::class);
+        $request = Request::create('/log?action=poll&do=delete&pollid=7', 'POST', ['sure' => 1]);
+        app()->instance('request', $request);
+
+        $response = $controller->legacyPost($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringStartsWith('http://localhost/web/log/poll/delete?', $response->getTargetUrl());
+        $this->assertStringContainsString('pollid=7', $response->getTargetUrl());
     }
 
     /**

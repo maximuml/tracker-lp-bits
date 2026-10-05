@@ -10,6 +10,7 @@ use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\InviteController;
+use App\Http\Controllers\LegacyRedirectController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ModerationController;
@@ -38,55 +39,52 @@ use Illuminate\Support\Facades\Route;
 
 // Renamed endpoints — the canonical GET URIs now live under /web/* in
 // routes/web.php; 301 forwards the query string unchanged.
-$redirect301 = fn (string $target) => fn (Request $request) => redirect()->to(
-    $target.($request->getQueryString() !== null && $request->getQueryString() !== '' ? '?'.$request->getQueryString() : ''),
-    301,
-);
+$get301 = static fn (string $from, string $to) => Route::get($from, [LegacyRedirectController::class, 'get'])->defaults('redirect_to', $to);
 
-Route::get('/upload', $redirect301('/web/upload'));
-Route::get('/bitbucket-upload', $redirect301('/web/bitbucket-upload'));
+$get301('/upload', '/web/upload');
+$get301('/bitbucket-upload', '/web/bitbucket-upload');
 Route::post('/bitbucket-upload', [BitbucketUploadController::class, 'store'])->middleware('throttle:upload');
-Route::get('/offers', $redirect301('/web/offers'));
+$get301('/offers', '/web/offers');
 Route::post('/offers', [OfferController::class, 'legacyAction'])->middleware('reject.get.mutations');
-Route::get('/torrents', $redirect301('/web/torrents'));
+$get301('/torrents', '/web/torrents');
 Route::get('/details/{id}', fn (Request $request) => redirect()->to(
     '/web/details/'.$request->route('id')
         .($request->getQueryString() !== null && $request->getQueryString() !== '' ? '?'.$request->getQueryString() : ''),
     301,
 ))->where('id', '[0-9]+');
-Route::get('/mybonus', $redirect301('/web/mybonus'));
+$get301('/mybonus', '/web/mybonus');
 Route::post('/mybonus', [MyController::class, 'bonusExchange'])->middleware('reject.get.mutations');
-Route::get('/my_bonus', $redirect301('/web/mybonus'));
+$get301('/my_bonus', '/web/mybonus');
 Route::post('/my_bonus', [MyController::class, 'bonusExchange'])->middleware('reject.get.mutations');
-Route::get('/myhr', $redirect301('/web/myhr'));
-Route::get('/topten', $redirect301('/web/topten'));
-Route::get('/log', $redirect301('/web/log'));
+$get301('/myhr', '/web/myhr');
+$get301('/topten', '/web/topten');
+$get301('/log', '/web/log');
 Route::post('/log', [LogController::class, 'legacyPost']);
-Route::get('/index', $redirect301('/web/index'));
+$get301('/index', '/web/index');
 Route::post('/index', [IndexController::class, 'legacyPost']);
-Route::get('/friends', $redirect301('/web/friends'));
+$get301('/friends', '/web/friends');
 Route::post('/friends', [FriendsController::class, 'friendsPost']);
-Route::get('/messages', $redirect301('/web/messages'));
+$get301('/messages', '/web/messages');
 Route::post('/messages', [MessageController::class, 'messagesAction'])->middleware('reject.get.mutations');
-Route::get('/getrss', $redirect301('/web/getrss'));
+$get301('/getrss', '/web/getrss');
 Route::post('/getrss', [RssController::class, 'getrssPost']);
-Route::get('/sendmessage', $redirect301('/web/sendmessage'));
-Route::get('/userhistory', $redirect301('/web/userhistory'));
-Route::get('/invite', $redirect301('/web/invite'));
+$get301('/sendmessage', '/web/sendmessage');
+$get301('/userhistory', '/web/userhistory');
+$get301('/invite', '/web/invite');
 Route::post('/invite', [InviteController::class, 'inviteAction'])->middleware('reject.get.mutations');
-Route::get('/news', $redirect301('/web/news'));
+$get301('/news', '/web/news');
 Route::post('/news', [NewsController::class, 'newsPost']);
-Route::get('/makepoll', $redirect301('/web/makepoll'));
+$get301('/makepoll', '/web/makepoll');
 Route::post('/makepoll', [PollController::class, 'makepollPost']);
-Route::get('/polloverview', $redirect301('/web/polloverview'));
+$get301('/polloverview', '/web/polloverview');
 Route::post('/polloverview', [PollController::class, 'polloverviewPost']);
-Route::get('/attendance', $redirect301('/web/attendance'));
+$get301('/attendance', '/web/attendance');
 Route::post('/attendance', [AttendanceController::class, 'attendancePost']);
 Route::post('/takemessage', [MessageController::class, 'takeMessage'])->middleware('reject.get.mutations')->name('takemessage.legacy');
 Route::post('/deletemessage', [MessageController::class, 'deletemessage'])->middleware('reject.get.mutations')->name('deletemessage.legacy');
-Route::get('/report', $redirect301('/web/report'));
+$get301('/report', '/web/report');
 Route::post('/report', [ModerationController::class, 'reportAction']);
-Route::get('/reports', $redirect301('/web/reports'));
+$get301('/reports', '/web/reports');
 
 // Phase 5.3: bans/cheaters/ipcheck migrated to Filament SecurityResource group
 Route::get('/bans', fn () => redirect('/nexusphp/security/bans'))->name('bans.legacy');
@@ -161,9 +159,9 @@ Route::get('/faqmanage', [FaqController::class, 'faqManage'])->name('faqmanage.l
 Route::post('/faqmanage', [FaqController::class, 'faqManagePost']);
 Route::get('/faqactions', [FaqController::class, 'faqActions'])->name('faqactions.legacy');
 Route::post('/faqactions', [FaqController::class, 'faqActionsPost']);
-Route::get('/search', $redirect301('/web/search'));
-Route::get('/usersearch', $redirect301('/web/usersearch'));
-Route::get('/autocomplete_torrents', $redirect301('/web/autocomplete_torrents'));
+$get301('/search', '/web/search');
+$get301('/usersearch', '/web/usersearch');
+$get301('/autocomplete_torrents', '/web/autocomplete_torrents');
 Route::get('/comment/add', [WebCommentController::class, 'create'])->middleware('throttle:comment');
 Route::post('/comment', [WebCommentController::class, 'store'])->middleware('throttle:comment');
 Route::get('/comment/{commentId}/edit', [WebCommentController::class, 'edit'])->middleware('throttle:comment');
@@ -178,19 +176,19 @@ Route::get('/moforums', fn () => redirect('/nexusphp/section/over-forums'))->nam
 Route::get('/fields', fn () => redirect('/nexusphp/torrent-custom-fields'))->name('fields.legacy');
 Route::get('/formats', fn () => redirect('/nexusphp/section/codecs'))->name('formats.legacy');
 Route::get('/videoformats', fn () => redirect('/nexusphp/section/standards'))->name('videoformats.legacy');
-Route::get('/attachment', $redirect301('/web/attachment'));
+$get301('/attachment', '/web/attachment');
 Route::post('/attachment', [UtilityController::class, 'attachmentStore'])->middleware('throttle:attachment');
-Route::get('/getattachment', $redirect301('/web/getattachment'));
-Route::get('/shoutbox_history', $redirect301('/web/shoutbox_history'));
-Route::get('/notifications', $redirect301('/web/notifications'));
+$get301('/getattachment', '/web/getattachment');
+$get301('/shoutbox_history', '/web/shoutbox_history');
+$get301('/notifications', '/web/notifications');
 Route::post('/notifications', [NotificationController::class, 'markRead'])->middleware('throttle:notifications')->name('notifications.read.legacy');
-Route::get('/latestcomments', $redirect301('/web/latestcomments'));
-Route::get('/bonus-log', $redirect301('/web/bonus-log'));
-Route::get('/task', $redirect301('/web/task'));
-Route::get('/uploaders', $redirect301('/web/uploaders'));
-Route::get('/settings', $redirect301('/web/settings'));
+$get301('/latestcomments', '/web/latestcomments');
+$get301('/bonus-log', '/web/bonus-log');
+$get301('/task', '/web/task');
+$get301('/uploaders', '/web/uploaders');
+$get301('/settings', '/web/settings');
 Route::post('/settings', [SettingsController::class, 'settingsAction'])->middleware('reject.get.mutations');
-Route::get('/freeleech', $redirect301('/web/freeleech'));
+$get301('/freeleech', '/web/freeleech');
 Route::post('/freeleech', [BonusShopController::class, 'freeleechPost']);
 Route::post('/magic', [BonusHistoryController::class, 'magic'])->middleware('reject.get.mutations')->name('magic.legacy');
 // Phase 5.6: delacctadmin/deletedisabled/massmail migrated to Filament SystemActions page
@@ -207,10 +205,10 @@ Route::get('/staffpanel', [StaffPageController::class, 'staffpanel'])->name('sta
 Route::post('/docleanup', [SystemMaintenanceController::class, 'docleanup'])->middleware('reject.get.mutations')->name('docleanup.legacy');
 Route::get('/location', [AdminToolsController::class, 'location'])->name('location.legacy');
 Route::post('/location', [AdminToolsController::class, 'locationPost']);
-Route::get('/preview', $redirect301('/web/preview'));
+$get301('/preview', '/web/preview');
 Route::post('/preview', [UtilityController::class, 'previewSubmit']);
-Route::get('/moresmilies', $redirect301('/web/moresmilies'));
-Route::get('/smilies', $redirect301('/web/smilies'));
+$get301('/moresmilies', '/web/moresmilies');
+$get301('/smilies', '/web/smilies');
 Route::get('/mailtest', [SystemMaintenanceController::class, 'mailtest'])->name('mailtest.legacy');
 Route::post('/mailtest', [SystemMaintenanceController::class, 'mailtestAction']);
 Route::get('/mysql_stats', [SystemMaintenanceController::class, 'mysqlStats'])->name('mysql_stats.legacy');
@@ -225,7 +223,7 @@ Route::post('/adduser', [UserAdminController::class, 'adduserPost']);
 Route::get('/bitbucketlog', [InfoController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
 Route::post('/bitbucketlog', [InfoController::class, 'bitbucketlogPost']);
 Route::post('/delete', [TorrentDeleteController::class, 'delete'])->middleware('reject.get.mutations')->name('delete.legacy');
-Route::get('/downloadnotice', $redirect301('/web/downloadnotice'));
+$get301('/downloadnotice', '/web/downloadnotice');
 Route::post('/downloadnotice', [TorrentDownloadController::class, 'downloadnoticeAction'])->middleware('reject.get.mutations');
 Route::post('/thanks', [TorrentBookmarkController::class, 'thanks'])->middleware('reject.get.mutations')->name('thanks.legacy');
 Route::get('/increment-bulk', [SystemBulkController::class, 'incrementBulk'])->name('increment-bulk.legacy');

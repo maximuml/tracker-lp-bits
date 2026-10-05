@@ -479,19 +479,6 @@ else{
 window.attachEvent("onkeydown",changepage,false);
 }
 
-// bookmark.js
-function bookmark(torrentid,counter)
-{
-ajax.fetchText('bookmark.php?torrentid='+torrentid).then(function(result){bmicon(result,counter)}).catch(function(){});
-}
-function bmicon(status,counter)
-{
-	if (status=="added")
-		document.getElementById("bookmark"+counter).innerHTML="<img class=\"bookmark\" src=\"pic/trans.gif\" alt=\"Bookmarked\" />";
-	else if (status=="deleted")
-		document.getElementById("bookmark"+counter).innerHTML="<img class=\"delbookmark\" src=\"pic/trans.gif\" src=\"pic/trans.gif\" alt=\"Unbookmarked\" />";
-}
-
 // check.js
 var checkflag = "false";
 function check(field,checkall_name,uncheckall_name) {
@@ -796,13 +783,6 @@ document.addEventListener('click', function (e) {
     var orderBtn = target.closest('#order');
     if (orderBtn && typeof dropmenu === 'function') {
         dropmenu(orderBtn);
-        return;
-    }
-
-    var bmLink = target.closest('a[data-bookmark-torrent]');
-    if (bmLink && typeof bookmark === 'function') {
-        bookmark(parseInt(bmLink.getAttribute('data-bookmark-torrent'), 10), bmLink.getAttribute('data-bookmark-counter') || '0');
-        e.preventDefault();
         return;
     }
 

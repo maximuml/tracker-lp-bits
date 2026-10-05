@@ -25,7 +25,6 @@ use App\Support\SearchBox;
 use App\Support\Time;
 use App\Support\Torrent\TorrentStatus;
 use App\Support\TorrentAccess;
-use App\Support\TorrentBookmark;
 use App\Support\UserDisplay;
 use App\ViewModels\Torrent\ApprovalBadge;
 use App\ViewModels\Torrent\CategoryIcon;
@@ -119,10 +118,6 @@ final class TorrentListViewFactory
         $timeAlive = ($user['timetype'] ?? null) == UserTimeType::TIMEALIVE->value;
         $promotionNote = ($user['appendpromotion'] ?? null) == UserAppendPromotion::HIGHLIGHT->value;
         $canViewAnonymous = Permission::canViewAnonymous();
-
-        $bookmarkIds = ($user['bmicon'] ?? false)
-            ? TorrentBookmark::bookmarkArray($cache, $user['id'])
-            : [];
 
         $lastcoms = [];
         if ($showComments && $showLastCom) {
@@ -241,7 +236,6 @@ final class TorrentListViewFactory
 
             $showDownload = (bool) ($user['dlicon'] ?? false) && (bool) ($user['downloadpos'] ?? true);
             $showBookmark = (bool) ($user['bmicon'] ?? false);
-            $bookmarked = $showBookmark && in_array($id, $bookmarkIds, false);
 
             $waitText = null;
             $waitClass = null;
@@ -324,9 +318,6 @@ final class TorrentListViewFactory
                 showDownload: $showDownload,
                 downloadUrl: 'download.php?id='.$id,
                 showBookmark: $showBookmark,
-                bookmarkElementId: 'bookmark'.$counter,
-                bookmarkCounter: $counter,
-                bookmarked: $bookmarked,
                 waitText: $waitText,
                 waitClass: $waitClass,
                 commentsUrl: 'details.php?id='.$id.'&hit=1&cmtpage=1#startcomments',

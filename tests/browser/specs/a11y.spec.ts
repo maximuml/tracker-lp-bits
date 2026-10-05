@@ -189,7 +189,7 @@ test.describe('compose form', () => {
     await page.getByRole('button', { name: 'Preview' }).focus();
     await page.keyboard.press('Enter');
     await expect(
-      page.locator('.nx-box:has-text("a11y spec body")'),
+      page.locator('.nx-box:not(.text-center):has-text("a11y spec body")'),
     ).toBeVisible();
 
     await page.getByRole('button', { name: 'Edit' }).focus();

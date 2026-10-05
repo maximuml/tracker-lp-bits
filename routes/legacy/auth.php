@@ -22,10 +22,8 @@ use App\Http\Controllers\RssController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StaffMessageController;
 use App\Http\Controllers\StaffModerationController;
-use App\Http\Controllers\StaffPageController;
 use App\Http\Controllers\SystemBulkController;
 use App\Http\Controllers\SystemMaintenanceController;
-use App\Http\Controllers\TorrentAjaxController;
 use App\Http\Controllers\TorrentBookmarkController;
 use App\Http\Controllers\TorrentDeleteController;
 use App\Http\Controllers\TorrentDownloadController;
@@ -102,24 +100,24 @@ Route::get('/iphistory', function (Request $request) {
     return $id > 0 ? redirect("/nexusphp/user/users/{$id}") : redirect('/nexusphp/user/users');
 })->name('iphistory.legacy');
 Route::get('/ipsearch', fn () => redirect('/nexusphp/user/users'))->name('ipsearch.legacy');
-Route::get('/modtask', [StaffModerationController::class, 'modtask'])->name('modtask.legacy');
+Route::get('/modtask', $redirect301('/web/modtask'));
 Route::post('/modtask', [StaffModerationController::class, 'modtaskPost']);
-Route::get('/staff', [StaffPageController::class, 'staff'])->name('staff.legacy');
+Route::get('/staff', $redirect301('/web/staff'));
 
 // Phase 5.4: staffbox migrated to Filament StaffMessageResource
 Route::get('/staffbox', fn () => redirect('/nexusphp/security/staff-messages'))->name('staffbox.legacy');
 Route::post('/staffbox', fn () => redirect('/nexusphp/security/staff-messages'))->name('staffbox.legacy.post');
 
 // Phase 5.4: staffmess/takestaffmess (mass PM) kept as legacy for now — admin-only mass-mail form
-Route::get('/staffmess', [StaffMessageController::class, 'staffmess'])->name('staffmess.legacy');
+Route::get('/staffmess', $redirect301('/web/staffmess'));
 Route::post('/staffmess', [StaffMessageController::class, 'staffmessPost']);
 Route::post('/takestaffmess', [StaffMessageController::class, 'takeStaffmess'])->middleware('reject.get.mutations')->name('takestaffmess.legacy');
 
 // Phase 5.4: contactstaff stays legacy (user-facing form to contact staff)
-Route::get('/contactstaff', [StaffMessageController::class, 'contactstaff'])->name('contactstaff.legacy');
+Route::get('/contactstaff', $redirect301('/web/contactstaff'));
 Route::post('/contactstaff', [StaffMessageController::class, 'contactstaffPost']);
 Route::post('/takecontact', [StaffMessageController::class, 'takecontact'])->middleware('reject.get.mutations')->name('takecontact.legacy');
-Route::get('/modrules', [StaffModerationController::class, 'modrules'])->name('modrules.legacy');
+Route::get('/modrules', $redirect301('/web/modrules'));
 Route::post('/modrules', [StaffModerationController::class, 'modrulesPost']);
 
 // Phase 5.5: stats/allagents migrated to Filament dashboard widgets
@@ -146,20 +144,20 @@ Route::post('/takeconfirm', function (Request $request) {
         ? redirect("/nexusphp/user/users/{$id}")
         : redirect('/nexusphp/user/users');
 })->name('takeconfirm.legacy');
-Route::get('/user-ban-log', [AdminToolsController::class, 'userBanLog'])->name('user-ban-log.legacy');
+Route::get('/user-ban-log', $redirect301('/web/user-ban-log'));
 Route::post('/user-ban-log', [AdminToolsController::class, 'userBanLogPost']);
-Route::get('/torrent_info', [TorrentMaintenanceController::class, 'torrentInfo'])->name('torrent_info.legacy');
-Route::get('/viewsnatches', [TorrentAjaxController::class, 'viewSnatches'])->name('viewsnatches.legacy');
+Route::get('/torrent_info', $redirect301('/web/torrent_info'));
+Route::get('/viewsnatches', $redirect301('/web/viewsnatches'));
 Route::post('/takeflush', [TorrentMaintenanceController::class, 'takeFlush'])->middleware('reject.get.mutations')->name('takeflush.legacy');
 Route::post('/takereseed', [TorrentMaintenanceController::class, 'takeReseed'])->middleware('reject.get.mutations')->name('takereseed.legacy');
-Route::get('/clearcache', [AdminToolsController::class, 'clearCache'])->name('clearcache.legacy');
+Route::get('/clearcache', $redirect301('/web/clearcache'));
 Route::post('/clearcache', [AdminToolsController::class, 'clearCachePost']);
 Route::post('/fastdelete', [TorrentDeleteController::class, 'fastDelete'])->middleware('reject.get.mutations')->name('fastdelete.legacy');
-Route::get('/donated', [InfoController::class, 'donated'])->name('donated.legacy');
+Route::get('/donated', $redirect301('/web/donated'));
 Route::post('/donated', [InfoController::class, 'donatedPost']);
-Route::get('/faqmanage', [FaqController::class, 'faqManage'])->name('faqmanage.legacy');
+Route::get('/faqmanage', $redirect301('/web/faqmanage'));
 Route::post('/faqmanage', [FaqController::class, 'faqManagePost']);
-Route::get('/faqactions', [FaqController::class, 'faqActions'])->name('faqactions.legacy');
+Route::get('/faqactions', $redirect301('/web/faqactions'));
 Route::post('/faqactions', [FaqController::class, 'faqActionsPost']);
 Route::get('/search', $redirect301('/web/search'));
 Route::get('/usersearch', $redirect301('/web/usersearch'));
@@ -202,37 +200,37 @@ Route::post('/massmail', fn () => redirect('/nexusphp/system-actions'))->name('m
 Route::post('/takeamountupload', [SystemBulkController::class, 'takeamountupload'])->middleware('reject.get.mutations')->name('takeamountupload.legacy');
 Route::post('/takeinvite', [SystemBulkController::class, 'takeinvite'])->middleware('reject.get.mutations')->name('takeinvite.legacy');
 Route::post('/takeupdate', [SystemBulkController::class, 'takeupdate'])->middleware('reject.get.mutations')->name('takeupdate.legacy');
-Route::get('/users', [UserAdminController::class, 'users'])->name('users.legacy');
-Route::get('/staffpanel', [StaffPageController::class, 'staffpanel'])->name('staffpanel.legacy');
+Route::get('/users', $redirect301('/web/users'));
+Route::get('/staffpanel', $redirect301('/web/staffpanel'));
 Route::post('/docleanup', [SystemMaintenanceController::class, 'docleanup'])->middleware('reject.get.mutations')->name('docleanup.legacy');
-Route::get('/location', [AdminToolsController::class, 'location'])->name('location.legacy');
+Route::get('/location', $redirect301('/web/location'));
 Route::post('/location', [AdminToolsController::class, 'locationPost']);
 Route::get('/preview', $redirect301('/web/preview'));
 Route::post('/preview', [UtilityController::class, 'previewSubmit']);
 Route::get('/moresmilies', $redirect301('/web/moresmilies'));
 Route::get('/smilies', $redirect301('/web/smilies'));
-Route::get('/mailtest', [SystemMaintenanceController::class, 'mailtest'])->name('mailtest.legacy');
+Route::get('/mailtest', $redirect301('/web/mailtest'));
 Route::post('/mailtest', [SystemMaintenanceController::class, 'mailtestAction']);
-Route::get('/mysql_stats', [SystemMaintenanceController::class, 'mysqlStats'])->name('mysql_stats.legacy');
-Route::get('/reset', [UserAdminController::class, 'reset'])->name('reset.legacy');
+Route::get('/mysql_stats', $redirect301('/web/mysql_stats'));
+Route::get('/reset', $redirect301('/web/reset'));
 Route::post('/reset', [UserAdminController::class, 'resetPost']);
-Route::get('/self-enable', [UserAdminController::class, 'selfEnable'])->name('self-enable.legacy');
+Route::get('/self-enable', $redirect301('/web/self-enable'));
 Route::post('/self-enable', [UserAdminController::class, 'selfEnablePost']);
-Route::get('/unco', [UserAdminController::class, 'unco'])->name('unco.legacy');
+Route::get('/unco', $redirect301('/web/unco'));
 Route::post('/unco', [UserAdminController::class, 'uncoPost']);
-Route::get('/adduser', [UserAdminController::class, 'adduser'])->name('adduser.legacy');
+Route::get('/adduser', $redirect301('/web/adduser'));
 Route::post('/adduser', [UserAdminController::class, 'adduserPost']);
-Route::get('/bitbucketlog', [InfoController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
+Route::get('/bitbucketlog', $redirect301('/web/bitbucketlog'));
 Route::post('/bitbucketlog', [InfoController::class, 'bitbucketlogPost']);
 Route::post('/delete', [TorrentDeleteController::class, 'delete'])->middleware('reject.get.mutations')->name('delete.legacy');
 Route::get('/downloadnotice', $redirect301('/web/downloadnotice'));
 Route::post('/downloadnotice', [TorrentDownloadController::class, 'downloadnoticeAction'])->middleware('reject.get.mutations');
 Route::post('/thanks', [TorrentBookmarkController::class, 'thanks'])->middleware('reject.get.mutations')->name('thanks.legacy');
-Route::get('/increment-bulk', [SystemBulkController::class, 'incrementBulk'])->name('increment-bulk.legacy');
+Route::get('/increment-bulk', $redirect301('/web/increment-bulk'));
 // Phase 5.6: maxlogin migrated to Filament LoginAttemptResource
 Route::get('/maxlogin', fn () => redirect('/nexusphp/security/login-attempts'))->name('maxlogin.legacy');
 Route::post('/maxlogin', fn () => redirect('/nexusphp/security/login-attempts'))->name('maxlogin.legacy.post');
-Route::get('/setlist_lookup', [SystemBulkController::class, 'setlistLookup'])->name('setlist_lookup.legacy');
+Route::get('/setlist_lookup', $redirect301('/web/setlist_lookup'));
 Route::post('/take-increment-bulk', [SystemBulkController::class, 'takeIncrementBulk'])->middleware('reject.get.mutations')->name('take-increment-bulk.legacy');
-Route::get('/testip', [AdminToolsController::class, 'testip'])->name('testip.legacy');
+Route::get('/testip', $redirect301('/web/testip'));
 Route::post('/testip', [AdminToolsController::class, 'testipPost']);

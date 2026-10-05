@@ -223,7 +223,7 @@ final class QueryBudgetTest extends TestCase
         $this->withNexusCookie($admin);
 
         $this->assertQueryCountBelow(45, function (): void {
-            $this->get('/staff');
+            $this->get('/web/staff');
         });
     }
 

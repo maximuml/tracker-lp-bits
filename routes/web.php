@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminToolsController;
 use App\Http\Controllers\Ajax\AttendanceAjaxController as AjaxAttendanceController;
 use App\Http\Controllers\Ajax\BenefitAjaxController as AjaxBenefitController;
 use App\Http\Controllers\Ajax\HitAndRunAjaxController as AjaxHitAndRunController;
@@ -39,7 +40,11 @@ use App\Http\Controllers\RssController;
 use App\Http\Controllers\RulesController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShoutboxController;
+use App\Http\Controllers\StaffMessageController;
+use App\Http\Controllers\StaffModerationController;
+use App\Http\Controllers\StaffPageController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\SystemBulkController;
 use App\Http\Controllers\SystemMaintenanceController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\ToolController;
@@ -51,8 +56,10 @@ use App\Http\Controllers\TorrentDetailsController;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Controllers\TorrentEditController;
 use App\Http\Controllers\TorrentListingController;
+use App\Http\Controllers\TorrentMaintenanceController;
 use App\Http\Controllers\TorrentRssController;
 use App\Http\Controllers\TorrentUploadController;
+use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\UsercpController;
 use App\Http\Controllers\UserDetailController;
 use App\Http\Controllers\UtilityController;
@@ -265,6 +272,31 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::get('downloadnotice', [TorrentDownloadController::class, 'downloadnotice'])->name('downloadnotice.legacy');
     Route::get('attachment', [UtilityController::class, 'attachment'])->middleware('throttle:attachment')->name('attachment.legacy');
     Route::get('getattachment', [UtilityController::class, 'getattachment'])->middleware('throttle:attachment')->name('getattachment.legacy');
+    Route::get('modtask', [StaffModerationController::class, 'modtask'])->name('modtask.legacy');
+    Route::get('staff', [StaffPageController::class, 'staff'])->name('staff.legacy');
+    Route::get('staffmess', [StaffMessageController::class, 'staffmess'])->name('staffmess.legacy');
+    Route::get('contactstaff', [StaffMessageController::class, 'contactstaff'])->name('contactstaff.legacy');
+    Route::get('modrules', [StaffModerationController::class, 'modrules'])->name('modrules.legacy');
+    Route::get('user-ban-log', [AdminToolsController::class, 'userBanLog'])->name('user-ban-log.legacy');
+    Route::get('torrent_info', [TorrentMaintenanceController::class, 'torrentInfo'])->name('torrent_info.legacy');
+    Route::get('viewsnatches', [TorrentAjaxController::class, 'viewSnatches'])->name('viewsnatches.legacy');
+    Route::get('clearcache', [AdminToolsController::class, 'clearCache'])->name('clearcache.legacy');
+    Route::get('donated', [InfoController::class, 'donated'])->name('donated.legacy');
+    Route::get('faqmanage', [FaqController::class, 'faqManage'])->name('faqmanage.legacy');
+    Route::get('faqactions', [FaqController::class, 'faqActions'])->name('faqactions.legacy');
+    Route::get('users', [UserAdminController::class, 'users'])->name('users.legacy');
+    Route::get('staffpanel', [StaffPageController::class, 'staffpanel'])->name('staffpanel.legacy');
+    Route::get('location', [AdminToolsController::class, 'location'])->name('location.legacy');
+    Route::get('mailtest', [SystemMaintenanceController::class, 'mailtest'])->name('mailtest.legacy');
+    Route::get('mysql_stats', [SystemMaintenanceController::class, 'mysqlStats'])->name('mysql_stats.legacy');
+    Route::get('reset', [UserAdminController::class, 'reset'])->name('reset.legacy');
+    Route::get('self-enable', [UserAdminController::class, 'selfEnable'])->name('self-enable.legacy');
+    Route::get('unco', [UserAdminController::class, 'unco'])->name('unco.legacy');
+    Route::get('adduser', [UserAdminController::class, 'adduser'])->name('adduser.legacy');
+    Route::get('bitbucketlog', [InfoController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
+    Route::get('increment-bulk', [SystemBulkController::class, 'incrementBulk'])->name('increment-bulk.legacy');
+    Route::get('setlist_lookup', [SystemBulkController::class, 'setlistLookup'])->name('setlist_lookup.legacy');
+    Route::get('testip', [AdminToolsController::class, 'testip'])->name('testip.legacy');
 });
 
 // Passkey assertion endpoints called by the login page — guest-facing,

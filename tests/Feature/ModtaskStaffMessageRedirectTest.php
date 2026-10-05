@@ -46,7 +46,7 @@ final class ModtaskStaffMessageRedirectTest extends TestCase
     public function test_staffmess_remains_legacy_route(): void
     {
         $admin = User::factory()->admin()->create();
-        $response = $this->withNexusCookie($admin)->get('/staffmess');
+        $response = $this->withNexusCookie($admin)->get('/web/staffmess');
 
         // staffmess is still a legacy route — should not redirect to Filament
         $this->assertNotEquals(302, $response->getStatusCode());
@@ -55,7 +55,7 @@ final class ModtaskStaffMessageRedirectTest extends TestCase
     public function test_contactstaff_remains_legacy_route(): void
     {
         $user = User::factory()->create();
-        $response = $this->withNexusCookie($user)->get('/contactstaff');
+        $response = $this->withNexusCookie($user)->get('/web/contactstaff');
 
         // contactstaff is still a legacy route — should not redirect to Filament
         $this->assertNotEquals(302, $response->getStatusCode());

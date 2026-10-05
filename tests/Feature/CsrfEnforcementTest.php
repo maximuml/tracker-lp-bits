@@ -189,7 +189,7 @@ final class CsrfEnforcementTest extends TestCase
         // modtask performs high-privilege user edits and must not be
         // reachable via GET (CSRF bypass vector). The reject.get.mutations
         // middleware returns 405 for GET/HEAD.
-        $response = $this->get('/modtask');
+        $response = $this->get('/web/modtask');
 
         $this->assertContains($response->status(), [405, 302]);
     }

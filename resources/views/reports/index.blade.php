@@ -4,7 +4,7 @@
 
 @section('content')
 <h1 class="text-center">{{ __('legacy/reports.text_reports')}}</h1>
-<table data-nx="data" class="mx-auto"><caption class="nx-sr-only">{{ __('legacy/reports.text_reports')}}</caption>
+<x-data-table :caption="__('legacy/reports.text_reports')" captionHidden class="mx-auto">
 <form method=post action=takeupdate.php>
 <tr>
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('legacy/reports.col_added')}}</nobr></th>
@@ -33,6 +33,6 @@
     </th>
 </tr>
 </form>
-</table>
+</x-data-table>
 {{ $pagerbottom ?? '' }}
 @endsection

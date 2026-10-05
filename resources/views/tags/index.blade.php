@@ -17,7 +17,7 @@
 
 @foreach ($tagItems ?? [] as $item)
     <p class=sub><b>{{ $item['name'] }}</b></p>
-    <table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/tags.text_tags') }}</caption>
+    <x-data-table :caption="__('legacy/tags.text_tags')" captionHidden class="main">
     <tr class="align-top"><td class="w-[25%]">{{ __('legacy/tags.text_description')}}</td><td>{{ $item['description'] }}
     <tr class="align-top"><td>{{ __('legacy/tags.text_syntax')}}</td><td><tt>{{ $item['syntax'] }}</tt>
     <tr class="align-top"><td>{{ __('legacy/tags.text_example')}}</td><td><tt>{{ $item['example'] }}</tt>
@@ -25,7 +25,7 @@
     @if ($item['remarks'] !== '')
         <tr><td>{{ __('legacy/tags.text_remarks')}}</td><td>{{ $item['remarks'] }}
     @endif
-    </table>
+    </x-data-table>
 @endforeach
 </x-frame>
 @endsection

@@ -7,12 +7,11 @@
     @if ($page === null)
         <x-frame :caption="__('legacy/complains.pending_complaints')" :center="false">
             @if (! empty($pendingRows))
-                <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/complains.pending_complaints') }}</caption>
-                <tr>
+                <x-data-table :caption="__('legacy/complains.pending_complaints')" captionHidden><x-slot:head><thead><tr>
                     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
                     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
                     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_action_view') ?? 'View' }}</th>
-                </tr>
+                </tr></thead></x-slot:head>
                 @foreach ($pendingRows as $row)
                     <tr>
                         <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
@@ -20,7 +19,7 @@
                         <td class="align-top px-2.5 py-1.5"><a href="?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
                     </tr>
                 @endforeach
-                </table>
+                </x-data-table>
             @else
                 {{ __('legacy/complains.no_pending_complaints') ?? 'No pending complaints.' }}
             @endif
@@ -30,12 +29,11 @@
     <x-frame :caption="__('legacy/complains.complaints_processed')" :center="false">
         @if (! empty($processedRows))
             {{ $pagertop ?? '' }}
-            <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/complains.complaints_processed') }}</caption>
-            <tr>
+            <x-data-table :caption="__('legacy/complains.complaints_processed')" captionHidden><x-slot:head><thead><tr>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_action_view') ?? 'View' }}</th>
-            </tr>
+            </tr></thead></x-slot:head>
             @foreach ($processedRows as $row)
                 <tr>
                     <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
@@ -43,7 +41,7 @@
                     <td class="align-top px-2.5 py-1.5"><a href="?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
                 </tr>
             @endforeach
-            </table>
+            </x-data-table>
             {{ $pagerbottom ?? '' }}
         @else
             {{ __('legacy/complains.no_complaints_have_been_processed') ?? 'No complaints have been processed.' }}

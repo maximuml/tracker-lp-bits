@@ -5,7 +5,7 @@
 @section('content')
 @if (! empty($rows ?? []))
     <x-frame :center="false">
-    <table data-nx="data"><caption class="nx-sr-only">Unconfirmed Users</caption>
+    <x-data-table caption="Unconfirmed Users" captionHidden>
         @if ($status ?? '')
             <tr>
                 <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim" colspan="5"><span class="text-nxm-danger text-[10px]">The User account has been updated!</span></td>
@@ -36,7 +36,7 @@
                 </form>
             </tr>
         @endforeach
-    </table>
+    </x-data-table>
     </x-frame>
 @endif
 @endsection

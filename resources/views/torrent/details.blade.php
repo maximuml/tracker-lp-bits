@@ -25,7 +25,7 @@
 @include('torrent.details._deny_banner', ['banner' => $details->denyBanner])
 @endif
 
-<table data-nx="data" class="w-[97%] nxm-kv"><caption class="nx-sr-only">{{ $details->title->name }}</caption>
+<x-data-table :caption="$details->title->name" captionHidden class="w-[97%] nxm-kv">
 @if ($details->downloadAllowed)
 <tr><td class="w-[1%] whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/details.row_download') }}</td><td class="align-top px-2.5 py-1.5"><a class="index" href="download.php?id={{ $torrentId }}">{{ ($torrentNamePrefix ?? '').'.'.$details->saveAs }}.torrent</a>&nbsp;&nbsp;<a id="bookmark0" href="#" data-bookmark-torrent="{{ $torrentId }}" data-bookmark-counter="0">{{ $details->bookmark }}</a>&nbsp;&nbsp;&nbsp;{{ __('legacy/details.row_upped_by') }}&nbsp;@if ($details->owner->anonymous)<i>{{ __('legacy/details.text_anonymous') }}</i>@if ($details->owner->showUsername) ({{ $details->owner->username }})@endif@elseif ($details->owner->username !== null){{ $details->owner->username }}@else<i></i>@endif{{ $details->uploadTimePrefix }}{{ $details->uploadTime }}</td></tr>
 @else
@@ -58,7 +58,7 @@
 <tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim"><span id="seeders"></span><span id="leechers"></span>{{ __('legacy/details.row_peers') }}<br /><span id="showpeer"><a href="#" data-peerlist="{{ $details->peers->torrentId }}" class="sublink">{{ __('legacy/details.text_see_full_list') }}</a></span><span id="hidepeer" class="nx-hidden"><a href="#" data-peerlist="{{ $details->peers->torrentId }}" data-peerlist-mode="hide" class="sublink">{{ __('legacy/details.text_hide_list') }}</a></span></td><td class="align-top px-2.5 py-1.5"><div id="peercount"><b>{{ $details->peers->seeders }}{{ __('legacy/details.text_seeders') }}{{ \App\Support\Strings::addS($details->peers->seeders) }}</b> | <b>{{ $details->peers->leechers }}{{ __('legacy/details.text_leechers') }}{{ \App\Support\Strings::addS($details->peers->leechers) }}</b></div><div id="peerlist"></div></td></tr>
 <x-settings-row :label="__('legacy/details.magic_value_award')">@include('torrent.details._magic', ['magic' => $details->magic])</x-settings-row>
 <x-settings-row :label="__('legacy/details.row_thanks_by')">@include('torrent.details._thanks', ['thanks' => $details->thanks])</x-settings-row>
-</table>
+</x-data-table>
 @else
 <h1 id="top">{{ __('legacy/details.text_comments_for') ?? '' }}<a href="details.php?id={{ $torrentId }}">{{ $torrentRow['name'] }}</a></h1>
 @endif

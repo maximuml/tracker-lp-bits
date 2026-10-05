@@ -61,8 +61,7 @@
 @else
     <p><strong>{{ ($success ?? false) ? '(Updated!)' : '' }}Existing Locations:</strong></p>
 @endif
-<table data-nx="data"><caption class="nx-sr-only">Manage Locations</caption>
-<tr>
+<x-data-table caption="Manage Locations" captionHidden><x-slot:head><thead><tr>
 <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>ID</b></th>
 <th class="bg-nxm-surface-alt font-semibold text-left" scope="col"><b>Name</b></th>
 <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>Pic</b></th>
@@ -76,7 +75,7 @@
 <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>P.D</b></th>
 <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>Edit</b></th>
 <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>Delete</b></th>
-</tr>
+</tr></thead></x-slot:head>
 @foreach ($rows ?? [] as $row)
 <tr>
 <td class="align-top px-2.5 py-1.5 text-center"><strong>{{ (int) $row['id'] }}</strong></td>
@@ -94,7 +93,7 @@
 <td class="align-top px-2.5 py-1.5 text-center"><a href='{{ $actionUrl ?? '' }}?delid={{ (int) $row['id'] }}'>Remove</a></td>
 </tr>
 @endforeach
-</table>
+</x-data-table>
 {{ $pagerbottom ?? '' }}
 @endif
 </x-frame>

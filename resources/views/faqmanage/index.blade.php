@@ -9,8 +9,7 @@
 @foreach (($faqCateg ?? []) as $lang => $temp2)
     @foreach ($temp2 as $id => $temp)
 <br />
-<table data-nx="data"><caption class="nx-sr-only">{{ $temp['title'] ?? 'FAQ section' }}</caption>
-<tr><th class="bg-nxm-surface-alt font-semibold" colspan="2" scope="colgroup">Position</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">Section/Item Title</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Language</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Status</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Actions</th></tr>
+<x-data-table :caption="$temp['title'] ?? 'FAQ section'" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" colspan="2" scope="colgroup">Position</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">Section/Item Title</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Language</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Status</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Actions</th></tr></thead></x-slot:head>
 <tr><td class="text-center w-[40px]"><select name="order[{{ (int) $id }}]">
     @for ($n = 1; $n <= count($temp2); $n++)
         <option value="{{ $n }}"@if ($n == ($temp['order'] ?? 0)) selected="selected"@endif>{{ $n }}</option>
@@ -26,12 +25,12 @@
         @endforeach
     @endif
 <tr><td colspan="6" class="text-center"><a href="faqactions.php?action=additem&inid={{ (int) $id }}&langid={{ (int) $lang }}">Add new item</a></td></tr>
-</table>
+</x-data-table>
     @endforeach
 @endforeach
 @if (! empty($faqOrphaned))
 <br />
-<table data-nx="data"><caption class="nx-sr-only">Orphaned Items</caption>
+<x-data-table caption="Orphaned Items" captionHidden>
 <tr><td class="text-center" colspan="3"><b>Orphaned Items</b></td></tr>
 <tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">Item Title</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Status</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Actions</th></tr>
     @foreach ($faqOrphaned as $lang => $temp2)
@@ -39,7 +38,7 @@
 <tr><td>{{ $temp['question'] ?? '' }}</td><td class="text-center w-[60px]">@if (($temp['flag'] ?? '') == "0")<span class="text-nxm-danger">Hidden</span>@elseif (($temp['flag'] ?? '') == "2")<span class="text-[#0000ff]">Updated</span>@elseif (($temp['flag'] ?? '') == "3")<span class="text-nxm-success">New</span>@else Normal @endif</td><td class="text-center w-[60px]"><a href="faqactions.php?action=edit&id={{ (int) $id }}">edit</a> <a href="faqactions.php?action=delete&id={{ (int) $id }}">delete</a></td></tr>
         @endforeach
     @endforeach
-</table>
+</x-data-table>
 @endif
 <br />
 <div class="nx-box nx-box--tight w-[97%] mx-auto text-center">

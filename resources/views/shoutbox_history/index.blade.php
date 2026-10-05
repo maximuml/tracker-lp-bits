@@ -19,14 +19,14 @@
 </section>
 
 <section class="nx-idx-card">
-<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/shoutbox.text_history_title') }}</caption>
+<x-data-table :caption="__('legacy/shoutbox.text_history_title')" captionHidden>
 @foreach ($items ?? [] as $item)
     <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
     <span class="date">[{{ $item['time'] }}]</span> {{ $item['actions'] }} {{ $item['username'] }} {{ $item['reactions'] }}
     <div>@include('shoutbox._message', ['id' => $item['msgId'], 'isLong' => $item['msgLong'], 'raw' => $item['msgRaw'], 'formatted' => $item['msgFormatted'], 'editedTime' => $item['editedTime'], 'labelMore' => '', 'labelLess' => ''])</div>
     </td></tr>
 @endforeach
-</table>
+</x-data-table>
 </section>
 
 @if (($totalPages ?? 0) > 1)

@@ -137,58 +137,17 @@ class UsercpController extends LegacyController
         $action = (string) $request->input('action');
         $type = (string) $request->input('type');
 
-        // W1-05: Validate POST mutations by action/type before delegating
-        $rules = match (true) {
-            $type === 'save' && $action === 'personal' => (new UpdatePersonalSettingsRequest)->rules(),
-            $type === 'save' && $action === 'forum' => (new UpdateForumSettingsRequest)->rules(),
-            $type === 'save' && $action === 'tracker' => (new UpdateTrackerSettingsRequest)->rules(),
-            $type === 'confirm' && $action === 'security' => (new UpdateSecuritySettingsRequest)->rules(),
+        $qs = $request->getQueryString();
+        $suffix = ($qs !== null && $qs !== '') ? '?'.$qs : '';
+        $redirect = match (true) {
+            $action === 'personal' && $type === 'save' => redirect()->to('/web/usercp/personal'.$suffix, 308),
+            $action === 'forum' && $type === 'save' => redirect()->to('/web/usercp/forum'.$suffix, 308),
+            $action === 'tracker' && $type === 'save' => redirect()->to('/web/usercp/tracker'.$suffix, 308),
+            $action === 'security' && $type === 'confirm' => redirect()->to('/web/usercp/security/confirm'.$suffix, 308),
             default => null,
         };
-
-        if ($rules !== null) {
-            // W2-02: validate only the subset of request fields that have rules.
-            // This keeps the dynamic rule selection while avoiding $request->all().
-            $validator = validator($request->only(array_keys($rules)), $rules);
-            if ($validator->fails()) {
-                return redirect('/usercp.php?action='.$action)->withErrors($validator)->withInput();
-            }
-        }
-
-        if ($type === 'save' && $action === 'personal') {
-            if (! $this->policy->updatePersonal($user, $user)) {
-                return redirect('/usercp.php?action=personal');
-            }
-            $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request, $user->avatar));
-
-            return redirect('/usercp.php?action=personal&type=saved');
-        }
-
-        if ($type === 'save' && $action === 'forum') {
-            if (! $this->policy->updateForum($user, $user)) {
-                return redirect('/usercp.php?action=forum');
-            }
-            $this->repository->updateForum(ForumSettingsDto::fromRequest($request));
-
-            return redirect('/usercp.php?action=forum&type=saved');
-        }
-
-        if ($type === 'save' && $action === 'tracker') {
-            if (! $this->policy->updateTracker($user, $user)) {
-                return redirect('/usercp.php?action=tracker');
-            }
-            $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
-
-            return redirect('/usercp.php?action=tracker&type=saved');
-        }
-
-        if ($type === 'confirm' && $action === 'security') {
-            if (! $this->policy->updateSecurity($user, $user)) {
-                return redirect('/usercp.php?action=security');
-            }
-            $to = $this->repository->updateSecurityFromLegacyRequest($request);
-
-            return redirect($to);
+        if ($redirect !== null) {
+            return $redirect;
         }
 
         if ($type === 'save' && $action === 'security') {
@@ -196,5 +155,60 @@ class UsercpController extends LegacyController
         }
 
         return redirect('/usercp.php');
+    }
+
+    public function savePersonal(UpdatePersonalSettingsRequest $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return redirect('/usercp.php');
+        }
+        if (! $this->policy->updatePersonal($user, $user)) {
+            return redirect('/usercp.php?action=personal');
+        }
+        $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request, $user->avatar));
+
+        return redirect('/usercp.php?action=personal&type=saved');
+    }
+
+    public function saveForum(UpdateForumSettingsRequest $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return redirect('/usercp.php');
+        }
+        if (! $this->policy->updateForum($user, $user)) {
+            return redirect('/usercp.php?action=forum');
+        }
+        $this->repository->updateForum(ForumSettingsDto::fromRequest($request));
+
+        return redirect('/usercp.php?action=forum&type=saved');
+    }
+
+    public function saveTracker(UpdateTrackerSettingsRequest $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return redirect('/usercp.php');
+        }
+        if (! $this->policy->updateTracker($user, $user)) {
+            return redirect('/usercp.php?action=tracker');
+        }
+        $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
+
+        return redirect('/usercp.php?action=tracker&type=saved');
+    }
+
+    public function confirmSecurity(UpdateSecuritySettingsRequest $request): RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return redirect('/usercp.php');
+        }
+        if (! $this->policy->updateSecurity($user, $user)) {
+            return redirect('/usercp.php?action=security');
+        }
+
+        return redirect($this->repository->updateSecurityFromLegacyRequest($request));
     }
 }

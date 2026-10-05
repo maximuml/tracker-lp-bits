@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 /**
- * W1-05: Validation for legacy POST /usercp with action=forum, type=save.
+ * W1-05: Validation for POST /web/usercp/forum.
  */
 class UpdateForumSettingsRequest extends FormRequest
 {
@@ -20,8 +22,6 @@ class UpdateForumSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'action' => 'required|string|in:forum',
-            'type' => 'required|string|in:save',
             'topicsperpage' => 'sometimes|integer|min:0|max:100',
             'postsperpage' => 'sometimes|integer|min:0|max:100',
             'avatars' => 'sometimes|in:yes',
@@ -30,5 +30,12 @@ class UpdateForumSettingsRequest extends FormRequest
             'signature' => 'sometimes|nullable|string|max:30000',
             'ttlastpost' => 'sometimes|in:yes',
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(
+            redirect('/usercp.php?action=forum')->withErrors($validator)->withInput()
+        );
     }
 }

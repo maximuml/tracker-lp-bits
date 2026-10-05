@@ -158,6 +158,10 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('forums/setlocked', [ForumController::class, 'setLocked']);
     Route::post('forums/hltopic', [ForumController::class, 'highlightTopic']);
     Route::post('forums/setsticky', [ForumController::class, 'setSticky']);
+    Route::post('usercp/personal', [UsercpController::class, 'savePersonal']);
+    Route::post('usercp/forum', [UsercpController::class, 'saveForum']);
+    Route::post('usercp/tracker', [UsercpController::class, 'saveTracker']);
+    Route::post('usercp/security/confirm', [UsercpController::class, 'confirmSecurity']);
 
     // REST endpoints for the actions the /ajax dispatcher used to route by
     // `action` string — POST /ajax {action: X} now 308-redirects here with

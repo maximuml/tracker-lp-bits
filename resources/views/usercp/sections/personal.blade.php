@@ -1,6 +1,6 @@
 @include('usercp.sections._menu', ['selected' => 'personal'])
 
-<form method=post action=usercp.php id="{{ $personal->formId }}"><input type=hidden name=action value=personal><input type=hidden name=type value=save>
+<form method=post action="/web/usercp/personal" id="{{ $personal->formId }}">
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($type === 'saved')
 <div class="nx-ffull text-center"><span class="text-nxm-danger"><b>{{ __('legacy/usercp.text_saved')}}</b></span></div>

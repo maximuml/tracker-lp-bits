@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 /**
- * W1-05: Validation for legacy POST /usercp with action=tracker, type=save.
+ * W1-05: Validation for POST /web/usercp/tracker.
  */
 class UpdateTrackerSettingsRequest extends FormRequest
 {
@@ -20,8 +22,6 @@ class UpdateTrackerSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'action' => 'required|string|in:tracker',
-            'type' => 'required|string|in:save',
             'pmnotif' => 'sometimes|in:yes',
             'emailnotif' => 'sometimes|in:yes',
             'incldead' => 'sometimes|integer',
@@ -49,5 +49,12 @@ class UpdateTrackerSettingsRequest extends FormRequest
             'showlastcom' => 'sometimes|in:yes,no',
             'fontsize' => 'sometimes|in:small,medium,large,0,1,2',
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(
+            redirect('/usercp.php?action=tracker')->withErrors($validator)->withInput()
+        );
     }
 }

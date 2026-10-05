@@ -31,7 +31,7 @@ final class UsercpHttpTest extends TestCase
 
     public function test_usercp_post_redirects_unauthenticated_user(): void
     {
-        $this->post('/usercp', ['action' => 'personal', 'type' => 'save'])
+        $this->post('/web/usercp/personal')
             ->assertRedirect();
     }
 
@@ -39,6 +39,23 @@ final class UsercpHttpTest extends TestCase
     {
         $this->get('/usercp')
             ->assertRedirect();
+    }
+
+    public function test_usercp_post_redirects_migrated_actions_to_rest_endpoints(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([
+            ['personal', 'save', '/web/usercp/personal'],
+            ['forum', 'save', '/web/usercp/forum'],
+            ['tracker', 'save', '/web/usercp/tracker'],
+            ['security', 'confirm', '/web/usercp/security/confirm'],
+        ] as [$action, $type, $uri]) {
+            $response = $this->withNexusCookie($user)
+                ->post('/usercp', ['action' => $action, 'type' => $type]);
+            $response->assertStatus(308);
+            $this->assertStringEndsWith($uri, (string) $response->headers->get('Location'));
+        }
     }
 
     // ─── FormRequest validation ──────────────────────────────────────
@@ -72,9 +89,7 @@ final class UsercpHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/usercp', [
-                'action' => 'tracker',
-                'type' => 'save',
+            ->post('/web/usercp/tracker', [
                 'torrentsperpage' => 999, // exceeds max:100
             ])
             ->assertRedirect('/usercp.php?action=tracker');
@@ -169,9 +184,7 @@ final class UsercpHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/usercp', [
-                'action' => 'personal',
-                'type' => 'save',
+            ->post('/web/usercp/personal', [
                 'parked' => 'yes',
                 'acceptpms' => 1,
                 'gender' => 0,
@@ -185,9 +198,7 @@ final class UsercpHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/usercp', [
-                'action' => 'personal',
-                'type' => 'save',
+            ->post('/web/usercp/personal', [
                 'acceptpms' => 'friends',
                 'gender' => 'Male',
             ])
@@ -199,9 +210,7 @@ final class UsercpHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/usercp', [
-                'action' => 'forum',
-                'type' => 'save',
+            ->post('/web/usercp/forum', [
                 'topicsperpage' => 25,
                 'postsperpage' => 30,
                 'avatars' => 'yes',
@@ -217,9 +226,7 @@ final class UsercpHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/usercp', [
-                'action' => 'forum',
-                'type' => 'save',
+            ->post('/web/usercp/forum', [
                 'clicktopic' => 'lastpage',
             ])
             ->assertRedirect('/usercp.php?action=forum&type=saved');
@@ -230,9 +237,7 @@ final class UsercpHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/usercp', [
-                'action' => 'tracker',
-                'type' => 'save',
+            ->post('/web/usercp/tracker', [
                 'torrentsperpage' => 50,
                 'timetype' => 0,
                 'appendsticky' => 'yes',
@@ -258,9 +263,7 @@ final class UsercpHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/usercp', [
-                'action' => 'tracker',
-                'type' => 'save',
+            ->post('/web/usercp/tracker', [
                 'fontsize' => 'small',
                 'timetype' => 'timeadded',
                 'appendpromotion' => 'highlight',
@@ -274,9 +277,7 @@ final class UsercpHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/usercp', [
-                'action' => 'tracker',
-                'type' => 'save',
+            ->post('/web/usercp/tracker', [
                 'theme' => 'dark',
                 'timetype' => 0,
                 'appendpromotion' => 1,

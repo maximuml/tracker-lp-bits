@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 /**
- * W1-05: Validation for legacy POST /usercp with action=security, type=confirm.
+ * W1-05: Validation for POST /web/usercp/security/confirm.
  */
 class UpdateSecuritySettingsRequest extends FormRequest
 {
@@ -20,8 +22,6 @@ class UpdateSecuritySettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'action' => 'required|string|in:security',
-            'type' => 'required|string|in:confirm',
             'response' => 'sometimes|nullable|string|max:500',
             'oldpassword' => 'sometimes|nullable|string|max:200',
             'email' => 'sometimes|nullable|email|max:255',
@@ -32,5 +32,12 @@ class UpdateSecuritySettingsRequest extends FormRequest
             'two_step_secret' => 'sometimes|nullable|string|max:500',
             'two_step_code' => 'sometimes|nullable|string|max:100',
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(
+            redirect('/usercp.php?action=security')->withErrors($validator)->withInput()
+        );
     }
 }

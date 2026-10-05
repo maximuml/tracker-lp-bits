@@ -1,6 +1,6 @@
 @include('usercp.sections._menu', ['selected' => 'tracker'])
 
-<form method=post action=usercp.php id="{{ $tracker->formId }}"><input type=hidden name=action value=tracker><input type=hidden name=type value=save>
+<form method=post action="/web/usercp/tracker" id="{{ $tracker->formId }}">
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($type === 'saved')
 <div class="nx-ffull text-center"><span class="text-nxm-danger"><b>{{ __('legacy/usercp.text_saved')}}</b></span></div>

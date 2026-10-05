@@ -9,7 +9,9 @@ use App\DTOs\Message\ListUnreadDto;
 use App\DTOs\Message\MessageListDto;
 use App\DTOs\Message\StoreMessageDto;
 use App\DTOs\Message\UpdateMessageDto;
+use App\Http\Requests\DeleteMailboxMessageRequest;
 use App\Http\Requests\DeleteMessageRequest;
+use App\Http\Requests\EditMailboxesRequest;
 use App\Http\Requests\MoveOrDeleteMessageRequest;
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Resources\MessageResource;
@@ -61,14 +63,33 @@ class MessageController extends LegacyController
         return $this->legacyPage($request, 'messages', true, $data);
     }
 
-    public function messagesAction(MoveOrDeleteMessageRequest $request): RedirectResponse
+    public function messagesAction(Request $request): RedirectResponse
     {
-        $redirect = $this->legacyService->handleMessagesActionPublic($request);
-        if ($redirect instanceof RedirectResponse) {
-            return $redirect;
-        }
+        $action = (string) $request->input('action', '');
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
 
-        return redirect('/messages');
+        return match ($action) {
+            'moveordel' => redirect()->to('/web/messages/move-or-delete'.$suffix, 308),
+            'editmailboxes2' => redirect()->to('/web/messages/mailboxes'.$suffix, 308),
+            'deletemessage' => redirect()->to('/web/messages/delete'.$suffix, 308),
+            default => redirect('/messages.php'),
+        };
+    }
+
+    public function moveOrDelete(MoveOrDeleteMessageRequest $request): RedirectResponse
+    {
+        return $this->legacyService->moveOrDelete($request);
+    }
+
+    public function editMailboxes(EditMailboxesRequest $request): RedirectResponse
+    {
+        return $this->legacyService->editMailboxes($request);
+    }
+
+    public function deleteMailboxMessage(DeleteMailboxMessageRequest $request): RedirectResponse
+    {
+        return $this->legacyService->deleteMailboxMessage($request);
     }
 
     public function sendmessage(Request $request): Response|RedirectResponse|View

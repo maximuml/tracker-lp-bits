@@ -5,6 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\OfferRepositoryInterface;
+use App\Http\Requests\AllowOfferRequest;
+use App\Http\Requests\DeleteOfferRequest;
+use App\Http\Requests\FinishOfferRequest;
+use App\Http\Requests\StoreOfferRequest;
+use App\Http\Requests\UpdateOfferRequest;
+use App\Services\OfferModerationService;
 use App\Services\OfferPageService;
 use App\Services\OfferService;
 use App\Services\OfferVoteService;
@@ -29,6 +35,7 @@ class OfferController extends LegacyController
         OfferService $offerService,
         OfferPageService $pageService,
         OfferVoteService $offerVoteService,
+        private readonly OfferModerationService $offerModerationService,
         private readonly CurrentUser $currentUser,
     ) {
         $this->repository = $repository;
@@ -61,6 +68,16 @@ class OfferController extends LegacyController
             return redirect('/offers.php'.($qs ? '?'.$qs : ''));
         }
 
+        if ($request->isMethod('post')) {
+            $qs = $request->getQueryString();
+            $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+            foreach (['new_offer' => 'create', 'allow_offer' => 'allow', 'finish_offer' => 'finish', 'del_offer' => 'delete', 'take_off_edit' => 'edit'] as $marker => $verb) {
+                if ($request->input($marker) !== null && $request->input($marker) !== '') {
+                    return redirect()->to('/web/offers/'.$verb.$suffix, 308);
+                }
+            }
+        }
+
         $voteResponse = $this->offerVoteService->handleVote($request);
         if ($voteResponse instanceof Response) {
             return $voteResponse;
@@ -74,5 +91,30 @@ class OfferController extends LegacyController
         $data = $this->pageService->build($request)->toArray();
 
         return $this->legacyPage($request, 'offers', true, $data);
+    }
+
+    public function store(StoreOfferRequest $request): RedirectResponse
+    {
+        return $this->offerService->handleCreate($request);
+    }
+
+    public function allow(AllowOfferRequest $request): RedirectResponse
+    {
+        return $this->offerModerationService->handleAllow($request);
+    }
+
+    public function finish(FinishOfferRequest $request): RedirectResponse
+    {
+        return $this->offerModerationService->handleFinish($request);
+    }
+
+    public function destroy(DeleteOfferRequest $request): RedirectResponse
+    {
+        return $this->offerService->handleDelete($request);
+    }
+
+    public function update(UpdateOfferRequest $request): RedirectResponse
+    {
+        return $this->offerService->handleEdit($request);
     }
 }

@@ -256,6 +256,9 @@ final class FriendsControllerTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('if you are sure', (string) $response->getContent());
+        // Pages rendered inline at /web/* must pin relative assets to the
+        // site root or every stylesheet/script 404s.
+        $this->assertStringContainsString('<base href=', (string) $response->getContent());
     }
 
     public function test_friends_post_redirects_add_to_rest_endpoint(): void

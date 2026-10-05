@@ -2,8 +2,8 @@
 <div>
 <div class="nx-colhead">{{ __('legacy/messages.text_add_mailboxes') }}</div>
 <div>{{ __('legacy/messages.text_extra_mailboxes_note') }}<br />
-<form action="/messages" method="get">
-<input type="hidden" name="action" value="editmailboxes2">
+<form action="/web/messages/mailboxes" method="post">
+@csrf
 <input type="hidden" name="action2" value="add">
 <input type="text" name="new1" size="40" maxlength="14"><br />
 <input type="text" name="new2" size="40" maxlength="14"><br />
@@ -12,8 +12,8 @@
 </form></div>
 <div class="nx-colhead">{{ __('legacy/messages.text_edit_mailboxes') }}</div>
 <div>{{ __('legacy/messages.text_edit_mailboxes_note') }}<br />{{ __('legacy/messages.text_edit_mailboxes_note_two') }}
-<form action="/messages" method="get">
-<input type="hidden" name="action" value="editmailboxes2">
+<form action="/web/messages/mailboxes" method="post">
+@csrf
 <input type="hidden" name="action2" value="edit">
 @if (! $editmailboxes['hasBoxes'])
 <span><b>{{ __('legacy/messages.text_no_mailboxes_to_edit') }}</b></span>

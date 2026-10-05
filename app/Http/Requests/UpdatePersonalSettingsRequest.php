@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 /**
- * W1-05: Validation for legacy POST /usercp with action=personal, type=save.
+ * W1-05: Validation for POST /web/usercp/personal.
  */
 class UpdatePersonalSettingsRequest extends FormRequest
 {
@@ -20,8 +22,6 @@ class UpdatePersonalSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'action' => 'required|string|in:personal',
-            'type' => 'required|string|in:save',
             'parked' => 'sometimes|in:yes',
             'acceptpms' => 'sometimes|in:yes,friends,no,0,1,2',
             'deletepms' => 'sometimes',
@@ -35,5 +35,12 @@ class UpdatePersonalSettingsRequest extends FormRequest
             'info' => 'sometimes|nullable|string|max:30000',
             'notifs' => 'sometimes|array',
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(
+            redirect('/usercp.php?action=personal')->withErrors($validator)->withInput()
+        );
     }
 }

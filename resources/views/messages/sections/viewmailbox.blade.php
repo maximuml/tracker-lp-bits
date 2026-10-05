@@ -9,9 +9,8 @@
 <x-empty-state :title="__('legacy/messages.text_no_messages')" />
 @else
 {{ $viewmailbox['pagertop'] ?? '' }}
-<form action="/messages" method="post">
+<form action="/web/messages/move-or-delete" method="post">
 @csrf
-<input type="hidden" name="action" value="moveordel">
 <div class="nx-maillist">
 <div class="nx-maillist__tools">
 	<input class="nx-postbtn" type="button" data-checkall data-label-check="{{ __('legacy/messages.input_check_all') }}" data-label-uncheck="{{ __('legacy/messages.input_uncheck_all') }}" value="{{ __('legacy/messages.input_check_all') }}">

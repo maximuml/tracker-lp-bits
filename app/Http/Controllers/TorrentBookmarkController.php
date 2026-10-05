@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BookmarkSubmitRequest;
 use App\Http\Requests\ThanksTorrentRequest;
 use App\Services\TorrentBookmarkService;
 use App\Support\CurrentUser;
@@ -44,7 +45,16 @@ class TorrentBookmarkController extends LegacyController
         return response($status, 200, $headers);
     }
 
-    public function bookmarkToggle(Request $request): Response
+    public function bookmarkToggle(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/torrents/bookmark'.$suffix, 308);
+    }
+
+    public function bookmarkSubmit(BookmarkSubmitRequest $request): Response
     {
         return $this->bookmark($request);
     }

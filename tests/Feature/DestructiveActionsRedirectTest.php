@@ -101,6 +101,12 @@ final class DestructiveActionsRedirectTest extends TestCase
             ['/polloverview', '/web/polls/overview'],
             ['/faqmanage', '/web/faq/manage'],
             ['/faqactions', '/web/faq/actions'],
+            ['/index', '/web/index/submit'],
+            ['/invite', '/web/invites/submit'],
+            ['/settings', '/web/settings/submit'],
+            ['/faq', '/web/faq/submit'],
+            ['/donate', '/web/donate/submit'],
+            ['/bookmark', '/web/torrents/bookmark'],
         ] as [$uri, $target]) {
             $response = $this->withNexusCookie($user)->post($uri, ['id' => '1']);
             $response->assertStatus(308);

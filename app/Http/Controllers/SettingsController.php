@@ -8,6 +8,7 @@ use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\StyleRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Enums\UserClass as UserClassEnum;
+use App\Http\Requests\SettingsSubmitRequest;
 use App\Models\Language;
 use App\Models\Setting;
 use App\Models\Torrent;
@@ -191,7 +192,16 @@ class SettingsController extends LegacyController
         return view('settings.index', $data);
     }
 
-    public function settingsAction(Request $request): RedirectResponse|Response
+    public function settingsAction(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/settings/submit'.$suffix, 308);
+    }
+
+    public function settingsSubmit(SettingsSubmitRequest $request): RedirectResponse|Response
     {
         $currentUser = $this->currentUser->get();
         if ($currentUser === null) {

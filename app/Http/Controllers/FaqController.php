@@ -8,6 +8,7 @@ use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Enums\FaqType;
 use App\Http\Requests\FaqActionsRequest;
 use App\Http\Requests\FaqManageSubmitRequest;
+use App\Http\Requests\FaqPostRequest;
 use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\Html;
@@ -63,7 +64,16 @@ class FaqController extends LegacyController
         return response(view('faq.index', ['faqCategories' => $categories])->render());
     }
 
-    public function faqPost(Request $request): Response|RedirectResponse
+    public function faqPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/faq/submit'.$suffix, 308);
+    }
+
+    public function faqSubmit(FaqPostRequest $request): Response|RedirectResponse
     {
         return $this->faq($request);
     }

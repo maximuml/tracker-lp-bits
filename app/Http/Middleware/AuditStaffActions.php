@@ -59,7 +59,9 @@ final class AuditStaffActions
         // staffmess/contactstaff page POSTs are user-self too (same as
         // their legacy prefixes and the send endpoints).
         'web/staffmess/submit',
-        'web/contactstaff/submit', 'web/invites/send',
+        'web/contactstaff/submit',
+        'web/torrents/bookmark',
+        'web/invites/submit', 'web/invites/send',
     ];
 
     /** First-segment prefixes where every sub-path is user activity. */

@@ -459,14 +459,16 @@ class HtmlTagTest extends TestCase
             ],
         );
 
-        $this->assertSame(
-            '<table data-nx="data">'
-            .'<thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">Name</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Age</th></tr></thead>'
+        $this->assertStringContainsString('class="overflow-x-auto"', $output);
+        $this->assertStringContainsString(
+            '<th scope="col">Name</th>'
+            .'<th scope="col">Age</th>'
+            .'</tr>'
+            .'</thead>'
             .'<tbody>'
             .'<tr><td class="">Alice</td><td class="">30</td></tr>'
-            .'<tr><td class="">Bob</td><td class="">25</td></tr>'
-            .'</tbody></table>',
-            $output,
+            .'<tr><td class="">Bob</td><td class="">25</td></tr>',
+            str_replace(["\n", '    '], '', $output),
         );
     }
 
@@ -501,8 +503,8 @@ class HtmlTagTest extends TestCase
         );
 
         $this->assertStringContainsString('<td class="colfollow">v</td>', $output);
-        // header cells stay surface-alt regardless of the option.
-        $this->assertStringContainsString('<th class="bg-nxm-surface-alt font-semibold" scope="col">X</th>', $output);
+        // header cells keep their surface-alt look via the component's thead_th utility.
+        $this->assertStringContainsString('<th scope="col">X</th>', $output);
     }
 
     public function test_build_table_escapes_markup_for_xss_safety(): void
@@ -514,7 +516,7 @@ class HtmlTagTest extends TestCase
             [['c' => '<i>v</i>']],
         );
 
-        $this->assertStringContainsString('<th class="bg-nxm-surface-alt font-semibold" scope="col">&lt;b&gt;H&lt;/b&gt;</th>', $output);
+        $this->assertStringContainsString('<th scope="col">&lt;b&gt;H&lt;/b&gt;</th>', $output);
         $this->assertStringContainsString('<td class="">&lt;i&gt;v&lt;/i&gt;</td>', $output);
     }
 
@@ -522,7 +524,8 @@ class HtmlTagTest extends TestCase
     {
         $output = Html::buildTable(['x' => 'X'], []);
 
-        $this->assertStringEndsWith('</thead><tbody></tbody></table>', $output);
+        $this->assertStringContainsString('</thead>', $output);
+        $this->assertStringEndsWith("</tbody>\n    </table>\n</div>", $output);
     }
 
     private static function promoLabels(): array

@@ -5,8 +5,8 @@
 @section('content')
 <h1>{{ $title }}</h1>
 
-<table data-nx="data"><caption class="nx-sr-only">{{ $title }}</caption>
-<thead>
+<x-data-table :caption="$title" captionHidden>
+<x-slot:head><thead>
 <tr>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnNameLabel }}</th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnIndexLabel }}</th>
@@ -19,8 +19,7 @@
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnDescLabel }}</th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $columnClaimLabel }}</th>
 </tr>
-</thead>
-<tbody>
+</thead></x-slot:head>
 @foreach ($rows as $row)
 <tr>
     <td class="whitespace-nowrap"><strong>{{ $row['name'] }}</strong></td>
@@ -35,8 +34,7 @@
     <td><input type="button" class="{{ $row['claimable'] ? 'claim' : '' }}" data-id="{{ $row['id'] }}" value="{{ $row['claimText'] }}"@unless($row['claimable']) disabled @endunless></td>
 </tr>
 @endforeach
-</tbody>
-</table>
+</x-data-table>
 
 {{ $pagerbottom ?? '' }}
 @endsection

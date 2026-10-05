@@ -56,7 +56,7 @@
                 <input type="button" id="reset" value="{{ $resetText }}">
             </form>
         </div>
-        <table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/invite.text_invite_status') }}</caption>
+        <x-data-table :caption="__('legacy/invite.text_invite_status')" captionHidden>
         <form method=post action=takeconfirm.php?id={{ (string) $id }}>
 
         @if (! $inviteeCount)
@@ -116,11 +116,11 @@
             @endif
             </form>
         @endif
-        </table>
+        </x-data-table>
         </div>{{ $inviteePagertop }}
 
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
-        <table data-nx="data"><caption class="nx-sr-only">{{ $menuSelected == 'sent' ? __('legacy/invite.text_sent_invites_status') : __('legacy/invite.text_tmp_status') }}</caption>
+        <x-data-table :caption="$menuSelected == 'sent' ? __('legacy/invite.text_sent_invites_status') : __('legacy/invite.text_tmp_status')" captionHidden>
         @if (! $sentTmpCount)
             <tr class="text-center"><td colspan=6>{{ __('legacy/functions.text_none')}}</tr>
         @else
@@ -150,7 +150,7 @@
                 </tr>
             @endforeach
         @endif
-        </table>
+        </x-data-table>
         </div>{{ $sentTmpPagertop }}
     @endif
 

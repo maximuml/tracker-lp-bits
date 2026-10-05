@@ -23,14 +23,13 @@
 <p class="text-center">{{ __('legacy/uploaders.text_no_uploaders_yet')}}</p>
 @else
 <div>
-<table data-nx="data" class="w-[97%] mx-auto"><caption class="nx-sr-only">{{ __('legacy/uploaders.text_uploaders')}}</caption>
-<tr>
+<x-data-table :caption="__('legacy/uploaders.text_uploaders')" captionHidden class="w-[97%] mx-auto"><x-slot:head><thead><tr>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_username')}}</th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_torrents_size')}}</th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_torrents_num')}}</th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_last_upload_time')}}</th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/uploaders.col_last_upload')}}</th>
-</tr>
+</tr></thead></x-slot:head>
 @foreach ($rows as $row)
 <tr>
     <td class="colfollow">{{ $row['usernameHtml'] }}</td>
@@ -40,7 +39,7 @@
     <td class="colfollow">@if ($row['last_name'] !== '')<a href="details.php?id={{ (int) $row['last_id'] }}">{{ $row['last_name'] }}</a>@else{{ $naText }}@endif</td>
 </tr>
 @endforeach
-</table>
+</x-data-table>
 </div>
 <div>
 <span id="order"><span class="big"><b>{{ __('legacy/uploaders.text_order_by')}}</b></span>

@@ -18,7 +18,7 @@
 @if ($isOwner || $canManageConfidential)
 <h2>{{ __('legacy/userdetails.text_flush_ghost_torrents') ?? '' }}<a class="altlink" href="takeflush.php?id={{ $id }}">{{ __('legacy/userdetails.text_here') ?? '' }}</a></h2>
 @endif
-<table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/userdetails.head_details_for') }}{{ $user['username'] }}</caption>
+<x-data-table :caption="__('legacy/userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)
 <x-settings-row-small :label="__('legacy/userdetails.text_user_id')">{{ $user['id'] }}@if ($canManageBasic && (int) $user['class'] < $currentClass)&nbsp;[<a href="{{ $userManageSystemUrl }}" target="_blank" class="altlink">{{ __('legacy/functions.text_management_system') ?? '' }}</a>]@endif</x-settings-row-small>
 @if ($isOwner || $canViewInvite)
@@ -54,8 +54,8 @@
 @if ($clientSelectHtml !== '')
 <x-settings-row-small :label="__('legacy/userdetails.row_bt_client')">{{ $clientSelectHtml }}</x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('legacy/userdetails.row_transfer')"><table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/userdetails.row_transfer') }}</caption>@if ($shareRatio !== null)<tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_share_ratio') ?? '' }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($shareRatio) }}">{{ number_format($shareRatio, 3) }}</span>(<strong>{{ __('legacy/userdetails.row_real_share_ratio') ?? '' }}</strong>: {{ number_format($trueRatio, 3) }})</td><td class="embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($shareRatio) }}</td></tr>@endif<tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['uploaded']) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.row_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['downloaded']) }}</td></tr><tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_real_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueUpload) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.row_real_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueDownload) }}</td><td class="embedded text-muted">&nbsp;&nbsp;{{ __('legacy/userdetails.row_real_ps') ?? '' }}</td></tr></table></x-settings-row-small>
-<x-settings-row-small :label="__('legacy/userdetails.row_sltime')"><table data-nx="data"><caption class="nx-sr-only">{{ __('legacy/userdetails.row_sltime') }}</caption>@if ($seedLeechRatio !== null)<tr><td class="embedded"><strong>{{ __('legacy/userdetails.text_seeding_leeching_time_ratio') ?? '' }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($seedLeechRatio) }}">{{ number_format($seedLeechRatio, 3) }}</span></td><td class="embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($seedLeechRatio) }}</td></tr>@endif<tr><td class="embedded"><strong>{{ __('legacy/userdetails.text_seeding_time') ?? '' }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['seedtime']) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.text_leeching_time') ?? '' }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['leechtime']) }}</td><td class="embedded text-muted">@if (! empty($user['seed_time_updated_at']))&nbsp;&nbsp;({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_time_updated_at'] }})@endif</td></tr></table></x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_transfer')"><x-data-table :caption="__('legacy/userdetails.row_transfer')" captionHidden>@if ($shareRatio !== null)<tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_share_ratio') ?? '' }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($shareRatio) }}">{{ number_format($shareRatio, 3) }}</span>(<strong>{{ __('legacy/userdetails.row_real_share_ratio') ?? '' }}</strong>: {{ number_format($trueRatio, 3) }})</td><td class="embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($shareRatio) }}</td></tr>@endif<tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['uploaded']) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.row_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['downloaded']) }}</td></tr><tr><td class="embedded"><strong>{{ __('legacy/userdetails.row_real_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueUpload) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.row_real_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueDownload) }}</td><td class="embedded text-muted">&nbsp;&nbsp;{{ __('legacy/userdetails.row_real_ps') ?? '' }}</td></tr></x-data-table></x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_sltime')"><x-data-table :caption="__('legacy/userdetails.row_sltime')" captionHidden>@if ($seedLeechRatio !== null)<tr><td class="embedded"><strong>{{ __('legacy/userdetails.text_seeding_leeching_time_ratio') ?? '' }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($seedLeechRatio) }}">{{ number_format($seedLeechRatio, 3) }}</span></td><td class="embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($seedLeechRatio) }}</td></tr>@endif<tr><td class="embedded"><strong>{{ __('legacy/userdetails.text_seeding_time') ?? '' }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['seedtime']) }}</td><td class="embedded">&nbsp;&nbsp;<strong>{{ __('legacy/userdetails.text_leeching_time') ?? '' }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['leechtime']) }}</td><td class="embedded text-muted">@if (! empty($user['seed_time_updated_at']))&nbsp;&nbsp;({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_time_updated_at'] }})@endif</td></tr></x-data-table></x-settings-row-small>
 <x-settings-row-small :label="__('legacy/userdetails.row_gender')">@if (($user['gender'] ?? '') === 'Male')<img class='male' src='pic/trans.gif' alt='Male' title='{{ __('legacy/userdetails.title_male') ?? '' }}' />@elseif (($user['gender'] ?? '') === 'Female')<img class='female' src='pic/trans.gif' alt='Female' title='{{ __('legacy/userdetails.title_female') ?? '' }}' />@elseif (($user['gender'] ?? '') === 'N/A')<img class='no_gender' src='pic/trans.gif' alt='N/A' title='{{ __('legacy/userdetails.title_not_available') ?? '' }}' />@endif</x-settings-row-small>
 @if (((float) ($user['donated'] ?? 0) > 0 || (float) ($user['donated_cny'] ?? 0) > 0) && ($canViewConfidential || $isOwner))
 <x-settings-row-small :label="__('legacy/userdetails.row_donated')">${{ $user['donated'] }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $user['donated_cny'] }}</x-settings-row-small>
@@ -95,7 +95,7 @@
 @if (! $isOwner)
 <tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="sendmessage.php?receiver={{ $user['id'] }}"><img class="f_pm" src="pic/trans.gif" alt="PM" title="{{ __('legacy/userdetails.title_send_pm') ?? '' }}" /></a>@endif<a href="report.php?user={{ $user['id'] }}"><img class="f_report" src="pic/trans.gif" alt="Report" title="{{ __('legacy/userdetails.title_report_user') ?? '' }}" /></a></td></tr>
 @endif
-</table>
+</x-data-table>
 
 @if ($canManageBasic && (int) $user['class'] < $currentClass)
 <x-frame :caption="__('legacy/userdetails.text_edit_user')" :center="false">
@@ -103,7 +103,7 @@
 <input type="hidden" name="action" value="edituser" />
 <input type="hidden" name="userid" value="{{ $id }}" />
 <input type="hidden" name="returnto" value="userdetails.php?id={{ $id }}" />
-<table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/userdetails.text_edit_user') }}</caption>
+<x-data-table :caption="__('legacy/userdetails.text_edit_user')" captionHidden class="main">
 <x-settings-row :label="__('legacy/userdetails.row_title')"><input type="text" size="60" name="title" value="{{ trim((string) $user['title']) }}" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_privacy_level')"><input type="radio" name="privacy" value="low"@if (($user['privacy'] ?? '') === 'low') checked="checked"@endif />{{ __('legacy/userdetails.radio_low') ?? '' }}<input type="radio" name="privacy" value="normal"@if (($user['privacy'] ?? '') === 'normal') checked="checked"@endif />{{ __('legacy/userdetails.radio_normal') ?? '' }}<input type="radio" name="privacy" value="strong"@if (($user['privacy'] ?? '') === 'strong') checked="checked"@endif />{{ __('legacy/userdetails.radio_strong') ?? '' }}</x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_avatar_url')"><input type="text" size="60" name="avatar" value="{{ trim((string) $user['avatar']) }}" /></x-settings-row>
@@ -124,7 +124,7 @@
 <x-settings-row :label="__('legacy/userdetails.row_comment')"><textarea cols="60" rows="6" name="modcomment" placeholder="{{ $modcomment }}"></textarea></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_seeding_karma')"><textarea cols="60" rows="6" name="bonuscomment" readonly="readonly">{{ $bonuscomment }}</textarea></x-settings-row>
 @endif
-<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/userdetails.row_warning_system') }}<br /><br />{{ __('legacy/userdetails.row_warning_system_note') }}</td><td class="align-top px-2.5 py-1.5"><table data-nx="data" class="main"><caption class="nx-sr-only">{{ __('legacy/userdetails.row_warning_system') }}</caption><tr><td class="align-top px-2.5 py-1.5">@if ($warned)<input name="warned" value="yes" type="radio" checked="checked" />{{ __('legacy/userdetails.radio_yes') ?? '' }}<input name="warned" value="no" type="radio" />{{ __('legacy/userdetails.radio_no') ?? '' }}@else{{ __('legacy/userdetails.text_not_warned') ?? '' }}@endif</td>
+<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('legacy/userdetails.row_warning_system') }}<br /><br />{{ __('legacy/userdetails.row_warning_system_note') }}</td><td class="align-top px-2.5 py-1.5"><x-data-table :caption="__('legacy/userdetails.row_warning_system')" captionHidden class="main"><tr><td class="align-top px-2.5 py-1.5">@if ($warned)<input name="warned" value="yes" type="radio" checked="checked" />{{ __('legacy/userdetails.radio_yes') ?? '' }}<input name="warned" value="no" type="radio" />{{ __('legacy/userdetails.radio_no') ?? '' }}@else{{ __('legacy/userdetails.text_not_warned') ?? '' }}@endif</td>
 @if ($warned)
 @if ($warnedUntilPretty === null)
 <td class="align-top px-2.5 py-1.5 text-center">{{ __('legacy/userdetails.text_arbitrary_duration') ?? '' }}</td>
@@ -158,7 +158,7 @@
 @else
 <td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_not_warned') ?? '' }}</td></tr>
 @endif
-</table></td></tr>
+</x-data-table></td></tr>
 <x-settings-row :label="__('legacy/userdetails.row_forum_post_possible')"><x-user.radio-yesno name="forumpost" :yes="\App\Support\LegacyYesNo::isYes($user['forumpost'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['forumpost'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_upload_possible')"><x-user.radio-yesno name="uploadpos" :yes="\App\Support\LegacyYesNo::isYes($user['uploadpos'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['uploadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_download_possible')"><x-user.radio-yesno name="downloadpos" :yes="\App\Support\LegacyYesNo::isYes($user['downloadpos'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['downloadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
@@ -168,7 +168,7 @@
 @endif
 <x-settings-row :label="__('legacy/userdetails.row_passkey')"><input name="resetkey" value="yes" type="checkbox" />{{ __('legacy/userdetails.checkbox_reset_passkey') ?? '' }}</x-settings-row>
 <tr><td class="toolbox text-center" colspan="2"><input type="submit" class="btn" value="{{ __('legacy/userdetails.submit_okay') ?? '' }}" /></td></tr>
-</table>
+</x-data-table>
 </form>
 </x-frame>
 @if ($canDeleteUser)

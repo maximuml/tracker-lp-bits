@@ -10,7 +10,7 @@ Total Images Stored: {{ $count ?? 0 }}
 @if (empty($items ?? []))
     <b>BitBucket Log is empty</b>
 @else
-    <table data-nx="data"><caption class="nx-sr-only">BitBucket Log</caption>
+    <x-data-table caption="BitBucket Log" captionHidden>
     @foreach ($items as $item)
         <tr>
         <td><div class="text-center"><a href="{{ $item['url'] }}"><img src="{{ $item['url'] }}" class="bitbucket-shot"></a></div>
@@ -22,7 +22,7 @@ Total Images Stored: {{ $count ?? 0 }}
         Added: {{ $item['date'] }} {{ $item['time'] }}</td>
         </tr>
     @endforeach
-    </table>
+    </x-data-table>
 @endif
 {{ $pagerbottom ?? '' }}
 @endsection

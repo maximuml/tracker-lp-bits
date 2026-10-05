@@ -6,11 +6,11 @@
 <x-frame :center="false">
 <x-slot:caption><span id="version">{{ $captions['version'] }}</span></x-slot>
 {{ $notes['version'] }}
-<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['version'] }}</caption>
+<x-data-table :caption="$captions['version']" captionHidden class="main">
     <x-settings-row :label="__('legacy/aboutnexus.text_main_version')">{{ PROJECTNAME }}</x-settings-row>
     <x-settings-row :label="__('legacy/aboutnexus.text_sub_version')">{{ VERSION_NUMBER }}</x-settings-row>
     <x-settings-row :label="__('legacy/aboutnexus.text_release_date')">{{ RELEASE_DATE }}</x-settings-row>
-</table>
+</x-data-table>
 <br /><br />
 </x-frame>
 
@@ -30,12 +30,11 @@
 <x-slot:caption><span id="translation">{{ $captions['translation'] }}</span></x-slot>
 {{ $notes['translation'] }}
 <br /><br />
-<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['translation'] }}</caption>
-    <tr>
+<x-data-table :caption="$captions['translation']" captionHidden class="main"><x-slot:head><thead><tr>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_flag')}}</th>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_language')}}</th>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_state')}}</th>
-    </tr>
+    </tr></thead></x-slot:head>
     @foreach ($languages as $row)
         <tr>
             <td class="align-top px-2.5 py-1.5"><img width="24" height="15" src="pic/flag/{{ $row['flagpic'] }}" alt="{{ $row['lang_name'] }}" title="{{ $row['lang_name'] }}" /></td>
@@ -43,7 +42,7 @@
             <td class="align-top px-2.5 py-1.5">{{ $row['trans_state'] }}</td>
         </tr>
     @endforeach
-</table>
+</x-data-table>
 <br /><br />
 </x-frame>
 
@@ -51,12 +50,11 @@
 <x-slot:caption><span id="stylesheet">{{ $captions['stylesheet'] }}</span></x-slot>
 {{ $notes['stylesheet'] }}
 <br /><br />
-<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['stylesheet'] }}</caption>
-    <tr>
+<x-data-table :caption="$captions['stylesheet']" captionHidden class="main"><x-slot:head><thead><tr>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_name')}}</th>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_designer')}}</th>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_comment')}}</th>
-    </tr>
+    </tr></thead></x-slot:head>
     @foreach ($stylesheets as $row)
         <tr>
             <td class="align-top px-2.5 py-1.5">{{ $row['name'] }}</td>
@@ -64,7 +62,7 @@
             <td class="align-top px-2.5 py-1.5">{{ $row['comment'] }}</td>
         </tr>
     @endforeach
-</table>
+</x-data-table>
 <br /><br />
 </x-frame>
 
@@ -72,9 +70,9 @@
 <x-slot:caption><span id="contact">{{ $captions['contact'] }}</span></x-slot>
 {{ $notes['contact'] }}
 <br /><br />
-<table data-nx="data" class="main"><caption class="nx-sr-only">{{ $captions['contact'] }}</caption>
+<x-data-table :caption="$captions['contact']" captionHidden class="main">
     <x-settings-row :label="__('legacy/aboutnexus.text_web_site')"><a href="{{ NEXUSPHPURL }}" target="_blank">{{ NEXUSPHPURL }}</a></x-settings-row>
-</table>
+</x-data-table>
 <br /><br />
 </x-frame>
 @endsection

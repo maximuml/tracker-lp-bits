@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserClass;
 use App\Models\Offer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -216,7 +217,9 @@ final class AjaxRestEndpointsTest extends TestCase
     #[DataProvider('shoutboxFailures')]
     public function test_shoutbox_endpoint_error_messages(string $uri, array $body, string $expectedMsg): void
     {
-        $user = User::factory()->create();
+        // Pin USER: a randomly-rolled staff class passes the clear gate and
+        // 'clear no permission' would observe the success envelope instead.
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         $body['_token'] = $this->csrfToken();
         $response = $this->asNexusUser($user)->post($uri, $body);
 

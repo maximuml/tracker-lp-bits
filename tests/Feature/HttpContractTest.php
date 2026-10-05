@@ -65,6 +65,10 @@ final class HttpContractTest extends TestCase
         // (passkey actions are guest-facing, the rest get a JSON 401 via
         // LegacyAuth::requireLoginFromContext)
         'ajax',
+        // Login-page passkey assertions — guest-facing by design; the
+        // WebAuthn challenge + signature is the credential itself.
+        'web/passkey/get-args',
+        'web/passkey/get',
         // Complaint channel — guest-facing by design (appeals from banned
         // accounts); per-action gates inside SupportController::complains:
         // captcha + per-IP/per-email locks on 'new', secret-uuid match on

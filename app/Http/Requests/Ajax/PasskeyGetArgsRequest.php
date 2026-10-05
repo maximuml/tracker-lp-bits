@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Requests\Ajax;
+
+final class PasskeyGetArgsRequest extends AjaxFormRequest
+{
+    /** @return array<string, mixed> */
+    public function rules(): array
+    {
+        return [];
+    }
+}

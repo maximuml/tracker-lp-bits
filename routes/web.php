@@ -6,6 +6,7 @@ use App\Http\Controllers\Ajax\HitAndRunAjaxController as AjaxHitAndRunController
 use App\Http\Controllers\Ajax\ModerationAjaxController as AjaxModerationController;
 use App\Http\Controllers\Ajax\NotificationAjaxController as AjaxNotificationController;
 use App\Http\Controllers\Ajax\OfferAjaxController as AjaxOfferController;
+use App\Http\Controllers\Ajax\PasskeyAjaxController as AjaxPasskeyController;
 use App\Http\Controllers\Ajax\ShoutboxAjaxController as AjaxShoutboxController;
 use App\Http\Controllers\Ajax\TaskAjaxController as AjaxTaskController;
 use App\Http\Controllers\Ajax\TorrentApprovalAjaxController as AjaxTorrentApprovalController;
@@ -153,7 +154,19 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
         Route::post('shoutbox/edit', [AjaxShoutboxController::class, 'edit']);
         Route::post('shoutbox/delete', [AjaxShoutboxController::class, 'delete']);
         Route::post('shoutbox/react', [AjaxShoutboxController::class, 'react']);
+        Route::post('passkey/create-args', [AjaxPasskeyController::class, 'createArgs']);
+        Route::post('passkey/create', [AjaxPasskeyController::class, 'processCreate']);
+        Route::post('passkey/list', [AjaxPasskeyController::class, 'list']);
+        Route::post('passkey/delete', [AjaxPasskeyController::class, 'delete']);
     });
+});
+
+// Passkey assertion endpoints called by the login page — guest-facing,
+// so they live outside the auth.nexus group. The old /ajax dispatcher
+// skipped requireLoginFromContext for exactly these two actions.
+Route::group(['prefix' => 'web', 'middleware' => ['throttle:ajax']], function () {
+    Route::post('passkey/get-args', [AjaxPasskeyController::class, 'getArgs']);
+    Route::post('passkey/get', [AjaxPasskeyController::class, 'processGet']);
 });
 
 // Passkey login v2 — fixed route with HMAC-SHA256, nonce replay protection,

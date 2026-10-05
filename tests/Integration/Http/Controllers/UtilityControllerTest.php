@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\UtilityController;
-use App\Repositories\UserPasskeyRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use Illuminate\Http\JsonResponse;
@@ -60,14 +59,10 @@ final class UtilityControllerTest extends TestCase
         $this->assertStringContainsString('Invalid action', $data['msg']);
     }
 
-    public function test_ajax_returns_success_for_valid_action(): void
+    public function test_ajax_308_redirects_migrated_action(): void
     {
         $this->mockLegacyRedisCache();
         $this->mockCurrentUser(['id' => 1, 'enabled' => true, 'username' => 'testuser']);
-
-        $mockPasskeyRepo = Mockery::mock(UserPasskeyRepository::class);
-        $mockPasskeyRepo->shouldReceive('getGetArgs')->once()->andReturn(['challenge' => 'test-challenge']);
-        app()->instance(UserPasskeyRepository::class, $mockPasskeyRepo);
 
         $controller = app(UtilityController::class);
         $request = Request::create('/ajax', 'GET', ['action' => 'getPasskeyGetArgs']);
@@ -75,50 +70,9 @@ final class UtilityControllerTest extends TestCase
 
         $response = $controller->ajax($request);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $data = $response->getData(true);
-        $this->assertSame(0, $data['ret']);
-        $this->assertSame(['challenge' => 'test-challenge'], $data['data']);
-    }
-
-    public function test_ajax_hides_internal_error_messages(): void
-    {
-        $this->mockLegacyRedisCache();
-        $this->mockCurrentUser(['id' => 1, 'enabled' => true, 'username' => 'testuser']);
-
-        $mockPasskeyRepo = Mockery::mock(UserPasskeyRepository::class);
-        $mockPasskeyRepo->shouldReceive('getGetArgs')->once()->andThrow(new \PDOException('SQLSTATE[42S02] secret_table'));
-        app()->instance(UserPasskeyRepository::class, $mockPasskeyRepo);
-
-        $controller = app(UtilityController::class);
-        $request = Request::create('/ajax', 'GET', ['action' => 'getPasskeyGetArgs']);
-        app()->instance('request', $request);
-
-        $data = $controller->ajax($request)->getData(true);
-
-        $this->assertSame(-1, $data['ret']);
-        $this->assertSame('Internal error', $data['msg']);
-    }
-
-    public function test_ajax_returns_error_for_exception(): void
-    {
-        $this->mockLegacyRedisCache();
-        $this->mockCurrentUser(['id' => 1, 'enabled' => true, 'username' => 'testuser']);
-
-        $mockPasskeyRepo = Mockery::mock(UserPasskeyRepository::class);
-        $mockPasskeyRepo->shouldReceive('getGetArgs')->once()->andThrow(new \RuntimeException('Test error'));
-        app()->instance(UserPasskeyRepository::class, $mockPasskeyRepo);
-
-        $controller = app(UtilityController::class);
-        $request = Request::create('/ajax', 'GET', ['action' => 'getPasskeyGetArgs']);
-        app()->instance('request', $request);
-
-        $response = $controller->ajax($request);
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $data = $response->getData(true);
-        $this->assertSame(-1, $data['ret']);
-        $this->assertSame('Test error', $data['msg']);
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('/web/passkey/get-args', $response->getTargetUrl());
     }
 
     public function test_search_redirects_guests_to_search_php(): void

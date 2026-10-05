@@ -7,6 +7,7 @@ namespace App\Livewire;
 use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
+use App\Livewire\Concerns\PersistsKlappe;
 use App\Services\ShoutboxService;
 use App\Support\Html\SafeHtml;
 use App\Support\Shoutbox as ShoutboxSupport;
@@ -16,12 +17,16 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
- * Index-page shoutbox panel: polling refresh + compose form.
+ * Index-page shoutbox card: collapse toggle + polling refresh + compose form.
  * Edit/delete/react stay on the delegated ajax.php handlers in
  * public/js/shoutbox.js; they dispatch 'shout-refresh' afterwards.
+ * The h2 elements owned by legacy JS (countdown, mentions badge,
+ * clear link) render wire:ignored so morph never resets their state.
  */
 final class Shoutbox extends Component
 {
+    use PersistsKlappe;
+
     public string $text = '';
 
     public string $status = '';
@@ -29,6 +34,26 @@ final class Shoutbox extends Component
     public int $refresh = 120;
 
     public int $limit = 70;
+
+    public string $cardTitle = '';
+
+    public string $autoRefreshLabel = '';
+
+    public string $refreshSeconds = '';
+
+    public string $secondsLabel = '';
+
+    public string $historyLabel = '';
+
+    public bool $canManage = false;
+
+    public string $clearConfirm = '';
+
+    public string $clearLabel = '';
+
+    public string $showHideTitle = '';
+
+    public bool $open = true;
 
     private ?ShoutboxRepositoryInterface $repository = null;
 
@@ -53,13 +78,45 @@ final class Shoutbox extends Component
         return $this->actor ?? throw new \LogicException('Shoutbox component used before boot()');
     }
 
-    public function mount(): void
-    {
+    public function mount(
+        string $cardTitle,
+        string $autoRefreshLabel,
+        string $refreshSeconds,
+        string $secondsLabel,
+        string $historyLabel,
+        bool $canManage,
+        string $clearConfirm,
+        string $clearLabel,
+        string $showHideTitle,
+    ): void {
         $currentUser = $this->actor()->toLegacyArray();
         $refresh = (int) ($currentUser['sbrefresh'] ?? 120);
         $this->refresh = $refresh > 0 ? $refresh : 120;
         $limit = (int) ($currentUser['sbnum'] ?? 70);
         $this->limit = $limit > 0 ? $limit : 70;
+        $this->cardTitle = $cardTitle;
+        $this->autoRefreshLabel = $autoRefreshLabel;
+        $this->refreshSeconds = $refreshSeconds;
+        $this->secondsLabel = $secondsLabel;
+        $this->historyLabel = $historyLabel;
+        $this->canManage = $canManage;
+        $this->clearConfirm = $clearConfirm;
+        $this->clearLabel = $clearLabel;
+        $this->showHideTitle = $showHideTitle;
+        $this->open = $this->klappeInitial('shoutbox', true);
+    }
+
+    public function toggle(): void
+    {
+        $this->open = ! $this->open;
+        $this->klappePersist('shoutbox', $this->open);
+    }
+
+    #[On('shoutbox-expand')]
+    public function expand(): void
+    {
+        $this->open = true;
+        $this->klappePersist('shoutbox', true);
     }
 
     public function send(): void

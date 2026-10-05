@@ -490,11 +490,11 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// Index-page collapse runs on the shared klappe mechanism (same as news):
-// the plus/minus icon toggles .nx-hidden on #kshoutbox and stats-details.js
-// persists the state. This block only surfaces new @-mentions via a badge
-// while the panel is collapsed. Runs only in the parent page — the iframe
-// document is detected via window.self !== window.top.
+// Index-page collapse is a server-side Livewire toggle: morph swaps the
+// plus/minus icon and .nx-hidden on #kshoutbox. This block only surfaces
+// new @-mentions via a badge while the panel is collapsed. Runs only in
+// the parent page — the iframe document is detected via
+// window.self !== window.top.
 (function () {
     if (window.self !== window.top) { return; }
 
@@ -529,8 +529,8 @@ document.addEventListener('click', function (e) {
     }
 
     badge.addEventListener('click', function () {
-        if (isCollapsed() && typeof klappe_news === 'function') {
-            klappe_news('shoutbox');
+        if (isCollapsed() && window.Livewire && typeof window.Livewire.dispatch === 'function') {
+            window.Livewire.dispatch('shoutbox-expand');
         }
     });
 

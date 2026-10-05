@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\PersistsKlappe;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -14,11 +15,19 @@ use Livewire\Component;
  */
 final class SearchPanelToggle extends Component
 {
+    use PersistsKlappe;
+
     public bool $open = false;
+
+    public function mount(): void
+    {
+        $this->open = $this->klappeInitial('searchboxmain', false);
+    }
 
     public function toggle(): void
     {
         $this->open = ! $this->open;
+        $this->klappePersist('searchboxmain', $this->open);
     }
 
     public function render(): View

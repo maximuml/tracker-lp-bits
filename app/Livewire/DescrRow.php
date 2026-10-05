@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\PersistsKlappe;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -14,6 +15,8 @@ use Livewire\Component;
  */
 final class DescrRow extends Component
 {
+    use PersistsKlappe;
+
     public string $descrRaw = '';
 
     public string $showOrHideTitle = '';
@@ -24,11 +27,13 @@ final class DescrRow extends Component
     {
         $this->descrRaw = $descrRaw;
         $this->showOrHideTitle = $showOrHideTitle;
+        $this->open = $this->klappeInitial('descr', true);
     }
 
     public function toggle(): void
     {
         $this->open = ! $this->open;
+        $this->klappePersist('descr', $this->open);
     }
 
     public function render(): View

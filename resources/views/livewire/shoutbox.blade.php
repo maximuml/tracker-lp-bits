@@ -1,3 +1,15 @@
+<section class="nx-idx-card">
+<h2>
+    <a href="#" wire:click.prevent="toggle" aria-expanded="{{ $open ? 'true' : 'false' }}"><img class="{{ $open ? 'minus' : 'plus' }}" src="pic/trans.gif" alt="Show/Hide" title="{{ $showHideTitle }}" /></a>
+    {{ $cardTitle }} - <span class="small">{{ $autoRefreshLabel }}</span>
+    <span class="striking" id="countdown" wire:ignore>{{ $refreshSeconds }}</span><span class="small">{{ $secondsLabel }}</span>
+    - <a href="shoutbox_history.php" class="small">{{ $historyLabel }}</a>
+    @if($canManage)
+        - <span class="small" id="clear-shout-box" data-confirm="{{ $clearConfirm }}" wire:ignore>[<a class="altlink" href="#"><b>{{ $clearLabel }}</b></a>]</span>
+    @endif
+    <button type="button" class="nx-shoutbox-mentions" id="shoutbox-mentions" hidden wire:ignore></button>
+</h2>
+<div class="p-[10pt]" id="kshoutbox" @if(!$open) class="nx-hidden" @endif>
 <div wire:poll.{{ $refresh }}s>
     <x-data-table :caption="__('legacy/index.text_shoutbox')" captionHidden>
     @foreach ($items as $item)
@@ -18,3 +30,5 @@
         </div>
     </form>
 </div>
+</div>
+</section>

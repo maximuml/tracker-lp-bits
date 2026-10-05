@@ -324,19 +324,6 @@ function SmileIT(smile,form,text){
    el.focus();
 }
 
-// java_klappe.js — only klappe_news survives: delegated data-klappe
-// emitters all render the plus/minus icon variant.
-
-function klappe_news(id)
-{
-var klappText = document.getElementById('k' + id);
-var klappBild = document.getElementById('pic' + id);
-if (!klappText) { return; }
-var hidden = klappText.classList.toggle('nx-hidden');
-if (klappBild) { klappBild.className = hidden ? 'plus' : 'minus'; }
-var trigger = document.querySelector('[data-klappe="' + id + '"]');
-if (trigger) { trigger.setAttribute('aria-expanded', hidden ? 'false' : 'true'); }
-}
 
 // ctrlenter.js
 var submitted = false;
@@ -635,13 +622,6 @@ document.addEventListener('click', function (e) {
     var newRow = target.closest('a.js-newrow');
     if (newRow && typeof NewRow === 'function') {
         NewRow(newRow, newRow.getAttribute('data-newrow') === 'before');
-        e.preventDefault();
-        return;
-    }
-
-    var klappeLink = target.closest('[data-klappe]');
-    if (klappeLink) {
-        if (typeof klappe_news === 'function') { klappe_news(klappeLink.getAttribute('data-klappe')); }
         e.preventDefault();
         return;
     }

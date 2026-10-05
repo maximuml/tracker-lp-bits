@@ -21,7 +21,7 @@ class NewsEditRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'newsid' => 'required',
+            'newsid' => 'nullable',
             'body' => 'nullable|string',
             'subject' => 'nullable|string',
             'notify' => 'nullable|string',

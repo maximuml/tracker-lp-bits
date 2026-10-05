@@ -200,10 +200,15 @@ class NewsController extends LegacyController
     {
         // Old POST /news.php?action=X callers land on the dedicated
         // endpoints — 308 replays the body unchanged.
+        // Legacy callers can carry params in the URL (?action=edit&newsid=N)
+        // — forward the query string so the target endpoint still sees them.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
         return match ((string) ($request->input('action') ?? '')) {
-            'add' => redirect()->to('/web/news/add', 308),
-            'edit' => redirect()->to('/web/news/edit', 308),
-            'delete' => redirect()->to('/web/news/delete', 308),
+            'add' => redirect()->to('/web/news/add'.$suffix, 308),
+            'edit' => redirect()->to('/web/news/edit'.$suffix, 308),
+            'delete' => redirect()->to('/web/news/delete'.$suffix, 308),
             default => $this->news($request),
         };
     }

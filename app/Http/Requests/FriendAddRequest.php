@@ -24,7 +24,7 @@ class FriendAddRequest extends FormRequest
     {
         return [
             'id' => 'nullable',
-            'targetid' => 'required',
+            'targetid' => 'nullable',
             'type' => 'nullable|string',
         ];
     }

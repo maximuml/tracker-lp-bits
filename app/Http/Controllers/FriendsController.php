@@ -119,9 +119,12 @@ class FriendsController extends LegacyController
     {
         // Old POST /friends.php?action=X callers land on the dedicated
         // endpoints — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
         return match ((string) ($request->input('action') ?? '')) {
-            'add' => redirect()->to('/web/friends/add', 308),
-            'delete' => redirect()->to('/web/friends/delete', 308),
+            'add' => redirect()->to('/web/friends/add'.$suffix, 308),
+            'delete' => redirect()->to('/web/friends/delete'.$suffix, 308),
             default => $this->friends($request),
         };
     }

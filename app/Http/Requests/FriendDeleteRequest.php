@@ -22,7 +22,7 @@ class FriendDeleteRequest extends FormRequest
     {
         return [
             'id' => 'nullable',
-            'targetid' => 'required',
+            'targetid' => 'nullable',
             'type' => 'nullable|string',
             'sure' => 'nullable',
         ];

@@ -21,7 +21,7 @@ class NewsDeleteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'newsid' => 'required',
+            'newsid' => 'nullable',
             'sure' => 'nullable',
             'returnto' => 'nullable|string',
         ];

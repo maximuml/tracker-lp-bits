@@ -292,6 +292,21 @@ final class FriendsControllerTest extends TestCase
         $this->assertStringEndsWith('/web/friends/delete', $response->getTargetUrl());
     }
 
+    public function test_friends_post_redirect_forwards_query_params(): void
+    {
+        $controller = app(FriendsController::class);
+        $request = Request::create('/friends?action=delete&id=7&targetid=5&type=friend', 'POST');
+        app()->instance('request', $request);
+
+        $response = $controller->friendsPost($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('targetid=5', $response->getTargetUrl());
+        $this->assertStringContainsString('id=7', $response->getTargetUrl());
+        $this->assertStringStartsWith('http://localhost/web/friends/delete?', $response->getTargetUrl());
+    }
+
     /**
      * Set up the legacy environment: load lang_functions from the language
      * file into Globals and bind LegacyRedisCache to null so that

@@ -1,0 +1,1 @@
+<a href="#" wire:click.prevent="toggle"><img class="{{ $bookmarked ? 'bookmark' : 'delbookmark' }}" src="pic/trans.gif" alt="{{ $bookmarked ? 'Bookmarked' : 'Unbookmarked' }}" title="{{ $bookmarked ? __('legacy/functions.title_delbookmark_torrent') : __('legacy/functions.title_bookmark_torrent') }}" /></a>

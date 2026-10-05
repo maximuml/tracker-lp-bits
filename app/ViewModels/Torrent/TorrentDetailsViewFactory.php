@@ -21,7 +21,6 @@ use App\Support\Promotion;
 use App\Support\Strings;
 use App\Support\Time;
 use App\Support\TorrentAccess;
-use App\Support\TorrentBookmark;
 use App\Support\UserDisplay;
 
 /**
@@ -70,9 +69,6 @@ final class TorrentDetailsViewFactory
             showOrHideTitle: self::plainTitle('legacy/details.title_show_or_hide'),
             downloadAllowed: $downloadAllowed,
             saveAs: (string) $row['save_as'],
-            bookmark: SafeHtml::fromTrustedHtml(
-                TorrentBookmark::stateMarkupWithContext((int) $currentUser['id'], $id, false)
-            ),
         );
     }
 

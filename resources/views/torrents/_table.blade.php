@@ -25,7 +25,7 @@
             <div class="nx-embedded nxm-rowactions">
                 @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><img class="download" src="pic/trans.gif" alt="download" title="{{ __('legacy/functions.title_download_torrent') }}" /></a>@endif
                 @if ($row->showDownload && $row->showBookmark)<br />@endif
-                @if ($row->showBookmark)<a id="{{ $row->bookmarkElementId }}" href="#" data-bookmark-torrent="{{ $row->id }}" data-bookmark-counter="{{ $row->bookmarkCounter }}"><img class="{{ $row->bookmarked ? 'bookmark' : 'delbookmark' }}" src="pic/trans.gif" alt="{{ $row->bookmarked ? 'Bookmarked' : 'Unbookmarked' }}" title="{{ $row->bookmarked ? __('legacy/functions.title_delbookmark_torrent') : __('legacy/functions.title_bookmark_torrent') }}" /></a>@endif
+                @if ($row->showBookmark)<livewire:bookmark-icon :torrent-id="$row->id" />@endif
             </div>
         </div>
     </td>

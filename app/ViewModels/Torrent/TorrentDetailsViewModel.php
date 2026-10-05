@@ -10,7 +10,7 @@ use App\Support\Html\SafeHtml;
  * Typed payload for the torrent details table — replaces the dozen
  * `*Html` strings assembled by `TorrentDetailsController`.
  *
- * Boundaries that stay SafeHtml: `bookmark`, `tags`, `customFields`,
+ * Boundaries that stay SafeHtml: `tags`, `customFields`,
  * `technicalInfo`, `descr` (BBCode output), `quickReply`, comments.
  */
 final class TorrentDetailsViewModel
@@ -33,6 +33,5 @@ final class TorrentDetailsViewModel
         public readonly string $showOrHideTitle,
         public readonly bool $downloadAllowed,
         public readonly string $saveAs,
-        public readonly SafeHtml $bookmark,
     ) {}
 }

@@ -137,6 +137,13 @@ function authenticate() {
   return true;
 }
 
+// Warm DB/Redis connections so the first measured /health/ready iteration
+// does not absorb container cold-start latency (observed: p95 spikes past
+// the 1000ms budget on fresh CI runners).
+export function setup() {
+  http.get(`${BASE_URL}/health/ready`);
+}
+
 export default function () {
   // ── Health checks (unauthenticated, very fast) ────────────────────────
   group('health/live', () => {

@@ -698,8 +698,9 @@ jobs:
     runs-on: ubuntu-latest
     # T-16: Mutation testing for critical paths: Auth, Token, Bonus, Tracker,
     # Outbox, Policies, Torrent/Thanks mutations.
-    # Full scope on push to php8 (min-msi=55 / min-covered-msi=55;
-    # last full run measured 56.8%).
+    # Full scope on push to php8: Controllers+Policies run on infection.json5
+    # (min-msi=55 / min-covered-msi=55), while app/Services + app/Auth run on
+    # infection-services-auth.json5 at the raised 60/60 gate.
     # W3-04: on PRs, only changed critical files are mutated
     # (min-covered-msi=50 on the filtered set; global min-msi=0 because a
     # small file set cannot carry a project-wide MSI).
@@ -754,7 +755,7 @@ jobs:
         id: changed
         run: bash scripts/ci/infection-changed-files.sh "${{ github.base_ref }}"
 
-      - name: Run Infection (full scope)
+      - name: Run Infection (controllers + policies)
         if: github.event_name == 'push'
         run: |
           # --testsuite=Unit,Integration: оба сюита работают на дампе
@@ -770,11 +771,23 @@ jobs:
             --logger-github \
             --test-framework-extra-args="--testsuite=Unit,Integration"
 
-      - name: Run Infection (changed files only)
+      - name: Run Infection (services + auth, 60/60 gate)
+        if: github.event_name == 'push'
+        run: |
+          DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
+            --configuration=infection-services-auth.json5 \
+            --threads=4 \
+            --min-msi=60 \
+            --min-covered-msi=60 \
+            --no-progress \
+            --logger-github \
+            --test-framework-extra-args="--testsuite=Unit,Integration"
+
+      - name: Run Infection (changed files only, core)
         # W3-04 follow-up: PR-scoped mutation is now fail-closed for the
         # set of critical files. Full-scope mutation on php8 still enforces
-        # the global 55/55 thresholds after merge.
-        if: github.event_name == 'pull_request' && steps.changed.outputs.skip != 'true'
+        # the 55/55 (core) and 60/60 (services/auth) thresholds after merge.
+        if: github.event_name == 'pull_request' && steps.changed.outputs.filter != ''
         run: |
           DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
@@ -787,6 +800,20 @@ jobs:
             --map-source-class-to-test \
             --test-framework-extra-args="--testsuite=Unit,Integration"
 
+      - name: Run Infection (changed files only, services + auth)
+        if: github.event_name == 'pull_request' && steps.changed.outputs.filter_svc != ''
+        run: |
+          DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
+            --configuration=infection-services-auth.json5 \
+            --threads=4 \
+            --no-progress \
+            --logger-github \
+            --min-msi=0 \
+            --min-covered-msi=60 \
+            --filter="${{ steps.changed.outputs.filter_svc }}" \
+            --map-source-class-to-test \
+            --test-framework-extra-args="--testsuite=Unit,Integration"
+
       - name: Upload Infection logs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always() && (github.event_name == 'push' || steps.changed.outputs.skip != 'true')
@@ -795,6 +822,8 @@ jobs:
           path: |
             infection.log
             infection-summary.log
+            infection-services-auth.log
+            infection-services-auth-summary.log
           retention-days: 14
 
   prod-compose-smoke:

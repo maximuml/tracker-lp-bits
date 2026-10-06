@@ -9,7 +9,7 @@
 <div>
 {{ $script ?? '' }}
 @if ($enableAttachment ?? false)
-    <form enctype="multipart/form-data" name="attachment" method="post" action="/web/attachment?callback_func={{ $callback_func }}">
+    <form enctype="multipart/form-data" name="attachment" method="post" action="/attachment?callback_func={{ $callback_func }}">
     @csrf
     <div class="nx-attach-controls">
     <input type="file" name="file[]" multiple aria-label="{{ __('legacy/attachment.submit_upload') }}" @if (! $count_left) disabled="disabled"@endif />

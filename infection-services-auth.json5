@@ -2,13 +2,13 @@
     "$schema": "vendor/infection/infection/resources/schema.json",
     "source": {
         "directories": [
-            "app/Http/Controllers/",
-            "app/Policies/"
+            "app/Services/",
+            "app/Auth/"
         ]
     },
     "logs": {
-        "text": "infection.log",
-        "summary": "infection-summary.log"
+        "text": "infection-services-auth.log",
+        "summary": "infection-services-auth-summary.log"
     },
     "mutators": {
         "global-ignore": [],
@@ -19,8 +19,8 @@
     "phpUnit": {
         "configDir": "."
     },
-    "minMsi": 55,
-    "minCoveredMsi": 55,
+    "minMsi": 60,
+    "minCoveredMsi": 60,
     "threads": 4,
     "timeout": 10
 }

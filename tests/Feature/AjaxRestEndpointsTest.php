@@ -217,9 +217,9 @@ final class AjaxRestEndpointsTest extends TestCase
     #[DataProvider('shoutboxFailures')]
     public function test_shoutbox_endpoint_error_messages(string $uri, array $body, string $expectedMsg): void
     {
-        // Pin USER: a randomly-rolled staff class passes the clear gate and
-        // 'clear no permission' would observe the success envelope instead.
-        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        // Pin the class — the factory randomly grants staff classes, which
+        // would pass the sbmanage gate on the 'clear' row.
+        $user = User::factory()->class(UserClass::USER->value)->create();
         $body['_token'] = $this->csrfToken();
         $response = $this->asNexusUser($user)->post($uri, $body);
 

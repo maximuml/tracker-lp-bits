@@ -98,6 +98,23 @@ final class AuditStaffActionsTest extends TestCase
         }
     }
 
+    public function test_rest_user_endpoints_keep_legacy_skip_semantics(): void
+    {
+        // Renamed take*/page-dispatcher endpoints stay user-self activity:
+        // their legacy URIs were listed in USER_PATH_PREFIXES.
+        foreach (['web/messages/send', 'web/messages/delete',
+            'web/messages/delete/in', 'web/messages/delete/out',
+            'web/messages/move-or-delete', 'web/messages/mailboxes',
+            'web/staffmess/send', 'web/contactstaff/send',
+            'web/usercp/theme', 'web/usercp/logout-all', 'web/usercp/personal',
+            'web/usercp/forum', 'web/usercp/tracker', 'web/usercp/security/confirm',
+            'web/offers/create', 'web/offers/allow', 'web/offers/finish',
+            'web/offers/delete', 'web/offers/edit',
+            'web/mybonus/exchange'] as $path) {
+            $this->assertFalse(AuditStaffActions::isAuditablePath($path), $path);
+        }
+    }
+
     public function test_get_requests_never_audited(): void
     {
         $response = $this->handle(

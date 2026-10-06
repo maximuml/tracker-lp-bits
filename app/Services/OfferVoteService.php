@@ -51,7 +51,7 @@ final class OfferVoteService
             $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
 
-        $offerid = (int) $request->input('id', 0);
+        $offerid = $request->integer('id');
         $curuser = $this->curUser();
         $userid = (int) ($curuser['id'] ?? 0);
 

@@ -156,6 +156,17 @@ final class OfferVoteServiceTest extends TestCase
         $this->callVote(['id' => 999, 'vote' => 'yeah']);
     }
 
+    public function test_missing_id_aborts(): void
+    {
+        $ownerId = $this->createUser();
+        $this->insertOffer($ownerId);
+        $voterId = $this->createUser();
+        $this->authenticatedUser(['id' => $voterId]);
+
+        $this->expectException(Throwable::class);
+        $this->callVote(['vote' => 'yeah']);
+    }
+
     public function test_owner_cannot_vote_own_offer(): void
     {
         $ownerId = $this->createUser();

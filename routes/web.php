@@ -195,9 +195,13 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('usercp/forum', [UsercpController::class, 'saveForum']);
     Route::post('usercp/tracker', [UsercpController::class, 'saveTracker']);
     Route::post('usercp/security/confirm', [UsercpController::class, 'confirmSecurity']);
+    Route::post('messages/send', [MessageController::class, 'send']);
+    Route::post('messages/delete/{type}', [MessageController::class, 'deleteTyped'])->whereIn('type', ['in', 'out']);
     Route::post('messages/move-or-delete', [MessageController::class, 'moveOrDelete']);
     Route::post('messages/mailboxes', [MessageController::class, 'editMailboxes']);
     Route::post('messages/delete', [MessageController::class, 'deleteMailboxMessage']);
+    Route::post('staffmess/send', [StaffMessageController::class, 'sendStaffMessage']);
+    Route::post('contactstaff/send', [StaffMessageController::class, 'sendContactStaff']);
     Route::post('offers/create', [OfferController::class, 'store']);
     Route::post('offers/allow', [OfferController::class, 'allow']);
     Route::post('offers/finish', [OfferController::class, 'finish']);

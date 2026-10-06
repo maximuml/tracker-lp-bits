@@ -7,13 +7,23 @@ namespace App\Http\Middleware;
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Http\LegacyScriptContext;
 use App\Http\LegacyUrlRewriter;
+use App\Support\AssetAppender;
 use App\Support\Bootstrap;
+use App\Support\Cache\LegacyRedisCache;
+use App\Support\Config;
 use App\Support\CurrentUser;
-use App\Support\LegacyBootstrap;
+use App\Support\Input;
 use App\Support\LegacyRuntime;
+use App\Support\Locale;
+use App\Support\NexusContext;
+use App\Support\PageState;
+use App\Support\RequestContext;
+use App\Support\SiteAccess;
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\Sanctum;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -59,7 +69,7 @@ final class LegacyRequestMiddleware
         $this->currentUser->reset();
 
         $rootpath = base_path().'/';
-        LegacyBootstrap::boot($request, $rootpath);
+        $this->bootLegacyContext($request);
 
         $script = $this->detectScript($request);
 
@@ -68,6 +78,55 @@ final class LegacyRequestMiddleware
         $this->pageLayoutRepository->prepareAccess();
 
         return $next($request);
+    }
+
+    /**
+     * Legacy bootstrap steps, inlined from the removed LegacyBootstrap:
+     * capture the request, cache warm-up, Sanctum token model, timezone,
+     * per-page language folder and the guest-visit gate.
+     */
+    private function bootLegacyContext(Request $request): void
+    {
+        NexusContext::reset();
+        NexusContext::instance()->setFromRequest($request);
+
+        ini_set('error_reporting', E_ALL);
+        ini_set('display_errors', 0);
+
+        if (defined('RUNNING_IN_OCTANE') && RUNNING_IN_OCTANE) {
+            // ResetNexus listener already flushed state; just re-boot
+            // the instance with fresh request-scoped data.
+            RequestContext::boot();
+        } else {
+            RequestContext::flush();
+            AssetAppender::flush();
+            RequestContext::boot();
+        }
+
+        // LegacyRedisCache is registered as a singleton in
+        // AppServiceProvider::register() — resolving it triggers the
+        // connection + language folder setup.
+        LegacyRedisCache::instance();
+
+        if (class_exists(Sanctum::class)) {
+            Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        }
+
+        ini_set('date.timezone', Config::get('nexus.timezone', null));
+
+        $script = RequestContext::instance()->getScript();
+        if (! in_array($script, ['announce', 'scrape'], true)) {
+            // Legacy per-page language arrays resolve through Laravel's
+            // translator (resources/lang/en/legacy/*.php). The language
+            // folder cookie is still read by Locale::currentFolder() and
+            // a few repositories.
+            PageState::instance()->setLangDir(Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
+        }
+
+        if (! in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {
+            defined('TIMENOW') || define('TIMENOW', time());
+            SiteAccess::checkGuestVisit();
+        }
     }
 
     public function terminate(Request $request, Response $response): void

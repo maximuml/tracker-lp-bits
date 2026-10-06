@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ClearCacheRequest;
+use App\Http\Requests\LocationPostRequest;
+use App\Http\Requests\TestIpRequest;
+use App\Http\Requests\UserBanLogRequest;
 use App\Repositories\ModerationRepository;
 use App\Repositories\UserModerationRepository;
 use App\Services\LocationService;
@@ -65,7 +69,16 @@ class AdminToolsController extends LegacyController
         ]);
     }
 
-    public function userBanLogPost(Request $request): View|RedirectResponse|Response
+    public function userBanLogPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/admin/user-ban-log'.$suffix, 308);
+    }
+
+    public function userBanLogSubmit(UserBanLogRequest $request): View|RedirectResponse|Response
     {
         return $this->userBanLog($request);
     }
@@ -85,7 +98,16 @@ class AdminToolsController extends LegacyController
         ]);
     }
 
-    public function clearCachePost(Request $request): View|RedirectResponse|Response
+    public function clearCachePost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/system/clear-cache'.$suffix, 308);
+    }
+
+    public function clearCacheSubmit(ClearCacheRequest $request): View|RedirectResponse|Response
     {
         if (UserDisplay::currentClass() < (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
@@ -166,7 +188,16 @@ class AdminToolsController extends LegacyController
         return $this->renderLocationList($request, $success, $error, $rangeStartIp, $rangeEndIp);
     }
 
-    public function locationPost(Request $request): View|RedirectResponse|Response
+    public function locationPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/system/location'.$suffix, 308);
+    }
+
+    public function locationSubmit(LocationPostRequest $request): View|RedirectResponse|Response
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
@@ -321,7 +352,16 @@ class AdminToolsController extends LegacyController
 
     }
 
-    public function testipPost(Request $request): View|RedirectResponse|Response
+    public function testipPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/system/test-ip'.$suffix, 308);
+    }
+
+    public function testIpSubmit(TestIpRequest $request): View|RedirectResponse|Response
     {
         return $this->testip($request);
     }

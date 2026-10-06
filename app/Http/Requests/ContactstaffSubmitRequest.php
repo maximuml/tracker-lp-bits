@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+/**
+ * REST rename of a legacy single-purpose POST URI — fields stay
+ * permissive so the controller's legacy abort pages remain
+ * byte-identical.
+ */
+class ContactstaffSubmitRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /** @return array<string, mixed> */
+    public function rules(): array
+    {
+        return [
+            'subject' => 'nullable|string|max:255',
+            'msg' => 'nullable|string',
+            'receiver' => 'nullable|integer',
+            'imagehash' => 'nullable|string|max:255',
+            'imagestring' => 'nullable|string|max:255',
+        ];
+    }
+}

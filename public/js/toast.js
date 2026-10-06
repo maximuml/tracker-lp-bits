@@ -552,7 +552,7 @@
 
     function markAllRead(panel) {
         var csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        fetch('notifications', {
+        fetch('/web/notifications/mark-read', {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',

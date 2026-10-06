@@ -5,7 +5,7 @@
 @section('content')
 <h1 class="text-center">{{ __('legacy/reports.text_reports')}}</h1>
 <x-data-table :caption="__('legacy/reports.text_reports')" captionHidden class="mx-auto">
-<form method=post action=takeupdate.php>
+<form method=post action="/web/system/update">@csrf
 <tr>
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('legacy/reports.col_added')}}</nobr></th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/reports.col_reporter')}}</th>

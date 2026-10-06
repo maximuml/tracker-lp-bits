@@ -16,7 +16,7 @@
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
-<h2>{{ __('legacy/userdetails.text_flush_ghost_torrents') ?? '' }}<a class="altlink" href="takeflush.php?id={{ $id }}">{{ __('legacy/userdetails.text_here') ?? '' }}</a></h2>
+<h2>{{ __('legacy/userdetails.text_flush_ghost_torrents') ?? '' }}<form method="post" action="/web/torrents/flush?id={{ $id }}" class="inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('legacy/userdetails.text_here') ?? '' }}</button></form></h2>
 @endif
 <x-data-table :caption="__('legacy/userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)
@@ -99,7 +99,7 @@
 
 @if ($canManageBasic && (int) $user['class'] < $currentClass)
 <x-frame :caption="__('legacy/userdetails.text_edit_user')" :center="false">
-<form method="post" action="modtask.php">
+<form method="post" action="/web/staff/modtask">@csrf
 <input type="hidden" name="action" value="edituser" />
 <input type="hidden" name="userid" value="{{ $id }}" />
 <input type="hidden" name="returnto" value="userdetails.php?id={{ $id }}" />

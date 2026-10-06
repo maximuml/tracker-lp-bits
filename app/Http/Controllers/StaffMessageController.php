@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\Http\Requests\ContactstaffSubmitRequest;
 use App\Http\Requests\SendContactStaffRequest;
 use App\Http\Requests\SendStaffMessageRequest;
+use App\Http\Requests\StaffmessSubmitRequest;
 use App\Jobs\BulkUserMessageJob;
 use App\Models\User;
 use App\Repositories\StaffMessageRepository;
@@ -53,7 +55,16 @@ class StaffMessageController extends LegacyController
         ]);
     }
 
-    public function staffmessPost(Request $request): View|RedirectResponse|Response
+    public function staffmessPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/staffmess/submit'.$suffix, 308);
+    }
+
+    public function staffmessSubmit(StaffmessSubmitRequest $request): View|RedirectResponse|Response
     {
         return $this->staffmess($request);
     }
@@ -119,7 +130,16 @@ class StaffMessageController extends LegacyController
 
     }
 
-    public function contactstaffPost(Request $request): View|RedirectResponse|Response
+    public function contactstaffPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/contactstaff/submit'.$suffix, 308);
+    }
+
+    public function contactstaffSubmit(ContactstaffSubmitRequest $request): View|RedirectResponse|Response
     {
         return $this->contactstaff($request);
     }

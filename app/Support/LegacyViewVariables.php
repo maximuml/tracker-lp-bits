@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Support\Config\SiteConfig;
+use Illuminate\Database\QueryException;
 
 /**
  * The legacy variables still shared with every Blade view ($SITENAME,
@@ -32,6 +33,18 @@ final class LegacyViewVariables
      * @return array<string, mixed>
      */
     private function settings(): array
+    {
+        try {
+            return $this->resolveSettings();
+        } catch (QueryException) {
+            return [];
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function resolveSettings(): array
     {
         $config = SiteConfig::current();
         $main = $config->main;

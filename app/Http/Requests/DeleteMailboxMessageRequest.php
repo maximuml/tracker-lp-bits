@@ -31,7 +31,7 @@ class DeleteMailboxMessageRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect('/messages.php')->withErrors($validator)->withInput()
+            redirect('/web/messages')->withErrors($validator)->withInput()
         );
     }
 }

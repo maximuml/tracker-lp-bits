@@ -60,7 +60,7 @@ class UserSocialTest extends TestCase
         $message = Message::factory()->between($sender, $receiver)->create();
 
         $this->withNexusCookie($receiver)
-            ->get('/messages')
+            ->get('/web/messages')
             ->assertStatus(200)
             ->assertSee($message->subject);
     }
@@ -71,7 +71,7 @@ class UserSocialTest extends TestCase
         $receiver = User::factory()->create();
 
         $this->withNexusCookie($sender)
-            ->get('/sendmessage')
+            ->get('/web/sendmessage')
             ->assertStatus(200);
 
         $subject = 'Test PM subject';
@@ -100,7 +100,7 @@ class UserSocialTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->get('/friends')
+            ->get('/web/friends')
             ->assertStatus(200);
     }
 

@@ -75,8 +75,8 @@ final class PasskeyPostLoginTest extends TestCase
             'signature' => $signature,
         ]);
 
-        // Should redirect to index.php (login fails silently, no user found)
-        $response->assertRedirect('index.php');
+        // Should redirect to /web/index (login fails silently, no user found)
+        $response->assertRedirect('/web/index');
     }
 
     public function test_passkey_is_not_in_url_on_post(): void
@@ -119,8 +119,8 @@ final class PasskeyPostLoginTest extends TestCase
             'signature' => str_repeat('0', 64),
         ]);
 
-        // Should redirect to index.php (HMAC validation fails, no auth)
-        $response->assertRedirect('index.php');
+        // Should redirect to /web/index (HMAC validation fails, no auth)
+        $response->assertRedirect('/web/index');
     }
 
     public function test_post_passkey_login_with_expired_timestamp_redirects_without_auth(): void
@@ -138,8 +138,8 @@ final class PasskeyPostLoginTest extends TestCase
             'signature' => $signature,
         ]);
 
-        // Should redirect to index.php (timestamp out of window, no auth)
-        $response->assertRedirect('index.php');
+        // Should redirect to /web/index (timestamp out of window, no auth)
+        $response->assertRedirect('/web/index');
     }
 
     public function test_post_passkey_login_with_valid_hmac_and_real_user_authenticates(): void
@@ -161,6 +161,6 @@ final class PasskeyPostLoginTest extends TestCase
             'signature' => $signature,
         ]);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
     }
 }

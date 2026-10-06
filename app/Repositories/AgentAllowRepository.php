@@ -201,7 +201,7 @@ class AgentAllowRepository extends BaseRepository
         }
 
         if (! $agentAllowPassed) {
-            throw new ClientNotAllowedException('Banned Client, Please goto '.Url::schemeAndHost(false).'/faq.php#id29 for a list of acceptable clients');
+            throw new ClientNotAllowedException('Banned Client, Please goto '.Url::schemeAndHost(false).'/web/faq#id29 for a list of acceptable clients');
         }
 
         if ($debug) {
@@ -223,7 +223,7 @@ class AgentAllowRepository extends BaseRepository
         }
         if (Url::isSecure() && ! $agentAllowPassed->allowhttps) {
             throw new ClientNotAllowedException(sprintf(
-                '[%s]This client does not support https well, Please goto %s/faq.php#id29 for a list of proper clients',
+                '[%s]This client does not support https well, Please goto %s/web/faq#id29 for a list of proper clients',
                 $agentAllowPassed->id, Url::schemeAndHost(false)
             ));
         }

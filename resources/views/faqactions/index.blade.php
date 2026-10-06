@@ -52,7 +52,7 @@
 @elseif (($mode ?? '') === 'confirm_delete')
     <h1 class="text-center">Confirmation required</h1>
     <div class="nx-box w-[97%] mx-auto text-center">
-    Please click <form method="post" action="/web/faq/actions?action=delete&id={{ (int) ($id ?? 0) }}" class="inline">@csrf<input type="hidden" name="confirm" value="yes"><button type="submit" class="nx-btn-link">here</button></form> to confirm.
+    Please click <form method="post" action="/web/faq/actions?action=delete&id={{ (int) ($id ?? 0) }}" class="nx-inline">@csrf<input type="hidden" name="confirm" value="yes"><button type="submit" class="nx-btn-link">here</button></form> to confirm.
     </div>
 @elseif (($mode ?? '') === 'additem')
     <h1 class="text-center">Add Item</h1>

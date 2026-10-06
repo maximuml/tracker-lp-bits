@@ -75,6 +75,32 @@ class LegacyUrlRewriterTest extends TestCase
         $this->assertSame('/details.php', $rewritten->server->get('SCRIPT_NAME'));
     }
 
+    public function test_web_paths_carry_the_page_script_for_legacy_context(): void
+    {
+        $request = Request::create('http://localhost/web/torrents?seeded=1', server: [
+            'SCRIPT_NAME' => '/index.php',
+            'SCRIPT_FILENAME' => public_path('index.php'),
+        ]);
+
+        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+
+        $this->assertSame('/web/torrents?seeded=1', $rewritten->server->get('REQUEST_URI'));
+        $this->assertSame('/index.php', $rewritten->server->get('SCRIPT_NAME'));
+        $this->assertSame('torrents', $rewritten->server->get('LEGACY_PAGE_SCRIPT'));
+    }
+
+    public function test_non_web_passthrough_paths_do_not_carry_a_page_script(): void
+    {
+        $request = Request::create('http://localhost/api/ping', server: [
+            'SCRIPT_NAME' => '/index.php',
+            'SCRIPT_FILENAME' => public_path('index.php'),
+        ]);
+
+        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+
+        $this->assertNull($rewritten->server->get('LEGACY_PAGE_SCRIPT'));
+    }
+
     public function test_auth_passkey_subpath_is_preserved_for_laravel_routing(): void
     {
         // SEC-03: /auth/passkey collapsed to /auth before reaching the

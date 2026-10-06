@@ -25,5 +25,5 @@
             @endforeach
         </ul>
     @endif
-    <p><a href="/bitbucket-upload.php">{{ __('legacy/bitbucketupload.std_upload_another_file') }}</a>.</p>
+    <p><a href="/web/bitbucket-upload">{{ __('legacy/bitbucketupload.std_upload_another_file') }}</a>.</p>
 @endsection

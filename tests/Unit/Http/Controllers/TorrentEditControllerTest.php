@@ -40,7 +40,7 @@ final class TorrentEditControllerTest extends TestCase
         $response = $controller->legacyUpdate($request, $repository);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('details.php?id=42&edited=1', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/details/42?edited=1', $response->getTargetUrl());
     }
 
     public function test_legacy_update_honors_returnto(): void
@@ -101,6 +101,6 @@ final class TorrentEditControllerTest extends TestCase
         $response = $controller->legacyUpdate($request, $repository);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertSame('http://localhost/details.php?id=42&edited=1', $response->getTargetUrl());
+        $this->assertSame('http://localhost/web/details/42?edited=1', $response->getTargetUrl());
     }
 }

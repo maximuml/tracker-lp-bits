@@ -52,7 +52,7 @@ final class SystemMaintenanceControllerTest extends TestCase
         $response = $controller->mailtest($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/mailtest.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/mailtest', $response->getTargetUrl());
     }
 
     public function test_mailtest_denies_non_sysop(): void

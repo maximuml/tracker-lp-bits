@@ -46,7 +46,7 @@ class MyController extends Controller
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/mybonus'.($qs ? '?'.$qs : ''));
         }
 
         $data = $this->bonusPageService->build($request)->toArray();
@@ -69,7 +69,7 @@ class MyController extends Controller
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/mybonus.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/mybonus'.($qs ? '?'.$qs : ''));
         }
 
         $qs = $request->getQueryString();
@@ -78,13 +78,13 @@ class MyController extends Controller
             return redirect()->to('/web/mybonus/exchange'.$suffix, 308);
         }
 
-        return redirect('/mybonus.php');
+        return redirect('/web/mybonus');
     }
 
     public function exchangeBonus(ExchangeBonusRequest $request): RedirectResponse
     {
         if ($this->currentUser->get() === null) {
-            return redirect('/mybonus.php');
+            return redirect('/web/mybonus');
         }
 
         $data = $this->bonusPageService->build($request)->toArray();
@@ -96,7 +96,7 @@ class MyController extends Controller
             $data['lockText']
         );
 
-        return $response instanceof RedirectResponse ? $response : redirect('/mybonus.php');
+        return $response instanceof RedirectResponse ? $response : redirect('/web/mybonus');
     }
 
     public function hr(Request $request): View|RedirectResponse
@@ -105,7 +105,7 @@ class MyController extends Controller
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/myhr.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/myhr'.($qs ? '?'.$qs : ''));
         }
 
         $viewerId = (int) ($curUser['id'] ?? 0);
@@ -161,7 +161,7 @@ document.getElementById('hr-table').addEventListener('click', function (e) {
     if (!e.target || !e.target.classList || !e.target.classList.contains('remove-hr')) return;
     var id = e.target.getAttribute('data-id');
     layer.confirm('{$msg}', function (index) {
-        nativePost('ajax.php', {"action": "removeHitAndRun", "params": {"id": id}}, function (response) {
+        nativePost('/web/hit-and-runs/remove', {"id": id}, function (response) {
             console.log(response)
             if (response.ret != 0) {
                 layer.alert(response.msg)

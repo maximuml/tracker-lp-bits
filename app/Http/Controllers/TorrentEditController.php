@@ -48,7 +48,7 @@ class TorrentEditController extends Controller
         if (! $user instanceof User) {
             $qs = $request->getQueryString();
 
-            return redirect('/edit.php'.($qs ? '?'.$qs : ''));
+            return redirect('/edit'.($qs ? '?'.$qs : ''));
         }
 
         $id = (int) $request->input('id', 0);
@@ -167,7 +167,7 @@ class TorrentEditController extends Controller
         $torrent = $repository->update($request);
 
         $id = $torrent->id;
-        $defaultUrl = "details.php?id=$id&edited=1";
+        $defaultUrl = "/web/details/$id?edited=1";
         $returl = $request->input('returnto', $defaultUrl);
 
         return redirect(SafeReturnUrl::filter(trim((string) $returl), $defaultUrl));

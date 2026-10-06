@@ -90,7 +90,7 @@ class UsercpController extends LegacyController
         if (! $user instanceof User) {
             $qs = $request->getQueryString();
 
-            return redirect('/usercp.php'.($qs ? '?'.$qs : ''));
+            return redirect('/usercp'.($qs ? '?'.$qs : ''));
         }
 
         $action = (string) $request->input('action', '');
@@ -131,7 +131,7 @@ class UsercpController extends LegacyController
     {
         $user = Auth::user();
         if (! $user instanceof User) {
-            return redirect('/usercp.php');
+            return redirect('/usercp');
         }
 
         $action = (string) $request->input('action');
@@ -154,59 +154,59 @@ class UsercpController extends LegacyController
             return $this->legacy($request);
         }
 
-        return redirect('/usercp.php');
+        return redirect('/usercp');
     }
 
     public function savePersonal(UpdatePersonalSettingsRequest $request): RedirectResponse
     {
         $user = Auth::user();
         if (! $user instanceof User) {
-            return redirect('/usercp.php');
+            return redirect('/usercp');
         }
         if (! $this->policy->updatePersonal($user, $user)) {
-            return redirect('/usercp.php?action=personal');
+            return redirect('/usercp?action=personal');
         }
         $this->repository->updatePersonal(PersonalSettingsDto::fromRequest($request, $user->avatar));
 
-        return redirect('/usercp.php?action=personal&type=saved');
+        return redirect('/usercp?action=personal&type=saved');
     }
 
     public function saveForum(UpdateForumSettingsRequest $request): RedirectResponse
     {
         $user = Auth::user();
         if (! $user instanceof User) {
-            return redirect('/usercp.php');
+            return redirect('/usercp');
         }
         if (! $this->policy->updateForum($user, $user)) {
-            return redirect('/usercp.php?action=forum');
+            return redirect('/usercp?action=forum');
         }
         $this->repository->updateForum(ForumSettingsDto::fromRequest($request));
 
-        return redirect('/usercp.php?action=forum&type=saved');
+        return redirect('/usercp?action=forum&type=saved');
     }
 
     public function saveTracker(UpdateTrackerSettingsRequest $request): RedirectResponse
     {
         $user = Auth::user();
         if (! $user instanceof User) {
-            return redirect('/usercp.php');
+            return redirect('/usercp');
         }
         if (! $this->policy->updateTracker($user, $user)) {
-            return redirect('/usercp.php?action=tracker');
+            return redirect('/usercp?action=tracker');
         }
         $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
 
-        return redirect('/usercp.php?action=tracker&type=saved');
+        return redirect('/usercp?action=tracker&type=saved');
     }
 
     public function confirmSecurity(UpdateSecuritySettingsRequest $request): RedirectResponse
     {
         $user = Auth::user();
         if (! $user instanceof User) {
-            return redirect('/usercp.php');
+            return redirect('/usercp');
         }
         if (! $this->policy->updateSecurity($user, $user)) {
-            return redirect('/usercp.php?action=security');
+            return redirect('/usercp?action=security');
         }
 
         return redirect($this->repository->updateSecurityFromLegacyRequest($request));

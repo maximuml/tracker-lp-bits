@@ -37,7 +37,7 @@ final class BitbucketUploadControllerTest extends TestCase
         $response = $controller->create($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/bitbucket-upload.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/bitbucket-upload', $response->getTargetUrl());
     }
 
     public function test_create_redirects_to_login_when_not_authenticated(): void
@@ -49,7 +49,7 @@ final class BitbucketUploadControllerTest extends TestCase
         $response = $controller->create($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/login.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/login', $response->getTargetUrl());
     }
 
     public function test_create_returns_view_for_authenticated_user(): void

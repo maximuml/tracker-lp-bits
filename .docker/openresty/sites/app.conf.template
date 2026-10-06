@@ -77,17 +77,10 @@ server {
         fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
     }
 
-    # confirmemail.php/<id>/<md5>/<email> uses PATH_INFO.
+    # confirmemail.php/<id>/<md5>/<email> — the canonical handler lives at
+    # /web/confirmemail/<id>/<md5>/<email>; redirect without hitting PHP.
     location ~ ^/confirmemail\.php(/.*)?$ {
-        fastcgi_split_path_info ^(/confirmemail\.php)(/.*)$;
-        fastcgi_pass php:9000;
-        fastcgi_index index.php;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
-        fastcgi_param SCRIPT_NAME /confirmemail.php;
-        fastcgi_param PATH_INFO $fastcgi_path_info;
-        fastcgi_param REQUEST_ID $request_id;
-        fastcgi_param HTTP_X_FORWARDED_FOR $proxy_add_x_forwarded_for;
+        return 301 /web/confirmemail$1$is_args$args;
     }
 
     # 301-redirect legacy .php URLs to canonical routes (Step 28).
@@ -99,14 +92,14 @@ server {
     # 308 preserves the POST method and body (logout is a POST form).
     location = /logout.php { return 308 /logout; }
     location = /signup.php { return 301 /signup?$args; }
-    location = /torrents.php { return 301 /torrents?$args; }
+    location = /torrents.php { return 301 /web/torrents?$args; }
     location = /forums.php { return 301 /forums?$args; }
-    location = /faq.php { return 301 /faq?$args; }
-    location = /rules.php { return 301 /rules?$args; }
-    location = /aboutnexus.php { return 301 /aboutnexus?$args; }
-    location = /useragreement.php { return 301 /useragreement?$args; }
+    location = /faq.php { return 301 /web/faq?$args; }
+    location = /rules.php { return 301 /web/rules?$args; }
+    location = /aboutnexus.php { return 301 /web/aboutnexus?$args; }
+    location = /useragreement.php { return 301 /web/useragreement?$args; }
     location = /recover.php { return 301 /recover?$args; }
-    location = /topten.php { return 301 /topten?$args; }
+    location = /topten.php { return 301 /web/topten?$args; }
 
     # Remaining .php URLs (including the root index.php wrapper) are served if the
     # file still exists; otherwise they fall through to index.php so legacy URLs

@@ -42,7 +42,7 @@ class InfoController extends LegacyController
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/userhistory.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/userhistory'.($qs ? '?'.$qs : ''));
         }
 
         $userid = (int) request()->query('id');
@@ -226,7 +226,7 @@ class InfoController extends LegacyController
             } else {
                 $this->userRepository->updateFields((int) $user->id, ['donated' => $donated]);
 
-                return redirect('/userdetails.php?id='.$user->id);
+                return redirect('/userdetails?id='.$user->id);
             }
         }
 
@@ -258,7 +258,7 @@ class InfoController extends LegacyController
 
         $count = $this->usercpLookupRepository->countBitbucket();
         $perpage = 10;
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, 'bitbucketlog.php?');
+        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, '/web/bitbucketlog?');
         $bitbucketRows = $this->usercpLookupRepository->listBitbucket($offset, $perpage);
 
         $userIds = [];

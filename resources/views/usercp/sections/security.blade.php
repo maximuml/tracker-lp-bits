@@ -1,6 +1,6 @@
 @include('usercp.sections._menu', ['selected' => 'security'])
 
-<form method=post action="{{ $security->isConfirm ? '/web/usercp/security/confirm' : '/usercp.php' }}" id="security"
+<form method=post action="{{ $security->isConfirm ? '/web/usercp/security/confirm' : '/usercp' }}" id="security"
       data-auth-form="{{ $security->isConfirm ? 'challenge' : 'hash' }}"
       data-username-name="username"
       data-password-class="{{ $security->isConfirm ? 'oldpassword' : 'password' }}"

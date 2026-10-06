@@ -71,7 +71,7 @@ class TorrentDetailsController extends Controller
 
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
+            return redirect('/login?returnto='.urlencode($request->fullUrl()));
         }
 
         $torrent = $this->torrentRepository->findById($id);
@@ -85,7 +85,7 @@ class TorrentDetailsController extends Controller
             $query = $request->query->all();
             unset($query['id']);
 
-            return redirect('/details.php?id='.$id.($query ? '&'.http_build_query($query) : ''));
+            return redirect('/web/details/'.$id.($query ? '?'.http_build_query($query) : ''));
         }
 
         $row = $this->torrentDetailRepository->getTorrent($id);
@@ -123,7 +123,7 @@ class TorrentDetailsController extends Controller
 
         $headers = [];
         if ($requestFlags['uploaded']) {
-            $headers['Refresh'] = "1; url=download.php?id={$id}";
+            $headers['Refresh'] = "1; url=/download?id={$id}";
         }
 
         $tagIds = $this->torrentDetailRepository->getTagIds($id);
@@ -215,7 +215,7 @@ class TorrentDetailsController extends Controller
             $commentCount = $this->torrentDetailRepository->getCommentCount($id);
             if ($commentCount > 0) {
                 [$commentPagerTop, $commentPagerBottom] = Pagination::pager(
-                    10, $commentCount, "details.php?id=$id&cmtpage=1&", ['lastpagedefault' => 1], 'page'
+                    10, $commentCount, "/web/details/$id?cmtpage=1&", ['lastpagedefault' => 1], 'page'
                 );
             }
         }

@@ -278,7 +278,7 @@ final class TorrentListViewFactory
             if ($row['seeders']) {
                 $seedRatio = $row['leechers'] ? $row['seeders'] / $row['leechers'] : 1;
                 $seedersColor = Ratio::seedLeechColorClass($seedRatio) ?: null;
-                $seedersUrl = 'details.php?id='.$id.'&hit=1&dllist=1#seeders';
+                $seedersUrl = '/web/details/'.$id.'?hit=1&dllist=1#seeders';
                 $seedersZeroClass = '';
             } else {
                 $seedersColor = null;
@@ -286,8 +286,8 @@ final class TorrentListViewFactory
                 $seedersZeroClass = Palette::seederLink(0);
             }
 
-            $leechersUrl = $row['leechers'] ? 'details.php?id='.$id.'&hit=1&dllist=1#leechers' : null;
-            $snatchedUrl = $row['times_completed'] >= 1 ? 'viewsnatches.php?id='.$id : null;
+            $leechersUrl = $row['leechers'] ? '/web/details/'.$id.'?hit=1&dllist=1#leechers' : null;
+            $snatchedUrl = $row['times_completed'] >= 1 ? '/web/viewsnatches?id='.$id : null;
 
             $uploaderAnonymous = $row['anonymous'] == 1;
             $uploaderShowOwner = $uploaderAnonymous
@@ -307,7 +307,7 @@ final class TorrentListViewFactory
                 coverSrc: $showCover ? (string) ($row['cover'] ?? '') : null,
                 stickyCount: $stickyCount,
                 stickyTitle: $stickyTitle,
-                nameUrl: 'details.php?id='.$id.'&hit=1',
+                nameUrl: '/web/details/'.$id.'?hit=1',
                 displayName: $dispname,
                 nameTitle: $nameTitle,
                 isNew: $appendNew && strtotime((string) $row['added']) >= $lastBrowse,
@@ -316,11 +316,11 @@ final class TorrentListViewFactory
                 tags: $tags,
                 progress: $progress,
                 showDownload: $showDownload,
-                downloadUrl: 'download.php?id='.$id,
+                downloadUrl: '/download?id='.$id,
                 showBookmark: $showBookmark,
                 waitText: $waitText,
                 waitClass: $waitClass,
-                commentsUrl: 'details.php?id='.$id.'&hit=1&cmtpage=1#startcomments',
+                commentsUrl: '/web/details/'.$id.'?hit=1&cmtpage=1#startcomments',
                 comments: (int) $row['comments'],
                 commentIsNew: $commentIsNew,
                 lastCommentTooltipId: $tooltipId,

@@ -47,10 +47,10 @@ final class ForumModerationService
     private function redirectTo(string $path): RedirectResponse
     {
         if (str_starts_with($path, '?')) {
-            return redirect('/forums.php'.$path);
+            return redirect('/forums'.$path);
         }
 
-        return redirect(SafeReturnUrl::filter($path, '/forums.php'));
+        return redirect(SafeReturnUrl::filter($path, '/forums'));
     }
 
     public function moveTopic(Request $request): RedirectResponse
@@ -103,7 +103,7 @@ final class ForumModerationService
         $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {
-            return $this->redirectTo('/forums.php');
+            return $this->redirectTo('/forums');
         }
 
         $forumid = (int) $topic->forumid;
@@ -169,7 +169,7 @@ final class ForumModerationService
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;
         $forumid = $this->data->topics->getTopicForumId($topicid) ?? 0;
         if ($forumid === 0) {
-            return $this->redirectTo('/forums.php');
+            return $this->redirectTo('/forums');
         }
 
         $this->data->posts->deletePost($postid, $topicid, $forumid);

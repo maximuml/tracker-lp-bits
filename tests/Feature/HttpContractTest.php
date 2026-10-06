@@ -97,6 +97,13 @@ final class HttpContractTest extends TestCase
      * Routes that are allowed to use GET for mutations (legacy compatibility).
      */
     private const GET_MUTATION_ALLOWLIST = [
+        // web/donate is the donation page (a read), not a mutation — the
+        // POST twin lives at web/donate/submit.
+        'web/donate',
+        // web/user-ban-log and web/reset are read pages (log list, form);
+        // the POST twins still live on the legacy URIs until the staff
+        // dispatcher migration reaches them.
+        'web/user-ban-log', 'web/reset',
         'takeedit', 'takeupload', 'takesettings', 'takeusercp', 'takemessage',
         'takecontactstaff', 'takeresend', 'takedeleteuser', 'takeflush',
         'takeinvite', 'takebonus', 'takesnlist', 'takerecover', 'takesignup',

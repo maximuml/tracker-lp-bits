@@ -37,8 +37,8 @@ final class RecoveryControllerTest extends TestCase
         $guard = Mockery::mock();
         $guard->shouldReceive('check')->once()->andReturn(true);
         Auth::shouldReceive('guard')->with('nexus-web')->once()->andReturn($guard);
-        Redirect::shouldReceive('to')->with('index.php')->once()->andReturn(
-            new RedirectResponse('index.php')
+        Redirect::shouldReceive('to')->with('/web/index')->once()->andReturn(
+            new RedirectResponse('/web/index')
         );
 
         $controller = new RecoveryController($recoveryService, $authService);

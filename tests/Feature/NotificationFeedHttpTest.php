@@ -69,7 +69,7 @@ final class NotificationFeedHttpTest extends TestCase
         $sender = $this->createUser('http_sender');
         $cookie = $this->cookieFor($user);
 
-        $response = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/notifications');
+        $response = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications');
 
         $response->assertOk()->assertJsonPath('ret', 0);
         $data = $response->json('data');
@@ -84,12 +84,12 @@ final class NotificationFeedHttpTest extends TestCase
             $this->createPm((int) $user->id, (int) $sender->id);
         }
 
-        $first = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/notifications')->json('data');
+        $first = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications')->json('data');
         $this->assertSame(25, $first['counts']['pm']);
         $this->assertCount(20, $first['items']);
         $this->assertTrue($first['has_more']);
 
-        $second = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/notifications?offset=20')->json('data');
+        $second = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications?offset=20')->json('data');
         $this->assertCount(5, $second['items']);
         $this->assertFalse($second['has_more']);
     }
@@ -101,10 +101,10 @@ final class NotificationFeedHttpTest extends TestCase
         $cookie = $this->cookieFor($user);
 
         // Seed cursors first.
-        $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/notifications');
+        $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications');
 
         $this->createPm((int) $user->id, (int) $sender->id);
-        $panel = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/notifications')->json('data');
+        $panel = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications')->json('data');
         $this->assertSame(1, $panel['counts']['pm']);
 
         // A new PM arrives after the panel snapshot; mark-read must not
@@ -114,7 +114,7 @@ final class NotificationFeedHttpTest extends TestCase
         $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->postJson('/web/notifications/mark-read', ['watermark' => $panel['watermark']])
             ->assertOk()->assertJsonPath('ret', 0);
 
-        $after = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/notifications')->json('data');
+        $after = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications')->json('data');
         $this->assertSame(1, $after['counts']['pm']);
     }
 
@@ -124,18 +124,18 @@ final class NotificationFeedHttpTest extends TestCase
         $sender = $this->createUser('nowm_sender');
         $cookie = $this->cookieFor($user);
 
-        $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/notifications');
+        $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications');
         $this->createPm((int) $user->id, (int) $sender->id);
 
         $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->postJson('/web/notifications/mark-read', [])
             ->assertOk()->assertJsonPath('ret', 0);
 
-        $after = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/notifications')->json('data');
+        $after = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications')->json('data');
         $this->assertSame(0, $after['counts']['pm']);
     }
 
     public function test_notifications_require_auth(): void
     {
-        $this->getJson('/notifications')->assertUnauthorized();
+        $this->getJson('/web/notifications')->assertUnauthorized();
     }
 }

@@ -101,7 +101,7 @@ class InviteController extends LegacyController
                     __('legacy/invite.std_sorry'),
                     view('invite._back_message', [
                         'message' => $exception->getMessage(),
-                        'backUrl' => 'invite.php?id='.(string) $currentUserId,
+                        'backUrl' => '/web/invite?id='.(string) $currentUserId,
                         'backText' => (string) __('legacy/invite.std_here'),
                         'backSuffix' => (string) __('legacy/invite.std_to_go_back'),
                     ])->render(),

@@ -36,7 +36,7 @@ class RegistrationController extends Controller
     public function showSignup(Request $request): View|RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::to('index.php');
+            return Redirect::to('/web/index');
         }
 
         $langFolder = $this->resolveLangFolder($request);
@@ -117,7 +117,7 @@ class RegistrationController extends Controller
     public function signup(SignupRequest $request): RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::to('index.php');
+            return Redirect::to('/web/index');
         }
 
         $langFolder = $this->resolveLangFolder($request);
@@ -143,20 +143,20 @@ class RegistrationController extends Controller
         try {
             $user = $this->registrationService->confirm($id, $secret, Network::clientIp());
         } catch (AuthenticationException $exception) {
-            return Redirect::to('ok.php?type=confirmed');
+            return Redirect::to('/web/ok?type=confirmed');
         }
 
         if ($user->status !== UserStatus::PENDING && $user->status !== UserStatus::CONFIRMED) {
-            return Redirect::to('ok.php?type=confirmed');
+            return Redirect::to('/web/ok?type=confirmed');
         }
 
-        return Redirect::to('ok.php?type=confirm');
+        return Redirect::to('/web/ok?type=confirm');
     }
 
     public function showConfirmResend(Request $request): View|RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::to('index.php');
+            return Redirect::to('/web/index');
         }
 
         $langFolder = $this->resolveLangFolder($request);
@@ -197,7 +197,7 @@ class RegistrationController extends Controller
     public function resendConfirmation(ConfirmResendRequest $request): RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::to('index.php');
+            return Redirect::to('/web/index');
         }
 
         $langFolder = $this->resolveLangFolder($request);

@@ -66,7 +66,7 @@ class SystemMaintenanceController extends LegacyController
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/mailtest.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/mailtest'.($qs ? '?'.$qs : ''));
         }
 
         if (UserDisplay::currentClass() < UC_SYSOP) {
@@ -120,7 +120,7 @@ class SystemMaintenanceController extends LegacyController
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/mysql_stats.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/mysql_stats'.($qs ? '?'.$qs : ''));
         }
 
         if (UserDisplay::currentClass() < UC_SYSOP) {

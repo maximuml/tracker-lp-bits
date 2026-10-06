@@ -46,7 +46,7 @@ class TorrentDeleteController extends LegacyController
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/fastdelete.php'.($qs ? '?'.$qs : ''));
+            return redirect('/fastdelete'.($qs ? '?'.$qs : ''));
         }
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
@@ -63,7 +63,7 @@ class TorrentDeleteController extends LegacyController
 
         $torrent = $this->torrentRepository->findById($id, ['name', 'owner', 'seeders', 'anonymous']);
         if (! $torrent instanceof Torrent) {
-            return redirect('/torrents.php');
+            return redirect('/web/torrents');
         }
         $row = $torrent->toArray();
         $ownerId = (int) ($row['owner'] ?? 0);
@@ -106,7 +106,7 @@ class TorrentDeleteController extends LegacyController
             ]);
         }
 
-        return redirect('/torrents.php');
+        return redirect('/web/torrents');
     }
 
     public function delete(Request $request): RedirectResponse
@@ -124,7 +124,7 @@ class TorrentDeleteController extends LegacyController
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/delete.php'.($qs ? '?'.$qs : ''));
+            return redirect('/delete'.($qs ? '?'.$qs : ''));
         }
 
         $currentUserId = (int) ($curUser['id'] ?? 0);
@@ -203,7 +203,7 @@ class TorrentDeleteController extends LegacyController
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
                 .$name
                 .Locale::trans('torrent.msg_was_deleted_by', [], $locale)
-                ."[url=userdetails.php?id=$currentUserId]{$curUser['username']}[/url]"
+                ."[url=/userdetails?id=$currentUserId]{$curUser['username']}[/url]"
                 .Locale::trans('torrent.msg_reason_is', [], $locale)
                 .$reasonstr;
             $this->messageRepository->add([

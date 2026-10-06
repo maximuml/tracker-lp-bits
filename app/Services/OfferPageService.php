@@ -213,7 +213,7 @@ final class OfferPageService
         $pagerTop = '';
         $pagerBottom = '';
         if ($commentCount) {
-            [$pagerTop, $pagerBottom] = Pagination::pager(10, $commentCount, "offers.php?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
+            [$pagerTop, $pagerBottom] = Pagination::pager(10, $commentCount, "/web/offers?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
         }
 
         return new OfferDetailsViewModel(
@@ -449,7 +449,7 @@ final class OfferPageService
                 if ($comms === 0) {
                     $comment = new OfferCommentCell(
                         count: 0,
-                        href: 'comment.php?action=add&pid='.$offerId.'&type=offer',
+                        href: '/comment?action=add&pid='.$offerId.'&type=offer',
                         hasNew: false,
                         title: (string) (__('legacy/offers.title_add_comments')),
                         tooltipId: null,

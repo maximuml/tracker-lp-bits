@@ -263,7 +263,7 @@ class MessageRepository extends BaseRepository
                 'title' => (string) __('legacy/notifications.title_pm'),
                 'body' => $row->subject,
                 'from' => (string) ($row->send_user->username ?? 'System'),
-                'url' => 'messages.php?action=viewmessage&id='.$row->id,
+                'url' => '/web/messages?action=viewmessage&id='.$row->id,
                 'timestamp' => (int) $row->getAttribute('ts'),
             ];
         }

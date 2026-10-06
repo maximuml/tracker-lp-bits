@@ -37,7 +37,7 @@ class WebController extends Controller
     public function showLogin(Request $request): View|RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::to('index.php');
+            return Redirect::to('/web/index');
         }
 
         $langFolder = $this->resolveLangFolder($request);
@@ -102,7 +102,7 @@ class WebController extends Controller
     public function login(LoginRequest $request): RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::intended('index.php');
+            return Redirect::intended('/web/index');
         }
 
         $ip = Network::clientIp();
@@ -121,10 +121,10 @@ class WebController extends Controller
 
         $returnto = $request->input('returnto', '');
         if (is_string($returnto) && $returnto !== '') {
-            return Redirect::to(SafeReturnUrl::filter($returnto, '/index.php'));
+            return Redirect::to(SafeReturnUrl::filter($returnto, '/web/index'));
         }
 
-        return Redirect::to('index.php');
+        return Redirect::to('/web/index');
     }
 
     public function logout(Request $request): RedirectResponse

@@ -1,1 +1,1 @@
-<br /><br /> {{ __('legacy/functions.text_please_see_faq') }}<a class="faqlink" href="faq.php#id22"><b>{{ __('legacy/functions.text_faq') }}</b></a>{{ __('legacy/functions.text_faq_suffix') }}<br /><br /><b></p>{{ __('legacy/functions.text_staff_signoff', ['site' => $siteName]) }}</b>
+<br /><br /> {{ __('legacy/functions.text_please_see_faq') }}<a class="faqlink" href="/web/faq#id22"><b>{{ __('legacy/functions.text_faq') }}</b></a>{{ __('legacy/functions.text_faq_suffix') }}<br /><br /><b></p>{{ __('legacy/functions.text_staff_signoff', ['site' => $siteName]) }}</b>

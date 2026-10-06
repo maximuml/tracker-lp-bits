@@ -137,6 +137,13 @@ function authenticate() {
   return true;
 }
 
+// Warm DB/Redis connections so the first measured /health/ready iteration
+// does not absorb container cold-start latency (observed: p95 spikes past
+// the 1000ms budget on fresh CI runners).
+export function setup() {
+  http.get(`${BASE_URL}/health/ready`);
+}
+
 export default function () {
   // ── Health checks (unauthenticated, very fast) ────────────────────────
   group('health/live', () => {
@@ -194,7 +201,7 @@ export default function () {
 
   // ── Index page (authenticated) ────────────────────────────────────────
   group('index', () => {
-    const res = http.get(`${BASE_URL}/index`, authParams);
+    const res = http.get(`${BASE_URL}/web/index`, authParams);
     indexTrend.add(res.timings.duration);
     const ok = check(res, {
       'index status 200': (r) => r.status === 200,
@@ -204,7 +211,7 @@ export default function () {
 
   // ── Browse torrents (authenticated) ───────────────────────────────────
   group('browse', () => {
-    const res = http.get(`${BASE_URL}/torrents`, authParams);
+    const res = http.get(`${BASE_URL}/web/torrents`, authParams);
     browseTrend.add(res.timings.duration);
     const ok = check(res, {
       'browse status 200': (r) => r.status === 200,
@@ -214,7 +221,7 @@ export default function () {
 
   // ── Search torrents (authenticated) ───────────────────────────────────
   group('search', () => {
-    const res = http.get(`${BASE_URL}/torrents?search=perf-torrent`, authParams);
+    const res = http.get(`${BASE_URL}/web/torrents?search=perf-torrent`, authParams);
     searchTrend.add(res.timings.duration);
     const ok = check(res, {
       'search status 200': (r) => r.status === 200,

@@ -46,7 +46,7 @@ final class TorrentDeleteControllerTest extends TestCase
         $response = $controller->fastDeleteTorrent($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('fastdelete.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/fastdelete', $response->getTargetUrl());
     }
 
     public function test_delete_legacy_uri_redirects_to_rest_endpoint(): void
@@ -72,6 +72,6 @@ final class TorrentDeleteControllerTest extends TestCase
         $response = $controller->deleteTorrent($request);
 
         $this->assertTrue($response->isRedirect());
-        $this->assertStringContainsString('delete.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/delete', $response->getTargetUrl());
     }
 }

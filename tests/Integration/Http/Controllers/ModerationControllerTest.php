@@ -138,7 +138,7 @@ final class ModerationControllerTest extends TestCase
         $this->assertInstanceOf(View::class, $response);
         $rows = $response->getData()['rows'];
         $this->assertSame('Torrent', $rows[0]['type_label']);
-        $this->assertStringContainsString('details.php?id='.$torrent->id, (string) $rows[0]['reporting']);
+        $this->assertStringContainsString('/web/details/'.$torrent->id, (string) $rows[0]['reporting']);
         $this->assertStringContainsString('EnumCheckTorrent', (string) $rows[0]['reporting']);
         $this->assertSame('test enum reason', $rows[0]['reason']);
     }

@@ -41,7 +41,7 @@ final class TorrentAccessTest extends TestCase
 
         $html = TorrentAccess::adminName($torrent)->toHtml();
 
-        $this->assertStringContainsString('href="/details.php?id=42"', $html);
+        $this->assertStringContainsString('href="/web/details/42"', $html);
         $this->assertStringContainsString('title="Test Torrent Name"', $html);
         $this->assertStringContainsString('Test Torrent Name', $html);
     }

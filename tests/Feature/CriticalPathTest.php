@@ -98,7 +98,7 @@ class CriticalPathTest extends TestCase
      */
     private function fetchLoginToken(): string
     {
-        $response = $this->request('GET', '/login.php', [], true);
+        $response = $this->request('GET', '/login', [], true);
         $this->assertSame(200, $response['status'], 'Could not fetch login page');
 
         if (preg_match('/name="_token"[^>]*value="([^"]+)"/', $response['body'], $matches)) {
@@ -113,7 +113,7 @@ class CriticalPathTest extends TestCase
      */
     private function fetchSignupToken(): string
     {
-        $response = $this->request('GET', '/signup.php', [], true);
+        $response = $this->request('GET', '/signup', [], true);
         $this->assertSame(200, $response['status'], 'Could not fetch signup page');
 
         if (preg_match('/name="_token"[^>]*value="([^"]+)"/', $response['body'], $matches)) {
@@ -240,14 +240,14 @@ class CriticalPathTest extends TestCase
 
         $this->assertSame(302, $signup['status'], "Signup returned unexpected status: {$signup['status']}\n{$signup['body']}");
         $this->assertNotEmpty($signup['redirect_url'], 'Signup did not redirect to confirmation URL');
-        $this->assertStringContainsString('confirm.php', $signup['redirect_url'], 'Signup redirect target is not confirm.php');
+        $this->assertStringContainsString('/confirm?id=', $signup['redirect_url'], 'Signup redirect target is not /confirm');
 
         // 2. Confirm account (and login)
         $confirm = $this->request('GET', '/'.ltrim((string) parse_url($signup['redirect_url'], PHP_URL_PATH), '/').'?'.(string) parse_url($signup['redirect_url'], PHP_URL_QUERY), [], true);
         $this->assertSame(200, $confirm['status'], "Account confirmation failed: {$confirm['status']}\n{$confirm['body']}");
 
         // 3. Logout and log back in to verify the standalone login flow
-        $this->request('GET', '/logout.php', [], true);
+        $this->request('GET', '/logout', [], true);
 
         $loginToken = $this->fetchLoginToken();
         $login = $this->request('POST', '/takelogin.php', [
@@ -277,10 +277,10 @@ class CriticalPathTest extends TestCase
 
         $this->assertSame(302, $upload['status'], "Upload failed: {$upload['status']}\n{$upload['body']}");
         $this->assertNotEmpty($upload['redirect_url'], 'Upload did not redirect to the details page');
-        $this->assertMatchesRegularExpression('/details\.php\?.*\bid=\d+/', $upload['redirect_url'], 'Upload redirect URL missing torrent id');
+        $this->assertMatchesRegularExpression('#/web/details/\d+\?uploaded=1#', $upload['redirect_url'], 'Upload redirect URL missing torrent id');
 
         // Extract the newly created torrent id and its binary info_hash
-        preg_match('/[?&]id=(\d+)/', $upload['redirect_url'], $matches);
+        preg_match('#/web/details/(\d+)#', $upload['redirect_url'], $matches);
         $this->assertNotEmpty($matches[1], 'Could not parse torrent id from upload redirect');
         $torrentId = (int) $matches[1];
 
@@ -288,10 +288,10 @@ class CriticalPathTest extends TestCase
         $this->assertNotNull($torrent, 'Torrent row was not created');
 
         // 4a. Verify the migrated details page renders
-        $torrentDetails = $this->request('GET', "/details.php?id={$torrentId}", [], true);
-        $this->assertSame(200, $torrentDetails['status'], "details.php failed: {$torrentDetails['status']}\n{$torrentDetails['body']}");
-        $this->assertStringContainsString('Details for torrent', $torrentDetails['body'], 'details.php is missing page title');
-        $this->assertStringContainsString('CriticalPathTest', $torrentDetails['body'], 'details.php does not show torrent name');
+        $torrentDetails = $this->request('GET', "/web/details/{$torrentId}", [], true);
+        $this->assertSame(200, $torrentDetails['status'], "/web/details failed: {$torrentDetails['status']}\n{$torrentDetails['body']}");
+        $this->assertStringContainsString('Details for torrent', $torrentDetails['body'], '/web/details is missing page title');
+        $this->assertStringContainsString('CriticalPathTest', $torrentDetails['body'], '/web/details does not show torrent name');
 
         $infoHash = $torrent->info_hash;
         $this->assertSame(20, strlen($infoHash), 'Torrent info_hash is not 20 bytes');
@@ -363,19 +363,19 @@ class CriticalPathTest extends TestCase
         $this->assertSame(10737418240, (int) $user->downloaded, 'Downloaded bytes not updated after completed announce');
 
         // 8. Verify ratio display on userdetails.php
-        $details = $this->request('GET', "/userdetails.php?id={$user->id}", [], true);
-        $this->assertSame(200, $details['status'], "userdetails.php failed: {$details['status']}\n{$details['body']}");
-        $this->assertStringContainsString('Share Ratio', $details['body'], 'userdetails.php is missing share ratio label');
-        $this->assertStringContainsString('2.000', $details['body'], 'userdetails.php does not show expected ratio 2.000');
+        $details = $this->request('GET', "/userdetails?id={$user->id}", [], true);
+        $this->assertSame(200, $details['status'], "/userdetails failed: {$details['status']}\n{$details['body']}");
+        $this->assertStringContainsString('Share Ratio', $details['body'], '/userdetails is missing share ratio label');
+        $this->assertStringContainsString('2.000', $details['body'], '/userdetails does not show expected ratio 2.000');
 
         // 9. Verify torrent listing and search still work after migration
-        $listing = $this->request('GET', '/torrents.php', [], true);
-        $this->assertSame(200, $listing['status'], "torrents.php listing failed: {$listing['status']}\n{$listing['body']}");
-        $this->assertStringContainsString('CriticalPathTest', $listing['body'], 'torrents.php is missing the uploaded torrent name');
+        $listing = $this->request('GET', '/web/torrents', [], true);
+        $this->assertSame(200, $listing['status'], "/web/torrents listing failed: {$listing['status']}\n{$listing['body']}");
+        $this->assertStringContainsString('CriticalPathTest', $listing['body'], '/web/torrents is missing the uploaded torrent name');
 
-        $search = $this->request('GET', '/torrents.php?search=Critical', [], true);
-        $this->assertSame(200, $search['status'], "torrents.php search failed: {$search['status']}\n{$search['body']}");
-        $this->assertStringContainsString('CriticalPathTest', $search['body'], 'torrents.php search is missing the uploaded torrent name');
+        $search = $this->request('GET', '/web/torrents?search=Critical', [], true);
+        $this->assertSame(200, $search['status'], "/web/torrents search failed: {$search['status']}\n{$search['body']}");
+        $this->assertStringContainsString('CriticalPathTest', $search['body'], '/web/torrents search is missing the uploaded torrent name');
 
         // 10. Direct Laravel /torrents route must work even when public/torrents/ exists
         $laravelListing = $this->request('GET', '/torrents', [], true);

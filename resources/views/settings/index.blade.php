@@ -216,7 +216,7 @@
     <x-settings-row layout="grid" :label="__('legacy/settings.row_login_secret')">
         {{ __('legacy/settings.text_login_secret_current') ?? 'Current secret' }}：{{ $config['login_secret'] ?? '' }}
         @if (! empty($config['login_secret']))
-            <br>{{ __('legacy/settings.text_login_url_with_secret') ?? '' }}: {{ \App\Support\Url::schemeAndHost(false) }}/login.php?secret={{ $config['login_secret'] }}
+            <br>{{ __('legacy/settings.text_login_url_with_secret') ?? '' }}: {{ \App\Support\Url::schemeAndHost(false) }}/login?secret={{ $config['login_secret'] }}
         @endif
         <br><label><input type="radio" name="login_secret_regenerate" value="no"@if (! empty($config['login_secret'])) checked @endif>{{ __('legacy/settings.text_login_secret_regenerate_no') ?? 'No' }}</label>
         <br><label><input type="radio" name="login_secret_regenerate" value="yes"@if (empty($config['login_secret'])) checked @endif>{{ __('legacy/settings.text_login_secret_regenerate_yes') ?? 'Yes' }}</label>
@@ -523,7 +523,7 @@
 
 @elseif ($action === 'miscsettings')
     <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_misc">@csrf
-    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_misc_donation_custom') ?? 'Donation custom' }}</div><div class="nx-fcell"><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_donation_custom_note') }}&nbsp;<b><a href="tags.php" target="_blank">{{ __('legacy/settings.text_bbcode_tag') }}</a></b></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_misc_donation_custom') ?? 'Donation custom' }}</div><div class="nx-fcell"><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_donation_custom_note') }}&nbsp;<b><a href="/web/tags" target="_blank">{{ __('legacy/settings.text_bbcode_tag') }}</a></b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('legacy/settings.text_protected_forum')" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />
     </form>

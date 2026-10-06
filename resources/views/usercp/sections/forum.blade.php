@@ -13,6 +13,6 @@
 <x-settings-row-small layout="grid" :label="__('legacy/usercp.row_tooltip_last_post')"><input type="checkbox" name="ttlastpost"@if ($forum->showLastPost) checked @endif value="yes">{{ __('legacy/usercp.checkbox_last_post_note') }}</x-settings-row-small>
 @endif
 <x-settings-radios layout="grid" :label="__('legacy/usercp.row_click_on_topic')" name="clicktopic" :options="['firstpage' => __('legacy/usercp.text_go_to_first_page'), 'lastpage' => __('legacy/usercp.text_go_to_last_page')]" :selected="$forum->clicktopic" />
-<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_forum_signature')"><textarea name="signature" rows="10">{{ $forum->signature }}</textarea><br />{{ __('legacy/usercp.text_signature_note') }}<a class="faqlink" href="tags.php" target="_new">{{ __('legacy/usercp.text_bb_codes') }}</a>{{ __('legacy/usercp.text_signature_note_tail') }}</x-settings-row-small>
+<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_forum_signature')"><textarea name="signature" rows="10">{{ $forum->signature }}</textarea><br />{{ __('legacy/usercp.text_signature_note') }}<a class="faqlink" href="/web/tags" target="_new">{{ __('legacy/usercp.text_bb_codes') }}</a>{{ __('legacy/usercp.text_signature_note_tail') }}</x-settings-row-small>
 <div class="nx-fhead">{{ __('legacy/usercp.row_save_settings')}}</div><div class="nx-fcell"><input type=submit value="{{ __('legacy/usercp.submit_save_settings')}}"></div>
 </div></form>

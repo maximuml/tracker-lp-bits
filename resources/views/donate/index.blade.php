@@ -4,7 +4,7 @@
 
 @section('content')
 @if ($thanks)
-    <x-std-message :heading="__('legacy/donate.std_success')" :htmlstrip="false">{{ __('legacy/donate.std_donation_success_note_one') }}<a href="sendmessage.php?receiver={{ $accountantId }}"><b>{{ __('legacy/donate.std_here') }}</b></a>{{ __('legacy/donate.std_donation_success_note_two') }}</x-std-message>
+    <x-std-message :heading="__('legacy/donate.std_success')" :htmlstrip="false">{{ __('legacy/donate.std_donation_success_note_one') }}<a href="/web/sendmessage?receiver={{ $accountantId }}"><b>{{ __('legacy/donate.std_here') }}</b></a>{{ __('legacy/donate.std_donation_success_note_two') }}</x-std-message>
 @elseif (! $enabled)
     <x-std-message :heading="__('legacy/donate.std_sorry')" :text="__('legacy/donate.std_do_not_accept_donation')" />
 @elseif (! $showAny)
@@ -44,8 +44,8 @@
                             <input type="hidden" name="image_url" value="">
                             <input type="hidden" name="shipping" value="0">
                             <input type="hidden" name="currency_code" value="USD">
-                            <input type="hidden" name="return" value="{{ $baseUrl }}/donate.php?do=thanks">
-                            <input type="hidden" name="cancel_return" value="{{ $baseUrl }}/donate.php">
+                            <input type="hidden" name="return" value="{{ $baseUrl }}/web/donate?do=thanks">
+                            <input type="hidden" name="cancel_return" value="{{ $baseUrl }}/web/donate">
                             <p class="text-center">
                                 <input type="image" src="pic/paypalbutton.gif" name="I1" alt="Make payments with PayPal">
                                 <br /><br />
@@ -69,7 +69,7 @@
         @endif
         <div class="p-[10pt]">
             {{ __('legacy/donate.text_after_donation_note_one') }}
-            <a href="sendmessage.php?receiver={{ $accountantId }}"><span class="striking"><b>{{ __('legacy/donate.text_send_us') }}</b></span></a>
+            <a href="/web/sendmessage?receiver={{ $accountantId }}"><span class="striking"><b>{{ __('legacy/donate.text_send_us') }}</b></span></a>
             {{ __('legacy/donate.text_after_donation_note_two') }} <b>{{ __('legacy/donate.text_transaction_information') }}</b>{{ __('legacy/donate.text_after_donation_note_two_end') }}
         </div>
     </div>

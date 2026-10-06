@@ -37,8 +37,8 @@
     <footer class="nx-post__foot">
         <span class="nx-post__contact">
             <span class="nx-post__status{{ $post->online ? ' nx-post__status--on' : '' }}" title="{{ $post->online ? __('legacy/forums.title_online') : __('legacy/forums.title_offline') }}"></span>
-            <a class="nx-postbtn" href="sendmessage.php?receiver={{ $post->posterId }}" title="{{ __('legacy/forums.title_send_message_to') }}{{ $post->posterName }}">{{ __('legacy/forums.text_pm') }}</a>
-            <a class="nx-postbtn" href="report.php?forumpost={{ $post->id }}" title="{{ __('legacy/forums.title_report_this_post') }}">{{ __('legacy/forums.text_report') }}</a>
+            <a class="nx-postbtn" href="/web/sendmessage?receiver={{ $post->posterId }}" title="{{ __('legacy/forums.title_send_message_to') }}{{ $post->posterName }}">{{ __('legacy/forums.text_pm') }}</a>
+            <a class="nx-postbtn" href="/web/report?forumpost={{ $post->id }}" title="{{ __('legacy/forums.title_report_this_post') }}">{{ __('legacy/forums.text_report') }}</a>
         </span>
         <span class="nx-post__tools">
             @if ($post->canQuote)

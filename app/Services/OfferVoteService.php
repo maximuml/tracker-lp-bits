@@ -59,7 +59,7 @@ final class OfferVoteService
             $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_cannot_vote_youself'));
         }
         if ($this->offerVoteRepository->userVoted($offerid, $userid)) {
-            $this->abort(__('legacy/offers.std_already_voted'), view('offers._back_to_details', ['note' => __('legacy/offers.std_already_voted_note'), 'url' => "offers.php?id={$offerid}&off_details=1"])->render(), false);
+            $this->abort(__('legacy/offers.std_already_voted'), view('offers._back_to_details', ['note' => __('legacy/offers.std_already_voted_note'), 'url' => "/web/offers?id={$offerid}&off_details=1"])->render(), false);
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offerid);
@@ -81,7 +81,7 @@ final class OfferVoteService
         $offeruptimeout = SiteConfig::current()->main->offerUploadTimeout(0);
         $offervoteBonus = SiteConfig::current()->bonus->offerVote();
         $finishtime = date('Y-m-d H:i:s');
-        $url = Url::absolute($this->baseUrl())."/offers.php?id={$offerid}&off_details=1";
+        $url = Url::absolute($this->baseUrl())."/web/offers?id={$offerid}&off_details=1";
 
         if (($yeah - $against) >= $minoffervotes && $offerVotes->allowed !== OfferAllowed::ALLOWED) {
             if ($offeruptimeout) {
@@ -116,7 +116,7 @@ final class OfferVoteService
         Bonus::updatePoints('+', $offervoteBonus, $userid);
 
         return response(
-            view('offers.vote-accepted', ['url' => "offers.php?id={$offerid}&off_details=1"])->render()
+            view('offers.vote-accepted', ['url' => "/web/offers?id={$offerid}&off_details=1"])->render()
         );
     }
 

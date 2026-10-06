@@ -94,7 +94,7 @@ final class Captcha
     public static function checkCode(
         string $imagehash,
         string $imagestring,
-        string $where = 'signup.php',
+        string $where = '/signup',
         bool $maxattemptlog = false,
         bool $head = true,
     ): bool {

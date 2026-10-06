@@ -30,7 +30,7 @@ class IndexController extends Controller
         if ($user === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/index.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/index'.($qs ? '?'.$qs : ''));
         }
 
         $this->indexRepository->touchLastHome((int) $user['id']);
@@ -56,7 +56,7 @@ class IndexController extends Controller
         if ($user === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/index.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/index'.($qs ? '?'.$qs : ''));
         }
 
         $this->indexRepository->touchLastHome((int) $user['id']);
@@ -77,11 +77,11 @@ class IndexController extends Controller
         $user = $this->currentUser->get();
 
         if ($choice === null || $choice === '' || (int) $choice != floor((float) $choice) || ! is_array($user)) {
-            return redirect('/index.php');
+            return redirect('/web/index');
         }
 
         $ok = $this->pollVoteService->vote($user, (int) $choice);
 
-        return redirect($ok ? '/' : '/index.php');
+        return redirect($ok ? '/' : '/web/index');
     }
 }

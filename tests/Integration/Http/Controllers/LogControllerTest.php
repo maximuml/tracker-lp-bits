@@ -126,7 +126,7 @@ final class LogControllerTest extends TestCase
         $response = $controller->chronicleAddPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/log?action=chronicle', $response->getTargetUrl());
     }
 
     public function test_chronicle_add_with_empty_txt_still_redirects(): void
@@ -150,7 +150,7 @@ final class LogControllerTest extends TestCase
         $response = $controller->chronicleAddPost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/log?action=chronicle', $response->getTargetUrl());
     }
 
     public function test_chronicle_update_with_zero_id_redirects(): void
@@ -175,7 +175,7 @@ final class LogControllerTest extends TestCase
         $response = $controller->chronicleUpdatePost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/log?action=chronicle', $response->getTargetUrl());
     }
 
     public function test_chronicle_del_with_zero_id_redirects(): void
@@ -199,7 +199,7 @@ final class LogControllerTest extends TestCase
         $response = $controller->chronicleDeletePost($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/log.php?action=chronicle', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/log?action=chronicle', $response->getTargetUrl());
     }
 
     public function test_poll_delete_get_shows_confirmation_form(): void

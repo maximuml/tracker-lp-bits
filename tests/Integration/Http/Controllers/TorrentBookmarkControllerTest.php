@@ -80,6 +80,6 @@ final class TorrentBookmarkControllerTest extends TestCase
         $response = $controller->thanksSubmit($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/thanks.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/thanks', $response->getTargetUrl());
     }
 }

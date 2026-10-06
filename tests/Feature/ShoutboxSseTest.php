@@ -69,7 +69,7 @@ final class ShoutboxSseTest extends TestCase
 
     public function test_guest_is_forbidden(): void
     {
-        $this->get('/shoutbox_sse?type=notifications')->assertForbidden();
+        $this->get('/web/shoutbox_sse?type=notifications')->assertForbidden();
     }
 
     public function test_saturated_global_counter_returns_real_503(): void
@@ -77,7 +77,7 @@ final class ShoutboxSseTest extends TestCase
         $user = User::factory()->create();
         Redis::connection()->client()->set('shoutbox_sse_global', 30);
 
-        $this->asUser($user)->get('/shoutbox_sse?type=notifications')
+        $this->asUser($user)->get('/web/shoutbox_sse?type=notifications')
             ->assertStatus(503);
 
         // The refused connection must not leak a slot.
@@ -96,7 +96,7 @@ final class ShoutboxSseTest extends TestCase
         $redis->set($key, 'foreign-token');
 
         $this->asUser($user)
-            ->get('/shoutbox_sse?type=notifications&loops=1&interval=0')
+            ->get('/web/shoutbox_sse?type=notifications&loops=1&interval=0')
             ->assertOk()
             ->streamedContent();
 
@@ -112,7 +112,7 @@ final class ShoutboxSseTest extends TestCase
         $pmId = $this->createPm((int) $user->id, (int) $sender->id);
 
         $response = $this->asUser($user)
-            ->get('/shoutbox_sse?type=notifications&loops=1&interval=0&last_pm_id='.($pmId - 1));
+            ->get('/web/shoutbox_sse?type=notifications&loops=1&interval=0&last_pm_id='.($pmId - 1));
 
         $response->assertOk();
         $body = $response->streamedContent();
@@ -132,7 +132,7 @@ final class ShoutboxSseTest extends TestCase
         // cursor must suppress re-delivery of the already-delivered pm.
         $response = $this->asUser($user)
             ->withHeader('Last-Event-ID', '{"pm":'.$pmId.',"shout":0,"comment":0,"topic_reply":0,"staff":0}')
-            ->get('/shoutbox_sse?type=notifications&loops=1&interval=0');
+            ->get('/web/shoutbox_sse?type=notifications&loops=1&interval=0');
 
         $body = $response->streamedContent();
         $this->assertStringNotContainsString('event: notifications', $body);
@@ -147,7 +147,7 @@ final class ShoutboxSseTest extends TestCase
 
         $response = $this->asUser($user)
             ->withHeader('Last-Event-ID', (string) $pmId)
-            ->get('/shoutbox_sse?type=notifications&loops=1&interval=0');
+            ->get('/web/shoutbox_sse?type=notifications&loops=1&interval=0');
 
         $body = $response->streamedContent();
         $this->assertStringNotContainsString('event: notifications', $body);
@@ -158,7 +158,7 @@ final class ShoutboxSseTest extends TestCase
         $user = User::factory()->create();
 
         $this->asUser($user)
-            ->get('/shoutbox_sse?type=notifications&loops=1&interval=0')
+            ->get('/web/shoutbox_sse?type=notifications&loops=1&interval=0')
             ->assertOk()
             ->streamedContent();
 
@@ -166,7 +166,7 @@ final class ShoutboxSseTest extends TestCase
 
         // The slot is free: a second stream is admitted, not 429'd.
         $this->asUser($user)
-            ->get('/shoutbox_sse?type=notifications&loops=1&interval=0')
+            ->get('/web/shoutbox_sse?type=notifications&loops=1&interval=0')
             ->assertOk()
             ->streamedContent();
     }

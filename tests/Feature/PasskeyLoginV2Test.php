@@ -71,7 +71,7 @@ final class PasskeyLoginV2Test extends TestCase
 
         $response = $this->post('/auth/passkey', $this->buildPayload($user->passkey));
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
     }
 
     public function test_altered_passkey_rejected(): void
@@ -87,7 +87,7 @@ final class PasskeyLoginV2Test extends TestCase
 
         $response = $this->post('/auth/passkey', $payload);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertGuest();
     }
 
@@ -104,7 +104,7 @@ final class PasskeyLoginV2Test extends TestCase
 
         $response = $this->post('/auth/passkey', $payload);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertGuest();
     }
 
@@ -121,10 +121,10 @@ final class PasskeyLoginV2Test extends TestCase
         $payload2 = $this->buildPayload($user->passkey, $nonce);
 
         $response1 = $this->post('/auth/passkey', $payload1);
-        $response1->assertRedirect('index.php');
+        $response1->assertRedirect('/web/index');
 
         $response2 = $this->post('/auth/passkey', $payload2);
-        $response2->assertRedirect('index.php');
+        $response2->assertRedirect('/web/index');
     }
 
     public function test_expired_timestamp_rejected(): void
@@ -140,7 +140,7 @@ final class PasskeyLoginV2Test extends TestCase
 
         $response = $this->post('/auth/passkey', $payload);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertGuest();
     }
 
@@ -157,7 +157,7 @@ final class PasskeyLoginV2Test extends TestCase
 
         $response = $this->post('/auth/passkey', $payload);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertGuest();
     }
 
@@ -226,7 +226,7 @@ final class PasskeyLoginV2Test extends TestCase
 
         $response = $this->post('/auth/passkey', $payload);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertGuest();
     }
 
@@ -242,7 +242,7 @@ final class PasskeyLoginV2Test extends TestCase
 
         $response = $this->post('/auth/passkey', $payload);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
     }
 
     public function test_invalid_action_rejected_by_validation(): void
@@ -273,7 +273,7 @@ final class PasskeyLoginV2Test extends TestCase
 
         $response = $this->post('/auth/passkey', $payload);
 
-        $response->assertRedirect('index.php');
+        $response->assertRedirect('/web/index');
         $this->assertGuest();
     }
 

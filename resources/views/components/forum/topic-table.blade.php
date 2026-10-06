@@ -1,5 +1,5 @@
 @props(['list'])
-<h1 class="text-center"><a class="faqlink" href="forums.php">{{ $list->siteName }}&nbsp;{{ __('legacy/forums.text_forums') }}</a>--&gt;<a class="faqlink" href="forums.php?action=viewforum&amp;forumid={{ $list->forumId }}">{{ $list->forumName }}</a></h1>
+<h1 class="text-center"><a class="faqlink" href="/forums">{{ $list->siteName }}&nbsp;{{ __('legacy/forums.text_forums') }}</a>--&gt;<a class="faqlink" href="/forums?action=viewforum&amp;forumid={{ $list->forumId }}">{{ $list->forumName }}</a></h1>
 <br />
 @if (! $list->mayPost)
     <p><i>{{ __('legacy/forums.text_unpermitted_starting_new_topics') }}</i></p>
@@ -33,7 +33,7 @@
         @endforeach
         <tr>
             <td>
-                <form method="get" action="forums.php" class="flex items-center gap-1.5"><b>{{ __('legacy/forums.text_fast_search') }}</b><input type="hidden" name="action" value="viewforum" /><input type="hidden" name="forumid" value="{{ $list->forumId }}" /><input type="text" class="w-[11.25rem]" name="search" />&nbsp;<x-button type="submit">{{ __('legacy/forums.text_go') }}</x-button></form>
+                <form method="get" action="/forums" class="flex items-center gap-1.5"><b>{{ __('legacy/forums.text_fast_search') }}</b><input type="hidden" name="action" value="viewforum" /><input type="hidden" name="forumid" value="{{ $list->forumId }}" /><input type="text" class="w-[11.25rem]" name="search" />&nbsp;<x-button type="submit">{{ __('legacy/forums.text_go') }}</x-button></form>
             </td>
             <td colspan="3">
                 <span id="order"><span><b>{{ __('legacy/forums.text_order') }}</b></span>

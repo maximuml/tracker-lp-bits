@@ -8,15 +8,15 @@
 <p><b>{{ __('legacy/userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)
 @if ($isFriend)
-<p>(<form method="post" action="/web/friends/delete" class="inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_friends') ?? '' }}</button></form>)</p>
+<p>(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_friends') ?? '' }}</button></form>)</p>
 @elseif ($currentUserBlockedTarget)
-<p>(<form method="post" action="/web/friends/delete" class="inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</p>
+<p>(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</p>
 @else
-<p>(<form method="post" action="/web/friends/add" class="inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="/web/friends/add" class="inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_blocks') ?? '' }}</button></form>)</p>
+<p>(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_blocks') ?? '' }}</button></form>)</p>
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
-<h2>{{ __('legacy/userdetails.text_flush_ghost_torrents') ?? '' }}<form method="post" action="/web/torrents/flush?id={{ $id }}" class="inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('legacy/userdetails.text_here') ?? '' }}</button></form></h2>
+<h2>{{ __('legacy/userdetails.text_flush_ghost_torrents') ?? '' }}<form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('legacy/userdetails.text_here') ?? '' }}</button></form></h2>
 @endif
 <x-data-table :caption="__('legacy/userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)
@@ -25,7 +25,7 @@
 @if ((int) $user['invites'] <= 0 && $temporaryInviteCount <= 0)
 <x-settings-row-small :label="__('legacy/userdetails.row_invitation')">{{ __('legacy/userdetails.text_no_invitation') ?? '' }}</x-settings-row-small>
 @else
-<x-settings-row-small :label="__('legacy/userdetails.row_invitation')"><a href="invite.php?id={{ $user['id'] }}" title="{{ __('legacy/userdetails.link_send_invitation') ?? '' }}">{{ $user['invites'] }}({{ $temporaryInviteCount }})</a></x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_invitation')"><a href="/web/invite?id={{ $user['id'] }}" title="{{ __('legacy/userdetails.link_send_invitation') ?? '' }}">{{ $user['invites'] }}({{ $temporaryInviteCount }})</a></x-settings-row-small>
 @endif
 @else
 @if ((int) $user['invites'] <= 0)
@@ -46,7 +46,7 @@
 <x-settings-row-small :label="__('legacy/userdetails.row_email')"><a href="mailto:{{ $user['email'] }}">{{ $user['email'] }}</a></x-settings-row-small>
 @endif
 @if ($canViewConfidential && $ipHistoryCount > 0)
-<x-settings-row-small :label="__('legacy/userdetails.row_ip_history')">{{ __('legacy/userdetails.text_user_earlier_used') ?? '' }}<b><a href="iphistory.php?id={{ $user['id'] }}">{{ $ipHistoryCount }}{{ __('legacy/userdetails.text_different_ips') ?? '' }}{{ \App\Support\Strings::addS($ipHistoryCount, true) }}</a></b></x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_ip_history')">{{ __('legacy/userdetails.text_user_earlier_used') ?? '' }}<b><a href="/iphistory?id={{ $user['id'] }}">{{ $ipHistoryCount }}{{ __('legacy/userdetails.text_different_ips') ?? '' }}{{ \App\Support\Strings::addS($ipHistoryCount, true) }}</a></b></x-settings-row-small>
 @endif
 @if ($canViewConfidential || $isOwner)
 <x-settings-row-small :label="__('legacy/userdetails.row_ip_address')">{{ \App\Support\Strings::hidden((string) $user['ip'].$locationInfoHtml) }}</x-settings-row-small>
@@ -67,13 +67,13 @@
 @if ($userProps !== [])
 <x-settings-row-small :label="__('legacy/userdetails.row_user_props')"><div>@foreach ($userProps as $prop){{ $prop }}@unless ($loop->last)&nbsp;|&nbsp;@endunless @endforeach</div></x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('legacy/userdetails.row_torrent_comment')">@if ($torrentcomments && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewcomments&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_comments') ?? '' }}">{{ $torrentcomments }}</a>@else{{ $torrentcomments }}@endif</x-settings-row-small>
-<x-settings-row-small :label="__('legacy/userdetails.row_forum_posts')">@if ($forumposts && ($isOwner || $canViewHistory))<a href="userhistory.php?action=viewposts&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_posts') ?? '' }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_torrent_comment')">@if ($torrentcomments && ($isOwner || $canViewHistory))<a href="/web/userhistory?action=viewcomments&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_comments') ?? '' }}">{{ $torrentcomments }}</a>@else{{ $torrentcomments }}@endif</x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_forum_posts')">@if ($forumposts && ($isOwner || $canViewHistory))<a href="/web/userhistory?action=viewposts&amp;id={{ $id }}" title="{{ __('legacy/userdetails.link_view_posts') ?? '' }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
 @if ($isOwner || $canViewHistory)
 @if ($hrStatusHtml !== '')
-<x-settings-row-small label="H&R"><a href="myhr.php?userid={{ $user['id'] }}" target="_blank" aria-label="H&R stats">{{ $hrStatusHtml }}</a></x-settings-row-small>
+<x-settings-row-small label="H&R"><a href="/web/myhr?userid={{ $user['id'] }}" target="_blank" aria-label="H&R stats">{{ $hrStatusHtml }}</a></x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('legacy/userdetails.row_karma_points')">{{ number_format((float) $user['seedbonus'], 1) }}&nbsp;&nbsp;<a href="bonus-log.php?uid={{ $user['id'] }}" target="_blank" class="altlink">[{{ \App\Support\Locale::trans('bonus-log.view_detail', [], null) }}]</a></x-settings-row-small>
+<x-settings-row-small :label="__('legacy/userdetails.row_karma_points')">{{ number_format((float) $user['seedbonus'], 1) }}&nbsp;&nbsp;<a href="/web/bonus-log?uid={{ $user['id'] }}" target="_blank" class="altlink">[{{ \App\Support\Locale::trans('bonus-log.view_detail', [], null) }}]</a></x-settings-row-small>
 <x-settings-row-small :label="__('legacy/functions.text_seed_points')">{{ number_format((float) $user['seed_points'], 1) }}&nbsp;&nbsp;@if (! empty($user['seed_points_updated_at']))<span class='text-muted'>({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_points_updated_at'] }})</span>@endif</x-settings-row-small>
 @endif
 @if ($canManageBasic && (int) $user['class'] < $currentClass && $bonusTableHtml !== '')
@@ -93,7 +93,7 @@
 <tr><td colspan="2" class="p-[10pt]"><span class="text-[#0000ff]">{{ __('legacy/userdetails.text_public_access_denied') ?? '' }}{{ $user['username'] }}{{ __('legacy/userdetails.text_user_wants_privacy') ?? '' }}</span></td></tr>
 @endif
 @if (! $isOwner)
-<tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="sendmessage.php?receiver={{ $user['id'] }}"><img class="f_pm" src="pic/trans.gif" alt="PM" title="{{ __('legacy/userdetails.title_send_pm') ?? '' }}" /></a>@endif<a href="report.php?user={{ $user['id'] }}"><img class="f_report" src="pic/trans.gif" alt="Report" title="{{ __('legacy/userdetails.title_report_user') ?? '' }}" /></a></td></tr>
+<tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="/web/sendmessage?receiver={{ $user['id'] }}"><img class="f_pm" src="pic/trans.gif" alt="PM" title="{{ __('legacy/userdetails.title_send_pm') ?? '' }}" /></a>@endif<a href="/web/report?user={{ $user['id'] }}"><img class="f_report" src="pic/trans.gif" alt="Report" title="{{ __('legacy/userdetails.title_report_user') ?? '' }}" /></a></td></tr>
 @endif
 </x-data-table>
 
@@ -102,7 +102,7 @@
 <form method="post" action="/web/staff/modtask">@csrf
 <input type="hidden" name="action" value="edituser" />
 <input type="hidden" name="userid" value="{{ $id }}" />
-<input type="hidden" name="returnto" value="userdetails.php?id={{ $id }}" />
+<input type="hidden" name="returnto" value="user/web/details/{{ $id }}" />
 <x-data-table :caption="__('legacy/userdetails.text_edit_user')" captionHidden class="main">
 <x-settings-row :label="__('legacy/userdetails.row_title')"><input type="text" size="60" name="title" value="{{ trim((string) $user['title']) }}" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_privacy_level')"><input type="radio" name="privacy" value="low"@if (($user['privacy'] ?? '') === 'low') checked="checked"@endif />{{ __('legacy/userdetails.radio_low') ?? '' }}<input type="radio" name="privacy" value="normal"@if (($user['privacy'] ?? '') === 'normal') checked="checked"@endif />{{ __('legacy/userdetails.radio_normal') ?? '' }}<input type="radio" name="privacy" value="strong"@if (($user['privacy'] ?? '') === 'strong') checked="checked"@endif />{{ __('legacy/userdetails.radio_strong') ?? '' }}</x-settings-row>

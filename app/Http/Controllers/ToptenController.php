@@ -26,7 +26,7 @@ class ToptenController extends Controller
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/topten.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/topten'.($qs ? '?'.$qs : ''));
         }
 
         if (! Permission::can(PermissionEnum::TOP_TEN)) {

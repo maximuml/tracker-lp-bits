@@ -183,11 +183,11 @@ class ModerationController extends LegacyController
             $arr = $comment->toArray();
             if ($arr['torrent'] ?? null) {
                 $name = $this->torrentRepository->getNameById((int) $arr['torrent']);
-                $url = 'details.php?id='.$arr['torrent'].'#'.$commentid;
+                $url = '/web/details/'.$arr['torrent'].'#'.$commentid;
                 $of = __('legacy/report.text_of_torrent');
             } elseif ($arr['offer'] ?? null) {
                 $name = $this->offerRepository->getOfferName((int) $arr['offer']);
-                $url = 'offers.php?id='.$arr['offer'].'&off_details=1#'.$commentid;
+                $url = '/web/offers?id='.$arr['offer'].'&off_details=1#'.$commentid;
                 $of = __('legacy/report.text_of_offer');
             } else {
                 return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_orphaned_comment'));
@@ -247,7 +247,7 @@ class ModerationController extends LegacyController
         }
 
         $perpage = 10;
-        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, 'reports.php?');
+        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, '/web/reports?');
 
         $reportRows = $repo->getReports($offset, $rpp);
 
@@ -329,11 +329,11 @@ class ModerationController extends LegacyController
                         $arr = $comment->toArray();
                         if ($arr['torrent'] ?? null) {
                             $name = $this->torrentRepository->getNameById((int) $arr['torrent']);
-                            $url = 'details.php?id='.$arr['torrent'].'#cid'.$row['reportid'];
+                            $url = '/web/details/'.$arr['torrent'].'#cid'.$row['reportid'];
                             $of = __('legacy/reports.text_of_torrent');
                         } elseif ($arr['offer'] ?? null) {
                             $name = $this->offerRepository->getOfferName((int) $arr['offer']);
-                            $url = 'offers.php?id='.$arr['offer'].'&off_details=1#cid'.$row['reportid'];
+                            $url = '/web/offers?id='.$arr['offer'].'&off_details=1#cid'.$row['reportid'];
                             $of = __('legacy/reports.text_of_offer');
                         } else {
                             $name = '';

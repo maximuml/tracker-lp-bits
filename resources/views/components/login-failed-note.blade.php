@@ -1,1 +1,1 @@
-<b>{{ __('legacy/functions.text_error') }}</b>{{ __('legacy/functions.std_login_failed_note') }}<br /><br />{{ __('legacy/functions.text_forgot_password') }}<b><a href="recover.php">{{ __('legacy/functions.text_recover') }}</a></b>{{ __('legacy/functions.text_recover_tail') }}
+<b>{{ __('legacy/functions.text_error') }}</b>{{ __('legacy/functions.std_login_failed_note') }}<br /><br />{{ __('legacy/functions.text_forgot_password') }}<b><a href="/recover">{{ __('legacy/functions.text_recover') }}</a></b>{{ __('legacy/functions.text_recover_tail') }}

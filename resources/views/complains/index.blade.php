@@ -59,10 +59,10 @@
         {{ __('legacy/complains.text_added') ?? 'Added' }}：<x-time :value="$complain['added'] ?? ''" /><br />{{ __('legacy/complains.text_new_email') ?? 'Email' }} {{ $complain['email'] ?? '' }}
         @if ($isAdmin)
             @if (! empty($user))
-                [<a href="userdetails.php?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ $user['username'] ?? '' }}</a>]
-                [<a href="user-ban-log.php?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank">{{ __('legacy/complains.text_view_band_log') ?? 'View ban log' }}</a>]
+                [<a href="user/web/details/{{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ $user['username'] ?? '' }}</a>]
+                [<a href="/web/user-ban-log?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank">{{ __('legacy/complains.text_view_band_log') ?? 'View ban log' }}</a>]
             @else
-                [<a href="usersearch.php?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank">{{ __('legacy/complains.text_search_account') ?? 'Search account' }}</a>]
+                [<a href="/web/usersearch?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank">{{ __('legacy/complains.text_search_account') ?? 'Search account' }}</a>]
             @endif
             <br />IP: {{ $complain['ip'] ?? '' }}
         @endif

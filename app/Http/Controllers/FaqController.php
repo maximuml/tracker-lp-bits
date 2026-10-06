@@ -164,7 +164,7 @@ class FaqController extends LegacyController
             ]);
         }
 
-        return redirect($redirectBase.'/faqmanage.php');
+        return redirect($redirectBase.'/web/faqmanage');
     }
 
     public function faqActionsPost(Request $request): RedirectResponse
@@ -190,7 +190,7 @@ class FaqController extends LegacyController
         if ($action === 'reorder' && $request->isMethod('post')) {
             $this->infoRepository->reorderFaq((array) request()->post('order'));
 
-            return redirect($redirectBase.'/faqmanage.php');
+            return redirect($redirectBase.'/web/faqmanage');
         }
 
         if ($action === 'edititem' && $request->isMethod('post')) {
@@ -201,7 +201,7 @@ class FaqController extends LegacyController
                 'categ' => (int) request()->post('categ'),
             ]);
 
-            return redirect($redirectBase.'/faqmanage.php');
+            return redirect($redirectBase.'/web/faqmanage');
         }
 
         if ($action === 'editsect' && $request->isMethod('post')) {
@@ -212,7 +212,7 @@ class FaqController extends LegacyController
                 'categ' => 0,
             ]);
 
-            return redirect($redirectBase.'/faqmanage.php');
+            return redirect($redirectBase.'/web/faqmanage');
         }
 
         if ($action === 'delete') {
@@ -220,7 +220,7 @@ class FaqController extends LegacyController
             if (request()->query('confirm') === 'yes') {
                 $this->infoRepository->deleteFaq($id);
 
-                return redirect($redirectBase.'/faqmanage.php');
+                return redirect($redirectBase.'/web/faqmanage');
             }
 
             return $this->legacyPage($request, 'faqactions', true, [
@@ -244,7 +244,7 @@ class FaqController extends LegacyController
                 'order' => $max['maxorder'] + 1,
             ]);
 
-            return redirect($redirectBase.'/faqmanage.php');
+            return redirect($redirectBase.'/web/faqmanage');
         }
 
         if ($action === 'addnewsect' && $request->isMethod('post')) {
@@ -261,7 +261,7 @@ class FaqController extends LegacyController
                 'order' => $max['maxorder'] + 1,
             ]);
 
-            return redirect($redirectBase.'/faqmanage.php');
+            return redirect($redirectBase.'/web/faqmanage');
         }
 
         return $this->faqActions($request);

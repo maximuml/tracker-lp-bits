@@ -2,46 +2,51 @@
 
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\InfoController;
-use App\Http\Controllers\RulesController;
-use App\Http\Controllers\ShoutboxController;
+use App\Http\Controllers\LegacyRedirectController;
 use App\Http\Controllers\SupportController;
-use App\Http\Controllers\SystemMaintenanceController;
-use App\Http\Controllers\TorrentAjaxController;
 use App\Http\Controllers\TorrentBookmarkController;
-use App\Http\Controllers\TorrentRssController;
 use App\Http\Controllers\UtilityController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// Renamed endpoints — the canonical GET URIs now live under /web/* in
+// routes/web.php; 301 forwards the query string unchanged.
+$get301 = static fn (string $from, string $to) => Route::get($from, [LegacyRedirectController::class, 'get'])->defaults('redirect_to', $to);
+
 // T-21: Static content pages — GET only (no POST handling in controllers)
-Route::get('/aboutnexus', [RulesController::class, 'aboutNexus'])->name('aboutnexus.legacy');
-Route::get('/rules', [RulesController::class, 'rules'])->name('rules.legacy');
-Route::get('/useragreement', [RulesController::class, 'userAgreement'])->name('useragreement.legacy');
-Route::get('/faq', [FaqController::class, 'faq'])->name('faq.legacy');
+$get301('/aboutnexus', '/web/aboutnexus');
+$get301('/rules', '/web/rules');
+$get301('/useragreement', '/web/useragreement');
+$get301('/faq', '/web/faq');
 Route::post('/faq', [FaqController::class, 'faqPost'])->middleware('auth.nexus:nexus-web');
-Route::get('/donate', [InfoController::class, 'donate'])->name('donate.legacy');
+$get301('/donate', '/web/donate');
 Route::post('/donate', [InfoController::class, 'donatePost'])->middleware('auth.nexus:nexus-web');
-Route::get('/getusertorrentlistajax', [TorrentAjaxController::class, 'getUserTorrentListAjax'])->name('getusertorrentlistajax.legacy');
-Route::get('/searchsuggest', [TorrentAjaxController::class, 'searchSuggest'])->name('searchsuggest.legacy');
+$get301('/getusertorrentlistajax', '/web/getusertorrentlistajax');
+$get301('/searchsuggest', '/web/searchsuggest');
 Route::post('/ajax', [UtilityController::class, 'ajax'])->middleware(['throttle:ajax', 'reject.get.mutations'])->name('ajax.legacy');
 
-Route::get('/image', [UtilityController::class, 'image'])->name('image.legacy');
-Route::get('/shoutbox_sse', [ShoutboxController::class, 'shoutboxSse'])->name('shoutbox_sse.legacy');
+$get301('/image', '/web/image');
+$get301('/shoutbox_sse', '/web/shoutbox_sse');
 
-Route::get('/torrentrss', [TorrentRssController::class, 'torrentrss'])->name('torrentrss.legacy');
+$get301('/torrentrss', '/web/torrentrss');
 
-Route::get('/tags', [UtilityController::class, 'tags'])->name('tags.legacy');
-Route::get('/suggest', [UtilityController::class, 'suggest'])->name('suggest.legacy');
-Route::get('/opensearch', [UtilityController::class, 'opensearch'])->name('opensearch.legacy');
+$get301('/tags', '/web/tags');
+$get301('/suggest', '/web/suggest');
+$get301('/opensearch', '/web/opensearch');
 
-Route::get('/confirmemail/{path?}', [UtilityController::class, 'confirmemail'])->where('path', '.*')->name('confirmemail.legacy');
-Route::get('/cron', [SystemMaintenanceController::class, 'cron'])->middleware('cron.token')->name('cron.legacy');
-Route::get('/ok', [UtilityController::class, 'ok'])->name('ok.legacy');
+Route::get('/confirmemail/{path?}', fn (Request $request) => redirect()->to(
+    '/web/confirmemail'.($request->route('path') !== null && $request->route('path') !== '' ? '/'.$request->route('path') : '')
+        .($request->getQueryString() !== null && $request->getQueryString() !== '' ? '?'.$request->getQueryString() : ''),
+    301,
+))->where('path', '.*');
+$get301('/cron', '/web/cron');
+$get301('/ok', '/web/ok');
 
-Route::get('/complains', [SupportController::class, 'complains'])->name('complains.legacy');
+$get301('/complains', '/web/complains');
 Route::post('/complains', [SupportController::class, 'complainsPost']);
-Route::get('/shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['auth.nexus:nexus-web', 'throttle:shoutbox'])->name('shoutbox.legacy');
+$get301('/shoutbox', '/web/shoutbox');
 
-Route::get('/bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');
+$get301('/bookmark', '/web/bookmark');
 Route::post('/bookmark', [TorrentBookmarkController::class, 'bookmarkToggle'])->middleware(['auth.nexus:nexus-web', 'reject.get.mutations']);
-Route::get('/viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
-Route::get('/viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->middleware('auth.nexus:nexus-web')->name('viewpeerlist.legacy');
+$get301('/viewfilelist', '/web/viewfilelist');
+$get301('/viewpeerlist', '/web/viewpeerlist');

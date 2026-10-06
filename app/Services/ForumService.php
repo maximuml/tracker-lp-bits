@@ -139,10 +139,10 @@ final class ForumService
     private function redirectTo(string $path): RedirectResponse
     {
         if (str_starts_with($path, '?')) {
-            return redirect('/forums.php'.$path);
+            return redirect('/forums'.$path);
         }
 
-        return redirect(SafeReturnUrl::filter($path, '/forums.php'));
+        return redirect(SafeReturnUrl::filter($path, '/forums'));
     }
 
     private function handlePost(Request $request): RedirectResponse
@@ -183,7 +183,7 @@ final class ForumService
             case 'edit':
                 $post = $this->data->postLookup->getPostEditInfo($id);
                 if ($post === null) {
-                    return $this->redirectTo('/forums.php');
+                    return $this->redirectTo('/forums');
                 }
                 $topicid = $post['topicid'];
                 $forumid = $post['forumid'];
@@ -192,7 +192,7 @@ final class ForumService
                 break;
 
             default:
-                return $this->redirectTo('/forums.php');
+                return $this->redirectTo('/forums');
         }
 
         if ($hassubject) {
@@ -208,7 +208,7 @@ final class ForumService
 
         $forumRow = $this->data->forums->getForumRow($forumid);
         if ($forumRow === null) {
-            return $this->redirectTo('/forums.php');
+            return $this->redirectTo('/forums');
         }
 
         $userClass = UserDisplay::currentClass();
@@ -230,7 +230,7 @@ final class ForumService
         if ($type !== 'new') {
             $topicModel = $this->data->topics->getTopic((int) $topicid);
             if ($topicModel === null) {
-                return $this->redirectTo('/forums.php');
+                return $this->redirectTo('/forums');
             }
 
             // W1-04: Use TopicPolicy for locked-topic reply authorization
@@ -244,7 +244,7 @@ final class ForumService
             $postInfo = $this->data->postLookup->getPostWithUser($postid);
             $topicInfo = $this->data->topics->getTopicWithUser($topicid);
             if ($postInfo === null || $topicInfo === null) {
-                return $this->redirectTo('/forums.php');
+                return $this->redirectTo('/forums');
             }
 
             // W1-04: Use PostPolicy for edit authorization
@@ -265,7 +265,7 @@ final class ForumService
             $this->data->posts->updatePostBody($postid, $body, $date, $userid);
             $this->cacheDelete('post_'.$postid.'_content');
 
-            $postUrl = sprintf('[url=/forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject ?? '');
+            $postUrl = sprintf('[url=/forums?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject ?? '');
             if ($postInfo->userid > 0 && $postInfo->userid !== $userid) {
                 $receiver = $postInfo->user;
                 if ($receiver !== null) {
@@ -280,7 +280,7 @@ final class ForumService
                 }
             }
 
-            $headerstr = '/forums.php?action=viewtopic&topicid='.$topicid;
+            $headerstr = '/forums?action=viewtopic&topicid='.$topicid;
 
             return $this->redirectTo($headerstr.'&page=p'.$postid.'#pid'.$postid);
         }
@@ -316,11 +316,11 @@ final class ForumService
 
         $newPostId = $this->data->posts->createPost($topicid, $userid, $body, $date);
         if ($newPostId <= 0) {
-            return $this->redirectTo('/forums.php');
+            return $this->redirectTo('/forums');
         }
 
         $topicInfo = $this->data->topics->getTopicWithUser($topicid);
-        $postUrl = sprintf('[url=/forums.php?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $newPostId, $newPostId, $topicInfo ? $topicInfo->subject : '');
+        $postUrl = sprintf('[url=/forums?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $newPostId, $newPostId, $topicInfo ? $topicInfo->subject : '');
 
         if ($type === 'reply') {
             if ($topicInfo !== null && $topicInfo->userid > 0 && $topicInfo->userid !== $userid) {
@@ -370,7 +370,7 @@ final class ForumService
 
         $this->data->posts->updateUserLastPost($userid, $date);
 
-        $headerstr = '/forums.php?action=viewtopic&topicid='.$topicid;
+        $headerstr = '/forums?action=viewtopic&topicid='.$topicid;
 
         return $this->redirectTo($headerstr.'&page=last#pid'.$newPostId);
     }

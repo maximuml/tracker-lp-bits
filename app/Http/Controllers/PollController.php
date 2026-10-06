@@ -131,7 +131,7 @@ class PollController extends LegacyController
         if ($returnto === 'main') {
             return redirect(url('/'));
         } elseif ($pollid > 0) {
-            return redirect('/log.php?action=poll#'.$newId);
+            return redirect('/web/log?action=poll#'.$newId);
         }
 
         return redirect('/');

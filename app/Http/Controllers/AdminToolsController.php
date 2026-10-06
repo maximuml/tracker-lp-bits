@@ -38,7 +38,7 @@ class AdminToolsController extends LegacyController
         if ($this->currentUser->get() === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/user-ban-log.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/user-ban-log'.($qs ? '?'.$qs : ''));
         }
 
         $qRaw = is_scalar($request->input('q', '')) ? (string) $request->input('q', '') : '';
@@ -140,7 +140,7 @@ class AdminToolsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Access denied.');
         }
 
-        $actionUrl = 'location.php';
+        $actionUrl = '/web/location';
         $success = false;
         $error = '';
         $editRow = [];
@@ -204,7 +204,7 @@ class AdminToolsController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Access denied.');
         }
 
-        $actionUrl = 'location.php';
+        $actionUrl = '/web/location';
         $success = false;
         $error = '';
 
@@ -300,7 +300,7 @@ class AdminToolsController extends LegacyController
 
     private function renderLocationList(Request $request, bool $success, string $error, string $rangeStartIp, string $rangeEndIp): View|RedirectResponse
     {
-        $actionUrl = 'location.php';
+        $actionUrl = '/web/location';
         $perpage = 50;
         $hasRangeFilter = false;
         $message = '';
@@ -321,7 +321,7 @@ class AdminToolsController extends LegacyController
         $rangeEndInt = $hasRangeFilter ? (int) ip2long($rangeEndIp) : null;
 
         $count = $this->locationService->countLocations($rangeStartInt, $rangeEndInt);
-        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, 'location.php?');
+        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, '/web/location?');
 
         $locations = $this->locationService->listLocations($offset, $rpp, $rangeStartInt, $rangeEndInt);
 

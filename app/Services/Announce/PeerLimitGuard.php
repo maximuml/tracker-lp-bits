@@ -57,7 +57,7 @@ final class PeerLimitGuard
 
             $remaining = $wait * 3600 - $elapsed;
             if ($remaining > 0) {
-                $faqUrl = Url::schemeAndHost(true).'/faq.php#id46';
+                $faqUrl = Url::schemeAndHost(true).'/web/faq#id46';
                 $this->warn(
                     'Your ratio is too low! You need to wait '.Format::prettyTimeWithLocale($remaining).' to start, please read '.$faqUrl.' for details',
                     $remaining
@@ -82,7 +82,7 @@ final class PeerLimitGuard
 
                 if ($leechingCount >= $max) {
                     throw TrackerException::failure(
-                        "Your slot limit is reached! You may at most download $max torrents at the same time, please read ".Url::schemeAndHost(true).'/faq.php#id66 for details'
+                        "Your slot limit is reached! You may at most download $max torrents at the same time, please read ".Url::schemeAndHost(true).'/web/faq#id66 for details'
                     );
                 }
             }

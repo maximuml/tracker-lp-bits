@@ -1,11 +1,11 @@
 <section class="nx-idx-card">
 <h2>{{ $polls->title }}
     @if($polls->canManage)
-        <span class="small"> - [<a class="altlink" href="makepoll.php?returnto=main"><b>{{ $polls->newLabel }}</b></a>]
+        <span class="small"> - [<a class="altlink" href="/web/makepoll?returnto=main"><b>{{ $polls->newLabel }}</b></a>]
         @if($polls->exists)
-             - [<a class="altlink" href="makepoll.php?action=edit&amp;pollid={{ $polls->pollId }}&amp;returnto=main"><b>{{ $polls->editLabel }}</b></a>]
-             - [<a class="altlink" href="log.php?action=poll&amp;do=delete&amp;pollid={{ $polls->pollId }}&amp;returnto=main"><b>{{ $polls->deleteLabel }}</b></a>]
-             - [<a class="altlink" href="polloverview.php?id={{ $polls->pollId }}"><b>{{ $polls->detailLabel }}</b></a>]
+             - [<a class="altlink" href="/web/makepoll?action=edit&amp;pollid={{ $polls->pollId }}&amp;returnto=main"><b>{{ $polls->editLabel }}</b></a>]
+             - [<a class="altlink" href="/web/log?action=poll&amp;do=delete&amp;pollid={{ $polls->pollId }}&amp;returnto=main"><b>{{ $polls->deleteLabel }}</b></a>]
+             - [<a class="altlink" href="/web/polloverview?id={{ $polls->pollId }}"><b>{{ $polls->detailLabel }}</b></a>]
         @endif
         </span>
     @endif
@@ -25,7 +25,7 @@
     </div>
     <p class="text-center">{{ $polls->votesLabel }} {{ $polls->totalVotes }}</p>
     @if($polls->canLog)
-        <p class="text-center"><a href="log.php?action=poll">{{ $polls->previousPollsLabel }}</a></p>
+        <p class="text-center"><a href="/web/log?action=poll">{{ $polls->previousPollsLabel }}</a></p>
     @endif
 @else
     <form wire:submit="vote">

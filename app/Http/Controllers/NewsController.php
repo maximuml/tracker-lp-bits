@@ -198,7 +198,7 @@ class NewsController extends LegacyController
 
     public function newsPost(Request $request): Response|RedirectResponse|View
     {
-        // Old POST /news.php?action=X callers land on the dedicated
+        // Old POST /web/news?action=X callers land on the dedicated
         // endpoints — 308 replays the body unchanged.
         // Legacy callers can carry params in the URL (?action=edit&newsid=N)
         // — forward the query string so the target endpoint still sees them.

@@ -36,7 +36,7 @@ final class UserDetailControllerTest extends TestCase
         $response = $controller->show($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/userdetails.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/userdetails', $response->getTargetUrl());
         $this->assertStringContainsString('id=5', $response->getTargetUrl());
     }
 

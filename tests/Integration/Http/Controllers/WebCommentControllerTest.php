@@ -99,7 +99,7 @@ final class WebCommentControllerTest extends TestCase
         $response = $controller->store($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('details.php?id='.$torrent->id, $response->getTargetUrl());
+        $this->assertStringContainsString('/web/details/'.$torrent->id, $response->getTargetUrl());
         $this->assertStringContainsString('#42', $response->getTargetUrl());
     }
 
@@ -159,7 +159,7 @@ final class WebCommentControllerTest extends TestCase
         $response = $controller->update($request, 10);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('details.php?id=5', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/details/5', $response->getTargetUrl());
     }
 
     public function test_destroy_returns_confirmation_view_when_not_sure(): void
@@ -184,7 +184,7 @@ final class WebCommentControllerTest extends TestCase
 
         $this->assertInstanceOf(View::class, $response);
         $this->assertSame('comments.delete', $response->name());
-        $this->assertSame('comment.php?action=delete&type=torrent&cid=10', $response->getData()['formAction']);
+        $this->assertSame('/comment?action=delete&type=torrent&cid=10', $response->getData()['formAction']);
     }
 
     public function test_destroy_deletes_comment_and_redirects(): void
@@ -209,7 +209,7 @@ final class WebCommentControllerTest extends TestCase
         $response = $controller->destroy($request, 10);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('details.php?id=5', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/details/5', $response->getTargetUrl());
     }
 
     public function test_original_returns_view_with_original_comment_text(): void

@@ -81,17 +81,17 @@ class TorrentDownloadController extends LegacyController
             }
             $user = Auth::guard('nexus-web')->user();
             if (! $user instanceof User) {
-                return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
+                return redirect('/login?returnto='.urlencode($request->fullUrl()));
             }
             if ($user->parked) {
                 throw new NexusException('download.account_parked');
             }
             if (! $request->letdown) {
                 if ($user->showclienterror) {
-                    return redirect('/downloadnotice.php?torrentid='.$id.'&type=client');
+                    return redirect('/web/downloadnotice?torrentid='.$id.'&type=client');
                 }
                 if ($user->leechwarn) {
-                    return redirect('/downloadnotice.php?torrentid='.$id.'&type=ratio');
+                    return redirect('/web/downloadnotice?torrentid='.$id.'&type=ratio');
                 }
             }
         }
@@ -124,7 +124,7 @@ class TorrentDownloadController extends LegacyController
         $trackerHost = is_array($trackerHost) ? implode('', $trackerHost) : $trackerHost;
         $dict->cleanRootFields()
             ->setAnnounce($trackerHost.'?passkey='.(string) $user->passkey)
-            ->setComment(Url::schemeAndHost(true).'/details.php?id='.$torrent->id)
+            ->setComment(Url::schemeAndHost(true).'/web/details/'.$torrent->id)
             ->setCreatedBy(SiteConfig::current()->basic->siteName())
             ->setCreationDate($torrent->added?->getTimestamp() ?? time());
 
@@ -145,7 +145,7 @@ class TorrentDownloadController extends LegacyController
         if ($curUser === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/downloadnotice.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/downloadnotice'.($qs ? '?'.$qs : ''));
         }
 
         $torrentid = (int) $request->input('torrentid');
@@ -213,7 +213,7 @@ class TorrentDownloadController extends LegacyController
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
-            return redirect('/downloadnotice.php');
+            return redirect('/web/downloadnotice');
         }
 
         $torrentid = (int) $request->input('id', 0);

@@ -11,4 +11,4 @@
     {{ $commentPagerBottom }}
 @endif
 
-<p class="text-center"><a class="index" href="{{ 'comment.php?action=add&pid=' . $id . '&type=torrent' }}">{{ __('legacy/details.text_add_a_comment') }}</a></p>
+<p class="text-center"><a class="index" href="{{ '/comment/add?pid=' . $id . '&type=torrent' }}">{{ __('legacy/details.text_add_a_comment') }}</a></p>

@@ -79,7 +79,7 @@ class UtilityController extends LegacyController
         if ($currentUser === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/search.php'.($qs ? '?'.$qs : ''));
+            return redirect('/web/search'.($qs ? '?'.$qs : ''));
         }
 
         $data = $this->searchPageRepository->dataForSearch($request, $currentUser);
@@ -103,7 +103,7 @@ class UtilityController extends LegacyController
         if ($this->legacyRedisCache === null) {
             $qs = $request->getQueryString();
 
-            return redirect('/ajax.php'.($qs ? '?'.$qs : ''));
+            return redirect('/ajax'.($qs ? '?'.$qs : ''));
         }
 
         $action = (string) $request->input('action', '');
@@ -495,23 +495,23 @@ class UtilityController extends LegacyController
     <Url type="text/html"
         rel="results"
         pageOffset="0"
-              template="{$url}/torrents.php?search={searchTerms}&amp;page={startPage?}" />
+              template="{$url}/web/torrents?search={searchTerms}&amp;page={startPage?}" />
     <Url type="application/rss+xml"
         rel="results"
         indexOffset="0"
-        template="{$url}/torrentrss.php?search={searchTerms}&amp;rows={count?}&amp;startindex={startIndex?}" />
+        template="{$url}/web/torrentrss?search={searchTerms}&amp;rows={count?}&amp;startindex={startIndex?}" />
     <Url type="application/opensearchdescription+xml"
         rel="self"
-        template="{$url}/opensearch.php" />
+        template="{$url}/web/opensearch" />
     <Url type="application/x-suggestions+json"
         rel="suggestions"
-        template="{$url}/searchsuggest.php?q={searchTerms}" />
+        template="{$url}/web/searchsuggest?q={searchTerms}" />
     <Contact>{$siteEmail}</Contact>
     <Tags>Torrents {$projectName}</Tags>
     <LongName>{$siteNameEsc} Torrents Search</LongName>
     <Image height="32" width="32" type="image/x-icon">{$faviconData}</Image>
     <Image height="32" width="32" type="image/x-icon">{$url}/favicon.ico</Image>
-    <moz:SearchForm>{$url}/torrents.php</moz:SearchForm>
+    <moz:SearchForm>{$url}/web/torrents</moz:SearchForm>
     <Query role="example" searchTerms="batman" />
     <Developer>{$siteNameEsc} Staff</Developer>
     <Attribution>{$attribution}</Attribution>
@@ -560,7 +560,7 @@ XML;
             abort(404);
         }
 
-        return redirect('/usercp.php?action=security&type=saved');
+        return redirect('/usercp?action=security&type=saved');
     }
 
     public function ok(Request $request): View|RedirectResponse

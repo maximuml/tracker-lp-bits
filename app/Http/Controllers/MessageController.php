@@ -74,7 +74,7 @@ class MessageController extends LegacyController
             'moveordel' => redirect()->to('/web/messages/move-or-delete'.$suffix, 308),
             'editmailboxes2' => redirect()->to('/web/messages/mailboxes'.$suffix, 308),
             'deletemessage' => redirect()->to('/web/messages/delete'.$suffix, 308),
-            default => redirect('/messages.php'),
+            default => redirect('/web/messages'),
         };
     }
 
@@ -124,7 +124,7 @@ class MessageController extends LegacyController
             if ((int) ($msga['receiver'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
                 return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
             }
-            $body .= ($msga['msg'] ?? '')."\n\n-------- [url=userdetails.php?id=".$currentUser['id'].']'.$currentUser['username'].'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
+            $body .= ($msga['msg'] ?? '')."\n\n-------- [url=/userdetails?id=".$currentUser['id'].']'.$currentUser['username'].'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
             $subject = (string) ($msga['subject'] ?? '');
             if (preg_match('/^Re:\\s/', $subject)) {
                 $subject = preg_replace('/^Re:\\s(.*)$/', 'Re(2): \\1', $subject) ?? $subject;

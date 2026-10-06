@@ -602,7 +602,7 @@ JS;
             }
         }
 
-        $categoriesTable = $this->searchCategoryTableFactory->create($browsecatmode, 'yes', 'torrents.php?allsec=1&', '', 3, $notifs, ['section_name' => true]);
+        $categoriesTable = $this->searchCategoryTableFactory->create($browsecatmode, 'yes', '/web/torrents?allsec=1&', '', 3, $notifs, ['section_name' => true]);
 
         $currentTheme = UserTheme::fromStringSafe(is_string($curUser['theme'] ?? null) ? $curUser['theme'] : null)->value;
         $themeOptions = [];

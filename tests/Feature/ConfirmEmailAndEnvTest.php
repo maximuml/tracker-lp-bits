@@ -34,7 +34,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
         $invalidEmail = 'not-an-email';
         $md5 = md5($sec.$invalidEmail.$sec);
 
-        $response = $this->get("/confirmemail/{$user->id}/{$md5}/".urlencode($invalidEmail));
+        $response = $this->get("/web/confirmemail/{$user->id}/{$md5}/".urlencode($invalidEmail));
 
         // Invalid email should be rejected with 404
         $response->assertNotFound();
@@ -56,7 +56,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
         $longEmail = str_repeat('a', 250).'@example.com';
         $md5 = md5($sec.$longEmail.$sec);
 
-        $response = $this->get("/confirmemail/{$user->id}/{$md5}/".urlencode($longEmail));
+        $response = $this->get("/web/confirmemail/{$user->id}/{$md5}/".urlencode($longEmail));
 
         $response->assertNotFound();
     }
@@ -72,7 +72,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
 
         // The route pattern requires (.+) so empty email won't match the regex
         // and will 404 before reaching validation
-        $response = $this->get("/confirmemail/{$user->id}/{$md5}/");
+        $response = $this->get("/web/confirmemail/{$user->id}/{$md5}/");
 
         $response->assertNotFound();
     }
@@ -86,9 +86,9 @@ final class ConfirmEmailAndEnvTest extends TestCase
         $newEmail = 'newmail@example.com';
         $user->forceFill(['editsecret' => $tokenService->emailChangeDigest($token, $newEmail)])->save();
 
-        $response = $this->get("/confirmemail/{$user->id}/{$token}/".urlencode($newEmail));
+        $response = $this->get("/web/confirmemail/{$user->id}/{$token}/".urlencode($newEmail));
 
-        $response->assertRedirect('/usercp.php?action=security&type=saved');
+        $response->assertRedirect('/usercp?action=security&type=saved');
         $user->refresh();
         $this->assertSame($newEmail, $user->email);
         $this->assertSame('', (string) $user->editsecret);
@@ -102,7 +102,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
         $token = $tokenService->generate();
         $user->forceFill(['editsecret' => $tokenService->emailChangeDigest($token, 'intended@example.com')])->save();
 
-        $response = $this->get("/confirmemail/{$user->id}/{$token}/".urlencode('attacker@example.com'));
+        $response = $this->get("/web/confirmemail/{$user->id}/{$token}/".urlencode('attacker@example.com'));
 
         $response->assertNotFound();
         $this->assertNotSame('attacker@example.com', $user->refresh()->email);
@@ -114,7 +114,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
         $tokenService = app(SecureTokenService::class);
         $user->forceFill(['editsecret' => $tokenService->emailChangeDigest($tokenService->generate(), 'other@example.com')])->save();
 
-        $response = $this->get("/confirmemail/{$user->id}/".$tokenService->generate().'/'.urlencode('other@example.com'));
+        $response = $this->get("/web/confirmemail/{$user->id}/".$tokenService->generate().'/'.urlencode('other@example.com'));
 
         $response->assertNotFound();
     }
@@ -129,9 +129,9 @@ final class ConfirmEmailAndEnvTest extends TestCase
         $legacyEmail = 'legacy-new@example.com';
         $md5 = md5($sec.$legacyEmail.$sec);
 
-        $response = $this->get("/confirmemail/{$user->id}/{$md5}/".urlencode($legacyEmail));
+        $response = $this->get("/web/confirmemail/{$user->id}/{$md5}/".urlencode($legacyEmail));
 
-        $response->assertRedirect('/usercp.php?action=security&type=saved');
+        $response->assertRedirect('/usercp?action=security&type=saved');
         $user->refresh();
         $this->assertSame($legacyEmail, $user->email);
         $this->assertSame('', (string) $user->editsecret);
@@ -146,7 +146,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
         $sec = str_pad((string) $user->editsecret, 20);
         $md5 = md5($sec.'intended@example.com'.$sec);
 
-        $response = $this->get("/confirmemail/{$user->id}/{$md5}/".urlencode('attacker@example.com'));
+        $response = $this->get("/web/confirmemail/{$user->id}/{$md5}/".urlencode('attacker@example.com'));
 
         $response->assertNotFound();
     }
@@ -156,7 +156,7 @@ final class ConfirmEmailAndEnvTest extends TestCase
         $user = User::factory()->create(['editsecret' => '']);
         $token = app(SecureTokenService::class)->generate();
 
-        $response = $this->get("/confirmemail/{$user->id}/{$token}/".urlencode('x@example.com'));
+        $response = $this->get("/web/confirmemail/{$user->id}/{$token}/".urlencode('x@example.com'));
 
         $response->assertNotFound();
     }

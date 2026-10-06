@@ -32,7 +32,7 @@
 @if ($info->haremAdditionFactor !== null)
 <h1>{{ __('legacy/mybonus.text_get_by_harem') }}</h1>
 <ul>
-<li>{{ __('legacy/mybonus.harem_additional_desc') }}<a href="invite.php?id={{ $info->userId }}" class="altlink" target="_blank">{{ __('legacy/mybonus.text_here') }}</a></li>
+<li>{{ __('legacy/mybonus.harem_additional_desc') }}<a href="/web/invite?id={{ $info->userId }}" class="altlink" target="_blank">{{ __('legacy/mybonus.text_here') }}</a></li>
 <li>{{ __('legacy/mybonus.harem_additional_factor') }}{{ $info->haremAdditionFactor }}</li>
 <li>{{ __('legacy/mybonus.harem_additional_note') }}</li>
 </ul>

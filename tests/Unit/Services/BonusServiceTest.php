@@ -88,7 +88,7 @@ final class BonusServiceTest extends TestCase
         );
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('mybonus.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/mybonus', $result->getTargetUrl());
     }
 
     public function test_returns_null_when_insufficient_bonus(): void

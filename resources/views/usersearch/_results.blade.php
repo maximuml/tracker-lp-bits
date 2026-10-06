@@ -21,7 +21,7 @@
     @foreach ($results->rows as $row)
         <tr><td>{{ $row->username }}</td>
             <td>@if ($row->ratio->colorClass !== null)<span class="{{ $row->ratio->colorClass }}">{{ $row->ratio->text }}</span>@else{{ $row->ratio->text }}@endif</td>
-            <td>@if ($row->ipBanned)<a href="testip.php?ip={{ $row->ip }}"><span class="text-nxm-danger"><b>{{ $row->ip }}</b></span></a>@else{{ $row->ip }}@endif</td>
+            <td>@if ($row->ipBanned)<a href="/web/testip?ip={{ $row->ip }}"><span class="text-nxm-danger"><b>{{ $row->ip }}</b></span></a>@else{{ $row->ip }}@endif</td>
             <td>{{ $row->email }}</td>
             <td><div class="text-center">{{ $row->added }}</div></td>
             <td><div class="text-center">{{ $row->lastAccess }}</div></td>
@@ -30,7 +30,7 @@
             <td><div class="text-center">@if ($row->peerRatio->colorClass !== null)<span class="{{ $row->peerRatio->colorClass }}">{{ $row->peerRatio->text }}</span>@else{{ $row->peerRatio->text }}@endif</div></td>
             <td><div class="text-right">{{ $row->peerUploaded }}</div></td>
             <td><div class="text-right">{{ $row->peerDownloaded }}</div></td>
-            <td><div class="text-center">@if ($row->postCount > 0)<a href="userhistory.php?action=viewposts&amp;id={{ $row->id }}">{{ $row->postCount }}</a>@else{{ $row->postCount }}@endif|@if ($row->commentCount > 0)<a href="userhistory.php?action=viewcomments&amp;id={{ $row->id }}">{{ $row->commentCount }}</a>@else{{ $row->commentCount }}@endif</div></td></tr>
+            <td><div class="text-center">@if ($row->postCount > 0)<a href="/web/userhistory?action=viewposts&amp;id={{ $row->id }}">{{ $row->postCount }}</a>@else{{ $row->postCount }}@endif|@if ($row->commentCount > 0)<a href="/web/userhistory?action=viewcomments&amp;id={{ $row->id }}">{{ $row->commentCount }}</a>@else{{ $row->commentCount }}@endif</div></td></tr>
     @endforeach
 </x-data-table>
 @if ($results->showPager)

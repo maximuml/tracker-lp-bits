@@ -12,11 +12,11 @@
     @foreach ($items ?? [] as $item)
         <p class=sub>
         {{ $item['added'] }}&nbsp;--&nbsp;<b>{{ __('legacy/userhistory.text_forum') }}&nbsp;</b>
-        <a href=forums.php?action=viewforum&forumid={{ $item['forumid'] }}>{{ $item['forumname'] }}</a>
+        <a href=/forums?action=viewforum&forumid={{ $item['forumid'] }}>{{ $item['forumname'] }}</a>
         &nbsp;--&nbsp;<b>{{ __('legacy/userhistory.text_topic') }}&nbsp;</b>
-        <a href=forums.php?action=viewtopic&topicid={{ $item['topicid'] }}>{{ $item['topicname'] }}</a>
+        <a href=/forums?action=viewtopic&topicid={{ $item['topicid'] }}>{{ $item['topicname'] }}</a>
         &nbsp;--&nbsp;<b>{{ __('legacy/userhistory.text_post') }}&nbsp;</b>
-        <a href=forums.php?action=viewtopic&topicid={{ $item['topicid'] }}&page=p{{ $item['postid'] }}#pid{{ $item['postid'] }}>#{{ $item['postid'] }}</a>
+        <a href=/forums?action=viewtopic&topicid={{ $item['topicid'] }}&page=p{{ $item['postid'] }}#pid{{ $item['postid'] }}>#{{ $item['postid'] }}</a>
         @if ($item['isNew']) &nbsp;<b>(<span class="new">{{ __('legacy/userhistory.text_new')}}</span>)</b>@endif
         </p>
         <br />
@@ -39,11 +39,11 @@
         <p class=sub>
         {{ $item['added'] }}&nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_torrent') }}&nbsp;</b>
         @if ($item['torrentName'] !== '')
-            <a href=details.php?id={{ $item['torrentid'] }}&tocomm=1&hit=1>{{ $item['torrentName'] }}</a>
+            <a href=/web/details/{{ $item['torrentid'] }}&tocomm=1&hit=1>{{ $item['torrentName'] }}</a>
         @else
             [Deleted]
         @endif
-        &nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_comment') }}&nbsp;</b>#<a href=details.php?id={{ $item['torrentid'] }}&tocomm=1&hit=1{{ $item['pageUrl'] }}>{{ $item['commentid'] }}</a>
+        &nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_comment') }}&nbsp;</b>#<a href=/web/details/{{ $item['torrentid'] }}&tocomm=1&hit=1{{ $item['pageUrl'] }}>{{ $item['commentid'] }}</a>
         </p>
         <br />
         <x-data-table :caption="__('legacy/userhistory.text_comments_history_for') . $subject" captionHidden class="main">

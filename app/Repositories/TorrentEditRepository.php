@@ -181,7 +181,7 @@ class TorrentEditRepository extends BaseRepository
 
         $this->writeEditLog($torrentOld, $torrentNew, $user);
 
-        $torrentUrl = sprintf('details.php?id=%s', $torrentOld->id);
+        $torrentUrl = sprintf('/web/details/%s', $torrentOld->id);
         if ($torrentOld->banned == 1 && $torrentOld->owner == $user->id) {
             StaffMessage::query()->insert([
                 'sender' => $user->id,

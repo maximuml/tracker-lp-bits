@@ -30,7 +30,7 @@ final class TorrentListingControllerTest extends TestCase
         $response = $controller->index($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/login.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/login', $response->getTargetUrl());
     }
 
     public function test_index_returns_view_when_authenticated(): void

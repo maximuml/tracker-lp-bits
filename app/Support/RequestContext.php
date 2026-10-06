@@ -280,9 +280,12 @@ final class RequestContext
 
     private function setScript(): void
     {
-        $script = (string) $this->retrieveFromServer(['SCRIPT_FILENAME', 'SCRIPT_NAME', 'Script', 'script'], true);
-        if (str_contains($script, '.')) {
-            $script = strstr(basename($script), '.', true);
+        $script = (string) $this->retrieveFromServer(['LEGACY_PAGE_SCRIPT']);
+        if ($script === '') {
+            $script = (string) $this->retrieveFromServer(['SCRIPT_FILENAME', 'SCRIPT_NAME', 'Script', 'script'], true);
+            if (str_contains($script, '.')) {
+                $script = strstr(basename($script), '.', true);
+            }
         }
         $this->script = (string) $script;
     }

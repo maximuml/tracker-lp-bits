@@ -80,7 +80,7 @@ final class QueryBudgetTest extends TestCase
         $this->withNexusCookie($user);
 
         $this->assertQueryCountBelow(61, function (): void {
-            $this->get('/index.php');
+            $this->get('/web/index');
         });
     }
 
@@ -95,7 +95,7 @@ final class QueryBudgetTest extends TestCase
         $this->withNexusCookie($user);
 
         $this->assertQueryCountBelow(45, function (): void {
-            $this->get('/torrents.php');
+            $this->get('/web/torrents');
         });
     }
 
@@ -196,7 +196,7 @@ final class QueryBudgetTest extends TestCase
         $this->withNexusCookie($user);
 
         $this->assertQueryCountBelow(29, function (): void {
-            $this->get('/messages.php');
+            $this->get('/web/messages');
         });
     }
 
@@ -210,7 +210,7 @@ final class QueryBudgetTest extends TestCase
         $this->withNexusCookie($user);
 
         $this->assertQueryCountBelow(34, function () use ($user): void {
-            $this->get('/getrss.php?passkey='.$user->passkey);
+            $this->get('/web/getrss?passkey='.$user->passkey);
         });
     }
 
@@ -223,7 +223,7 @@ final class QueryBudgetTest extends TestCase
         $this->withNexusCookie($admin);
 
         $this->assertQueryCountBelow(45, function (): void {
-            $this->get('/staff');
+            $this->get('/web/staff');
         });
     }
 

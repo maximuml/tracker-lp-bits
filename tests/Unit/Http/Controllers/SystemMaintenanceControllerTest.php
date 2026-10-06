@@ -32,7 +32,7 @@ final class SystemMaintenanceControllerTest extends TestCase
         $response = $controller->mysqlStats($request);
 
         $this->assertSame(302, $response->getStatusCode());
-        $this->assertStringContainsString('/mysql_stats.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/mysql_stats', $response->getTargetUrl());
     }
 
     public function test_mysql_stats_redirects_guest_preserving_query_string(): void
@@ -44,7 +44,7 @@ final class SystemMaintenanceControllerTest extends TestCase
         $response = $controller->mysqlStats($request);
 
         $this->assertSame(302, $response->getStatusCode());
-        $this->assertStringContainsString('/mysql_stats.php?order=foo', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/mysql_stats?order=foo', $response->getTargetUrl());
     }
 
     public function test_mysql_stats_aborts_for_non_sysop_user(): void

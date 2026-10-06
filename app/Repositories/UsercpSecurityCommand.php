@@ -177,7 +177,7 @@ final class UsercpSecurityCommand
                 'username' => $user->username,
                 'email' => $email,
                 'ip' => $request->ip(),
-                'confirmUrl' => $baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail,
+                'confirmUrl' => $baseUrl.'/web/confirmemail/'.$user->id.'/'.$hash.'/'.$obemail,
                 'siteName' => $siteName,
             ])->render();
 
@@ -198,7 +198,7 @@ final class UsercpSecurityCommand
             AuthCookie::setLoginCookie((int) $user->id, null, 0);
         }
 
-        $to = 'usercp.php?action=security&type=saved';
+        $to = '/usercp?action=security&type=saved';
         if ($changedemail === 1) {
             $to .= '&mail=1';
         }
@@ -274,7 +274,7 @@ final class UsercpSecurityCommand
                 'username' => $user->username,
                 'email' => $email,
                 'ip' => $dto->ip,
-                'confirmUrl' => $baseUrl.'/confirmemail.php/'.$user->id.'/'.$hash.'/'.$obemail,
+                'confirmUrl' => $baseUrl.'/web/confirmemail/'.$user->id.'/'.$hash.'/'.$obemail,
                 'siteName' => $siteName,
             ])->render();
 

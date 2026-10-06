@@ -18,7 +18,7 @@
 @foreach ($tracker->langOptions as $id => $name)
 <option value="{{ $id }}"@if ($tracker->currentLangId === (int) $id) selected @endif>{{ $name }}</option>
 @endforeach
-</select>&nbsp;&nbsp;<span class="small">{{ __('legacy/usercp.text_translation_note') }}<a href="aboutnexus.php#translation"><b>{{ __('legacy/usercp.text_translation_link') }}</b></a></span>.</x-settings-row-small>
+</select>&nbsp;&nbsp;<span class="small">{{ __('legacy/usercp.text_translation_note') }}<a href="/web/aboutnexus#translation"><b>{{ __('legacy/usercp.text_translation_link') }}</b></a></span>.</x-settings-row-small>
 <x-settings-row-small layout="grid" :label="__('legacy/usercp.row_pm_boxes')">{{ __('legacy/usercp.text_show') }}<input type="text" name="pmnum" size="5" value="{{ $tracker->pmnum }}"> {{ __('legacy/usercp.text_pms_per_page') }}</x-settings-row-small>
 @if ($tracker->showShoutbox)
 <x-settings-row-small layout="grid" :label="__('legacy/usercp.row_shoutbox')">{{ __('legacy/usercp.text_show_last') }}<input type="text" name="sbnum" size="5" value="{{ $tracker->sbnum }}"> {{ __('legacy/usercp.text_messages_at_shoutbox') }}<br />{{ __('legacy/usercp.text_refresh_shoutbox_every') }}<input type="text" name="sbrefresh" size="5" value="{{ $tracker->sbrefresh }}"> {{ __('legacy/usercp.text_seconds') }}</x-settings-row-small>

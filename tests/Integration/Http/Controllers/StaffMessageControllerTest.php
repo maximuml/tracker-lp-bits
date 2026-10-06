@@ -81,7 +81,7 @@ final class StaffMessageControllerTest extends TestCase
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
     }
 
-    public function test_contactstaff_redirects_guest_to_contactstaff_php(): void
+    public function test_contactstaff_redirects_guest_to_contactstaff(): void
     {
         $this->mockCurrentUser(null);
 
@@ -92,7 +92,7 @@ final class StaffMessageControllerTest extends TestCase
         $response = $controller->contactstaff($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/contactstaff.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/contactstaff', $response->getTargetUrl());
     }
 
     public function test_contactstaff_redirects_guest_preserving_query_string(): void
@@ -106,7 +106,7 @@ final class StaffMessageControllerTest extends TestCase
         $response = $controller->contactstaff($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/contactstaff.php?foo=bar', $response->getTargetUrl());
+        $this->assertStringContainsString('/contactstaff?foo=bar', $response->getTargetUrl());
     }
 
     public function test_takecontact_redirects_post_to_rest_endpoint(): void
@@ -281,7 +281,7 @@ final class StaffMessageControllerTest extends TestCase
         $response = $controller->sendStaffMessage($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('staffmess.php?sent=1', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/staffmess?sent=1', $response->getTargetUrl());
         Queue::assertPushed(BulkUserMessageJob::class, 1);
     }
 

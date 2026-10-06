@@ -59,7 +59,7 @@ final class ChromeAlerts
             if (! empty($currentPromotion['remark'])) {
                 $lines[] = sprintf($remarkTpl, $currentPromotion['remark']);
             }
-            $alerts[] = ['url' => 'torrents.php', 'text' => implode(' · ', $lines), 'color' => 'green'];
+            $alerts[] = ['url' => '/web/torrents', 'text' => implode(' · ', $lines), 'color' => 'green'];
         }
         if ($upcomingPromotion) {
             $promotionText = TorrentPromotion::fromIntSafe((int) ($upcomingPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
@@ -70,12 +70,12 @@ final class ChromeAlerts
             if (! empty($upcomingPromotion['remark'])) {
                 $lines[] = sprintf($remarkTpl, $upcomingPromotion['remark']);
             }
-            $alerts[] = ['url' => 'torrents.php', 'text' => implode(' · ', $lines), 'color' => 'blue'];
+            $alerts[] = ['url' => '/web/torrents', 'text' => implode(' · ', $lines), 'color' => 'blue'];
         }
         if ($user['leechwarn'] ?? false) {
             $kicktimeout = Time::format($user['leechwarnuntil'], false, false, true);
             $alerts[] = [
-                'url' => 'faq.php#id17',
+                'url' => '/web/faq#id17',
                 'text' => (string) (__('legacy/functions.text_please_improve_ratio_within')).$kicktimeout.(string) (__('legacy/functions.text_or_you_will_be_banned')),
                 'color' => 'orange',
             ];
@@ -89,7 +89,7 @@ final class ChromeAlerts
                     if ($addedtime + $secs / 3 < TIMENOW) {
                         $kicktimeout = Time::format(date('Y-m-d H:i:s', $addedtime + $secs), false, false, true);
                         $alerts[] = [
-                            'url' => 'rules.php',
+                            'url' => '/web/rules',
                             'text' => (string) (__('legacy/functions.text_please_download_something_within')).$kicktimeout.(string) (__('legacy/functions.text_inactive_account_be_deleted')),
                             'color' => 'gray',
                         ];
@@ -98,7 +98,7 @@ final class ChromeAlerts
             }
         }
         if ($user['showclienterror'] ?? false) {
-            $alerts[] = ['url' => 'faq.php#id29', 'text' => (string) (__('legacy/functions.text_banned_client_warning')), 'color' => 'black'];
+            $alerts[] = ['url' => '/web/faq#id29', 'text' => (string) (__('legacy/functions.text_banned_client_warning')), 'color' => 'black'];
         }
         foreach (MsgAlert::pendingAlerts() as $alert) {
             $alerts[] = $alert;
@@ -113,7 +113,7 @@ final class ChromeAlerts
             $newNews = (int) $newNews;
             if ($newNews > 0) {
                 $alerts[] = [
-                    'url' => 'index.php',
+                    'url' => '/web/index',
                     'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($newNews).$newNews.(string) (__('legacy/functions.text_new_news')),
                     'color' => 'green',
                 ];
@@ -128,7 +128,7 @@ final class ChromeAlerts
         $staffMessages = (int) $staffMessages;
         if ($staffMessages > 0) {
             $alerts[] = [
-                'url' => 'staffbox.php',
+                'url' => '/staffbox',
                 'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($staffMessages).$staffMessages.(string) (__('legacy/functions.text_new_staff_message')).Strings::addS($staffMessages),
                 'color' => 'blue',
             ];
@@ -143,7 +143,7 @@ final class ChromeAlerts
             $toApprovalCounts = (int) $toApprovalCounts;
             if ($toApprovalCounts) {
                 $alerts[] = [
-                    'url' => 'torrents.php?approval_status=0&incldead=0',
+                    'url' => '/web/torrents?approval_status=0&incldead=0',
                     'text' => sprintf((string) (__('legacy/functions.text_torrent_to_approval')), Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)),
                     'color' => 'darkred',
                 ];
@@ -159,7 +159,7 @@ final class ChromeAlerts
             $complaints = (int) $complaints;
             if ($complaints) {
                 $alerts[] = [
-                    'url' => 'complains.php?action=list',
+                    'url' => '/web/complains?action=list',
                     'text' => sprintf((string) (__('legacy/functions.text_complains')), Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)),
                     'color' => 'darkred',
                 ];
@@ -172,7 +172,7 @@ final class ChromeAlerts
             $numReports = (int) $numReports;
             if ($numReports) {
                 $alerts[] = [
-                    'url' => 'reports.php',
+                    'url' => '/web/reports',
                     'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($numReports).$numReports.(string) (__('legacy/functions.text_new_report')).Strings::addS($numReports),
                     'color' => 'blue',
                 ];
@@ -185,7 +185,7 @@ final class ChromeAlerts
             $numCheaters = (int) $numCheaters;
             if ($numCheaters) {
                 $alerts[] = [
-                    'url' => 'cheaterbox.php',
+                    'url' => '/cheaterbox',
                     'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($numCheaters).$numCheaters.(string) (__('legacy/functions.text_new_suspected_cheater')).Strings::addS($numCheaters),
                     'color' => 'blue',
                 ];
@@ -195,7 +195,7 @@ final class ChromeAlerts
         $currentExam = (new Exam)->getCurrent($userId);
         if (! empty($currentExam['html']) && $currentExam['exam'] !== null) {
             $alerts[] = [
-                'url' => $currentExam['exam']->type == ExamType::TASK->value ? 'task.php' : 'messages.php',
+                'url' => $currentExam['exam']->type == ExamType::TASK->value ? '/web/task' : '/web/messages',
                 'text' => $currentExam['html'],
                 'color' => $currentExam['exam']->background_color ?? 'blue',
             ];

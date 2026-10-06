@@ -5,14 +5,14 @@
     if (clearBtn) {
         clearBtn.addEventListener('click', function () {
             layer.confirm(clearBtn.getAttribute('data-confirm'), {title: 'Info', btn: ['Yes', 'Cancel'], btnAlign: 'c'}, function (layerIndex) {
-                nativePost('ajax.php', {action: 'clearShoutBox', params: {csrf: (typeof SHOUT_CSRF !== 'undefined' ? SHOUT_CSRF : '')}}, function (response) {
+                nativePost('/web/shoutbox/clear', {}, function (response) {
                     layer.close(layerIndex);
                     if (response.ret != 0) {
                         layer.alert(response.msg, {title: 'Info', btn: ['OK', 'Cancel'], btnAlign: 'c'});
                     } else {
                         var iframe = document.getElementById('iframe-shout-box');
                         if (iframe) {
-                            iframe.src = 'shoutbox.php?type=shoutbox';
+                            iframe.src = '/web/shoutbox?type=shoutbox';
                         } else if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
                             window.Livewire.dispatch('shout-refresh');
                         }

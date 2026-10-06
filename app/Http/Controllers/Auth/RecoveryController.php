@@ -74,7 +74,7 @@ class RecoveryController extends Controller
     private function recoverPreamble(RecoverRequest $request): ?RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::to('index.php');
+            return Redirect::to('/web/index');
         }
 
         $langFolder = $this->resolveLangFolder($request);
@@ -97,7 +97,7 @@ class RecoveryController extends Controller
     public function resetPassword(PasswordResetRequest $request): RedirectResponse
     {
         if (Auth::guard('nexus-web')->check()) {
-            return Redirect::to('index.php');
+            return Redirect::to('/web/index');
         }
 
         $validated = $request->validated();

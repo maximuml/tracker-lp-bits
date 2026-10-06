@@ -39,7 +39,7 @@ final class UtilityControllerTest extends TestCase
         $response = $controller->ajax($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/ajax.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/ajax', $response->getTargetUrl());
     }
 
     public function test_ajax_returns_error_for_invalid_action(): void
@@ -86,7 +86,7 @@ final class UtilityControllerTest extends TestCase
         $response = $controller->search($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertSame('http://localhost/search.php?q=x', $response->getTargetUrl());
+        $this->assertSame('http://localhost/web/search?q=x', $response->getTargetUrl());
     }
 
     public function test_getattachment_rejects_missing_id_or_key(): void

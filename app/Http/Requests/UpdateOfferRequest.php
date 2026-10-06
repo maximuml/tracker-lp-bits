@@ -28,7 +28,7 @@ class UpdateOfferRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect('/offers.php')->withErrors($validator)->withInput()
+            redirect('/web/offers')->withErrors($validator)->withInput()
         );
     }
 }

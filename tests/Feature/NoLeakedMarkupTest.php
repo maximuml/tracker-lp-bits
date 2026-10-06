@@ -47,8 +47,8 @@ final class NoLeakedMarkupTest extends TestCase
     public static function pageProvider(): array
     {
         return [
-            'index' => ['/index'],
-            'torrents' => ['/torrents'],
+            'index' => ['/web/index'],
+            'torrents' => ['/web/torrents'],
             'forums' => ['/forums'],
             'usercp' => ['/usercp'],
         ];
@@ -77,7 +77,7 @@ final class NoLeakedMarkupTest extends TestCase
     {
         $user = User::factory()->admin()->create();
 
-        $response = $this->withNexusCookie($user)->get('/topten');
+        $response = $this->withNexusCookie($user)->get('/web/topten');
 
         $response->assertOk();
         $html = (string) $response->getContent();
@@ -95,7 +95,7 @@ final class NoLeakedMarkupTest extends TestCase
     {
         $user = User::factory()->create(['appendpromotion' => UserAppendPromotion::HIGHLIGHT->value]);
 
-        $response = $this->withNexusCookie($user)->get('/torrents');
+        $response = $this->withNexusCookie($user)->get('/web/torrents');
 
         $response->assertOk();
         $html = (string) $response->getContent();

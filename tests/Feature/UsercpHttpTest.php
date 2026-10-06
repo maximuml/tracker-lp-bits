@@ -92,7 +92,7 @@ final class UsercpHttpTest extends TestCase
             ->post('/web/usercp/tracker', [
                 'torrentsperpage' => 999, // exceeds max:100
             ])
-            ->assertRedirect('/usercp.php?action=tracker');
+            ->assertRedirect('/usercp?action=tracker');
     }
 
     public function test_security_confirm_validates_required_action(): void
@@ -202,7 +202,7 @@ final class UsercpHttpTest extends TestCase
                 'acceptpms' => 'friends',
                 'gender' => 'Male',
             ])
-            ->assertRedirect('/usercp.php?action=personal&type=saved');
+            ->assertRedirect('/usercp?action=personal&type=saved');
     }
 
     public function test_forum_save_redirects_on_success(): void
@@ -229,7 +229,7 @@ final class UsercpHttpTest extends TestCase
             ->post('/web/usercp/forum', [
                 'clicktopic' => 'lastpage',
             ])
-            ->assertRedirect('/usercp.php?action=forum&type=saved');
+            ->assertRedirect('/usercp?action=forum&type=saved');
     }
 
     public function test_tracker_save_redirects_on_success(): void
@@ -269,7 +269,7 @@ final class UsercpHttpTest extends TestCase
                 'appendpromotion' => 'highlight',
                 'tooltip' => 'off',
             ])
-            ->assertRedirect('/usercp.php?action=tracker&type=saved');
+            ->assertRedirect('/usercp?action=tracker&type=saved');
     }
 
     public function test_tracker_save_accepts_theme(): void
@@ -282,7 +282,7 @@ final class UsercpHttpTest extends TestCase
                 'timetype' => 0,
                 'appendpromotion' => 1,
             ])
-            ->assertRedirect('/usercp.php?action=tracker&type=saved');
+            ->assertRedirect('/usercp?action=tracker&type=saved');
 
         $this->assertSame('dark', $user->fresh()->theme);
     }

@@ -97,7 +97,7 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
         StaffMessage::query()->insert([
             'sender' => $senderId,
             'subject' => Locale::trans('offer.msg_new_offer_subject', [], null),
-            'msg' => Locale::trans('offer.msg_new_offer_msg', ['username' => "[url=userdetails.php?id={$senderId}]{$senderName}[/url]", 'offername' => "[url=offers.php?id={$offerId}&off_details=1]{$offerName}[/url]"], null),
+            'msg' => Locale::trans('offer.msg_new_offer_msg', ['username' => "[url=/userdetails?id={$senderId}]{$senderName}[/url]", 'offername' => "[url=/web/offers?id={$offerId}&off_details=1]{$offerName}[/url]"], null),
             'added' => now(),
         ]);
     }

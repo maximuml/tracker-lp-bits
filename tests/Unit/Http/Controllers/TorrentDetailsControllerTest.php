@@ -64,7 +64,7 @@ final class TorrentDetailsControllerTest extends TestCase
         $response = $controller->show($request, 5, app(CustomField::class));
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/login.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/login', $response->getTargetUrl());
         $this->assertStringContainsString('returnto=', $response->getTargetUrl());
     }
 
@@ -80,7 +80,7 @@ final class TorrentDetailsControllerTest extends TestCase
         $response = $controller->show($request, 10, app(CustomField::class));
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/login.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/login', $response->getTargetUrl());
         $this->assertStringContainsString('returnto=', $response->getTargetUrl());
     }
 

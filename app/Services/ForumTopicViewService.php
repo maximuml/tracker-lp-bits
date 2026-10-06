@@ -225,7 +225,7 @@ final class ForumTopicViewService
                 id: $postid,
                 number: $pn + $offset,
                 isLast: $isLast,
-                anchorUrl: 'forums.php?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid,
+                anchorUrl: '/forums?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid,
                 addedRaw: (string) ($arr['added'] ?? ''),
                 by: SafeHtml::fromTrustedHtml(UserDisplay::username($posterid, false, true, true, false, false, true)),
                 authorToggleUrl: $authorid

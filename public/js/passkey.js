@@ -1,5 +1,5 @@
 const Passkey = (() => {
-    const apiUrl = '/ajax.php';
+    const apiUrl = '/ajax';
 
     const supported = () => {
         return window.PublicKeyCredential;

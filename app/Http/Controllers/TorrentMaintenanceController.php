@@ -190,7 +190,7 @@ class TorrentMaintenanceController extends LegacyController
             $pnMsg = Locale::trans('torrent.msg_reseed_user', [], $locale)
                 .$curUser['username']
                 .Locale::trans('torrent.msg_ask_reseed', [], $locale)
-                .'[url='.Url::absolute($baseUrl).'/details.php?id='.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
+                .'[url='.Url::absolute($baseUrl).'/web/details/'.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
                 .Locale::trans('torrent.msg_thank_you', [], $locale);
             $this->messageRepository->add([
                 'sender' => null,

@@ -43,7 +43,7 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
     public function getDownloadUrl($id, array|User $user): string
     {
         return sprintf(
-            '%s/download.php?downhash=%s.%s',
+            '%s/download?downhash=%s.%s',
             Url::schemeAndHost(false), is_array($user) ? $user['id'] : $user->id, $this->encryptDownHash($id, $user)
         );
     }

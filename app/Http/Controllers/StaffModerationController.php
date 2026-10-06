@@ -82,7 +82,7 @@ class StaffModerationController extends LegacyController
             }
             $this->modtaskRepository->confirmUser($userId, $confirm);
 
-            return redirect(Url::absolute($baseUrl).'/unco.php?status=1');
+            return redirect(Url::absolute($baseUrl).'/web/unco?status=1');
         }
 
         if ($action !== 'edituser') {
@@ -381,7 +381,7 @@ class StaffModerationController extends LegacyController
         $returnto = (string) request()->post('returnto');
         $prefix = Url::absolute($baseUrl);
 
-        return redirect($prefix.'/'.($returnto !== '' ? $returnto : 'userdetails.php?id='.$userId));
+        return redirect($prefix.'/'.($returnto !== '' ? $returnto : '/userdetails?id='.$userId));
     }
 
     public function modrules(Request $request): View|RedirectResponse|Response
@@ -479,7 +479,7 @@ class StaffModerationController extends LegacyController
             ]);
             Cache::forgetWithLocales('rules');
 
-            return redirect('modrules.php');
+            return redirect('/web/modrules');
         }
 
         if ($act === 'edited') {
@@ -494,7 +494,7 @@ class StaffModerationController extends LegacyController
             ]);
             Cache::forgetWithLocales('rules');
 
-            return redirect('modrules.php');
+            return redirect('/web/modrules');
         }
 
         if ($act === 'del') {
@@ -506,7 +506,7 @@ class StaffModerationController extends LegacyController
             $this->ruleRepository->deleteById($id);
             Cache::forgetWithLocales('rules');
 
-            return redirect('modrules.php');
+            return redirect('/web/modrules');
         }
 
         return $this->modrules($request);

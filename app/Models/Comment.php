@@ -39,13 +39,13 @@ class Comment extends NexusModel
             'model' => Torrent::class,
             'foreign_key' => 'torrent',
             'target_name_field' => 'name',
-            'target_script' => 'details.php?id=%s',
+            'target_script' => '/web/details/%s',
         ],
         CommentType::OFFER->value => [
             'model' => Offer::class,
             'foreign_key' => 'offer',
             'target_name_field' => 'name',
-            'target_script' => 'offers.php?id=%s&off_details=1',
+            'target_script' => '/web/offers?id=%s&off_details=1',
         ],
     ];
 

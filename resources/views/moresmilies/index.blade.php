@@ -2,6 +2,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="color-scheme" content="light dark">
 <title>{{ __('legacy/moresmilies.head_more_smilies') }}</title>
+<base href="{{ url('/') }}/" />
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 img {border: none;}
 body {color: CanvasText; background-color: Canvas}

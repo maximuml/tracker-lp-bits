@@ -35,7 +35,7 @@ final class ForumSearchViewModel
      */
     public function pagerHref(): string
     {
-        return 'forums.php?action=search&keywords='.rawurlencode($this->keywords).'&';
+        return '/forums?action=search&keywords='.rawurlencode($this->keywords).'&';
     }
 
     /**

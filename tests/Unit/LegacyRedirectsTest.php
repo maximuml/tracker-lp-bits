@@ -29,10 +29,10 @@ final class LegacyRedirectsTest extends TestCase
         $conf = file_get_contents(base_path('.docker/openresty/sites/app.conf.template'));
         $this->assertStringContainsString('return 301 /login', $conf, 'nginx must redirect /login.php');
         $this->assertStringContainsString('return 301 /signup', $conf, 'nginx must redirect /signup.php');
-        $this->assertStringContainsString('return 301 /torrents', $conf, 'nginx must redirect /torrents.php');
+        $this->assertStringContainsString('return 301 /web/torrents', $conf, 'nginx must redirect /torrents.php');
         $this->assertStringContainsString('return 301 /forums', $conf, 'nginx must redirect /forums.php');
-        $this->assertStringContainsString('return 301 /faq', $conf, 'nginx must redirect /faq.php');
-        $this->assertStringContainsString('return 301 /rules', $conf, 'nginx must redirect /rules.php');
+        $this->assertStringContainsString('return 301 /web/faq', $conf, 'nginx must redirect /faq.php');
+        $this->assertStringContainsString('return 301 /web/rules', $conf, 'nginx must redirect /rules.php');
     }
 
     /**
@@ -113,21 +113,21 @@ final class LegacyRedirectsTest extends TestCase
     public function test_k6_baseline_uses_canonical_urls(): void
     {
         $baseline = file_get_contents(base_path('tests/Performance/baseline.js'));
-        $this->assertStringContainsString('${BASE_URL}/index', $baseline, 'k6 must use /index');
+        $this->assertStringContainsString('${BASE_URL}/web/index', $baseline, 'k6 must use /web/index');
         $this->assertStringContainsString('${BASE_URL}/login', $baseline, 'k6 must use /login');
-        $this->assertStringContainsString('${BASE_URL}/torrents', $baseline, 'k6 must use /torrents');
+        $this->assertStringContainsString('${BASE_URL}/web/torrents', $baseline, 'k6 must use /web/torrents');
         $this->assertStringNotContainsString('${BASE_URL}/index.php', $baseline, 'k6 must not use /index.php');
         $this->assertStringNotContainsString('${BASE_URL}/login.php', $baseline, 'k6 must not use /login.php');
         $this->assertStringNotContainsString('${BASE_URL}/torrents.php', $baseline, 'k6 must not use /torrents.php');
     }
 
     /**
-     * Root route redirects to /index (not /index.php).
+     * Root route redirects to /web/index (not /index.php).
      */
     public function test_root_route_redirects_to_index(): void
     {
         $routes = file_get_contents(base_path('routes/web.php'));
-        $this->assertStringContainsString("redirect('/index')", $routes, 'Root must redirect to /index');
+        $this->assertStringContainsString("redirect('/web/index')", $routes, 'Root must redirect to /web/index');
         $this->assertStringNotContainsString("redirect('index.php')", $routes, 'Root must not redirect to index.php');
     }
 }

@@ -19,16 +19,16 @@ final class IndexControllerTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_legacy_redirects_guest_to_index_php(): void
+    public function test_legacy_redirects_guest_to_index(): void
     {
         $controller = app(IndexController::class);
-        $request = Request::create('/index.php', 'GET');
+        $request = Request::create('/web/index', 'GET');
         app()->instance('request', $request);
 
         $response = $controller->legacy($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/index.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/index', $response->getTargetUrl());
     }
 
     public function test_legacy_returns_view_for_authenticated_user(): void
@@ -37,7 +37,7 @@ final class IndexControllerTest extends TestCase
         $this->actingAs($user);
 
         $controller = app(IndexController::class);
-        $request = Request::create('/index.php', 'GET');
+        $request = Request::create('/web/index', 'GET');
         app()->instance('request', $request);
 
         $response = $controller->legacy($request);

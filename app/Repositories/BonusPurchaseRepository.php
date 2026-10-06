@@ -225,7 +225,7 @@ class BonusPurchaseRepository extends BaseRepository
                 'receiver' => $user->id,
                 'added' => now(),
                 'subject' => Locale::trans('message.buy_torrent_success.subject', [], $buyerLocale),
-                'msg' => Locale::trans('message.buy_torrent_success.body', ['torrent_name' => $torrent->name, 'bonus' => $requireBonus, 'url' => sprintf('details.php?id=%s&hit=1', $torrent->id)], $buyerLocale),
+                'msg' => Locale::trans('message.buy_torrent_success.body', ['torrent_name' => $torrent->name, 'bonus' => $requireBonus, 'url' => sprintf('/web/details/%s?hit=1', $torrent->id)], $buyerLocale),
             ];
             $this->messageRepository->add($buyTorrentSuccessMessage);
 

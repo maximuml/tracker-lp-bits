@@ -36,7 +36,7 @@
     <td class="colfollow">{{ $row['sizeFormatted'] }}</td>
     <td class="colfollow">{{ $row['torrent_count'] }}</td>
     <td class="colfollow">@if ($row['last_added'])<x-time :value="$row['last_added']" />@else{{ $naText }}@endif</td>
-    <td class="colfollow">@if ($row['last_name'] !== '')<a href="details.php?id={{ (int) $row['last_id'] }}">{{ $row['last_name'] }}</a>@else{{ $naText }}@endif</td>
+    <td class="colfollow">@if ($row['last_name'] !== '')<a href="/web/details/{{ (int) $row['last_id'] }}">{{ $row['last_name'] }}</a>@else{{ $naText }}@endif</td>
 </tr>
 @endforeach
 </x-data-table>

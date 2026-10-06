@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 /**
- * POST /web/mybonus/exchange — replaces legacy POST /mybonus.php?action=exchange
+ * POST /web/mybonus/exchange — replaces legacy POST /web/mybonus?action=exchange
  * (karma-shop purchase; `option` + art-specific fields are validated by the
  * service's cheat checks, which render the legacy error page).
  */
@@ -31,7 +31,7 @@ class ExchangeBonusRequest extends FormRequest
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
-            redirect('/mybonus.php')->withErrors($validator)->withInput()
+            redirect('/web/mybonus')->withErrors($validator)->withInput()
         );
     }
 }

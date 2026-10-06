@@ -10,8 +10,8 @@
 	@if ($home->showAvatar)
 	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_avatar')"><img src="{{ $home->avatarUrl }}" alt=""></x-settings-row-small>
 	@endif
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_invitations')">{{ $home->invites }} [<a href="invite.php?id={{ $home->userId }}" title="{{ $home->invitesLinkTitle }}">{{ __('legacy/usercp.text_send') }}</a>]</x-settings-row-small>
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_karma_points')">{{ $home->seedbonus }} [<a href="mybonus.php" title="{{ $home->karmaLinkTitle }}">{{ __('legacy/usercp.text_use') }}</a>]</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_invitations')">{{ $home->invites }} [<a href="/web/invite?id={{ $home->userId }}" title="{{ $home->invitesLinkTitle }}">{{ __('legacy/usercp.text_send') }}</a>]</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_karma_points')">{{ $home->seedbonus }} [<a href="/web/mybonus" title="{{ $home->karmaLinkTitle }}">{{ __('legacy/usercp.text_use') }}</a>]</x-settings-row-small>
 	</div>
 </div>
 
@@ -57,9 +57,9 @@
 <div class="nx-ucard">
 	<div class="nx-ucard__title">{{ __('legacy/usercp.section_activity') }}</div>
 	<div class="nx-fgrid nx-fgrid--flat">
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_written_comments')">{{ $home->commentCount }} [<a href="userhistory.php?action=viewcomments&id={{ $home->userId }}" title="{{ $home->commentsLinkTitle }}">{{ __('legacy/usercp.text_view') }}</a>]</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_written_comments')">{{ $home->commentCount }} [<a href="/web/userhistory?action=viewcomments&id={{ $home->userId }}" title="{{ $home->commentsLinkTitle }}">{{ __('legacy/usercp.text_view') }}</a>]</x-settings-row-small>
 	@if ($home->forumPosts !== null)
-	<x-settings-row layout="grid" :label="__('legacy/usercp.row_forum_posts')">{{ $home->forumPosts->posts }} [<a href="userhistory.php?action=viewposts&id={{ $home->userId }}" title="{{ $home->postsLinkTitle }}">{{ __('legacy/usercp.text_view') }}</a>] ({{ $home->forumPosts->dayPosts }}{{ __('legacy/usercp.text_posts_per_day') }}; {{ $home->forumPosts->percentages }}{{ __('legacy/usercp.text_of_total_posts') }})</x-settings-row>
+	<x-settings-row layout="grid" :label="__('legacy/usercp.row_forum_posts')">{{ $home->forumPosts->posts }} [<a href="/web/userhistory?action=viewposts&id={{ $home->userId }}" title="{{ $home->postsLinkTitle }}">{{ __('legacy/usercp.text_view') }}</a>] ({{ $home->forumPosts->dayPosts }}{{ __('legacy/usercp.text_posts_per_day') }}; {{ $home->forumPosts->percentages }}{{ __('legacy/usercp.text_of_total_posts') }})</x-settings-row>
 	@endif
 	</div>
 </div>
@@ -70,7 +70,7 @@
 <x-data-table :headers="[__('legacy/usercp.col_topic_title'), __('legacy/usercp.col_replies').'/'.__('legacy/usercp.col_views'), __('legacy/usercp.col_topic_starter'), __('legacy/usercp.col_last_post')]">
 @foreach ($home->readTopics as $topic)
 <tr>
-    <td><a href="forums.php?action=viewtopic&amp;topicid={{ $topic->id }}"><b>{{ $topic->subject }}</b></a></td>
+    <td><a href="/forums?action=viewtopic&amp;topicid={{ $topic->id }}"><b>{{ $topic->subject }}</b></a></td>
     <td class="text-center">{{ $topic->replies }}/{{ $topic->views }}</td>
     <td class="text-center">{{ $topic->author }}</td>
     <td class="text-center whitespace-nowrap">@if ($topic->lastPostAdded !== null)<x-time :value="$topic->lastPostAdded" /> | @endif{{ $topic->lastPostUsername }}</td>

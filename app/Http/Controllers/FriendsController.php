@@ -117,7 +117,7 @@ class FriendsController extends LegacyController
 
     public function friendsPost(Request $request): Response|RedirectResponse|View
     {
-        // Old POST /friends.php?action=X callers land on the dedicated
+        // Old POST /web/friends?action=X callers land on the dedicated
         // endpoints — 308 replays the body unchanged.
         $qs = $request->getQueryString();
         $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
@@ -178,7 +178,7 @@ class FriendsController extends LegacyController
         $this->friendsRepository->add($userid, $type, $targetid);
         $this->purgeNeighborsCache();
 
-        return redirect('/friends.php?id='.$userid.'#'.$frag);
+        return redirect('/web/friends?id='.$userid.'#'.$frag);
     }
 
     private function handleDelete(Request $request, int $userid): RedirectResponse|Response
@@ -223,7 +223,7 @@ class FriendsController extends LegacyController
 
         $this->purgeNeighborsCache();
 
-        return redirect('/friends.php?id='.$userid.'#'.$frag);
+        return redirect('/web/friends?id='.$userid.'#'.$frag);
     }
 
     /**

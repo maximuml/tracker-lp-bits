@@ -206,8 +206,8 @@ final class LegacyAuth
     }
 
     /**
-     * Legacy login guard: if no current user, redirect to login.php
-     * (with returnto for non-main pages, or just login.php for main
+     * Legacy login guard: if no current user, redirect to /login
+     * (with returnto for non-main pages, or just /login for main
      * pages). For ajax calls, return a JSON `fail()` response. If the
      * user is disabled and the current script is not self-enable, redirect
      * to self-enable.php.
@@ -222,17 +222,17 @@ final class LegacyAuth
             }
 
             if ($mainPage) {
-                LegacyResponse::redirect('login.php');
+                LegacyResponse::redirect('/login');
             } else {
                 $returnTo = $context->requestUri !== null && $context->requestUri !== ''
                     ? rawurlencode(basename($context->requestUri))
                     : '';
-                LegacyResponse::redirect('login.php?returnto='.$returnTo);
+                LegacyResponse::redirect('/login?returnto='.$returnTo);
             }
         }
 
         if (! ($context->user['enabled'] ?? false) && $context->script !== 'self-enable') {
-            LegacyResponse::redirect('self-enable.php');
+            LegacyResponse::redirect('/web/self-enable');
         }
     }
 

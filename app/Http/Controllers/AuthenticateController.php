@@ -116,7 +116,7 @@ class AuthenticateController extends Controller
         if (! hash_equals($expected, $signature)) {
             Logger::writeWithContext((string) 'passkeyLogin: invalid HMAC signature', (string) 'warning', (bool) false);
 
-            return redirect('index.php');
+            return redirect('/web/index');
         }
 
         // Validate timestamp is within ±5 minutes
@@ -124,7 +124,7 @@ class AuthenticateController extends Controller
         if (abs($now - $timestamp) > 300) {
             Logger::writeWithContext((string) sprintf('passkeyLogin: timestamp out of window (server=%d, client=%d)', $now, $timestamp), (string) 'warning', (bool) false);
 
-            return redirect('index.php');
+            return redirect('/web/index');
         }
 
         // Replay protection: atomic "set if not exists". The marker must
@@ -138,12 +138,12 @@ class AuthenticateController extends Controller
         } catch (\Throwable $e) {
             Logger::writeWithContext((string) sprintf('passkeyLogin: replay marker store unavailable (%s) — rejecting login', $e->getMessage()), (string) 'error', (bool) false);
 
-            return redirect('index.php');
+            return redirect('/web/index');
         }
         if ($stored === false) {
             Logger::writeWithContext((string) 'passkeyLogin: replay detected — signature already used', (string) 'warning', (bool) false);
 
-            return redirect('index.php');
+            return redirect('/web/index');
         }
 
         if ($deadline && $deadline > now()->toDateTimeString()) {
@@ -157,7 +157,7 @@ class AuthenticateController extends Controller
             }
         }
 
-        return redirect('index.php');
+        return redirect('/web/index');
     }
 
     /**
@@ -185,7 +185,7 @@ class AuthenticateController extends Controller
         $action = (string) $request->input('action', PasskeyLoginService::ACTION_LOGIN);
 
         if (! $service->verify($passkey, $timestamp, $nonce, $signature, $keyId, $action)) {
-            return redirect('index.php');
+            return redirect('/web/index');
         }
 
         $deadline = SiteConfig::current()->security->loginSecretDeadline();
@@ -200,7 +200,7 @@ class AuthenticateController extends Controller
             }
         }
 
-        return redirect('index.php');
+        return redirect('/web/index');
     }
 
     /**

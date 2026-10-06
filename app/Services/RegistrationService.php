@@ -258,17 +258,17 @@ class RegistrationService
 
         if ($verification === 'admin') {
             return $type === 'invite'
-                ? 'ok.php?type=inviter'
-                : 'ok.php?type=adminactivate';
+                ? '/web/ok?type=inviter'
+                : '/web/ok?type=adminactivate';
         }
 
         if ($verification === 'automatic' || SiteConfig::current()->smtp->type('none') === 'none') {
-            return $baseUrl.'/confirm.php?id='.$userId.'&secret='.$confirmToken;
+            return $baseUrl.'/confirm?id='.$userId.'&secret='.$confirmToken;
         }
 
         $this->emailConfirmation->sendConfirmationEmail((string) $user->username, $email, $userId, $confirmToken, Network::clientIp(), $langFolder);
 
-        return 'ok.php?type=signup&email='.rawurlencode($email);
+        return '/web/ok?type=signup&email='.rawurlencode($email);
     }
 
     private function validateSignupFields(

@@ -36,7 +36,7 @@ final class SettingsControllerTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_settings_redirects_guest_to_settings_php(): void
+    public function test_settings_redirects_guest_to_settings(): void
     {
         $this->bindTagRepository();
         $this->mockCurrentUser(null);
@@ -48,7 +48,7 @@ final class SettingsControllerTest extends TestCase
         $response = $controller->settings($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/settings.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/settings', $response->getTargetUrl());
     }
 
     public function test_settings_denies_access_for_non_sysop_user(): void
@@ -66,7 +66,7 @@ final class SettingsControllerTest extends TestCase
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
     }
 
-    public function test_settings_post_with_unknown_action_redirects_to_settings_php(): void
+    public function test_settings_post_with_unknown_action_redirects_to_settings(): void
     {
         $this->bindTagRepository();
 
@@ -81,7 +81,7 @@ final class SettingsControllerTest extends TestCase
         $response = $controller->settingsSubmit($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/settings.php', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/settings', $response->getTargetUrl());
     }
 
     /**

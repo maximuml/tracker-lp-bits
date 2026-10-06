@@ -29,12 +29,12 @@ class BitbucketUploadController extends Controller
     public function create(Request $request): View|RedirectResponse
     {
         if ($this->legacyRedisCache === null) {
-            return redirect('/bitbucket-upload.php?'.$request->getQueryString());
+            return redirect('/web/bitbucket-upload?'.$request->getQueryString());
         }
 
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
+            return redirect('/login?returnto='.urlencode($request->fullUrl()));
         }
 
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
@@ -63,12 +63,12 @@ class BitbucketUploadController extends Controller
     public function store(Request $request): View|RedirectResponse
     {
         if ($this->legacyRedisCache === null) {
-            return redirect('/bitbucket-upload.php', 307);
+            return redirect('/web/bitbucket-upload', 307);
         }
 
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            return redirect('/login.php?returnto='.urlencode($request->fullUrl()));
+            return redirect('/login?returnto='.urlencode($request->fullUrl()));
         }
 
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();

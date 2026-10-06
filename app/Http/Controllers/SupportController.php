@@ -148,7 +148,7 @@ class SupportController extends LegacyController
         if (! Captcha::checkCode(
             (string) ($request->input('imagehash') ?? ''),
             (string) ($request->input('imagestring') ?? ''),
-            'complains.php',
+            '/web/complains',
             false,
             true,
         )) {
@@ -166,7 +166,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
         }
 
-        return redirect('/complains.php?action=view&id='.urlencode($uuid));
+        return redirect('/web/complains?action=view&id='.urlencode($uuid));
     }
 
     private function complainReply(Request $request, int $uid): RedirectResponse|Response
@@ -190,7 +190,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Complain not found.');
         }
 
-        return redirect()->to($request->headers->get('referer') ?: '/complains.php');
+        return redirect()->to($request->headers->get('referer') ?: '/web/complains');
     }
 
     private function complainToggle(Request $request, bool $isAdmin, string $action): RedirectResponse|Response
@@ -206,7 +206,7 @@ class SupportController extends LegacyController
 
         $this->complainService->toggleAnswered($id, $action === 'answered');
 
-        return redirect()->to($request->headers->get('referer') ?: '/complains.php');
+        return redirect()->to($request->headers->get('referer') ?: '/web/complains');
     }
 
     private function complainList(Request $request, bool $isAdmin): View|RedirectResponse|Response

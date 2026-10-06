@@ -72,13 +72,13 @@
     </form>
 
     @if ($isComplainEnabled)
-        <p>[<b><a href="complains.php">{{ __('legacy/login.text_complain')}}</a></b>]</p>
+        <p>[<b><a href="/web/complains">{{ __('legacy/login.text_complain')}}</a></b>]</p>
     @endif
 
-    <p>{{ __('legacy/login.p_no_account_signup') }} <a href="signup.php"><b>{{ __('legacy/login.text_sign_up') }}</b></a> {{ __('legacy/login.p_no_account_signup_end') }}</p>
+    <p>{{ __('legacy/login.p_no_account_signup') }} <a href="/signup"><b>{{ __('legacy/login.text_sign_up') }}</b></a> {{ __('legacy/login.p_no_account_signup_end') }}</p>
     @if ($isSmtpEnabled)
-        <p>{{ __('legacy/login.p_forget_pass_recover') }} <a href="recover.php"><b>{{ __('legacy/login.text_via_email') }}</b></a></p>
-        <p>{{ __('legacy/login.p_account_banned') }} <a href="user-ban-log.php"><b>{{ __('legacy/login.text_user_ban_log') }}</b></a></p>
-        <p>{{ __('legacy/login.p_resend_confirm') }} <a href="confirm_resend.php"><b>{{ __('legacy/login.text_send_confirmation_again') }}</b></a></p>
+        <p>{{ __('legacy/login.p_forget_pass_recover') }} <a href="/recover"><b>{{ __('legacy/login.text_via_email') }}</b></a></p>
+        <p>{{ __('legacy/login.p_account_banned') }} <a href="/web/user-ban-log"><b>{{ __('legacy/login.text_user_ban_log') }}</b></a></p>
+        <p>{{ __('legacy/login.p_resend_confirm') }} <a href="/confirm_resend"><b>{{ __('legacy/login.text_send_confirmation_again') }}</b></a></p>
     @endif
 @endsection

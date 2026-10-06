@@ -191,7 +191,7 @@ final class OfferServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('offers.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/offers', $result->getTargetUrl());
     }
 
     public function test_handle_action_returns_null_for_unknown_action(): void
@@ -355,7 +355,7 @@ final class OfferServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('offers.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/offers', $result->getTargetUrl());
         $this->assertSame(0, DB::table('offers')->where('id', $offerId)->count());
     }
 
@@ -432,7 +432,7 @@ final class OfferServiceTest extends TestCase
         $result = $this->callService($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $result);
-        $this->assertStringContainsString('offers.php', $result->getTargetUrl());
+        $this->assertStringContainsString('/web/offers', $result->getTargetUrl());
 
         $offer = DB::table('offers')->where('id', $offerId)->first();
         $this->assertNotNull($offer);

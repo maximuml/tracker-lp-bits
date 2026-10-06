@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Concerns;
 
-use App\Support\Globals;
 use App\Support\Settings;
 
 trait SeedsLegacySettings
@@ -273,12 +272,11 @@ trait SeedsLegacySettings
     /**
      * Seeds the settings behind a legacy flat key list: keys that mirror a
      * `settings` row are written via `Settings::saveBatch` (what migrated
-     * `SiteConfig` call sites read); anything else is still pushed into
-     * `$globals` for the runtime keys that have no settings row.
+     * `SiteConfig` call sites read); unmapped keys are ignored.
      *
      * @param  array<string, mixed>  $values
      */
-    protected function seedTestSettings(array $values, ?Globals $globals = null): void
+    protected function seedTestSettings(array $values): void
     {
         $byCategory = [];
         foreach ($values as $key => $value) {
@@ -286,8 +284,6 @@ trait SeedsLegacySettings
             if ($setting !== null) {
                 [$category, $name] = explode('.', $setting, 2);
                 $byCategory[$category][$name] = is_float($value) ? (string) $value : $value;
-            } elseif ($globals !== null) {
-                $globals->set($key, $value);
             }
         }
         foreach ($byCategory as $category => $pairs) {

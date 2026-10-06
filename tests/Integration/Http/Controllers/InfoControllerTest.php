@@ -6,7 +6,6 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\InfoController;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -116,11 +115,5 @@ final class InfoControllerTest extends TestCase
      * Set up minimal language strings so legacyAbortResponse's stdhead()
      * can render for guest users (no authenticated user block).
      */
-    private function setupMinimalLang(): void
-    {
-        app(Globals::class)->set('lang_functions', [
-            'text_login' => 'Login',
-            'text_signup' => 'Signup',
-        ]);
-    }
+    private function setupMinimalLang(): void {}
 }

@@ -9,7 +9,6 @@ use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumComposeService;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -59,8 +58,6 @@ final class ForumComposeServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         $this->initialObLevel = ob_get_level();
-        app(Globals::class)->set('maxsubjectlength', 100);
-        app(Globals::class)->set('lang_functions', self::LANG_FUNCTIONS);
         $this->seedTestSettings(['enableattach_attachment' => 'yes']);
     }
 

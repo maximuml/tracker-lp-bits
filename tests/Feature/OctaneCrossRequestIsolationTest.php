@@ -8,7 +8,7 @@ use App\Listeners\ResetNexus;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\PageState;
 use App\Support\Settings;
 use App\Support\SupportContext;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -124,15 +124,18 @@ final class OctaneCrossRequestIsolationTest extends TestCase
 
     public function test_support_context_does_not_leak_between_requests(): void
     {
-        // Request A: set a global
-        app(Globals::class)->set('TEST_ISOLATION_KEY', 'value_from_A');
-        $this->assertSame('value_from_A', app(Globals::class)->get('TEST_ISOLATION_KEY'));
+        // Request A: set per-request page state
+        PageState::instance()->setLangDir('chs');
+        PageState::instance()->setMenu('<ul>A</ul>', 'forums');
+        $this->assertSame('chs', PageState::instance()->langDir());
 
         // Simulate end of request A → ResetNexus
         $this->dispatchResetNexus();
 
-        // Request B: global should be reset (not carry over from A)
-        $this->assertNull(app(Globals::class)->get('TEST_ISOLATION_KEY'));
+        // Request B: page state should be reset (not carry over from A)
+        $this->assertSame('', PageState::instance()->langDir());
+        $this->assertSame('', PageState::instance()->menuHtml());
+        $this->assertSame('', PageState::instance()->menuSelected());
     }
 
     public function test_two_users_alternating_requests_no_leak(): void
@@ -208,7 +211,7 @@ final class OctaneCrossRequestIsolationTest extends TestCase
     {
         // Set up state that ResetNexus should clear
         app(CurrentUser::class)->set(['id' => 999, 'username' => 'test']);
-        app(Globals::class)->set('TEST_KEY', 'test_value');
+        PageState::instance()->setKeyShortcutScript('<script></script>');
         $guard = Auth::guard();
         $ref = new \ReflectionProperty($guard, 'user');
         $ref->setValue($guard, new User);
@@ -218,7 +221,7 @@ final class OctaneCrossRequestIsolationTest extends TestCase
 
         // Verify all state is cleared
         $this->assertNull(app(CurrentUser::class)->get());
-        $this->assertNull(app(Globals::class)->get('TEST_KEY'));
+        $this->assertSame('', PageState::instance()->keyShortcutScript());
         $this->assertNull(Auth::guard()->user());
     }
 

@@ -152,9 +152,7 @@ final class Locale
      */
     public static function currentLangDir(string $default = ''): string
     {
-        $dir = Globals::instance()->get('CURLANGDIR', $default);
-
-        return is_string($dir) ? $dir : $default;
+        return PageState::instance()->langDir($default);
     }
 
     /**

@@ -9,9 +9,9 @@ use App\Models\Invite;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Input;
 use App\Support\Menu;
+use App\Support\PageState;
 use App\Support\RequestContext;
 use App\Support\UserUpdateBatch;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
+        private readonly PageState $pageState,
         private readonly IpLogRepository $ipLogRepository,
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly UserUpdateBatch $userUpdateBatch,
@@ -161,11 +161,10 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
             null,
             $user,
             $this->legacyRedisCache,
-            (string) $this->globals->get('CURLANGDIR', ''),
+            $this->pageState->langDir(),
         );
 
-        $this->globals->set('nexus_menu_html', $menuResult['html']);
-        $this->globals->set('nexus_menu_selected', $menuResult['selected']);
+        $this->pageState->setMenu($menuResult['html'], $menuResult['selected']);
 
         if (SiteConfig::current()->tweak->where() === 'yes') {
             $this->userUpdateBatch->add('page', $menuResult['selected']);

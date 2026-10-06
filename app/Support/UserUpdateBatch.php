@@ -9,7 +9,7 @@ namespace App\Support;
  *
  * Replaces SupportContext::addUserUpdate()/getUserUpdateSet() with a
  * container singleton. Internally delegates to NexusContext which holds
- * the actual array storage (and mirrors it into globals['USERUPDATESET']).
+ * the actual array storage.
  */
 final class UserUpdateBatch
 {

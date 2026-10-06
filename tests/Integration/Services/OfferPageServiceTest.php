@@ -9,7 +9,6 @@ use App\Repositories\UsercpRepository;
 use App\Services\OfferPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\ViewModels\Offer\OfferListViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -132,9 +131,8 @@ final class OfferPageServiceTest extends TestCase
     }
 
     /** @param  array<string, mixed>  $values */
-    private function mockGlobals(array $values = []): void
+    private function seedSettings(array $values = []): void
     {
-        $globals = new Globals;
         $defaults = [
             'BASEURL' => 'http://test.com',
             'CONTENT_WIDTH' => '737',
@@ -148,8 +146,7 @@ final class OfferPageServiceTest extends TestCase
             'addoffer_class' => 2,
             'againstoffer_class' => 13,
         ];
-        $this->seedTestSettings(array_merge($defaults, $values), $globals);
-        $this->app->instance(Globals::class, $globals);
+        $this->seedTestSettings(array_merge($defaults, $values));
     }
 
     private function mockCache(): void
@@ -197,7 +194,7 @@ final class OfferPageServiceTest extends TestCase
     public function test_build_aborts_when_offers_disabled(): void
     {
         $this->authenticatedUser();
-        $this->mockGlobals(['enableoffer' => 'no']);
+        $this->seedSettings(['enableoffer' => 'no']);
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET');
@@ -213,7 +210,7 @@ final class OfferPageServiceTest extends TestCase
         $this->insertCategory();
 
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET');
@@ -237,7 +234,7 @@ final class OfferPageServiceTest extends TestCase
         $this->insertOffer($userId, $catId, ['name' => 'My Offer']);
 
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET');
@@ -258,7 +255,7 @@ final class OfferPageServiceTest extends TestCase
         $this->insertCategory();
 
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET');
@@ -273,7 +270,7 @@ final class OfferPageServiceTest extends TestCase
     public function test_build_add_offer_aborts_without_permission(): void
     {
         $this->authenticatedUser(['class' => 1]);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         // No user authenticated via Auth, so Permission::can returns false
@@ -287,7 +284,7 @@ final class OfferPageServiceTest extends TestCase
     public function test_build_off_details_aborts_with_zero_id(): void
     {
         $this->authenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET', ['off_details' => '1']);
@@ -300,7 +297,7 @@ final class OfferPageServiceTest extends TestCase
     public function test_build_off_details_aborts_for_nonexistent_offer(): void
     {
         $this->authenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET', ['off_details' => '1', 'id' => '999']);
@@ -313,7 +310,7 @@ final class OfferPageServiceTest extends TestCase
     public function test_build_edit_offer_aborts_for_nonexistent_offer(): void
     {
         $this->authenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET', ['edit_offer' => '1', 'id' => '999']);
@@ -330,7 +327,7 @@ final class OfferPageServiceTest extends TestCase
         $offerId = $this->insertOffer($userId, $catId, ['name' => 'Vote Test Offer']);
 
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET', ['offer_vote' => '1', 'id' => (string) $offerId]);
@@ -350,7 +347,7 @@ final class OfferPageServiceTest extends TestCase
     public function test_build_list_with_invalid_sort_aborts(): void
     {
         $this->authenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET', ['sort' => 'malicious_column']);
@@ -366,7 +363,7 @@ final class OfferPageServiceTest extends TestCase
         $this->insertCategory();
 
         $this->authenticatedUser(['id' => $userId, 'username' => 'tester']);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/offers.php', 'GET');
@@ -391,7 +388,7 @@ final class OfferPageServiceTest extends TestCase
         $this->insertCategory();
 
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         // add_offer=0 should be ignored, defaulting to list

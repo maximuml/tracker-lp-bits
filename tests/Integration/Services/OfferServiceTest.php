@@ -11,7 +11,6 @@ use App\Repositories\OfferVoteRepository;
 use App\Services\OfferModerationService;
 use App\Services\OfferService;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,8 +42,6 @@ final class OfferServiceTest extends TestCase
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -60,7 +57,6 @@ final class OfferServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->currentUser = new CurrentUser;
-        $this->globals = new Globals;
         $this->service = new OfferService(
             $this->currentUser,
             new OfferRepository,
@@ -127,10 +123,9 @@ final class OfferServiceTest extends TestCase
         $this->currentUser->set(array_merge($defaults, $userData));
     }
 
-    private function mockGlobals(): void
+    private function seedSettings(): void
     {
-        $this->seedTestSettings(['BASEURL' => 'example.com'], $this->globals);
-        $this->globals->set('lang_offers', []);
+        $this->seedTestSettings(['BASEURL' => 'example.com']);
     }
 
     /**
@@ -174,7 +169,7 @@ final class OfferServiceTest extends TestCase
     public function test_handle_action_returns_null_for_empty_action(): void
     {
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST');
 
@@ -184,7 +179,7 @@ final class OfferServiceTest extends TestCase
     public function test_handle_action_returns_redirect_for_get_request(): void
     {
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'GET', ['new_offer' => 1]);
 
@@ -197,7 +192,7 @@ final class OfferServiceTest extends TestCase
     public function test_handle_action_returns_null_for_unknown_action(): void
     {
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', ['unknown_action' => 1]);
 
@@ -209,7 +204,7 @@ final class OfferServiceTest extends TestCase
     public function test_handle_create_throws_without_permission(): void
     {
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'new_offer' => 1,
@@ -226,7 +221,7 @@ final class OfferServiceTest extends TestCase
     public function test_handle_allow_throws_without_permission(): void
     {
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'allow_offer' => 1,
@@ -241,7 +236,7 @@ final class OfferServiceTest extends TestCase
     public function test_handle_finish_throws_without_permission(): void
     {
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'finish_offer' => 1,
@@ -257,7 +252,7 @@ final class OfferServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'del_offer' => 0,
@@ -273,7 +268,7 @@ final class OfferServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'del_offer' => 1,
@@ -289,7 +284,7 @@ final class OfferServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'del_offer' => 1,
@@ -307,7 +302,7 @@ final class OfferServiceTest extends TestCase
         $otherUserId = $this->createUser();
         $offerId = $this->insertOffer($otherUserId);
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'del_offer' => 1,
@@ -324,7 +319,7 @@ final class OfferServiceTest extends TestCase
         $userId = $this->createUser();
         $offerId = $this->insertOffer($userId);
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'del_offer' => 1,
@@ -343,7 +338,7 @@ final class OfferServiceTest extends TestCase
         $userId = $this->createUser();
         $offerId = $this->insertOffer($userId);
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'del_offer' => 1,
@@ -365,7 +360,7 @@ final class OfferServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'take_off_edit' => 0,
@@ -381,7 +376,7 @@ final class OfferServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'take_off_edit' => 1,
@@ -399,7 +394,7 @@ final class OfferServiceTest extends TestCase
         $otherUserId = $this->createUser();
         $offerId = $this->insertOffer($otherUserId);
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'take_off_edit' => 1,
@@ -419,7 +414,7 @@ final class OfferServiceTest extends TestCase
         $userId = $this->createUser();
         $offerId = $this->insertOffer($userId);
         $this->authenticatedUser(['id' => $userId, 'username' => 'testuser']);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/offers.php', 'POST', [
             'take_off_edit' => 1,

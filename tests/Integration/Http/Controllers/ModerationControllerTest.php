@@ -12,7 +12,6 @@ use App\Models\User;
 use App\Repositories\ModerationRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -271,11 +270,5 @@ final class ModerationControllerTest extends TestCase
      * Set up minimal language strings so legacyAbortResponse's stdhead()
      * can render for guest users (no authenticated user block).
      */
-    private function setupMinimalLang(): void
-    {
-        app(Globals::class)->set('lang_functions', [
-            'text_login' => 'Login',
-            'text_signup' => 'Signup',
-        ]);
-    }
+    private function setupMinimalLang(): void {}
 }

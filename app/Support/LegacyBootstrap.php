@@ -29,7 +29,6 @@ final class LegacyBootstrap
         self::bootCache($rootpath);
         self::bootDatabase();
         self::bootTimezone();
-        self::bootSettings();
         self::bootLanguage($rootpath);
         self::bootUser($request);
     }
@@ -77,11 +76,6 @@ final class LegacyBootstrap
         ini_set('date.timezone', Config::get('nexus.timezone', null));
     }
 
-    private static function bootSettings(): void
-    {
-        SettingsSeed::seed();
-    }
-
     private static function bootLanguage(string $rootpath): void
     {
         $script = RequestContext::instance()->getScript();
@@ -90,10 +84,10 @@ final class LegacyBootstrap
         }
 
         // Legacy per-page language arrays resolve through Laravel's
-        // translator (resources/lang/en/legacy/*.php). CURLANGDIR is the
-        // locale folder cookie still read by Locale::currentFolder() and
+        // translator (resources/lang/en/legacy/*.php). The language
+        // folder cookie still read by Locale::currentFolder() and
         // a few repositories.
-        Globals::instance()->set('CURLANGDIR', Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
+        PageState::instance()->setLangDir(Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
     }
 
     private static function bootUser(?Request $request): void

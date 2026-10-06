@@ -9,7 +9,6 @@ use App\Repositories\BonusRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\SettingRepository;
 use App\Services\BonusService;
-use App\Support\Globals;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -93,8 +92,6 @@ final class BonusServiceTest extends TestCase
 
     public function test_returns_null_when_insufficient_bonus(): void
     {
-        // Bind a real Globals instance (it's final, can't be mocked)
-        $this->app->instance(Globals::class, new Globals);
 
         $allBonus = [
             0 => ['art' => 'traffic', 'points' => 5000, 'value' => 10737418240],
@@ -116,7 +113,6 @@ final class BonusServiceTest extends TestCase
 
     public function test_returns_null_for_unknown_art_type(): void
     {
-        $this->app->instance(Globals::class, new Globals);
 
         // Lock uses Redis internally; in the test environment Redis is available.
         // The lock will be acquired and released automatically.

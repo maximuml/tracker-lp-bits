@@ -9,7 +9,6 @@ use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -54,7 +53,6 @@ final class MessagePageServiceTest extends TestCase
             $this->app->make(MessageRepository::class),
             $this->app->make(MailboxRepository::class),
             $this->app->make(CurrentUser::class),
-            $this->app->make(Globals::class),
             $this->app->make(LegacyRedisCache::class),
         );
     }
@@ -137,29 +135,9 @@ final class MessagePageServiceTest extends TestCase
         $currentUser->set(array_merge($defaults, $userData));
     }
 
-    private function mockGlobals(): void
+    private function seedSettings(): void
     {
-        $globals = $this->app->make(Globals::class);
-        $this->seedTestSettings(['BASEURL' => 'example.com'], $globals);
-        $globals->set('CONTENT_WIDTH', '737');
-        $globals->set('lang_messages', [
-            'text_inbox' => 'Inbox',
-            'text_sentbox' => 'Sentbox',
-            'text_sender' => 'Sender',
-            'text_receiver' => 'Receiver',
-            'text_system' => 'System',
-            'text_no_subject' => 'No subject',
-            'text_new' => 'New',
-            'text_from' => 'From',
-            'text_to' => 'To',
-            'text_reply' => 'Reply',
-            'std_error' => 'Error',
-            'std_no_permission' => 'No permission.',
-            'std_invalid_mailbox' => 'Invalid mailbox.',
-            'std_no_permission_forwarding' => 'No permission to forward.',
-            'select_inbox' => 'Inbox',
-            'select_sentbox' => 'Sentbox',
-        ]);
+        $this->seedTestSettings(['BASEURL' => 'example.com']);
     }
 
     /**
@@ -199,7 +177,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET');
 
@@ -215,7 +193,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET', ['box' => 1]);
 
@@ -235,7 +213,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET', ['box' => -1]);
 
@@ -252,7 +230,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $this->insertMessage([
             'sender' => 0,
@@ -278,7 +256,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->insertPmBox($userId, 2, 'My Custom Box');
 
         $request = Request::create('/messages.php', 'GET', ['box' => 2]);
@@ -294,7 +272,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         // box=99 doesn't exist for this user
         $request = Request::create('/messages.php', 'GET', ['box' => 99]);
@@ -308,7 +286,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $msgId = $this->insertMessage([
             'sender' => 0,
@@ -338,7 +316,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET', [
             'action' => 'viewmessage',
@@ -352,7 +330,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET', [
             'action' => 'viewmessage',
@@ -366,7 +344,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $msgId = $this->insertMessage([
             'sender' => 0,
@@ -395,7 +373,7 @@ final class MessagePageServiceTest extends TestCase
         $userId = $this->createUser();
         $senderId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $msgId = $this->insertMessage([
             'sender' => $senderId,
@@ -425,7 +403,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET', [
             'action' => 'forward',
@@ -441,7 +419,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->insertPmBox($userId, 2, 'Work');
         $this->insertPmBox($userId, 3, 'Personal');
 
@@ -461,7 +439,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET', ['action' => 'editmailboxes']);
 
@@ -478,7 +456,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET', ['action' => 'unknown_action']);
 
@@ -494,7 +472,7 @@ final class MessagePageServiceTest extends TestCase
     {
         $userId = $this->createUser();
         $this->authenticatedUser(['id' => $userId]);
-        $this->mockGlobals();
+        $this->seedSettings();
 
         $request = Request::create('/messages.php', 'GET');
 

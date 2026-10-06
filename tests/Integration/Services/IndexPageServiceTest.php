@@ -11,7 +11,6 @@ use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\ViewModels\Index\IndexBrowserNoteSection;
 use App\ViewModels\Index\IndexClassStatRow;
 use App\ViewModels\Index\IndexDisclaimerSection;
@@ -52,8 +51,6 @@ final class IndexPageServiceTest extends TestCase
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     private LegacyRedisCache $cache;
 
     /** @var IndexRepository&MockInterface */
@@ -68,7 +65,6 @@ final class IndexPageServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->currentUser = new CurrentUser;
-        $this->globals = new Globals;
         $this->cache = new LegacyRedisCache;
 
         /** @var IndexRepository&MockInterface $repo */
@@ -90,9 +86,9 @@ final class IndexPageServiceTest extends TestCase
     }
 
     /** @param  array<string, mixed>  $values */
-    private function mockGlobals(array $values = []): void
+    private function seedSettings(array $values = []): void
     {
-        $this->seedTestSettings($values, $this->globals);
+        $this->seedTestSettings($values);
     }
 
     /** @param  array<string, mixed>  $userData */
@@ -171,7 +167,7 @@ final class IndexPageServiceTest extends TestCase
         $this->mockIndexRepo();
         $this->setCurrentUser();
         $this->mockCache();
-        $this->mockGlobals(array_merge([
+        $this->seedSettings(array_merge([
             'showshoutbox_main' => 'no',
             'showlastxforumposts_main' => 'no',
             'showlastxtorrents_main' => 'no',
@@ -219,7 +215,7 @@ final class IndexPageServiceTest extends TestCase
         $this->mockIndexRepo();
         $this->setCurrentUser(['id' => 99, 'username' => 'myuser']);
         $this->mockCache();
-        $this->mockGlobals([
+        $this->seedSettings([
             'showshoutbox_main' => 'no',
             'showlastxforumposts_main' => 'no',
             'showlastxtorrents_main' => 'no',
@@ -266,7 +262,7 @@ final class IndexPageServiceTest extends TestCase
         $this->mockIndexRepo();
         $this->setCurrentUser(['id' => 0]);
         $this->mockCache();
-        $this->mockGlobals([
+        $this->seedSettings([
             'showshoutbox_main' => 'no',
             'showlastxforumposts_main' => 'yes',
             'showlastxtorrents_main' => 'no',

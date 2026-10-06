@@ -41,6 +41,11 @@ final class MainConfig extends Config
         return $this->int("autoclean_interval_{$level}", $default);
     }
 
+    public function altName(string $default = ''): string
+    {
+        return $this->string('altname', $default);
+    }
+
     public function browseCat(int $default = 0): int
     {
         return $this->int('browsecat', $default);

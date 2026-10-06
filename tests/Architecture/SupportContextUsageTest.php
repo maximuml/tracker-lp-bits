@@ -11,7 +11,7 @@ use Tests\Attributes\TestCategory;
  * W2-12: Ratchet on SupportContext usage.
  *
  * SupportContext is a static facade for the per-request NexusContext.
- * It should only be used in wrapper classes (CurrentUser, Globals,
+ * It should only be used in wrapper classes (CurrentUser, PageState,
  * UserUpdateBatch, LegacyBootstrap, Bootstrap, ResetNexus) that
  * provide DI-friendly access to the same data.
  *
@@ -33,7 +33,7 @@ final class SupportContextUsageTest extends TestCase
      */
     private const ALLOWED_FILES = [
         'Support/CurrentUser.php',
-        'Support/Globals.php',
+        'Support/PageState.php',
         'Support/UserUpdateBatch.php',
         'Support/LegacyBootstrap.php',
         'Support/Bootstrap.php',
@@ -96,7 +96,7 @@ final class SupportContextUsageTest extends TestCase
             $violations,
             "SupportContext:: is used outside wrapper classes:\n".
             implode("\n", $violations)."\n\n".
-            'Use CurrentUser, Globals, UserUpdateBatch, or inject NexusContext instead.',
+            'Use CurrentUser, PageState, UserUpdateBatch, or inject NexusContext instead.',
         );
     }
 }

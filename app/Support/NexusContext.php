@@ -32,24 +32,16 @@ final class NexusContext
     /** @var array<string, mixed> */
     public array $userUpdateSet = [];
 
-    /** @var array<string, mixed> */
-    public array $globals = [];
+    public string $langDir = '';
 
-    /**
-     * Variables that are PHP internals/Laravel bootstraps and should never be
-     * exposed to legacy views or copied from $GLOBALS.
-     *
-     * @var list<string>
-     */
-    private const GLOBALS_EXCLUDED = [
-        'GLOBALS', '_GET', '_POST', '_REQUEST', '_SERVER', '_FILES', '_COOKIE', '_ENV',
-        'argc', 'argv', 'app', 'kernel', 'request', 'response',
-        'parameters', 'files', 'server', 'method', 'uri', 'routePath', 'pathInfo',
-        'queryString', 'isWrapper', 'page', 'executedScript', 'scriptFilename', 'scriptName',
-        'parsedUrl', 'requestPath', 'requestUri', 'nexusRoute', 'parkedScripts',
-        'extraLangFiles', 'scriptLangFiles', 'scriptLangFile', 'langPath', 'HTTP_RAW_POST_DATA',
-        '__composer_autoload_files',
-    ];
+    public string $keyShortcutScript = '';
+
+    public string $menuHtml = '';
+
+    public string $menuSelected = '';
+
+    /** @var array<string, mixed>|null */
+    public ?array $viewSettings = null;
 
     public function setFromRequest(Request $request): void
     {
@@ -58,14 +50,12 @@ final class NexusContext
         $this->cookie = $request->cookies->all();
         $this->get = $request->query->all();
 
-        $this->ensureUserUpdateSetReference();
     }
 
     /** @param array<string, mixed>|null $user */
     public function setUser(?array $user): void
     {
         $this->user = $user;
-        $this->globals['CURUSER'] = $user;
     }
 
     /** @return array<string, mixed>|null */
@@ -83,32 +73,6 @@ final class NexusContext
     public function addUserUpdate(string $key, mixed $value): void
     {
         $this->userUpdateSet[$key] = $value;
-    }
-
-    public function setGlobal(string $key, mixed $value): void
-    {
-        $this->globals[$key] = $value;
-    }
-
-    public function getGlobal(string $key, mixed $default = null): mixed
-    {
-        return $this->globals[$key] ?? $default;
-    }
-
-    /**
-     * Return a snapshot of the legacy global state suitable for passing to
-     * Blade/PHP partials.
-     *
-     * @return array<string, mixed>
-     */
-    public function getGlobalsForView(): array
-    {
-        $context = $this->globals;
-        foreach (self::GLOBALS_EXCLUDED as $key) {
-            unset($context[$key]);
-        }
-
-        return $context;
     }
 
     public function getServerValue(string $key, mixed $default = null): mixed
@@ -155,13 +119,5 @@ final class NexusContext
         }
 
         return $default;
-    }
-
-    private function ensureUserUpdateSetReference(): void
-    {
-        if (! array_key_exists('USERUPDATESET', $this->globals)) {
-            $this->globals['USERUPDATESET'] = [];
-        }
-        $this->userUpdateSet = &$this->globals['USERUPDATESET'];
     }
 }

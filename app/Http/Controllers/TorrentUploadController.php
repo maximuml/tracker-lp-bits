@@ -55,10 +55,6 @@ class TorrentUploadController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        // Views still read $lang_upload/$lang_edit from Globals (View composer
-        // injects every global) — keep populating them until the per-key
-        // __('legacy/x.k') conversion lands.
-
         if ($currentUser['parked']) {
             LegacyResponse::abort(__('legacy/upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
         }

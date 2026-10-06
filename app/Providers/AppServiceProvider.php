@@ -83,10 +83,10 @@ use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
 use App\Support\Env;
 use App\Support\Environment;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyHeaderBag;
 use App\Support\LegacyRuntime;
+use App\Support\LegacyViewVariables;
 use App\Support\Locale;
 use App\Support\Metrics\Collectors;
 use App\Support\Metrics\MetricsRegistry;
@@ -126,7 +126,6 @@ class AppServiceProvider extends ServiceProvider
             return $cache;
         });
         $this->app->singleton(CurrentUser::class);
-        $this->app->singleton(Globals::class);
         $this->app->singleton(UserUpdateBatch::class);
         // T-20: ActorContext is a per-request singleton — the instance is
         // resolved lazily from the authenticated user and must be flushed
@@ -292,16 +291,12 @@ class AppServiceProvider extends ServiceProvider
             Css::make('admin', asset('styles/admin.css')),
         ]);
 
-        // Pass the legacy global context into every view as individual variables
-        // so Blade/PHP partials no longer need extract($context, EXTR_SKIP).
         View::composer('*', function (\Illuminate\View\View $view): void {
-            $context = $this->app->make(Globals::class)->forView();
-            foreach ($context as $key => $value) {
+            foreach ($this->app->make(LegacyViewVariables::class)->all() as $key => $value) {
                 if (! array_key_exists($key, $view->getData())) {
                     $view->with($key, $value);
                 }
             }
-            $view->with('context', $context);
         });
 
         // Variant A (ADR 0014) / ADR 0018: inject the semantic chrome view

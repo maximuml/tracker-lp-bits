@@ -18,7 +18,6 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -45,7 +44,6 @@ final class OfferPageService
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
         private readonly OfferCommentRepositoryInterface $offerCommentRepository,
@@ -65,7 +63,7 @@ final class OfferPageService
             'userId' => $userId,
             'action' => $action,
             'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'),
-            'contentWidth' => (string) $this->globals->get('CONTENT_WIDTH', '737'),
+            'contentWidth' => '737',
             'browsecatmode' => SiteConfig::current()->main->browseCat(1),
             'enableoffer' => SiteConfig::current()->main->showOffer(true) ? 'yes' : 'no',
             'minoffervotes' => SiteConfig::current()->main->minOfferVotes(),

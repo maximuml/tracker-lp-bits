@@ -147,7 +147,7 @@ final class Pagination
      */
     /**
      * Full legacy pager: resolve page from `$_GET`, build labels from
-     * legacy globals, set the `$add_key_shortcut` global and return the
+     * legacy globals, record the key-shortcut script in PageState and return the
      * same array shape as the legacy `pager()` helper.
      *
      * Backs the `pager()` helper.
@@ -179,7 +179,7 @@ final class Pagination
         ];
 
         $result = self::render($rpp, $count, $href, $page, $pages, $labels, $pagename, $isPresto);
-        Globals::instance()->set('add_key_shortcut', Html::keyShortcutScript($page, $pages - 1));
+        PageState::instance()->setKeyShortcutScript(Html::keyShortcutScript($page, $pages - 1));
 
         return $result;
     }

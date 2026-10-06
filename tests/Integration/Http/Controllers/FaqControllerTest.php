@@ -27,7 +27,7 @@ final class FaqControllerTest extends TestCase
         app()->instance('request', $request);
 
         // The faq page renders a legacy Blade template that requires
-        // Globals language strings. In a unit test without full legacy
+        // legacy language strings. In a unit test without full legacy
         // bootstrap, this throws a ViewException.
         try {
             $response = $controller->faq($request);

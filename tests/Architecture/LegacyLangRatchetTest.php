@@ -29,7 +29,7 @@ use Tests\Attributes\TestCategory;
  *
  * Hard rules (not baselines):
  *   - lang/ directory must not come back
- *   - Globals::get('lang_…') / globals->get('lang_…') reads are banned —
+ *   - globals->get('lang_…') reads are banned —
  *     use trans('legacy/<suffix>') for the whole array or __('legacy/x.k')
  *     for a single key.
  *

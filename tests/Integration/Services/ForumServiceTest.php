@@ -18,7 +18,6 @@ use App\Services\ForumModerationService;
 use App\Services\ForumService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -197,11 +196,9 @@ final class ForumServiceTest extends TestCase
     }
 
     /** @param  array<string, mixed>  $values */
-    private function mockGlobals(array $values = []): void
+    private function seedSettings(array $values = []): void
     {
-        $globals = new Globals;
-        $this->seedTestSettings($values, $globals);
-        $this->app->instance(Globals::class, $globals);
+        $this->seedTestSettings($values);
     }
 
     private function mockCache(): void
@@ -219,7 +216,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', ['action' => 'unknown']);
@@ -231,7 +228,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'GET');
@@ -243,7 +240,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'GET', ['action' => 'viewforum']);
@@ -255,7 +252,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $repo->shouldReceive('forumExists')->with(1)->andReturn(false);
@@ -275,7 +272,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -291,7 +288,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         // W1-04: handleDeleteTopic now uses Topic model instead of repo
@@ -311,7 +308,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'GET', [
@@ -326,7 +323,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -342,7 +339,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php?action=hltopic&topicid=1', 'POST', [
@@ -356,7 +353,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -374,7 +371,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $repo->shouldReceive('forumExists')->with(999)->andReturn(false);
@@ -394,7 +391,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $repo->shouldReceive('topicExists')->with(999)->andReturn(null);
@@ -413,7 +410,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $this->postLookupRepo->shouldReceive('getPostEditInfo')->with(999)->andReturn(null);
@@ -435,7 +432,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
@@ -460,7 +457,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 10]);
+        $this->seedSettings(['maxsubjectlength' => 10]);
         $this->mockCache();
 
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
@@ -485,7 +482,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
@@ -510,7 +507,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -531,7 +528,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
@@ -555,7 +552,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser(['class' => 'user']);
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
@@ -582,7 +579,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser(['forumpost' => false]);
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         // abort() renders the error page (header + message + footer) and
@@ -614,7 +611,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $repo->shouldReceive('getForumRow')->with(1)->andReturn([
@@ -658,7 +655,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->actingAsUser();
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $this->topicRepo->shouldReceive('topicExists')->with(1)->andReturn(1);
@@ -689,7 +686,7 @@ final class ForumServiceTest extends TestCase
         $this->authenticatedUser([
             'last_post' => date('Y-m-d H:i:s', time() - 3),
         ]);
-        $this->mockGlobals(['maxsubjectlength' => 100]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
         $this->mockCache();
 
         $this->topicRepo->shouldReceive('topicExists')->with(1)->andReturn(1);
@@ -734,7 +731,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals([
+        $this->seedSettings([
             'maxsubjectlength' => 100,
             'starttopic_bonus' => 0,
         ]);
@@ -765,7 +762,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->actingAsUser();
-        $this->mockGlobals([
+        $this->seedSettings([
             'maxsubjectlength' => 100,
             'makepost_bonus' => 0,
         ]);
@@ -801,7 +798,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $repo->shouldReceive('getTopicForumAndUser')->with(999)->andReturn(null);
@@ -821,7 +818,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         // W1-04: handleDeleteTopic now uses Topic model instead of repo
@@ -843,7 +840,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'GET', [
@@ -860,7 +857,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -876,7 +873,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -894,7 +891,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -910,7 +907,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -928,7 +925,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -944,7 +941,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php', 'POST', [
@@ -962,7 +959,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->unauthenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php?action=hltopic&topicid=1', 'POST', [
@@ -976,7 +973,7 @@ final class ForumServiceTest extends TestCase
     {
         $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->mockGlobals();
+        $this->seedSettings();
         $this->mockCache();
 
         $request = Request::create('/forums.php?action=hltopic&topicid=0', 'POST', [

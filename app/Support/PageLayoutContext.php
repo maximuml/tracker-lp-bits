@@ -102,6 +102,7 @@ final class PageLayoutContext
         $tweak = $siteConfig->tweak;
         $account = $siteConfig->account;
         $basic = $siteConfig->basic;
+        $pageState = PageState::instance();
 
         return new self(
             user: CurrentUser::instance()->get(),
@@ -123,8 +124,8 @@ final class PageLayoutContext
             iniUploadMain: $main->iniUpload(0),
             dateFounded: $tweak->dateFounded(),
             icpLicenseMain: $main->icpLicense(),
-            addKeyShortcut: (string) Globals::instance()->get('add_key_shortcut', ''),
-            queryName: (array) Globals::instance()->get('query_name', []),
+            addKeyShortcut: $pageState->keyShortcutScript(),
+            queryName: [],
             enableSqlDebugTweak: $tweak->enableSqlDebug(false) ? 'yes' : 'no',
             sqlDebugTweak: $tweak->sqlDebug(0),
             analyticsCodeTweak: $tweak->analyticsCode(),
@@ -136,8 +137,8 @@ final class PageLayoutContext
             customMenu: null,
             maxdlSystem: $main->maxDlSystem(false) ? 'yes' : '',
             whereTweak: $tweak->where(),
-            menuHtml: (string) Globals::instance()->get('nexus_menu_html', ''),
-            menuSelected: (string) Globals::instance()->get('nexus_menu_selected', ''),
+            menuHtml: $pageState->menuHtml(),
+            menuSelected: $pageState->menuSelected(),
             adminClass: defined('UC_ADMINISTRATOR') ? (int) \constant('UC_ADMINISTRATOR') : 0,
             moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
             sysopClass: defined('UC_SYSOP') ? (int) \constant('UC_SYSOP') : 0,

@@ -753,7 +753,9 @@ jobs:
       - name: Detect changed critical files (PR)
         if: github.event_name == 'pull_request'
         id: changed
-        run: bash scripts/ci/infection-changed-files.sh "${{ github.base_ref }}"
+        # base.sha (not base_ref): the remote tracking ref can lag a force-push
+        # rebase on stacked PRs, while the event payload sha is exact.
+        run: bash scripts/ci/infection-changed-files.sh "${{ github.event.pull_request.base.sha || github.base_ref }}"
 
       - name: Run Infection (controllers + policies)
         if: github.event_name == 'push'
@@ -783,11 +785,13 @@ jobs:
             --logger-github \
             --test-framework-extra-args="--testsuite=Unit,Integration"
 
-      - name: Run Infection (changed files only, core)
-        # W3-04 follow-up: PR-scoped mutation is now fail-closed for the
-        # set of critical files. Full-scope mutation on php8 still enforces
-        # the 55/55 (core) and 60/60 (services/auth) thresholds after merge.
-        if: github.event_name == 'pull_request' && steps.changed.outputs.filter != ''
+      - name: Run Infection (changed lines only, core)
+        # W3-04 follow-up: PR-scoped mutation is fail-closed for the set of
+        # critical files. --git-diff-lines scopes mutation to added/modified
+        # lines so mechanical refactors aren't charged whole-file escapes on
+        # lines they merely touched. Full-scope mutation on php8 still
+        # enforces the 55/55 (core) and 60/60 (services/auth) thresholds.
+        if: github.event_name == 'pull_request' && steps.changed.outputs.core_changed == 'true'
         run: |
           DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection.json5 \
@@ -796,12 +800,13 @@ jobs:
             --logger-github \
             --min-msi=0 \
             --min-covered-msi=50 \
-            --filter="${{ steps.changed.outputs.filter }}" \
+            --git-diff-lines \
+            --git-diff-base="${{ steps.changed.outputs.diff_base }}" \
             --map-source-class-to-test \
             --test-framework-extra-args="--testsuite=Unit,Integration"
 
-      - name: Run Infection (changed files only, services + auth)
-        if: github.event_name == 'pull_request' && steps.changed.outputs.filter_svc != ''
+      - name: Run Infection (changed lines only, services + auth)
+        if: github.event_name == 'pull_request' && steps.changed.outputs.svc_changed == 'true'
         run: |
           DB_DATABASE=nexusphp_unit_testing vendor/bin/infection \
             --configuration=infection-services-auth.json5 \
@@ -810,7 +815,8 @@ jobs:
             --logger-github \
             --min-msi=0 \
             --min-covered-msi=60 \
-            --filter="${{ steps.changed.outputs.filter_svc }}" \
+            --git-diff-lines \
+            --git-diff-base="${{ steps.changed.outputs.diff_base }}" \
             --map-source-class-to-test \
             --test-framework-extra-args="--testsuite=Unit,Integration"
 

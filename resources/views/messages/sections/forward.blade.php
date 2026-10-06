@@ -1,5 +1,5 @@
 <h1 class="text-center">{{ __('legacy/messages.text_forward_pm') }}</h1>
-<form action="/takemessage" method="post">
+<form action="/web/messages/send" method="post">
 @csrf
 <input type="hidden" name="forward" value="1">
 <input type="hidden" name="origmsg" value="{{ $forward['pmId'] }}">

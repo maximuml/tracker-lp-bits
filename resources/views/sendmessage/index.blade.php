@@ -3,7 +3,7 @@
 @section('title', $title ?? (__('legacy/sendmessage.head_send_message')))
 
 @section('content')
-<form id="compose" name="compose" method="post" action="/takemessage">
+<form id="compose" name="compose" method="post" action="/web/messages/send">
 @csrf
 <input type="hidden" name="receiver" value="{{ $receiver }}">
 @if ($returnto !== '')

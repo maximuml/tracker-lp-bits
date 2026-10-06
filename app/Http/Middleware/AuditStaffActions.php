@@ -34,6 +34,19 @@ final class AuditStaffActions
         'web/benefits/consume', 'web/attendance/retroactive',
         'web/shoutbox/post', 'web/shoutbox/react',
         'web/friends/add', 'web/friends/delete',
+        // Renamed take*/mailbox endpoints — user-self activity that the
+        // legacy prefixes (takemessage, deletemessage, messages, usercp,
+        // offers, mybonus, takecontact, takestaffmess, contactstaff,
+        // staffmess) already excluded.
+        'web/messages/send', 'web/messages/delete',
+        'web/messages/delete/in', 'web/messages/delete/out',
+        'web/messages/move-or-delete', 'web/messages/mailboxes',
+        'web/staffmess/send', 'web/contactstaff/send',
+        'web/usercp/theme', 'web/usercp/logout-all', 'web/usercp/personal',
+        'web/usercp/forum', 'web/usercp/tracker', 'web/usercp/security/confirm',
+        'web/offers/create', 'web/offers/allow', 'web/offers/finish',
+        'web/offers/delete', 'web/offers/edit',
+        'web/mybonus/exchange',
     ];
 
     /** First-segment prefixes where every sub-path is user activity. */

@@ -197,7 +197,7 @@ final class TorrentDetailsViewFactory
 
         if (Permission::can(PermissionEnum::ASK_RESEED) && (int) $row['seeders'] === 0) {
             $actions[] = new TorrentAction(
-                url: "takereseed.php?reseedid={$id}",
+                url: "/takereseed?reseedid={$id}",
                 title: self::plainTitle('legacy/details.title_ask_for_reseed'),
                 iconClass: 'dt_reseed',
                 iconAlt: 'reseed',

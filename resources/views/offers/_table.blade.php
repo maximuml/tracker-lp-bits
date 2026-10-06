@@ -33,9 +33,9 @@
         <b><a href="{{ $row->voteResults->href }}" title="{{ __('legacy/offers.title_show_vote_details') }}"><span class="text-nxm-success">{{ $row->voteResults->yeah }}</span> - <span class="text-nxm-danger">{{ $row->voteResults->against }}</span> = {{ $row->voteResults->yeah - $row->voteResults->against }}</a></b>
         @endif
     </td>
-    <td class="align-top px-2.5 py-1.5 whitespace-nowrap" @if (! $table->canAgainst) colspan="2" @endif><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;vote=yeah" title="{{ __('legacy/offers.title_i_want_this') }}"><span class="text-nxm-success"><b>{{ __('legacy/offers.text_yep') }}</b></span></a></td>
+    <td class="align-top px-2.5 py-1.5 whitespace-nowrap" @if (! $table->canAgainst) colspan="2" @endif><form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="yeah" /><button type="submit" class="nx-btn-link" title="{{ __('legacy/offers.title_i_want_this') }}"><span class="text-nxm-success"><b>{{ __('legacy/offers.text_yep') }}</b></span></button></form></td>
     @if ($table->showAgainstCell)
-    <td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center"><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;vote=against" title="{{ __('legacy/offers.title_do_not_want_it') }}"><span class="text-nxm-danger"><b>{{ __('legacy/offers.text_nah') }}</b></span></a></td>
+    <td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center"><form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="against" /><button type="submit" class="nx-btn-link" title="{{ __('legacy/offers.title_do_not_want_it') }}"><span class="text-nxm-danger"><b>{{ __('legacy/offers.text_nah') }}</b></span></button></form></td>
     @endif
     <td class="align-top px-2.5 py-1.5">
         @if ($row->comment->count === 0)

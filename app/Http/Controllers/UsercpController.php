@@ -9,6 +9,7 @@ use App\DTOs\Usercp\ForumSettingsDto;
 use App\DTOs\Usercp\PersonalSettingsDto;
 use App\DTOs\Usercp\SecuritySettingsDto;
 use App\DTOs\Usercp\TrackerSettingsDto;
+use App\Http\Requests\SecuritySaveRequest;
 use App\Http\Requests\UpdateForumSettingsRequest;
 use App\Http\Requests\UpdatePersonalSettingsRequest;
 use App\Http\Requests\UpdateSecuritySettingsRequest;
@@ -151,7 +152,7 @@ class UsercpController extends LegacyController
         }
 
         if ($type === 'save' && $action === 'security') {
-            return $this->legacy($request);
+            return redirect()->to('/web/usercp/security'.$suffix, 308);
         }
 
         return redirect('/usercp');
@@ -197,6 +198,22 @@ class UsercpController extends LegacyController
         $this->repository->updateTracker(TrackerSettingsDto::fromRequest($request));
 
         return redirect('/usercp?action=tracker&type=saved');
+    }
+
+    /**
+     * Security settings save — renders the password-confirm step; the
+     * confirm form then posts to /web/usercp/security/confirm.
+     */
+    public function saveSecurity(SecuritySaveRequest $request): View|Response|RedirectResponse
+    {
+        $user = Auth::user();
+        if (! $user instanceof User) {
+            return redirect('/usercp');
+        }
+
+        $data = $this->pageService->build('security', 'save')->toArray();
+
+        return $this->legacyPage($request, 'usercp', true, $data);
     }
 
     public function confirmSecurity(UpdateSecuritySettingsRequest $request): RedirectResponse

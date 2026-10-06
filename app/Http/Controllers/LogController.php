@@ -79,10 +79,24 @@ class LogController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_invalid_action'));
         }
 
+        // View-mode POSTs are idempotent — replay them as GET on the
+        // canonical page; mutation bodies keep their 308s below.
+        $qs = static function (array $params): string {
+            $query = http_build_query(array_filter($params, static fn ($v) => $v !== null && $v !== ''), '', '&');
+
+            return $query !== '' ? '?'.$query : '';
+        };
+        $inputs = fn (array $extra = []): string => $qs([
+            'query' => $request->input('query'),
+            'search' => $request->input('search'),
+            'pollid' => $request->input('pollid'),
+            'returnto' => $request->input('returnto'),
+        ] + $extra);
+
         return match ($action) {
-            'dailylog' => $this->dailyLog($request),
+            'dailylog' => redirect('/web/log'.$inputs(['action' => 'dailylog'])),
+            'news' => redirect('/web/log'.$inputs(['action' => 'news'])),
             'chronicle' => $this->chroniclePost($request, $userId),
-            'news' => $this->newsLog($request),
             'poll' => $this->pollLogPost($request),
         };
     }
@@ -165,7 +179,7 @@ class LogController extends LegacyController
         return $this->chronicleList($request, $q, $canManage, null);
     }
 
-    private function chroniclePost(Request $request, int $userId): View|RedirectResponse|Response
+    private function chroniclePost(Request $request, int $userId): RedirectResponse|Response
     {
         $q = htmlspecialchars(trim((string) ($request->input('query') ?? '')));
         $canManage = Permission::can(PermissionEnum::CHR_MANAGE);
@@ -173,7 +187,7 @@ class LogController extends LegacyController
         $do = (string) ($request->input('do') ?? '');
 
         if ($do === 'edit') {
-            return $this->chronicle($request, $userId);
+            return redirect('/web/log?action=chronicle&do=edit&id='.(int) $request->input('id', 0));
         }
 
         if ($do !== '') {
@@ -199,7 +213,7 @@ class LogController extends LegacyController
             }
         }
 
-        return $this->chronicleList($request, $q, $canManage, null);
+        return redirect('/web/log?action=chronicle'.($q !== '' ? '&query='.rawurlencode($q) : ''));
     }
 
     public function chronicleAddPost(ChronicleAddRequest $request): RedirectResponse|Response
@@ -441,7 +455,7 @@ class LogController extends LegacyController
         ]);
     }
 
-    private function pollLogPost(Request $request): View|RedirectResponse|Response
+    private function pollLogPost(Request $request): RedirectResponse|Response
     {
         $do = (string) ($request->input('do') ?? '');
 
@@ -458,6 +472,14 @@ class LogController extends LegacyController
             return redirect()->to('/web/log/poll/delete'.$suffix, 308);
         }
 
-        return $this->pollLog($request);
+        // View-mode POST — replay as GET on the canonical page.
+        $params = array_filter([
+            'action' => 'poll',
+            'do' => $do !== '' ? $do : null,
+            'pollid' => $request->input('pollid'),
+            'returnto' => $request->input('returnto'),
+        ], static fn ($v) => $v !== null && $v !== '');
+
+        return redirect('/web/log?'.http_build_query($params, '', '&'));
     }
 }

@@ -23,7 +23,7 @@
                 <form method="post" action="/web/staff/modtask">@csrf
                     <input type="hidden" name="action" value="confirmuser">
                     <input type="hidden" name="userid" value="{{ $row['id'] }}">
-                    <td><a href="user/web/details/{{ $row['id'] }}">{{ $row['username'] }}</a></td>
+                    <td><a href="/userdetails?id={{ $row['id'] }}">{{ $row['username'] }}</a></td>
                     <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['email'] }}</td>
                     <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['added'] }}</td>
                     <td class="text-center">

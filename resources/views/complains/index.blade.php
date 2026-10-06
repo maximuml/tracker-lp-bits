@@ -16,7 +16,7 @@
                     <tr>
                         <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
                         <td class="align-top px-2.5 py-1.5">{{ $row['email'] ?? '' }}</td>
-                        <td class="align-top px-2.5 py-1.5"><a href="?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
+                        <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
                     </tr>
                 @endforeach
                 </x-data-table>
@@ -38,7 +38,7 @@
                 <tr>
                     <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
                     <td class="align-top px-2.5 py-1.5">{{ $row['email'] ?? '' }}</td>
-                    <td class="align-top px-2.5 py-1.5"><a href="?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
+                    <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
                 </tr>
             @endforeach
             </x-data-table>
@@ -59,7 +59,7 @@
         {{ __('legacy/complains.text_added') ?? 'Added' }}：<x-time :value="$complain['added'] ?? ''" /><br />{{ __('legacy/complains.text_new_email') ?? 'Email' }} {{ $complain['email'] ?? '' }}
         @if ($isAdmin)
             @if (! empty($user))
-                [<a href="user/web/details/{{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ $user['username'] ?? '' }}</a>]
+                [<a href="/userdetails?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ $user['username'] ?? '' }}</a>]
                 [<a href="/web/user-ban-log?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank">{{ __('legacy/complains.text_view_band_log') ?? 'View ban log' }}</a>]
             @else
                 [<a href="/web/usersearch?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank">{{ __('legacy/complains.text_search_account') ?? 'Search account' }}</a>]

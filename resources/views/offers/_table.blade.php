@@ -21,7 +21,7 @@
 @foreach ($table->rows as $row)
 <tr>
     <td class="align-top px-2.5 py-1.5"><x-torrent.category-icon :icon="$row->categoryIcon" /></td>
-    <td><a href="?id={{ $row->id }}&amp;off_details=1" title="{{ $row->fullName }}"><b>{{ $row->displayName }}</b></a>
+    <td><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;off_details=1" title="{{ $row->fullName }}"><b>{{ $row->displayName }}</b></a>
         @if ($row->isNew)
         <b> (<span class="new">{{ __('legacy/offers.text_new') }}</span>)</b>
         @endif
@@ -33,9 +33,9 @@
         <b><a href="{{ $row->voteResults->href }}" title="{{ __('legacy/offers.title_show_vote_details') }}"><span class="text-nxm-success">{{ $row->voteResults->yeah }}</span> - <span class="text-nxm-danger">{{ $row->voteResults->against }}</span> = {{ $row->voteResults->yeah - $row->voteResults->against }}</a></b>
         @endif
     </td>
-    <td class="align-top px-2.5 py-1.5 whitespace-nowrap" @if (! $table->canAgainst) colspan="2" @endif><a href="?id={{ $row->id }}&amp;vote=yeah" title="{{ __('legacy/offers.title_i_want_this') }}"><span class="text-nxm-success"><b>{{ __('legacy/offers.text_yep') }}</b></span></a></td>
+    <td class="align-top px-2.5 py-1.5 whitespace-nowrap" @if (! $table->canAgainst) colspan="2" @endif><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;vote=yeah" title="{{ __('legacy/offers.title_i_want_this') }}"><span class="text-nxm-success"><b>{{ __('legacy/offers.text_yep') }}</b></span></a></td>
     @if ($table->showAgainstCell)
-    <td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center"><a href="?id={{ $row->id }}&amp;vote=against" title="{{ __('legacy/offers.title_do_not_want_it') }}"><span class="text-nxm-danger"><b>{{ __('legacy/offers.text_nah') }}</b></span></a></td>
+    <td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center"><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;vote=against" title="{{ __('legacy/offers.title_do_not_want_it') }}"><span class="text-nxm-danger"><b>{{ __('legacy/offers.text_nah') }}</b></span></a></td>
     @endif
     <td class="align-top px-2.5 py-1.5">
         @if ($row->comment->count === 0)
@@ -50,7 +50,7 @@
     @endif
     <td class="align-top px-2.5 py-1.5">{{ $row->offeredBy }}</td>
     @if ($table->canManage)
-    <td class="align-top px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nxm-linkbtn" title="{{ __('legacy/offers.title_delete') }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('legacy/offers.title_delete') }}" /></button></form><br /><a href="?id={{ $row->id }}&amp;edit_offer=1"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('legacy/offers.title_edit') }}" /></a></td>
+    <td class="align-top px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nxm-linkbtn" title="{{ __('legacy/offers.title_delete') }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('legacy/offers.title_delete') }}" /></button></form><br /><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('legacy/offers.title_edit') }}" /></a></td>
     @endif
 </tr>
 @endforeach

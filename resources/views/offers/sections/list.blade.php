@@ -16,9 +16,9 @@
 @endif
 </ul></div>
 @if ($list->canAddOffer)
-<div class="text-center"><a href="?add_offer=1"><b>{{ __('legacy/offers.text_add_offer') }}</b></a></div>
+<div class="text-center"><a href="{{ request()->getPathInfo() }}?add_offer=1"><b>{{ __('legacy/offers.text_add_offer') }}</b></a></div>
 @endif
-<div class="text-center"><form method="get" action="?"><label for="specialboxg">{{ __('legacy/offers.text_search_offers') }}</label>&nbsp;&nbsp;<input type="text" id="specialboxg" name="search" />&nbsp;&nbsp;<select name="category" aria-label="{{ __('legacy/offers.select_show_all') }}"><option value="0">{{ __('legacy/offers.select_show_all') }}</option>
+<div class="text-center"><form method="get" action="{{ request()->getPathInfo() }}"><label for="specialboxg">{{ __('legacy/offers.text_search_offers') }}</label>&nbsp;&nbsp;<input type="text" id="specialboxg" name="search" />&nbsp;&nbsp;<select name="category" aria-label="{{ __('legacy/offers.select_show_all') }}"><option value="0">{{ __('legacy/offers.select_show_all') }}</option>
 @foreach ($list->categories as $cat)
 <option value="{{ $cat->id }}">{{ $cat->name }}</option>
 @endforeach

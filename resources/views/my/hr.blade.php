@@ -4,7 +4,7 @@
 
 @section('content')
 <h1>{{ ($userInfo->username ?? '') . ' - H&R' }}</h1>
-<p>@foreach(($headerFilters ?? []) as $headerFilter)<a href="?{{ $headerFilter['query'] }}" class="{{ $headerFilter['active'] ? 'faqlink' : '' }}"><b>{{ $headerFilter['text'] }}</b></a>@if(! $loop->last) | @endif@endforeach</p>
+<p>@foreach(($headerFilters ?? []) as $headerFilter)<a href="{{ request()->getPathInfo() }}?{{ $headerFilter['query'] }}" class="{{ $headerFilter['active'] ? 'faqlink' : '' }}"><b>{{ $headerFilter['text'] }}</b></a>@if(! $loop->last) | @endif@endforeach</p>
 <form id="filterForm" action="{{ $requestUri ?? '' }}" method="get">
     <input id="q" type="text" name="q" value="{{ $q ?? '' }}" placeholder="{{ __('legacy/myhr.th_hr_id')}}">
     <input type="submit">

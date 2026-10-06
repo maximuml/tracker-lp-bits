@@ -17,7 +17,7 @@ Total Images Stored: {{ $count ?? 0 }}
         Uploaded by: {{ $item['usernameHtml'] }}<br />
         (#{{ $item['id'] }}) Filename: {{ $item['name'] }} ({{ $item['width'] }}&nbsp;x&nbsp;{{ $item['height'] }})
         @if ($isModerator ?? false)
-            <b><a href="?delete={{ $item['id'] }}">[Delete]</a></b><br />
+            <b><a href="{{ request()->getPathInfo() }}?delete={{ $item['id'] }}">[Delete]</a></b><br />
         @endif
         Added: {{ $item['date'] }} {{ $item['time'] }}</td>
         </tr>

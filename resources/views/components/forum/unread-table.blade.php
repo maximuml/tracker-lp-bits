@@ -16,18 +16,18 @@
                     <div class="flex items-start gap-2">
                         <img class="unlockednew" src="pic/trans.gif" alt="unread" title="{{ __('legacy/forums.title_unread') }}" />
                         <div>
-                            <a href="?action=viewtopic&amp;topicid={{ $row->topicId }}@if ($row->jumpToPostId !== null)&amp;page=p{{ $row->jumpToPostId }}#pid{{ $row->jumpToPostId }}@endif">@if ($row->hlcolor > 0)<b class="nx-hl-{{ $row->hlcolor }}">{{ $row->subject }}</b>@else{{ $row->subject }}@endif</a>
+                            <a href="{{ request()->getPathInfo() }}?action=viewtopic&amp;topicid={{ $row->topicId }}@if ($row->jumpToPostId !== null)&amp;page=p{{ $row->jumpToPostId }}#pid{{ $row->jumpToPostId }}@endif">@if ($row->hlcolor > 0)<b class="nx-hl-{{ $row->hlcolor }}">{{ $row->subject }}</b>@else{{ $row->subject }}@endif</a>
                         </div>
                     </div>
                 </td>
-                <td><a href="?action=viewforum&amp;forumid={{ $row->forumId }}"><b>{{ $row->forumName }}</b></a></td>
+                <td><a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $row->forumId }}"><b>{{ $row->forumName }}</b></a></td>
             </tr>
         @endforeach
     </x-data-table>
     <div class="mt-2 flex gap-2">
-        <form method="get" action="?"><input type="hidden" name="catchup" value="1" /><x-button type="submit">{{ __('legacy/forums.text_catch_up') }}</x-button></form>
+        <form method="get" action="{{ request()->getPathInfo() }}"><input type="hidden" name="catchup" value="1" /><x-button type="submit">{{ __('legacy/forums.text_catch_up') }}</x-button></form>
         @if ($list->moreBeforePostId !== null)
-            <form method="get" action="?"><input type="hidden" name="action" value="viewunread" /><input type="hidden" name="beforepostid" value="{{ $list->moreBeforePostId }}" /><x-button type="submit">{{ __('legacy/forums.submit_show_more') }}</x-button></form>
+            <form method="get" action="{{ request()->getPathInfo() }}"><input type="hidden" name="action" value="viewunread" /><input type="hidden" name="beforepostid" value="{{ $list->moreBeforePostId }}" /><x-button type="submit">{{ __('legacy/forums.submit_show_more') }}</x-button></form>
         @endif
     </div>
 @else

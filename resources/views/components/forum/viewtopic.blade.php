@@ -4,7 +4,7 @@
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
     <a href="/forums">{{ trim(__('legacy/forums.text_forums')) }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
-    <a href="?action=viewforum&amp;forumid={{ $topic->forumid }}">{{ $topic->forumname }}</a>
+    <a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $topic->forumid }}">{{ $topic->forumname }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
     <span class="nx-crumbs__current" id="top">{{ $topic->subject }}@if ($topic->locked)&nbsp;<span class="nx-crumbs__locked">[{{ __('legacy/forums.text_locked') }}]</span>@endif</span>
 </nav>
@@ -29,7 +29,7 @@
                         <input type="hidden" name="locked" value="{{ $topic->locked ? 0 : 1 }}" />
                         <input type="submit" class="medium" value="{{ $topic->locked ? __('legacy/forums.submit_unlock') : __('legacy/forums.submit_lock') }}" />
                     </form>
-                    <form method="get" action="?">
+                    <form method="get" action="{{ request()->getPathInfo() }}">
                         <input type="hidden" name="action" value="deletetopic" />
                         <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                         <input type="hidden" name="forumid" value="{{ $topic->forumid }}" />
@@ -55,7 +55,7 @@
             </details>
         @endif
         @if ($topic->mayPost)
-            <a class="nx-postbtn" href="?action=reply&amp;topicid={{ $topic->topicid }}" title="{{ __('legacy/forums.title_reply_directly') }}">{{ __('legacy/forums.text_add_reply') }}</a>
+            <a class="nx-postbtn" href="{{ request()->getPathInfo() }}?action=reply&amp;topicid={{ $topic->topicid }}" title="{{ __('legacy/forums.title_reply_directly') }}">{{ __('legacy/forums.text_add_reply') }}</a>
         @endif
     </span>
 </div>

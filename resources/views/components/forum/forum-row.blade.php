@@ -6,7 +6,7 @@
                  alt="{{ $row->hasUnread ? 'unread' : 'read' }}"
                  title="{{ $row->hasUnread ? __('legacy/forums.title_unread') : __('legacy/forums.title_read') }}" />
             <div>
-                <a href="?action=viewforum&amp;forumid={{ $row->id }}"><b class="big">{{ $row->name }}</b></a>
+                <a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $row->id }}"><b class="big">{{ $row->name }}</b></a>
                 @if ($row->postsToday > 0)
                     <span class="ml-1.5">({{ __('legacy/forums.text_today') }}<b class="new">{{ $row->postsToday }}</b>)</span>
                 @endif

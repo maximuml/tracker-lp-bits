@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\Http\Requests\SendContactStaffRequest;
+use App\Http\Requests\SendStaffMessageRequest;
 use App\Jobs\BulkUserMessageJob;
 use App\Models\User;
 use App\Repositories\StaffMessageRepository;
@@ -56,14 +58,19 @@ class StaffMessageController extends LegacyController
         return $this->staffmess($request);
     }
 
-    public function takeStaffmess(Request $request): Response|RedirectResponse
+    public function takeStaffmess(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/staffmess/send'.$suffix, 308);
+    }
+
+    public function sendStaffMessage(SendStaffMessageRequest $request): Response|RedirectResponse
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
-        }
-
-        if (! $request->isMethod('post')) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
 
@@ -117,13 +124,18 @@ class StaffMessageController extends LegacyController
         return $this->contactstaff($request);
     }
 
-    public function takecontact(Request $request): View|RedirectResponse|Response
+    public function takecontact(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/contactstaff/send'.$suffix, 308);
+    }
+
+    public function sendContactStaff(SendContactStaffRequest $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-
-        if (! $request->isMethod('post')) {
-            return $this->legacyAbortResponse(__('legacy/takecontact.std_error'), __('legacy/takecontact.std_method'));
-        }
 
         $msg = trim((string) request()->post('body'));
         $subject = trim((string) request()->post('subject'));

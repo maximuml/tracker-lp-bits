@@ -136,7 +136,7 @@ final class CleanupServiceTest extends TestCase
 
         $result = $this->service()->runFull(true, false);
 
-        $this->assertStringNotContainsString('name="forceall"', $result);
+        $this->assertStringNotContainsString('forceall=1', $result);
     }
 
     public function test_run_full_without_force_all_includes_force_link(): void
@@ -145,7 +145,7 @@ final class CleanupServiceTest extends TestCase
 
         $result = $this->service()->runFull(false, false);
 
-        $this->assertStringContainsString('name="forceall" value="1"', $result);
+        $this->assertStringContainsString('forceall=1', $result);
     }
 
     public function test_run_full_includes_time_consumed(): void

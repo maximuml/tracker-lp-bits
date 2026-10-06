@@ -6,7 +6,7 @@
 <div class="nx-main nx-embedded nx-box--737">
 <div class="text-center">
 <h1>Mass PM to all Staff members and users:</h1>
-<form method=post action="takestaffmess.php">
+<form method=post action="/takestaffmess">
 @csrf
 @if ($showReturnto)
     <input type=hidden name=returnto value="{{ $returnto }}">

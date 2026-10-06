@@ -10,7 +10,7 @@
         @endif
     </div>
     <div class="nx-search-form">
-        <form method="get" action="forums.php" id="search_form" class="nx-search-form__inner">
+        <form method="get" action="/forums" id="search_form" class="nx-search-form__inner">
             <input type="hidden" name="action" value="search" />
             <div>{{ __('legacy/forums.text_by_keyword') }}</div>
             <div class="nx-search-form__row">

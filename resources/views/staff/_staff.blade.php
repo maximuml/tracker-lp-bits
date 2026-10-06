@@ -4,18 +4,18 @@
 <br /><br />
 <x-data-table :caption="__('legacy/staff.text_firstline_support')" captionHidden>
     <tr>
-        <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_language')}}</b></td>
-        <td class="embedded"><b>{{ __('legacy/staff.text_support_for')}}</b></td>
+        <td class="nx-embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_language')}}</b></td>
+        <td class="nx-embedded"><b>{{ __('legacy/staff.text_support_for')}}</b></td>
     </tr>
-    <tr><td class="embedded" colspan=6><hr color="#4040c0"></td></tr>
+    <tr><td class="nx-embedded" colspan=6><hr color="#4040c0"></td></tr>
     @foreach ($supportRows as $row)
     <tr>
 @include('staff._cells')
-        @foreach ($row['extras'] ?? [] as $e)<td class="embedded">{{ $e }}</td>@endforeach
+        @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
     </tr>
     @endforeach
 </x-data-table>
@@ -27,17 +27,17 @@
 <br /><br />
 <x-data-table :caption="__('legacy/staff.text_movie_critics')" captionHidden>
     <tr>
-        <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
-        <td class="embedded"><b>{{ __('legacy/staff.text_responsible_for')}}</b></td>
+        <td class="nx-embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+        <td class="nx-embedded"><b>{{ __('legacy/staff.text_responsible_for')}}</b></td>
     </tr>
-    <tr><td class="embedded" colspan=5><hr color="#4040c0"></td></tr>
+    <tr><td class="nx-embedded" colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($pickerRows as $row)
     <tr>
 @include('staff._cells')
-        @foreach ($row['extras'] ?? [] as $e)<td class="embedded">{{ $e }}</td>@endforeach
+        @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
     </tr>
     @endforeach
 </x-data-table>
@@ -49,17 +49,17 @@
 <br /><br />
 <x-data-table :caption="__('legacy/staff.text_forum_moderators')" captionHidden>
     <tr>
-        <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
-        <td class="embedded"><b>{{ __('legacy/staff.text_forums')}}</b></td>
+        <td class="nx-embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+        <td class="nx-embedded"><b>{{ __('legacy/staff.text_forums')}}</b></td>
     </tr>
-    <tr><td class="embedded" colspan=5><hr color="#4040c0"></td></tr>
+    <tr><td class="nx-embedded" colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($forumModRows as $row)
     <tr>
 @include('staff._cells')
-        <td class="embedded">@foreach (($row['forums'] ?? []) as $f)<a href=/forums?action=viewforum&forumid={{ $f['id'] }}>{{ $f['name'] }}</a>{{ $loop->last ? '' : ', ' }}@endforeach</td>
+        <td class="nx-embedded">@foreach (($row['forums'] ?? []) as $f)<a href=/forums?action=viewforum&forumid={{ $f['id'] }}>{{ $f['name'] }}</a>{{ $loop->last ? '' : ', ' }}@endforeach</td>
     </tr>
     @endforeach
 </x-data-table>
@@ -72,20 +72,20 @@
 <x-data-table :caption="__('legacy/staff.text_general_staff')" captionHidden>
     @foreach ($staffRows as $row)
         @if (isset($row['header']))
-            @if (! $loop->first)<tr height=15><td class="embedded text-right" colspan=5>&nbsp;</td></tr>@endif
-            <tr height=15><td class="embedded text-right" colspan=5>{{ $row['class_name'] ?? '' }}</td></tr>
+            @if (! $loop->first)<tr height=15><td class="nx-embedded text-right" colspan=5>&nbsp;</td></tr>@endif
+            <tr height=15><td class="nx-embedded text-right" colspan=5>{{ $row['class_name'] ?? '' }}</td></tr>
             <tr>
-                <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-                <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-                <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-                <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
-                <td class="embedded"><b>{{ __('legacy/staff.text_duties')}}</b></td>
+                <td class="nx-embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
+                <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+                <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+                <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+                <td class="nx-embedded"><b>{{ __('legacy/staff.text_duties')}}</b></td>
             </tr>
-            <tr height=15><td class="embedded" colspan=5><hr color="#4040c0"></td></tr>
+            <tr height=15><td class="nx-embedded" colspan=5><hr color="#4040c0"></td></tr>
         @else
             <tr>
 @include('staff._cells')
-                @foreach ($row['extras'] ?? [] as $e)<td class="embedded">{{ $e }}</td>@endforeach
+                @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
             </tr>
         @endif
     @endforeach
@@ -98,17 +98,17 @@
 <br /><br />
 <x-data-table :caption="__('legacy/staff.text_vip')" captionHidden>
     <tr>
-        <td class="embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
-        <td class="embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
-        <td class="embedded"><b>{{ __('legacy/staff.text_reason')}}</b></td>
+        <td class="nx-embedded"><b>{{ __('legacy/staff.text_username')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_country')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_online_or_offline')}}</b></td>
+        <td class="nx-embedded text-center"><b>{{ __('legacy/staff.text_contact')}}</b></td>
+        <td class="nx-embedded"><b>{{ __('legacy/staff.text_reason')}}</b></td>
     </tr>
-    <tr><td class="embedded" colspan=5><hr color="#4040c0"></td></tr>
+    <tr><td class="nx-embedded" colspan=5><hr color="#4040c0"></td></tr>
     @foreach ($vipRows as $row)
     <tr>
 @include('staff._cells')
-        @foreach ($row['extras'] ?? [] as $e)<td class="embedded">{{ $e }}</td>@endforeach
+        @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
     </tr>
     @endforeach
 </x-data-table>

@@ -268,7 +268,7 @@ final class TagRepositoryTest extends TestCase
 
         $html = $this->repository->renderSpan(0, [$tag->id], true);
 
-        $this->assertStringContainsString('<a href="?tag_id='.$tag->id.'">', $html);
+        $this->assertStringContainsString('<a href="/web/torrents?tag_id='.$tag->id.'">', $html);
     }
 
     public function test_render_span_returns_empty_when_no_matching_tags(): void

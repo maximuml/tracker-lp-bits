@@ -37,7 +37,7 @@
             <tr>
                 <td class="text-center">{{ $row->postId }}</td>
                 <td><a href="{{ $search->resultUrl($row->topicId, $row->postId) }}">@if ($row->hlcolor > 0)<b class="nx-hl-{{ $row->hlcolor }}">{{ $row->subject }}</b>@else{{ $row->subject }}@endif</a></td>
-                <td class="whitespace-nowrap"><a href="?action=viewforum&amp;forumid={{ $row->forumId }}"><b>{{ $row->forumName }}</b></a></td>
+                <td class="whitespace-nowrap"><a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $row->forumId }}"><b>{{ $row->forumName }}</b></a></td>
                 <td class="whitespace-nowrap"><x-time :value="$row->added" />&nbsp;|&nbsp;{{ $row->poster }}</td>
             </tr>
         @endforeach

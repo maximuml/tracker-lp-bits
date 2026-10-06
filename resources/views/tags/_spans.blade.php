@@ -1,1 +1,1 @@
-@foreach ($tags as $tag)@if ($withLink)<a href="?tag_id={{ $tag['id'] }}"><span class="nx-tag" title="{{ $tag['description'] }}">{{ $tag['name'] }}</span></a>@else<span class="nx-tag" title="{{ $tag['description'] }}">{{ $tag['name'] }}</span>@endif@endforeach
+@foreach ($tags as $tag)@if ($withLink)<a href="/web/torrents?tag_id={{ $tag['id'] }}"><span class="nx-tag" title="{{ $tag['description'] }}">{{ $tag['name'] }}</span></a>@else<span class="nx-tag" title="{{ $tag['description'] }}">{{ $tag['name'] }}</span>@endif@endforeach

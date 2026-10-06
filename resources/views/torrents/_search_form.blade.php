@@ -1,5 +1,5 @@
 {{-- Modern torrents search panel (Variant A, ADR 0014). Replaces SearchBox::buildCategoryTable — data arrives in $panelVm. --}}
-<form method="get" name="searchbox" action="?" class="nxm-searchpanel">
+<form method="get" name="searchbox" action="{{ request()->getPathInfo() }}" class="nxm-searchpanel">
 	<livewire:search-panel-toggle>
 		<fieldset class="nxm-fieldset">
 			<legend>{{ $panelVm->categoryLabel }}</legend>
@@ -112,14 +112,14 @@
 		@if ($panelVm->hotSearches !== [])
 		<div class="nxm-hotsearches">
 			@foreach ($panelVm->hotSearches as $kw)
-			<a href="?search={{ rawurlencode($kw) }}&amp;notnewword=1"><u>{{ $kw }}</u></a>
+			<a href="/web/torrents?search={{ rawurlencode($kw) }}&amp;notnewword=1"><u>{{ $kw }}</u></a>
 			@endforeach
 		</div>
 		@endif
 		@if ($allTags->isNotEmpty())
 		<div class="nxm-tags">
 			@foreach ($allTags as $tag)
-			<a href="?tag_id={{ $tag->id }}"><span class="nx-tag" title="{{ $tag->description }}">{{ $tag->name }}</span></a>
+			<a href="/web/torrents?tag_id={{ $tag->id }}"><span class="nx-tag" title="{{ $tag->description }}">{{ $tag->name }}</span></a>
 			@endforeach
 		</div>
 		@endif

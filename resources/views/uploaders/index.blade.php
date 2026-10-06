@@ -7,7 +7,7 @@
 <h1 class="text-center">{{ __('legacy/uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
 
 <div>
-<form method="get" action="?">
+<form method="get" action="{{ request()->getPathInfo() }}">
 <span>
 {{ __('legacy/uploaders.text_select_month')}}
 <select name="year">@foreach ($yearOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
@@ -44,9 +44,9 @@
 <div>
 <span id="order"><span class="big"><b>{{ __('legacy/uploaders.text_order_by')}}</b></span>
 <span id="orderlist" class="dropmenu nx-hidden"><ul>
-<li><a href="?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=username">{{ __('legacy/uploaders.text_username')}}</a></li>
-<li><a href="?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=torrent_size">{{ __('legacy/uploaders.text_torrent_size')}}</a></li>
-<li><a href="?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=torrent_count">{{ __('legacy/uploaders.text_torrent_num')}}</a></li>
+<li><a href="{{ request()->getPathInfo() }}?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=username">{{ __('legacy/uploaders.text_username')}}</a></li>
+<li><a href="{{ request()->getPathInfo() }}?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=torrent_size">{{ __('legacy/uploaders.text_torrent_size')}}</a></li>
+<li><a href="{{ request()->getPathInfo() }}?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=torrent_count">{{ __('legacy/uploaders.text_torrent_num')}}</a></li>
 </ul>
 </span>
 </span>

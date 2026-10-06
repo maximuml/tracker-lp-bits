@@ -42,13 +42,13 @@
         </span>
         <span class="nx-post__tools">
             @if ($post->canQuote)
-                <a class="nx-postbtn" href="?action=quotepost&amp;postid={{ $post->id }}" title="{{ __('legacy/forums.title_reply_with_quote') }}">{{ __('legacy/forums.text_quote') }}</a>
+                <a class="nx-postbtn" href="{{ request()->getPathInfo() }}?action=quotepost&amp;postid={{ $post->id }}" title="{{ __('legacy/forums.title_reply_with_quote') }}">{{ __('legacy/forums.text_quote') }}</a>
             @endif
             @if ($post->canDelete)
-                <a class="nx-postbtn nx-postbtn--danger" href="?action=deletepost&amp;postid={{ $post->id }}" title="{{ __('legacy/forums.title_delete_post') }}">{{ __('legacy/forums.text_delete') }}</a>
+                <a class="nx-postbtn nx-postbtn--danger" href="{{ request()->getPathInfo() }}?action=deletepost&amp;postid={{ $post->id }}" title="{{ __('legacy/forums.title_delete_post') }}">{{ __('legacy/forums.text_delete') }}</a>
             @endif
             @if ($post->canEdit)
-                <a class="nx-postbtn" href="?action=editpost&amp;postid={{ $post->id }}" title="{{ __('legacy/forums.title_edit_post') }}">{{ __('legacy/forums.text_edit') }}</a>
+                <a class="nx-postbtn" href="{{ request()->getPathInfo() }}?action=editpost&amp;postid={{ $post->id }}" title="{{ __('legacy/forums.title_edit_post') }}">{{ __('legacy/forums.text_edit') }}</a>
             @endif
         </span>
     </footer>

@@ -103,7 +103,7 @@ final class NoLeakedMarkupTest extends TestCase
         // The promotion legend is a markup-bearing lang value rendered
         // through SafeHtml — its links must be real tags.
         if (str_contains($html, 'Those highlighted are')) {
-            $this->assertStringContainsString('<a href="?spstate=2"', $html);
+            $this->assertStringContainsString('<a href="/web/torrents?spstate=2"', $html);
             $this->assertStringNotContainsString('&lt;a href', $html);
         } else {
             $this->markTestSkipped('promotion legend not rendered in this fixture state');

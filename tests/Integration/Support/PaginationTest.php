@@ -4,6 +4,7 @@ namespace Tests\Integration\Support;
 
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
+use Illuminate\Http\Request;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -86,6 +87,15 @@ final class PaginationTest extends TestCase
     {
         $result = Pagination::render(10, 30, '/list.php?', 0, 3, self::LABELS);
         $this->assertStringContainsString('class="my-2.5 text-center"', $result[0]);
+    }
+
+    public function test_pager_prefixes_query_only_href_with_request_path(): void
+    {
+        $this->app->instance('request', Request::create('/web/log', 'GET'));
+
+        [$top] = Pagination::pager(10, 50, '?action=dailylog&');
+
+        $this->assertStringContainsString('/web/log?action=dailylog', $top->toHtml());
     }
 
     public function test_render_pager_top_and_bottom_are_identical(): void

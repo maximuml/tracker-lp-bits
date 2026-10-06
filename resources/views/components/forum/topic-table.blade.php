@@ -12,7 +12,7 @@
     </div>
     <div class="whitespace-nowrap">
         @if ($list->mayPost)
-            <a href="?action=newtopic&amp;forumid={{ $list->forumId }}"><img class="f_new" src="pic/trans.gif" alt="New Topic" title="{{ __('legacy/forums.title_new_topic') }}" /></a>&nbsp;&nbsp;
+            <a href="{{ request()->getPathInfo() }}?action=newtopic&amp;forumid={{ $list->forumId }}"><img class="f_new" src="pic/trans.gif" alt="New Topic" title="{{ __('legacy/forums.title_new_topic') }}" /></a>&nbsp;&nbsp;
         @endif
     </div>
 </div>
@@ -22,9 +22,9 @@
             <thead>
                 <tr>
                     <th class="w-[99%]" scope="col">{{ __('legacy/forums.col_topic') }}</th>
-                    <th scope="col"><a href="?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort={{ $list->sortToggles()['first'] }}" title="{{ $list->sortToggles()['firstTitle'] }}">{{ __('legacy/forums.col_author') }}</a></th>
+                    <th scope="col"><a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort={{ $list->sortToggles()['first'] }}" title="{{ $list->sortToggles()['firstTitle'] }}">{{ __('legacy/forums.col_author') }}</a></th>
                     <th scope="col">{{ __('legacy/forums.col_replies') }}/{{ __('legacy/forums.col_views') }}</th>
-                    <th scope="col"><a href="?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort={{ $list->sortToggles()['last'] }}" title="{{ $list->sortToggles()['lastTitle'] }}">{{ __('legacy/forums.col_last_post') }}</a></th>
+                    <th scope="col"><a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort={{ $list->sortToggles()['last'] }}" title="{{ $list->sortToggles()['lastTitle'] }}">{{ __('legacy/forums.col_last_post') }}</a></th>
                 </tr>
             </thead>
         </x-slot:head>
@@ -38,10 +38,10 @@
             <td colspan="3">
                 <span id="order"><span><b>{{ __('legacy/forums.text_order') }}</b></span>
                 <span id="orderlist" class="dropmenu nx-hidden"><ul>
-                    <li><a href="?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort=firstpostdesc">{{ __('legacy/forums.text_topic_desc') }}</a></li>
-                    <li><a href="?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort=firstpostasc">{{ __('legacy/forums.text_topic_asc') }}</a></li>
-                    <li><a href="?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort=lastpostdesc">{{ __('legacy/forums.text_post_desc') }}</a></li>
-                    <li><a href="?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort=lastpostasc">{{ __('legacy/forums.text_post_asc') }}</a></li>
+                    <li><a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort=firstpostdesc">{{ __('legacy/forums.text_topic_desc') }}</a></li>
+                    <li><a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort=firstpostasc">{{ __('legacy/forums.text_topic_asc') }}</a></li>
+                    <li><a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort=lastpostdesc">{{ __('legacy/forums.text_post_desc') }}</a></li>
+                    <li><a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $list->forumId }}{{ $list->addParam() }}&amp;sort=lastpostasc">{{ __('legacy/forums.text_post_asc') }}</a></li>
                 </ul>
                 </span>
                 </span>

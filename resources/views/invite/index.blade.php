@@ -26,9 +26,9 @@
 @else
     {{-- Invite menu nav --}}
     <div id="invitenav"><ul id="invitemenu" class="menu">
-    <li{{ $menuSelected == 'invitee' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=invitee">{{ __('legacy/invite.text_invite_status')}}</a></li>
-    <li{{ $menuSelected == 'sent' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=sent">{{ __('legacy/invite.text_sent_invites_status')}}</a></li>
-    <li{{ $menuSelected == 'tmp' ? ' class=selected' : '' }}><a href="?id={{ $id }}&menu=tmp">{{ __('legacy/invite.text_tmp_status')}}</a></li>
+    <li{{ $menuSelected == 'invitee' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=invitee">{{ __('legacy/invite.text_invite_status')}}</a></li>
+    <li{{ $menuSelected == 'sent' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=sent">{{ __('legacy/invite.text_sent_invites_status')}}</a></li>
+    <li{{ $menuSelected == 'tmp' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=tmp">{{ __('legacy/invite.text_tmp_status')}}</a></li>
     @if (($CURUSER['id'] ?? 0) == $id)
         </ul><form method=post action="/web/invites/submit?id={{ (string) $id }}&type=new">@csrf<input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
     @else
@@ -98,7 +98,7 @@
                     <td class="align-top px-2.5 py-1.5">{{ number_format(floatval($arr['seed_points_per_hour']) * $haremAdditionFactor, 3) }}</td>
                 @endif
                     <td class="align-top px-2.5 py-1.5">{{ $arr['last_announce_at'] }}</td>
-                    <td class="align-top px-2.5 py-1.5">@if (($arr['status'] ?? '') === 'confirmed')<a href=user/web/details/{{ (int) $arr['id'] }}><span class="nx-color-1f7309">{{ __('legacy/invite.text_confirmed') }}</span></a>@else<a href=/checkuser?id={{ (int) $arr['id'] }}><span class="nx-color-ca0226">{{ __('legacy/invite.text_pending') }}</span></a>@endif</td>
+                    <td class="align-top px-2.5 py-1.5">@if (($arr['status'] ?? '') === 'confirmed')<a href=/userdetails?id={{ (int) $arr['id'] }}><span class="nx-color-1f7309">{{ __('legacy/invite.text_confirmed') }}</span></a>@else<a href=/checkuser?id={{ (int) $arr['id'] }}><span class="nx-color-ca0226">{{ __('legacy/invite.text_pending') }}</span></a>@endif</td>
                     @if ($canConfirm)
                         <td class="align-top px-2.5 py-1.5">
                         @if ($arr['status'] == 'pending')
@@ -142,7 +142,7 @@
                 @if ($menuSelected == 'sent')
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['validText'] ?? '' }}</td>
                 @endif
-                <td class="align-top px-2.5 py-1.5">@if (! ($arr1['hashValid'] ?? false))<a href=user/web/details/{{ (int) $arr1['invitee_register_uid'] }}><span class="nx-color-1f7309">{{ $arr1['invitee_register_username'] }}</span></a>@endif</td>
+                <td class="align-top px-2.5 py-1.5">@if (! ($arr1['hashValid'] ?? false))<a href=/userdetails?id={{ (int) $arr1['invitee_register_uid'] }}><span class="nx-color-1f7309">{{ $arr1['invitee_register_username'] }}</span></a>@endif</td>
                 @if ($menuSelected == 'tmp')
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['expired_at'] }}</td>
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['created_at'] }}</td>

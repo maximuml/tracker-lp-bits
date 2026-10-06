@@ -3,7 +3,7 @@
 @section('title', $title)
 
 @section('content')
-<h1 class="text-center">{{ $title }}<a href="user/web/details/{{ (int) $uid }}"><b>&nbsp;{{ $username }}</b></a></h1>
+<h1 class="text-center">{{ $title }}<a href="/userdetails?id={{ (int) $uid }}"><b>&nbsp;{{ $username }}</b></a></h1>
 
 <div>
     <form id="filterForm" action="{{ $requestUri }}" method="get">

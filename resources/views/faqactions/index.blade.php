@@ -8,7 +8,7 @@
     @if (empty($arr))
         <p>Invalid id</p>
     @elseif (($arr['type'] ?? '') === 'item')
-        <form method="post" action="faqactions.php?action=edititem">
+        <form method="post" action="/faqactions?action=edititem">
             @csrf
             <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
             <div class="nx-fcell">ID:</div><div class="nx-fcell">{{ (int) $arr['id'] }} <input type="hidden" name="id" value="{{ (int) $arr['id'] }}" /></div>
@@ -33,7 +33,7 @@
             </div>
         </form>
     @elseif (($arr['type'] ?? '') === 'categ')
-        <form method="post" action="faqactions.php?action=editsect">
+        <form method="post" action="/faqactions?action=editsect">
             @csrf
             <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
             <div class="nx-fcell">ID:</div><div class="nx-fcell">{{ (int) $arr['id'] }} <input type="hidden" name="id" value="{{ (int) $arr['id'] }}" /></div>
@@ -56,7 +56,7 @@
     </div>
 @elseif (($mode ?? '') === 'additem')
     <h1 class="text-center">Add Item</h1>
-    <form method="post" action="faqactions.php?action=addnewitem">
+    <form method="post" action="/faqactions?action=addnewitem">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
         <div class="nx-fcell">Question:</div><div class="nx-fcell"><input type="text" name="question" value="" /></div>
@@ -76,7 +76,7 @@
     </form>
 @elseif (($mode ?? '') === 'addsection')
     <h1 class="text-center">Add Section</h1>
-    <form method="post" action="faqactions.php?action=addnewsect">
+    <form method="post" action="/faqactions?action=addnewsect">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
         <div class="nx-fcell">Title:</div><div class="nx-fcell"><input type="text" name="title" value="" /></div>

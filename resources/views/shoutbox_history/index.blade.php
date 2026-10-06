@@ -7,7 +7,7 @@
 
 <section class="nx-idx-card">
 <h2>{{ __('legacy/shoutbox.text_history_title')}}</h2>
-<form action="shoutbox_history.php" method="get">
+<form action="/shoutbox_history" method="get">
 <div class="flex items-start">
 <div class="p-[5px]">{{ __('legacy/shoutbox.text_username')}}</div><div class="p-[5px]"><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></div>
 <div class="p-[5px]">{{ __('legacy/shoutbox.text_from')}}</div><div class="p-[5px]"><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></div>

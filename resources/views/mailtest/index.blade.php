@@ -4,7 +4,7 @@
 
 @section('content')
 <h1 class="text-center">{{ __('legacy/mailtest.text_mail_test')}}</h1>
-<form method="post" action="mailtest.php">
+<form method="post" action="/mailtest">
         <input type="hidden" name="action" value="sendmail">
         <div class="nx-fgrid">
         <div class="nx-fhead whitespace-nowrap">{{ __('legacy/mailtest.row_enter_email')}}</div><div class="nx-fcell"><input type='text' name='email' size=35><br />{{ __('legacy/mailtest.text_enter_email_note') }}</div>

@@ -110,6 +110,7 @@ Route::post('/staffbox', fn () => redirect('/nexusphp/security/staff-messages'))
 $get301('/staffmess', '/web/staffmess');
 Route::post('/staffmess', [StaffMessageController::class, 'staffmessPost']);
 Route::post('/takestaffmess', [StaffMessageController::class, 'takeStaffmess'])->middleware('reject.get.mutations')->name('takestaffmess.legacy');
+// take* URIs keep replaying the body at the renamed /web/* endpoints.
 
 // Phase 5.4: contactstaff stays legacy (user-facing form to contact staff)
 $get301('/contactstaff', '/web/contactstaff');

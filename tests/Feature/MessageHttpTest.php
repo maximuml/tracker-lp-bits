@@ -77,6 +77,24 @@ final class MessageHttpTest extends TestCase
         $this->assertStringContainsString('/web/mybonus/exchange', (string) $response->headers->get('Location'));
     }
 
+    public function test_legacy_take_uris_redirect_to_rest_endpoints(): void
+    {
+        $user = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        foreach ([
+            ['/takemessage', ['receiver' => (string) $receiver->id, 'body' => 'hi'], '/web/messages/send'],
+            ['/deletemessage', ['id' => '1', 'type' => 'in'], '/web/messages/delete/in'],
+            ['/deletemessage', ['id' => '1', 'type' => 'out'], '/web/messages/delete/out'],
+            ['/takestaffmess', ['msg' => 'x'], '/web/staffmess/send'],
+            ['/takecontact', ['body' => 'x', 'subject' => 'y'], '/web/contactstaff/send'],
+        ] as [$uri, $data, $target]) {
+            $response = $this->withNexusCookie($user)->post($uri, $data);
+            $response->assertStatus(308);
+            $this->assertStringEndsWith($target, (string) $response->headers->get('Location'));
+        }
+    }
+
     // ─── FormRequest validation ────────────────────────────────────────
 
     public function test_takemessage_validates_required_body(): void
@@ -85,7 +103,7 @@ final class MessageHttpTest extends TestCase
         $receiver = User::factory()->create();
 
         $this->withNexusCookie($sender)
-            ->post('/takemessage', [
+            ->post('/web/messages/send', [
                 'receiver' => (string) $receiver->id,
                 'subject' => 'Test',
                 // body missing
@@ -98,7 +116,7 @@ final class MessageHttpTest extends TestCase
         $sender = User::factory()->create();
 
         $this->withNexusCookie($sender)
-            ->post('/takemessage', [
+            ->post('/web/messages/send', [
                 'body' => 'Hello',
                 'subject' => 'Test',
                 // receiver missing
@@ -111,8 +129,7 @@ final class MessageHttpTest extends TestCase
         $user = User::factory()->create();
 
         $this->withNexusCookie($user)
-            ->post('/deletemessage', [
-                'type' => 'in',
+            ->post('/web/messages/delete/in', [
                 // id missing
             ])
             ->assertRedirect();
@@ -123,12 +140,13 @@ final class MessageHttpTest extends TestCase
         $user = User::factory()->create();
         $message = Message::factory()->between(User::factory()->create(), $user)->create();
 
+        // `type` is a route parameter constrained to in|out — an unknown
+        // side no longer resolves to the endpoint at all.
         $this->withNexusCookie($user)
-            ->post('/deletemessage', [
+            ->post('/web/messages/delete/invalid', [
                 'id' => (string) $message->id,
-                'type' => 'invalid',
             ])
-            ->assertRedirect();
+            ->assertNotFound();
     }
 
     public function test_messages_action_validates_action_enum(): void
@@ -153,9 +171,8 @@ final class MessageHttpTest extends TestCase
 
         // Owner (receiver) can delete
         $this->withNexusCookie($owner)
-            ->post('/deletemessage', [
+            ->post('/web/messages/delete/in', [
                 'id' => (string) $message->id,
-                'type' => 'in',
             ])
             ->assertRedirect();
 
@@ -164,9 +181,8 @@ final class MessageHttpTest extends TestCase
 
         // Other user cannot delete
         $this->withNexusCookie($other)
-            ->post('/deletemessage', [
+            ->post('/web/messages/delete/in', [
                 'id' => (string) $message2->id,
-                'type' => 'in',
             ])
             ->assertRedirect();
     }
@@ -180,9 +196,8 @@ final class MessageHttpTest extends TestCase
 
         // Sender can delete from sentbox
         $this->withNexusCookie($sender)
-            ->post('/deletemessage', [
+            ->post('/web/messages/delete/out', [
                 'id' => (string) $message->id,
-                'type' => 'out',
             ])
             ->assertRedirect();
 
@@ -191,9 +206,8 @@ final class MessageHttpTest extends TestCase
 
         // Other user cannot delete from sentbox
         $this->withNexusCookie($other)
-            ->post('/deletemessage', [
+            ->post('/web/messages/delete/out', [
                 'id' => (string) $message2->id,
-                'type' => 'out',
             ])
             ->assertRedirect();
     }
@@ -226,7 +240,7 @@ final class MessageHttpTest extends TestCase
         $receiver = User::factory()->create();
 
         $this->withNexusCookie($sender)
-            ->post('/takemessage', [
+            ->post('/web/messages/send', [
                 'receiver' => (string) $receiver->id,
                 'body' => 'Hello world',
                 'subject' => 'Test subject',
@@ -248,9 +262,8 @@ final class MessageHttpTest extends TestCase
         $message = Message::factory()->between($sender, $receiver)->create();
 
         $this->withNexusCookie($receiver)
-            ->post('/deletemessage', [
+            ->post('/web/messages/delete/in', [
                 'id' => (string) $message->id,
-                'type' => 'in',
             ])
             ->assertRedirect();
     }
@@ -277,7 +290,7 @@ final class MessageHttpTest extends TestCase
         $receiver = User::factory()->create(['class' => 1]);
 
         $this->withNexusCookie($sender)
-            ->post('/takemessage', [
+            ->post('/web/messages/send', [
                 'receiver' => (string) $receiver->id,
                 'subject' => 'Test',
                 'body' => 'Second PM',
@@ -292,7 +305,7 @@ final class MessageHttpTest extends TestCase
         $receiver = User::factory()->create(['class' => 1]);
 
         $this->withNexusCookie($sender)
-            ->post('/takemessage', [
+            ->post('/web/messages/send', [
                 'receiver' => (string) $receiver->id,
                 'subject' => 'Test',
                 'body' => 'Old PM is fine',

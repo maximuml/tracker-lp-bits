@@ -106,6 +106,16 @@ class CurrentUser
         return $this->get()[$key] ?? $default;
     }
 
+    public function yes(string $key): bool
+    {
+        return YesNo::isYes($this->value($key));
+    }
+
+    public function no(string $key): bool
+    {
+        return YesNo::isNo($this->value($key));
+    }
+
     private function initialize(): void
     {
         $this->initialized = true;

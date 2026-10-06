@@ -23,7 +23,7 @@ use App\Support\Format;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
-use App\Support\LegacyYesNo;
+use App\Support\YesNo;
 use App\Support\Locale;
 use App\ViewModels\Torrent\TorrentEditPickViewModel;
 use Illuminate\Http\RedirectResponse;
@@ -95,7 +95,7 @@ class TorrentEditController extends Controller
         $pick = null;
         if (
             Permission::can(PermissionEnum::TORRENT_SET_STICKY)
-            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && LegacyYesNo::isYes($this->currentUser->value('picker', null)))
+            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && $this->currentUser->yes('picker'))
         ) {
             $promotionOptions = Permission::can(PermissionEnum::TORRENT_ON_PROMOTION)
                 ? SafeHtml::fromTrustedHtml(Html::promotionSelection((int) $row['sp_state'], 0))
@@ -151,9 +151,9 @@ class TorrentEditController extends Controller
             'priceRow' => $priceRow,
             'sectionMode' => $sectionmode,
             'showVisibleCheck' => $showVisibleCheck,
-            'visibleChecked' => LegacyYesNo::isYes($row['visible'] ?? null),
+            'visibleChecked' => YesNo::isYes($row['visible'] ?? null),
             'showAnonymousCheck' => $showAnonymousCheck,
-            'anonymousChecked' => LegacyYesNo::isYes($row['anonymous'] ?? null),
+            'anonymousChecked' => YesNo::isYes($row['anonymous'] ?? null),
             'pick' => $pick,
             'showDeleteForm' => $showDeleteForm,
             'descrContent' => (string) ($row['descr'] ?? ''),

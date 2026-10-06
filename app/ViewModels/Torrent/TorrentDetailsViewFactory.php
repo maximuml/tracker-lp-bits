@@ -15,13 +15,13 @@ use App\Repositories\TorrentModerationRepository;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Promotion;
 use App\Support\Strings;
 use App\Support\Time;
 use App\Support\TorrentAccess;
 use App\Support\UserDisplay;
+use App\Support\YesNo;
 
 /**
  * Assembles {@see TorrentDetailsViewModel} — the presentation assembly
@@ -49,7 +49,7 @@ final class TorrentDetailsViewFactory
     ): TorrentDetailsViewModel {
         $isOwner = (int) ($currentUser['id'] ?? 0) === (int) ($row['owner'] ?? 0);
         $owned = Permission::can(PermissionEnum::TORRENT_MANAGE) || $isOwner;
-        $downloadAllowed = $isOwner || ! LegacyYesNo::isNo($currentUser['downloadpos'] ?? null);
+        $downloadAllowed = $isOwner || ! YesNo::isNo($currentUser['downloadpos'] ?? null);
 
         return new TorrentDetailsViewModel(
             title: $this->buildTitle($row),

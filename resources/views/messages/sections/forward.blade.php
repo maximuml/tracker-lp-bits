@@ -14,7 +14,7 @@
 <div class="nx-fcell"><input type="text" name="subject" value="{{ $forward['subject'] }}"></div>
 <div class="nx-fhead"><nobr>{{ __('legacy/messages.row_message') }}</nobr></div>
 <div class="nx-fcell"><textarea name="body" rows="8"></textarea><br />{{ $forward['body'] ?? '' }}</div>
-<div class="nx-ffull text-center"><input class=checkbox type="checkbox" name="save" value="yes"{{ \App\Support\LegacyYesNo::isYes($curUser['savepms'] ?? null) ? ' checked' : '' }}>{{ __('legacy/messages.checkbox_save_message') }}&nbsp;
+<div class="nx-ffull text-center"><input class=checkbox type="checkbox" name="save" value="yes"{{ \App\Support\YesNo::isYes($curUser['savepms'] ?? null) ? ' checked' : '' }}>{{ __('legacy/messages.checkbox_save_message') }}&nbsp;
 <input type="submit" class="btn" value={{ __('legacy/messages.submit_forward') }}></div>
 </div>
 </form>

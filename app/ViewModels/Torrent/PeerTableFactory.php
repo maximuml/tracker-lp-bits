@@ -7,7 +7,7 @@ namespace App\ViewModels\Torrent;
 use App\Services\PermissionChecker;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyYesNo;
+use App\Support\YesNo;
 use App\Support\Ratio;
 use App\Support\Strings;
 
@@ -34,12 +34,12 @@ final class PeerTableFactory
         foreach ($arr as $e) {
             $privacy = $privacyData[$e['userid']] ?? '';
             $secs = max(1, $e['la'] - $e['st']);
-            $isStrongPrivacy = $privacy === 'strong' || (LegacyYesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
+            $isStrongPrivacy = $privacy === 'strong' || (YesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
             $canView = $this->permissionChecker->userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
 
             $uploaded = (float) $e['uploaded'];
             $downloaded = (float) $e['downloaded'];
-            if (LegacyYesNo::isNo($e['seeder'] ?? null)) {
+            if (YesNo::isNo($e['seeder'] ?? null)) {
                 $downloadRate = Format::size(($downloaded - $e['downloadoffset']) / $secs);
             } else {
                 $downloadRate = Format::size(($downloaded - $e['downloadoffset']) / max(1, $e['finishedat'] - $e['st']));
@@ -69,7 +69,7 @@ final class PeerTableFactory
                 locationLines: $enablelocationTweak === 'yes'
                     ? array_column($peerIpInfo[$e['id']] ?? [], 'public')
                     : array_column($peerIpInfo[$e['id']] ?? [], 'ip'),
-                connectableYes: LegacyYesNo::isYes($e['connectable'] ?? null),
+                connectableYes: YesNo::isYes($e['connectable'] ?? null),
                 uploaded: Format::size($uploaded),
                 uploadRate: Format::size(($uploaded - $e['uploadoffset']) / $secs),
                 downloaded: Format::size($downloaded),

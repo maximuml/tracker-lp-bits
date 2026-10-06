@@ -21,7 +21,6 @@ use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Services\MessageService;
 use App\Support\CurrentUser;
-use App\Support\LegacyYesNo;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -158,8 +157,8 @@ class MessageController extends LegacyController
             'title' => $title,
             'frameTitle' => $frameTitle,
             'stdheadMsgalert' => false,
-            'deleteChecked' => LegacyYesNo::isYes($this->currentUser->value('deletepms', null)) ? ' checked' : '',
-            'saveChecked' => LegacyYesNo::isYes($this->currentUser->value('savepms', null)) ? ' checked' : '',
+            'deleteChecked' => $this->currentUser->yes('deletepms') ? ' checked' : '',
+            'saveChecked' => $this->currentUser->yes('savepms') ? ' checked' : '',
         ]);
     }
 

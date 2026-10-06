@@ -21,7 +21,6 @@ use App\Support\Avatar;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyYesNo;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserDisplay;
@@ -158,7 +157,7 @@ class ForumController extends LegacyController
             $userDisplayMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, false, false, true);
         }
 
-        $showAvatars = LegacyYesNo::isYes(((array) ($this->currentUser->get() ?? []))['avatars'] ?? null);
+        $showAvatars = $this->currentUser->yes('avatars');
         foreach ($rows as &$row) {
             $row = (array) $row;
             $commentId = (int) ($row['id'] ?? 0);

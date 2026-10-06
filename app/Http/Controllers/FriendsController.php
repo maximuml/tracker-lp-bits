@@ -13,7 +13,6 @@ use App\Support\Avatar;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
-use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -80,7 +79,7 @@ class FriendsController extends LegacyController
                 ? UserClass::name((int) ($friend['class'] ?? 0), false, true, true)
                 : SafeHtml::fromTrustedHtml(htmlspecialchars($title, ENT_QUOTES, 'UTF-8'));
             $avatar = '';
-            if (LegacyYesNo::isYes($this->currentUser->value('avatars', null))) {
+            if ($this->currentUser->yes('avatars')) {
                 $avatar = htmlspecialchars((string) ($friend['avatar'] ?? ''), ENT_QUOTES, 'UTF-8');
             }
             $friend['avatarSrc'] = Avatar::forUser($friendId, $avatar);

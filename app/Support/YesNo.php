@@ -11,7 +11,7 @@ namespace App\Support;
  * 1/0 while legacy code compared against the 'yes'/'no' strings. Accepts
  * both representations so either source works.
  */
-final class LegacyYesNo
+final class YesNo
 {
     public static function isYes(mixed $value): bool
     {

@@ -6,7 +6,7 @@ namespace App\Services\Usercp;
 
 use App\Enums\UserClickTopic;
 use App\Support\Config\SiteConfig;
-use App\Support\LegacyYesNo;
+use App\Support\YesNo;
 use App\Support\Strings;
 use App\ViewModels\Usercp\UsercpForumSection;
 
@@ -25,9 +25,9 @@ final class UsercpForumBuilder
             showTooltipSetting: SiteConfig::current()->tweak->enableTooltip(),
             topicsPerPage: (int) ($curUser['topicsperpage'] ?? 0),
             postsPerPage: (int) ($curUser['postsperpage'] ?? 0),
-            avatars: LegacyYesNo::isYes($curUser['avatars'] ?? null),
-            signatures: LegacyYesNo::isYes($curUser['signatures'] ?? null),
-            showLastPost: LegacyYesNo::isYes($curUser['showlastpost'] ?? null),
+            avatars: YesNo::isYes($curUser['avatars'] ?? null),
+            signatures: YesNo::isYes($curUser['signatures'] ?? null),
+            showLastPost: YesNo::isYes($curUser['showlastpost'] ?? null),
             clicktopic: UserClickTopic::tryFrom((int) ($curUser['clicktopic'] ?? 0))?->stringValue() ?? 'firstpage',
             signature: (string) ($curUser['signature'] ?? ''),
         );

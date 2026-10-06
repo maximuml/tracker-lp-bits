@@ -24,7 +24,7 @@ use App\Support\Env;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
-use App\Support\LegacyYesNo;
+use App\Support\YesNo;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\Strings;
@@ -215,8 +215,8 @@ class UserDetailController extends Controller
             $seedLeechRatio = floor($user['seedtime'] / $user['leechtime'] * 1000) / 1000;
         }
 
-        $warned = LegacyYesNo::isYes($user['warned'] ?? null);
-        $leechwarn = LegacyYesNo::isYes($user['leechwarn'] ?? null);
+        $warned = YesNo::isYes($user['warned'] ?? null);
+        $leechwarn = YesNo::isYes($user['leechwarn'] ?? null);
         $lastwarnedTs = ($user['lastwarned'] ?? null) !== null && $user['lastwarned'] !== ''
             ? strtotime((string) $user['lastwarned'])
             : false;

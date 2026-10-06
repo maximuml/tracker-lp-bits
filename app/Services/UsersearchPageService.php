@@ -202,7 +202,7 @@ final class UsersearchPageService
         $userIds = array_map(fn ($row) => (int) ($row['id'] ?? 0), $res);
         $ips = array_map(fn ($row) => (string) ($row['ip'] ?? ''), $res);
         UserDisplay::preload($userIds);
-        $extraStats = $this->userListingRepository->getSearchExtraStats($userIds, $ips, (int) ($this->currentUser->classId()));
+        $extraStats = $this->userListingRepository->getSearchExtraStats($userIds, $ips, (int) ($curUser['class'] ?? 0));
         $peerTotals = $extraStats['peers'];
         $postCounts = $extraStats['posts'];
         $commentCounts = $extraStats['comments'];

@@ -49,7 +49,7 @@ final class BonusPageService
     public function build(Request $request): BonusPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($this->currentUser->id());
+        $userId = (int) ($curUser['id'] ?? 0);
 
         $bonusTweak = SiteConfig::current()->tweak->bonus();
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
@@ -73,7 +73,7 @@ final class BonusPageService
 
         $msg = $this->resolveDoMessage($do, $curUser, $lockText);
 
-        $bonus = number_format((float) ($this->currentUser->seedbonus()), 1);
+        $bonus = number_format((float) ($curUser['seedbonus'] ?? 0), 1);
 
         $shop = null;
         $info = null;
@@ -205,7 +205,7 @@ final class BonusPageService
                 'post' => (string) (__('legacy/mybonus.text_success_vip_two')),
             ])->render(),
             'vipfalse' => view('my.sections._b-msg', ['pre' => '', 'b' => (string) (__('legacy/mybonus.text_error_bang')), 'post' => (string) (__('legacy/mybonus.text_no_permission'))])->render(),
-            'title' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_custom_title')), 'b' => (string) ($this->currentUser->value('title', '')), 'post' => '!'])->render(),
+            'title' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_custom_title')), 'b' => (string) ($curUser['title'] ?? ''), 'post' => '!'])->render(),
             'transfer' => view('my.sections._b-msg', ['pre' => (string) (__('legacy/mybonus.text_success_gift')), 'b' => (string) (__('legacy/mybonus.text_karma')), 'post' => (string) (__('legacy/mybonus.text_karma_well'))])->render(),
             'charity' => (string) (__('legacy/mybonus.text_success_charity')),
             'cancel_hr' => (string) (__('legacy/mybonus.text_success_cancel_hr')),
@@ -245,7 +245,7 @@ final class BonusPageService
                 default => SafeHtml::fromUntrustedHtml(number_format((float) $bonusarray['points'])),
             };
 
-            $affordable = ($this->currentUser->seedbonus()) >= $bonusarray['points'];
+            $affordable = ($curUser['seedbonus'] ?? 0) >= $bonusarray['points'];
             $trade = $affordable
                 ? $this->resolveTradeButton($art, $curUser, $ratiolimitBonus, $dlamountlimitBonus)
                 : $this->tradeButton('legacy/mybonus.text_more_points_needed', true);
@@ -306,9 +306,9 @@ final class BonusPageService
             return $this->tradeButton('legacy/mybonus.submit_exchange', false);
         }
         if ($art === 'traffic') {
-            if (($this->currentUser->value('downloaded', 0)) > 0) {
-                if (($this->currentUser->value('uploaded', 0)) > $dlamountlimitBonus * 1073741824) {
-                    $ratio = ($this->currentUser->value('uploaded', 0)) / ($this->currentUser->value('downloaded', 1));
+            if (($curUser['downloaded'] ?? 0) > 0) {
+                if (($curUser['uploaded'] ?? 0) > $dlamountlimitBonus * 1073741824) {
+                    $ratio = ($curUser['uploaded'] ?? 0) / ($curUser['downloaded'] ?? 1);
                 } else {
                     $ratio = 0;
                 }
@@ -322,14 +322,14 @@ final class BonusPageService
             return $this->tradeButton('legacy/mybonus.submit_exchange', false);
         }
         if ($art === 'change_username_card') {
-            if ($this->bonusCalculationRepository->hasChangeUsernameCard((int) ($this->currentUser->id()))) {
+            if ($this->bonusCalculationRepository->hasChangeUsernameCard((int) ($curUser['id'] ?? 0))) {
                 return $this->tradeButton('legacy/mybonus.text_change_username_card_already_has', true);
             }
 
             return $this->tradeButton('legacy/mybonus.submit_exchange', false);
         }
         if ($art === 'rainbow_id') {
-            if ($this->bonusCalculationRepository->hasRainbowIdForever((int) ($this->currentUser->id()))) {
+            if ($this->bonusCalculationRepository->hasRainbowIdForever((int) ($curUser['id'] ?? 0))) {
                 return $this->tradeButton('legacy/mybonus.text_rainbow_id_already_valid_forever', true);
             }
 
@@ -363,7 +363,7 @@ final class BonusPageService
         $maxseedingBonus = SiteConfig::current()->bonus->maxSeeding();
         $bzeroBonus = SiteConfig::current()->bonus->bZero();
 
-        $seedBonusResult = Bonus::calculateForUser((int) ($this->currentUser->id()), null);
+        $seedBonusResult = Bonus::calculateForUser((int) ($curUser['id'] ?? 0), null);
         $bonusTableResult = Bonus::buildBonusTableForUser($curUser, $seedBonusResult, ['table_style' => 'width: 50%']);
 
         $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzeroBonus + $perseedingBonus * $maxseedingBonus);
@@ -385,7 +385,7 @@ final class BonusPageService
             aFactor: (string) round((float) $seedBonusResult['A'], 1),
             percentLabel: (string) $percent,
             loadbarClass: $loadpic,
-            userId: (int) ($this->currentUser->id()),
+            userId: (int) ($curUser['id'] ?? 0),
             officialAdditionFactor: $bonusTableResult['has_official_addition'] ? (string) $bonusTableResult['official_addition_factor'] : null,
             haremAdditionFactor: $bonusTableResult['has_harem_addition'] ? (string) $bonusTableResult['harem_addition_factor'] : null,
             summaryTable: SafeHtml::fromTrustedHtml((string) $bonusTableResult['table']),

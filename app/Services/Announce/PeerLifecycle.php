@@ -53,13 +53,16 @@ final class PeerLifecycle
 
     private readonly PeerLimitGuard $limitGuard;
 
+    private readonly TorrentStatsService $torrentStats;
+
     /**
      * @param  array<string, mixed>  $torrent
      * @param  array<string, mixed>  $user
      */
-    public function __construct(AnnounceRequestDto $dto, array $torrent, array $user, string $dt)
+    public function __construct(AnnounceRequestDto $dto, array $torrent, array $user, string $dt, TorrentStatsService $torrentStats)
     {
         $this->limitGuard = new PeerLimitGuard($dto, $torrent);
+        $this->torrentStats = $torrentStats;
         $this->user = $user;
         $this->dt = $dt;
 
@@ -211,7 +214,7 @@ final class PeerLifecycle
                     'to_go' => $this->left,
                     'last_action' => $this->dt,
                 ]);
-                $this->snatchInfo = app(TorrentStatsService::class)->getSnatchInfo($this->torrentId, $this->userId);
+                $this->snatchInfo = $this->torrentStats->getSnatchInfo($this->torrentId, $this->userId);
             } else {
                 $snatchInsert = [
                     'torrentid' => $this->torrentId,
@@ -225,7 +228,7 @@ final class PeerLifecycle
                     'last_action' => $this->dt,
                 ];
                 Snatch::query()->insert($snatchInsert);
-                $this->snatchInfo = app(TorrentStatsService::class)->getSnatchInfo($this->torrentId, $this->userId);
+                $this->snatchInfo = $this->torrentStats->getSnatchInfo($this->torrentId, $this->userId);
             }
         } catch (\Exception $exception) {
             Logger::writeWithContext((string) ('[INSERT PEER] error: '.$exception->getMessage()), (string) 'info', (bool) false);

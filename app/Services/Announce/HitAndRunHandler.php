@@ -21,6 +21,7 @@ final class HitAndRunHandler
     public function __construct(
         private readonly HitAndRunLookupRepository $hitAndRunRepository,
         private readonly SnatchRepository $snatchRepository,
+        private readonly TorrentStatsService $torrentStats,
     ) {}
 
     /**
@@ -48,7 +49,7 @@ final class HitAndRunHandler
             return null;
         }
 
-        $snatchInfo = app(TorrentStatsService::class)->getSnatchInfo($torrentId, $userId);
+        $snatchInfo = $this->torrentStats->getSnatchInfo($torrentId, $userId);
         if (! $snatchInfo) {
             return null;
         }

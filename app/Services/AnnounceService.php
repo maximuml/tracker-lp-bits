@@ -49,6 +49,7 @@ class AnnounceService
         private readonly CleanupRepository $cleanupRepository,
         private readonly IpLogRepository $ipLogRepository,
         private readonly RequireSeedTorrentRepository $requireSeedTorrentRepository,
+        private readonly TorrentStatsService $torrentStats,
     ) {}
 
     /**
@@ -102,7 +103,7 @@ class AnnounceService
             return $repDict;
         }
 
-        $peerLifecycle = new PeerLifecycle($dto, $torrent, $ctx->user, $ctx->dt);
+        $peerLifecycle = new PeerLifecycle($dto, $torrent, $ctx->user, $ctx->dt, $this->torrentStats);
         $self = $peerLifecycle->findSelf();
         $ctx = $ctx->withSelf($self);
 
@@ -262,7 +263,7 @@ class AnnounceService
     /** @return array<string, mixed>|false */
     private function loadSnatchInfo(AnnounceContext $ctx): array|false
     {
-        return $ctx->self !== null ? app(TorrentStatsService::class)->getSnatchInfo($ctx->torrentId(), $ctx->userId()) : false;
+        return $ctx->self !== null ? $this->torrentStats->getSnatchInfo($ctx->torrentId(), $ctx->userId()) : false;
     }
 
     private function validateAnnounceTime(AnnounceContext $ctx): void
@@ -351,7 +352,7 @@ class AnnounceService
             }
 
             if ($this->requireSeedTorrentRepository->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
-                $snatchInfo = app(TorrentStatsService::class)->getSnatchInfo($ctx->torrentId(), $ctx->userId());
+                $snatchInfo = $this->torrentStats->getSnatchInfo($ctx->torrentId(), $ctx->userId());
                 if ($snatchInfo) {
                     $this->requireSeedTorrentRepository->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
                 }

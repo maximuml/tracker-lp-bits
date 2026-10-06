@@ -44,8 +44,6 @@ final class ActorContextRatchetTest extends TestCase
      */
     private const BASELINE_APP_CALLS = 64;
 
-    private const BASELINE_GLOBALS_REFS = 2;
-
     private const APP_DIR = __DIR__.'/../../app';
 
     public function test_app_call_count_does_not_exceed_baseline(): void
@@ -65,24 +63,19 @@ final class ActorContextRatchetTest extends TestCase
         );
     }
 
-    public function test_globals_reference_count_does_not_exceed_baseline(): void
+    public function test_globals_store_is_not_reintroduced(): void
     {
-        $count = $this->countPattern('Globals::class|app\s*\(\s*Globals::class');
-
-        $this->assertLessThanOrEqual(
-            self::BASELINE_GLOBALS_REFS,
+        $count = $this->countPattern('\bGlobals::|\bGlobals \$|App\\Support\\Globals\b|SettingsSeed');
+        $count = $this->countPattern('\bGlobals\b|\bSettingsSeed\b', caseSensitive: true);
+        $this->assertSame(
+            0,
             $count,
-            sprintf(
-                'Globals::class reference count increased from baseline %d to %d. '
-                .'Use typed config objects (SiteConfig, UiConfig) instead of Globals::get(). '
-                .'If this increase is intentional and justified, update BASELINE_GLOBALS_REFS.',
-                self::BASELINE_GLOBALS_REFS,
-                $count,
-            ),
+            'The untyped Globals key-value store was removed. Read settings via SiteConfig, '
+            .'per-request page state via PageState, and shared view variables via LegacyViewVariables.',
         );
     }
 
-    private function countPattern(string $pattern): int
+    private function countPattern(string $pattern, bool $caseSensitive = false): int
     {
         $count = 0;
         $directory = new \RecursiveIteratorIterator(
@@ -101,7 +94,7 @@ final class ActorContextRatchetTest extends TestCase
 
             // Count lines containing at least one match (grep-style)
             foreach (explode("\n", $content) as $line) {
-                if (preg_match('/'.$pattern.'/i', $line)) {
+                if (preg_match('/'.$pattern.'/'.($caseSensitive ? '' : 'i'), $line)) {
                     $count++;
                 }
             }

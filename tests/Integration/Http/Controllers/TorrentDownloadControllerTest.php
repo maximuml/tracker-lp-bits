@@ -10,7 +10,6 @@ use App\Http\Requests\DownloadNoticeRequest;
 use App\Repositories\TorrentDownloadRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -182,11 +181,5 @@ final class TorrentDownloadControllerTest extends TestCase
      * Set up minimal language strings so legacyAbortResponse's stdhead()
      * can render for guest users (no authenticated user block).
      */
-    private function setupMinimalLang(): void
-    {
-        app(Globals::class)->set('lang_functions', [
-            'text_login' => 'Login',
-            'text_signup' => 'Signup',
-        ]);
-    }
+    private function setupMinimalLang(): void {}
 }

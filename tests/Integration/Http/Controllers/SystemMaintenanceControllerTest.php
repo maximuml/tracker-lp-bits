@@ -10,7 +10,6 @@ use App\Jobs\SendLegacyMail;
 use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
@@ -29,8 +28,6 @@ final class SystemMaintenanceControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
 
         app()->bind(LegacyRedisCache::class, fn () => null);
     }

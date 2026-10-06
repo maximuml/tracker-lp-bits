@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\LegacyResponse;
 use App\ViewModels\ForumPageViewModel;
 use Illuminate\Http\Request;
@@ -31,7 +30,6 @@ final class ForumPageService
         private readonly ForumTopicViewService $topicViewService,
         private readonly ForumListingService $listingService,
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
     ) {}
 
     /**
@@ -42,9 +40,7 @@ final class ForumPageService
         $curUser = (array) ($this->currentUser->get() ?? []);
         $userId = (int) ($curUser['id'] ?? 0);
 
-        // Global variables previously set by the procedural partial.
         $mainConfig = SiteConfig::current()->main;
-        $maxsubjectlength = $mainConfig->maxSubjectLength(100);
         $postsperpage = (int) ($curUser['postsperpage'] ?? 0);
         if (! $postsperpage) {
             $postsperpage = $mainConfig->forumPostsPerPage(10);
@@ -54,10 +50,6 @@ final class ForumPageService
             $topicsperpage = $mainConfig->forumTopicsPerPage(20);
         }
         $todayDate = date('Y-m-d');
-        $this->globals->set('maxsubjectlength', $maxsubjectlength);
-        $this->globals->set('postsperpage', $postsperpage);
-        $this->globals->set('topicsperpage', $topicsperpage);
-        $this->globals->set('today_date', $todayDate);
 
         $action = htmlspecialchars(trim((string) request()->query('action')));
 

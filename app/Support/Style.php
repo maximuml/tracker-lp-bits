@@ -146,8 +146,7 @@ final class Style
     }
 
     /**
-     * Resolve the default stylesheet id, matching the `defcss` seeding in
-     * {@see SettingsSeed}: the `main.defstylesheet` setting, falling back
+     * Resolve the default stylesheet id from the `main.defstylesheet` setting, falling back
      * to the first stylesheet row (id 3 when the table is empty).
      */
     private static function defaultStylesheetId(): int

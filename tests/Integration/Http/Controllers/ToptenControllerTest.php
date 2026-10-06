@@ -7,7 +7,7 @@ namespace Tests\Integration\Http\Controllers;
 use App\Enums\UserClass;
 use App\Http\Controllers\ToptenController;
 use App\Models\User;
-use App\Support\Globals;
+use App\Support\Locale;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -58,7 +58,7 @@ final class ToptenControllerTest extends TestCase
         $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
         $this->actingAs($user);
 
-        $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
+        $langFolder = Locale::currentLangDir('en');
         Cache::put("topten_data_1_10__{$langFolder}", [
             'type' => 1,
             'limit' => 10,

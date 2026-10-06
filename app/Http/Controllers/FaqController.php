@@ -10,7 +10,6 @@ use App\Http\Requests\FaqActionsRequest;
 use App\Http\Requests\FaqManageSubmitRequest;
 use App\Http\Requests\FaqPostRequest;
 use App\Support\Config\SiteConfig;
-use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
@@ -27,17 +26,14 @@ class FaqController extends LegacyController
 {
     private InfoRepositoryInterface $infoRepository;
 
-    private Globals $globals;
-
-    public function __construct(InfoRepositoryInterface $infoRepository, Globals $globals)
+    public function __construct(InfoRepositoryInterface $infoRepository)
     {
         $this->infoRepository = $infoRepository;
-        $this->globals = $globals;
     }
 
     public function faq(Request $request): Response|RedirectResponse
     {
-        $langFolder = (string) $this->globals->get('CURLANGDIR', 'en');
+        $langFolder = Locale::currentLangDir('en');
         $cacheKey = "{$langFolder}_faq";
 
         $categories = RedisGuard::remember($cacheKey, 900, function () {

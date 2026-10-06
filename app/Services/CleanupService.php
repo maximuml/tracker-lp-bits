@@ -9,7 +9,6 @@ use App\Repositories\AvpRepository;
 use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
 use App\Support\Config\SiteConfig;
-use App\Support\Globals;
 use App\Support\Lock;
 use App\Support\Logger;
 use App\Support\RequestContext;
@@ -52,7 +51,6 @@ final class CleanupService implements CleanupServiceInterface
 
     public function __construct(
         private readonly Tasks $tasks,
-        private readonly Globals $globals,
         private readonly CleanupRepository $cleanupRepository,
         private readonly RequestContext $requestContext,
         private readonly AvpRepository $avpRepository,
@@ -65,7 +63,7 @@ final class CleanupService implements CleanupServiceInterface
      */
     public function triggerCron(): string
     {
-        $useCronTriggerCleanUp = (bool) $this->globals->get('useCronTriggerCleanUp', true);
+        $useCronTriggerCleanUp = (bool) config('nexus.cleanup_cron_triggered', true);
 
         if (! $useCronTriggerCleanUp) {
             return "Forbidden. Clean-up is set to be browser-triggered.\n";

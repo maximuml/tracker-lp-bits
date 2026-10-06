@@ -13,7 +13,6 @@ use App\Repositories\MessageRepository;
 use App\Repositories\UserAccountRepository;
 use App\Services\MessageMailboxService;
 use App\Services\MessageService;
-use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,8 +38,6 @@ final class MessageServiceTest extends TestCase
 
     private MessageService $service;
 
-    private Globals $globals;
-
     private int $initialObLevel;
 
     protected function setUp(): void
@@ -56,8 +53,6 @@ final class MessageServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->globals = new Globals;
-        $this->app->instance(Globals::class, $this->globals);
         $this->service = new MessageService(
             app(MessagePolicy::class),
             app(MessageMailboxService::class),
@@ -119,11 +114,6 @@ final class MessageServiceTest extends TestCase
     private function login(User $user): void
     {
         auth()->login($user);
-    }
-
-    private function mockGlobals(): void
-    {
-        $this->app->instance(Globals::class, $this->globals);
     }
 
     /** @return MessageRepository&MockInterface */
@@ -198,7 +188,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_rejects_non_post_method(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $this->login($sender);
 
@@ -212,7 +201,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_rejects_unauthenticated_user(): void
     {
-        $this->mockGlobals();
 
         $request = Request::create('/messages.php', 'POST', [
             'receiver' => 1,
@@ -224,7 +212,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_rejects_zero_receiver(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $this->login($sender);
 
@@ -239,7 +226,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_rejects_empty_body(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $recipient = $this->createUser();
         $this->login($sender);
@@ -255,7 +241,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_rejects_forward_with_zero_origmsg(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $this->login($sender);
 
@@ -271,7 +256,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_rejects_parked_recipient(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $recipient = $this->createUser(['parked' => 1]);
         $this->login($sender);
@@ -287,7 +271,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_rejects_recipient_blocking_all_pms(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $recipient = $this->createUser(['acceptpms' => 2]);
         $this->login($sender);
@@ -303,7 +286,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_rejects_recipient_friends_only(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $recipient = $this->createUser(['acceptpms' => 1]);
         $this->login($sender);
@@ -321,7 +303,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_succeeds_and_creates_message(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser(['last_pm' => null]);
         $recipient = $this->createUser(['acceptpms' => 0, 'notifs' => '']);
         $this->login($sender);
@@ -346,7 +327,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_updates_sender_last_pm(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser(['last_pm' => null]);
         $recipient = $this->createUser(['acceptpms' => 0, 'notifs' => '']);
         $this->login($sender);
@@ -366,7 +346,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_take_message_redirects_to_messages_php(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser(['last_pm' => null]);
         $recipient = $this->createUser(['acceptpms' => 0, 'notifs' => '']);
         $this->login($sender);
@@ -387,7 +366,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_delete_message_rejects_invalid_id(): void
     {
-        $this->mockGlobals();
         $user = $this->createUser();
         $this->login($user);
 
@@ -401,7 +379,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_delete_message_rejects_unauthenticated_user(): void
     {
-        $this->mockGlobals();
 
         $request = Request::create('/messages.php', 'POST', [
             'id' => 1,
@@ -413,7 +390,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_delete_message_inbox_deletes_message(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $receiver = $this->createUser();
         $this->login($receiver);
@@ -436,7 +412,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_delete_message_outbox_updates_saved_flag(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $receiver = $this->createUser();
         $this->login($sender);
@@ -463,7 +438,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_delete_message_rejects_unknown_type(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $receiver = $this->createUser();
         $this->login($receiver);
@@ -480,7 +454,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_delete_message_inbox_rejects_non_owner(): void
     {
-        $this->mockGlobals();
         $sender = $this->createUser();
         $receiver = $this->createUser();
         $otherUser = $this->createUser();
@@ -500,7 +473,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_handle_messages_action_returns_null_for_empty_action(): void
     {
-        $this->mockGlobals();
         $this->mockMessageRepo();
 
         $request = Request::create('/messages.php', 'GET');
@@ -512,7 +484,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_handle_messages_action_viewmessage_redirects_for_invalid_id(): void
     {
-        $this->mockGlobals();
         $repo = $this->mockMessageRepo();
         $user = $this->createUser();
         $this->login($user);
@@ -532,7 +503,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_handle_messages_action_moveordel_redirects_for_non_post(): void
     {
-        $this->mockGlobals();
         $this->mockMessageRepo();
 
         $request = Request::create('/messages.php', 'GET', [
@@ -547,7 +517,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_handle_messages_action_editmailboxes2_redirects_for_non_post(): void
     {
-        $this->mockGlobals();
         $this->mockMessageRepo();
 
         $request = Request::create('/messages.php', 'GET', [
@@ -562,7 +531,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_handle_messages_action_deletemessage_redirects_for_non_post(): void
     {
-        $this->mockGlobals();
         $this->mockMessageRepo();
 
         $request = Request::create('/messages.php', 'GET', [
@@ -577,7 +545,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_handle_messages_action_viewmessage_returns_null_for_valid_message(): void
     {
-        $this->mockGlobals();
         $repo = $this->mockMessageRepo();
         $sender = $this->createUser();
         $receiver = $this->createUser();
@@ -601,7 +568,6 @@ final class MessageServiceTest extends TestCase
 
     public function test_handle_messages_action_unknown_action_returns_null(): void
     {
-        $this->mockGlobals();
         $this->mockMessageRepo();
 
         $request = Request::create('/messages.php', 'GET', [

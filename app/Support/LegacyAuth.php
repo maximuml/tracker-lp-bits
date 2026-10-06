@@ -310,14 +310,11 @@ final class LegacyAuth
         $user = self::loginFromCookie($context);
 
         if ($user !== null) {
-            Globals::instance()->set('oldip', $user['old_ip'] ?? $user['ip'] ?? '');
-            Globals::instance()->set('CURUSER', $user);
             CurrentUser::instance()->set($user);
 
             return true;
         }
 
-        Globals::instance()->set('CURUSER', null);
         CurrentUser::instance()->set(null);
 
         return false;

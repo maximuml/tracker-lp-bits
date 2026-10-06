@@ -12,7 +12,6 @@ use App\Repositories\UserPasskeyRepository;
 use App\Services\UsercpPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\ViewModels\Search\SearchCategoryTableFactory;
 use App\ViewModels\Usercp\TwoStepState;
 use App\ViewModels\Usercp\UsercpHomeSection;
@@ -44,8 +43,6 @@ final class UsercpPageServiceTest extends TestCase
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     /** @var TokenRepository&MockInterface */
     private TokenRepository $tokenRepository;
 
@@ -69,13 +66,11 @@ final class UsercpPageServiceTest extends TestCase
         $this->userId = $this->createUser();
 
         $this->currentUser = new CurrentUser;
-        $this->globals = new Globals;
         $this->tokenRepository = Mockery::mock(TokenRepository::class);
         $this->passkeyRepository = Mockery::mock(UserPasskeyRepository::class);
 
         $this->service = new UsercpPageService(
             $this->currentUser,
-            $this->globals,
             new LegacyRedisCache,
             app(UsercpRepository::class),
             app(UsercpLookupRepository::class),
@@ -118,9 +113,9 @@ final class UsercpPageServiceTest extends TestCase
     }
 
     /** @param  array<string, mixed>  $values */
-    private function mockGlobals(array $values = []): void
+    private function seedSettings(array $values = []): void
     {
-        $this->seedTestSettings($values, $this->globals);
+        $this->seedTestSettings($values);
     }
 
     /** @param  array<string, mixed>  $overrides */
@@ -159,7 +154,7 @@ final class UsercpPageServiceTest extends TestCase
     {
         $this->setCurrentUser();
         $this->mockTokenRepo();
-        $this->mockGlobals(array_merge([
+        $this->seedSettings(array_merge([
             'CONTENT_WIDTH' => '737',
             'enablelocation_tweak' => 'no',
             'enabletooltip_tweak' => 'no',
@@ -179,7 +174,6 @@ final class UsercpPageServiceTest extends TestCase
     {
         $service = new UsercpPageService(
             new CurrentUser,
-            new Globals,
             new LegacyRedisCache,
             app(UsercpRepository::class),
             app(UsercpLookupRepository::class),

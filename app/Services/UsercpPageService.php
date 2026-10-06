@@ -26,7 +26,6 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Forum;
-use App\Support\Globals;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
@@ -66,7 +65,6 @@ final class UsercpPageService
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly Globals $globals,
         private readonly LegacyRedisCache $cache,
         private readonly UsercpRepositoryInterface $usercpRepository,
         private readonly UsercpLookupRepositoryInterface $usercpLookupRepository,
@@ -91,7 +89,7 @@ final class UsercpPageService
             'siteName' => $siteName,
             'action' => $action,
             'type' => $type,
-            'contentWidth' => (string) ($this->globals->get('CONTENT_WIDTH', '737')),
+            'contentWidth' => '737',
         ];
 
         switch ($action) {

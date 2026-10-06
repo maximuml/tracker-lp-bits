@@ -17,7 +17,7 @@ use App\Services\ForumIndexService;
 use App\Services\ForumTopicViewService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\PageState;
 use App\ViewModels\Forum\ViewTopicViewModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -61,33 +61,8 @@ final class ForumTopicViewServiceTest extends TestCase
         parent::setUp();
         Redis::connection()->flushdb();
         $this->initialObLevel = ob_get_level();
-        $this->seedTestSettings(['SITENAME' => 'TestSite'], app(Globals::class));
-        app(Globals::class)->set('CURLANGDIR', 'en');
-        app(Globals::class)->set('lang_functions', [
-            'text_prev' => 'Prev', 'text_next' => 'Next',
-            'text_locked' => 'Locked', 'text_forums' => 'Forums',
-            'there_is' => 'There is ', 'hits_on_this_topic' => ' views',
-            'title_reply_directly' => 'Reply', 'text_by' => 'by',
-            'text_at' => 'at', 'text_number' => '#', 'text_lou' => '',
-            'text_back_to_top' => 'Top', 'text_view_all_posts' => 'All',
-            'text_view_this_author_only' => 'Author', 'text_posts' => 'Posts',
-            'text_ul' => 'UL', 'text_dl' => 'DL', 'text_ratio' => 'Ratio',
-            'title_online' => 'Online', 'title_offline' => 'Offline',
-            'title_send_message_to' => 'PM', 'title_report_this_post' => 'Report',
-            'title_reply_with_quote' => 'Quote', 'title_delete_post' => 'Delete',
-            'title_edit_post' => 'Edit', 'submit_sticky' => 'Sticky',
-            'submit_unsticky' => 'Unsticky', 'submit_lock' => 'Lock',
-            'submit_unlock' => 'Unlock', 'submit_delete_topic' => 'Delete Topic',
-            'text_move_thread_to' => 'Move to', 'submit_move' => 'Move',
-            'text_highlight_topic' => 'Highlight', 'select_color' => 'Color',
-            'submit_change' => 'Change', 'text_quick_reply' => 'Quick Reply',
-            'submit_add_reply' => 'Add Reply', 'text_add_reply' => 'Reply',
-            'text_topic_locked_new_denied' => 'Locked', 'text_unpermitted_posting_here' => 'No post',
-            'text_post_protected' => 'Protected', 'text_last_edited_by' => 'Edited by',
-            'text_last_edit_at' => ' at ', 'std_error' => 'Error',
-            'std_forum_error' => 'Forum Error', 'std_topic_not_found' => 'Topic not found',
-            'std_unpermitted_viewing_topic' => 'No permission',
-        ]);
+        $this->seedTestSettings(['SITENAME' => 'TestSite']);
+        PageState::instance()->setLangDir('en');
 
         $indexService = new ForumIndexService(
             $this->app->make(CurrentUser::class),

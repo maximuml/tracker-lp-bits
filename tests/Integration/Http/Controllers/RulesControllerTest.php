@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\RulesController;
-use App\Support\Globals;
+use App\Support\Locale;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -27,7 +27,7 @@ final class RulesControllerTest extends TestCase
 
     public function test_rules_renders_cached_rule_data(): void
     {
-        $langFolder = (string) app(Globals::class)->get('CURLANGDIR', 'en');
+        $langFolder = Locale::currentLangDir('en');
         Cache::put("{$langFolder}_rules", [['title' => 'Cached Rule', 'text' => 'Cached rule body']], 900);
 
         $controller = app(RulesController::class);

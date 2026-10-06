@@ -7,7 +7,6 @@ namespace Tests\Integration\Services;
 use App\Repositories\CleanupRepository;
 use App\Services\Cleanup\Tasks;
 use App\Services\CleanupService;
-use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -59,16 +58,11 @@ final class CleanupServiceTest extends TestCase
         $this->app->instance(CleanupRepository::class, $repo);
     }
 
-    private function setGlobal(string $key, mixed $value): void
-    {
-        app(Globals::class)->set($key, $value);
-    }
-
     // --- triggerCron ---
 
     public function test_trigger_cron_when_disabled_returns_forbidden(): void
     {
-        $this->setGlobal('useCronTriggerCleanUp', false);
+        config()->set('nexus.cleanup_cron_triggered', false);
 
         $result = $this->service()->triggerCron();
 
@@ -77,7 +71,7 @@ final class CleanupServiceTest extends TestCase
 
     public function test_trigger_cron_when_enabled_but_not_due_returns_not_triggered(): void
     {
-        $this->setGlobal('useCronTriggerCleanUp', true);
+        config()->set('nexus.cleanup_cron_triggered', true);
         $this->mockCleanupRepo();
 
         // No avps record → runAll returns false → "Clean-up not triggered."
@@ -88,7 +82,7 @@ final class CleanupServiceTest extends TestCase
 
     public function test_trigger_cron_when_enabled_and_due_returns_progress(): void
     {
-        $this->setGlobal('useCronTriggerCleanUp', true);
+        config()->set('nexus.cleanup_cron_triggered', true);
         $this->mockCleanupRepo();
 
         // Insert stale avps records for all 5 cleanup levels so runAll proceeds

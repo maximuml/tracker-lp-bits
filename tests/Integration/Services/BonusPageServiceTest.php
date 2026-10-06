@@ -7,7 +7,6 @@ namespace Tests\Integration\Services;
 use App\Repositories\BonusCalculationRepository;
 use App\Services\BonusPageService;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,8 +39,6 @@ final class BonusPageServiceTest extends TestCase
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -59,9 +56,6 @@ final class BonusPageServiceTest extends TestCase
         $this->currentUser = new CurrentUser;
         $this->app->instance(CurrentUser::class, $this->currentUser);
 
-        $this->globals = new Globals;
-        $this->app->instance(Globals::class, $this->globals);
-
         $this->service = new BonusPageService($this->currentUser, $rep);
     }
 
@@ -75,9 +69,9 @@ final class BonusPageServiceTest extends TestCase
     }
 
     /** @param  array<string, mixed>  $values */
-    private function mockGlobals(array $values = []): void
+    private function seedSettings(array $values = []): void
     {
-        $this->seedTestSettings($values, $this->globals);
+        $this->seedTestSettings($values);
     }
 
     /** @param  array<string, mixed>  $userData */
@@ -109,7 +103,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_returns_non_empty_array(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'onegbupload_bonus' => 100.0,
             'fivegbupload_bonus' => 200.0,
             'tengbupload_bonus' => 300.0,
@@ -128,7 +122,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_first_item_is_1gb_upload(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'onegbupload_bonus' => 100.0,
             'oneinvite_bonus' => 0.0,
         ]);
@@ -142,7 +136,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_second_item_is_5gb_upload(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'fivegbupload_bonus' => 200.0,
             'oneinvite_bonus' => 0.0,
         ]);
@@ -156,7 +150,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_excludes_invite_when_bonus_is_zero(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'oneinvite_bonus' => 0.0,
         ]);
 
@@ -168,7 +162,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_includes_invite_when_bonus_is_positive(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'oneinvite_bonus' => 500.0,
         ]);
 
@@ -180,7 +174,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_includes_custom_title_item(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'customtitle_bonus' => 5000.0,
             'oneinvite_bonus' => 0.0,
         ]);
@@ -193,7 +187,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_includes_vip_status_item(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'vipstatus_bonus' => 10000.0,
             'oneinvite_bonus' => 0.0,
         ]);
@@ -206,7 +200,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_includes_gift_item(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'oneinvite_bonus' => 0.0,
         ]);
 
@@ -220,7 +214,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_includes_cancel_hr_item(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'oneinvite_bonus' => 0.0,
         ]);
 
@@ -232,7 +226,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_bonus_array_each_item_has_required_keys(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'oneinvite_bonus' => 500.0,
         ]);
 
@@ -251,7 +245,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_with_action_set_returns_null_shop_and_info(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => '',
             'oneinvite_bonus' => 0.0,
         ]);
@@ -268,7 +262,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_returns_expected_top_level_keys(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => '',
             'oneinvite_bonus' => 0.0,
         ]);
@@ -291,7 +285,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_resolves_do_message_for_upload(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => '',
             'oneinvite_bonus' => 0.0,
         ]);
@@ -307,7 +301,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_resolves_do_message_for_unknown_do(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => '',
             'oneinvite_bonus' => 0.0,
         ]);
@@ -322,7 +316,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_formats_bonus_with_one_decimal(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => '',
             'oneinvite_bonus' => 0.0,
         ]);
@@ -337,7 +331,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_with_bonus_tweak_disable_throws(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => 'disable',
             'oneinvite_bonus' => 0.0,
         ]);
@@ -356,7 +350,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_with_bonus_tweak_disablesave_throws(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => 'disablesave',
             'oneinvite_bonus' => 0.0,
         ]);
@@ -375,7 +369,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_returns_user_id_from_current_user(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => '',
             'oneinvite_bonus' => 0.0,
         ]);
@@ -390,7 +384,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_build_returns_all_bonus_array_in_result(): void
     {
-        $this->mockGlobals([
+        $this->seedSettings([
             'bonus_tweak' => '',
             'oneinvite_bonus' => 500.0,
         ]);

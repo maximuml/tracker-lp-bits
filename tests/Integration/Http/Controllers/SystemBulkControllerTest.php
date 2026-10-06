@@ -18,7 +18,6 @@ use App\Jobs\SendLegacyMail;
 use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -508,7 +507,6 @@ final class SystemBulkControllerTest extends TestCase
 
     private function setupLegacyEnvironment(): void
     {
-        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
 
         app()->bind(LegacyRedisCache::class, fn () => null);
 

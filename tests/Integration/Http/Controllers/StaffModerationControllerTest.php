@@ -13,7 +13,6 @@ use App\Repositories\ModtaskRepository;
 use App\Repositories\ToolRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
@@ -218,13 +217,11 @@ final class StaffModerationControllerTest extends TestCase
     }
 
     /**
-     * Set up the legacy environment: load lang_functions from the language
-     * file into Globals and bind LegacyRedisCache to null so that
+     * Set up the legacy environment: bind LegacyRedisCache to null so that
      * legacyAbortResponse() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {
-        app(Globals::class)->set('lang_functions', (array) trans('legacy/functions'));
 
         app()->bind(LegacyRedisCache::class, fn () => null);
 

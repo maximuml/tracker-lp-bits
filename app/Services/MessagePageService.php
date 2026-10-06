@@ -10,7 +10,6 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -44,21 +43,17 @@ class MessagePageService
 
     private CurrentUser $currentUser;
 
-    private Globals $globals;
-
     private ?LegacyRedisCache $legacyRedisCache;
 
     public function __construct(
         MessageRepository $messageRepository,
         MailboxRepository $mailboxRepository,
         CurrentUser $currentUser,
-        Globals $globals,
         ?LegacyRedisCache $legacyRedisCache,
     ) {
         $this->messageRepository = $messageRepository;
         $this->mailboxRepository = $mailboxRepository;
         $this->currentUser = $currentUser;
-        $this->globals = $globals;
         $this->legacyRedisCache = $legacyRedisCache;
     }
 
@@ -80,7 +75,7 @@ class MessagePageService
             'userId' => $userId,
             'action' => $action,
             'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'),
-            'contentWidth' => (string) $this->globals->get('CONTENT_WIDTH', '737'),
+            'contentWidth' => '737',
         ];
 
         switch ($action) {

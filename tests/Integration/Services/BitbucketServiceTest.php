@@ -7,8 +7,8 @@ namespace Tests\Integration\Services;
 use App\Repositories\BitbucketRepository;
 use App\Repositories\UserAccountRepository;
 use App\Services\BitbucketService;
-use App\Support\Globals;
 use App\Support\Path;
+use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -91,7 +91,7 @@ final class BitbucketServiceTest extends TestCase
 
     private function bitbucketPath(string $filename): string
     {
-        $bitbucket = (string) app(Globals::class)->get('bitbucket', 'bitbucket');
+        $bitbucket = (string) (Settings::get('main.bitbucket') ?: 'bitbucket');
 
         return Path::resolve("{$bitbucket}/{$filename}", public_path());
     }

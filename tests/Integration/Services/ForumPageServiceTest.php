@@ -12,7 +12,7 @@ use App\Repositories\TopicRepository;
 use App\Services\ForumPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
-use App\Support\Globals;
+use App\Support\PageState;
 use App\Support\Settings;
 use App\ViewModels\Forum\ForumIndexViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -55,12 +55,7 @@ final class ForumPageServiceTest extends TestCase
         Settings::saveBatch('basic', ['SITENAME' => 'TestSite']);
         Settings::saveBatch('main', ['postsperpage' => 10, 'topicsperpage' => 20, 'showforumstats' => 'no']);
         Settings::resetCache();
-        app(Globals::class)->set('CURLANGDIR', 'en');
-        app(Globals::class)->set('lang_forums', [
-            'text_forums' => 'Forums', 'text_search' => 'Search',
-            'text_view_unread' => 'Unread', 'text_catch_up' => 'Catch Up',
-            'std_forum_error' => 'Error', 'std_unknown_action' => 'Unknown action',
-        ]);
+        PageState::instance()->setLangDir('en');
     }
 
     /**

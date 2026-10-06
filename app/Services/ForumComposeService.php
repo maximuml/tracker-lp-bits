@@ -9,8 +9,8 @@ use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
+use App\Support\Config\SiteConfig;
 use App\Support\Forum;
-use App\Support\Globals;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
@@ -27,7 +27,6 @@ final class ForumComposeService
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly TopicRepository $topicRepository,
         private readonly PostLookupRepository $postRepository,
-        private readonly Globals $globals,
     ) {}
 
     /**
@@ -37,7 +36,7 @@ final class ForumComposeService
      */
     public function buildComposeFrame(int $id, string $type): ?ForumComposeViewModel
     {
-        $maxsubjectlength = (int) $this->globals->get('maxsubjectlength');
+        $maxsubjectlength = SiteConfig::current()->main->maxSubjectLength(100);
         $hassubject = false;
         $subject = '';
         $body = '';

@@ -92,4 +92,8 @@ return [
     // (throttle.tracker) is a separate middleware and is unaffected.
     'rate_limiting' => Env::get('NEXUS_RATE_LIMITING', true),
 
+    // false makes public/cron.php refuse to run cleanup (legacy
+    // browser-triggered mode).
+    'cleanup_cron_triggered' => true,
+
 ];

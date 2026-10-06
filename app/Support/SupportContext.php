@@ -67,11 +67,6 @@ final class SupportContext
         self::context()->addUserUpdate($key, $value);
     }
 
-    public static function getGlobal(string $key, mixed $default = null): mixed
-    {
-        return self::context()->getGlobal($key, $default);
-    }
-
     public static function getServerValue(string $key, mixed $default = null): mixed
     {
         return self::context()->getServerValue($key, $default);

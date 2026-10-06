@@ -43,7 +43,7 @@ final class RouteInventoryTest extends TestCase
         'api/challenge' => true,
         // ajax.php — per-action guard inside UtilityController::ajax()
         // (passkey actions are guest-facing, the rest get a JSON 401 via
-        // LegacyAuth::requireLoginFromContext)
+        // AccessGate::requireLogin (JSON 401 for ajax))
         'ajax' => true,
         // Login-page passkey assertions — guest-facing by design (they
         // run before the user has a session; the WebAuthn challenge +

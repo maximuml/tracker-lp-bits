@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Auth\AccessGate;
+use App\Auth\AuthContext;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Requests\PreviewRequest;
 use App\Models\Setting;
@@ -14,7 +16,6 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
 use App\Support\LegacyAjaxRedirects;
-use App\Support\LegacyAuth;
 use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
 use App\Support\RedisGuard;
@@ -34,6 +35,7 @@ class UtilityController extends LegacyController
         private readonly ?LegacyRedisCache $legacyRedisCache,
         private readonly LegacyHeaderBag $legacyHeaderBag,
         private readonly SecureTokenService $secureTokenService,
+        private readonly AccessGate $accessGate,
     ) {}
 
     public function ajax(Request $request): JsonResponse|RedirectResponse
@@ -60,7 +62,7 @@ class UtilityController extends LegacyController
         // dispatcher — their REST endpoints are guest-facing too.
         $guestActions = ['getPasskeyGetArgs', 'processPasskeyGet'];
         if (! in_array($action, $guestActions, true)) {
-            LegacyAuth::requireLoginFromContext();
+            $this->accessGate->requireLogin(false, AuthContext::current());
         }
 
         // Every action migrated to its own REST endpoint — 308 redirects

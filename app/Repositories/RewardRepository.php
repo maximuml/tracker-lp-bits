@@ -7,8 +7,8 @@ namespace App\Repositories;
 use App\Models\Reward;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Support\QueryLog;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 

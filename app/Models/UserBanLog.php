@@ -14,8 +14,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Support\QueryLog;
 use App\Support\Logger;
+use App\Support\QueryLog;
 
 class UserBanLog extends NexusModel
 {

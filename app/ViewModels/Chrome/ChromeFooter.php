@@ -6,8 +6,8 @@ namespace App\ViewModels\Chrome;
 
 use App\Support\AssetAppender;
 use App\Support\Html\SafeHtml;
-use App\Support\QueryLog;
 use App\Support\PageLayoutContext;
+use App\Support\QueryLog;
 
 /**
  * Footer chrome data (ADR 0018): copyright/version line, page-generation

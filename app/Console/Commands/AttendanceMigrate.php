@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Repositories\AttendanceRepository;
-use App\Support\QueryLog;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
 

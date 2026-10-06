@@ -9,8 +9,8 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\UserAccountRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\QueryLog;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use Illuminate\Support\Facades\DB;
 
 /**

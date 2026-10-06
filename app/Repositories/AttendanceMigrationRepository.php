@@ -6,8 +6,8 @@ namespace App\Repositories;
 
 use App\Models\Attendance;
 use App\Support\Environment;
-use App\Support\QueryLog;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 

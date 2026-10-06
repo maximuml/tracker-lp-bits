@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Auth\AuthContext;
+use App\Contracts\Repositories\AuthRepositoryInterface;
+use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\Security\PasskeyGenerator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
@@ -28,7 +32,7 @@ final class SiteAccess
      */
     public static function checkGuestVisit(): void
     {
-        if (LegacyAuth::loginFromContext()) {
+        if (self::loginFromCookie()) {
             return;
         }
 
@@ -114,5 +118,67 @@ final class SiteAccess
         }
 
         return true;
+    }
+
+    /**
+     * Bootstrap the current user from the auth cookie and populate the
+     * request-scoped CurrentUser. Mirrors the legacy `userlogin()` helper:
+     * checks the IP ban list, reads the user from the cookie and generates
+     * a missing passkey.
+     */
+    private static function loginFromCookie(): bool
+    {
+        $context = AuthContext::current();
+        $user = self::resolveCookieUser($context);
+
+        if ($user !== null) {
+            CurrentUser::instance()->set($user);
+
+            return true;
+        }
+
+        CurrentUser::instance()->set(null);
+
+        return false;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function resolveCookieUser(AuthContext $context): ?array
+    {
+        $cache = $context->cache;
+
+        $ip = $context->ip;
+        $nip = ip2long($ip);
+        $authRepository = app(AuthRepositoryInterface::class);
+
+        if ($nip && $authRepository->isIpBanned($nip)) {
+            $html = view('errors.unauthorized-ip')->render()."\n";
+            throw new HttpResponseException(new Response($html, 403));
+        }
+
+        $row = AuthCookie::userFromCookie($context->cookies, true);
+        if (empty($row)) {
+            return null;
+        }
+        if ($row instanceof User) {
+            $row = $row->toArray();
+        }
+
+        if (empty($row['passkey'])) {
+            $passkey = app(PasskeyGenerator::class)->generate();
+            $authRepository->updateUserPasskey((int) $row['id'], $passkey);
+        }
+
+        $row['old_ip'] = $row['ip'];
+        $row['ip'] = $ip;
+        $row['seedbonus'] = floatval($row['seedbonus']);
+
+        if (isset($context->queryParams['clearcache']) && $context->queryParams['clearcache'] && (int) ($row['class'] ?? 0) >= $context->moderatorClass && $cache !== null && method_exists($cache, 'setClearCache')) {
+            $cache->setClearCache(1);
+        }
+
+        return $row;
     }
 }

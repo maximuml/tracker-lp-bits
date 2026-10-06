@@ -2,24 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Support;
+namespace App\Auth;
 
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
+use App\Support\Input;
+use App\Support\Locale;
+use App\Support\Network;
+use App\Support\RequestContext;
 
 /**
- * Context bundle for legacy authentication helpers.
+ * Context bundle for the access-gate checks.
  *
- * `LegacyAuth` no longer reads `$GLOBALS` or super-globals directly;
- * callers (the procedural wrappers in `include/functions.php`) collect
- * the required values and pass them in this object. This makes the
- * auth helpers testable and decouples them from global state.
- *
- * The factory that builds this object from legacy globals lives in
- * `include/functions.php` so `App\Support` stays free of `$_GET`/`$_POST`
- * and `$GLOBALS`.
+ * Collects user row, request data and settings so the gate helpers
+ * stay testable and decoupled from global state.
  */
-final class LegacyAuthContext
+final class AuthContext
 {
     private ?int $langIdCache = null;
 
@@ -51,11 +50,9 @@ final class LegacyAuthContext
     ) {}
 
     /**
-     * Build a context from the current {@see SupportContext}.
-     * Replaces the legacy `legacy_auth_context()` helper for callers that
-     * already live inside the modern support layer.
+     * Build a context from the current request-scoped state.
      */
-    public static function fromSupportContext(): self
+    public static function current(): self
     {
         $script = '';
         if (\function_exists('nexus')) {

@@ -37,7 +37,7 @@ final class NotificationFeedHttpTest extends TestCase
 
     /**
      * Authenticate for the legacy stack the way a browser does — with a
-     * real `c_secure_pass` cookie. LegacyAuth::loginFromContext() fills
+     * real `c_secure_pass` cookie. SiteAccess cookie bootstrap fills
      * CurrentUser during boot; the nexus-web guard passes middleware.
      */
     private function cookieFor(User $user): string

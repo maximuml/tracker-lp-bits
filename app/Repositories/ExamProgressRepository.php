@@ -16,8 +16,8 @@ use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Json;
-use App\Support\QueryLog;
 use App\Support\Logger;
+use App\Support\QueryLog;
 
 /**
  * Handles exam progress calculation, formatting, and bulk updates.

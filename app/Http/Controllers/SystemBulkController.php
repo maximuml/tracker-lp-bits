@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Auth\AccessGate;
+use App\Auth\AuthContext;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
@@ -28,7 +30,6 @@ use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
 use App\Support\Input;
-use App\Support\LegacyAuth;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Lock;
@@ -60,6 +61,7 @@ class SystemBulkController extends LegacyController
         UserModerationRepositoryInterface $userModerationRepository,
         CurrentUser $currentUser,
         ?LegacyRedisCache $legacyRedisCache,
+        private readonly AccessGate $accessGate,
     ) {
         $this->userModerationRepository = $userModerationRepository;
         $this->currentUser = $currentUser;
@@ -161,7 +163,7 @@ class SystemBulkController extends LegacyController
         }
 
         try {
-            LegacyAuth::registrationCheckFromContext('invitesystem', true, false);
+            $this->accessGate->registrationCheck('invitesystem', true, false, AuthContext::current());
 
             $userRep = $this->userModerationRepository;
             try {

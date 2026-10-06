@@ -39,7 +39,7 @@ final class OfferVoteService
 
     public function handleVote(Request $request): ?Response
     {
-        $vote = (string) $request->input('vote', '');
+        $vote = $request->string('vote')->toString();
         if ($vote === '') {
             return null;
         }

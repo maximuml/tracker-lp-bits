@@ -113,7 +113,7 @@ final class ChromeAlerts
             $newNews = (int) $newNews;
             if ($newNews > 0) {
                 $alerts[] = [
-                    'url' => 'index.php',
+                    'url' => '/web/index',
                     'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($newNews).$newNews.(string) (__('legacy/functions.text_new_news')),
                     'color' => 'green',
                 ];

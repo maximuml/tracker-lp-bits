@@ -50,7 +50,7 @@
     @endif
     <td class="align-top px-2.5 py-1.5">{{ $row->offeredBy }}</td>
     @if ($table->canManage)
-    <td class="align-top px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nxm-linkbtn" title="{{ __('legacy/offers.title_delete') }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('legacy/offers.title_delete') }}" /></button></form><br /><a href="?id={{ $row->id }}&amp;edit_offer=1"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('legacy/offers.title_edit') }}" /></a></td>
+    <td class="align-top px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nxm-linkbtn" title="{{ __('legacy/offers.title_delete') }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('legacy/offers.title_delete') }}" /></button></form><br /><a href="?id={{ $row->id }}&amp;edit_offer=1"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('legacy/offers.title_edit') }}" /></a></td>
     @endif
 </tr>
 @endforeach

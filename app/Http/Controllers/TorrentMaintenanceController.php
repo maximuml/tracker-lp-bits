@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Http\Requests\FlushTorrentRequest;
+use App\Http\Requests\ReseedTorrentRequest;
 use App\Models\Torrent;
 use App\Repositories\MessageRepository;
 use App\Repositories\PeerRepository;
@@ -105,7 +107,16 @@ class TorrentMaintenanceController extends LegacyController
         return $nodes;
     }
 
-    public function takeFlush(Request $request): Response|RedirectResponse
+    public function takeFlush(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/torrents/flush'.$suffix, 308);
+    }
+
+    public function flush(FlushTorrentRequest $request): Response|RedirectResponse
     {
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
@@ -133,7 +144,16 @@ class TorrentMaintenanceController extends LegacyController
         );
     }
 
-    public function takeReseed(Request $request): View|RedirectResponse|Response
+    public function takeReseed(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/torrents/reseed'.$suffix, 308);
+    }
+
+    public function reseed(ReseedTorrentRequest $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {

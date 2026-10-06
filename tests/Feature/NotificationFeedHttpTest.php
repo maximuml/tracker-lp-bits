@@ -111,7 +111,7 @@ final class NotificationFeedHttpTest extends TestCase
         // swallow it.
         $this->createPm((int) $user->id, (int) $sender->id);
 
-        $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->postJson('/notifications', ['watermark' => $panel['watermark']])
+        $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->postJson('/web/notifications/mark-read', ['watermark' => $panel['watermark']])
             ->assertOk()->assertJsonPath('ret', 0);
 
         $after = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications')->json('data');
@@ -127,7 +127,7 @@ final class NotificationFeedHttpTest extends TestCase
         $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications');
         $this->createPm((int) $user->id, (int) $sender->id);
 
-        $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->postJson('/notifications', [])
+        $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->postJson('/web/notifications/mark-read', [])
             ->assertOk()->assertJsonPath('ret', 0);
 
         $after = $this->withCredentials()->withUnencryptedCookie(AuthCookie::COOKIE_NAME, $cookie)->getJson('/web/notifications')->json('data');

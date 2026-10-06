@@ -28,7 +28,7 @@ class StaffPageController extends LegacyController
     public function staff(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
 
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');

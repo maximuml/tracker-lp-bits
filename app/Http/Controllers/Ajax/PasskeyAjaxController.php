@@ -26,7 +26,7 @@ final class PasskeyAjaxController extends AjaxController
         return $this->respond(function () {
             $user = $this->currentUser->get() ?? [];
 
-            return $this->userPasskeyRepository->getCreateArgs($user['id'], $user['username']);
+            return $this->userPasskeyRepository->getCreateArgs($this->currentUser->id(), $this->currentUser->username());
         });
     }
 
@@ -36,7 +36,7 @@ final class PasskeyAjaxController extends AjaxController
             $user = $this->currentUser->get() ?? [];
 
             return $this->userPasskeyRepository->processCreate(
-                $user['id'],
+                $this->currentUser->id(),
                 $request->input('challengeId'),
                 $request->input('clientDataJSON'),
                 $request->input('attestationObject'),
@@ -49,7 +49,7 @@ final class PasskeyAjaxController extends AjaxController
         return $this->respond(function () use ($request) {
             $user = $this->currentUser->get() ?? [];
 
-            return $this->userPasskeyRepository->delete($user['id'], $request->input('credentialId'));
+            return $this->userPasskeyRepository->delete($this->currentUser->id(), $request->input('credentialId'));
         });
     }
 
@@ -58,7 +58,7 @@ final class PasskeyAjaxController extends AjaxController
         return $this->respond(function () {
             $user = $this->currentUser->get() ?? [];
 
-            return $this->userPasskeyRepository->getList($user['id']);
+            return $this->userPasskeyRepository->getList($this->currentUser->id());
         });
     }
 

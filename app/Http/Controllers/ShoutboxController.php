@@ -105,7 +105,7 @@ class ShoutboxController extends LegacyController
         $result = $this->repository->history($request);
 
         $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($currentUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         $rows = (array) ($result['data'] ?? []);
         $shoutIds = array_map(fn ($r) => (int) ($r['id'] ?? 0), $rows);
         $userIds = array_filter(array_unique(array_map(fn ($r) => (int) ($r['userid'] ?? 0), $rows)));
@@ -210,7 +210,7 @@ class ShoutboxController extends LegacyController
                 'staff' => (int) $request->input('last_staff_id', 0),
             ]
         );
-        $userId = (int) ($user['id'] ?? 0);
+        $userId = (int) ($this->currentUser->id());
 
         // Bounded stream lifetime: the client reconnects after the loop
         // ends and resumes via Last-Event-ID/cursor params.

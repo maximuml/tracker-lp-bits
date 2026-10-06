@@ -50,7 +50,7 @@ final class UserDisplay
     {
         $user = CurrentUser::instance()->get();
         if (LegacyRuntime::instance()->isLegacy()) {
-            return $user['class'] ?? '';
+            return CurrentUser::instance()->value('class', '');
         }
 
         if (! auth()->check()) {
@@ -88,7 +88,7 @@ final class UserDisplay
     {
         $user = CurrentUser::instance()->get();
         if (LegacyRuntime::instance()->isLegacy()) {
-            return (int) ($user['id'] ?? 0);
+            return (int) (CurrentUser::instance()->id());
         }
 
         if (! auth()->check()) {
@@ -107,7 +107,7 @@ final class UserDisplay
     {
         $user = CurrentUser::instance()->get();
         if (LegacyRuntime::instance()->isLegacy()) {
-            return $user['username'] ?? '';
+            return CurrentUser::instance()->username();
         }
 
         if (! auth()->check()) {

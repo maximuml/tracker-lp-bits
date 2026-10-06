@@ -302,7 +302,7 @@ class PollController extends LegacyController
     public function vote(PollVoteRequest $request): array
     {
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($currentUser['id'] ?? 0);
+        $userId = (int) ($this->currentUser->id());
 
         $data = $request->validated();
 

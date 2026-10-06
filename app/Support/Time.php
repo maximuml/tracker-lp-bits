@@ -283,7 +283,7 @@ final class Time
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
         $timeStr = $time instanceof Carbon ? $time->toDateTimeString() : (string) $time;
 
-        if (isset($CURUSER) && ($CURUSER['timetype'] ?? 1) != UserTimeType::TIMEALIVE->value && ! $forceago) {
+        if (isset($CURUSER) && (CurrentUser::instance()->value('timetype', 1)) != UserTimeType::TIMEALIVE->value && ! $forceago) {
             return [
                 'mode' => 'absolute',
                 'inner' => self::formatAbsoluteTime($timeStr, $twoline),

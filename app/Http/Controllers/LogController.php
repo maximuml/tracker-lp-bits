@@ -48,7 +48,7 @@ class LogController extends LegacyController
         }
 
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($currentUser['id'] ?? 0);
+        $userId = (int) ($this->currentUser->id());
 
         $action = (string) ($request->input('action', 'dailylog'));
         $allowed = ['dailylog', 'chronicle', 'news', 'poll'];
@@ -71,7 +71,7 @@ class LogController extends LegacyController
         }
 
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($currentUser['id'] ?? 0);
+        $userId = (int) ($this->currentUser->id());
 
         $action = (string) ($request->input('action', 'dailylog'));
         $allowed = ['dailylog', 'chronicle', 'news', 'poll'];
@@ -225,7 +225,7 @@ class LogController extends LegacyController
         $txt = (string) ($request->input('txt') ?? '');
         if ($txt !== '') {
             $currentUser = (array) ($this->currentUser->get() ?? []);
-            $this->logRepository->addChronicle((int) ($currentUser['id'] ?? 0), $txt);
+            $this->logRepository->addChronicle((int) ($this->currentUser->id()), $txt);
         }
 
         return redirect('/web/log?action=chronicle');

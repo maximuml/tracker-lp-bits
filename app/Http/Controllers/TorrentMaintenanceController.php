@@ -48,7 +48,7 @@ class TorrentMaintenanceController extends LegacyController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_STRUCTURE->value, false, $currentUserId)) {
             abort(403);
         }
@@ -124,7 +124,7 @@ class TorrentMaintenanceController extends LegacyController
         }
 
         $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($currentUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         $currentClass = (int) UserDisplay::currentClass();
 
         if ($currentClass >= UserClassEnum::MODERATOR->value || $currentUserId === $id) {
@@ -162,7 +162,7 @@ class TorrentMaintenanceController extends LegacyController
             return redirect('/takereseed.php'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         if (! $this->permissionChecker->userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
             return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), ('Permission denied.'));
         }
@@ -188,7 +188,7 @@ class TorrentMaintenanceController extends LegacyController
             $locale = Locale::userLocale((int) $snatchRow['userid']);
             $rsSubject = Locale::trans('torrent.msg_reseed_request', [], $locale);
             $pnMsg = Locale::trans('torrent.msg_reseed_user', [], $locale)
-                .$curUser['username']
+                .$this->currentUser->username()
                 .Locale::trans('torrent.msg_ask_reseed', [], $locale)
                 .'[url='.Url::absolute($baseUrl).'/web/details/'.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
                 .Locale::trans('torrent.msg_thank_you', [], $locale);

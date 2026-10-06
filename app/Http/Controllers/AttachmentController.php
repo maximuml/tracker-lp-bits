@@ -32,7 +32,7 @@ class AttachmentController extends LegacyController
     public function attachment(Request $request): Response
     {
         $currentUser = $this->currentUser->get() ?? [];
-        $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
+        $Attach = new AttachmentService((int) ($this->currentUser->id()));
 
         return $this->renderAttachment($request, $currentUser, $Attach);
     }
@@ -49,7 +49,7 @@ class AttachmentController extends LegacyController
     public function attachmentUpload(AttachmentUploadRequest $request, AttachmentMutationService $attachmentMutationService): Response
     {
         $currentUser = $this->currentUser->get() ?? [];
-        $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
+        $Attach = new AttachmentService((int) ($this->currentUser->id()));
 
         $warning = '';
         $script = '';
@@ -120,8 +120,8 @@ class AttachmentController extends LegacyController
             'callback_func' => (string) $request->input('callback_func', ''),
             'warning' => $warning,
             'script' => SafeHtml::fromTrustedHtml($script),
-            'theme' => UserTheme::fromStringSafe(is_string($currentUser['theme'] ?? null) ? $currentUser['theme'] : null)->value,
-            'fontSize' => UserFontsize::fromMixed($currentUser['fontsize'] ?? null)->stringValue(),
+            'theme' => UserTheme::fromStringSafe(is_string($this->currentUser->value('theme', null)) ? $this->currentUser->value('theme') : null)->value,
+            'fontSize' => UserFontsize::fromMixed($this->currentUser->value('fontsize', null))->stringValue(),
         ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);

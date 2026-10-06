@@ -37,7 +37,7 @@ class SupportController extends LegacyController
     public function complains(Request $request): View|RedirectResponse|Response
     {
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $uid = (int) ($currentUser['id'] ?? 0);
+        $uid = (int) ($this->currentUser->id());
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
 
         if ($uid > 0 && ! $isAdmin) {
@@ -108,7 +108,7 @@ class SupportController extends LegacyController
     {
         $currentUser = (array) ($this->currentUser->get() ?? []);
 
-        return (int) ($currentUser['id'] ?? 0);
+        return (int) ($this->currentUser->id());
     }
 
     private function complainsGate(): ?Response

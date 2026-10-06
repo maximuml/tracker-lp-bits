@@ -147,8 +147,8 @@ final class LegacyResponse
 
         $CURUSER = CurrentUser::instance()->get() ?? [];
 
-        $msg = 'Invalid ID Attempt: Username: '.($CURUSER['username'] ?? '')
-            .' - UserID: '.($CURUSER['id'] ?? '')
+        $msg = 'Invalid ID Attempt: Username: '.(CurrentUser::instance()->username())
+            .' - UserID: '.(CurrentUser::instance()->value('id', ''))
             .' - UserIP : '.(Network::clientIp());
 
         if ($log && \function_exists('write_log')) {
@@ -188,12 +188,12 @@ final class LegacyResponse
     {
         $CURUSER = CurrentUser::instance()->get() ?? [];
 
-        if (! ($CURUSER['uploadpos'] ?? true)) {
+        if (! (CurrentUser::instance()->value('uploadpos', true))) {
             return false;
         }
 
         $uploadDenyApprovalDenyCount = (int) SiteConfig::current()->main->uploadDenyApprovalDenyCount();
-        $approvalDenyCount = app(TorrentModerationRepository::class)->getApprovalDenyCount((int) ($CURUSER['id'] ?? 0));
+        $approvalDenyCount = app(TorrentModerationRepository::class)->getApprovalDenyCount((int) (CurrentUser::instance()->id()));
 
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             self::abort(
@@ -205,7 +205,7 @@ final class LegacyResponse
 
         if ($where === 'torrents') {
             $offerSkipApprovedCount = (int) SiteConfig::current()->main->offerSkipApprovedCount();
-            if (($CURUSER['offer_allowed_count'] ?? 0) >= $offerSkipApprovedCount) {
+            if ((CurrentUser::instance()->value('offer_allowed_count', 0)) >= $offerSkipApprovedCount) {
                 return true;
             }
             if (Permission::canUploadToNormalSection()) {

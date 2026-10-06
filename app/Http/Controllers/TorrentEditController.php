@@ -74,7 +74,7 @@ class TorrentEditController extends Controller
         $headTitle = (__('legacy/edit.head_edit_torrent')).'"'.$row['name'].'"';
         $cats = Category::listByModeWithContext($sectionmode);
 
-        $canEdit = (int) ($currentUser['id'] ?? 0) === (int) ($row['owner'] ?? 0)
+        $canEdit = (int) ($this->currentUser->id()) === (int) ($row['owner'] ?? 0)
             || Permission::can(PermissionEnum::TORRENT_MANAGE);
 
         $priceRow = null;
@@ -95,7 +95,7 @@ class TorrentEditController extends Controller
         $pick = null;
         if (
             Permission::can(PermissionEnum::TORRENT_SET_STICKY)
-            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && LegacyYesNo::isYes($currentUser['picker'] ?? null))
+            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && LegacyYesNo::isYes($this->currentUser->value('picker', null)))
         ) {
             $promotionOptions = Permission::can(PermissionEnum::TORRENT_ON_PROMOTION)
                 ? SafeHtml::fromTrustedHtml(Html::promotionSelection((int) $row['sp_state'], 0))

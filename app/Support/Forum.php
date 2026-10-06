@@ -82,7 +82,7 @@ final class Forum
         $CURUSER = CurrentUser::instance()->get() ?? [];
 
         $forumRep = self::forumModRepository();
-        $userId = (int) ($CURUSER['id'] ?? 0);
+        $userId = (int) (CurrentUser::instance()->id());
 
         switch ($in) {
             case 'post':

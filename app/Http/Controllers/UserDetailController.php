@@ -64,7 +64,7 @@ class UserDetailController extends Controller
 
         if ($id <= 0) {
             $currentUser = $this->currentUser->get();
-            $id = (int) ($currentUser['id'] ?? 0);
+            $id = (int) ($this->currentUser->id());
             if ($id <= 0) {
                 abort(404);
             }
@@ -112,7 +112,7 @@ class UserDetailController extends Controller
     private function buildDetailsViewData(int $id, array $user, ?User $userModel): array
     {
         $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($currentUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         $isOwner = $currentUserId === $id;
 
         $canViewConfidential = Permission::can(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);

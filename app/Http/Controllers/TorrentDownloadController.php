@@ -162,10 +162,10 @@ class TorrentDownloadController extends LegacyController
                 $forcecheck = false;
                 break;
             case 'ratio':
-                $leechwarnuntiltime = strtotime((string) ($curUser['leechwarnuntil'] ?? ''));
+                $leechwarnuntiltime = strtotime((string) ($this->currentUser->value('leechwarnuntil', '')));
                 $note = '';
                 if ($leechwarnuntiltime && $timenow < $leechwarnuntiltime) {
-                    $kicktimeout = Time::format($curUser['leechwarnuntil'], false, false, true);
+                    $kicktimeout = Time::format($this->currentUser->value('leechwarnuntil'), false, false, true);
                     $note = view('downloadnotice._note', ['type' => 'ratio', 'kicktimeout' => $kicktimeout])->render();
                 }
                 $title = __('legacy/downloadnotice.text_low_ratio_notice');
@@ -223,7 +223,7 @@ class TorrentDownloadController extends LegacyController
             return response('error');
         }
 
-        $userId = (int) ($curUser['id'] ?? 0);
+        $userId = (int) ($this->currentUser->id());
         if ($hidenotice && $userId > 0) {
             $update = [];
             if ($type === 'firsttime') {

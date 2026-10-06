@@ -93,7 +93,7 @@ class SystemBulkController extends LegacyController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $senderId = request()->post('sender') === 'system' ? null : (int) ($curUser['id'] ?? 0);
+        $senderId = request()->post('sender') === 'system' ? null : (int) ($this->currentUser->id());
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) request()->post('msg'));
         $amount = request()->post('amount');
@@ -153,7 +153,7 @@ class SystemBulkController extends LegacyController
             return redirect('/takeinvite.php'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         $lockName = sprintf('takeinvite:%s', $currentUserId);
         $lock = new Lock($lockName, 10);
         if (! $lock->get()) {
@@ -253,7 +253,7 @@ class SystemBulkController extends LegacyController
             $inviteTimeout = (string) SiteConfig::current()->main->inviteTimeout();
 
             $message = nl2br(view('emails.invite', [
-                'senderUsername' => $curUser['username'],
+                'senderUsername' => $this->currentUser->username(),
                 'signupUrl' => $signupUrl,
                 'inviteTimeout' => $inviteTimeout,
                 'personalBody' => $body,
@@ -324,7 +324,7 @@ class SystemBulkController extends LegacyController
             return redirect('/takeupdate.php'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');
         }
@@ -438,7 +438,7 @@ class SystemBulkController extends LegacyController
         $validTypeMap = (array) (__('legacy/incrementbulk.types'));
 
         $currentUser = $this->currentUser->get() ?? [];
-        $senderId = $request->input('sender') === 'system' ? null : ((int) ($currentUser['id'] ?? 0));
+        $senderId = $request->input('sender') === 'system' ? null : ((int) ($this->currentUser->id()));
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) $request->input('msg', ''));
         $amount = $request->input('amount');

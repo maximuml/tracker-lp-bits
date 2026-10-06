@@ -119,7 +119,7 @@ final class Promotion
             $promotion,
             (string) ($posState ?? ''),
             $torrent ?? [],
-            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
+            UserAppendPromotion::tryFrom((int) (CurrentUser::instance()->value('appendpromotion', 2)))?->stringValue() ?? 'icon',
         );
     }
 
@@ -285,7 +285,7 @@ final class Promotion
             $promotionTimeType,
             $promotionUntil,
             $ignoreGlobal,
-            UserAppendPromotion::tryFrom((int) ($user['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
+            UserAppendPromotion::tryFrom((int) (CurrentUser::instance()->value('appendpromotion', 2)))?->stringValue() ?? 'icon',
             self::expireTorrentGlobals(),
         );
     }

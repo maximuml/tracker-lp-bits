@@ -38,7 +38,7 @@ class SearchController extends LegacyController
     public function search(Request $request): View|RedirectResponse
     {
         $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($curUser['id'] ?? 0)) : null;
+        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($this->currentUser->id())) : null;
         if ($currentUser === null) {
             $qs = $request->getQueryString();
 

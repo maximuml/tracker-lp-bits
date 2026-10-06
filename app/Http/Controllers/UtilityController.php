@@ -75,7 +75,7 @@ class UtilityController extends LegacyController
         }
 
         $currentUser = $this->currentUser->get() ?? [];
-        Logger::writeWithContext((string) ('hacking attempt made by '.($currentUser['username'] ?? 'guest').',uid '.($currentUser['id'] ?? 0)), (string) 'error', (bool) false);
+        Logger::writeWithContext((string) ('hacking attempt made by '.($this->currentUser->value('username', 'guest')).',uid '.($this->currentUser->id())), (string) 'error', (bool) false);
 
         return response()->json(Api::call(1, "Invalid action: {$action}", $request->only(['action', 'params'])));
     }

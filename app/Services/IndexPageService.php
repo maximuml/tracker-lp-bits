@@ -81,8 +81,8 @@ final class IndexPageService
         }
 
         // Reset unread news count
-        if (! empty($curUser['id'])) {
-            $this->cache->delete_value('user_'.(int) $curUser['id'].'_unread_news_count');
+        if (! empty($this->currentUser->id())) {
+            $this->cache->delete_value('user_'.(int) $this->currentUser->id().'_unread_news_count');
         }
 
         return new IndexPageViewModel(
@@ -135,7 +135,7 @@ final class IndexPageService
             return new IndexShoutboxSection;
         }
 
-        $csrf = Shoutbox::csrfToken((int) ($curUser['id'] ?? 0));
+        $csrf = Shoutbox::csrfToken((int) ($this->currentUser->id()));
         AssetAppender::js("var SHOUT_CSRF = '".addslashes($csrf)."';", 'footer', false);
 
         return new IndexShoutboxSection(
@@ -152,7 +152,7 @@ final class IndexPageService
             submitLabel: __('legacy/index.sumbit_shout'),
             clearButtonLabel: __('legacy/index.submit_clear'),
             showHideTitle: __('legacy/index.title_show_or_hide'),
-            refreshSeconds: (int) ($curUser['sbrefresh'] ?? 120),
+            refreshSeconds: (int) ($this->currentUser->value('sbrefresh', 120)),
         );
     }
 

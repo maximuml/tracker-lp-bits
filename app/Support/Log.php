@@ -24,6 +24,6 @@ final class Log
     {
         $user = CurrentUser::instance()->get() ?? [];
 
-        self::write($text, $security, (int) ($user['id'] ?? 0));
+        self::write($text, $security, (int) (CurrentUser::instance()->id()));
     }
 }

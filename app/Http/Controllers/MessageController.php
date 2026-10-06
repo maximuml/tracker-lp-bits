@@ -121,10 +121,10 @@ class MessageController extends LegacyController
                 return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
             }
             $msga = $msg->toArray();
-            if ((int) ($msga['receiver'] ?? 0) !== (int) ($currentUser['id'] ?? 0)) {
+            if ((int) ($msga['receiver'] ?? 0) !== (int) ($this->currentUser->id())) {
                 return $this->legacyAbortResponse(__('legacy/sendmessage.std_error'), __('legacy/sendmessage.std_permission_denied'));
             }
-            $body .= ($msga['msg'] ?? '')."\n\n-------- [url=/userdetails?id=".$currentUser['id'].']'.$currentUser['username'].'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
+            $body .= ($msga['msg'] ?? '')."\n\n-------- [url=/userdetails?id=".$this->currentUser->id().']'.$this->currentUser->username().'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
             $subject = (string) ($msga['subject'] ?? '');
             if (preg_match('/^Re:\\s/', $subject)) {
                 $subject = preg_replace('/^Re:\\s(.*)$/', 'Re(2): \\1', $subject) ?? $subject;
@@ -158,8 +158,8 @@ class MessageController extends LegacyController
             'title' => $title,
             'frameTitle' => $frameTitle,
             'stdheadMsgalert' => false,
-            'deleteChecked' => LegacyYesNo::isYes($currentUser['deletepms'] ?? null) ? ' checked' : '',
-            'saveChecked' => LegacyYesNo::isYes($currentUser['savepms'] ?? null) ? ' checked' : '',
+            'deleteChecked' => LegacyYesNo::isYes($this->currentUser->value('deletepms', null)) ? ' checked' : '',
+            'saveChecked' => LegacyYesNo::isYes($this->currentUser->value('savepms', null)) ? ' checked' : '',
         ]);
     }
 

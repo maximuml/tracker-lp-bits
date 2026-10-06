@@ -225,7 +225,7 @@ class SettingsController extends LegacyController
     {
         $action = (string) ($request->post('action') ?? '');
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $username = (string) ($currentUser['username'] ?? 'unknown');
+        $username = (string) ($this->currentUser->value('username', 'unknown'));
         $actiontime = date('F j, Y, g:i a');
 
         $saveMap = [

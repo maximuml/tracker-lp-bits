@@ -40,7 +40,7 @@ class TorrentBookmarkController extends LegacyController
             return response('failed', 200, $headers);
         }
 
-        $status = $this->bookmarkService->toggleBookmark((int) $user['id'], $torrentId);
+        $status = $this->bookmarkService->toggleBookmark((int) $this->currentUser->id(), $torrentId);
 
         return response($status, 200, $headers);
     }

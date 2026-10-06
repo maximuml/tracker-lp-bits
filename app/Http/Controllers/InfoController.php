@@ -48,7 +48,7 @@ class InfoController extends LegacyController
         $userid = (int) request()->query('id');
         LegacyResponse::assertId($userid, true);
 
-        $viewerId = (int) ($curUser['id'] ?? 0);
+        $viewerId = (int) ($this->currentUser->id());
         if ($viewerId != $userid && ! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId)) {
             LegacyResponse::permissionDenied();
         }
@@ -70,7 +70,7 @@ class InfoController extends LegacyController
         ];
 
         if ($action === 'viewposts') {
-            $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($curUser['class'] ?? 0), $perpage, $phpSelf);
+            $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($this->currentUser->classId()), $perpage, $phpSelf);
             if (empty($result['posts'])) {
                 return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_error')), (string) (__('legacy/userhistory.std_no_posts_found')));
             }

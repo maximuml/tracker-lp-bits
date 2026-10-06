@@ -243,12 +243,12 @@ final class ForumIndexService
         if (! $CURUSER) {
             return;
         }
-        $this->readStateRepository->clearReadPosts((int) $CURUSER['id']);
-        $Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
+        $this->readStateRepository->clearReadPosts((int) $this->currentUser->id());
+        $Cache->delete_value('user_'.$this->currentUser->id().'_last_read_post_list');
         $lastpostid = $this->postRepository->getLastPostId();
         if ($lastpostid) {
             $CURUSER['last_catchup'] = $lastpostid;
-            $this->postRepository->updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
+            $this->postRepository->updateLastCatchup((int) $this->currentUser->id(), (int) $lastpostid);
         }
     }
 

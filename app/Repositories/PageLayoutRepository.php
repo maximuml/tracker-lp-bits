@@ -141,7 +141,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
     public function prepareAccess(): void
     {
         $user = $this->currentUser->get();
-        if ($user === null || empty($user['id'])) {
+        if ($user === null || empty($this->currentUser->id())) {
             return;
         }
 
@@ -151,9 +151,9 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         }
 
         $this->userUpdateBatch->add('last_access', date('Y-m-d H:i:s'));
-        $this->userUpdateBatch->add('ip', $user['ip'] ?? Input::serverValue('REMOTE_ADDR', ''));
+        $this->userUpdateBatch->add('ip', $this->currentUser->value('ip', Input::serverValue('REMOTE_ADDR', '')));
 
-        $this->ipLogRepository->saveToCache((int) $user['id']);
+        $this->ipLogRepository->saveToCache((int) $this->currentUser->id());
 
         $menuResult = $this->menu->render(
             $script,
@@ -177,7 +177,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
     public function flushAccess(): void
     {
         $user = $this->currentUser->get();
-        if ($user === null || empty($user['id'])) {
+        if ($user === null || empty($this->currentUser->id())) {
             return;
         }
 
@@ -186,6 +186,6 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
             return;
         }
 
-        $this->updateUser((int) $user['id'], $userUpdateSet);
+        $this->updateUser((int) $this->currentUser->id(), $userUpdateSet);
     }
 }

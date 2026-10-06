@@ -136,7 +136,7 @@ class NewsController extends LegacyController
         $data = $request->validated();
 
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $data['userid'] = (int) ($currentUser['id'] ?? 0);
+        $data['userid'] = (int) ($this->currentUser->id());
         $data['added'] = now()->toDateTimeString();
         $data['notify'] = ($data['notify'] ?? 'no') === 'yes';
 
@@ -234,7 +234,7 @@ class NewsController extends LegacyController
 
         $currentUser = (array) ($this->currentUser->get() ?? []);
         $newsId = $this->newsRepository->insertGetId([
-            'userid' => (int) ($currentUser['id'] ?? 0),
+            'userid' => (int) ($this->currentUser->id()),
             'added' => $added,
             'body' => $body,
             'title' => $title,

@@ -48,7 +48,7 @@ class StaffMessageController extends LegacyController
             'classes' => $classes,
             'body' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) request()->query('body'))),
             'receiver' => (int) (request()->query('receiver') ?? 0),
-            'username' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($currentUser['username'] ?? ''))),
+            'username' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($this->currentUser->username()))),
             'sent' => (int) (request()->query('sent') ?? 0),
             'showReturnto' => (bool) ($returntoQuery || $httpReferer),
             'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),
@@ -86,7 +86,7 @@ class StaffMessageController extends LegacyController
         }
 
         $currentUser = $this->currentUser->get() ?? [];
-        $senderId = request()->post('sender') === 'system' ? null : (int) ($currentUser['id'] ?? 0);
+        $senderId = request()->post('sender') === 'system' ? null : (int) ($this->currentUser->id());
         $subject = trim((string) request()->post('subject'));
         $msg = trim((string) request()->post('msg'));
 
@@ -167,12 +167,12 @@ class StaffMessageController extends LegacyController
             return $this->legacyAbortResponse(__('legacy/takecontact.std_error'), __('legacy/takecontact.std_please_define_subject'));
         }
 
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
         $timeNow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
 
         if (UserDisplay::currentClass() < $moderatorClass) {
-            $last = $curUser['last_staffmsg'] ?? null;
+            $last = $this->currentUser->value('last_staffmsg', null);
             if ($last !== null && strtotime((string) $last) > ($timeNow - 60)) {
                 $secs = 60 - ($timeNow - strtotime((string) $last));
 

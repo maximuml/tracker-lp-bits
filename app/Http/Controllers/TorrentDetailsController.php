@@ -105,7 +105,7 @@ class TorrentDetailsController extends Controller
             ? $this->torrentDetailRepository->getLatestApprovalDenyLog($id)
             : null;
 
-        $hasBuy = $this->torrentPurchaseRepository->hasBuySuccess((int) ($currentUser['id'] ?? 0), $id);
+        $hasBuy = $this->torrentPurchaseRepository->hasBuySuccess((int) ($this->currentUser->id()), $id);
 
         $requestFlags = [
             'hit' => $request->has('hit'),
@@ -202,7 +202,7 @@ class TorrentDetailsController extends Controller
         }
 
         $descr = $rawDescr !== '' ? Format::formatComment($rawDescr) : '';
-        $showDescription = ! LegacyYesNo::isNo($currentUser['showdescription'] ?? null) && $descr !== '';
+        $showDescription = ! LegacyYesNo::isNo($this->currentUser->value('showdescription', null)) && $descr !== '';
 
         $details = $this->detailsViewFactory->build(
             $id, $row, $currentUser, $denyLog, $hasBuy, $requestFlags
@@ -210,7 +210,7 @@ class TorrentDetailsController extends Controller
         $commentPagerTop = '';
         $commentPagerBottom = '';
         $commentCount = 0;
-        $commentsEnabled = ! LegacyYesNo::isNo($currentUser['showcomment'] ?? null);
+        $commentsEnabled = ! LegacyYesNo::isNo($this->currentUser->value('showcomment', null));
         if ($commentsEnabled) {
             $commentCount = $this->torrentDetailRepository->getCommentCount($id);
             if ($commentCount > 0) {

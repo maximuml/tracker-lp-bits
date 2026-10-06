@@ -1028,7 +1028,7 @@ dialog.nx-modal--loading .nx-modal__spinner {
         border: 0;
     }
     table.nxm-kv td.rowhead { padding-bottom: 0; }
-    table.nxm-kv td.rowfollow { overflow-wrap: anywhere; }
+    table.nxm-kv :is(td.rowfollow, td.nx-rowfollow) { overflow-wrap: anywhere; }
     .nexus-media-info-raw { overflow-x: auto; }
     h1 { overflow-wrap: anywhere; }
 }
@@ -1175,7 +1175,7 @@ a.nxm-alert__action:visited {
     color: var(--nxm-text-dim);
     padding: 0.35rem 0.6rem;
 }
-.rowfollow { padding: 0.35rem 0.6rem; }
+.rowfollow, .nx-rowfollow { padding: 0.35rem 0.6rem; }
 
 /* Legacy theme classes remapped to tokens (ADR 0019). modern.css loads
    after Classic/theme.css, so these win by source order and follow the
@@ -1205,7 +1205,7 @@ th.nxm-th--sorted :is(a:link, a:visited) { color: var(--nxm-accent-text); }
 table[data-nx="data"] a { text-decoration: none; }
 table[data-nx="data"] a:hover, table[data-nx="data"] a:focus-visible { text-decoration: underline; }
 td.rowhead, td.rowhead_left, td.rowhead_center { color: var(--nxm-text-dim); }
-td.rowfollow, td.colfollow, td.text, td.comment { color: var(--nxm-text); }
+td.rowfollow, td.nx-rowfollow, td.colfollow, td.nx-colfollow, td.text, td.comment { color: var(--nxm-text); }
 td.navigation { color: var(--nxm-text-dim); }
 /* legacy .gray/#aca899 fails WCAG AA on light surfaces — remap to token */
 .gray, font.gray { color: var(--nxm-text-dim); text-decoration: underline; }

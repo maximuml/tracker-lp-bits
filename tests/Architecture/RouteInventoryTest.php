@@ -168,7 +168,7 @@ final class RouteInventoryTest extends TestCase
         // +6 passkey REST endpoints (4 authed + 2 guest login assertions).
         // +5 friends/news page-POST endpoints (FormRequest validated).
         $this->assertLessThanOrEqual(
-            202, // 202: +8 complains/log +7 forums +4 usercp +9 messages/offers/bonus endpoints
+            206, // 206: +4 take*-URI renames (messages send/delete/{type}, staffmess, contactstaff)
             $currentCount,
             sprintf(
                 'App mutation route count increased from baseline to %d. '.

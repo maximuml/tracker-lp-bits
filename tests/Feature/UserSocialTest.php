@@ -78,7 +78,7 @@ class UserSocialTest extends TestCase
         $body = 'This is a test private message.';
 
         $response = $this->withNexusCookie($sender)
-            ->post('/takemessage', [
+            ->post('/web/messages/send', [
                 'receiver' => (string) $receiver->id,
                 'subject' => $subject,
                 'body' => $body,

@@ -9,6 +9,10 @@ RUN apk add --no-cache gettext~=0.24 bash~=5.3 curl~=8.22 openssl~=3.5 socat~=1.
 # explicitly until the pinned digest is bumped past it.
 RUN apk add --no-cache 'expat>=2.8.5' 'libexpat>=2.8.5'
 
+# CVE-2026-46675: same for libpng — base layer carries a pre-1.6.59
+# build (png_read_end use-after-free); pull the patched one.
+RUN apk add --no-cache 'libpng>=1.6.59'
+
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY .docker/openresty/render-config.sh /usr/local/bin/render-config.sh

@@ -158,6 +158,9 @@ final class Pagination
      */
     public static function pager(int $rpp, int $count, string $href, array $opts = [], string $pagename = 'page'): array
     {
+        if (str_starts_with($href, '?')) {
+            $href = request()->getPathInfo().$href;
+        }
         $pages = (int) ceil($count / $rpp);
         $rawPage = request()->query($pagename);
         if (! is_scalar($rawPage) || is_bool($rawPage)) {

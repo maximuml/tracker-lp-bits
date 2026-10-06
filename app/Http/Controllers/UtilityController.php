@@ -41,6 +41,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -107,6 +108,16 @@ class UtilityController extends LegacyController
         }
 
         $action = (string) $request->input('action', '');
+
+        // Count shim hits per action so the /ajax route can be dropped
+        // once this family goes quiet (exposed via /metrics; unmapped
+        // actions collapse to __invalid to bound label cardinality).
+        $label = LegacyAjaxRedirects::uriFor($action) !== null ? $action : '__invalid';
+        RedisGuard::attempt(static function () use ($label) {
+            $redis = Redis::connection();
+            $redis->incr("metrics:legacy_ajax:{$label}");
+            $redis->sadd('metrics:legacy_ajax_actions', $label);
+        });
 
         // The two login-page passkey assertions ran pre-auth in the old
         // dispatcher — their REST endpoints are guest-facing too.

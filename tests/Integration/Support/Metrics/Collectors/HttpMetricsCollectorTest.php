@@ -42,6 +42,21 @@ final class HttpMetricsCollectorTest extends TestCase
         $this->assertContains('nexus_http_request_duration_seconds_count 9', $lines);
     }
 
+    public function test_collect_emits_legacy_ajax_shim_counters(): void
+    {
+        $redis = Redis::connection();
+        $redis->set('metrics:legacy_ajax:clearShoutBox', 4);
+        $redis->set('metrics:legacy_ajax:__invalid', 2);
+        $redis->sadd('metrics:legacy_ajax_actions', 'clearShoutBox', '__invalid');
+
+        $lines = (new HttpMetricsCollector(new PrometheusFormatter))->collect();
+
+        $this->assertContains('# HELP nexus_legacy_ajax_requests_total Hits on the /ajax 308 shim by action', $lines);
+        $this->assertContains('# TYPE nexus_legacy_ajax_requests_total counter', $lines);
+        $this->assertContains('nexus_legacy_ajax_requests_total{action="__invalid"} 2', $lines);
+        $this->assertContains('nexus_legacy_ajax_requests_total{action="clearShoutBox"} 4', $lines);
+    }
+
     public function test_collect_emits_statuses_recorded_outside_fixed_list(): void
     {
         $redis = Redis::connection();

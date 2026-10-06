@@ -23,7 +23,7 @@ final class HttpMetricsCollector implements MetricsCollector
      */
     public function collect(): array
     {
-        return array_merge($this->requests(), $this->latency());
+        return array_merge($this->requests(), $this->latency(), $this->legacyAjax());
     }
 
     /**
@@ -73,6 +73,30 @@ final class HttpMetricsCollector implements MetricsCollector
 
             $count = $redis->get('metrics:http_latency_count') ?? 0;
             $lines[] = "nexus_http_request_duration_seconds_count {$count}";
+        } catch (\Throwable) {
+            // Redis unavailable — skip
+        }
+
+        return $lines;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function legacyAjax(): array
+    {
+        $lines = $this->fmt->head('nexus_legacy_ajax_requests_total', 'Hits on the /ajax 308 shim by action', 'counter');
+
+        try {
+            $redis = Redis::connection();
+            $actions = (array) $redis->smembers('metrics:legacy_ajax_actions');
+            sort($actions);
+            foreach ($actions as $action) {
+                $count = $redis->get("metrics:legacy_ajax:{$action}");
+                if ($count !== null) {
+                    $lines[] = $this->fmt->line('nexus_legacy_ajax_requests_total', (float) $count, ['action' => (string) $action]);
+                }
+            }
         } catch (\Throwable) {
             // Redis unavailable — skip
         }

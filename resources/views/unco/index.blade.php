@@ -20,7 +20,7 @@
         </tr>
         @foreach ($rows as $row)
             <tr>
-                <form method="post" action="/modtask">
+                <form method="post" action="/web/staff/modtask">@csrf
                     <input type="hidden" name="action" value="confirmuser">
                     <input type="hidden" name="userid" value="{{ $row['id'] }}">
                     <td><a href="userdetails.php?id={{ $row['id'] }}">{{ $row['username'] }}</a></td>

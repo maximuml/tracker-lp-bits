@@ -6,7 +6,7 @@
     <div class="nx-main nx-embedded nx-box--737">
                 <div class="text-center">
                     <h1>{{ __('legacy/incrementbulk.page_title') }}</a></h1>
-                    <form method=post action=/take-increment-bulk>
+                    <form method=post action="/web/system/increment-bulk">@csrf
                         @if ($returnto || $httpReferer)
                             <input type=hidden name=returnto value="{{ $returnto }}">
                         @endif

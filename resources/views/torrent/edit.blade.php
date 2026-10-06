@@ -44,7 +44,8 @@
 </form>
 @if ($showDeleteForm)
 <br /><br />
-<form method="post" action="/delete">
+<form method="post" action="/web/torrents/delete">
+@csrf
 <input type="hidden" name="id" value="{{ $torrentId }}" />
 @if ($returnto !== '')
 <input type="hidden" name="returnto" value="{{ $returnto }}" />

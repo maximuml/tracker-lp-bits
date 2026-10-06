@@ -57,4 +57,60 @@ final class DestructiveActionsRedirectTest extends TestCase
         $response->assertStatus(302);
         $response->assertRedirect('/nexusphp/security/login-attempts');
     }
+
+    public function test_legacy_take_uris_redirect_to_rest_endpoints(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([
+            ['/takeflush', '/web/torrents/flush'],
+            ['/takereseed', '/web/torrents/reseed'],
+            ['/fastdelete', '/web/torrents/fast-delete'],
+            ['/delete', '/web/torrents/delete'],
+            ['/takeinvite', '/web/invites/send'],
+            ['/takeamountupload', '/web/system/amount-upload'],
+            ['/takeupdate', '/web/system/update'],
+            ['/take-increment-bulk', '/web/system/increment-bulk'],
+            ['/docleanup', '/web/system/cleanup'],
+            ['/mailtest', '/web/system/mail-test'],
+            ['/clearcache', '/web/system/clear-cache'],
+            ['/location', '/web/system/location'],
+            ['/testip', '/web/system/test-ip'],
+            ['/user-ban-log', '/web/admin/user-ban-log'],
+            ['/reset', '/web/admin/users/reset'],
+            ['/self-enable', '/web/admin/users/self-enable'],
+            ['/unco', '/web/admin/users/unco'],
+            ['/adduser', '/web/admin/users/add'],
+            ['/bitbucketlog', '/web/admin/bitbucket-log'],
+            ['/donated', '/web/info/donated'],
+            ['/thanks', '/web/torrents/thanks'],
+            ['/downloadnotice', '/web/torrents/download-notice'],
+            ['/magic', '/web/bonus/magic'],
+            ['/freeleech', '/web/bonus/freeleech'],
+            ['/attendance', '/web/user/attendance'],
+            ['/report', '/web/reports/create'],
+            ['/getrss', '/web/rss/generate'],
+            ['/preview', '/web/preview'],
+            ['/notifications', '/web/notifications/mark-read'],
+            ['/attachment', '/web/attachments/upload'],
+            ['/modtask', '/web/staff/modtask'],
+            ['/modrules', '/web/staff/modrules'],
+            ['/staffmess', '/web/staffmess/submit'],
+            ['/contactstaff', '/web/contactstaff/submit'],
+            ['/makepoll', '/web/polls/create'],
+            ['/polloverview', '/web/polls/overview'],
+            ['/faqmanage', '/web/faq/manage'],
+            ['/faqactions', '/web/faq/actions'],
+            ['/index', '/web/index/submit'],
+            ['/invite', '/web/invites/submit'],
+            ['/settings', '/web/settings/submit'],
+            ['/faq', '/web/faq/submit'],
+            ['/donate', '/web/donate/submit'],
+            ['/bookmark', '/web/torrents/bookmark'],
+        ] as [$uri, $target]) {
+            $response = $this->withNexusCookie($user)->post($uri, ['id' => '1']);
+            $response->assertStatus(308);
+            $this->assertStringEndsWith($target, (string) $response->headers->get('Location'));
+        }
+    }
 }

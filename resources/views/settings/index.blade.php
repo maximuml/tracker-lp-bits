@@ -24,14 +24,14 @@
         'miscsettings' => ['row_misc_settings', 'submit_misc_settings', 'text_misc_settings_note'],
     ] as $act => [$row, $btn, $note])
     <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.'.$row) }}</div><div class="nx-fcell">
-        <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="{{ $act }}">@csrf
+        <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="{{ $act }}">@csrf
         <input type="submit" value="{{ __('legacy/settings.'.$btn) }}"> {{ __('legacy/settings.'.$note) }}
         </form>
     </div>
     @endforeach
 
 @elseif ($action === 'basicsettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_basic">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_basic">@csrf
     <x-settings-row layout="grid" :label="__('legacy/settings.row_site_name')">
         <input type="text" name="SITENAME" value="{{ (string)($config['SITENAME'] ?? 'Nexus') }}"> {{ __('legacy/settings.text_site_name_note') ?? '' }}
     </x-settings-row>
@@ -42,7 +42,7 @@
     </form>
 
 @elseif ($action === 'mainsettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_main">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_main">@csrf
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_site_online')" name="site_online" :value="$config['site_online'] ?? 'yes'" :note="__('legacy/settings.text_site_online_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_invite_system')" name="invitesystem" :value="$config['invitesystem'] ?? 'yes'" :note="__('legacy/settings.text_invite_system_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_initial_uploading_amount')" name="iniupload" :value="$config['iniupload'] ?? 0" :note="__('legacy/settings.text_initial_uploading_amount_note')" />
@@ -141,7 +141,7 @@
     </form>
 
 @elseif ($action === 'smtpsettings')
-    <form method="post" action="{{ $scriptName }}" name="smtpsettings_form"><input type="hidden" name="action" value="savesettings_smtp">@csrf
+    <form method="post" action="/web/settings/submit" name="smtpsettings_form"><input type="hidden" name="action" value="savesettings_smtp">@csrf
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_email_notification')" name="emailnotify" :value="$config['emailnotify'] ?? 'no'" :note="__('legacy/settings.text_email_notification_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_mail_function_type')"
         name="smtptype"
@@ -169,7 +169,7 @@
     </form>
 
 @elseif ($action === 'securitysettings')
-    <form method="post" action="{{ $scriptName }}" name="securitysettings_form"><input type="hidden" name="action" value="savesettings_security">@csrf
+    <form method="post" action="/web/settings/submit" name="securitysettings_form"><input type="hidden" name="action" value="savesettings_security">@csrf
     <x-settings-radios layout="grid"         :label="__('legacy/settings.row_enable_ssl')"
         name="securelogin"
         :options="['yes' => __('legacy/settings.text_yes'), 'no' => __('legacy/settings.text_no'), 'op' => __('legacy/settings.text_optional')]"
@@ -227,7 +227,7 @@
     </form>
 
 @elseif ($action === 'authoritysettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_authority">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_authority">@csrf
     @foreach ([
         ['defaultclass', 'row_default_class', \App\Enums\UserClass::USER, 'text_default_class_note'],
         ['staffmem', 'row_staff_member', \App\Enums\UserClass::MODERATOR, 'text_staff_member_note'],
@@ -286,7 +286,7 @@
     </form>
 
 @elseif ($action === 'tweaksettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_tweak">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_tweak">@csrf
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_save_user_location')" name="where" :value="$config['where'] ?? 'no'" :note="__('legacy/settings.text_save_user_location_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-row layout="grid" :label="__('legacy/settings.row_kps_enabled')">
         @foreach (['enable' => 'text_enabled', 'disablesave' => 'text_disabled_but_save', 'disable' => 'text_disabled_no_save'] as $val => $labelKey)
@@ -307,7 +307,7 @@
     </form>
 
 @elseif ($action === 'bonussettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_bonus">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_bonus">@csrf
     <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_bonus_by_seeding') ?? 'Bonus by seeding' }}</b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_min_size')" name="min_size" :value="$config['min_size'] ?? 0" :note="__('legacy/settings.text_bonus_mini_size').' '.(__('legacy/settings.text_bonus_mini_size_help'))" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_donor_gets_double')" name="donortimes" :value="$config['donortimes'] ?? 2" :note="__('legacy/settings.text_donor_gets').' '.(__('legacy/settings.text_times_as_many'))" />
@@ -379,7 +379,7 @@
     </form>
 
 @elseif ($action === 'accountsettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_account">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_account">@csrf
     <div class="nx-ffull text-center"><b>{{ __('legacy/settings.text_delete_inactive_accounts') ?? 'Delete inactive' }}</b></div>
     <x-settings-row layout="grid" :label="__('legacy/settings.row_never_delete')">
         {{ \App\Support\UserClass::classSelectWithContext('neverdelete', \App\Enums\UserClass::VIP->value, $config['neverdelete'] ?? 0) }}{{ __('legacy/settings.text_never_delete') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::VETERAN_USER->value, false, true, true) }}
@@ -417,7 +417,7 @@
     </form>
 
 @elseif ($action === 'torrentsettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_torrent">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_torrent">@csrf
     <x-settings-text layout="grid" :label="__('legacy/settings.row_sticky_first_level_background_color')" name="sticky_first_level_background_color" :value="$config['sticky_first_level_background_color'] ?? ''" :note="__('legacy/settings.text_sticky_first_level_background_color_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_sticky_second_level_background_color')" name="sticky_second_level_background_color" :value="$config['sticky_second_level_background_color'] ?? ''" :note="__('legacy/settings.text_sticky_second_level_background_color_note')" />
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_download_support_passkey')" name="download_support_passkey" :value="$config['download_support_passkey'] ?? 'yes'" :note="__('legacy/settings.text_download_support_passkey_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
@@ -476,7 +476,7 @@
     </form>
 
 @elseif ($action === 'attachmentsettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_attachment">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_attachment">@csrf
     <x-settings-yesno layout="grid" :label="__('legacy/settings.row_enable_attachment')" name="enableattach" :value="$config['enableattach'] ?? 'no'" :note="__('legacy/settings.text_enable_attachment_note')" :yes-label="__('legacy/settings.text_yes')" :no-label="__('legacy/settings.text_no')" />
     <x-settings-row layout="grid" :label="__('legacy/settings.row_attachment_authority')">
         <ul>
@@ -513,7 +513,7 @@
     </form>
 
 @elseif ($action === 'codesettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_code">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_code">@csrf
     <x-settings-text layout="grid" :label="__('legacy/settings.row_main_version')" name="mainversion" :value="$config['mainversion'] ?? 'NexusPHP'" :note="__('legacy/settings.text_main_version_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_sub_version')" name="subversion" :value="$config['subversion'] ?? '1.0'" :note="__('legacy/settings.text_sub_version_note')" />
     <x-settings-text layout="grid" :label="__('legacy/settings.row_release_date')" name="releasedate" :value="$config['releasedate'] ?? '2008-12-10'" :note="__('legacy/settings.text_release_date_note')" />
@@ -522,7 +522,7 @@
     </form>
 
 @elseif ($action === 'miscsettings')
-    <form method="post" action="{{ $scriptName }}"><input type="hidden" name="action" value="savesettings_misc">@csrf
+    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_misc">@csrf
     <div class="nx-fhead whitespace-nowrap">{{ __('legacy/settings.row_misc_donation_custom') ?? 'Donation custom' }}</div><div class="nx-fcell"><textarea cols="100" rows="10" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('legacy/settings.text_donation_custom_note') }}&nbsp;<b><a href="tags.php" target="_blank">{{ __('legacy/settings.text_bbcode_tag') }}</a></b></div>
     <x-settings-text layout="grid" :label="__('legacy/settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('legacy/settings.text_protected_forum')" />
     <x-settings-save layout="grid" :label="__('legacy/settings.row_save_settings')" :text="__('legacy/settings.submit_save_settings')" />

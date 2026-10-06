@@ -39,6 +39,10 @@ else
     echo "$SVC_FILES"
     echo "Changed critical files (core):"
     echo "$CORE_FILES"
-    [ -n "$SVC_FILES" ] && echo "filter_svc=$(build_filter "$SVC_FILES")" >> "$GITHUB_OUTPUT"
-    [ -n "$CORE_FILES" ] && echo "filter=$(build_filter "$CORE_FILES")" >> "$GITHUB_OUTPUT"
+    if [ -n "$SVC_FILES" ]; then
+        echo "filter_svc=$(build_filter "$SVC_FILES")" >> "$GITHUB_OUTPUT"
+    fi
+    if [ -n "$CORE_FILES" ]; then
+        echo "filter=$(build_filter "$CORE_FILES")" >> "$GITHUB_OUTPUT"
+    fi
 fi

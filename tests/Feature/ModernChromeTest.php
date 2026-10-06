@@ -48,7 +48,7 @@ final class ModernChromeTest extends TestCase
 
         $this->assertStringContainsString('aria-current="page"', $html);
         $this->assertMatchesRegularExpression(
-            '/<a href="index\.php"[^>]*aria-current="page"/',
+            '/<a href="\/web\/index"[^>]*aria-current="page"/',
             $html,
             'Home nav item must carry aria-current on /index',
         );
@@ -65,9 +65,9 @@ final class ModernChromeTest extends TestCase
         $html = (string) $response->getContent();
 
         $this->assertStringContainsString('nxm-userbar', $html);
-        $this->assertStringContainsString('logout.php', $html);
-        $this->assertStringContainsString('usercp.php', $html);
-        $this->assertStringContainsString('messages.php', $html);
+        $this->assertStringContainsString('/logout', $html);
+        $this->assertStringContainsString('/usercp', $html);
+        $this->assertStringContainsString('/web/messages', $html);
         $this->assertStringContainsString('42.5', $html);
     }
 

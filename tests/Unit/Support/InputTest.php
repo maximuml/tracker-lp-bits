@@ -3,7 +3,7 @@
 namespace Tests\Unit\Support;
 
 use App\Support\Input;
-use App\Support\SupportContext;
+use App\Support\NexusContext;
 use PHPUnit\Framework\TestCase;
 use Tests\Attributes\TestCategory;
 
@@ -13,7 +13,7 @@ final class InputTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        SupportContext::reset();
+        NexusContext::reset();
     }
 
     public function test_unescape_returns_value_unchanged(): void

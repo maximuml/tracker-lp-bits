@@ -35,9 +35,9 @@ final class LegacyBootstrap
 
     private static function resetAndCapture(?Request $request): void
     {
-        SupportContext::reset();
+        NexusContext::reset();
         if ($request !== null) {
-            SupportContext::fromRequest($request);
+            NexusContext::instance()->setFromRequest($request);
         }
     }
 

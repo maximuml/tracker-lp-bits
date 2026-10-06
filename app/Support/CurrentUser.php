@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 /**
  * Per-request cache of the current user's legacy array representation.
  *
- * Replaces SupportContext::getUser()/setUser() with a container singleton
+ * Replaces NexusContext::instance()->getUser()/setUser() with a container singleton
  * that reads from Laravel's Auth facade. The legacy array format (with keys
  * like 'id', 'class', 'passkey') is preserved so existing call sites that
  * use `$user['key']` access patterns continue to work.
@@ -73,7 +73,7 @@ class CurrentUser
             // before all service providers are loaded). Fall back to the
             // legacy SupportContext which is always available.
             try {
-                $this->cached = SupportContext::getUser();
+                $this->cached = NexusContext::instance()->getUser();
             } catch (\Throwable) {
                 $this->cached = null;
             }

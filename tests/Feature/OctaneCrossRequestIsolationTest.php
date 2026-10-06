@@ -8,9 +8,9 @@ use App\Listeners\ResetNexus;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\CurrentUser;
+use App\Support\NexusContext;
 use App\Support\PageState;
 use App\Support\Settings;
-use App\Support\SupportContext;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Tests\Attributes\TestCategory;
@@ -250,7 +250,7 @@ final class OctaneCrossRequestIsolationTest extends TestCase
     private function resetWorkerState(): void
     {
         app(CurrentUser::class)->reset();
-        SupportContext::reset();
+        NexusContext::reset();
         Settings::resetCache();
         $guard = Auth::guard();
         if (property_exists($guard, 'user')) {

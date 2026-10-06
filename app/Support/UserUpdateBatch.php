@@ -7,7 +7,7 @@ namespace App\Support;
 /**
  * Per-request batch of user column updates.
  *
- * Replaces SupportContext::addUserUpdate()/getUserUpdateSet() with a
+ * Replaces NexusContext::addUserUpdate()/getUserUpdateSet() with a
  * container singleton. Internally delegates to NexusContext which holds
  * the actual array storage.
  */
@@ -18,7 +18,7 @@ final class UserUpdateBatch
      */
     public function add(string $key, mixed $value): void
     {
-        SupportContext::addUserUpdate($key, $value);
+        NexusContext::instance()->addUserUpdate($key, $value);
     }
 
     /**
@@ -28,7 +28,7 @@ final class UserUpdateBatch
      */
     public function &all(): array
     {
-        $set = &SupportContext::getUserUpdateSet();
+        $set = NexusContext::instance()->getUserUpdateSet();
 
         return $set;
     }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MakePollRequest;
+use App\Http\Requests\PolloverviewRequest;
 use App\Http\Requests\PollStoreRequest;
 use App\Http\Requests\PollUpdateRequest;
 use App\Http\Requests\PollVoteRequest;
@@ -94,7 +96,16 @@ class PollController extends LegacyController
         ]);
     }
 
-    public function makepollPost(Request $request): Response|RedirectResponse|View
+    public function makepollPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/polls/create'.$suffix, 308);
+    }
+
+    public function makepollSubmit(MakePollRequest $request): Response|RedirectResponse|View
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
@@ -126,7 +137,16 @@ class PollController extends LegacyController
         return redirect('/');
     }
 
-    public function polloverviewPost(Request $request): View|RedirectResponse|Response
+    public function polloverviewPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/polls/overview'.$suffix, 308);
+    }
+
+    public function polloverviewSubmit(PolloverviewRequest $request): View|RedirectResponse|Response
     {
         return $this->polloverview($request);
     }

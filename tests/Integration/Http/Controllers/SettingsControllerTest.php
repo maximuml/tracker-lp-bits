@@ -7,6 +7,7 @@ namespace Tests\Integration\Http\Controllers;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Enums\UserClass;
 use App\Http\Controllers\SettingsController;
+use App\Http\Requests\SettingsSubmitRequest;
 use App\Models\User;
 use App\Support\CurrentUser;
 use App\Support\Globals;
@@ -74,10 +75,10 @@ final class SettingsControllerTest extends TestCase
         $this->actingAs($user);
 
         $controller = app(SettingsController::class);
-        $request = Request::create('/settings', 'POST', ['action' => 'unknown']);
+        $request = SettingsSubmitRequest::create('/web/settings/submit', 'POST', ['action' => 'unknown']);
         app()->instance('request', $request);
 
-        $response = $controller->settingsAction($request);
+        $response = $controller->settingsSubmit($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/web/settings', $response->getTargetUrl());

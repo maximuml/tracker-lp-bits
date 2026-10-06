@@ -12,8 +12,7 @@
     <h1>{{ __('legacy/makepoll.text_make_poll')}}</h1>
 @endif
 
-<form method="post" action="/makepoll">
-@csrf
+<form method="post" action="/web/polls/create">@csrf
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 input.mp { width: 450px; }
 </style>

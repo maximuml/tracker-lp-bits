@@ -29,7 +29,7 @@ class SettingsUrlNormalizationTest extends TestCase
     {
         $sysop = $this->sysop();
 
-        $response = $this->withNexusCookie($sysop)->post('/settings', [
+        $response = $this->withNexusCookie($sysop)->post('/web/settings/submit', [
             'action' => 'savesettings_basic',
             'SITENAME' => 'Test Tracker',
             'BASEURL' => 'example.com/',
@@ -47,7 +47,7 @@ class SettingsUrlNormalizationTest extends TestCase
         Settings::resetCache();
         $sysop = $this->sysop();
 
-        $response = $this->withNexusCookie($sysop)->post('/settings', [
+        $response = $this->withNexusCookie($sysop)->post('/web/settings/submit', [
             'action' => 'savesettings_basic',
             'SITENAME' => 'Test Tracker',
             'BASEURL' => 'javascript://alert(1)',
@@ -63,7 +63,7 @@ class SettingsUrlNormalizationTest extends TestCase
     {
         $sysop = $this->sysop();
 
-        $response = $this->withNexusCookie($sysop)->post('/settings', [
+        $response = $this->withNexusCookie($sysop)->post('/web/settings/submit', [
             'action' => 'savesettings_security',
             'https_announce_url' => 'tracker.example.com/announce.php',
         ]);
@@ -77,7 +77,7 @@ class SettingsUrlNormalizationTest extends TestCase
         /** @var User $user */
         $user = User::factory()->create(['class' => UserClass::USER->value]);
 
-        $response = $this->withNexusCookie($user)->post('/settings', [
+        $response = $this->withNexusCookie($user)->post('/web/settings/submit', [
             'action' => 'savesettings_basic',
             'SITENAME' => 'Test Tracker',
             'BASEURL' => 'example.com',

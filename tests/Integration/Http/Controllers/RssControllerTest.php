@@ -6,6 +6,7 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Enums\UserClass;
 use App\Http\Controllers\RssController;
+use App\Http\Requests\GetrssRequest;
 use App\Models\User;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -80,12 +81,12 @@ final class RssControllerTest extends TestCase
         Settings::resetCache();
 
         $controller = app(RssController::class);
-        $request = Request::create('/getrss', 'POST', [
+        $request = GetrssRequest::create('/web/rss/generate', 'POST', [
             'showrows' => '999',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->getrssPost($request);
+        $response = $controller->getrssSubmit($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('must select rows', (string) $response->getContent());

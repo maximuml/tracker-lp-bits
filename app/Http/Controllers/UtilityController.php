@@ -8,6 +8,8 @@ use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
+use App\Http\Requests\AttachmentUploadRequest;
+use App\Http\Requests\PreviewRequest;
 use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Repositories\SearchPageRepository;
@@ -136,7 +138,16 @@ class UtilityController extends LegacyController
         return $this->renderAttachment($request, $currentUser, $Attach);
     }
 
-    public function attachmentStore(Request $request, AttachmentMutationService $attachmentMutationService): Response
+    public function attachmentStore(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/attachments/upload'.$suffix, 308);
+    }
+
+    public function attachmentUpload(AttachmentUploadRequest $request, AttachmentMutationService $attachmentMutationService): Response
     {
         $currentUser = $this->currentUser->get() ?? [];
         $Attach = new AttachmentService((int) ($currentUser['id'] ?? 0));
@@ -409,7 +420,16 @@ class UtilityController extends LegacyController
         return $this->renderPreview($request);
     }
 
-    public function previewSubmit(Request $request): View|RedirectResponse
+    public function previewSubmit(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/preview'.$suffix, 308);
+    }
+
+    public function previewRender(PreviewRequest $request): View|RedirectResponse
     {
         return $this->renderPreview($request);
     }

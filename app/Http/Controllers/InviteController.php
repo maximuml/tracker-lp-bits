@@ -10,6 +10,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\InviteValid;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Http\Requests\InviteActionRequest;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Repositories\InviteRepository;
@@ -35,7 +36,16 @@ class InviteController extends LegacyController
         private readonly InviteRepository $inviteRepository,
     ) {}
 
-    public function inviteAction(Request $request): View|RedirectResponse|Response
+    public function inviteAction(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/invites/submit'.$suffix, 308);
+    }
+
+    public function inviteSubmit(InviteActionRequest $request): View|RedirectResponse|Response
     {
         return $this->invite($request);
     }

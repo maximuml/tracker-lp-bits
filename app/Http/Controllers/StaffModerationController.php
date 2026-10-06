@@ -9,6 +9,8 @@ use App\Contracts\Repositories\RuleRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UsernameChangeType;
 use App\Enums\UserPrivacy;
+use App\Http\Requests\ModrulesRequest;
+use App\Http\Requests\ModtaskRequest;
 use App\Repositories\MessageRepository;
 use App\Repositories\ModtaskRepository;
 use App\Repositories\UserDetailRepository;
@@ -50,7 +52,16 @@ class StaffModerationController extends LegacyController
         return $this->legacyAbortResponse('Error', 'Invalid action.');
     }
 
-    public function modtaskPost(Request $request): Response|RedirectResponse
+    public function modtaskPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/staff/modtask'.$suffix, 308);
+    }
+
+    public function modtaskSubmit(ModtaskRequest $request): Response|RedirectResponse
     {
         $deny = $this->modtaskPreamble();
         if ($deny !== null) {
@@ -439,7 +450,16 @@ class StaffModerationController extends LegacyController
         return null;
     }
 
-    public function modrulesPost(Request $request): View|RedirectResponse|Response
+    public function modrulesPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/staff/modrules'.$suffix, 308);
+    }
+
+    public function modrulesSubmit(ModrulesRequest $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {

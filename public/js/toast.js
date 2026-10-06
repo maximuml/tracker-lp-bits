@@ -401,7 +401,7 @@
     function openPanel(panel) {
         panel.classList.remove('nx-hidden');
         renderLoading(panel);
-        fetch('/web/notifications', {
+        fetch('notifications', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {
@@ -422,7 +422,7 @@
     function loadMore(panel, wrap) {
         var btn = wrap.querySelector('button');
         if (btn) { btn.disabled = true; }
-        fetch('/web/notifications?offset=' + encodeURIComponent(panelFetched), {
+        fetch('notifications?offset=' + encodeURIComponent(panelFetched), {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {
@@ -552,7 +552,7 @@
 
     function markAllRead(panel) {
         var csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        fetch('/notifications', {
+        fetch('/web/notifications/mark-read', {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -597,7 +597,7 @@
     function refreshBadge() {
         var els = bellElements();
         if (!els.badge) { return; }
-        fetch('/web/notifications', {
+        fetch('notifications', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {

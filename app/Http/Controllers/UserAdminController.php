@@ -8,6 +8,10 @@ use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\AddUserRequest;
+use App\Http\Requests\ResetUserRequest;
+use App\Http\Requests\SelfEnableRequest;
+use App\Http\Requests\UncoRequest;
 use App\Models\Setting;
 use App\Repositories\BonusRepository;
 use App\Repositories\StaffDirectoryRepository;
@@ -159,7 +163,16 @@ class UserAdminController extends LegacyController
         return $this->resetPage($request, false, '');
     }
 
-    public function resetPost(Request $request): View|RedirectResponse|Response
+    public function resetPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/admin/users/reset'.$suffix, 308);
+    }
+
+    public function resetSubmit(ResetUserRequest $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
@@ -291,7 +304,16 @@ class UserAdminController extends LegacyController
 
     }
 
-    public function selfEnablePost(Request $request): View|RedirectResponse|Response
+    public function selfEnablePost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/admin/users/self-enable'.$suffix, 308);
+    }
+
+    public function selfEnableSubmit(SelfEnableRequest $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($curUser['id'] ?? 0);
@@ -414,7 +436,16 @@ class UserAdminController extends LegacyController
         ]);
     }
 
-    public function uncoPost(Request $request): View|RedirectResponse|Response
+    public function uncoPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/admin/users/unco'.$suffix, 308);
+    }
+
+    public function uncoSubmit(UncoRequest $request): View|RedirectResponse|Response
     {
         return $this->unco($request);
     }
@@ -429,7 +460,16 @@ class UserAdminController extends LegacyController
         return $this->legacyPage($request, 'adduser', true);
     }
 
-    public function adduserPost(Request $request): Response|RedirectResponse|View
+    public function adduserPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/admin/users/add'.$suffix, 308);
+    }
+
+    public function adduserSubmit(AddUserRequest $request): Response|RedirectResponse|View
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {

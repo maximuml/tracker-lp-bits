@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Contracts\CleanupServiceInterface;
 use App\Contracts\Repositories\MysqlStatsRepositoryInterface;
+use App\Http\Requests\CleanupRequest;
+use App\Http\Requests\MailTestRequest;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Email;
@@ -25,7 +27,16 @@ class SystemMaintenanceController extends LegacyController
         private readonly CleanupServiceInterface $cleanupService,
     ) {}
 
-    public function docleanup(Request $request): Response
+    public function docleanup(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/system/cleanup'.$suffix, 308);
+    }
+
+    public function cleanup(CleanupRequest $request): Response
     {
 
         return \response(
@@ -36,7 +47,16 @@ class SystemMaintenanceController extends LegacyController
 
     }
 
-    public function mailtestAction(Request $request): View|RedirectResponse|Response
+    public function mailtestAction(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/system/mail-test'.$suffix, 308);
+    }
+
+    public function mailtestSubmit(MailTestRequest $request): View|RedirectResponse|Response
     {
         return $this->mailtest($request);
     }

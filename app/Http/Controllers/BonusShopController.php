@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Enums\ExamType;
+use App\Http\Requests\FreeleechRequest;
 use App\Models\User;
 use App\Repositories\UserDetailRepository;
 use App\Support\AssetAppender;
@@ -156,7 +157,16 @@ JS;
 
     }
 
-    public function freeleechPost(Request $request): View|RedirectResponse|Response
+    public function freeleechPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/bonus/freeleech'.$suffix, 308);
+    }
+
+    public function freeleechSubmit(FreeleechRequest $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {

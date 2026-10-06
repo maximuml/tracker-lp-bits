@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\TorrentBookmarkController;
+use App\Http\Requests\ThanksTorrentRequest;
 use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -73,10 +74,10 @@ final class TorrentBookmarkControllerTest extends TestCase
     public function test_thanks_redirects_guest_to_login(): void
     {
         $controller = app(TorrentBookmarkController::class);
-        $request = Request::create('/thanks', 'GET');
+        $request = ThanksTorrentRequest::create('/web/torrents/thanks', 'GET');
         app()->instance('request', $request);
 
-        $response = $controller->thanks($request);
+        $response = $controller->thanksSubmit($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/thanks', $response->getTargetUrl());

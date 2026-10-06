@@ -7,7 +7,7 @@
 @if (($error ?? '') !== '')
     <p class="text-center"><span class="striking">{{ $error }}</span></p>
 @endif
-<form method="post" action="/donated">
+<form method="post" action="/web/info/donated">
 @csrf
 <div class="nx-fgrid">
     <div class="nx-fhead">User name</div><div class="nx-fcell"><input type="text" name="username" size="40"></div>

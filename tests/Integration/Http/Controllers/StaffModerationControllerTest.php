@@ -6,6 +6,8 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Enums\UserClass;
 use App\Http\Controllers\StaffModerationController;
+use App\Http\Requests\ModrulesRequest;
+use App\Http\Requests\ModtaskRequest;
 use App\Models\User;
 use App\Repositories\ModtaskRepository;
 use App\Repositories\ToolRepository;
@@ -98,10 +100,10 @@ final class StaffModerationControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, UserClass::ADMINISTRATOR->value);
 
         $controller = app(StaffModerationController::class);
-        $request = Request::create('/modrules?act=del', 'POST', ['id' => 1, 'sure' => 0]);
+        $request = ModrulesRequest::create('/web/staff/modrules?act=del', 'POST', ['id' => 1, 'sure' => 0]);
         app()->instance('request', $request);
 
-        $response = $controller->modrulesPost($request);
+        $response = $controller->modrulesSubmit($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('delete a rule', (string) $response->getContent());
@@ -115,14 +117,14 @@ final class StaffModerationControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, UserClass::ADMINISTRATOR->value);
 
         $controller = app(StaffModerationController::class);
-        $request = Request::create('/modrules?act=addsect', 'POST', [
+        $request = ModrulesRequest::create('/web/staff/modrules?act=addsect', 'POST', [
             'title' => 'Test Rule',
             'text' => 'Rule content',
             'language' => 1,
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->modrulesPost($request);
+        $response = $controller->modrulesSubmit($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/web/modrules', $response->getTargetUrl());
@@ -141,10 +143,10 @@ final class StaffModerationControllerTest extends TestCase
         app()->instance(ToolRepository::class, $toolRepository);
 
         $controller = app(StaffModerationController::class);
-        $request = Request::create('/modtask', 'POST', ['action' => 'edituser']);
+        $request = ModtaskRequest::create('/web/staff/modtask', 'POST', ['action' => 'edituser']);
         app()->instance('request', $request);
 
-        $response = $controller->modtaskPost($request);
+        $response = $controller->modtaskSubmit($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
@@ -158,10 +160,10 @@ final class StaffModerationControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, UserClass::STAFFLEADER->value);
 
         $controller = app(StaffModerationController::class);
-        $request = Request::create('/modtask', 'POST', ['action' => 'invalid']);
+        $request = ModtaskRequest::create('/web/staff/modtask', 'POST', ['action' => 'invalid']);
         app()->instance('request', $request);
 
-        $response = $controller->modtaskPost($request);
+        $response = $controller->modtaskSubmit($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Invalid action', (string) $response->getContent());
@@ -175,14 +177,14 @@ final class StaffModerationControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, UserClass::STAFFLEADER->value);
 
         $controller = app(StaffModerationController::class);
-        $request = Request::create('/modtask', 'POST', [
+        $request = ModtaskRequest::create('/web/staff/modtask', 'POST', [
             'action' => 'confirmuser',
             'userid' => 1,
             'confirm' => 'invalid',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->modtaskPost($request);
+        $response = $controller->modtaskSubmit($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Invalid confirmation status', (string) $response->getContent());
@@ -201,14 +203,14 @@ final class StaffModerationControllerTest extends TestCase
         app()->instance(ModtaskRepository::class, $modtaskRepository);
 
         $controller = app(StaffModerationController::class);
-        $request = Request::create('/modtask', 'POST', [
+        $request = ModtaskRequest::create('/web/staff/modtask', 'POST', [
             'action' => 'confirmuser',
             'userid' => 1,
             'confirm' => 'confirmed',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->modtaskPost($request);
+        $response = $controller->modtaskSubmit($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/web/unco', $response->getTargetUrl());

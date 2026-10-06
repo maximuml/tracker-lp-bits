@@ -8,6 +8,10 @@ use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\UserClass;
 use App\Http\Controllers\SystemBulkController;
+use App\Http\Requests\AmountUploadRequest;
+use App\Http\Requests\IncrementBulkRequest;
+use App\Http\Requests\SendInviteRequest;
+use App\Http\Requests\SystemUpdateRequest;
 use App\Jobs\BulkUserIncrementJob;
 use App\Jobs\BulkUserMessageJob;
 use App\Jobs\SendLegacyMail;
@@ -228,6 +232,32 @@ final class SystemBulkControllerTest extends TestCase
         Queue::assertPushed(BulkUserMessageJob::class, 1);
     }
 
+    public function test_takeamountupload_legacy_uri_redirects_to_rest_endpoint(): void
+    {
+        $controller = app(SystemBulkController::class);
+        $request = Request::create('/takeamountupload', 'POST', ['msg' => 'hi']);
+        app()->instance('request', $request);
+
+        $response = $controller->takeamountupload($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('/web/system/amount-upload', $response->getTargetUrl());
+    }
+
+    public function test_take_increment_bulk_legacy_uri_redirects_to_rest_endpoint(): void
+    {
+        $controller = app(SystemBulkController::class);
+        $request = Request::create('/take-increment-bulk', 'POST', ['msg' => 'hi']);
+        app()->instance('request', $request);
+
+        $response = $controller->takeIncrementBulk($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('/web/system/increment-bulk', $response->getTargetUrl());
+    }
+
     // ─── takeupdate ──────────────────────────────────────────────────────
 
     public function test_takeupdate_redirects_guest(): void
@@ -241,7 +271,8 @@ final class SystemBulkControllerTest extends TestCase
         $response = $controller->takeupdate($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/takeupdate.php', $response->getTargetUrl());
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('/web/system/update', $response->getTargetUrl());
     }
 
     public function test_takeupdate_denies_regular_user(): void
@@ -335,7 +366,8 @@ final class SystemBulkControllerTest extends TestCase
         $response = $controller->takeinvite($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('/takeinvite.php', $response->getTargetUrl());
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('/web/invites/send', $response->getTargetUrl());
     }
 
     public function test_takeinvite_aborts_when_invite_system_disabled(): void
@@ -346,11 +378,11 @@ final class SystemBulkControllerTest extends TestCase
         $this->mockCurrentUserWithDefaults($user->id, UserClass::USER->value);
 
         $controller = app(SystemBulkController::class);
-        $request = Request::create('/takeinvite', 'POST', ['email' => 'x@example.com', 'body' => 'hi', 'hash' => 'permanent']);
+        $request = SendInviteRequest::create('/web/invites/send', 'POST', ['email' => 'x@example.com', 'body' => 'hi', 'hash' => 'permanent']);
         app()->instance('request', $request);
 
         try {
-            $controller->takeinvite($request);
+            $controller->sendInvite($request);
             $this->fail('Expected HttpResponseException for disabled invite system');
         } catch (HttpResponseException $e) {
             $this->assertStringContainsString('invite', (string) $e->getResponse()->getContent());
@@ -537,40 +569,40 @@ final class SystemBulkControllerTest extends TestCase
     private function callTakeAmountUpload(string $method, array $post = [], array $query = []): Response|RedirectResponse|View
     {
         $controller = app(SystemBulkController::class);
-        $request = Request::create('/takeamountupload', $method, $post + $query);
+        $request = AmountUploadRequest::create('/web/system/amount-upload', $method, $post + $query);
         app()->instance('request', $request);
 
-        return $controller->takeamountupload($request);
+        return $controller->amountUpload($request);
     }
 
     /** @param  array<string, mixed>  $post */
     private function callTakeIncrementBulk(string $method, array $post = []): Response|RedirectResponse
     {
         $controller = app(SystemBulkController::class);
-        $request = Request::create('/take-increment-bulk', $method, $post);
+        $request = IncrementBulkRequest::create('/web/system/increment-bulk', $method, $post);
         app()->instance('request', $request);
 
-        return $controller->takeIncrementBulk($request);
+        return $controller->incrementBulkSend($request);
     }
 
     /** @param  array<string, mixed>  $post */
     private function callTakeupdate(array $post): Response|RedirectResponse
     {
         $controller = app(SystemBulkController::class);
-        $request = Request::create('/takeupdate', 'POST', $post);
+        $request = SystemUpdateRequest::create('/web/system/update', 'POST', $post);
         app()->instance('request', $request);
 
-        return $controller->takeupdate($request);
+        return $controller->systemUpdate($request);
     }
 
     /** @param  array<string, mixed>  $post */
     private function callTakeinvite(array $post): Response|RedirectResponse
     {
         $controller = app(SystemBulkController::class);
-        $request = Request::create('/takeinvite', 'POST', $post);
+        $request = SendInviteRequest::create('/web/invites/send', 'POST', $post);
         app()->instance('request', $request);
 
-        return $controller->takeinvite($request);
+        return $controller->sendInvite($request);
     }
 
     /**

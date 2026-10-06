@@ -6,6 +6,7 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Exceptions\NexusException;
 use App\Http\Controllers\TorrentDownloadController;
+use App\Http\Requests\DownloadNoticeRequest;
 use App\Repositories\TorrentDownloadRepository;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -124,13 +125,13 @@ final class TorrentDownloadControllerTest extends TestCase
         app()->bind(LegacyRedisCache::class, fn () => null);
 
         $controller = app(TorrentDownloadController::class);
-        $request = Request::create('/downloadnotice', 'POST', [
+        $request = DownloadNoticeRequest::create('/web/torrents/download-notice', 'POST', [
             'id' => 0,
             'type' => 'client',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->downloadnoticeAction($request);
+        $response = $controller->downloadnoticeSubmit($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame('error', (string) $response->getContent());
@@ -142,13 +143,13 @@ final class TorrentDownloadControllerTest extends TestCase
         app()->bind(LegacyRedisCache::class, fn () => null);
 
         $controller = app(TorrentDownloadController::class);
-        $request = Request::create('/downloadnotice', 'POST', [
+        $request = DownloadNoticeRequest::create('/web/torrents/download-notice', 'POST', [
             'id' => 5,
             'type' => 'invalid',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->downloadnoticeAction($request);
+        $response = $controller->downloadnoticeSubmit($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame('error', (string) $response->getContent());

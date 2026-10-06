@@ -7,6 +7,10 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
+use App\Http\Requests\AmountUploadRequest;
+use App\Http\Requests\IncrementBulkRequest;
+use App\Http\Requests\SendInviteRequest;
+use App\Http\Requests\SystemUpdateRequest;
 use App\Jobs\BulkUserIncrementJob;
 use App\Jobs\BulkUserMessageJob;
 use App\Models\Invite;
@@ -62,7 +66,16 @@ class SystemBulkController extends LegacyController
         $this->legacyRedisCache = $legacyRedisCache;
     }
 
-    public function takeamountupload(Request $request): Response|RedirectResponse|View
+    public function takeamountupload(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/system/amount-upload'.$suffix, 308);
+    }
+
+    public function amountUpload(AmountUploadRequest $request): Response|RedirectResponse|View
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
@@ -120,7 +133,16 @@ class SystemBulkController extends LegacyController
 
     }
 
-    public function takeinvite(Request $request): Response|RedirectResponse
+    public function takeinvite(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/invites/send'.$suffix, 308);
+    }
+
+    public function sendInvite(SendInviteRequest $request): Response|RedirectResponse
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
@@ -282,7 +304,16 @@ class SystemBulkController extends LegacyController
         return redirect('/web/invite?id='.$currentUserId.'&sent=1');
     }
 
-    public function takeupdate(Request $request): Response|RedirectResponse
+    public function takeupdate(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/system/update'.$suffix, 308);
+    }
+
+    public function systemUpdate(SystemUpdateRequest $request): Response|RedirectResponse
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
@@ -383,7 +414,16 @@ class SystemBulkController extends LegacyController
         }
     }
 
-    public function takeIncrementBulk(Request $request): Response|RedirectResponse
+    public function takeIncrementBulk(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/system/increment-bulk'.$suffix, 308);
+    }
+
+    public function incrementBulkSend(IncrementBulkRequest $request): Response|RedirectResponse
     {
         if (! $request->isMethod('POST')) {
             return $this->legacyAbortResponse('Error', 'Permission denied!');

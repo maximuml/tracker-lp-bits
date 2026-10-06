@@ -63,7 +63,7 @@ class MessagePageService
     public function build(Request $request): MessagePageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($this->currentUser->id());
+        $userId = $this->currentUser->id();
 
         $action = (string) $request->input('action', '');
         if ($action === '') {

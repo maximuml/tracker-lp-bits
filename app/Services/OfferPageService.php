@@ -37,7 +37,7 @@ final class OfferPageService
     public function build(Request $request): OfferPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($this->currentUser->id());
+        $userId = $this->currentUser->id();
 
         $action = $this->resolveAction($request);
 

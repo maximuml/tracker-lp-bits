@@ -92,7 +92,7 @@
                     </div>
                     <div class="nxm-usermenu__links">
                         <a href="/usercp">{{ __('legacy/functions.text_user_cp') }}</a>
-                        @if($chrome->userBar->isModerator)<a href="/staffpanel">{{ __('legacy/functions.text_staff_panel') }}</a>@endif
+                        @if($chrome->userBar->isModerator)<a href="/web/staffpanel">{{ __('legacy/functions.text_staff_panel') }}</a>@endif
                         @if($chrome->userBar->isSysop)<a href="/web/settings">{{ __('legacy/functions.text_site_settings') }}</a>@endif
                         <a href="/web/torrents?inclbookmarked=1&amp;allsec=1&amp;incldead=0">{{ __('legacy/functions.text_bookmarks') }}</a>
                         <a href="/web/mybonus">{{ __('legacy/functions.text_bonus') }}<span class="nxm-usermenu__count">{{ $chrome->userBar->seedbonus }}</span></a>

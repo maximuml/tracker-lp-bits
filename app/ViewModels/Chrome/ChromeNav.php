@@ -63,9 +63,9 @@ final class ChromeNav
         $items[] = ['key' => 'rules', 'href' => '/web/rules', 'label' => __('legacy/functions.text_rules')];
         $items[] = ['key' => 'faq', 'href' => '/web/faq', 'label' => __('legacy/functions.text_faq')];
         if ($chrome->permissionChecker->userCan('staffmem', false, $userId)) {
-            $items[] = ['key' => 'staff', 'href' => '/staff', 'label' => __('legacy/functions.text_staff')];
+            $items[] = ['key' => 'staff', 'href' => '/web/staff', 'label' => __('legacy/functions.text_staff')];
         }
-        $items[] = ['key' => 'contactstaff', 'href' => '/contactstaff', 'label' => __('legacy/functions.text_contactstaff')];
+        $items[] = ['key' => 'contactstaff', 'href' => '/web/contactstaff', 'label' => __('legacy/functions.text_contactstaff')];
 
         return array_values(array_map(
             fn (array $item): array => $item + ['selected' => $item['key'] === $selected, 'attrs' => ''],

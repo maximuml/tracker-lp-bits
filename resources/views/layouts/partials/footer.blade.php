@@ -4,7 +4,7 @@
     <nav class="nxm-footer__links" aria-label="{{ __('legacy/functions.text_footer_nav') }}">
         <a href="/web/rules">{{ __('legacy/functions.text_rules') }}</a>
         <a href="/web/faq">{{ __('legacy/faq.head_faq') }}</a>
-        <a href="/staff">{{ __('legacy/functions.text_staff') }}</a>
+        <a href="/web/staff">{{ __('legacy/functions.text_staff') }}</a>
         <a href="/web/donate">{{ 'Donate' }}</a>
     </nav>
     <span class="nxm-footer__copy">(c) <a href="{{ $chrome->baseUrl }}">{{ $chrome->siteName }}</a>

@@ -31,7 +31,7 @@ final class PrivateAttachmentsTest extends TestCase
      */
     public function test_controller_uses_x_accel_redirect(): void
     {
-        $source = file_get_contents(app_path('Http/Controllers/UtilityController.php'));
+        $source = file_get_contents(app_path('Http/Controllers/AttachmentController.php'));
         $this->assertStringContainsString('X-Accel-Redirect', $source, 'getattachment must use X-Accel-Redirect');
     }
 
@@ -40,7 +40,7 @@ final class PrivateAttachmentsTest extends TestCase
      */
     public function test_controller_checks_dlkey(): void
     {
-        $source = file_get_contents(app_path('Http/Controllers/UtilityController.php'));
+        $source = file_get_contents(app_path('Http/Controllers/AttachmentController.php'));
         $repoSource = file_get_contents(app_path('Repositories/AttachmentRepository.php'));
         $this->assertStringContainsString('dlkey', $source, 'getattachment must verify dlkey');
         $this->assertStringContainsString("where('dlkey'", $repoSource, 'getattachment must query by dlkey');
@@ -51,7 +51,7 @@ final class PrivateAttachmentsTest extends TestCase
      */
     public function test_controller_has_path_traversal_protection(): void
     {
-        $source = file_get_contents(app_path('Http/Controllers/UtilityController.php'));
+        $source = file_get_contents(app_path('Http/Controllers/AttachmentController.php'));
         $this->assertStringContainsString('realpath', $source, 'getattachment must use realpath()');
         $this->assertStringContainsString('str_starts_with', $source, 'getattachment must verify file is within base path');
     }
@@ -61,7 +61,7 @@ final class PrivateAttachmentsTest extends TestCase
      */
     public function test_controller_sets_nosniff_header(): void
     {
-        $source = file_get_contents(app_path('Http/Controllers/UtilityController.php'));
+        $source = file_get_contents(app_path('Http/Controllers/AttachmentController.php'));
         $this->assertStringContainsString('nosniff', $source, 'getattachment must set X-Content-Type-Options: nosniff');
     }
 
@@ -70,7 +70,7 @@ final class PrivateAttachmentsTest extends TestCase
      */
     public function test_controller_sets_content_disposition_attachment(): void
     {
-        $source = file_get_contents(app_path('Http/Controllers/UtilityController.php'));
+        $source = file_get_contents(app_path('Http/Controllers/AttachmentController.php'));
         $this->assertStringContainsString('Content-Disposition', $source);
         $this->assertStringContainsString('attachment;', $source, 'getattachment must force download (Content-Disposition: attachment)');
     }

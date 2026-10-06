@@ -12,11 +12,11 @@
 @elseif ($currentUserBlockedTarget)
 <p>(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</p>
 @else
-<p>(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="/web/friends/add" class="inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_blocks') ?? '' }}</button></form>)</p>
+<p>(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/userdetails.text_add_to_blocks') ?? '' }}</button></form>)</p>
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
-<h2>{{ __('legacy/userdetails.text_flush_ghost_torrents') ?? '' }}<form method="post" action="/takeflush" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn altlink">{{ __('legacy/userdetails.text_here') ?? '' }}</button></form></h2>
+<h2>{{ __('legacy/userdetails.text_flush_ghost_torrents') ?? '' }}<form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('legacy/userdetails.text_here') ?? '' }}</button></form></h2>
 @endif
 <x-data-table :caption="__('legacy/userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)
@@ -99,7 +99,7 @@
 
 @if ($canManageBasic && (int) $user['class'] < $currentClass)
 <x-frame :caption="__('legacy/userdetails.text_edit_user')" :center="false">
-<form method="post" action="/modtask">
+<form method="post" action="/web/staff/modtask">@csrf
 <input type="hidden" name="action" value="edituser" />
 <input type="hidden" name="userid" value="{{ $id }}" />
 <input type="hidden" name="returnto" value="user/web/details/{{ $id }}" />
@@ -173,7 +173,7 @@
 </x-frame>
 @if ($canDeleteUser)
 <x-frame :caption="__('legacy/userdetails.text_delete_user')">
-<form method="post" action="/delacctadmin" name="deluser">
+<form method="post" action="delacctadmin.php" name="deluser">
 <input name="userid" size="10" type="hidden" value="{{ $user['id'] }}" />
 <input name="delenable" type="checkbox" data-del-msg="{{ __('legacy/userdetails.js_delete_user_note') ?? '' }}" /><input name="submit" type="submit" value="{{ __('legacy/userdetails.submit_delete') ?? '' }}" disabled="disabled" /></form>
 </x-frame>

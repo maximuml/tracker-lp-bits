@@ -8,6 +8,9 @@ use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\BitbucketLogRequest;
+use App\Http\Requests\DonatedRequest;
+use App\Http\Requests\DonateSubmitRequest;
 use App\Services\BitbucketService;
 use App\Services\PermissionChecker;
 use App\Support\CurrentUser;
@@ -171,7 +174,16 @@ class InfoController extends LegacyController
         return $this->legacyPage($request, 'donate', false, $data);
     }
 
-    public function donatePost(Request $request): View|RedirectResponse|Response
+    public function donatePost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/donate/submit'.$suffix, 308);
+    }
+
+    public function donateSubmit(DonateSubmitRequest $request): View|RedirectResponse|Response
     {
         return $this->donate($request);
     }
@@ -186,7 +198,16 @@ class InfoController extends LegacyController
         return $this->donatedPage($request, '');
     }
 
-    public function donatedPost(Request $request): Response|RedirectResponse|View
+    public function donatedPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/info/donated'.$suffix, 308);
+    }
+
+    public function donatedSubmit(DonatedRequest $request): Response|RedirectResponse|View
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
@@ -299,7 +320,16 @@ class InfoController extends LegacyController
         ]);
     }
 
-    public function bitbucketlogPost(Request $request): Response|RedirectResponse|View
+    public function bitbucketlogPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/admin/bitbucket-log'.$suffix, 308);
+    }
+
+    public function bitbucketLogSubmit(BitbucketLogRequest $request): Response|RedirectResponse|View
     {
         $currentClass = (int) UserDisplay::currentClass();
 

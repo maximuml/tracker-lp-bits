@@ -24,7 +24,7 @@
         </div><div class="grow">
         <div class="flex items-start nx-main">
         <div class="nx-embedded w-[80%]">{{ $friend['usernameHtml'] }} ({{ $friend['titleHtml'] }})<br /><br />{{ __('legacy/friends.text_last_seen_on') }}<x-time :value="$friend['lastSeen']" /></div>
-        <div class="nx-embedded w-[20%]"><form method="post" action="/web/friends/delete" class="inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $friend['id'] }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/friends.text_remove_from_friends') }}</button></form><br /><br /><a href="/web/sendmessage?receiver={{ $friend['id'] }}">{{ __('legacy/friends.text_send_pm') }}</a></div>
+        <div class="nx-embedded w-[20%]"><form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $friend['id'] }}" /><button type="submit" class="nxm-linkbtn">{{ __('legacy/friends.text_remove_from_friends') }}</button></form><br /><br /><a href="/web/sendmessage?receiver={{ $friend['id'] }}">{{ __('legacy/friends.text_send_pm') }}</a></div>
         </div>
         </div>
         </div>
@@ -42,7 +42,7 @@
 @if ($blocks === [])
 <x-empty-state :title="__('legacy/friends.text_blocklist_empty')" />
 @else
-<div class="nxm-grid-6">@foreach ($blocks as $block)<div>[<form method="post" action="/web/friends/delete" class="inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $block['id'] }}" /><button type="submit" class="nxm-linkbtn small">D</button></form>] {{ $block['usernameHtml'] }}</div>@endforeach</div>
+<div class="nxm-grid-6">@foreach ($blocks as $block)<div>[<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $block['id'] }}" /><button type="submit" class="nxm-linkbtn small">D</button></form>] {{ $block['usernameHtml'] }}</div>@endforeach</div>
 @endif
 </div>
 </section>

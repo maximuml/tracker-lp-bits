@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\GetrssRequest;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -36,7 +37,16 @@ class RssController extends LegacyController
         return $this->legacyPage($request, 'getrss', true, $this->getrssData());
     }
 
-    public function getrssPost(Request $request): Response|RedirectResponse
+    public function getrssPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/rss/generate'.$suffix, 308);
+    }
+
+    public function getrssSubmit(GetrssRequest $request): Response|RedirectResponse
     {
         return $this->handleGetrssPost($request);
     }

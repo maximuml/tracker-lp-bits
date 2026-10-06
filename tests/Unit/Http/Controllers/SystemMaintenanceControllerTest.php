@@ -6,6 +6,7 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Contracts\CleanupServiceInterface;
 use App\Http\Controllers\SystemMaintenanceController;
+use App\Http\Requests\CleanupRequest;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Mockery;
@@ -112,9 +113,9 @@ final class SystemMaintenanceControllerTest extends TestCase
         });
 
         $controller = app(SystemMaintenanceController::class);
-        $request = Request::create('/docleanup', 'GET');
+        $request = CleanupRequest::create('/web/system/cleanup', 'POST');
 
-        $response = $controller->docleanup($request);
+        $response = $controller->cleanup($request);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('normal', (string) $response->getContent());
@@ -144,9 +145,9 @@ final class SystemMaintenanceControllerTest extends TestCase
         });
 
         $controller = app(SystemMaintenanceController::class);
-        $request = Request::create('/docleanup', 'GET', ['forceall' => '1']);
+        $request = CleanupRequest::create('/web/system/cleanup?forceall=1', 'POST');
 
-        $response = $controller->docleanup($request);
+        $response = $controller->cleanup($request);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('forced', (string) $response->getContent());

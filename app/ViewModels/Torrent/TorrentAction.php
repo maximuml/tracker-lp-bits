@@ -24,5 +24,9 @@ final class TorrentAction
         public readonly ?string $spanId = null,
         public readonly ?int $dataTorrentId = null,
         public readonly ?SafeHtml $iconHtml = null,
+        /** Render as a POST form instead of an anchor (mutating actions). */
+        public readonly bool $isPost = false,
+        /** @var array<string, string|int> */
+        public readonly array $postFields = [],
     ) {}
 }

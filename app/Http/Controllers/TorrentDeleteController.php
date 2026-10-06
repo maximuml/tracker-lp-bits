@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
+use App\Http\Requests\DeleteTorrentRequest;
+use App\Http\Requests\FastDeleteTorrentRequest;
 use App\Models\Torrent;
 use App\Repositories\MessageRepository;
 use App\Services\PermissionChecker;
@@ -29,7 +31,16 @@ class TorrentDeleteController extends LegacyController
         private readonly UserRepositoryInterface $userRepository,
     ) {}
 
-    public function fastDelete(Request $request): Response|RedirectResponse
+    public function fastDelete(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/torrents/fast-delete'.$suffix, 308);
+    }
+
+    public function fastDeleteTorrent(FastDeleteTorrentRequest $request): Response|RedirectResponse
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {
@@ -98,7 +109,16 @@ class TorrentDeleteController extends LegacyController
         return redirect('/torrents.php');
     }
 
-    public function delete(Request $request): View|RedirectResponse|Response
+    public function delete(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/torrents/delete'.$suffix, 308);
+    }
+
+    public function deleteTorrent(DeleteTorrentRequest $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {

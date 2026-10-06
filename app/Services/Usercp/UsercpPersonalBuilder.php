@@ -11,9 +11,9 @@ use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Input;
-use App\Support\YesNo;
 use App\Support\Strings;
 use App\Support\Url;
+use App\Support\YesNo;
 use App\ViewModels\Usercp\UsercpPersonalSection;
 
 /**

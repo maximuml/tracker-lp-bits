@@ -14,9 +14,9 @@ use App\Support\Config\SiteConfig;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
-use App\Support\YesNo;
 use App\Support\Locale;
 use App\Support\Strings;
+use App\Support\YesNo;
 use App\ViewModels\Search\SearchCategoryTableFactory;
 use App\ViewModels\Usercp\UsercpTrackerSection;
 

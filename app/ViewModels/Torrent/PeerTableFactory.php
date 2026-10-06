@@ -7,9 +7,9 @@ namespace App\ViewModels\Torrent;
 use App\Services\PermissionChecker;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\YesNo;
 use App\Support\Ratio;
 use App\Support\Strings;
+use App\Support\YesNo;
 
 final class PeerTableFactory
 {

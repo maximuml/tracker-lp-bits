@@ -6,8 +6,8 @@ namespace App\Services\Usercp;
 
 use App\Enums\UserClickTopic;
 use App\Support\Config\SiteConfig;
-use App\Support\YesNo;
 use App\Support\Strings;
+use App\Support\YesNo;
 use App\ViewModels\Usercp\UsercpForumSection;
 
 /**

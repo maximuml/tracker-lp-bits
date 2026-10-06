@@ -1,9 +1,9 @@
 {{-- Legacy commenttable() frame: two nested layout tables preserved as-is --}}
-<x-data-table role="presentation" class="main"><tr><td class="nx-embedded" >
+<x-data-table role="presentation" class="nx-main"><tr><td class="nx-embedded" >
 <x-data-table role="presentation"><tr><td class="text" >
 @foreach ($vm->rows as $row)
 <div><x-data-table role="presentation" id="cid{{ $row->id }}"><tr><td class="nx-embedded w-[99%]">#{{ $row->id }}&nbsp;&nbsp;<span class="text-nxm-text-dim">{{ __('legacy/functions.text_by') }}</span>{{ $row->author }}&nbsp;&nbsp;<span class="text-nxm-text-dim">{{ __('legacy/functions.text_at') }}</span>{{ $row->addedTime }}@if ($row->showViewOriginal) - [<a href="/comment?action=vieworiginal&amp;cid={{ $row->id }}&amp;type={{ $vm->type }}">{{ __('legacy/functions.text_view_original') }}</a>]@endif</td><td class="nx-embedded whitespace-nowrap w-[1%]"><a href="#top" title="Top" aria-label="Top">↑</a>&nbsp;&nbsp;</td></tr></x-data-table></div>
-<x-data-table role="presentation" class="main">
+<x-data-table role="presentation" class="nx-main">
 <tr>
 <td class="align-top w-[9.375rem]">{{ $row->avatar }}</td>
 <td class="align-top break-all"><br />{{ $row->text }}@if ($row->editedBy)<br /><p><span class="small">{{ __('legacy/functions.text_last_edited_by') }}{{ $row->editedBy }}{{ __('legacy/functions.text_edited_at') }}{{ $row->editedAt }}</span></p>

@@ -20,7 +20,7 @@
         @if ($item['isNew']) &nbsp;<b>(<span class="new">{{ __('legacy/userhistory.text_new')}}</span>)</b>@endif
         </p>
         <br />
-        <x-data-table :caption="__('legacy/userhistory.text_posts_history_for') . $subject" captionHidden class="main">
+        <x-data-table :caption="__('legacy/userhistory.text_posts_history_for') . $subject" captionHidden class="nx-main">
         <tr class="align-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
         </x-data-table>
         <br />
@@ -46,7 +46,7 @@
         &nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_comment') }}&nbsp;</b>#<a href=/web/details/{{ $item['torrentid'] }}&tocomm=1&hit=1{{ $item['pageUrl'] }}>{{ $item['commentid'] }}</a>
         </p>
         <br />
-        <x-data-table :caption="__('legacy/userhistory.text_comments_history_for') . $subject" captionHidden class="main">
+        <x-data-table :caption="__('legacy/userhistory.text_comments_history_for') . $subject" captionHidden class="nx-main">
         <tr class="align-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
         </x-data-table>
         <br />

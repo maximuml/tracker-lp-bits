@@ -1,6 +1,6 @@
 <b>{{ $table->count }} {{ $table->name }}</b>
 @if ($table->count > 0)
-<x-data-table class="main" :caption="$table->name" :caption-hidden="true">
+<x-data-table class="nx-main" :caption="$table->name" :caption-hidden="true">
     <x-slot:head>
         <thead>
             <tr>

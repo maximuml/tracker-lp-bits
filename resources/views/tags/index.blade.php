@@ -17,7 +17,7 @@
 
 @foreach ($tagItems ?? [] as $item)
     <p class=sub><b>{{ $item['name'] }}</b></p>
-    <x-data-table :caption="__('legacy/tags.text_tags')" captionHidden class="main">
+    <x-data-table :caption="__('legacy/tags.text_tags')" captionHidden class="nx-main">
     <tr class="align-top"><td class="w-[25%]">{{ __('legacy/tags.text_description')}}</td><td>{{ $item['description'] }}
     <tr class="align-top"><td>{{ __('legacy/tags.text_syntax')}}</td><td><tt>{{ $item['syntax'] }}</tt>
     <tr class="align-top"><td>{{ __('legacy/tags.text_example')}}</td><td><tt>{{ $item['example'] }}</tt>

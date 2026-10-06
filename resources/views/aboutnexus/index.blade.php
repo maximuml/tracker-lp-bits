@@ -6,7 +6,7 @@
 <x-frame :center="false">
 <x-slot:caption><span id="version">{{ $captions['version'] }}</span></x-slot>
 {{ $notes['version'] }}
-<x-data-table :caption="$captions['version']" captionHidden class="main">
+<x-data-table :caption="$captions['version']" captionHidden class="nx-main">
     <x-settings-row :label="__('legacy/aboutnexus.text_main_version')">{{ PROJECTNAME }}</x-settings-row>
     <x-settings-row :label="__('legacy/aboutnexus.text_sub_version')">{{ VERSION_NUMBER }}</x-settings-row>
     <x-settings-row :label="__('legacy/aboutnexus.text_release_date')">{{ RELEASE_DATE }}</x-settings-row>
@@ -30,7 +30,7 @@
 <x-slot:caption><span id="translation">{{ $captions['translation'] }}</span></x-slot>
 {{ $notes['translation'] }}
 <br /><br />
-<x-data-table :caption="$captions['translation']" captionHidden class="main"><x-slot:head><thead><tr>
+<x-data-table :caption="$captions['translation']" captionHidden class="nx-main"><x-slot:head><thead><tr>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_flag')}}</th>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_language')}}</th>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_state')}}</th>
@@ -50,7 +50,7 @@
 <x-slot:caption><span id="stylesheet">{{ $captions['stylesheet'] }}</span></x-slot>
 {{ $notes['stylesheet'] }}
 <br /><br />
-<x-data-table :caption="$captions['stylesheet']" captionHidden class="main"><x-slot:head><thead><tr>
+<x-data-table :caption="$captions['stylesheet']" captionHidden class="nx-main"><x-slot:head><thead><tr>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_name')}}</th>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_designer')}}</th>
         <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/aboutnexus.text_comment')}}</th>
@@ -70,7 +70,7 @@
 <x-slot:caption><span id="contact">{{ $captions['contact'] }}</span></x-slot>
 {{ $notes['contact'] }}
 <br /><br />
-<x-data-table :caption="$captions['contact']" captionHidden class="main">
+<x-data-table :caption="$captions['contact']" captionHidden class="nx-main">
     <x-settings-row :label="__('legacy/aboutnexus.text_web_site')"><a href="{{ NEXUSPHPURL }}" target="_blank">{{ NEXUSPHPURL }}</a></x-settings-row>
 </x-data-table>
 <br /><br />

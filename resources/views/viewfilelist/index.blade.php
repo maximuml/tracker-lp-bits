@@ -2,7 +2,7 @@
 {{-- .fileicon rules live in styles/nexus.css: this fragment is AJAX-injected
      into an already-loaded page, so an inline <style> here always carries a
      nonce for the wrong request and CSP refuses it. --}}
-<x-data-table class="main" :caption="__('legacy/viewfilelist.col_path')" :caption-hidden="true">
+<x-data-table class="nx-main" :caption="__('legacy/viewfilelist.col_path')" :caption-hidden="true">
     <x-slot:head>
         <thead>
             <tr>

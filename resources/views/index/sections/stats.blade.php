@@ -10,7 +10,7 @@
 <details class="nx-stats__details">
 <summary><img class="plus nx-stats__sign" src="pic/trans.gif" alt="" /><span class="nx-stats__title">{{ $stats->title }}</span></summary>
 <div class="p-[10pt] text-center">
-<x-data-table :caption="$stats->title" captionHidden class="main mx-auto">
+<x-data-table :caption="$stats->title" captionHidden class="nx-main mx-auto">
 <tr>
 <td>{{ $stats->labels['rowUsersActiveToday'] }}</td><td>{{ $stats->userStats['activeToday'] }}</td>
 <td>{{ $stats->labels['rowUsersActiveThisWeek'] }}</td><td>{{ $stats->userStats['activeThisWeek'] }}</td>

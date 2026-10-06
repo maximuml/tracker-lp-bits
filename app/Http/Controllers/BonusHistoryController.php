@@ -273,7 +273,16 @@ JS;
 
     }
 
-    public function magic(MagicRewardRequest $request, MagicRewardService $magicRewardService): JsonResponse|Response
+    public function magic(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/bonus/magic'.$suffix, 308);
+    }
+
+    public function magicSubmit(MagicRewardRequest $request, MagicRewardService $magicRewardService): JsonResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
         $validated = $request->validated();

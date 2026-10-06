@@ -6,6 +6,9 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Enums\FaqType;
+use App\Http\Requests\FaqActionsRequest;
+use App\Http\Requests\FaqManageSubmitRequest;
+use App\Http\Requests\FaqPostRequest;
 use App\Support\Config\SiteConfig;
 use App\Support\Globals;
 use App\Support\Html;
@@ -61,7 +64,16 @@ class FaqController extends LegacyController
         return response(view('faq.index', ['faqCategories' => $categories])->render());
     }
 
-    public function faqPost(Request $request): Response|RedirectResponse
+    public function faqPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/faq/submit'.$suffix, 308);
+    }
+
+    public function faqSubmit(FaqPostRequest $request): Response|RedirectResponse
     {
         return $this->faq($request);
     }
@@ -78,7 +90,16 @@ class FaqController extends LegacyController
         return $this->legacyPage($request, 'faqmanage', true, $faqData);
     }
 
-    public function faqManagePost(Request $request): View|RedirectResponse|Response
+    public function faqManagePost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/faq/manage'.$suffix, 308);
+    }
+
+    public function faqManageSubmit(FaqManageSubmitRequest $request): View|RedirectResponse|Response
     {
         return $this->faqManage($request);
     }
@@ -146,7 +167,16 @@ class FaqController extends LegacyController
         return redirect($redirectBase.'/faqmanage.php');
     }
 
-    public function faqActionsPost(Request $request): View|RedirectResponse|Response
+    public function faqActionsPost(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/faq/actions'.$suffix, 308);
+    }
+
+    public function faqActionsSubmit(FaqActionsRequest $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {

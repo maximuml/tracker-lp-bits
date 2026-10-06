@@ -8,6 +8,7 @@ use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Exceptions\NexusException;
+use App\Http\Requests\DownloadNoticeRequest;
 use App\Models\User;
 use App\Repositories\IpLogRepository;
 use App\Support\Config\SiteConfig;
@@ -199,7 +200,16 @@ class TorrentDownloadController extends LegacyController
         ]);
     }
 
-    public function downloadnoticeAction(Request $request): Response|RedirectResponse
+    public function downloadnoticeAction(Request $request): RedirectResponse
+    {
+        // Renamed endpoint — 308 replays the body + query string unchanged.
+        $qs = $request->getQueryString();
+        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
+
+        return redirect()->to('/web/torrents/download-notice'.$suffix, 308);
+    }
+
+    public function downloadnoticeSubmit(DownloadNoticeRequest $request): Response|RedirectResponse
     {
         $curUser = $this->currentUser->get();
         if ($curUser === null) {

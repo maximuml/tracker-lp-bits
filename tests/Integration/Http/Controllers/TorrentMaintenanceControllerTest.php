@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\TorrentMaintenanceController;
+use App\Http\Requests\FlushTorrentRequest;
+use App\Http\Requests\ReseedTorrentRequest;
 use App\Support\CurrentUser;
 use App\Support\Globals;
 use Illuminate\Http\RedirectResponse;
@@ -35,10 +37,10 @@ final class TorrentMaintenanceControllerTest extends TestCase
         $this->mockCurrentUser(null);
 
         $controller = app(TorrentMaintenanceController::class);
-        $request = Request::create('/takeflush', 'GET', ['id' => 0]);
+        $request = FlushTorrentRequest::create('/web/torrents/flush', 'POST', ['id' => 0]);
         app()->instance('request', $request);
 
-        $response = $controller->takeFlush($request);
+        $response = $controller->flush($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Invalid ID.', (string) $response->getContent());
@@ -49,10 +51,10 @@ final class TorrentMaintenanceControllerTest extends TestCase
         $this->mockCurrentUser(null);
 
         $controller = app(TorrentMaintenanceController::class);
-        $request = Request::create('/takeflush', 'GET', ['id' => -5]);
+        $request = FlushTorrentRequest::create('/web/torrents/flush', 'POST', ['id' => -5]);
         app()->instance('request', $request);
 
-        $response = $controller->takeFlush($request);
+        $response = $controller->flush($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Invalid ID.', (string) $response->getContent());
@@ -63,13 +65,37 @@ final class TorrentMaintenanceControllerTest extends TestCase
         $this->mockCurrentUser(null);
 
         $controller = app(TorrentMaintenanceController::class);
-        $request = Request::create('/takeflush', 'GET', ['id' => 2]);
+        $request = FlushTorrentRequest::create('/web/torrents/flush', 'POST', ['id' => 2]);
         app()->instance('request', $request);
 
-        $response = $controller->takeFlush($request);
+        $response = $controller->flush($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('only clean your own ghost torrents', (string) $response->getContent());
+    }
+
+    public function test_take_flush_legacy_uri_redirects_to_rest_endpoint(): void
+    {
+        $controller = app(TorrentMaintenanceController::class);
+        $request = Request::create('/takeflush', 'POST', ['id' => 2]);
+
+        $response = $controller->takeFlush($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('/web/torrents/flush', $response->getTargetUrl());
+    }
+
+    public function test_take_reseed_legacy_uri_redirects_to_rest_endpoint(): void
+    {
+        $controller = app(TorrentMaintenanceController::class);
+        $request = Request::create('/takereseed', 'POST', ['reseedid' => 10]);
+
+        $response = $controller->takeReseed($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertStringContainsString('/web/torrents/reseed', $response->getTargetUrl());
     }
 
     public function test_take_reseed_redirects_guest_to_takereseed_php(): void
@@ -77,10 +103,10 @@ final class TorrentMaintenanceControllerTest extends TestCase
         $this->mockCurrentUser(null);
 
         $controller = app(TorrentMaintenanceController::class);
-        $request = Request::create('/takereseed', 'GET', ['reseedid' => 10]);
+        $request = ReseedTorrentRequest::create('/web/torrents/reseed?reseedid=10', 'POST');
         app()->instance('request', $request);
 
-        $response = $controller->takeReseed($request);
+        $response = $controller->reseed($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/takereseed.php', $response->getTargetUrl());

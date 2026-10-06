@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UtilityController;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -79,7 +81,7 @@ final class UtilityControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(UtilityController::class);
+        $controller = app(SearchController::class);
         $request = Request::create('/search', 'GET', ['q' => 'x']);
         app()->instance('request', $request);
 
@@ -93,7 +95,7 @@ final class UtilityControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(UtilityController::class);
+        $controller = app(AttachmentController::class);
         $request = Request::create('/getattachment', 'GET');
         app()->instance('request', $request);
 
@@ -107,7 +109,7 @@ final class UtilityControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(UtilityController::class);
+        $controller = app(AttachmentController::class);
         $request = Request::create('/getattachment', 'GET', ['id' => 999999, 'dlkey' => 'nope']);
         app()->instance('request', $request);
 
@@ -141,7 +143,7 @@ final class UtilityControllerTest extends TestCase
         )->andReturn($this->fakeView());
         View::shouldReceive('make')->zeroOrMoreTimes()->withAnyArgs()->andReturn($this->fakeView());
 
-        $controller = app(UtilityController::class);
+        $controller = app(SearchController::class);
         $request = Request::create('/tags', 'POST', ['test' => 'abc']);
         app()->instance('request', $request);
 
@@ -154,7 +156,7 @@ final class UtilityControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(UtilityController::class);
+        $controller = app(SearchController::class);
         $request = Request::create('/searchsuggest', 'GET');
         app()->instance('request', $request);
 
@@ -169,7 +171,7 @@ final class UtilityControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(UtilityController::class);
+        $controller = app(SearchController::class);
         $request = Request::create('/searchsuggest', 'GET', ['q' => 'zzz-no-match']);
         app()->instance('request', $request);
 
@@ -229,7 +231,7 @@ final class UtilityControllerTest extends TestCase
         $this->mockCurrentUser(null);
         Cache::forget('opensearch_description');
 
-        $controller = app(UtilityController::class);
+        $controller = app(SearchController::class);
         $request = Request::create('/opensearch', 'GET');
         app()->instance('request', $request);
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminToolsController;
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BitbucketUploadController;
 use App\Http\Controllers\BonusHistoryController;
@@ -176,7 +177,7 @@ Route::get('/fields', fn () => redirect('/nexusphp/torrent-custom-fields'))->nam
 Route::get('/formats', fn () => redirect('/nexusphp/section/codecs'))->name('formats.legacy');
 Route::get('/videoformats', fn () => redirect('/nexusphp/section/standards'))->name('videoformats.legacy');
 $get301('/attachment', '/web/attachment');
-Route::post('/attachment', [UtilityController::class, 'attachmentStore'])->middleware('throttle:attachment');
+Route::post('/attachment', [AttachmentController::class, 'attachmentStore'])->middleware('throttle:attachment');
 $get301('/getattachment', '/web/getattachment');
 $get301('/shoutbox_history', '/web/shoutbox_history');
 $get301('/notifications', '/web/notifications');

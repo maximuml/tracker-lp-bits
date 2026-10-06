@@ -4,7 +4,7 @@
 
 @section('content')
 <h1 class="text-center">{{ __('legacy/getrss.text_rss_feeds') }}</h1>
-<form method="post" action="/web/getrss">
+<form method="post" action="/getrss">
 @csrf
 <div class="nx-fgrid nx-fgrid--flat w-[97%]">
 <div class="nx-fhead">{{ __('legacy/getrss.row_categories_to_retrieve') }}

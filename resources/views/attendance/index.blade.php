@@ -11,7 +11,7 @@
     <x-frame :caption="__('legacy/attendance.title')" :center="false">
     <div class="nx-box">
     <div>
-    <form method="post" action="/web/attendance" class="nx-inline-block">
+    <form method="post" action="/attendance" class="nx-inline-block">
     <div class="nx-fgrid nx-fgrid--flat">
     {{ $captchaHtml ?? '' }}
     <div class="nx-ffull text-center"><input type="submit" value="{{ __('legacy/attendance.attend_button')}}" class="btn" /></div>

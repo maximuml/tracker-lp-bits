@@ -4,7 +4,7 @@
 
 @section('content')
 <h1 class="text-center">FAQ Management</h1>
-<form method="post" action="/web/faqactions?action=reorder">
+<form method="post" action="/faqactions?action=reorder">
 @csrf
 @foreach (($faqCateg ?? []) as $lang => $temp2)
     @foreach ($temp2 as $id => $temp)

@@ -155,7 +155,11 @@ for (const file of fs.readdirSync(currentDir).filter((f) => f.endsWith('.json'))
   for (const [scenario, cur] of Object.entries(current.scenarios ?? {})) {
     // The control scenario defines the noise floor — its own delta is runner
     // noise by definition, and its absolute budget is enforced by k6.
-    if (scenario === CONTROL_SCENARIO) {
+    // page_health_ready_duration is exempt for the same reason: it probes
+    // DB/Redis connectivity, so cold-start connection setup dominates its
+    // p95 (observed: +722% one-off spike on php8 and PR runs alike). Its
+    // absolute budget stays enforced by the k6 threshold.
+    if (scenario === CONTROL_SCENARIO || scenario === 'page_health_ready_duration') {
       console.log(`SKIP ${file}:${scenario}: noise-floor control`);
       skipped++;
       continue;

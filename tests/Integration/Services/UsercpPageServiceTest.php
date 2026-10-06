@@ -9,6 +9,11 @@ use App\Repositories\TokenRepository;
 use App\Repositories\UsercpLookupRepository;
 use App\Repositories\UsercpRepository;
 use App\Repositories\UserPasskeyRepository;
+use App\Services\Usercp\UsercpForumBuilder;
+use App\Services\Usercp\UsercpHomeBuilder;
+use App\Services\Usercp\UsercpPersonalBuilder;
+use App\Services\Usercp\UsercpSecurityBuilder;
+use App\Services\Usercp\UsercpTrackerBuilder;
 use App\Services\UsercpPageService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
@@ -69,14 +74,27 @@ final class UsercpPageServiceTest extends TestCase
         $this->tokenRepository = Mockery::mock(TokenRepository::class);
         $this->passkeyRepository = Mockery::mock(UserPasskeyRepository::class);
 
-        $this->service = new UsercpPageService(
-            $this->currentUser,
-            new LegacyRedisCache,
-            app(UsercpRepository::class),
-            app(UsercpLookupRepository::class),
-            $this->passkeyRepository,
-            $this->tokenRepository,
-            app(SearchCategoryTableFactory::class),
+        $this->service = $this->makeService();
+    }
+
+    private function makeService(): UsercpPageService
+    {
+        $lookup = app(UsercpLookupRepository::class);
+
+        return new UsercpPageService(
+            $this->currentUser ?? new CurrentUser,
+            new UsercpHomeBuilder(
+                $lookup,
+                app(UsercpRepository::class),
+                $this->tokenRepository ?? Mockery::mock(TokenRepository::class),
+                new LegacyRedisCache,
+            ),
+            new UsercpPersonalBuilder($lookup),
+            new UsercpTrackerBuilder(app(SearchCategoryTableFactory::class)),
+            new UsercpForumBuilder,
+            new UsercpSecurityBuilder(
+                $this->passkeyRepository ?? Mockery::mock(UserPasskeyRepository::class),
+            ),
         );
     }
 
@@ -172,15 +190,7 @@ final class UsercpPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new UsercpPageService(
-            new CurrentUser,
-            new LegacyRedisCache,
-            app(UsercpRepository::class),
-            app(UsercpLookupRepository::class),
-            Mockery::mock(UserPasskeyRepository::class),
-            Mockery::mock(TokenRepository::class),
-            app(SearchCategoryTableFactory::class),
-        );
+        $service = $this->makeService();
 
         $this->assertInstanceOf(UsercpPageService::class, $service);
     }

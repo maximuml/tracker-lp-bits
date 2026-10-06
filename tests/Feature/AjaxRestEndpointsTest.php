@@ -6,6 +6,7 @@ use App\Enums\UserClass;
 use App\Models\Offer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Attributes\TestCategory;
@@ -86,6 +87,37 @@ final class AjaxRestEndpointsTest extends TestCase
 
         $response->assertStatus(308);
         $response->assertRedirect($uri);
+    }
+
+    public function test_ajax_shim_hits_are_counted_per_action(): void
+    {
+        $redis = Redis::connection();
+        $redis->del('metrics:legacy_ajax:clearShoutBox');
+        $redis->srem('metrics:legacy_ajax_actions', 'clearShoutBox');
+
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->asNexusUser($user)
+            ->post('/ajax', ['action' => 'clearShoutBox', 'params' => [], '_token' => $this->csrfToken()])
+            ->assertStatus(308);
+
+        $this->assertSame('1', (string) $redis->get('metrics:legacy_ajax:clearShoutBox'));
+        $this->assertTrue((bool) $redis->sismember('metrics:legacy_ajax_actions', 'clearShoutBox'));
+    }
+
+    public function test_ajax_shim_invalid_action_counts_under_invalid_label(): void
+    {
+        $redis = Redis::connection();
+        $redis->del('metrics:legacy_ajax:__invalid');
+        $redis->srem('metrics:legacy_ajax_actions', '__invalid');
+
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->asNexusUser($user)
+            ->post('/ajax', ['action' => 'notARealAction', 'params' => [], '_token' => $this->csrfToken()])
+            ->assertOk();
+
+        $this->assertSame('1', (string) $redis->get('metrics:legacy_ajax:__invalid'));
     }
 
     /**

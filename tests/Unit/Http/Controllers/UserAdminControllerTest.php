@@ -43,7 +43,7 @@ final class UserAdminControllerTest extends TestCase
             $userModerationRepository,
             $bonusRepository,
             Mockery::mock(UserListingRepository::class),
-            Mockery::mock(CurrentUser::class),
+            new CurrentUser,
         );
 
         $this->assertInstanceOf(UserAdminController::class, $controller);

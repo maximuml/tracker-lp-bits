@@ -33,7 +33,7 @@ final class BonusHistoryControllerTest extends TestCase
             Mockery::mock(UserListingRepository::class),
             Mockery::mock(UserRepositoryInterface::class),
             $calculationRepository,
-            Mockery::mock(CurrentUser::class),
+            new CurrentUser,
         );
 
         $this->assertInstanceOf(BonusHistoryController::class, $controller);

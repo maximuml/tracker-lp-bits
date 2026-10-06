@@ -25,7 +25,6 @@ use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Json;
-use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\RedisGuard;
 use App\Support\Tracker;
@@ -263,7 +262,7 @@ class AnnounceService
     /** @return array<string, mixed>|false */
     private function loadSnatchInfo(AnnounceContext $ctx): array|false
     {
-        return $ctx->self !== null ? LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId()) : false;
+        return $ctx->self !== null ? app(TorrentStatsService::class)->getSnatchInfo($ctx->torrentId(), $ctx->userId()) : false;
     }
 
     private function validateAnnounceTime(AnnounceContext $ctx): void
@@ -352,7 +351,7 @@ class AnnounceService
             }
 
             if ($this->requireSeedTorrentRepository->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
-                $snatchInfo = LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId());
+                $snatchInfo = app(TorrentStatsService::class)->getSnatchInfo($ctx->torrentId(), $ctx->userId());
                 if ($snatchInfo) {
                     $this->requireSeedTorrentRepository->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
                 }

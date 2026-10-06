@@ -10,7 +10,7 @@ use App\Support\Cache\LegacyRedisCache;
 use App\Support\Database;
 use App\Support\Format;
 use App\Support\Input;
-use App\Support\LegacyDb;
+use App\Support\QueryLog;
 use App\Support\Locale;
 use App\Support\RequestContext;
 use Composer\InstalledVersions;
@@ -97,7 +97,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' => $this->requestContext->getDbQueryCount() + (int) LegacyDb::lastQuery('COUNT', 'json'),
+            'value' => $this->requestContext->getDbQueryCount() + (int) QueryLog::count(),
         ];
         $name = 'redis_io';
         $result[$name] = [

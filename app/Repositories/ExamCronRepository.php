@@ -21,7 +21,7 @@ use App\Models\UserBanLog;
 use App\Models\UserModifyLog;
 use App\Support\Cache;
 use App\Support\Json;
-use App\Support\LegacyDb;
+use App\Support\QueryLog;
 use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
@@ -148,7 +148,7 @@ class ExamCronRepository extends BaseRepository
         while (true) {
             $logPrefix = sprintf('[%s], exam: %s, size: %s', __FUNCTION__, $exam->id, $size);
             $users = (clone $baseQuery)->where("$userTable.id", '>', $minId)->limit($size)->get();
-            Logger::writeWithContext((string) ("{$logPrefix}, query: ".LegacyDb::lastQuery(false, 'json').', counts: '.$users->count()), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$logPrefix}, query: ".QueryLog::last().', counts: '.$users->count()), (string) 'info', (bool) false);
             if ($users->isEmpty()) {
                 Logger::writeWithContext((string) 'no more data...', (string) 'info', (bool) false);
                 break;
@@ -228,7 +228,7 @@ class ExamCronRepository extends BaseRepository
         while (true) {
             $logPrefix = sprintf('[%s], size: %s', __FUNCTION__, $size);
             $examUsers = (clone $baseQuery)->where("$examUserTable.id", '>', $minId)->limit($size)->get();
-            Logger::writeWithContext((string) ("{$logPrefix}, fetch exam users: {$examUsers->count()} by: ".LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$logPrefix}, fetch exam users: {$examUsers->count()} by: ".QueryLog::last()), (string) 'info', (bool) false);
             if ($examUsers->isEmpty()) {
                 Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;

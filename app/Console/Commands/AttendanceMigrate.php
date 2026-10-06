@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Repositories\AttendanceRepository;
-use App\Support\LegacyDb;
+use App\Support\QueryLog;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
@@ -42,7 +42,7 @@ class AttendanceMigrate extends Command
     public function handle(AttendanceRepository $rep): int
     {
         $result = $rep->migrateAttendance();
-        $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
+        $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), QueryLog::last());
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 

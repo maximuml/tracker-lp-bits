@@ -9,7 +9,7 @@ use App\Models\BonusLogs;
 use App\Models\User;
 use App\Support\Cache;
 use App\Support\Json;
-use App\Support\LegacyDb;
+use App\Support\QueryLog;
 use App\Support\Logger;
 use Illuminate\Support\Facades\DB;
 
@@ -71,7 +71,7 @@ class BonusConsumptionRepository extends BaseRepository
                 ->where('seedbonus', $oldUserBonus)
                 ->update($userUpdates);
             if ($affectedRows != 1) {
-                Logger::writeWithContext((string) ('update user seedbonus affected rows: '.$affectedRows.' != 1, query: '.LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                Logger::writeWithContext((string) ('update user seedbonus affected rows: '.$affectedRows.' != 1, query: '.QueryLog::last()), (string) 'error', (bool) false);
                 throw new \RuntimeException('Update user seedbonus fail.');
             }
             $nowStr = now()->toDateTimeString();

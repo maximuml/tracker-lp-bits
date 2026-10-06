@@ -8,7 +8,7 @@ use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
 use App\Models\Peer;
 use App\Models\Snatch;
-use App\Support\LegacyDb;
+use App\Services\TorrentStatsService;
 use App\Support\Logger;
 use Illuminate\Support\Facades\DB;
 
@@ -211,7 +211,7 @@ final class PeerLifecycle
                     'to_go' => $this->left,
                     'last_action' => $this->dt,
                 ]);
-                $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
+                $this->snatchInfo = app(TorrentStatsService::class)->getSnatchInfo($this->torrentId, $this->userId);
             } else {
                 $snatchInsert = [
                     'torrentid' => $this->torrentId,
@@ -225,7 +225,7 @@ final class PeerLifecycle
                     'last_action' => $this->dt,
                 ];
                 Snatch::query()->insert($snatchInsert);
-                $this->snatchInfo = LegacyDb::snatchInfo($this->torrentId, $this->userId);
+                $this->snatchInfo = app(TorrentStatsService::class)->getSnatchInfo($this->torrentId, $this->userId);
             }
         } catch (\Exception $exception) {
             Logger::writeWithContext((string) ('[INSERT PEER] error: '.$exception->getMessage()), (string) 'info', (bool) false);

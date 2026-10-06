@@ -11,7 +11,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Services\Announce\PeerLifecycle;
 use App\Support\Cache;
-use App\Support\LegacyDb;
+use App\Services\TorrentStatsService;
 use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
 use App\ValueObjects\PeerId;
@@ -226,7 +226,7 @@ final class PeerLifecycleTest extends TestCase
 
         $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 600, 300), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
         $this->assertNotNull($lifecycle->findSelf());
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 300, 'leechtime', 60, 0);
 
         $peer = $this->peerRow($torrent, $user);
@@ -256,7 +256,7 @@ final class PeerLifecycleTest extends TestCase
         // left=0 → isSeeder() → seeder flag flips to 1.
         $lifecycle = new PeerLifecycle($this->makeDto(null, 0, 600, 500), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'seedtime', 60, 0);
 
         $peer = $this->peerRow($torrent, $user);
@@ -274,7 +274,7 @@ final class PeerLifecycleTest extends TestCase
 
         $lifecycle = new PeerLifecycle($this->makeDto('completed', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'leechtime', 60, 0);
 
         $snatch = $this->snatchRow($torrent, $user);
@@ -293,7 +293,7 @@ final class PeerLifecycleTest extends TestCase
 
         $lifecycle = new PeerLifecycle($this->makeDto('completed', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'leechtime', 60, 0);
 
         $this->assertArrayNotHasKey('times_completed', $result->torrentUpdate);
@@ -308,7 +308,7 @@ final class PeerLifecycleTest extends TestCase
 
         $lifecycle = new PeerLifecycle($this->makeDto('stopped', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'leechtime', 60, 0);
 
         $this->assertSame(0, DB::table('peers')->where('torrent', $torrent->id)->count());
@@ -325,7 +325,7 @@ final class PeerLifecycleTest extends TestCase
 
         $lifecycle = new PeerLifecycle($this->makeDto('stopped', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'seedtime', 60, 0);
 
         $this->assertSame(0, DB::table('peers')->where('torrent', $torrent->id)->count());
@@ -425,7 +425,7 @@ final class PeerLifecycleTest extends TestCase
 
         $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 600, 300), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $lifecycle->process(600, 300, 'leechtime', 60, 120);
 
         $snatch = $this->snatchRow($torrent, $user);

@@ -10,7 +10,7 @@ use App\Models\Snatch;
 use App\Models\User;
 use App\Repositories\HitAndRunLookupRepository;
 use App\Support\Format;
-use App\Support\LegacyDb;
+use App\Support\QueryLog;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Ratio;
@@ -136,7 +136,7 @@ class HitAndRunStatusService
     {
         $update['status'] = HitAndRunStatus::REACHED->value;
         $affectedRows = $this->hitAndRunRepository->updateInspectingTo((int) $hitAndRun->id, $update);
-        Logger::writeWithContext((string) ("[{$logPrefix}], ".LegacyDb::lastQuery(false, 'json').", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ("[{$logPrefix}], ".QueryLog::last().", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
         if ($affectedRows != 1) {
             Logger::writeWithContext((string) ($hitAndRun->toJson().", [{$logPrefix}], affectedRows != 1, skip!"), (string) 'notice', (bool) false);
 
@@ -174,7 +174,7 @@ class HitAndRunStatusService
             'comment' => $comment,
         ];
         $affectedRows = $this->hitAndRunRepository->updateInspectingTo((int) $hitAndRun->id, $update);
-        Logger::writeWithContext((string) ('[H&R_UNREACHED], '.LegacyDb::lastQuery(false, 'json').", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ('[H&R_UNREACHED], '.QueryLog::last().", affectedRows: {$affectedRows}"), (string) 'info', (bool) false);
         if ($affectedRows != 1) {
             Logger::writeWithContext((string) ($hitAndRun->toJson().', [H&R_UNREACHED], affectedRows != 1, skip!'), (string) 'notice', (bool) false);
 

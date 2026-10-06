@@ -15,7 +15,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Env;
 use App\Support\Json;
-use App\Support\LegacyDb;
+use App\Support\QueryLog;
 use App\Support\Logger;
 use Carbon\Carbon;
 
@@ -51,7 +51,7 @@ class ExamProgressLegacyRepository
         $now = Carbon::now()->toDateTimeString();
         $examUser = $user->exams()->where('status', ExamUserStatus::NORMAL->value)->orderBy('id', 'desc')->first();
         if (! $examUser) {
-            Logger::writeWithContext((string) ('no exam is on the way, '.LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ('no exam is on the way, '.QueryLog::last()), (string) 'info', (bool) false);
 
             return false;
         }
@@ -170,7 +170,7 @@ class ExamProgressLegacyRepository
             ->get()
             ->pluck('sum', 'index')
             ->toArray();
-        $logPrefix .= ', progressSum raw: '.json_encode($progressSum).', query: '.LegacyDb::lastQuery(false, 'json');
+        $logPrefix .= ', progressSum raw: '.json_encode($progressSum).', query: '.QueryLog::last();
         if ($allSum) {
             Logger::writeWithContext((string) $logPrefix, (string) 'info', (bool) false);
 
@@ -186,7 +186,7 @@ class ExamProgressLegacyRepository
                 ->first();
             $torrentCount = $torrentCountRow instanceof ExamProgress ? (int) $torrentCountRow->torrent_count : 0;
             $progressSum[$index] = intval($progressSum[$index] / $torrentCount);
-            $logPrefix .= ", index: INDEX_SEED_TIME_AVERAGE, get torrent count: $torrentCount, from query: ".LegacyDb::lastQuery(false, 'json');
+            $logPrefix .= ", index: INDEX_SEED_TIME_AVERAGE, get torrent count: $torrentCount, from query: ".QueryLog::last();
         }
 
         Logger::writeWithContext((string) ("{$logPrefix}, final progressSum: ".json_encode($progressSum)), (string) 'info', (bool) false);

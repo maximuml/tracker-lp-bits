@@ -261,7 +261,7 @@ final class Time
     }
 
     /**
-     * Elapsed/absolute display parts for the legacy (LegacyRuntime) branch
+     * Elapsed/absolute display parts for the legacy (RuntimeContext) branch
      * of {@see format()}, shared with {@see timeParts()}.
      *
      * `mode` distinguishes the two legacy renderings: `absolute` is the
@@ -343,7 +343,7 @@ final class Time
             return null;
         }
 
-        if (! LegacyRuntime::instance()->isLegacy()) {
+        if (! RuntimeContext::instance()->isLegacy()) {
             try {
                 return Carbon::parse($time)->diffForHumans();
             } catch (\Exception $e) {
@@ -389,7 +389,7 @@ final class Time
             return null;
         }
 
-        if (! LegacyRuntime::instance()->isLegacy()) {
+        if (! RuntimeContext::instance()->isLegacy()) {
             $attr = $time instanceof Carbon ? $time->toDateTimeString() : (string) $time;
             try {
                 $inner = SafeHtml::fromPlainText(Carbon::parse($time)->diffForHumans());

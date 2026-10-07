@@ -8,7 +8,7 @@ use App\Http\Requests\BookmarkSubmitRequest;
 use App\Http\Requests\ThanksTorrentRequest;
 use App\Services\TorrentBookmarkService;
 use App\Support\CurrentUser;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -78,7 +78,7 @@ class TorrentBookmarkController extends LegacyController
         $curUser = $this->currentUser->get();
 
         if ($request->query('id') !== null) {
-            LegacyResponse::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
+            PageResponses::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
         }
 
         $torrentid = (int) $request->post('id');
@@ -86,7 +86,7 @@ class TorrentBookmarkController extends LegacyController
         try {
             $this->bookmarkService->thankTorrent($curUser, $torrentid);
         } catch (\RuntimeException $e) {
-            LegacyResponse::abort('Error', $e->getMessage());
+            PageResponses::abort('Error', $e->getMessage());
         }
 
         return $this->renderPage($request, 'thanks', true, [

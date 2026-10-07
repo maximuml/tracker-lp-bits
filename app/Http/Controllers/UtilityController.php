@@ -15,8 +15,8 @@ use App\Support\Api;
 use App\Support\Cache\NexusCache;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
+use App\Support\HeaderBag;
 use App\Support\LegacyAjaxRedirects;
-use App\Support\LegacyHeaderBag;
 use App\Support\Logger;
 use App\Support\RedisGuard;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +33,7 @@ class UtilityController extends LegacyController
         private readonly UserRepositoryInterface $userRepository,
         private readonly CurrentUser $currentUser,
         private readonly ?NexusCache $cache,
-        private readonly LegacyHeaderBag $legacyHeaderBag,
+        private readonly HeaderBag $headerBag,
         private readonly SecureTokenService $secureTokenService,
         private readonly AccessGate $accessGate,
     ) {}
@@ -97,9 +97,9 @@ class UtilityController extends LegacyController
 
         $content = $driver->imageBytes($imagehash);
 
-        // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
+        // T-11: Read from the per-request HeaderBag instead of SAPI
         // globals that leak state across Octane worker requests.
-        $headerBag = $this->legacyHeaderBag;
+        $headerBag = $this->headerBag;
         $status = $headerBag->getStatusCode();
         $headers = $headerBag->toResponseHeaders();
         $headerBag->flush();

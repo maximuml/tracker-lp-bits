@@ -259,18 +259,19 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->setUser();
         $this->setRequest(['topicid' => 0]);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
+        // 'Invalid ID' + the std-message frame pin assertId(topicid, stdhead:
+        // true) — removing the call lands on the topic-not-found abort, and
+        // flipping stdhead renders the int-error partial instead.
+        $this->assertAbortContains(
+            fn () => $this->service->buildViewTopic(
                 ['id' => 1, 'username' => 'test', 'class' => 10],
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 0]),
                 10,
-            ));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when topicid is invalid (0)');
+            ),
+            'Invalid ID',
+            'nx-box--500',
+        );
     }
 
     // --- buildViewTopic: topic not found ---

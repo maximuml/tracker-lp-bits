@@ -59,7 +59,7 @@ final class ForumServiceTest extends TestCase
 
     protected function tearDown(): void
     {
-        // Clean up any output buffers left open by LegacyResponse::abort($die=false)
+        // Clean up any output buffers left open by PageResponses::abort($die=false)
         while (ob_get_level() > $this->initialObLevel) {
             ob_end_clean();
         }
@@ -71,7 +71,7 @@ final class ForumServiceTest extends TestCase
     /**
      * Call the service while suppressing E_NOTICE/E_WARNING from the
      * legacy rendering system (PageRenderer, Html::stdhead) that is
-     * triggered by LegacyResponse::abort()/permissionDenied().
+     * triggered by PageResponses::abort()/permissionDenied().
      */
     private function callService(Request $request): mixed
     {
@@ -89,7 +89,7 @@ final class ForumServiceTest extends TestCase
     /**
      * Assert that calling the service with $request triggers an abort/guard.
      *
-     * LegacyResponse::abort()/permissionDenied() throws HttpResponseException,
+     * PageResponses::abort()/permissionDenied() throws HttpResponseException,
      * but the legacy rendering (Html::stdhead → PageRenderer) may also throw
      * TypeError or ErrorException when language/user data is incomplete in
      * the test environment. Any Throwable from the guard path indicates the
@@ -667,7 +667,10 @@ final class ForumServiceTest extends TestCase
             ob_end_clean();
         }
 
-        $this->assertNotEmpty($output, 'Expected error output from abort()');
+        // htmlstrip=false keeps the '(<a ...' inbox link raw — flipping it
+        // escapes the tag to &lt;a entities. The bare href alone appears in
+        // the page chrome, so the paren makes the needle body-specific.
+        $this->assertStringContainsString('(<a href="/web/messages">', $output);
     }
 
     public function test_handle_post_reply_outputs_error_when_topic_locked(): void
@@ -894,7 +897,9 @@ final class ForumServiceTest extends TestCase
             'topicid' => (string) $topic->id,
         ]);
 
-        $this->assertServiceThrows($request);
+        // 'Permission denied!' distinguishes the policy-deny abort from the
+        // downstream sure-check confirm abort that a removed deny falls into.
+        $this->assertAbortContent($request, 'Permission denied!');
     }
 
     // ─── handleDeletePost ─────────────────────────────────────────────
@@ -982,6 +987,25 @@ final class ForumServiceTest extends TestCase
         $this->assertServiceThrows($request);
     }
 
+    public function test_set_locked_aborts_when_topic_missing(): void
+    {
+        $this->mockForumRepo();
+        // actingAsUser logs a real User into Auth — removing the null-topic
+        // guard falls into TopicPolicy::lock($user, null) → TypeError, not
+        // the HttpResponseException the permission-denied path produces.
+        $this->actingAsUser();
+        $this->seedSettings();
+        $this->mockCache();
+
+        $request = Request::create('/forums.php', 'POST', [
+            'action' => 'setlocked',
+            'topicid' => 1,
+            'locked' => 1,
+        ]);
+
+        $this->assertAbortContent($request, 'Permission denied!');
+    }
+
     // ─── handleSetSticky ──────────────────────────────────────────────
 
     public function test_set_sticky_permission_denied_for_unauthenticated(): void
@@ -1016,6 +1040,24 @@ final class ForumServiceTest extends TestCase
         $this->assertServiceThrows($request);
     }
 
+    public function test_set_sticky_aborts_when_topic_missing(): void
+    {
+        $this->mockForumRepo();
+        // Same null-topic guard pin as setLocked — authenticated user so the
+        // removed guard falls into TopicPolicy::sticky($user, null).
+        $this->actingAsUser();
+        $this->seedSettings();
+        $this->mockCache();
+
+        $request = Request::create('/forums.php', 'POST', [
+            'action' => 'setsticky',
+            'topicid' => 1,
+            'sticky' => 'yes',
+        ]);
+
+        $this->assertAbortContent($request, 'Permission denied!');
+    }
+
     // ─── handleHighlightTopic ─────────────────────────────────────────
 
     public function test_highlight_topic_permission_denied_for_unauthenticated(): void
@@ -1044,5 +1086,21 @@ final class ForumServiceTest extends TestCase
         ]);
 
         $this->assertServiceThrows($request);
+    }
+
+    public function test_highlight_topic_aborts_when_topic_missing(): void
+    {
+        $this->mockForumRepo();
+        // Same null-topic guard pin — authenticated user so the removed
+        // guard falls into TopicPolicy::highlight($user, null).
+        $this->actingAsUser();
+        $this->seedSettings();
+        $this->mockCache();
+
+        $request = Request::create('/forums.php?action=hltopic&topicid=1', 'POST', [
+            'color' => 1,
+        ]);
+
+        $this->assertAbortContent($request, 'Permission denied!');
     }
 }

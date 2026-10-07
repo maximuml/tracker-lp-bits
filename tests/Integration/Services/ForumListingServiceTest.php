@@ -391,13 +391,14 @@ final class ForumListingServiceTest extends TestCase
         $this->setUser();
         $this->setRequest(['forumid' => 0]);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(['id' => 1, 'username' => 'test', 'class' => 10], Request::create('/forums.php', 'GET', ['forumid' => 0]), 20, 10));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when forumid is invalid (0)');
+        // 'Invalid ID' + the std-message frame pin assertId(forumid, stdhead:
+        // true) — removing the call lands on the forum-not-found abort, and
+        // flipping stdhead renders the int-error partial instead.
+        $this->assertAbortContains(
+            fn () => $this->service->buildViewForum(['id' => 1, 'username' => 'test', 'class' => 10], Request::create('/forums.php', 'GET', ['forumid' => 0]), 20, 10),
+            'Invalid ID',
+            'nx-box--500',
+        );
     }
 
     public function test_build_view_forum_with_nonexistent_forum_aborts(): void

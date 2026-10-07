@@ -15,8 +15,8 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\PageResponses;
 use App\Support\Strings;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -53,7 +53,7 @@ final class BonusPageService
 
         $bonusTweak = SiteConfig::current()->tweak->bonus();
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 __('mybonus.std_sorry'),
                 view('my.sections._bonus_disabled', [
                     'disabled' => __('mybonus.std_karma_system_disabled'),

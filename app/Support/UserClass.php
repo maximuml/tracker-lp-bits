@@ -189,7 +189,7 @@ final class UserClass
         bool $I18N = false,
         array $options = [],
     ): SafeHtml {
-        if (! LegacyRuntime::instance()->isLegacy()) {
+        if (! RuntimeContext::instance()->isLegacy()) {
             return SafeHtml::fromTrustedHtml(User::getClassName($class, $compact, $b_colored, $I18N));
         }
 

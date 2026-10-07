@@ -12,8 +12,8 @@ use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -69,7 +69,7 @@ class AttendanceController extends LegacyController
         }
         $attendance = $repository->attend($uid);
         if (! $attendance->is_updated) {
-            LegacyResponse::abort(__('attendance.sorry'), __('attendance.already_attended'));
+            PageResponses::abort(__('attendance.sorry'), __('attendance.already_attended'));
         }
 
         return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);

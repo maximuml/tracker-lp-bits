@@ -47,6 +47,13 @@ final class BonusServiceTest extends TestCase
         return new BonusService($repo, $calcRepo, $this->app->make(MessageRepository::class));
     }
 
+    public function test_handle_exchange_stays_public(): void
+    {
+        $this->assertTrue(
+            (new \ReflectionMethod(BonusService::class, 'handleExchange'))->isPublic(),
+        );
+    }
+
     public function test_returns_null_when_action_is_not_exchange(): void
     {
         $request = Request::create('/mybonus.php', 'GET', ['action' => 'view']);

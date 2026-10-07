@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Support\LegacyRuntime;
 use App\Support\RedisGuard;
+use App\Support\RuntimeContext;
 use Closure;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 
@@ -22,7 +22,7 @@ class TrackerThrottle extends ThrottleRequests
 {
     public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
     {
-        LegacyRuntime::instance()->markTracker();
+        RuntimeContext::instance()->markTracker();
 
         if (! RedisGuard::available()) {
             return $next($request);

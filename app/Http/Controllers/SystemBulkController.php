@@ -29,12 +29,12 @@ use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Lock;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Mail;
+use App\Support\PageResponses;
 use App\Support\RedisGuard;
 use App\Support\RequestValues;
 use App\Support\SetlistLookup;
@@ -86,7 +86,7 @@ class SystemBulkController extends LegacyController
 
         if ($request->isMethod('get')) {
             if (request()->query('sent') == '1') {
-                return response(LegacyResponse::captureAbort('Success', 'Upload amount has been added successfully.', true, 'Add Upload'));
+                return response(PageResponses::captureAbort('Success', 'Upload amount has been added successfully.', true, 'Add Upload'));
             }
 
             return $this->legacyAbortResponse('Error', 'Permission denied!');

@@ -16,7 +16,7 @@ use App\Services\PermissionChecker;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\Pagination;
 use App\Support\RequestValues;
 use App\Support\Time;
@@ -46,11 +46,11 @@ class InfoController extends LegacyController
         }
 
         $userid = (int) request()->query('id');
-        LegacyResponse::assertId($userid, true);
+        PageResponses::assertId($userid, true);
 
         $viewerId = (int) ($this->currentUser->id());
         if ($viewerId != $userid && ! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $action = htmlspecialchars((string) request()->query('action'));

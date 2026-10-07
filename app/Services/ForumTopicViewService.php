@@ -18,7 +18,7 @@ use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\Ratio;
 use App\Support\RequestValues;
 use App\Support\UserClass;
@@ -53,13 +53,13 @@ final class ForumTopicViewService
     {
         $highlight = trim((string) ($request->query('highlight') ?? ''));
         $topicid = (int) ($request->query('topicid') ?? 0);
-        LegacyResponse::assertId($topicid, true);
+        PageResponses::assertId($topicid, true);
         $page = is_string($val = $request->query('page')) ? $val : 0;
         $authorid = (int) ($request->query('authorid') ?? 0);
 
         $topic = $this->topicRepository->getTopic($topicid);
         if (! $topic) {
-            LegacyResponse::abort(__('forums.std_forum_error'), __('forums.std_topic_not_found'));
+            PageResponses::abort(__('forums.std_forum_error'), __('forums.std_topic_not_found'));
         }
         $arr = $topic->toArray();
 
@@ -80,7 +80,7 @@ final class ForumTopicViewService
         $isMod = Permission::can(PermissionEnum::POST_MANAGE) || $isForummod;
 
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
-            LegacyResponse::abort(__('forums.std_error'), __('forums.std_unpermitted_viewing_topic'));
+            PageResponses::abort(__('forums.std_error'), __('forums.std_unpermitted_viewing_topic'));
         }
         $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && YesNo::isYes($curUser['forumpost'] ?? null);
 

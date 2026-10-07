@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Support\Config\SiteConfig;
-use App\Support\LegacyRuntime;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use App\Support\RequestValues;
+use App\Support\RuntimeContext;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\JsonResponse;
@@ -53,7 +53,7 @@ class Locale
 
     public static function getLocaleFromCookie(): string
     {
-        $runtime = LegacyRuntime::instance();
+        $runtime = RuntimeContext::instance();
         if ($runtime->isLegacy()) {
             $lang = $runtime->isTracker() ? null : \App\Support\Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) false);
             $log = "legacy runtime, get_langfolder_cookie() or tracker use null: $lang";

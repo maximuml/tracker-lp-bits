@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support;
 
-use App\Support\LegacyHeaderBag;
+use App\Support\HeaderBag;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
- * Unit tests for LegacyHeaderBag — per-request replacement for
+ * Unit tests for HeaderBag — per-request replacement for
  * PHP SAPI globals headers_list()/http_response_code()/header_remove().
  */
 #[TestCategory(TestCategory::PURE_UNIT)]
-final class LegacyHeaderBagTest extends TestCase
+final class HeaderBagTest extends TestCase
 {
-    private LegacyHeaderBag $bag;
+    private HeaderBag $bag;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->bag = new LegacyHeaderBag;
+        $this->bag = new HeaderBag;
     }
 
     public function test_set_and_get_header(): void

@@ -71,7 +71,7 @@ final class ActorContextRatchetTest extends TestCase
             0,
             $count,
             'The untyped Globals key-value store was removed. Read settings via SiteConfig, '
-            .'per-request page state via PageState, and shared view variables via LegacyViewVariables.',
+            .'per-request page state via PageState, and shared view variables via SharedViewVariables.',
         );
     }
 

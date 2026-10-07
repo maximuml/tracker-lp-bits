@@ -17,7 +17,7 @@ namespace App\Support;
  * the flag per test) without leaking state across Octane worker requests —
  * the exact hazard a process-global constant could not express.
  */
-final class LegacyRuntime
+final class RuntimeContext
 {
     private bool $entryLegacy;
 

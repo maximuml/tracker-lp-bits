@@ -9,8 +9,8 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\PageResponses;
 use App\Support\RequestValues;
 use App\Support\SearchBox;
 use App\Support\Url;
@@ -223,6 +223,6 @@ class RssController extends LegacyController
 
     private function getrssMessageResponse(string $heading, string $text, string $title = ''): Response
     {
-        return response(LegacyResponse::captureAbort($heading, $text, false, $title));
+        return response(PageResponses::captureAbort($heading, $text, false, $title));
     }
 }

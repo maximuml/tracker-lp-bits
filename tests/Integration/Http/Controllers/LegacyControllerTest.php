@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Support\CurrentUser;
-use App\Support\LegacyHeaderBag;
+use App\Support\HeaderBag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -87,7 +87,7 @@ final class LegacyControllerTest extends TestCase
     public function test_legacy_page_with_redirect_follows_location_header(): void
     {
         View::shouldReceive('make')->once()->andReturn($this->fakeView('unused'));
-        app(LegacyHeaderBag::class)->set('Location', '/target.php');
+        app(HeaderBag::class)->set('Location', '/target.php');
 
         $response = $this->controller()->pageWithRedirect(Request::create('/mypage', 'GET'), 'mypage', false);
 
@@ -99,7 +99,7 @@ final class LegacyControllerTest extends TestCase
     public function test_legacy_page_with_redirect_preserves_3xx_status(): void
     {
         View::shouldReceive('make')->once()->andReturn($this->fakeView('unused'));
-        $headerBag = app(LegacyHeaderBag::class);
+        $headerBag = app(HeaderBag::class);
         $headerBag->set('Location', '/target.php');
         $headerBag->setStatusCode(301);
 
@@ -121,7 +121,7 @@ final class LegacyControllerTest extends TestCase
     public function test_legacy_page_raw_returns_content_with_headers(): void
     {
         View::shouldReceive('make')->once()->andReturn($this->fakeView('raw body'));
-        $headerBag = app(LegacyHeaderBag::class);
+        $headerBag = app(HeaderBag::class);
         $headerBag->set('X-Legacy', 'yes');
         $headerBag->setStatusCode(201);
 
@@ -144,7 +144,7 @@ final class LegacyControllerTest extends TestCase
     public function test_legacy_page_raw_follows_location_header(): void
     {
         View::shouldReceive('make')->once()->andReturn($this->fakeView('unused'));
-        app(LegacyHeaderBag::class)->set('Location', '/elsewhere.php');
+        app(HeaderBag::class)->set('Location', '/elsewhere.php');
 
         $response = $this->controller()->pageRaw(Request::create('/mypage', 'GET'), 'mypage', false);
 

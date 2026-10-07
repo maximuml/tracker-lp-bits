@@ -140,7 +140,7 @@ final class Captcha
             }
 
             if (! $maxattemptlog) {
-                LegacyResponse::abort('Error', $message, false);
+                PageResponses::abort('Error', $message, false);
             } else {
                 self::recordFailedLogin($message, true, $head, 'std_failed', $context);
             }
@@ -163,14 +163,14 @@ final class Captcha
         }
 
         if ($type === 'login') {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 (string) (__('functions.std_login_failed')),
                 view('components.login-failed-note')->render(),
                 false,
                 $head,
             );
         } else {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 (string) (__('functions.'.$failedLangKey)),
                 $type,
                 false,

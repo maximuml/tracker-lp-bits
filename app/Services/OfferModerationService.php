@@ -11,9 +11,9 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
+use App\Support\PageResponses;
 use App\Support\RequestValues;
 use App\Support\Url;
 use App\Support\Validators;
@@ -50,7 +50,7 @@ final class OfferModerationService
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void
     {
-        LegacyResponse::abort($heading, $text, $htmlstrip);
+        PageResponses::abort($heading, $text, $htmlstrip);
     }
 
     public function handleAllow(Request $request): RedirectResponse

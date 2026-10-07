@@ -49,7 +49,7 @@ final class UserDisplay
     public static function currentClass(): string|int
     {
         $user = CurrentUser::instance()->get();
-        if (LegacyRuntime::instance()->isLegacy()) {
+        if (RuntimeContext::instance()->isLegacy()) {
             return CurrentUser::instance()->value('class', '');
         }
 
@@ -70,7 +70,7 @@ final class UserDisplay
         $id = app(AuthRepositoryInterface::class)->getUserIdByUsername($username);
 
         if ($id === null) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 (string) (__('functions.std_error')),
                 (string) (__('functions.std_no_user_named'))."'".$username."'",
             );
@@ -87,7 +87,7 @@ final class UserDisplay
     public static function currentId(): int
     {
         $user = CurrentUser::instance()->get();
-        if (LegacyRuntime::instance()->isLegacy()) {
+        if (RuntimeContext::instance()->isLegacy()) {
             return (int) (CurrentUser::instance()->id());
         }
 
@@ -106,7 +106,7 @@ final class UserDisplay
     public static function currentUsername(): string
     {
         $user = CurrentUser::instance()->get();
-        if (LegacyRuntime::instance()->isLegacy()) {
+        if (RuntimeContext::instance()->isLegacy()) {
             return CurrentUser::instance()->username();
         }
 

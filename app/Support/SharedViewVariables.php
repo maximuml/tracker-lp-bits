@@ -12,7 +12,7 @@ use Illuminate\Database\QueryException;
  * The legacy variables still shared with every Blade view ($SITENAME,
  * $BASEURL, $CURUSER, …), resolved from typed config and the current user.
  */
-final class LegacyViewVariables
+final class SharedViewVariables
 {
     public function __construct(
         private readonly CurrentUser $currentUser,

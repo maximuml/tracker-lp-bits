@@ -83,16 +83,16 @@ use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
 use App\Support\Env;
 use App\Support\Environment;
+use App\Support\HeaderBag;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyHeaderBag;
-use App\Support\LegacyRuntime;
-use App\Support\LegacyViewVariables;
 use App\Support\Locale;
 use App\Support\Metrics\Collectors;
 use App\Support\Metrics\MetricsRegistry;
 use App\Support\Metrics\PrometheusFormatter;
 use App\Support\PageRenderer;
 use App\Support\RequestContext;
+use App\Support\RuntimeContext;
+use App\Support\SharedViewVariables;
 use App\Support\UserUpdateBatch;
 use App\View\Composers\SiteChromeComposer;
 use Filament\Facades\Filament;
@@ -136,15 +136,15 @@ class AppServiceProvider extends ServiceProvider
         // T-11: Per-request header bag for the legacy bridge — replaces
         // SAPI globals headers_list()/http_response_code()/header_remove()
         // that leak state across Octane worker requests.
-        $this->app->singleton(LegacyHeaderBag::class);
+        $this->app->singleton(HeaderBag::class);
         // Per-request page chrome renderer — carries the layout context
         // between stdhead()/stdfoot(); flushed by ResetNexus.
         $this->app->singleton(PageRenderer::class);
         // ADR 0017: request-scoped legacy/tracker flags. bootstrap/app.php
         // binds the entry-seeded instance before providers register; this is
         // only a safety net for contexts that boot the container differently.
-        if (! $this->app->bound(LegacyRuntime::class)) {
-            $this->app->singleton(LegacyRuntime::class);
+        if (! $this->app->bound(RuntimeContext::class)) {
+            $this->app->singleton(RuntimeContext::class);
         }
         // Per-request context is managed by RequestContext's own static
         // boot/flush lifecycle (bootstrap/app.php + ResetNexus) — bind, not
@@ -292,7 +292,7 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         View::composer('*', function (\Illuminate\View\View $view): void {
-            foreach ($this->app->make(LegacyViewVariables::class)->all() as $key => $value) {
+            foreach ($this->app->make(SharedViewVariables::class)->all() as $key => $value) {
                 if (! array_key_exists($key, $view->getData())) {
                     $view->with($key, $value);
                 }

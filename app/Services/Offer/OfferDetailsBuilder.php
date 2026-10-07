@@ -14,7 +14,7 @@ use App\Enums\UserTimeType;
 use App\Support\Cache\NexusCache;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserDisplay;
@@ -41,12 +41,12 @@ final class OfferDetailsBuilder
     {
         $id = (int) $request->query('id', 0);
         if (! $id) {
-            LegacyResponse::abort(__('offers.std_error'), __('offers.std_smell_rat'));
+            PageResponses::abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
-            LegacyResponse::abort(__('offers.std_error'), __('offers.text_nothing_found'));
+            PageResponses::abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
         $num = $offer->toArray();
 

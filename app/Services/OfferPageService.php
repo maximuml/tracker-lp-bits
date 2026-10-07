@@ -13,7 +13,7 @@ use App\Services\Offer\OfferListBuilder;
 use App\Services\Offer\OfferVoteListBuilder;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\RequestValues;
 use App\ViewModels\OfferPageViewModel;
 use Illuminate\Http\Request;
@@ -59,7 +59,7 @@ final class OfferPageService
         ];
 
         if ($data['enableoffer'] === 'no') {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         switch ($action) {

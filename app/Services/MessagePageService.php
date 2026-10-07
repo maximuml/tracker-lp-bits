@@ -11,7 +11,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\Pagination;
 use App\Support\RequestValues;
 use App\Support\Time;
@@ -128,7 +128,7 @@ class MessagePageService
         if ($mailbox !== self::PM_INBOX && $mailbox !== self::PM_SENT_BOX) {
             $pmBoxName = $this->mailboxRepository->getMailboxName($userId, $mailbox);
             if (! $pmBoxName) {
-                LegacyResponse::abort(
+                PageResponses::abort(
                     __('messages.std_error'),
                     __('messages.std_invalid_mailbox')
                 );
@@ -283,7 +283,7 @@ class MessagePageService
     {
         $pmId = (int) $request->input('id', 0);
         if ($pmId <= 0) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 __('messages.std_error'),
                 __('messages.std_no_permission')
             );
@@ -291,7 +291,7 @@ class MessagePageService
 
         $messageModel = $this->messageRepository->getMessageForUser($pmId, $userId);
         if (! $messageModel) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 __('messages.std_error'),
                 __('messages.std_no_permission')
             );
@@ -368,7 +368,7 @@ class MessagePageService
 
         $messageModel = $this->messageRepository->getMessageForForward($pmId, $userId);
         if (! $messageModel) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 __('messages.std_error'),
                 __('messages.std_no_permission_forwarding')
             );

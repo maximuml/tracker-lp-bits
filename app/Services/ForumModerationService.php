@@ -12,7 +12,7 @@ use App\Support\Bonus;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\Palette;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -60,27 +60,27 @@ final class ForumModerationService
 
         $topic = $this->data->topics->getTopic((int) $topicid);
         if ($topic === null) {
-            LegacyResponse::abort(__('forums.std_error'), __('forums.std_topic_not_found'));
+            PageResponses::abort(__('forums.std_error'), __('forums.std_topic_not_found'));
         }
 
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->move($user, $topic)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $minclasswrite = $this->data->forums->getForumMinclasswrite($forumid);
         if ($minclasswrite === null) {
-            LegacyResponse::abort(__('forums.std_error'), __('forums.std_forum_not_found'));
+            PageResponses::abort(__('forums.std_error'), __('forums.std_forum_not_found'));
         }
 
         if (UserDisplay::currentClass() < $minclasswrite) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $oldForumid = $this->data->topics->getTopicForumId($topicid);
         if ($oldForumid === null) {
-            LegacyResponse::abort(__('forums.std_error'), __('forums.std_topic_not_found'));
+            PageResponses::abort(__('forums.std_error'), __('forums.std_topic_not_found'));
         }
 
         $postCount = $this->data->posts->countTopicPosts($topicid);
@@ -112,12 +112,12 @@ final class ForumModerationService
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->delete($user, $topic)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $sure = (int) $request->input('sure', 0);
         if ($sure !== 1 || ! $request->isMethod('POST')) {
-            LegacyResponse::abort(__('forums.std_delete_topic'), (__('forums.std_delete_topic_note')).view('forums._confirm-form', ['action' => 'deletetopic', 'name' => 'topicid', 'value' => $topicid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
+            PageResponses::abort(__('forums.std_delete_topic'), (__('forums.std_delete_topic_note')).view('forums._confirm-form', ['action' => 'deletetopic', 'name' => 'topicid', 'value' => $topicid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
         }
 
         $postCount = $this->data->posts->countTopicPosts($topicid);
@@ -145,13 +145,13 @@ final class ForumModerationService
 
         $post = $this->data->postLookup->getPost((int) $postid);
         if ($post === null) {
-            LegacyResponse::abort(__('forums.std_error'), __('forums.std_post_not_found'));
+            PageResponses::abort(__('forums.std_error'), __('forums.std_post_not_found'));
         }
 
         // W1-04: Use PostPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->postPolicy->delete($user, $post)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $topicid = (int) $post->topicid;
@@ -159,11 +159,11 @@ final class ForumModerationService
         $prevPostId = $this->data->postLookup->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
-            LegacyResponse::abort(__('forums.std_error'), (__('forums.std_cannot_delete_post')).view('components.altlink', ['class' => 'altlink', 'url' => "?action=deletetopic&topicid={$topicid}&sure=1", 'text' => __('forums.std_delete_topic_link')])->render().__('forums.std_instead'), false);
+            PageResponses::abort(__('forums.std_error'), (__('forums.std_cannot_delete_post')).view('components.altlink', ['class' => 'altlink', 'url' => "?action=deletetopic&topicid={$topicid}&sure=1", 'text' => __('forums.std_delete_topic_link')])->render().__('forums.std_instead'), false);
         }
 
         if ($sure !== 1 || ! $request->isMethod('POST')) {
-            LegacyResponse::abort(__('forums.std_delete_post'), (__('forums.std_delete_post_note')).view('forums._confirm-form', ['action' => 'deletepost', 'name' => 'postid', 'value' => $postid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
+            PageResponses::abort(__('forums.std_delete_post'), (__('forums.std_delete_post_note')).view('forums._confirm-form', ['action' => 'deletepost', 'name' => 'postid', 'value' => $postid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
         }
 
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;
@@ -195,13 +195,13 @@ final class ForumModerationService
         $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->lock($user, $topic)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $locked = (bool) $request->input('locked');
@@ -216,13 +216,13 @@ final class ForumModerationService
         $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->highlight($user, $topic)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $color = (int) $request->input('color');
@@ -247,13 +247,13 @@ final class ForumModerationService
         $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         // W1-04: Use TopicPolicy for authorization
         $user = Auth::user();
         if (! $user instanceof User || ! $this->topicPolicy->sticky($user, $topic)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $sticky = $request->input('sticky');

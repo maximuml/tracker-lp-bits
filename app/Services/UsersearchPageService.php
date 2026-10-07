@@ -10,7 +10,7 @@ use App\Repositories\UserListingRepository;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\Pagination;
 use App\Support\Ratio;
 use App\Support\RequestValues;
@@ -49,7 +49,7 @@ final class UsersearchPageService
         $hasModcomment = Schema::hasColumn('users', 'modcomment');
 
         if (UserDisplay::currentClass() < UC_MODERATOR) {
-            LegacyResponse::abort('Error', 'Permission denied.');
+            PageResponses::abort('Error', 'Permission denied.');
         }
 
         $highlight = 'nx-hl';

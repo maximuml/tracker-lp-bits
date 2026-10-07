@@ -11,11 +11,11 @@ use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Lock;
 use App\Support\Log;
 use App\Support\Logger;
+use App\Support\PageResponses;
 use App\Support\RequestValues;
 use App\Support\Url;
 use App\Support\UserClass;
@@ -84,7 +84,7 @@ final class BonusService
             || ! isset($allBonus[(int) $request->post('option', 0)])
         ) {
             Log::writeWithContext('User '.($curUser['username'] ?? '').','.($curUser['ip'] ?? '').' is trying to cheat at bonus system', 'mod');
-            LegacyResponse::abort(__('mybonus.text_error'), __('mybonus.text_cheat_alert'), true, false);
+            PageResponses::abort(__('mybonus.text_error'), __('mybonus.text_cheat_alert'), true, false);
         }
 
         $option = (int) $request->post('option', 0);
@@ -172,7 +172,7 @@ final class BonusService
             $ratio = 0;
         }
         if ($ratiolimitBonus > 0 && $ratio > $ratiolimitBonus) {
-            LegacyResponse::abort(__('mybonus.text_error'), __('mybonus.text_cheat_alert'), true, false);
+            PageResponses::abort(__('mybonus.text_error'), __('mybonus.text_cheat_alert'), true, false);
         }
         $up = (int) ($curUser['uploaded'] ?? 0) + (int) $bonusarray['menge'];
         Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange uploaded from %s to %s', $curUser['id'] ?? 0, $points, $curUser['uploaded'] ?? 0, $up), 'info', false);
@@ -200,7 +200,7 @@ final class BonusService
     private function exchangeClass(array $curUser, float $points, string $baseUrl): RedirectResponse
     {
         if (UserDisplay::currentClass() >= UC_VIP) {
-            LegacyResponse::abort(__('mybonus.std_no_permission'), __('mybonus.std_class_above_vip'), false);
+            PageResponses::abort(__('mybonus.std_no_permission'), __('mybonus.std_class_above_vip'), false);
         }
         $vipUntil = date('Y-m-d H:i:s', (strtotime(date('Y-m-d H:i:s')) + 28 * 86400));
         $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::BUY_VIP->value, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => true, 'vip_until' => $vipUntil]);
@@ -215,7 +215,7 @@ final class BonusService
     private function exchangeInvite(array $curUser, array $bonusarray, float $points, string $baseUrl, int $buyinviteClass): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
-            LegacyResponse::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
+            PageResponses::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
         }
         $inv = (int) ($curUser['invites'] ?? 0) + (int) $bonusarray['menge'];
         $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::EXCHANGE_INVITE->value, $points.' Points for invites.', ['invites' => $inv]);
@@ -229,7 +229,7 @@ final class BonusService
     private function exchangeTmpInvite(array $curUser, float $points, string $baseUrl, int $buyinviteClass): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
-            LegacyResponse::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
+            PageResponses::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
         }
         $this->bonusRep->consumeToBuyTemporaryInvite((int) $curUser['id']);
 
@@ -256,18 +256,18 @@ final class BonusService
     {
         $points = (int) $request->post('bonuscharity', 0);
         if ($points < 1000 || $points > 50000) {
-            LegacyResponse::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed_two'), false);
+            PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed_two'), false);
         }
         $ratiocharity = (float) $request->post('ratiocharity', 0);
         if ($ratiocharity < 0.1 || $ratiocharity > 0.8) {
-            LegacyResponse::abort(__('mybonus.text_error'), __('mybonus.bonus_ratio_not_allowed'), false);
+            PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_ratio_not_allowed'), false);
         }
         if (($curUser['seedbonus'] ?? 0) < $points) {
             return null;
         }
         $charityReceiverCount = $this->bonusCalculationRepository->getCharityReceiverCount($ratiocharity);
         if (! $charityReceiverCount) {
-            LegacyResponse::abort(__('mybonus.std_sorry'), __('mybonus.std_no_users_need_charity'), false);
+            PageResponses::abort(__('mybonus.std_sorry'), __('mybonus.std_no_users_need_charity'), false);
         }
         $senderId = (int) $curUser['id'];
         $charityPerUser = $points / $charityReceiverCount;
@@ -290,12 +290,12 @@ final class BonusService
         $usernamegift = trim((string) $request->post('username', ''));
         $arr = $this->bonusCalculationRepository->findGiftReceiver($usernamegift);
         if (empty($arr)) {
-            LegacyResponse::abort(__('mybonus.text_error'), view('my.sections._abort-receiver-not-exists')->render(), false);
+            PageResponses::abort(__('mybonus.text_error'), view('my.sections._abort-receiver-not-exists')->render(), false);
         }
         $useridgift = (int) $arr['id'];
         $userseedbonus = (float) $arr['seedbonus'];
         if ($points < (float) $bonusarray['points']) {
-            LegacyResponse::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed'), false);
+            PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed'), false);
         }
         if (($curUser['seedbonus'] ?? 0) < $points) {
             return null;
@@ -308,7 +308,7 @@ final class BonusService
             $aftertaxpoint -= $basictaxBonus;
         }
         if ((int) $curUser['id'] === $useridgift) {
-            LegacyResponse::abort(__('mybonus.text_huh'), view('my.sections._abort-karma-self')->render(), false);
+            PageResponses::abort(__('mybonus.text_huh'), view('my.sections._abort-karma-self')->render(), false);
         }
         $points2 = number_format($points, 1);
         $points2receiver = number_format($aftertaxpoint, 1);
@@ -341,7 +341,7 @@ final class BonusService
     {
         $hrId = $request->post('hr_id');
         if (empty($hrId)) {
-            LegacyResponse::abort('Error', 'Invalid H&R ID: '.($hrId ?? ''), false, false);
+            PageResponses::abort('Error', 'Invalid H&R ID: '.($hrId ?? ''), false, false);
         }
         $this->bonusRep->consumeToCancelHitAndRun($userid, $hrId);
 

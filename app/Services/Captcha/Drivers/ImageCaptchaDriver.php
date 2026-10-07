@@ -7,7 +7,7 @@ namespace App\Services\Captcha\Drivers;
 use App\Repositories\RegImageRepository;
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
-use App\Support\LegacyHeaderBag;
+use App\Support\HeaderBag;
 use App\Support\Strings;
 
 class ImageCaptchaDriver implements CaptchaDriverInterface
@@ -18,7 +18,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     /**
      * @param  array<string, mixed>  $config
      */
-    public function __construct(array $config, private readonly LegacyHeaderBag $headerBag, private readonly RegImageRepository $regImageRepository)
+    public function __construct(array $config, private readonly HeaderBag $headerBag, private readonly RegImageRepository $regImageRepository)
     {
         $this->config = $config;
     }
@@ -157,7 +157,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         }
         imagestring($im, 5, $textposh, $textposv, $characters, $textcolor);
 
-        // T-11: Use LegacyHeaderBag instead of SAPI header() to avoid
+        // T-11: Use HeaderBag instead of SAPI header() to avoid
         // cross-request header leakage under Octane.
         $this->headerBag->set('Content-Type', 'image/png');
         imagepng($im);
@@ -175,7 +175,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
     protected function renderFallback(): void
     {
-        // T-11: Use LegacyHeaderBag instead of SAPI http_response_code() to
+        // T-11: Use HeaderBag instead of SAPI http_response_code() to
         // avoid cross-request status code leakage under Octane.
         $this->headerBag->setStatusCode(404);
     }

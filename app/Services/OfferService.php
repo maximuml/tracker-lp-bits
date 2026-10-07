@@ -13,9 +13,9 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\CurrentUser;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
+use App\Support\PageResponses;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -89,7 +89,7 @@ final class OfferService
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void
     {
-        LegacyResponse::abort($heading, $text, $htmlstrip);
+        PageResponses::abort($heading, $text, $htmlstrip);
     }
 
     public function handleCreate(Request $request): RedirectResponse

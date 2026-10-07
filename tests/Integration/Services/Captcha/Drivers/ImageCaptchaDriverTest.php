@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Services\Captcha\Drivers;
+namespace Tests\Integration\Services\Captcha\Drivers;
 
 use App\Models\RegImage;
 use App\Repositories\RegImageRepository;

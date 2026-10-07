@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\ViewModels\ForumPageViewModel;
 use Illuminate\Http\Request;
 
@@ -102,7 +102,7 @@ final class ForumPageService
                 break;
             default:
                 if ($action !== '') {
-                    LegacyResponse::abort(__('forums.std_forum_error'), __('forums.std_unknown_action'));
+                    PageResponses::abort(__('forums.std_forum_error'), __('forums.std_unknown_action'));
                 }
                 $forums = $this->indexService->buildForumsIndex($curUser, $userId);
                 $action = 'forums';

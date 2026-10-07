@@ -17,7 +17,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
@@ -60,7 +60,7 @@ final class OfferListBuilder
         if (in_array($sortParam, $allowedSorts, true)) {
             $sort = $sortParam;
         } elseif ($sortParam !== '') {
-            LegacyResponse::abort(__('offers.std_error'), __('offers.std_smell_rat'));
+            PageResponses::abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $catOrderType = 'desc';

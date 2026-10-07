@@ -9,7 +9,7 @@ use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Support\Category;
 use App\Support\Input;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\ViewModels\Offer\OfferCategoryOption;
 use Illuminate\Http\Request;
 
@@ -31,12 +31,12 @@ final class OfferEditBuilder
         $id = (int) $request->query('id', 0);
         $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
-            LegacyResponse::abort(__('offers.std_error'), __('offers.text_nothing_found'));
+            PageResponses::abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
         $num = $offer->toArray();
 
         if ($userId !== (int) ($num['userid'] ?? 0) && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            LegacyResponse::abort(__('offers.std_error'), __('offers.std_cannot_edit_others_offer'));
+            PageResponses::abort(__('offers.std_error'), __('offers.std_cannot_edit_others_offer'));
         }
 
         $body = htmlspecialchars(Input::unescape((string) ($num['descr'] ?? '')));

@@ -13,7 +13,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Http\Request;
 
@@ -59,7 +59,7 @@ final class ForumComposeService
             case 'quote':
                 $post = $this->postRepository->getPostForQuote((int) $id);
                 if (! $post) {
-                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_post_id'));
+                    PageResponses::abort(__('forums.std_error'), __('forums.std_no_post_id'));
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
@@ -115,7 +115,7 @@ final class ForumComposeService
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post');
         if (! Forum::canViewPost((int) ($curUser['id'] ?? 0), $postid)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         return $this->buildComposeFrame($postid, 'quote');
@@ -139,13 +139,13 @@ final class ForumComposeService
 
         $post = $this->postRepository->getPostWithTopic((int) $postid);
         if (! $post) {
-            LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_post_id'));
+            PageResponses::abort(__('forums.std_error'), __('forums.std_no_post_id'));
         }
 
         $locked = (bool) $post['locked'];
         $ismod = Forum::isModerator($postid, 'post');
         if (($curUser['id'] != $post['userid'] || $locked) && ! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         return $this->buildComposeFrame($postid, 'edit');
@@ -153,18 +153,18 @@ final class ForumComposeService
 
     public function checkWhetherExist(int $id, string $place): void
     {
-        LegacyResponse::assertId($id, true);
+        PageResponses::assertId($id, true);
         switch ($place) {
             case 'forum':
                 if (! $this->forumRepository->forumExists((int) $id)) {
-                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_forum_id'));
+                    PageResponses::abort(__('forums.std_error'), __('forums.std_no_forum_id'));
                 }
                 break;
 
             case 'topic':
                 $forumid = $this->topicRepository->topicExists((int) $id);
                 if (! $forumid) {
-                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_bad_topic_id'));
+                    PageResponses::abort(__('forums.std_error'), __('forums.std_bad_topic_id'));
                 }
                 $this->checkWhetherExist((int) $forumid, 'forum');
                 break;
@@ -172,7 +172,7 @@ final class ForumComposeService
             case 'post':
                 $topicid = $this->postRepository->postExists((int) $id);
                 if (! $topicid) {
-                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_post_id'));
+                    PageResponses::abort(__('forums.std_error'), __('forums.std_no_post_id'));
                 }
                 $this->checkWhetherExist((int) $topicid, 'topic');
                 break;

@@ -18,7 +18,7 @@ use App\Models\User;
 use App\Policies\UsercpPolicy;
 use App\Services\UsercpPageService;
 use App\Support\Cache;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -99,7 +99,7 @@ class UsercpController extends LegacyController
 
         $allowedActions = ['personal', 'tracker', 'forum', 'security'];
         if ($action !== '' && ! in_array($action, $allowedActions, true)) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 (string) (__('usercp.std_error')),
                 (string) (__('usercp.std_invalid_action'))
             );

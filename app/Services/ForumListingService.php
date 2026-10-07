@@ -12,8 +12,8 @@ use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
 use App\Support\Log;
+use App\Support\PageResponses;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserDisplay;
@@ -52,15 +52,15 @@ final class ForumListingService
     public function buildViewForum(array $curUser, Request $request, int $topicsperpage, int $postsperpage): TopicListViewModel
     {
         $forumid = (int) (request()->query('forumid') ?? 0);
-        LegacyResponse::assertId($forumid, true);
+        PageResponses::assertId($forumid, true);
 
         $row = $this->index->getForumRow($forumid);
         if (! $row) {
             Log::writeWithContext('User '.($curUser['username'] ?? '').','.($curUser['ip'] ?? '')." is trying to visit forum that doesn't exist", 'mod');
-            LegacyResponse::abort(__('forums.std_forum_error'), __('forums.std_forum_not_found'));
+            PageResponses::abort(__('forums.std_forum_error'), __('forums.std_forum_not_found'));
         }
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $forumname = (string) ($row['name'] ?? '');

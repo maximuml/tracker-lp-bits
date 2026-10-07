@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +29,7 @@ final class MessageMailboxService
     {
         $user = Auth::user();
         if (! $user instanceof User) {
-            LegacyResponse::abort('Error', 'Permission denied.');
+            PageResponses::abort('Error', 'Permission denied.');
         }
         $userId = (int) $user->id;
 
@@ -43,13 +43,13 @@ final class MessageMailboxService
                 $updated = $this->messageRepository->markAsRead($pmId, $userId);
             } else {
                 if ($pmMessages === []) {
-                    LegacyResponse::abort('Error', __('functions.select_at_least_one_record'));
+                    PageResponses::abort('Error', __('functions.select_at_least_one_record'));
                 }
                 $updated = $this->messageRepository->markAsRead($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
             if ($updated == 0) {
-                LegacyResponse::abort(__('messages.std_error'), __('messages.std_cannot_mark_messages'));
+                PageResponses::abort(__('messages.std_error'), __('messages.std_cannot_mark_messages'));
             }
 
             return redirect("/web/messages?action=viewmailbox&box={$pmBox}");
@@ -62,7 +62,7 @@ final class MessageMailboxService
                 $updated = $this->messageRepository->moveMessages($pmMessages, $userId, $pmBox);
             }
             if ($updated == 0) {
-                LegacyResponse::abort(__('messages.std_error'), __('messages.std_cannot_move_messages'));
+                PageResponses::abort(__('messages.std_error'), __('messages.std_cannot_move_messages'));
             }
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
@@ -75,26 +75,26 @@ final class MessageMailboxService
                 $deletedCount = $this->messageRepository->deleteSingleMessage($pmId, $userId) ? 1 : 0;
             } else {
                 if ($pmMessages === []) {
-                    LegacyResponse::abort(__('messages.std_error'), __('messages.std_no_message_selected'));
+                    PageResponses::abort(__('messages.std_error'), __('messages.std_no_message_selected'));
                 }
                 $deletedCount = $this->messageRepository->deleteMultipleMessages($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
             if ($deletedCount == 0) {
-                LegacyResponse::abort(__('messages.std_error'), __('messages.std_cannot_delete_messages'));
+                PageResponses::abort(__('messages.std_error'), __('messages.std_cannot_delete_messages'));
             }
 
             return redirect('/web/messages?action=viewmailbox');
         }
-        LegacyResponse::abort(__('messages.std_error'), __('messages.std_no_action'));
+        PageResponses::abort(__('messages.std_error'), __('messages.std_no_action'));
     }
 
     public function handleEditMailboxes(Request $request): RedirectResponse
     {
         $user = Auth::user();
         if (! $user instanceof User) {
-            LegacyResponse::abort('Error', 'Permission denied.');
+            PageResponses::abort('Error', 'Permission denied.');
         }
         $userId = (int) $user->id;
 
@@ -113,7 +113,7 @@ final class MessageMailboxService
         if ($action2 === 'edit') {
             $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
             if ($pmBoxes->isEmpty()) {
-                LegacyResponse::abort(__('messages.std_error'), __('messages.text_no_mailboxes_to_edit'));
+                PageResponses::abort(__('messages.std_error'), __('messages.text_no_mailboxes_to_edit'));
             }
             foreach ($pmBoxes as $pmBox) {
                 $newValue = (string) ($request->input('edit'.$pmBox->id) ?? '');
@@ -127,21 +127,21 @@ final class MessageMailboxService
             return redirect('/web/messages?action=editmailboxes');
         }
 
-        LegacyResponse::abort(__('messages.std_error'), __('messages.std_no_action'));
+        PageResponses::abort(__('messages.std_error'), __('messages.std_no_action'));
     }
 
     public function handleDeleteMessage(Request $request): RedirectResponse
     {
         $user = Auth::user();
         if (! $user instanceof User) {
-            LegacyResponse::abort('Error', 'Permission denied.');
+            PageResponses::abort('Error', 'Permission denied.');
         }
         $userId = (int) $user->id;
 
         $pmId = (int) $request->input('id', 0);
         $message = $this->messageRepository->deleteSingleMessage($pmId, $userId);
         if (! $message) {
-            LegacyResponse::abort(__('messages.std_error'), __('messages.std_no_message_id'));
+            PageResponses::abort(__('messages.std_error'), __('messages.std_no_message_id'));
         }
         Cache::clearInboxCount($userId);
         Cache::forgetWithLocales('user_'.$userId.'_outbox_count');

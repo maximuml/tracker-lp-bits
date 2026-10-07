@@ -23,9 +23,9 @@ use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Network;
+use App\Support\PageResponses;
 use App\Support\Strings;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -77,14 +77,14 @@ class UserDetailController extends Controller
         $user = $this->userDetailRepository->getUser($id);
 
         if ($user === null) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 __('userdetails.std_error'),
                 __('userdetails.std_no_such_user')
             );
         }
 
         if (($user['status'] ?? null) === UserStatus::PENDING->stringValue()) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 __('userdetails.std_sorry'),
                 __('userdetails.std_user_not_confirmed')
             );

@@ -12,8 +12,8 @@ use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\LegacyResponse;
 use App\Support\Mail;
+use App\Support\PageResponses;
 use App\Support\PasswordHasher;
 use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
@@ -85,24 +85,24 @@ final class UsercpSecurityCommand
         $response = (string) $request->input('response', '');
         $oldPassword = (string) $request->input('oldpassword', '');
         if ($response === '' && $oldPassword === '') {
-            LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_enter_old_password')));
+            PageResponses::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_enter_old_password')));
         }
 
         // For argon2id users, verify via plaintext password (sent over HTTPS)
         $userAlgo = (string) ($user->passhash_algo ?? PasswordHasher::ALGO_SHA256);
         if ($oldPassword !== '' && $userAlgo === PasswordHasher::ALGO_ARGON2ID) {
             if (! password_verify($oldPassword, (string) $user->passhash)) {
-                LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_password_note')));
+                PageResponses::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_password_note')));
             }
         } else {
             $challenge = $this->getChallenge((string) $user->username);
             if (empty($challenge)) {
-                LegacyResponse::abort((string) (__('usercp.std_error')), 'expired!');
+                PageResponses::abort((string) (__('usercp.std_error')), 'expired!');
             }
 
             $expectedResponse = hash_hmac('sha256', (string) $user->passhash, (string) $challenge);
             if (! hash_equals($expectedResponse, $response)) {
-                LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_password_note')));
+                PageResponses::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_password_note')));
             }
         }
 
@@ -130,7 +130,7 @@ final class UsercpSecurityCommand
             }
 
             if (! TwoFactorAuthHelper::verifyCode($secretToVerify, $twoStepSecretHash)) {
-                LegacyResponse::abort((string) (__('usercp.std_error')), 'Invalid two step code');
+                PageResponses::abort((string) (__('usercp.std_error')), 'Invalid two step code');
             }
         }
 
@@ -149,11 +149,11 @@ final class UsercpSecurityCommand
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
-                LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_email_address_format')));
+                PageResponses::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_email_address_format')));
             }
 
             if ($this->emailExistsForOther($email, (int) $user->id)) {
-                LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_email_in_use')));
+                PageResponses::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_email_in_use')));
             }
 
             $changedemail = 1;

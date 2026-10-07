@@ -13,11 +13,11 @@ use App\Support\Cache\NexusCache;
 use App\Support\Config;
 use App\Support\CurrentUser;
 use App\Support\Input;
-use App\Support\LegacyRuntime;
 use App\Support\Locale;
 use App\Support\NexusContext;
 use App\Support\PageState;
 use App\Support\RequestContext;
+use App\Support\RuntimeContext;
 use App\Support\SiteAccess;
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
@@ -51,7 +51,7 @@ final class LegacyRequestMiddleware
         // ADR 0017: every request through the HTTP kernel is a legacy-context
         // request (public/index.php semantics); tracker endpoints are marked
         // per request so the flag stays correct under Octane workers.
-        $runtime = $this->app->make(LegacyRuntime::class);
+        $runtime = $this->app->make(RuntimeContext::class);
         $runtime->markLegacy();
         $requestUri = (string) $request->server->get('REQUEST_URI', '');
         if (preg_match('#^/(?:announce|scrape)(?:\.php)?(?:/|$|\?)#', $requestUri) === 1) {

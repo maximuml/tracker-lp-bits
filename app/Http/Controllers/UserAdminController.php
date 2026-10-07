@@ -20,10 +20,10 @@ use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
+use App\Support\PageResponses;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\User;
@@ -415,7 +415,7 @@ class UserAdminController extends LegacyController
 
         $status = $request->query('status');
         if ($status) {
-            LegacyResponse::assertId($status, true);
+            PageResponses::assertId($status, true);
         }
 
         $rows = $this->staffDirectoryRepository->listPendingOrdered()

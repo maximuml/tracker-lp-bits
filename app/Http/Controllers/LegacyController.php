@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Support\CurrentUser;
-use App\Support\LegacyHeaderBag;
-use App\Support\LegacyResponse;
+use App\Support\HeaderBag;
+use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -48,10 +48,10 @@ abstract class LegacyController extends Controller
         $viewName = $this->legacyViewName($page);
         $content = view()->make($viewName, $data)->render();
 
-        // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
+        // T-11: Read from the per-request HeaderBag instead of SAPI
         // globals (headers_list/http_response_code/header_remove) that
         // leak state across Octane worker requests.
-        $headerBag = LegacyHeaderBag::instance();
+        $headerBag = HeaderBag::instance();
         $status = $headerBag->getStatusCode();
 
         // Check for a Location header (redirect)
@@ -81,10 +81,10 @@ abstract class LegacyController extends Controller
         $viewName = $this->legacyViewName($page);
         $content = view()->make($viewName, $data)->render();
 
-        // T-11: Read from the per-request LegacyHeaderBag instead of SAPI
+        // T-11: Read from the per-request HeaderBag instead of SAPI
         // globals (headers_list/http_response_code/header_remove) that
         // leak state across Octane worker requests.
-        $headerBag = LegacyHeaderBag::instance();
+        $headerBag = HeaderBag::instance();
         $status = $headerBag->getStatusCode();
 
         // Check for a Location header (redirect)
@@ -107,7 +107,7 @@ abstract class LegacyController extends Controller
 
     protected function legacyAbortResponse(string $heading, string $text, bool $htmlstrip = true): Response
     {
-        return response(LegacyResponse::captureAbort($heading, $text, $htmlstrip));
+        return response(PageResponses::captureAbort($heading, $text, $htmlstrip));
     }
 
     private function legacyViewName(string $page): string

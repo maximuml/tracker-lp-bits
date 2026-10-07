@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup\Tasks;
 
-use App\Enums\ModelEventEnum;
+use App\Enums\ModelEvent;
 use App\Enums\UserClass as UserClassEnum;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserCleanupRepository;
@@ -107,7 +107,7 @@ final class UserClassManagementTask implements CleanupTask
                 'msg' => $msg,
             ];
 
-            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+            Events::publishModel(ModelEvent::UserUpdated, $uid);
         }
 
         $this->userCleanupRepository->updateWhereInIds($uidArr, ['class' => (string) $newclass]);
@@ -178,7 +178,7 @@ final class UserClassManagementTask implements CleanupTask
                 'msg' => $msg,
             ];
 
-            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+            Events::publishModel(ModelEvent::UserUpdated, $uid);
         }
 
         $this->userCleanupRepository->updateWhereInIds($uidArr, [
@@ -228,7 +228,7 @@ final class UserClassManagementTask implements CleanupTask
         Logger::writeWithContext((string) ('ban user: '.implode(', ', $uidArr)), (string) 'info', (bool) false);
 
         foreach ($uidArr as $uid) {
-            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+            Events::publishModel(ModelEvent::UserUpdated, $uid);
         }
     }
 

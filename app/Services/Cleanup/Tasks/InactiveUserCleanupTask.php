@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Cleanup\Tasks;
 
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
-use App\Enums\ModelEventEnum;
+use App\Enums\ModelEvent;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Repositories\UserCleanupRepository;
@@ -193,7 +193,7 @@ final class InactiveUserCleanupTask implements CleanupTask
         Logger::writeWithContext((string) ("[DISABLE_USER]({$reasonKey}): ".implode(', ', $uidArr)), (string) 'info', (bool) false);
 
         foreach ($uidArr as $uid) {
-            Events::publishModel(ModelEventEnum::USER_DISABLED, $uid);
+            Events::publishModel(ModelEvent::UserDisabled, $uid);
         }
     }
 

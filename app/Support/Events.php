@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\ModelEvent;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -18,13 +19,14 @@ final class Events
      *
      * Mirrors `publish_model_event()`.
      */
-    public static function publishModel(string $event, int $id, string $json = ''): void
+    public static function publishModel(ModelEvent $event, int $id, string $json = ''): void
     {
+        $name = $event->value;
         $channel = Env::get('CHANNEL_NAME_MODEL_EVENT', null);
         if (! empty($channel)) {
-            RedisGuard::attempt(static fn () => Redis::connection()->client()->publish($channel, json_encode(['event' => $event, 'id' => $id, 'json' => $json])));
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->publish($channel, json_encode(['event' => $name, 'id' => $id, 'json' => $json])));
         } else {
-            Logger::writeWithContext("event: $event, id: $id, channel: ".(is_scalar($channel) ? (string) $channel : '').', channel is empty!', 'error');
+            Logger::writeWithContext("event: $name, id: $id, channel: ".(is_scalar($channel) ? (string) $channel : '').', channel is empty!', 'error');
         }
     }
 }

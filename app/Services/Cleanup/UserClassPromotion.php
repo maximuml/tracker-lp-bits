@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Cleanup;
 
-use App\Enums\ModelEventEnum;
+use App\Enums\ModelEvent;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Repositories\MessageRepository;
@@ -101,7 +101,7 @@ final class UserClassPromotion
                 'msg' => Locale::trans('cleanup.msg_your_ratio_warning_removed', [], $locale),
             ];
 
-            Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+            Events::publishModel(ModelEvent::UserUpdated, $uid);
         }
 
         $this->userCleanupRepository->updateWhereInIds($uidArr, [
@@ -204,7 +204,7 @@ final class UserClassPromotion
                     'msg' => $msg,
                 ];
 
-                Events::publishModel(ModelEventEnum::USER_UPDATED, $uid);
+                Events::publishModel(ModelEvent::UserUpdated, $uid);
             }
         });
 

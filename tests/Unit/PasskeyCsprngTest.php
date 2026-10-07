@@ -58,7 +58,7 @@ final class PasskeyCsprngTest extends TestCase
     {
         $filesToCheck = [
             'app/Services/PasswordSetup.php',
-            'app/Support/LegacyAuth.php',
+            'app/Support/SiteAccess.php',
             'app/Repositories/UserRepository.php',
             'app/Repositories/UsercpSecurityCommand.php',
             'app/Http/Controllers/TorrentDownloadController.php',

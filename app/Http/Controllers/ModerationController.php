@@ -51,7 +51,7 @@ class ModerationController extends LegacyController
     public function report(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
         $cache = $this->legacyRedisCache;
@@ -234,7 +234,7 @@ class ModerationController extends LegacyController
     public function reports(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
 
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->legacyAbortResponse('Error', 'Permission denied.');

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Repositories\TokenRepository;
-use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
 
@@ -53,7 +53,7 @@ class DeleteExpiredToken extends Command
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 
         $result = $tokenRepository->deleteExpiredPersonalAccessTokens($uid !== null ? (int) $uid : null, (int) $days);
-        $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), LegacyDb::lastQuery(false, 'json'));
+        $log = sprintf('[%s], %s, result: %s, query: %s', RequestContext::instance()->getRequestId(), __METHOD__, var_export($result, true), QueryLog::last());
         $this->info($log);
         Logger::writeWithContext((string) $log, (string) 'info', (bool) false);
 

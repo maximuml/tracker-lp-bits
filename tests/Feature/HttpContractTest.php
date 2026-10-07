@@ -63,7 +63,7 @@ final class HttpContractTest extends TestCase
         '{legacyPasskeyPath}',
         // ajax.php — per-action guard inside UtilityController::ajax()
         // (passkey actions are guest-facing, the rest get a JSON 401 via
-        // LegacyAuth::requireLoginFromContext)
+        // AccessGate::requireLogin (JSON 401 for ajax))
         'ajax',
         // Login-page passkey assertions — guest-facing by design; the
         // WebAuthn challenge + signature is the credential itself.

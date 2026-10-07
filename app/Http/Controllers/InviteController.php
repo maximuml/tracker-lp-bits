@@ -53,7 +53,7 @@ class InviteController extends LegacyController
     public function invite(Request $request): View|RedirectResponse|Response
     {
         $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($currentUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
 
         if (! Validators::isId($id) || ($currentUserId !== $id && ! Permission::can(PermissionEnum::VIEW_INVITE))) {
@@ -123,7 +123,7 @@ class InviteController extends LegacyController
                 ];
             }
 
-            $invitation_body = sprintf(__('legacy/invite.text_invitation_body'), $SITENAME).$currentUser['username'];
+            $invitation_body = sprintf(__('legacy/invite.text_invitation_body'), $SITENAME).$this->currentUser->username();
             $showPreUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
             $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? (__('legacy/invite.text_s')) : '';
 

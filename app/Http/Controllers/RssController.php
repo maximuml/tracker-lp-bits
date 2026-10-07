@@ -135,7 +135,7 @@ class RssController extends LegacyController
             return $this->getrssMessageResponse(__('legacy/getrss.std_error'), __('legacy/getrss.std_no_row'));
         }
 
-        $query = ['passkey' => $curUser['passkey'] ?? '', 'rows' => (int) $showrows];
+        $query = ['passkey' => $this->currentUser->passkey(), 'rows' => (int) $showrows];
 
         $brcats = Category::listByModeWithContext($browsecatmode);
         foreach ($brcats as $cat) {

@@ -9,8 +9,8 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\UserAccountRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -52,14 +52,14 @@ final class ThankService
             if ($sayThanksBonus > 0) {
                 $affectedRows = $this->userAccountRepository->incrementSeedBonusForExpected((int) $user->id, $user->seedbonus, $sayThanksBonus);
                 if ($affectedRows != 1) {
-                    Logger::writeWithContext((string) ('affectedRows: '.$affectedRows.', query: '.LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                    Logger::writeWithContext((string) ('affectedRows: '.$affectedRows.', query: '.QueryLog::last()), (string) 'error', (bool) false);
                     throw new \RuntimeException('increment user bonus fail.');
                 }
             }
             if ($receiveThanksBonus > 0) {
                 $affectedRows = $this->userAccountRepository->incrementSeedBonusForExpected((int) $torrentOwner->id, $torrentOwner->seedbonus, $receiveThanksBonus);
                 if ($affectedRows != 1) {
-                    Logger::writeWithContext((string) ('affectedRows: '.$affectedRows.', query: '.LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                    Logger::writeWithContext((string) ('affectedRows: '.$affectedRows.', query: '.QueryLog::last()), (string) 'error', (bool) false);
                     throw new \RuntimeException('increment owner bonus fail.');
                 }
             }

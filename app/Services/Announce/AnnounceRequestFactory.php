@@ -7,7 +7,7 @@ namespace App\Services\Announce;
 use App\DTOs\AnnounceRequestDto;
 use App\Support\Network;
 use App\Support\Network\ClientIpResolver;
-use App\Support\SupportContext;
+use App\Support\NexusContext;
 use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
 use App\ValueObjects\PeerId;
@@ -34,7 +34,7 @@ final class AnnounceRequestFactory
     {
         // Side effect: populate per-request SupportContext from the request.
         // This was previously inside AnnounceRequestDto::fromRequest().
-        SupportContext::fromRequest($request);
+        NexusContext::instance()->setFromRequest($request);
 
         return $this->build($params, $request->header('User-Agent'));
     }

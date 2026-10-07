@@ -10,12 +10,12 @@ use App\Repositories\TorrentModerationRepository;
 use App\Services\PermissionChecker;
 use App\Support\Category;
 use App\Support\Format;
-use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Promotion;
 use App\Support\Ratio;
 use App\Support\Strings;
 use App\Support\TorrentAccess;
+use App\Support\YesNo;
 
 /**
  * Builds the UserTorrentListViewModel for the getusertorrentlistajax
@@ -100,7 +100,7 @@ final class UserTorrentListVmFactory
                 nameUrl: '/web/details/'.$arr['torrent'].'?hit=1',
                 nameTitle: $nameTitle,
                 displayName: $displayName,
-                isBanned: LegacyYesNo::isYes($arr['banned'] ?? null),
+                isBanned: YesNo::isYes($arr['banned'] ?? null),
                 badges: new TorrentBadgeSet(
                     promotion: Promotion::badgeWithContext((int) $arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false),
                     hitAndRun: TorrentAccess::requiresHrIcon($arr, $arr['search_box_id'] ?? 0),

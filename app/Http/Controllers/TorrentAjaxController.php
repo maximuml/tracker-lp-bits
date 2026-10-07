@@ -67,7 +67,7 @@ class TorrentAjaxController extends LegacyController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($curUser['id'] ?? 0)) : null;
+        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($this->currentUser->id())) : null;
 
         $headers = [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
@@ -97,7 +97,7 @@ class TorrentAjaxController extends LegacyController
         $curUser = $this->currentUser->get() ?? [];
         $data['rows'] = $this->decorateSnatchRows(
             $data['snatchedRows'] ?? collect(),
-            (int) ($curUser['id'] ?? 0)
+            (int) ($this->currentUser->id())
         );
         $data['canViewConfidential'] = Permission::can(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
         unset($data['snatchedRows']);
@@ -170,7 +170,7 @@ class TorrentAjaxController extends LegacyController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($curUser['id'] ?? 0)) : null;
+        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($this->currentUser->id())) : null;
 
         if ($currentUser === null || (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id) && $currentUser->id !== $targetUserId)) {
             return response('', 403, ['Content-Type' => 'text/html; charset=utf-8']);

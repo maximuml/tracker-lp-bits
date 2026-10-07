@@ -43,7 +43,7 @@ final class RouteInventoryTest extends TestCase
         'api/challenge' => true,
         // ajax.php — per-action guard inside UtilityController::ajax()
         // (passkey actions are guest-facing, the rest get a JSON 401 via
-        // LegacyAuth::requireLoginFromContext)
+        // AccessGate::requireLogin (JSON 401 for ajax))
         'ajax' => true,
         // Login-page passkey assertions — guest-facing by design (they
         // run before the user has a session; the WebAuthn challenge +
@@ -168,7 +168,7 @@ final class RouteInventoryTest extends TestCase
         // +6 passkey REST endpoints (4 authed + 2 guest login assertions).
         // +5 friends/news page-POST endpoints (FormRequest validated).
         $this->assertLessThanOrEqual(
-            250, // 250: +6 remaining POST URI renames (index, invite, settings, faq, donate, bookmark)
+            252, // 252: +2 last POST dispatcher endpoints (usercp security save, offers vote) — FormRequest validated
             $currentCount,
             sprintf(
                 'App mutation route count increased from baseline to %d. '.

@@ -108,7 +108,7 @@ class MyController extends Controller
             return redirect('/web/myhr'.($qs ? '?'.$qs : ''));
         }
 
-        $viewerId = (int) ($curUser['id'] ?? 0);
+        $viewerId = (int) ($this->currentUser->id());
         $userid = $viewerId;
         $pagerParams = [];
 
@@ -152,7 +152,7 @@ class MyController extends Controller
         $cancelHrBonus = SiteConfig::current()->bonus->cancelHr();
 
         $hasActionRemove = collect($list)->contains(
-            fn ($row) => $row->uid == $curUser['id'] && in_array($row->status, HitAndRun::CAN_PARDON_STATUS)
+            fn ($row) => $row->uid == $this->currentUser->id() && in_array($row->status, HitAndRun::CAN_PARDON_STATUS)
         );
         if ($hasActionRemove) {
             $msg = Locale::trans('hr.remove_confirm_msg', ['bonus' => $cancelHrBonus], null);

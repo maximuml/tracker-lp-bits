@@ -504,4 +504,141 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->assertTrue($result->locked);
         $this->assertStringContainsString('Locked Topic', (string) $result->subject);
     }
+
+    /**
+     * @param  array<string, mixed>  $curUser
+     * @param  array<string, mixed>  $forumRow
+     * @param  array<string, mixed>  $topicAttrs
+     * @param  array<string, mixed>  $posterAttrs
+     */
+    private function viewTopicVm(array $curUser = [], array $forumRow = [], array $topicAttrs = [], array $posterAttrs = []): ViewTopicViewModel
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $curUser = array_merge(['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+            'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes', 'last_catchup' => 0], $curUser);
+        $userId = $this->setUser($curUser);
+        $this->setRequest(['topicid' => 1]);
+
+        $topic = new Topic;
+        $topic->id = 1;
+        $topic->setAttribute('userid', $userId);
+        $topic->subject = 'Test Topic';
+        $topic->locked = false;
+        $topic->forumid = 1;
+        $topic->sticky = false;
+        $topic->hlcolor = 0;
+        $topic->views = 5;
+        foreach ($topicAttrs as $key => $value) {
+            $topic->setAttribute($key, $value);
+        }
+
+        $post = new Post;
+        $post->id = 1;
+        $post->topicid = 1;
+        $post->setAttribute('userid', $userId);
+        $post->added = Carbon::parse('2024-01-01 12:00:00');
+        $post->body = 'Hello world';
+        $post->editedby = 0;
+
+        $user = new User;
+        $user->id = $userId;
+        $user->username = 'user'.$userId;
+        $user->class = 10;
+        $user->enabled = true;
+        $user->donor = false;
+        $user->leechwarn = false;
+        $user->warned = false;
+        $user->avatar = '';
+        $user->signature = '';
+        $user->uploaded = 0;
+        $user->downloaded = 0;
+        $user->last_access = '2024-01-01 00:00:00';
+        $user->title = '';
+        foreach ($posterAttrs as $key => $value) {
+            $user->setAttribute($key, $value);
+        }
+
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn($topic);
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => array_merge(['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0], $forumRow),
+        ]);
+        $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(1);
+        $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection([$post]));
+        $repo->shouldReceive('getUsersByIds')->andReturn(new EloquentCollection([$userId => $user]));
+        $this->postRepo->shouldReceive('countUserPosts')->andReturn(0);
+        $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
+        $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
+
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
+            $curUser,
+            (int) $curUser['id'],
+            Request::create('/forums.php', 'GET', ['topicid' => 1]),
+            10,
+        ));
+
+        $this->assertInstanceOf(ViewTopicViewModel::class, $result);
+
+        return $result;
+    }
+
+    public function test_viewtopic_maypost_false_when_class_below_minwrite(): void
+    {
+        $vm = $this->viewTopicVm(['class' => 2], ['minclasswrite' => 5]);
+
+        $this->assertFalse($vm->mayPost);
+    }
+
+    public function test_viewtopic_maypost_false_when_topic_locked(): void
+    {
+        $vm = $this->viewTopicVm([], [], ['locked' => true]);
+
+        $this->assertFalse($vm->mayPost);
+    }
+
+    public function test_viewtopic_maypost_false_when_forumpost_disabled(): void
+    {
+        $vm = $this->viewTopicVm(['forumpost' => 'no']);
+
+        $this->assertFalse($vm->mayPost);
+    }
+
+    public function test_viewtopic_maypost_true_when_class_equals_minwrite(): void
+    {
+        $vm = $this->viewTopicVm(['class' => 5], ['minclasswrite' => 5]);
+
+        $this->assertTrue($vm->mayPost);
+    }
+
+    public function test_viewtopic_maypost_true_when_minwrite_key_null(): void
+    {
+        $vm = $this->viewTopicVm(['class' => 0], ['minclasswrite' => null]);
+
+        $this->assertTrue($vm->mayPost);
+    }
+
+    public function test_viewtopic_maypost_true_for_mod_despite_locked(): void
+    {
+        $mod = User::factory()->create(['class' => 15]);
+        DB::table('forummods')->insert(['forumid' => 1, 'userid' => $mod->id]);
+
+        $vm = $this->viewTopicVm(['id' => $mod->id, 'class' => 15], ['minclasswrite' => 20], ['locked' => true]);
+
+        $this->assertTrue($vm->mayPost);
+    }
+
+    public function test_viewtopic_hides_signature_when_pref_disabled(): void
+    {
+        $vm = $this->viewTopicVm(['signatures' => 'no'], [], [], ['signature' => 'my signature']);
+
+        $this->assertNull($vm->posts[0]->signature);
+    }
+
+    public function test_viewtopic_uses_default_avatar_when_pref_disabled(): void
+    {
+        $vm = $this->viewTopicVm(['avatars' => 'no'], [], [], ['avatar' => 'pic/custom.png']);
+
+        $this->assertStringContainsString('default_avatar', (string) $vm->posts[0]->avatarImage);
+    }
 }

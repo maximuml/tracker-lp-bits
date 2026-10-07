@@ -38,14 +38,14 @@ final class ForumPageService
     public function build(Request $request): ForumPageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($curUser['id'] ?? 0);
+        $userId = $this->currentUser->id();
 
         $mainConfig = SiteConfig::current()->main;
-        $postsperpage = (int) ($curUser['postsperpage'] ?? 0);
+        $postsperpage = (int) ($this->currentUser->value('postsperpage', 0));
         if (! $postsperpage) {
             $postsperpage = $mainConfig->forumPostsPerPage(10);
         }
-        $topicsperpage = (int) ($curUser['topicsperpage'] ?? 0);
+        $topicsperpage = (int) ($this->currentUser->value('topicsperpage', 0));
         if (! $topicsperpage) {
             $topicsperpage = $mainConfig->forumTopicsPerPage(20);
         }

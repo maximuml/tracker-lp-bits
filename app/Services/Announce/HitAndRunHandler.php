@@ -11,7 +11,7 @@ use App\Events\HitAndRunCreated;
 use App\Models\HitAndRun;
 use App\Repositories\HitAndRunLookupRepository;
 use App\Repositories\SnatchRepository;
-use App\Support\LegacyDb;
+use App\Services\TorrentStatsService;
 use App\Support\Logger;
 use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Cache;
@@ -21,6 +21,7 @@ final class HitAndRunHandler
     public function __construct(
         private readonly HitAndRunLookupRepository $hitAndRunRepository,
         private readonly SnatchRepository $snatchRepository,
+        private readonly TorrentStatsService $torrentStats,
     ) {}
 
     /**
@@ -48,7 +49,7 @@ final class HitAndRunHandler
             return null;
         }
 
-        $snatchInfo = LegacyDb::snatchInfo($torrentId, $userId);
+        $snatchInfo = $this->torrentStats->getSnatchInfo($torrentId, $userId);
         if (! $snatchInfo) {
             return null;
         }

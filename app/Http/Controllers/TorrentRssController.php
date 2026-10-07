@@ -49,7 +49,7 @@ class TorrentRssController extends LegacyController
     {
         $cache = $this->legacyRedisCache;
         $currentUser = $this->currentUser->get() ?? [];
-        $passkey = (string) ($request->input('passkey') ?? $currentUser['passkey'] ?? '');
+        $passkey = (string) ($request->input('passkey') ?? $this->currentUser->passkey());
 
         if ($passkey === '') {
             return response('require passkey', 400, ['Content-Type' => 'text/plain; charset=utf-8']);

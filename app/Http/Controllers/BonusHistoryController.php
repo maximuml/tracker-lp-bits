@@ -46,7 +46,7 @@ class BonusHistoryController extends LegacyController
     public function bonusLog(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $uid = (int) (request()->input('uid') ?? $curUser['id'] ?? 0);
+        $uid = (int) (request()->input('uid') ?? $this->currentUser->id());
 
         if (! Validators::isId($uid)) {
             return $this->legacyAbortResponse('Error', 'Invalid uid.');
@@ -57,7 +57,7 @@ class BonusHistoryController extends LegacyController
             return $this->legacyAbortResponse('Error', "Invalid uid: {$uid}");
         }
 
-        if ($uid != ($curUser['id'] ?? 0)) {
+        if ($uid != ($this->currentUser->id())) {
             $allowed = Permission::can(PermissionEnum::VIEW_USER_HISTORY, $user);
             if (! $allowed) {
                 return $this->legacyAbortResponse('Error', 'Permission denied.');

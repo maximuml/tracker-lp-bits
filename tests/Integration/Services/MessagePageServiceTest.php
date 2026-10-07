@@ -252,6 +252,40 @@ final class MessagePageServiceTest extends TestCase
         $this->assertSame('System message', $mailbox['rows'][0]['subject']);
     }
 
+    public function test_build_viewmailbox_uses_default_perpage_when_pmnum_absent(): void
+    {
+        $userId = $this->createUser();
+        $this->authenticatedUser(['id' => $userId, 'pmnum' => null]);
+        $this->seedSettings();
+
+        for ($i = 0; $i < 25; $i++) {
+            $this->insertMessage(['receiver' => $userId, 'subject' => "Message {$i}"]);
+        }
+
+        $request = Request::create('/messages.php', 'GET', ['box' => 1]);
+
+        $data = $this->callBuild($request);
+
+        $this->assertCount(20, $data['viewmailbox']['rows']);
+    }
+
+    public function test_build_viewmailbox_honors_user_pmnum(): void
+    {
+        $userId = $this->createUser();
+        $this->authenticatedUser(['id' => $userId, 'pmnum' => '5']);
+        $this->seedSettings();
+
+        for ($i = 0; $i < 8; $i++) {
+            $this->insertMessage(['receiver' => $userId, 'subject' => "Message {$i}"]);
+        }
+
+        $request = Request::create('/messages.php', 'GET', ['box' => 1]);
+
+        $data = $this->callBuild($request);
+
+        $this->assertCount(5, $data['viewmailbox']['rows']);
+    }
+
     public function test_build_viewmailbox_custom_mailbox_returns_name(): void
     {
         $userId = $this->createUser();

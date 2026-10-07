@@ -10,7 +10,7 @@ namespace App\Support;
  * shortcuts, rendered menu, settings exported to Blade).
  *
  * Backed by NexusContext, so it is reset together with the rest of the
- * legacy request state ({@see SupportContext::reset()}) and cannot leak
+ * legacy request state ({@see NexusContext::reset()}) and cannot leak
  * between requests in a long-lived worker.
  */
 final class PageState
@@ -22,39 +22,39 @@ final class PageState
 
     public function langDir(string $default = ''): string
     {
-        $dir = SupportContext::getContext()->langDir;
+        $dir = NexusContext::instance()->langDir;
 
         return $dir !== '' ? $dir : $default;
     }
 
     public function setLangDir(string $dir): void
     {
-        SupportContext::getContext()->langDir = $dir;
+        NexusContext::instance()->langDir = $dir;
     }
 
     public function keyShortcutScript(): string
     {
-        return SupportContext::getContext()->keyShortcutScript;
+        return NexusContext::instance()->keyShortcutScript;
     }
 
     public function setKeyShortcutScript(string $script): void
     {
-        SupportContext::getContext()->keyShortcutScript = $script;
+        NexusContext::instance()->keyShortcutScript = $script;
     }
 
     public function menuHtml(): string
     {
-        return SupportContext::getContext()->menuHtml;
+        return NexusContext::instance()->menuHtml;
     }
 
     public function menuSelected(): string
     {
-        return SupportContext::getContext()->menuSelected;
+        return NexusContext::instance()->menuSelected;
     }
 
     public function setMenu(string $html, string $selected): void
     {
-        $context = SupportContext::getContext();
+        $context = NexusContext::instance();
         $context->menuHtml = $html;
         $context->menuSelected = $selected;
     }
@@ -65,7 +65,7 @@ final class PageState
      */
     public function viewSettings(callable $resolve): array
     {
-        $context = SupportContext::getContext();
+        $context = NexusContext::instance();
 
         return $context->viewSettings ??= $resolve();
     }

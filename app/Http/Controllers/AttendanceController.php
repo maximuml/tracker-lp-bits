@@ -32,7 +32,7 @@ class AttendanceController extends LegacyController
             return redirect('/web/attendance');
         }
 
-        $uid = (int) ($curUser['id'] ?? 0);
+        $uid = (int) ($this->currentUser->id());
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
         $attendance = $repository->getAttendance($uid);
 
@@ -55,7 +55,7 @@ class AttendanceController extends LegacyController
             return redirect('/web/attendance');
         }
 
-        $uid = (int) ($curUser['id'] ?? 0);
+        $uid = (int) ($this->currentUser->id());
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
 
         if ($captchaEnabled && SiteConfig::current()->security->captchaRequired()) {
@@ -108,7 +108,7 @@ class AttendanceController extends LegacyController
                 'totalDays' => $attendance->total_days,
                 'days' => $attendance->days,
                 'points' => $attendance->points,
-                'cards' => $curUser['attendance_card'] ?? 0,
+                'cards' => $this->currentUser->value('attendance_card', 0),
             ])->render());
             $data['headerRight'] = SafeHtml::fromTrustedHtml(Locale::trans(
                 'attendance.ranking',
@@ -204,7 +204,7 @@ EOP;
             return $this->fail([], 'Unauthenticated');
         }
 
-        $uid = (int) ($curUser['id'] ?? 0);
+        $uid = (int) ($this->currentUser->id());
         $attendance = $repository->attend($uid);
 
         return $this->success([

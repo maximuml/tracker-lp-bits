@@ -10,9 +10,9 @@ use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Input;
 use App\Support\Json;
-use App\Support\LegacyDb;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -148,7 +148,7 @@ class AttendanceRepository extends BaseRepository
         $logQuery = $attendance->logs()->where('date', '<=', $start->format('Y-m-d'))->orderBy('date', 'desc');
         $attendanceLogs = $logQuery->get(['date'])->keyBy(fn ($log) => $log->date->format('Y-m-d'));
         $counts = $attendanceLogs->count();
-        Logger::writeWithContext((string) sprintf('user: %s, log counts: %s from query: %s', $attendance->uid, $counts, LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) sprintf('user: %s, log counts: %s from query: %s', $attendance->uid, $counts, QueryLog::last()), (string) 'info', (bool) false);
         if ($counts == 0) {
             return 0;
         }
@@ -213,10 +213,10 @@ class AttendanceRepository extends BaseRepository
                 ->update($userUpdates);
             $msg = 'Decrement user attendance_card and increment bonus';
             if ($affectedRows != 1) {
-                Logger::writeWithContext((string) ("{$msg} fail, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) ("{$msg} fail, query: ".QueryLog::last()), (string) 'info', (bool) false);
                 throw new \RuntimeException("$msg fail");
             }
-            Logger::writeWithContext((string) ("{$msg} success, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$msg} success, query: ".QueryLog::last()), (string) 'info', (bool) false);
             $insert = [
                 'uid' => $user->id,
                 'points' => $points,

@@ -43,9 +43,10 @@ final class AuditStaffActions
         'web/messages/move-or-delete', 'web/messages/mailboxes',
         'web/staffmess/send', 'web/contactstaff/send',
         'web/usercp/theme', 'web/usercp/logout-all', 'web/usercp/personal',
-        'web/usercp/forum', 'web/usercp/tracker', 'web/usercp/security/confirm',
+        'web/usercp/forum', 'web/usercp/tracker', 'web/usercp/security',
+        'web/usercp/security/confirm',
         'web/offers/create', 'web/offers/allow', 'web/offers/finish',
-        'web/offers/delete', 'web/offers/edit',
+        'web/offers/delete', 'web/offers/edit', 'web/offers/vote',
         'web/mybonus/exchange',
         'web/torrents/flush',
         // Renamed legacy user-interaction endpoints (chunk 4) — same

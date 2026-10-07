@@ -6,8 +6,8 @@ namespace App\ViewModels\Chrome;
 
 use App\Support\AssetAppender;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyDb;
 use App\Support\PageLayoutContext;
+use App\Support\QueryLog;
 
 /**
  * Footer chrome data (ADR 0018): copyright/version line, page-generation
@@ -45,7 +45,7 @@ final class ChromeFooter
         $debugEnabled = $context->enableSqlDebugTweak === 'yes' && $context->userClass() >= $context->sqlDebugTweak;
         $laravelQueries = [];
         if ($debugEnabled) {
-            $laravelQueries = (array) LegacyDb::lastQuery(true, 'json');
+            $laravelQueries = (array) QueryLog::all();
         }
 
         $keyShortcut = '';

@@ -360,7 +360,7 @@ final class Shoutbox
         $reactionCounts = (array) ($reactionData['counts'] ?? []);
         $reactionMine = (array) ($reactionData['mine'] ?? []);
         $reactionUsers = (array) ($reactionData['users'] ?? []);
-        $showAvatars = LegacyYesNo::isYes($currentUser['avatars'] ?? null);
+        $showAvatars = YesNo::isYes($currentUser['avatars'] ?? null);
         $tooltipAvatar = (string) (__('legacy/shoutbox.tooltip_avatar'));
         $tooltipReply = (string) (__('legacy/shoutbox.tooltip_nick_reply'));
         $labelMore = (string) (__('legacy/shoutbox.shout_show_more'));

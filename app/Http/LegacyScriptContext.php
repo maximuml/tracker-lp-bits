@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use App\Support\LegacyAuth;
+use App\Auth\AccessGate;
+use App\Auth\AuthContext;
 
 /**
  * Load per-script legacy language files and run the parked() guard.
@@ -14,6 +15,10 @@ use App\Support\LegacyAuth;
  */
 final class LegacyScriptContext
 {
+    public function __construct(
+        private readonly AccessGate $accessGate,
+    ) {}
+
     /** @var array<int, string> */
     private const PARKED_SCRIPTS = [
         'viewsnatches', 'users', 'forums', 'report', 'cheaterbox', 'upload',
@@ -29,7 +34,7 @@ final class LegacyScriptContext
     public function boot(string $script, string $rootpath): void
     {
         if (in_array($script, self::PARKED_SCRIPTS, true)) {
-            LegacyAuth::parkedFromContext();
+            $this->accessGate->parked(AuthContext::current());
         }
     }
 }

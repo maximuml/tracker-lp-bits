@@ -49,7 +49,7 @@ class TorrentDeleteController extends LegacyController
             return redirect('/fastdelete'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
 
         $id = (int) request()->input('id');
         if ($id <= 0) {
@@ -87,7 +87,7 @@ class TorrentDeleteController extends LegacyController
         if ($anonymous == 1 && $currentUserId == $ownerId) {
             Log::writeWithContext("Torrent $id ({$name}) was deleted by its anonymous uploader", 'normal');
         } else {
-            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$curUser['username']}", 'normal');
+            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$this->currentUser->username()}", 'normal');
         }
 
         if ($currentUserId != $ownerId && $this->userRepository->existsById($ownerId)) {
@@ -96,7 +96,7 @@ class TorrentDeleteController extends LegacyController
             $subject = Locale::trans('torrent.msg_torrent_deleted', [], $locale);
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
                 .$name
-                .Locale::trans('torrent.msg_was_deleted_by', ['admin' => $curUser['username']], $locale);
+                .Locale::trans('torrent.msg_was_deleted_by', ['admin' => $this->currentUser->username()], $locale);
             $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $ownerId,
@@ -127,7 +127,7 @@ class TorrentDeleteController extends LegacyController
             return redirect('/delete'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
 
         if ($request->query('id') !== null) {
             return $this->legacyAbortResponse('Party is over!', "This trick doesn't work anymore. You need to click the button!");
@@ -190,7 +190,7 @@ class TorrentDeleteController extends LegacyController
         if ($anonymous == 1 && $currentUserId == $ownerId) {
             Log::writeWithContext("Torrent $id ({$name}) was deleted by its anonymous uploader ($reasonstr)", 'normal');
         } else {
-            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$curUser['username']} ($reasonstr)", 'normal');
+            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$this->currentUser->username()} ($reasonstr)", 'normal');
         }
 
         $uploadtorrentBonus = (float) SiteConfig::current()->bonus->uploadTorrent();
@@ -203,7 +203,7 @@ class TorrentDeleteController extends LegacyController
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
                 .$name
                 .Locale::trans('torrent.msg_was_deleted_by', [], $locale)
-                ."[url=/userdetails?id=$currentUserId]{$curUser['username']}[/url]"
+                ."[url=/userdetails?id=$currentUserId]{$this->currentUser->username()}[/url]"
                 .Locale::trans('torrent.msg_reason_is', [], $locale)
                 .$reasonstr;
             $this->messageRepository->add([

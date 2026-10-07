@@ -20,11 +20,11 @@ use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
-use App\Support\LegacyYesNo;
 use App\Support\Ratio;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\Support\YesNo;
 use App\ViewModels\Forum\PostViewModel;
 use App\ViewModels\Forum\ViewTopicViewModel;
 use Illuminate\Http\Request;
@@ -82,7 +82,7 @@ final class ForumTopicViewService
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
             LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_unpermitted_viewing_topic'));
         }
-        $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && LegacyYesNo::isYes($curUser['forumpost'] ?? null);
+        $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && YesNo::isYes($curUser['forumpost'] ?? null);
 
         $this->topicRepository->incrementTopicViews($topicid);
 
@@ -157,7 +157,7 @@ final class ForumTopicViewService
         $renderedFmt = [];
         if ($this->legacyRedisCache !== null && $allPosts !== []) {
             $fmtKeys = array_map(static fn ($p) => 'fmt_post_'.md5((string) ($p['body'] ?? '')), $allPosts);
-            if (LegacyYesNo::isYes($curUser['signatures'] ?? null)) {
+            if (YesNo::isYes($curUser['signatures'] ?? null)) {
                 foreach ($allPosts as $p) {
                     $sig = (string) (optional($userInfoArr->get((int) ($p['userid'] ?? 0)))->signature ?? '');
                     if ($sig !== '') {
@@ -191,8 +191,8 @@ final class ForumTopicViewService
 
             $forumposts = $postCounts[$posterid] ?? 0;
 
-            $signature = LegacyYesNo::isYes($curUser['signatures'] ?? null) ? (string) ($arr2['signature'] ?? '') : '';
-            $avatar = LegacyYesNo::isYes($curUser['avatars'] ?? null) ? (string) ($arr2['avatar'] ?? '') : '';
+            $signature = YesNo::isYes($curUser['signatures'] ?? null) ? (string) ($arr2['signature'] ?? '') : '';
+            $avatar = YesNo::isYes($curUser['avatars'] ?? null) ? (string) ($arr2['avatar'] ?? '') : '';
             if ($avatar === '') {
                 $avatar = 'pic/default_avatar.png';
             }

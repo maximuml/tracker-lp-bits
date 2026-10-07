@@ -16,6 +16,7 @@ use App\Services\ForumListingService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Settings;
+use App\ViewModels\Forum\TopicListViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -518,5 +519,94 @@ final class ForumListingServiceTest extends TestCase
         $this->assertSame('firstpostasc', $vm->sort);
         $this->assertSame('&search=abc', $vm->addParam());
         $this->assertStringContainsString('search=abc', $vm->pagerHref());
+    }
+
+    /**
+     * @param  array<string, mixed>  $curUser
+     * @param  array<string, mixed>  $forumRow
+     */
+    private function viewForumVm(array $curUser = [], array $forumRow = []): TopicListViewModel
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $curUser = array_merge([
+            'id' => 1, 'username' => 'test', 'class' => 10,
+            'forumpost' => 'yes', 'ip' => '127.0.0.1',
+        ], $curUser);
+        $this->setUser($curUser);
+        $this->setRequest(['forumid' => 1]);
+
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => array_merge([
+                'id' => 1, 'name' => 'Test Forum', 'forid' => 1,
+                'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0,
+            ], $forumRow),
+        ]);
+        $this->topicRepo->shouldReceive('getTopicsByForum')->andReturn([
+            'count' => 1,
+            'rows' => new Collection([$this->fakeTopic(['id' => 7, 'subject' => 'Topic'])]),
+        ]);
+        $this->postRepo->shouldReceive('countTopicPostsBatch')->with([7])->andReturn([7 => 3]);
+
+        $vm = $this->service->buildViewForum(
+            $curUser,
+            Request::create('/forums.php', 'GET', ['forumid' => 1]),
+            20,
+            10,
+        );
+
+        $this->assertInstanceOf(TopicListViewModel::class, $vm);
+
+        return $vm;
+    }
+
+    public function test_build_view_forum_tooltips_enabled_when_tweak_on_and_pref_not_no(): void
+    {
+        Settings::saveBatch('tweak', ['enabletooltip' => 'yes']);
+        Settings::resetCache();
+
+        $vm = $this->viewForumVm();
+
+        $this->assertSame('lastpost_0', $vm->topics[0]->tooltipId);
+        $this->assertCount(1, $vm->tooltips);
+    }
+
+    public function test_build_view_forum_tooltips_disabled_when_showlastpost_no(): void
+    {
+        Settings::saveBatch('tweak', ['enabletooltip' => 'yes']);
+        Settings::resetCache();
+
+        $vm = $this->viewForumVm(['showlastpost' => 'no']);
+
+        $this->assertNull($vm->topics[0]->tooltipId);
+        $this->assertSame([], $vm->tooltips);
+    }
+
+    public function test_build_view_forum_maypost_false_when_class_below_minwrite(): void
+    {
+        $vm = $this->viewForumVm(['class' => 2], ['minclasswrite' => 5]);
+
+        $this->assertFalse($vm->mayPost);
+    }
+
+    public function test_build_view_forum_maypost_false_when_class_below_mincreate(): void
+    {
+        $vm = $this->viewForumVm(['class' => 2], ['minclasscreate' => 5]);
+
+        $this->assertFalse($vm->mayPost);
+    }
+
+    public function test_build_view_forum_maypost_false_when_forumpost_disabled(): void
+    {
+        $vm = $this->viewForumVm(['forumpost' => 'no']);
+
+        $this->assertFalse($vm->mayPost);
+    }
+
+    public function test_build_view_forum_maypost_true_at_minclass_boundary(): void
+    {
+        $vm = $this->viewForumVm(['class' => 5], ['minclasswrite' => 5, 'minclasscreate' => 5]);
+
+        $this->assertTrue($vm->mayPost);
     }
 }

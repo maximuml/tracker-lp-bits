@@ -33,7 +33,7 @@ class BonusShopController extends LegacyController
     public function task(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
 
         $total = $this->examRepository->countEnabledTasks();
         $perPage = 20;

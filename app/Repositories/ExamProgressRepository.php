@@ -16,8 +16,8 @@ use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Json;
-use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\QueryLog;
 
 /**
  * Handles exam progress calculation, formatting, and bulk updates.
@@ -113,12 +113,12 @@ class ExamProgressRepository extends BaseRepository
                 ->where('index', $index['index'])
                 ->orderBy('id', 'desc')
                 ->first();
-            Logger::writeWithContext((string) ('check newVersionProgress: '.LegacyDb::lastQuery(false, 'json').', exists: '.json_encode($newVersionProgress)), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ('check newVersionProgress: '.QueryLog::last().', exists: '.json_encode($newVersionProgress)), (string) 'info', (bool) false);
             if ($newVersionProgress) {
                 // just need to do update the value
                 if ($attributes['value'] != $newVersionProgress->value) {
                     $newVersionProgress->update(['value' => $attributes['value']]);
-                    Logger::writeWithContext((string) ('newVersionProgress [EXISTS], doUpdate: '.LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+                    Logger::writeWithContext((string) ('newVersionProgress [EXISTS], doUpdate: '.QueryLog::last()), (string) 'info', (bool) false);
                 } else {
                     Logger::writeWithContext((string) 'newVersionProgress [EXISTS], no change....', (string) 'info', (bool) false);
                 }
@@ -139,7 +139,7 @@ class ExamProgressRepository extends BaseRepository
                     ->where('last_action', '<=', $end)
                     ->selectRaw('count(distinct(torrentid)) as counts')
                     ->first();
-                Logger::writeWithContext((string) ("special index: {$index['index']}, get torrent count by: ".LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) ("special index: {$index['index']}, get torrent count by: ".QueryLog::last()), (string) 'info', (bool) false);
                 // if just seeding, no download torrent, counts = 1
                 if ($torrentCountsRes && $torrentCountsRes->counts > 0) {
                     $torrentCounts = $torrentCountsRes->counts;
@@ -213,7 +213,7 @@ class ExamProgressRepository extends BaseRepository
         }
         $examUsers = $query->get();
         if ($examUsers->isEmpty()) {
-            Logger::writeWithContext((string) ("{$logPrefix}, no examUser, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$logPrefix}, no examUser, query: ".QueryLog::last()), (string) 'info', (bool) false);
 
             return null;
         }
@@ -267,7 +267,7 @@ class ExamProgressRepository extends BaseRepository
             $rows = $query->forPage($page, $size)->get();
             $count = $rows->count();
             $total += $count;
-            Logger::writeWithContext((string) ("{$logPrefix}, ".LegacyDb::lastQuery(false, 'json').", count: {$count}"), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$logPrefix}, ".QueryLog::last().", count: {$count}"), (string) 'info', (bool) false);
             if ($rows->isEmpty()) {
                 Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;

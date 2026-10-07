@@ -23,8 +23,8 @@ use App\Support\Format;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
-use App\Support\LegacyYesNo;
 use App\Support\Locale;
+use App\Support\YesNo;
 use App\ViewModels\Torrent\TorrentEditPickViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -74,7 +74,7 @@ class TorrentEditController extends Controller
         $headTitle = (__('legacy/edit.head_edit_torrent')).'"'.$row['name'].'"';
         $cats = Category::listByModeWithContext($sectionmode);
 
-        $canEdit = (int) ($currentUser['id'] ?? 0) === (int) ($row['owner'] ?? 0)
+        $canEdit = (int) ($this->currentUser->id()) === (int) ($row['owner'] ?? 0)
             || Permission::can(PermissionEnum::TORRENT_MANAGE);
 
         $priceRow = null;
@@ -95,7 +95,7 @@ class TorrentEditController extends Controller
         $pick = null;
         if (
             Permission::can(PermissionEnum::TORRENT_SET_STICKY)
-            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && LegacyYesNo::isYes($currentUser['picker'] ?? null))
+            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && $this->currentUser->yes('picker'))
         ) {
             $promotionOptions = Permission::can(PermissionEnum::TORRENT_ON_PROMOTION)
                 ? SafeHtml::fromTrustedHtml(Html::promotionSelection((int) $row['sp_state'], 0))
@@ -151,9 +151,9 @@ class TorrentEditController extends Controller
             'priceRow' => $priceRow,
             'sectionMode' => $sectionmode,
             'showVisibleCheck' => $showVisibleCheck,
-            'visibleChecked' => LegacyYesNo::isYes($row['visible'] ?? null),
+            'visibleChecked' => YesNo::isYes($row['visible'] ?? null),
             'showAnonymousCheck' => $showAnonymousCheck,
-            'anonymousChecked' => LegacyYesNo::isYes($row['anonymous'] ?? null),
+            'anonymousChecked' => YesNo::isYes($row['anonymous'] ?? null),
             'pick' => $pick,
             'showDeleteForm' => $showDeleteForm,
             'descrContent' => (string) ($row['descr'] ?? ''),

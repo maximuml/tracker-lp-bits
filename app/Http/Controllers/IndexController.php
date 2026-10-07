@@ -33,7 +33,7 @@ class IndexController extends Controller
             return redirect('/web/index'.($qs ? '?'.$qs : ''));
         }
 
-        $this->indexRepository->touchLastHome((int) $user['id']);
+        $this->indexRepository->touchLastHome((int) $this->currentUser->id());
 
         $data = $this->indexPageService->build()->toArray();
         $this->indexPageService->appendAssets($data['curUser']);
@@ -59,7 +59,7 @@ class IndexController extends Controller
             return redirect('/web/index'.($qs ? '?'.$qs : ''));
         }
 
-        $this->indexRepository->touchLastHome((int) $user['id']);
+        $this->indexRepository->touchLastHome((int) $this->currentUser->id());
 
         if (SiteConfig::current()->main->showPolls()) {
             return $this->handlePollVote($request);

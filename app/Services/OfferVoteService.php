@@ -39,7 +39,7 @@ final class OfferVoteService
 
     public function handleVote(Request $request): ?Response
     {
-        $vote = (string) $request->query('vote', '');
+        $vote = $request->string('vote')->toString();
         if ($vote === '') {
             return null;
         }
@@ -51,7 +51,7 @@ final class OfferVoteService
             $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
         }
 
-        $offerid = (int) $request->query('id', 0);
+        $offerid = $request->integer('id');
         $curuser = $this->curUser();
         $userid = (int) ($curuser['id'] ?? 0);
 

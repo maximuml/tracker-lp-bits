@@ -10,8 +10,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Mockery;
-use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -44,9 +42,8 @@ final class ForumControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        /** @var CurrentUser&MockInterface $currentUser */
-        $currentUser = Mockery::mock(CurrentUser::class);
-        $currentUser->shouldReceive('get')->andReturn(['id' => $user->id]);
+        $currentUser = new CurrentUser;
+        $currentUser->set(['id' => $user->id]);
         app()->instance(CurrentUser::class, $currentUser);
 
         $controller = app(ForumController::class);

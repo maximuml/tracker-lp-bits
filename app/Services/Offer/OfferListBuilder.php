@@ -18,11 +18,11 @@ use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
 use App\Support\LegacyResponse;
-use App\Support\LegacyYesNo;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
+use App\Support\YesNo;
 use App\ViewModels\Offer\OfferAllowedBadge;
 use App\ViewModels\Offer\OfferCategoryOption;
 use App\ViewModels\Offer\OfferCommentCell;
@@ -305,7 +305,7 @@ final class OfferListBuilder
                     categoryIcon: new CategoryIcon($catIconData['iconClass'], $catIconData['name'], '?category='.(int) ($arr['cat_id'] ?? 0)),
                     displayName: $dispname,
                     fullName: (string) ($arr['name'] ?? ''),
-                    isNew: ! LegacyYesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer,
+                    isNew: ! YesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer,
                     allowed: $allowed,
                     voteResults: $voteResults,
                     comment: $comment,

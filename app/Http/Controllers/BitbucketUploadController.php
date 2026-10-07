@@ -40,7 +40,7 @@ class BitbucketUploadController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        if ($currentUser['parked']) {
+        if ($this->currentUser->value('parked')) {
             LegacyResponse::abort((''), (''), false);
         }
 
@@ -74,7 +74,7 @@ class BitbucketUploadController extends Controller
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
         $this->currentUser->set($currentUser);
 
-        if ($currentUser['parked']) {
+        if ($this->currentUser->value('parked')) {
             LegacyResponse::abort((''), (''), false);
         }
 

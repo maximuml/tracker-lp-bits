@@ -97,7 +97,7 @@ final class Logger
             $curUser = CurrentUser::instance()->get();
             if (is_array($curUser) && ! empty($curUser)) {
                 $user = $curUser;
-                $passkey = (string) ($curUser['passkey'] ?? '');
+                $passkey = (string) (CurrentUser::instance()->passkey());
             }
             if ($passkey === '') {
                 $passkey = (string) (request()->input('passkey') ?? request()->input('authkey') ?? '');

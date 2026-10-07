@@ -57,10 +57,8 @@
     @if ($canManage)
         <x-data-table :caption="! empty($editItem) ? __('legacy/log.text_edit_chronicle') : __('legacy/log.text_add_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ ! empty($editItem) ? (__('legacy/log.text_edit_chronicle')) : (__('legacy/log.text_add_chronicle')) }}</th></tr></thead></x-slot:head>
             <tr><td class="toolbox">
-                <form method="post" action="">
+                <form method="post" action="/web/log/chronicle/{{ ! empty($editItem) ? 'update' : 'add' }}">@csrf
                     <textarea name="txt" rows="3">{{ ! empty($editItem) ? ($editItem['txt'] ?? '') : (__('legacy/log.text_add_chronicle')) }}</textarea>
-                    <input type="hidden" name="action" value="chronicle">
-                    <input type="hidden" name="do" value="{{ ! empty($editItem) ? 'update' : 'add' }}">
                     @if (! empty($editItem))
                         <input type="hidden" name="id" value="{{ (int) ($editItem['id'] ?? 0) }}">
                     @endif

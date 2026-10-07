@@ -10,8 +10,8 @@ use App\Exceptions\TrackerWarningException;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Services\Announce\PeerLifecycle;
+use App\Services\TorrentStatsService;
 use App\Support\Cache;
-use App\Support\LegacyDb;
 use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
 use App\ValueObjects\PeerId;
@@ -164,7 +164,7 @@ final class PeerLifecycleTest extends TestCase
         $user = $this->makeUser();
         $torrent = $this->makeTorrent($user);
 
-        $lifecycle = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $this->assertNull($lifecycle->findSelf());
 
         $result = $lifecycle->process(100, 50, 'leechtime', 60, 0);
@@ -195,7 +195,7 @@ final class PeerLifecycleTest extends TestCase
         $user = $this->makeUser();
         $torrent = $this->makeTorrent($user);
 
-        $lifecycle = new PeerLifecycle($this->makeDto(null, 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $result = $lifecycle->process(100, 0, 'seedtime', 60, 0);
 
         $peer = $this->peerRow($torrent, $user);
@@ -210,7 +210,7 @@ final class PeerLifecycleTest extends TestCase
         $user = $this->makeUser();
         $torrent = $this->makeTorrent($user);
 
-        $lifecycle = new PeerLifecycle($this->makeDto('stopped'), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto('stopped'), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->process(0, 0, 'leechtime', 0, 0);
 
         $this->assertSame(0, DB::table('peers')->where('torrent', $torrent->id)->count());
@@ -224,9 +224,9 @@ final class PeerLifecycleTest extends TestCase
         $this->insertPeer($user, $torrent);
         $this->insertSnatch($user, $torrent);
 
-        $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 600, 300), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 600, 300), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $this->assertNotNull($lifecycle->findSelf());
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 300, 'leechtime', 60, 0);
 
         $peer = $this->peerRow($torrent, $user);
@@ -254,9 +254,9 @@ final class PeerLifecycleTest extends TestCase
         $this->insertSnatch($user, $torrent);
 
         // left=0 → isSeeder() → seeder flag flips to 1.
-        $lifecycle = new PeerLifecycle($this->makeDto(null, 0, 600, 500), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 0, 600, 500), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'seedtime', 60, 0);
 
         $peer = $this->peerRow($torrent, $user);
@@ -272,9 +272,9 @@ final class PeerLifecycleTest extends TestCase
         $this->insertPeer($user, $torrent);
         $this->insertSnatch($user, $torrent);
 
-        $lifecycle = new PeerLifecycle($this->makeDto('completed', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto('completed', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'leechtime', 60, 0);
 
         $snatch = $this->snatchRow($torrent, $user);
@@ -291,9 +291,9 @@ final class PeerLifecycleTest extends TestCase
         $this->insertPeer($user, $torrent);
         $this->insertSnatch($user, $torrent, finished: 1);
 
-        $lifecycle = new PeerLifecycle($this->makeDto('completed', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto('completed', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'leechtime', 60, 0);
 
         $this->assertArrayNotHasKey('times_completed', $result->torrentUpdate);
@@ -306,9 +306,9 @@ final class PeerLifecycleTest extends TestCase
         $this->insertPeer($user, $torrent);
         $this->insertSnatch($user, $torrent);
 
-        $lifecycle = new PeerLifecycle($this->makeDto('stopped', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto('stopped', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'leechtime', 60, 0);
 
         $this->assertSame(0, DB::table('peers')->where('torrent', $torrent->id)->count());
@@ -323,9 +323,9 @@ final class PeerLifecycleTest extends TestCase
         $this->insertPeer($user, $torrent, seeder: 1);
         $this->insertSnatch($user, $torrent);
 
-        $lifecycle = new PeerLifecycle($this->makeDto('stopped', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto('stopped', 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $result = $lifecycle->process(600, 500, 'seedtime', 60, 0);
 
         $this->assertSame(0, DB::table('peers')->where('torrent', $torrent->id)->count());
@@ -338,10 +338,10 @@ final class PeerLifecycleTest extends TestCase
         $user = $this->makeUser();
         $torrent = $this->makeTorrent($user);
 
-        $lifecycle = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->process(100, 50, 'leechtime', 60, 0);
 
-        $lifecycle2 = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle2 = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle2->process(100, 50, 'leechtime', 60, 0);
 
         $this->assertSame(1, DB::table('peers')->where('torrent', $torrent->id)->where('userid', $user->id)->count());
@@ -353,7 +353,7 @@ final class PeerLifecycleTest extends TestCase
         $torrent = $this->makeTorrent($user);
         $snatchId = $this->insertSnatch($user, $torrent);
 
-        $lifecycle = new PeerLifecycle($this->makeDto(null, 200), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 200), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->process(100, 50, 'leechtime', 60, 0);
 
         $this->assertSame(1, DB::table('snatched')->where('torrentid', $torrent->id)->where('userid', $user->id)->count());
@@ -368,7 +368,7 @@ final class PeerLifecycleTest extends TestCase
         $torrent = $this->makeTorrent($user);
         $this->insertPeer($user, $torrent, seeder: 0, peerId: '-qB4500-zzzzzzzzzzz0', ip: '10.0.0.2');
 
-        $lifecycle = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
 
         $this->expectException(TrackerException::class);
         $lifecycle->process(100, 50, 'leechtime', 60, 0);
@@ -382,7 +382,7 @@ final class PeerLifecycleTest extends TestCase
             $this->insertPeer($user, $torrent, seeder: 1, peerId: '-qB4500-zzzzzzzzzzz'.$i, ip: $ip);
         }
 
-        $lifecycle = new PeerLifecycle($this->makeDto(null, 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
 
         $this->expectException(TrackerException::class);
         $lifecycle->process(100, 0, 'seedtime', 60, 0);
@@ -394,7 +394,7 @@ final class PeerLifecycleTest extends TestCase
         $torrent = $this->makeTorrent($user);
         $peerId = $this->insertPeer($user, $torrent);
 
-        $lifecycle = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $self = $lifecycle->findSelf();
 
         $this->assertNotNull($self);
@@ -409,7 +409,7 @@ final class PeerLifecycleTest extends TestCase
         $user = $this->makeUser();
         $torrent = $this->makeTorrent($user);
 
-        $lifecycle = new PeerLifecycle($this->makeDto(ipv6: '2001:db8::1'), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(ipv6: '2001:db8::1'), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->process(100, 50, 'leechtime', 60, 0);
 
         $peer = $this->peerRow($torrent, $user);
@@ -423,9 +423,9 @@ final class PeerLifecycleTest extends TestCase
         $this->insertPeer($user, $torrent);
         $this->insertSnatch($user, $torrent);
 
-        $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 600, 300), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 600, 300), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
         $lifecycle->findSelf();
-        $lifecycle->setSnatchInfo(LegacyDb::snatchInfo($torrent->id, $user->id));
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
         $lifecycle->process(600, 300, 'leechtime', 60, 120);
 
         $snatch = $this->snatchRow($torrent, $user);
@@ -438,7 +438,7 @@ final class PeerLifecycleTest extends TestCase
         $torrent = $this->makeTorrent($user);
         $this->insertPeer($user, $torrent, seeder: 1, peerId: '-qB4500-zzzzzzzzzzz0', ip: '10.0.0.1');
 
-        $lifecycle = new PeerLifecycle($this->makeDto(null, 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt());
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
 
         $this->expectException(TrackerWarningException::class);
         $lifecycle->process(100, 0, 'seedtime', 60, 0);

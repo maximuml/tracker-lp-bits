@@ -4,7 +4,7 @@
 
 @section('content')
 <h1>{{ $usernameHtml }}<img src="pic/flag/{{ $countryFlagPic }}" alt="{{ $countryName }}" /></h1>
-@if (! \App\Support\LegacyYesNo::isYes($user['enabled'] ?? null))
+@if (! \App\Support\YesNo::isYes($user['enabled'] ?? null))
 <p><b>{{ __('legacy/userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)
 @if ($isFriend)
@@ -109,16 +109,16 @@
 <x-settings-row :label="__('legacy/userdetails.row_avatar_url')"><input type="text" size="60" name="avatar" value="{{ trim((string) $user['avatar']) }}" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_signature')"><textarea cols="60" rows="6" name="signature">{{ trim((string) $user['signature']) }}</textarea></x-settings-row>
 @if ($currentClass === UC_STAFFLEADER)
-<x-settings-row :label="__('legacy/userdetails.row_donor_status')"><x-user.radio-yesno name="donor" :yes="\App\Support\LegacyYesNo::isYes($user['donor'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['donor'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_donor_status')"><x-user.radio-yesno name="donor" :yes="\App\Support\YesNo::isYes($user['donor'] ?? null)" :no="\App\Support\YesNo::isNo($user['donor'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_donated')">USD: <input type="text" size="5" name="donated" value="{{ $user['donated'] }}" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type="text" size="5" name="donated_cny" value="{{ $user['donated_cny'] }}" />{{ __('legacy/userdetails.text_transaction_memo') ?? '' }}<input type="text" size="50" name="donation_memo" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_donoruntil')"><input type="text" name="donoruntil" value="{{ $user['donoruntil'] }}" /> {{ __('legacy/userdetails.text_donoruntil_note') ?? '' }}</x-settings-row>
 @endif
 <x-settings-row :label="__('legacy/functions.text_management_system')">{{ $migratedHelp }}</x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_staff_duties')"><textarea cols="60" rows="6" name="staffduties">{{ $user['stafffor'] }}</textarea></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_support_language')"><input type="text" name="supportlang" value="{{ $user['supportlang'] }}" /></x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_support')"><x-user.radio-yesno name="support" :yes="\App\Support\LegacyYesNo::isYes($user['support'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['support'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_support')"><x-user.radio-yesno name="support" :yes="\App\Support\YesNo::isYes($user['support'] ?? null)" :no="\App\Support\YesNo::isNo($user['support'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_support_for')"><textarea cols="60" rows="6" name="supportfor">{{ $user['supportfor'] }}</textarea></x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_movie_picker')"><x-user.radio-yesno name="moviepicker" :yes="\App\Support\LegacyYesNo::isYes($user['picker'] ?? null)" :no="! \App\Support\LegacyYesNo::isYes($user['picker'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_movie_picker')"><x-user.radio-yesno name="moviepicker" :yes="\App\Support\YesNo::isYes($user['picker'] ?? null)" :no="! \App\Support\YesNo::isYes($user['picker'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_pick_for')"><textarea cols="60" rows="6" name="pickfor">{{ $user['pickfor'] }}</textarea></x-settings-row>
 @if ($canManageConfidential)
 <x-settings-row :label="__('legacy/userdetails.row_comment')"><textarea cols="60" rows="6" name="modcomment" placeholder="{{ $modcomment }}"></textarea></x-settings-row>
@@ -159,9 +159,9 @@
 <td class="align-top px-2.5 py-1.5">{{ __('legacy/userdetails.text_not_warned') ?? '' }}</td></tr>
 @endif
 </x-data-table></td></tr>
-<x-settings-row :label="__('legacy/userdetails.row_forum_post_possible')"><x-user.radio-yesno name="forumpost" :yes="\App\Support\LegacyYesNo::isYes($user['forumpost'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['forumpost'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_upload_possible')"><x-user.radio-yesno name="uploadpos" :yes="\App\Support\LegacyYesNo::isYes($user['uploadpos'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['uploadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
-<x-settings-row :label="__('legacy/userdetails.row_download_possible')"><x-user.radio-yesno name="downloadpos" :yes="\App\Support\LegacyYesNo::isYes($user['downloadpos'] ?? null)" :no="\App\Support\LegacyYesNo::isNo($user['downloadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_forum_post_possible')"><x-user.radio-yesno name="forumpost" :yes="\App\Support\YesNo::isYes($user['forumpost'] ?? null)" :no="\App\Support\YesNo::isNo($user['forumpost'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_upload_possible')"><x-user.radio-yesno name="uploadpos" :yes="\App\Support\YesNo::isYes($user['uploadpos'] ?? null)" :no="\App\Support\YesNo::isNo($user['uploadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
+<x-settings-row :label="__('legacy/userdetails.row_download_possible')"><x-user.radio-yesno name="downloadpos" :yes="\App\Support\YesNo::isYes($user['downloadpos'] ?? null)" :no="\App\Support\YesNo::isNo($user['downloadpos'] ?? null)" :yesLabel="__('legacy/userdetails.radio_yes')" :noLabel="__('legacy/userdetails.radio_no')" /></x-settings-row>
 @if ($canManageConfidential)
 <x-settings-row :label="__('legacy/userdetails.row_change_username')"><input type="text" size="25" name="username" value="{{ $user['username'] }}" /></x-settings-row>
 <x-settings-row :label="__('legacy/userdetails.row_change_email')"><input type="text" size="80" name="email" value="{{ $user['email'] }}" /></x-settings-row>

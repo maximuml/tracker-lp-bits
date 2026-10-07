@@ -130,7 +130,7 @@ final class Style
         $user = CurrentUser::instance()->get() ?? [];
         $defaultId = self::defaultStylesheetId();
 
-        return self::cssUri(LegacyRedisCache::instance(), $user ? $user['stylesheet'] : $defaultId, $defaultId, $file);
+        return self::cssUri(LegacyRedisCache::instance(), $user ? CurrentUser::instance()->value('stylesheet') : $defaultId, $defaultId, $file);
     }
 
     /**
@@ -142,7 +142,7 @@ final class Style
         $user = CurrentUser::instance()->get() ?? [];
         $defaultId = self::defaultStylesheetId();
 
-        return SafeHtml::fromTrustedHtml(self::addiCode(LegacyRedisCache::instance(), $user ? $user['stylesheet'] : $defaultId, $defaultId));
+        return SafeHtml::fromTrustedHtml(self::addiCode(LegacyRedisCache::instance(), $user ? CurrentUser::instance()->value('stylesheet') : $defaultId, $defaultId));
     }
 
     /**

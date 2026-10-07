@@ -197,6 +197,7 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('usercp/personal', [UsercpController::class, 'savePersonal']);
     Route::post('usercp/forum', [UsercpController::class, 'saveForum']);
     Route::post('usercp/tracker', [UsercpController::class, 'saveTracker']);
+    Route::post('usercp/security', [UsercpController::class, 'saveSecurity']);
     Route::post('usercp/security/confirm', [UsercpController::class, 'confirmSecurity']);
     Route::post('messages/send', [MessageController::class, 'send']);
     Route::post('messages/delete/{type}', [MessageController::class, 'deleteTyped'])->whereIn('type', ['in', 'out']);
@@ -254,6 +255,7 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('offers/finish', [OfferController::class, 'finish']);
     Route::post('offers/delete', [OfferController::class, 'destroy']);
     Route::post('offers/edit', [OfferController::class, 'update']);
+    Route::post('offers/vote', [OfferController::class, 'vote']);
     Route::post('mybonus/exchange', [MyController::class, 'exchangeBonus']);
 
     // REST endpoints for the actions the /ajax dispatcher used to route by

@@ -35,7 +35,7 @@ final class MessageControllerTest extends TestCase
         /** @var MessagePageService&Mockery\MockInterface $pageService */
         $pageService = Mockery::mock(MessagePageService::class);
 
-        $controller = new MessageController($repository, $legacyService, $pageService, Mockery::mock(CurrentUser::class), Mockery::mock(UserRepositoryInterface::class));
+        $controller = new MessageController($repository, $legacyService, $pageService, new CurrentUser, Mockery::mock(UserRepositoryInterface::class));
 
         $this->assertInstanceOf(MessageController::class, $controller);
     }
@@ -57,7 +57,7 @@ final class MessageControllerTest extends TestCase
             ->once()
             ->andReturn(['title' => 'Messages', 'rows' => []]);
 
-        $controller = new MessageController($repository, $legacyService, $pageService, Mockery::mock(CurrentUser::class), Mockery::mock(UserRepositoryInterface::class));
+        $controller = new MessageController($repository, $legacyService, $pageService, new CurrentUser, Mockery::mock(UserRepositoryInterface::class));
         $request = Request::create('/messages', 'GET');
 
         // The controller calls legacyPage which may fail on view rendering,
@@ -87,7 +87,7 @@ final class MessageControllerTest extends TestCase
         $pageService = Mockery::mock(MessagePageService::class);
         $pageService->shouldNotReceive('build');
 
-        $controller = new MessageController($repository, $legacyService, $pageService, Mockery::mock(CurrentUser::class), Mockery::mock(UserRepositoryInterface::class));
+        $controller = new MessageController($repository, $legacyService, $pageService, new CurrentUser, Mockery::mock(UserRepositoryInterface::class));
         $request = Request::create('/messages', 'GET');
 
         $response = $controller->messages($request);

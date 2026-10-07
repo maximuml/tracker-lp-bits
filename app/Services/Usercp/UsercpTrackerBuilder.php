@@ -14,9 +14,9 @@ use App\Support\Config\SiteConfig;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
-use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Strings;
+use App\Support\YesNo;
 use App\ViewModels\Search\SearchCategoryTableFactory;
 use App\ViewModels\Usercp\UsercpTrackerSection;
 
@@ -100,19 +100,19 @@ final class UsercpTrackerBuilder
             showShoutbox: SiteConfig::current()->main->showShoutbox(),
             sbnum: (int) ($curUser['sbnum'] ?? 0),
             sbrefresh: (int) ($curUser['sbrefresh'] ?? 0),
-            showdescription: LegacyYesNo::isYes($curUser['showdescription'] ?? null),
-            showcomment: LegacyYesNo::isYes($curUser['showcomment'] ?? null),
+            showdescription: YesNo::isYes($curUser['showdescription'] ?? null),
+            showcomment: YesNo::isYes($curUser['showcomment'] ?? null),
             timetype: UserTimeType::tryFrom((int) ($curUser['timetype'] ?? 1))?->stringValue() ?? 'timealive',
             torrentsperpage: (int) ($curUser['torrentsperpage'] ?? 0),
             tooltip: UserTooltip::tryFrom((int) ($curUser['tooltip'] ?? 2))?->stringValue() ?? 'off',
-            appendsticky: LegacyYesNo::isYes($curUser['appendsticky'] ?? null),
-            appendnew: LegacyYesNo::isYes($curUser['appendnew'] ?? null),
+            appendsticky: YesNo::isYes($curUser['appendsticky'] ?? null),
+            appendnew: YesNo::isYes($curUser['appendnew'] ?? null),
             appendpromotion: UserAppendPromotion::tryFrom((int) ($curUser['appendpromotion'] ?? 2))?->stringValue() ?? 'icon',
-            appendpicked: LegacyYesNo::isYes($curUser['appendpicked'] ?? null),
-            dlicon: LegacyYesNo::isYes($curUser['dlicon'] ?? null),
-            bmicon: LegacyYesNo::isYes($curUser['bmicon'] ?? null),
-            showcomnum: LegacyYesNo::isYes($curUser['showcomnum'] ?? null),
-            showlastcom: ! LegacyYesNo::isNo($curUser['showlastcom'] ?? null),
+            appendpicked: YesNo::isYes($curUser['appendpicked'] ?? null),
+            dlicon: YesNo::isYes($curUser['dlicon'] ?? null),
+            bmicon: YesNo::isYes($curUser['bmicon'] ?? null),
+            showcomnum: YesNo::isYes($curUser['showcomnum'] ?? null),
+            showlastcom: ! YesNo::isNo($curUser['showlastcom'] ?? null),
             showTooltipSetting: $showTooltipSetting,
         );
     }

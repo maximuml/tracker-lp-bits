@@ -14,8 +14,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\QueryLog;
 
 class UserBanLog extends NexusModel
 {
@@ -37,13 +37,13 @@ class UserBanLog extends NexusModel
             ->having('counts', '>', 1)
             ->get();
         if ($lists->isEmpty()) {
-            Logger::writeWithContext((string) ('sql: '.LegacyDb::lastQuery(false, 'json').', no data to delete'), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ('sql: '.QueryLog::last().', no data to delete'), (string) 'info', (bool) false);
 
             return;
         }
         $idArr = $lists->pluck('id')->toArray();
         $uidArr = $lists->pluck('uid')->toArray();
         $result = UserBanLog::query()->whereIn('uid', $uidArr)->whereNotIn('id', $idArr)->delete();
-        Logger::writeWithContext((string) ('sql: '.LegacyDb::lastQuery(false, 'json').", result: {$result}"), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) ('sql: '.QueryLog::last().", result: {$result}"), (string) 'info', (bool) false);
     }
 }

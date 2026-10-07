@@ -6,8 +6,8 @@ namespace App\Repositories;
 
 use App\Models\Attendance;
 use App\Support\Environment;
-use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -38,7 +38,7 @@ class AttendanceMigrationRepository
                 ->selectRaw('uid, max(id) as id, count(*) as counts')
                 ->forPage($page, $size)
                 ->get();
-            Logger::writeWithContext((string) ("{$logPrefix}, ".LegacyDb::lastQuery(false, 'json').', count: '.$result->count()), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$logPrefix}, ".QueryLog::last().', count: '.$result->count()), (string) 'info', (bool) false);
             if ($result->isEmpty()) {
                 Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;
@@ -76,7 +76,7 @@ class AttendanceMigrationRepository
         $deleteCounts = 0;
         while (true) {
             $rows = $query->forPage($page, $size)->get();
-            $log = 'sql: '.LegacyDb::lastQuery(false, 'json').', count: '.$rows->count();
+            $log = 'sql: '.QueryLog::last().', count: '.$rows->count();
             Logger::writeWithContext((string) $log, (string) 'info', (bool) Environment::isConsole());
             if ($rows->isEmpty()) {
                 $log = 'no more data....';
@@ -90,7 +90,7 @@ class AttendanceMigrationRepository
                         ->where('id', '<', $row->max_id)
                         ->limit(10000)
                         ->delete();
-                    $log = "delete: $deleted by sql: ".LegacyDb::lastQuery(false, 'json');
+                    $log = "delete: $deleted by sql: ".QueryLog::last();
                     $deleteCounts += $deleted;
                     Logger::writeWithContext((string) $log, (string) 'info', (bool) Environment::isConsole());
                 } while ($deleted > 0);
@@ -124,7 +124,7 @@ class AttendanceMigrationRepository
                 $query->where('uid', $uid);
             }
             $result = $query->get();
-            Logger::writeWithContext((string) ("{$logPrefix}, ".LegacyDb::lastQuery(false, 'json').', count: '.$result->count()), (string) 'info', (bool) Environment::isConsole());
+            Logger::writeWithContext((string) ("{$logPrefix}, ".QueryLog::last().', count: '.$result->count()), (string) 'info', (bool) Environment::isConsole());
             if ($result->isEmpty()) {
                 Logger::writeWithContext((string) "{$logPrefix}, no more data...", (string) 'info', (bool) false);
                 break;

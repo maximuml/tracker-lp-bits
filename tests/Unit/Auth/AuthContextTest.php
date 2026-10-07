@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Support;
 
-use App\Support\LegacyAuthContext;
+use App\Auth\AuthContext;
 use PHPUnit\Framework\TestCase;
 use Tests\Attributes\TestCategory;
 
 #[TestCategory(TestCategory::PURE_UNIT)]
-class LegacyAuthContextTest extends TestCase
+class AuthContextTest extends TestCase
 {
     public function test_holds_request_context_values(): void
     {
-        $context = new LegacyAuthContext(
+        $context = new AuthContext(
             user: ['id' => 42, 'class' => 4],
             cache: null,
             ip: '127.0.0.1',
@@ -38,7 +38,7 @@ class LegacyAuthContextTest extends TestCase
 
     public function test_guest_user_is_not_logged_in(): void
     {
-        $context = new LegacyAuthContext(
+        $context = new AuthContext(
             user: null,
             cache: null,
             ip: '127.0.0.1',
@@ -61,7 +61,7 @@ class LegacyAuthContextTest extends TestCase
 
     public function test_moderator_check_uses_moderator_class(): void
     {
-        $context = new LegacyAuthContext(
+        $context = new AuthContext(
             user: ['id' => 1, 'class' => 3],
             cache: null,
             ip: '127.0.0.1',
@@ -84,7 +84,7 @@ class LegacyAuthContextTest extends TestCase
 
     public function test_lang_id_is_zero_when_no_folder(): void
     {
-        $context = new LegacyAuthContext(
+        $context = new AuthContext(
             user: null,
             cache: null,
             ip: '127.0.0.1',

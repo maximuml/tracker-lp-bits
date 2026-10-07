@@ -13,8 +13,6 @@ use App\Models\Snatch;
 use App\Models\User;
 use App\Repositories\AgentAllowRepository;
 use App\Repositories\CleanupRepository;
-use App\Repositories\IpLogRepository;
-use App\Repositories\RequireSeedTorrentRepository;
 use App\Services\Announce\AnnounceRequestFactory;
 use App\Services\Announce\PeerLifecycle;
 use App\Services\Announce\PeerLifecycleResult;
@@ -25,7 +23,6 @@ use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Json;
-use App\Support\LegacyDb;
 use App\Support\Logger;
 use App\Support\RedisGuard;
 use App\Support\Tracker;
@@ -48,8 +45,7 @@ class AnnounceService
         private readonly PasskeyUserLookup $passkeyUserLookup,
         private readonly CurrentUser $currentUser,
         private readonly CleanupRepository $cleanupRepository,
-        private readonly IpLogRepository $ipLogRepository,
-        private readonly RequireSeedTorrentRepository $requireSeedTorrentRepository,
+        private readonly AnnounceRepositories $repos,
     ) {}
 
     /**
@@ -103,7 +99,7 @@ class AnnounceService
             return $repDict;
         }
 
-        $peerLifecycle = new PeerLifecycle($dto, $torrent, $ctx->user, $ctx->dt);
+        $peerLifecycle = new PeerLifecycle($dto, $torrent, $ctx->user, $ctx->dt, $this->repos->torrentStats);
         $self = $peerLifecycle->findSelf();
         $ctx = $ctx->withSelf($self);
 
@@ -263,7 +259,7 @@ class AnnounceService
     /** @return array<string, mixed>|false */
     private function loadSnatchInfo(AnnounceContext $ctx): array|false
     {
-        return $ctx->self !== null ? LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId()) : false;
+        return $ctx->self !== null ? $this->repos->torrentStats->getSnatchInfo($ctx->torrentId(), $ctx->userId()) : false;
     }
 
     private function validateAnnounceTime(AnnounceContext $ctx): void
@@ -348,13 +344,13 @@ class AnnounceService
             $lockKey = sprintf('record_batch_lock:%s:%s', $ctx->userId(), $ctx->torrentId());
             if ($redis->set($lockKey, TIMENOW, ['nx', 'ex' => $ctx->autocleanIntervalOne])) {
                 $this->cleanupRepository->recordBatch($redis, $ctx->userId(), $ctx->torrentId());
-                $this->ipLogRepository->saveToCache($ctx->userId(), null, [$ctx->ip]);
+                $this->repos->ipLog->saveToCache($ctx->userId(), null, [$ctx->ip]);
             }
 
-            if ($this->requireSeedTorrentRepository->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
-                $snatchInfo = LegacyDb::snatchInfo($ctx->torrentId(), $ctx->userId());
+            if ($this->repos->requireSeedTorrent->shouldRecordUser($redis, $ctx->userId(), $ctx->torrentId())) {
+                $snatchInfo = $this->repos->torrentStats->getSnatchInfo($ctx->torrentId(), $ctx->userId());
                 if ($snatchInfo) {
-                    $this->requireSeedTorrentRepository->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
+                    $this->repos->requireSeedTorrent->recordUser($redis, $ctx->userId(), $ctx->torrentId(), $snatchInfo);
                 }
             }
         });

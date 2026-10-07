@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Models\UserMeta;
 use App\Repositories\UserMetaRepository;
@@ -49,7 +50,7 @@ final class UserDisplay
     {
         $user = CurrentUser::instance()->get();
         if (LegacyRuntime::instance()->isLegacy()) {
-            return $user['class'] ?? '';
+            return CurrentUser::instance()->value('class', '');
         }
 
         if (! auth()->check()) {
@@ -66,7 +67,16 @@ final class UserDisplay
      */
     public static function userIdFromName(string $username): int
     {
-        return LegacyAuth::userIdFromName($username, LegacyAuthContext::fromSupportContext());
+        $id = app(AuthRepositoryInterface::class)->getUserIdByUsername($username);
+
+        if ($id === null) {
+            LegacyResponse::abort(
+                (string) (__('legacy/functions.std_error')),
+                (string) (__('legacy/functions.std_no_user_named'))."'".$username."'",
+            );
+        }
+
+        return (int) $id;
     }
 
     /**
@@ -78,7 +88,7 @@ final class UserDisplay
     {
         $user = CurrentUser::instance()->get();
         if (LegacyRuntime::instance()->isLegacy()) {
-            return (int) ($user['id'] ?? 0);
+            return (int) (CurrentUser::instance()->id());
         }
 
         if (! auth()->check()) {
@@ -97,7 +107,7 @@ final class UserDisplay
     {
         $user = CurrentUser::instance()->get();
         if (LegacyRuntime::instance()->isLegacy()) {
-            return $user['username'] ?? '';
+            return CurrentUser::instance()->username();
         }
 
         if (! auth()->check()) {

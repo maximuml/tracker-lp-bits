@@ -196,7 +196,7 @@ class TorrentSearchRepository
 
         if ($shouldUseMeili) {
             try {
-                $resultFromSearchRep = $this->engine->meiliAdapter->search($searchParams, $CURUSER['id']);
+                $resultFromSearchRep = $this->engine->meiliAdapter->search($searchParams, $this->currentUser->id());
                 $count = $resultFromSearchRep['total'];
             } catch (\Throwable $e) {
                 Logger::writeWithContext((string) ('MeiliSearch search failed, falling back to SQL: '.$e->getMessage()), (string) 'error', (bool) false);
@@ -209,8 +209,8 @@ class TorrentSearchRepository
         $maxPageSize = 100;
         if (! empty($searchParams['pageSize'])) {
             $torrentsperpage = (int) $searchParams['pageSize'];
-        } elseif ($CURUSER['torrentsperpage']) {
-            $torrentsperpage = (int) $CURUSER['torrentsperpage'];
+        } elseif ($this->currentUser->value('torrentsperpage')) {
+            $torrentsperpage = (int) $this->currentUser->value('torrentsperpage');
         } elseif ($torrentsperpage_main) {
             $torrentsperpage = $torrentsperpage_main;
         } else {
@@ -220,7 +220,7 @@ class TorrentSearchRepository
 
         if ($count) {
             if ($searchstr !== null && (! isset($searchParams['notnewword']) || ! $searchParams['notnewword'])) {
-                SearchSuggest::add((string) $searchstr, $CURUSER['id'], (bool) true);
+                SearchSuggest::add((string) $searchstr, $this->currentUser->id(), (bool) true);
             }
             if ($pagerlink !== '') {
                 if (substr($addparam, -1) === ';') {

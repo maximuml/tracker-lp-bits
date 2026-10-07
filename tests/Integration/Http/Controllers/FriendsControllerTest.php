@@ -327,9 +327,8 @@ final class FriendsControllerTest extends TestCase
     private function mockCurrentUser(?array $user): void
     {
         $real = new CurrentUser;
-        $mock = Mockery::mock($real);
-        $mock->shouldReceive('get')->andReturn($user);
-        app()->instance(CurrentUser::class, $mock);
+        $real->set($user);
+        app()->instance(CurrentUser::class, $real);
     }
 
     /**

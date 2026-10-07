@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Auth\AuthContext;
+use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Services\Captcha\CaptchaManager;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
+use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\Config\SiteConfig;
 use Illuminate\Container\Container;
 
@@ -98,6 +101,81 @@ final class Captcha
         bool $maxattemptlog = false,
         bool $head = true,
     ): bool {
-        return LegacyAuth::checkCode($imagehash, $imagestring, $where, $maxattemptlog, $head, LegacyAuthContext::fromSupportContext());
+        $context = AuthContext::current();
+
+        if (! $context->captchaEnabled) {
+            return true;
+        }
+
+        $manager = self::manager();
+
+        if (! $manager->isEnabled()) {
+            return true;
+        }
+
+        $payload = [
+            'imagehash' => $imagehash,
+            'imagestring' => $imagestring,
+            'request' => $context->request,
+        ];
+
+        $captchaContext = [
+            'where' => $where,
+            'maxattemptlog' => $maxattemptlog,
+            'head' => $head,
+            'ip' => $context->ip,
+        ];
+
+        try {
+            if ($manager->verify($payload, $captchaContext)) {
+                return true;
+            }
+        } catch (CaptchaValidationException $exception) {
+            $message = $exception->getMessage();
+
+            $defaultMessage = view('auth._invalid_image_code', ['where' => $where])->render();
+
+            if ($message === '' || $message === 'Invalid captcha response.' || $message === 'Missing captcha parameters.') {
+                $message = $defaultMessage;
+            }
+
+            if (! $maxattemptlog) {
+                LegacyResponse::abort('Error', $message, false);
+            } else {
+                self::recordFailedLogin($message, true, $head, 'std_failed', $context);
+            }
+        }
+
+        return false;
+    }
+
+    private static function recordFailedLogin(
+        string $type,
+        bool $recover,
+        bool $head,
+        string $failedLangKey,
+        AuthContext $context,
+    ): void {
+        app(AuthRepositoryInterface::class)->recordFailedLogin($context->ip, $recover);
+
+        if ($type === 'silent') {
+            return;
+        }
+
+        if ($type === 'login') {
+            LegacyResponse::abort(
+                (string) (__('legacy/functions.std_login_failed')),
+                view('components.login-failed-note')->render(),
+                false,
+                $head,
+            );
+        } else {
+            LegacyResponse::abort(
+                (string) (__('legacy/functions.'.$failedLangKey)),
+                $type,
+                false,
+                $head,
+            );
+        }
     }
 }

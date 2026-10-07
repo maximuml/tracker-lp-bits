@@ -53,7 +53,7 @@ final readonly class ActorContext
         if ($user === null) {
             $cached = CurrentUser::instance()->get();
             if ($cached !== null) {
-                $userId = (int) ($cached['id'] ?? 0);
+                $userId = (int) (CurrentUser::instance()->id());
                 if ($userId > 0) {
                     $user = self::userRepo()->findById($userId);
                 }

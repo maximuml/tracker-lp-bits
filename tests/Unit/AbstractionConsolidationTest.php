@@ -22,8 +22,8 @@ use Tests\TestCase;
  * - Html: HTML helpers (App\Support\Html) — now includes formatHidden/formatTextAlign
  * - Html\SafeHtml: HTML sanitization VO
  * - Html\HtmlSanitizer: sanitizer implementation
- * - NexusContext, SupportContext, PageLayoutContext: distinct context objects
- * - LegacyAuth, AuthCookie, LegacyAuthContext: auth logic, cookies, context DTO
+ * - NexusContext, PageLayoutContext: distinct context objects
+ * - AccessGate, AuthContext, AuthCookie: access-gate checks, context DTO, cookies
  */
 #[TestCategory(TestCategory::PURE_UNIT)]
 final class AbstractionConsolidationTest extends TestCase
@@ -125,11 +125,10 @@ final class AbstractionConsolidationTest extends TestCase
         $this->assertFileExists(app_path('Support/Html.php'));
         $this->assertFileExists(app_path('Support/Html/SafeHtml.php'));
         $this->assertFileExists(app_path('Support/Html/HtmlSanitizer.php'));
-        $this->assertFileExists(app_path('Support/LegacyAuth.php'));
+        $this->assertFileExists(app_path('Auth/AccessGate.php'));
         $this->assertFileExists(app_path('Support/AuthCookie.php'));
-        $this->assertFileExists(app_path('Support/LegacyAuthContext.php'));
+        $this->assertFileExists(app_path('Auth/AuthContext.php'));
         $this->assertFileExists(app_path('Support/NexusContext.php'));
-        $this->assertFileExists(app_path('Support/SupportContext.php'));
         $this->assertFileExists(app_path('Support/PageLayoutContext.php'));
     }
 }

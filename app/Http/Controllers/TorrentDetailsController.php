@@ -19,7 +19,6 @@ use App\Support\CurrentUser;
 use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyYesNo;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Strings;
@@ -105,7 +104,7 @@ class TorrentDetailsController extends Controller
             ? $this->torrentDetailRepository->getLatestApprovalDenyLog($id)
             : null;
 
-        $hasBuy = $this->torrentPurchaseRepository->hasBuySuccess((int) ($currentUser['id'] ?? 0), $id);
+        $hasBuy = $this->torrentPurchaseRepository->hasBuySuccess((int) ($this->currentUser->id()), $id);
 
         $requestFlags = [
             'hit' => $request->has('hit'),
@@ -202,7 +201,7 @@ class TorrentDetailsController extends Controller
         }
 
         $descr = $rawDescr !== '' ? Format::formatComment($rawDescr) : '';
-        $showDescription = ! LegacyYesNo::isNo($currentUser['showdescription'] ?? null) && $descr !== '';
+        $showDescription = ! $this->currentUser->no('showdescription') && $descr !== '';
 
         $details = $this->detailsViewFactory->build(
             $id, $row, $currentUser, $denyLog, $hasBuy, $requestFlags
@@ -210,7 +209,7 @@ class TorrentDetailsController extends Controller
         $commentPagerTop = '';
         $commentPagerBottom = '';
         $commentCount = 0;
-        $commentsEnabled = ! LegacyYesNo::isNo($currentUser['showcomment'] ?? null);
+        $commentsEnabled = ! $this->currentUser->no('showcomment');
         if ($commentsEnabled) {
             $commentCount = $this->torrentDetailRepository->getCommentCount($id);
             if ($commentCount > 0) {

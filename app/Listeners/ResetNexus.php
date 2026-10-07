@@ -10,12 +10,12 @@ use App\Support\Category;
 use App\Support\CurrentUser;
 use App\Support\LegacyHeaderBag;
 use App\Support\LegacyRuntime;
+use App\Support\NexusContext;
 use App\Support\PageRenderer;
 use App\Support\Permissions;
 use App\Support\RequestContext;
 use App\Support\Settings;
 use App\Support\Style;
-use App\Support\SupportContext;
 use App\Support\UserDisplay;
 use App\Utils\MsgAlert;
 use Illuminate\Contracts\Foundation\Application;
@@ -37,7 +37,7 @@ class ResetNexus
      */
     public function handle($event): void
     {
-        SupportContext::reset();
+        NexusContext::reset();
         $this->currentUser->reset();
         // T-20: Flush the ActorContext singleton so the next request
         // re-resolves it from the freshly-reset auth guard.

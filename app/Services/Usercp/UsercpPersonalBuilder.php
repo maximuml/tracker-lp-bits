@@ -11,9 +11,9 @@ use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Input;
-use App\Support\LegacyYesNo;
 use App\Support\Strings;
 use App\Support\Url;
+use App\Support\YesNo;
 use App\ViewModels\Usercp\UsercpPersonalSection;
 
 /**
@@ -59,11 +59,11 @@ final class UsercpPersonalBuilder
 
         return new UsercpPersonalSection(
             formId: 'form'.Strings::randomCode(6),
-            parked: LegacyYesNo::isYes($curUser['parked'] ?? null),
+            parked: YesNo::isYes($curUser['parked'] ?? null),
             acceptpms: UserAcceptPms::tryFrom((int) ($curUser['acceptpms'] ?? 0))?->stringValue() ?? 'yes',
-            deletepms: LegacyYesNo::isYes($curUser['deletepms'] ?? null),
-            savepms: LegacyYesNo::isYes($curUser['savepms'] ?? null),
-            commentpm: LegacyYesNo::isYes($curUser['commentpm'] ?? null),
+            deletepms: YesNo::isYes($curUser['deletepms'] ?? null),
+            savepms: YesNo::isYes($curUser['savepms'] ?? null),
+            commentpm: YesNo::isYes($curUser['commentpm'] ?? null),
             notifCheckboxes: $notifCheckboxes,
             gender: UserGender::tryFrom((int) ($curUser['gender'] ?? 2))?->stringValue() ?? 'N/A',
             trackerUrlId: (string) ($curUser['tracker_url_id'] ?? ''),

@@ -13,11 +13,11 @@ use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
-use App\Support\LegacyYesNo;
 use App\Support\Log;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserDisplay;
+use App\Support\YesNo;
 use App\ViewModels\Forum\ForumSearchViewModel;
 use App\ViewModels\Forum\SearchResultRow;
 use App\ViewModels\Forum\TopicListViewModel;
@@ -84,7 +84,7 @@ final class ForumListingService
         $topicRows = $topicResult['rows'];
 
         $enabletooltipTweak = SiteConfig::current()->tweak->enableTooltip() ? 'yes' : 'no';
-        $tooltipsEnabled = $enabletooltipTweak === 'yes' && ! LegacyYesNo::isNo($curUser['showlastpost'] ?? null);
+        $tooltipsEnabled = $enabletooltipTweak === 'yes' && ! YesNo::isNo($curUser['showlastpost'] ?? null);
 
         $topics = [];
         $tooltips = [];
@@ -241,7 +241,7 @@ final class ForumListingService
             $counter++;
         }
 
-        $maypost = UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && UserDisplay::currentClass() >= (int) ($row['minclasscreate'] ?? 0) && LegacyYesNo::isYes($curUser['forumpost'] ?? null);
+        $maypost = UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && UserDisplay::currentClass() >= (int) ($row['minclasscreate'] ?? 0) && YesNo::isYes($curUser['forumpost'] ?? null);
 
         return new TopicListViewModel(
             siteName: SiteConfig::current()->basic->siteName(),

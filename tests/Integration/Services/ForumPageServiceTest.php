@@ -299,4 +299,33 @@ final class ForumPageServiceTest extends TestCase
         $this->assertSame(10, $result['postsperpage']);
         $this->assertSame(20, $result['topicsperpage']);
     }
+
+    public function test_build_uses_globals_when_user_pref_keys_are_null(): void
+    {
+        $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser(['postsperpage' => null, 'topicsperpage' => null]);
+        $this->setRequest();
+
+        Settings::saveBatch('main', ['postsperpage' => 15, 'topicsperpage' => 25]);
+        Settings::resetCache();
+
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
+
+        $this->assertSame(15, $result['postsperpage']);
+        $this->assertSame(25, $result['topicsperpage']);
+    }
+
+    public function test_build_casts_string_user_prefs_to_int(): void
+    {
+        $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser(['postsperpage' => '33', 'topicsperpage' => '44']);
+        $this->setRequest();
+
+        $result = $this->callWithSuppressedErrors(fn () => $this->service()->build(Request::create('/forums.php', 'GET'))->toArray());
+
+        $this->assertSame(33, $result['postsperpage']);
+        $this->assertSame(44, $result['topicsperpage']);
+    }
 }

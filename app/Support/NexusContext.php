@@ -15,6 +15,27 @@ use Illuminate\Http\Request;
  */
 final class NexusContext
 {
+    /**
+     * Request-scoped singleton accessor — binds a fresh context on first
+     * use so every caller shares one instance for the request lifetime.
+     */
+    public static function instance(): self
+    {
+        if (! app()->bound(self::class)) {
+            app()->instance(self::class, new self);
+        }
+
+        return app(self::class);
+    }
+
+    /**
+     * Discard the current context (request boundary / test reset).
+     */
+    public static function reset(): void
+    {
+        app()->instance(self::class, new self);
+    }
+
     public ?Request $laravelRequest = null;
 
     /** @var array<string, mixed>|null */

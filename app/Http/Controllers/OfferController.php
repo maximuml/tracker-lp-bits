@@ -10,6 +10,7 @@ use App\Http\Requests\DeleteOfferRequest;
 use App\Http\Requests\FinishOfferRequest;
 use App\Http\Requests\StoreOfferRequest;
 use App\Http\Requests\UpdateOfferRequest;
+use App\Http\Requests\VoteOfferRequest;
 use App\Services\OfferModerationService;
 use App\Services\OfferPageService;
 use App\Services\OfferService;
@@ -116,5 +117,10 @@ class OfferController extends LegacyController
     public function update(UpdateOfferRequest $request): RedirectResponse
     {
         return $this->offerService->handleEdit($request);
+    }
+
+    public function vote(VoteOfferRequest $request): RedirectResponse|Response
+    {
+        return $this->offerVoteService->handleVote($request) ?? redirect('/web/offers');
     }
 }

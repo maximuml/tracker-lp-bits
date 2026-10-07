@@ -7,8 +7,8 @@ namespace App\Repositories;
 use App\Models\Reward;
 use App\Models\Torrent;
 use App\Models\User;
-use App\Support\LegacyDb;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -65,7 +65,7 @@ class RewardRepository extends BaseRepository
                 ->where('seedbonus', $user->seedbonus)
                 ->decrement('seedbonus', $value);
             if ($affectedRows != 1) {
-                Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".QueryLog::last()), (string) 'error', (bool) false);
                 throw new \RuntimeException('decrement user bonus fail.');
             }
             $affectedRows = User::query()
@@ -73,7 +73,7 @@ class RewardRepository extends BaseRepository
                 ->where('seedbonus', $torrentOwner->seedbonus)
                 ->increment('seedbonus', $value);
             if ($affectedRows != 1) {
-                Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".LegacyDb::lastQuery(false, 'json')), (string) 'error', (bool) false);
+                Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".QueryLog::last()), (string) 'error', (bool) false);
                 throw new \RuntimeException('increment owner bonus fail.');
             }
 

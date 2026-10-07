@@ -73,7 +73,7 @@ final class Api
         }
 
         if (! LegacyRuntime::instance()->isLegacy() && Config::get('app.debug')) {
-            $results['queries'] = LegacyDb::lastQuery(true);
+            $results['queries'] = QueryLog::all();
         }
 
         Logger::write('api end', 'info');

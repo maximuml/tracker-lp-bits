@@ -12,9 +12,9 @@ use App\Repositories\MessageRepository;
 use App\Repositories\UserCleanupRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Json;
-use App\Support\LegacyDb;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\QueryLog;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -95,7 +95,7 @@ class HitAndRunCronjobService
             $rows = $query->forPage($page, $size)->get();
             Logger::writeWithContext((string) ("{$logPrefix}, counts: ".$rows->count()), (string) 'info', (bool) false);
             if ($rows->isEmpty()) {
-                Logger::writeWithContext((string) ("{$logPrefix}, no more data...".LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+                Logger::writeWithContext((string) ("{$logPrefix}, no more data...".QueryLog::last()), (string) 'info', (bool) false);
                 break;
             }
             foreach ($rows as $row) {
@@ -206,7 +206,7 @@ class HitAndRunCronjobService
             $setting['diff_in_section'] ? (int) $setting['search_box_id'] : null,
         );
         if ($result->isEmpty()) {
-            Logger::writeWithContext((string) ("{$logPrefix}, No user to disable: ".LegacyDb::lastQuery(false, 'json')), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ("{$logPrefix}, No user to disable: ".QueryLog::last()), (string) 'info', (bool) false);
 
             return;
         }

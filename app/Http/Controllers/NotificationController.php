@@ -28,7 +28,7 @@ class NotificationController extends LegacyController
 
         $offset = max(0, (int) $request->query('offset', 0));
 
-        return response()->json(['ret' => 0, 'data' => $this->feed->unread((int) $user['id'], $offset)]);
+        return response()->json(['ret' => 0, 'data' => $this->feed->unread((int) $this->currentUser->id(), $offset)]);
     }
 
     public function markRead(Request $request): RedirectResponse
@@ -60,7 +60,7 @@ class NotificationController extends LegacyController
             }
         }
 
-        $cursors = $this->feed->markAllRead((int) $user['id'], $watermark);
+        $cursors = $this->feed->markAllRead((int) $this->currentUser->id(), $watermark);
 
         return response()->json(['ret' => 0, 'data' => ['cursors' => $cursors]]);
     }

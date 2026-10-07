@@ -24,12 +24,12 @@ use App\Support\Env;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
-use App\Support\LegacyYesNo;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\Strings;
 use App\Support\Url;
 use App\Support\UserDisplay;
+use App\Support\YesNo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -64,7 +64,7 @@ class UserDetailController extends Controller
 
         if ($id <= 0) {
             $currentUser = $this->currentUser->get();
-            $id = (int) ($currentUser['id'] ?? 0);
+            $id = (int) ($this->currentUser->id());
             if ($id <= 0) {
                 abort(404);
             }
@@ -112,7 +112,7 @@ class UserDetailController extends Controller
     private function buildDetailsViewData(int $id, array $user, ?User $userModel): array
     {
         $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($currentUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
         $isOwner = $currentUserId === $id;
 
         $canViewConfidential = Permission::can(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
@@ -215,8 +215,8 @@ class UserDetailController extends Controller
             $seedLeechRatio = floor($user['seedtime'] / $user['leechtime'] * 1000) / 1000;
         }
 
-        $warned = LegacyYesNo::isYes($user['warned'] ?? null);
-        $leechwarn = LegacyYesNo::isYes($user['leechwarn'] ?? null);
+        $warned = YesNo::isYes($user['warned'] ?? null);
+        $leechwarn = YesNo::isYes($user['leechwarn'] ?? null);
         $lastwarnedTs = ($user['lastwarned'] ?? null) !== null && $user['lastwarned'] !== ''
             ? strtotime((string) $user['lastwarned'])
             : false;

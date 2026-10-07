@@ -158,7 +158,7 @@ class UserAdminController extends LegacyController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $currentUsername = (string) ($curUser['username'] ?? '');
+        $currentUsername = (string) ($this->currentUser->username());
 
         return $this->resetPage($request, false, '');
     }
@@ -180,7 +180,7 @@ class UserAdminController extends LegacyController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $currentUsername = (string) ($curUser['username'] ?? '');
+        $currentUsername = (string) ($this->currentUser->username());
 
         $success = false;
         $message = '';
@@ -241,7 +241,7 @@ class UserAdminController extends LegacyController
     public function selfEnable(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($curUser['id'] ?? 0);
+        $currentUserId = (int) ($this->currentUser->id());
 
         $title = Locale::trans('self-enable.title', [], null);
         $unit = Setting::getSelfEnableBonus();
@@ -249,8 +249,8 @@ class UserAdminController extends LegacyController
         $viewData = [
             'title' => $title,
             'unit' => $unit,
-            'enabled' => (bool) ($curUser['enabled'] ?? false),
-            'bonus' => (float) ($curUser['seedbonus'] ?? 0),
+            'enabled' => (bool) ($this->currentUser->enabled()),
+            'bonus' => (float) ($this->currentUser->seedbonus()),
             'latestBanLog' => null,
             'elapsedDay' => 0,
             'total' => 0,
@@ -274,7 +274,7 @@ class UserAdminController extends LegacyController
             return $this->legacyPage($request, 'self-enable', true, $viewData);
         }
 
-        if (($curUser['enabled'] ?? false)) {
+        if (($this->currentUser->enabled())) {
             return $this->legacyPage($request, 'self-enable', true, $viewData);
         }
 
@@ -290,8 +290,8 @@ class UserAdminController extends LegacyController
             ? (int) ceil((time() - $latestBanLogCreatedAt->getTimestamp()) / 86400)
             : 0;
         $total = $unit * $elapsedDay;
-        $isUserBonusEnough = (float) ($curUser['seedbonus'] ?? 0) >= $total;
-        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);
+        $isUserBonusEnough = (float) ($this->currentUser->seedbonus()) >= $total;
+        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $this->currentUser->seedbonus()], null);
         $viewData['t']['deductTotal'] = Locale::trans('self-enable.deduct_bonus_total', ['days' => number_format($elapsedDay), 'total' => number_format($total)], null);
 
         $viewData['latestBanLog'] = $latestBanLog;
@@ -316,8 +316,8 @@ class UserAdminController extends LegacyController
     public function selfEnableSubmit(SelfEnableRequest $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($curUser['id'] ?? 0);
-        $currentUsername = (string) ($curUser['username'] ?? '');
+        $currentUserId = (int) ($this->currentUser->id());
+        $currentUsername = (string) ($this->currentUser->username());
 
         $title = Locale::trans('self-enable.title', [], null);
         $unit = Setting::getSelfEnableBonus();
@@ -325,8 +325,8 @@ class UserAdminController extends LegacyController
         $viewData = [
             'title' => $title,
             'unit' => $unit,
-            'enabled' => (bool) ($curUser['enabled'] ?? false),
-            'bonus' => (float) ($curUser['seedbonus'] ?? 0),
+            'enabled' => (bool) ($this->currentUser->enabled()),
+            'bonus' => (float) ($this->currentUser->seedbonus()),
             'latestBanLog' => null,
             'elapsedDay' => 0,
             'total' => 0,
@@ -350,7 +350,7 @@ class UserAdminController extends LegacyController
             return $this->legacyPage($request, 'self-enable', true, $viewData);
         }
 
-        if (($curUser['enabled'] ?? false)) {
+        if (($this->currentUser->enabled())) {
             return $this->legacyPage($request, 'self-enable', true, $viewData);
         }
 
@@ -366,8 +366,8 @@ class UserAdminController extends LegacyController
             ? (int) ceil((time() - $latestBanLogCreatedAt->getTimestamp()) / 86400)
             : 0;
         $total = $unit * $elapsedDay;
-        $isUserBonusEnough = (float) ($curUser['seedbonus'] ?? 0) >= $total;
-        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $curUser['seedbonus'] ?? 0], null);
+        $isUserBonusEnough = (float) ($this->currentUser->seedbonus()) >= $total;
+        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $this->currentUser->seedbonus()], null);
         $viewData['t']['deductTotal'] = Locale::trans('self-enable.deduct_bonus_total', ['days' => number_format($elapsedDay), 'total' => number_format($total)], null);
 
         if ($request->post('submit')) {

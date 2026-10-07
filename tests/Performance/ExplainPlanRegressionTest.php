@@ -17,6 +17,7 @@ use App\Repositories\TorrentListingRepository;
 use App\Repositories\UserSearchRepository;
 use App\Services\Announce\PeerLifecycle;
 use App\Services\Cleanup\Tasks\PeerCleanupTask;
+use App\Services\TorrentStatsService;
 use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
 use App\ValueObjects\PeerId;
@@ -270,6 +271,7 @@ final class ExplainPlanRegressionTest extends TestCase
             ['id' => $torrent->id],
             ['id' => $user->id],
             date('Y-m-d H:i:s'),
+            app(TorrentStatsService::class),
         );
 
         $queries = $this->captureQueries(fn () => $lifecycle->findSelf());

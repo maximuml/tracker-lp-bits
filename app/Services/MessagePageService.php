@@ -63,7 +63,7 @@ class MessagePageService
     public function build(Request $request): MessagePageViewModel
     {
         $curUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($curUser['id'] ?? 0);
+        $userId = $this->currentUser->id();
 
         $action = (string) $request->input('action', '');
         if ($action === '') {
@@ -153,7 +153,7 @@ class MessagePageService
             $unreadRaw === 'no' || $unreadRaw === '0' => false,
             default => null,
         };
-        $perpage = (int) ($curUser['pmnum'] ?? 0) ?: 20;
+        $perpage = (int) ($this->currentUser->value('pmnum', 0)) ?: 20;
 
         $countResult = $this->messageRepository->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, 0, 0);
         $count = $countResult['count'];

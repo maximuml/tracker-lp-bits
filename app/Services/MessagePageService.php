@@ -129,20 +129,20 @@ class MessagePageService
             $pmBoxName = $this->mailboxRepository->getMailboxName($userId, $mailbox);
             if (! $pmBoxName) {
                 LegacyResponse::abort(
-                    __('legacy/messages.std_error'),
-                    __('legacy/messages.std_invalid_mailbox')
+                    __('messages.std_error'),
+                    __('messages.std_invalid_mailbox')
                 );
             }
             $mailboxName = htmlspecialchars((string) $pmBoxName);
         } elseif ($mailbox === self::PM_INBOX) {
-            $mailboxName = __('legacy/messages.text_inbox');
+            $mailboxName = __('messages.text_inbox');
         } else {
-            $mailboxName = __('legacy/messages.text_sentbox');
+            $mailboxName = __('messages.text_sentbox');
         }
 
         $senderReceiver = $mailbox !== self::PM_SENT_BOX
-            ? __('legacy/messages.text_sender')
-            : __('legacy/messages.text_receiver');
+            ? __('messages.text_sender')
+            : __('messages.text_receiver');
 
         // Search params
         $keyword = trim((string) $request->input('keyword', ''));
@@ -182,12 +182,12 @@ class MessagePageService
                     $username = UserDisplay::username((int) ($row['receiver'] ?? 0));
                 }
             } else {
-                $username = (string) (__('legacy/messages.text_system'));
+                $username = __('messages.text_system');
             }
 
             $subject = (string) ($row['subject'] ?? '');
             if (strlen($subject) <= 0) {
-                $subject = (string) (__('legacy/messages.text_no_subject'));
+                $subject = __('messages.text_no_subject');
             }
 
             $rows[] = [
@@ -261,8 +261,8 @@ class MessagePageService
     private function buildJumpToBoxOptions(Collection $pmBoxes, int $selected): array
     {
         $options = [
-            new MessageBoxOption(self::PM_INBOX, (string) (__('legacy/messages.select_inbox')), $selected === self::PM_INBOX),
-            new MessageBoxOption(self::PM_SENT_BOX, (string) (__('legacy/messages.select_sentbox')), $selected === self::PM_SENT_BOX),
+            new MessageBoxOption(self::PM_INBOX, __('messages.select_inbox'), $selected === self::PM_INBOX),
+            new MessageBoxOption(self::PM_SENT_BOX, __('messages.select_sentbox'), $selected === self::PM_SENT_BOX),
         ];
         foreach ($pmBoxes as $row) {
             $rowArr = (array) $row;
@@ -284,16 +284,16 @@ class MessagePageService
         $pmId = (int) $request->input('id', 0);
         if ($pmId <= 0) {
             LegacyResponse::abort(
-                __('legacy/messages.std_error'),
-                __('legacy/messages.std_no_permission')
+                __('messages.std_error'),
+                __('messages.std_no_permission')
             );
         }
 
         $messageModel = $this->messageRepository->getMessageForUser($pmId, $userId);
         if (! $messageModel) {
             LegacyResponse::abort(
-                __('legacy/messages.std_error'),
-                __('legacy/messages.std_no_permission')
+                __('messages.std_error'),
+                __('messages.std_no_permission')
             );
         }
 
@@ -304,11 +304,11 @@ class MessagePageService
 
         if ($isSender) {
             $sender = UserDisplay::username((int) ($message['receiver'] ?? 0));
-            $from = __('legacy/messages.text_to');
+            $from = __('messages.text_to');
         } else {
-            $from = __('legacy/messages.text_from');
+            $from = __('messages.text_from');
             if ((int) ($message['sender'] ?? 0) === 0) {
-                $sender = (string) (__('legacy/messages.text_system'));
+                $sender = __('messages.text_system');
             } else {
                 $sender = UserDisplay::username((int) ($message['sender'] ?? 0));
                 $replyHref = '/web/sendmessage?receiver='.(int) ($message['sender'] ?? 0).'&replyto='.$pmId;
@@ -322,7 +322,7 @@ class MessagePageService
 
         $subject = (string) ($message['subject'] ?? '');
         if (strlen($subject) <= 0) {
-            $subject = (string) (__('legacy/messages.text_no_subject'));
+            $subject = __('messages.text_no_subject');
         }
 
         // Mark message as read
@@ -369,8 +369,8 @@ class MessagePageService
         $messageModel = $this->messageRepository->getMessageForForward($pmId, $userId);
         if (! $messageModel) {
             LegacyResponse::abort(
-                __('legacy/messages.std_error'),
-                __('legacy/messages.std_no_permission_forwarding')
+                __('messages.std_error'),
+                __('messages.std_no_permission_forwarding')
             );
         }
 
@@ -382,8 +382,8 @@ class MessagePageService
 
         $fromName = UserDisplay::username($from);
         if ($orig === 0) {
-            $origName = (string) (__('legacy/messages.text_system'));
-            $origName2 = __('legacy/messages.text_system');
+            $origName = __('messages.text_system');
+            $origName2 = __('messages.text_system');
         } else {
             $origName = UserDisplay::username($orig);
             $origName2 = $this->messageRepository->getUsername($orig) ?? '';

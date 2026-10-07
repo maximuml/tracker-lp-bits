@@ -45,12 +45,12 @@ class MessageService
     public function takeMessage(Request $request): RedirectResponse
     {
         if (! $request->isMethod('POST')) {
-            LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_permission_denied'));
+            LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_permission_denied'));
         }
 
         $sender = Auth::user();
         if (! $sender instanceof User) {
-            LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_permission_denied'));
+            LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_permission_denied'));
         }
 
         $origmsg = (int) $request->input('origmsg', 0);
@@ -63,23 +63,23 @@ class MessageService
 
         if ($isForward) {
             if ($origmsg <= 0) {
-                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_invalid_id'));
+                LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_invalid_id'));
             }
 
             $origmsgRecord = $this->messageLookupRepository->findVisibleToUser($origmsg, (int) $sender->id);
 
             if (! $origmsgRecord) {
-                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_no_permission_forwarding'));
+                LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_no_permission_forwarding'));
             }
 
             $to = trim((string) $request->input('to', ''));
             if ($to === '') {
-                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_must_enter_username'));
+                LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_must_enter_username'));
             }
 
             $receiver = UserDisplay::userIdFromName($to);
             if ($receiver <= 0) {
-                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_user_not_exist'));
+                LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_user_not_exist'));
             }
 
             $locale = Locale::userLocale($receiver);
@@ -93,11 +93,11 @@ class MessageService
         } else {
             $receiver = (int) $request->input('receiver', 0);
             if ($receiver <= 0 || ($origmsg > 0 && ! Validators::isId($origmsg))) {
-                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_invalid_id'));
+                LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_invalid_id'));
             }
 
             if ($body === '') {
-                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_please_enter_something'));
+                LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_please_enter_something'));
             }
         }
 
@@ -105,30 +105,30 @@ class MessageService
             $lastPmTs = $sender->last_pm?->getTimestamp();
             if ($lastPmTs !== null && $lastPmTs > (time() - 10)) {
                 $secs = 60 - (time() - $lastPmTs);
-                LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_message_flooding_denied').$secs.__('legacy/takemessage.std_before_sending_pm'));
+                LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_message_flooding_denied').$secs.__('takemessage.std_before_sending_pm'));
             }
         }
 
         $recipient = $this->userAccountRepository->findByIdFields($receiver, ['*']);
         if (! $recipient) {
-            LegacyResponse::abort(__('legacy/takemessage.std_error'), __('legacy/takemessage.std_user_not_exist'));
+            LegacyResponse::abort(__('takemessage.std_error'), __('takemessage.std_user_not_exist'));
         }
 
         // W1-03: Use MessagePolicy for authorization checks
         if (! $this->policy->sendTo($sender, $recipient)) {
             if ($recipient->parked) {
-                LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_account_parked'));
+                LegacyResponse::abort(__('takemessage.std_refused'), __('takemessage.std_account_parked'));
             }
 
             if ($recipient->acceptpms === UserAcceptPms::YES) {
-                LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_user_blocks_your_pms'));
+                LegacyResponse::abort(__('takemessage.std_refused'), __('takemessage.std_user_blocks_your_pms'));
             } elseif ($recipient->acceptpms === UserAcceptPms::FRIENDS) {
-                LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_user_accepts_friends_pms'));
+                LegacyResponse::abort(__('takemessage.std_refused'), __('takemessage.std_user_accepts_friends_pms'));
             } elseif ($recipient->acceptpms === UserAcceptPms::NO) {
-                LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_user_blocks_all_pms'));
+                LegacyResponse::abort(__('takemessage.std_refused'), __('takemessage.std_user_blocks_all_pms'));
             }
 
-            LegacyResponse::abort(__('legacy/takemessage.std_refused'), __('legacy/takemessage.std_permission_denied'));
+            LegacyResponse::abort(__('takemessage.std_refused'), __('takemessage.std_permission_denied'));
         }
 
         $message = $this->messageRepository->add([
@@ -173,12 +173,12 @@ class MessageService
     {
         $sender = Auth::user();
         if (! $sender instanceof User) {
-            LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_bad_message_id'));
+            LegacyResponse::abort(__('functions.std_error'), __('deletemessage.std_bad_message_id'));
         }
 
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
-            LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_bad_message_id'));
+            LegacyResponse::abort(__('functions.std_error'), __('deletemessage.std_bad_message_id'));
         }
 
         $type = (string) $request->input('type', '');
@@ -186,11 +186,11 @@ class MessageService
         if ($type === 'in') {
             $msg = $this->messageLookupRepository->findByIdFields($id, ['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || ! $this->policy->deleteInbox($sender, $msg)) {
-                LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_suggested'));
+                LegacyResponse::abort(__('functions.std_error'), __('deletemessage.std_not_suggested'));
             }
 
             if ((int) $msg->location === 0) {
-                LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_in_inbox'));
+                LegacyResponse::abort(__('functions.std_error'), __('deletemessage.std_not_in_inbox'));
             }
 
             if ($msg->saved === 'yes') {
@@ -203,11 +203,11 @@ class MessageService
         } elseif ($type === 'out') {
             $msg = $this->messageLookupRepository->findByIdFields($id, ['id', 'receiver', 'sender', 'location', 'saved', 'unread']);
             if (! $msg || ! $this->policy->deleteSentbox($sender, $msg)) {
-                LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_suggested'));
+                LegacyResponse::abort(__('functions.std_error'), __('deletemessage.std_not_suggested'));
             }
 
             if ((int) $msg->location === 0 && $msg->saved === 'no') {
-                LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_not_in_sentbox'));
+                LegacyResponse::abort(__('functions.std_error'), __('deletemessage.std_not_in_sentbox'));
             }
 
             if ((int) $msg->location === 0) {
@@ -218,7 +218,7 @@ class MessageService
 
             Cache::forgetWithLocales('user_'.$sender->id.'_outbox_count');
         } else {
-            LegacyResponse::abort(__('legacy/functions.std_error'), __('legacy/deletemessage.std_unknown_pm_type'));
+            LegacyResponse::abort(__('functions.std_error'), __('deletemessage.std_unknown_pm_type'));
         }
 
         $redirect = $type === 'out' ? '/web/messages?out=1' : '/web/messages';

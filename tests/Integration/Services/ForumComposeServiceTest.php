@@ -344,13 +344,14 @@ final class ForumComposeServiceTest extends TestCase
         $this->mockForumRepo();
         $this->setUser();
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(0, 'forum'));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when ID is invalid (0)');
+        // 'Invalid ID' + the std-message frame pin assertId(id, stdhead:
+        // true): removing it falls through to forumExists() → std_no_forum_id,
+        // flipping stdhead renders the int-error partial instead.
+        $this->assertAbortContains(
+            fn () => $this->service()->checkWhetherExist(0, 'forum'),
+            'Invalid ID',
+            'nx-box--500',
+        );
     }
 
     public function test_check_whether_exist_forum_found_does_not_abort(): void

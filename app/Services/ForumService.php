@@ -17,8 +17,8 @@ use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Http\SafeReturnUrl;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\PageResponses;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -150,7 +150,7 @@ final class ForumService
         $user = $this->user();
 
         if (! ($user['forumpost'] ?? true)) {
-            LegacyResponse::abort(__('forums.std_sorry'), view('forums._unauthorized-post')->render(), false);
+            PageResponses::abort(__('forums.std_sorry'), view('forums._unauthorized-post')->render(), false);
         }
 
         $id = (int) $request->input('id');
@@ -166,7 +166,7 @@ final class ForumService
         switch ($type) {
             case 'new':
                 if (! $this->data->forums->forumExists($id)) {
-                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_forum_id'));
+                    PageResponses::abort(__('forums.std_error'), __('forums.std_no_forum_id'));
                 }
                 $forumid = $id;
                 $hassubject = true;
@@ -175,7 +175,7 @@ final class ForumService
             case 'reply':
                 $forumid = $this->data->topics->topicExists($id);
                 if ($forumid === null) {
-                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_bad_topic_id'));
+                    PageResponses::abort(__('forums.std_error'), __('forums.std_bad_topic_id'));
                 }
                 $topicid = $id;
                 break;
@@ -198,11 +198,11 @@ final class ForumService
         if ($hassubject) {
             $subject = trim($subject);
             if ($subject === '') {
-                LegacyResponse::abort(__('forums.std_error'), __('forums.std_must_enter_subject'));
+                PageResponses::abort(__('forums.std_error'), __('forums.std_must_enter_subject'));
             }
             $maxsubjectlength = SiteConfig::current()->main->maxSubjectLength();
             if (strlen($subject) > $maxsubjectlength) {
-                LegacyResponse::abort(__('forums.std_error'), __('forums.std_subject_limited'));
+                PageResponses::abort(__('forums.std_error'), __('forums.std_subject_limited'));
             }
         }
 
@@ -217,11 +217,11 @@ final class ForumService
             || $userClass < (int) ($forumRow['minclasswrite'] ?? 0)
             || ($type === 'new' && $userClass < (int) ($forumRow['minclasscreate'] ?? 0))
         ) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         if ($body === '') {
-            LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_body_text'));
+            PageResponses::abort(__('forums.std_error'), __('forums.std_no_body_text'));
         }
 
         $userid = (int) ($user['id'] ?? 0);
@@ -236,7 +236,7 @@ final class ForumService
             // W1-04: Use TopicPolicy for locked-topic reply authorization
             $authUser = Auth::user();
             if ($topicModel->locked && (! $authUser instanceof User || ! $this->topicPolicy->reply($authUser, $topicModel))) {
-                LegacyResponse::abort(__('forums.std_error'), __('forums.std_topic_locked'));
+                PageResponses::abort(__('forums.std_error'), __('forums.std_topic_locked'));
             }
         }
 
@@ -251,7 +251,7 @@ final class ForumService
             $postModel = $this->data->postLookup->getPost((int) $postid);
             $authUser = Auth::user();
             if (! $authUser instanceof User || $postModel === null || ! $this->postPolicy->update($authUser, $postModel)) {
-                LegacyResponse::permissionDenied();
+                PageResponses::permissionDenied();
             }
 
             if ($hassubject) {
@@ -290,7 +290,7 @@ final class ForumService
             $timenow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
             if (strtotime($lastPost) > ($timenow - 10)) {
                 $secs = 10 - ($timenow - strtotime($lastPost));
-                LegacyResponse::abort(__('forums.std_error'), (__('forums.std_post_flooding')).$secs.(__('forums.std_seconds_before_making')), false);
+                PageResponses::abort(__('forums.std_error'), (__('forums.std_post_flooding')).$secs.(__('forums.std_seconds_before_making')), false);
             }
         }
 
@@ -302,7 +302,7 @@ final class ForumService
 
             $topicid = $this->data->topics->createTopic($userid, $forumid, $subject);
             if ($topicid <= 0) {
-                LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_topic_id_returned'));
+                PageResponses::abort(__('forums.std_error'), __('forums.std_no_topic_id_returned'));
             }
             $this->data->forums->incrementForumTopicCount($forumid);
             $this->data->forums->incrementForumPostCount($forumid);

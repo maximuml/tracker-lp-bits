@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Html;
 
-use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 /**
  * SafeHtml value object.
@@ -18,13 +18,11 @@ use Illuminate\Contracts\Support\Htmlable;
  * "HTML that has been sanitized", preventing accidental raw output
  * of user-controlled data.
  */
-final class SafeHtml implements Htmlable
+final class SafeHtml extends HtmlString
 {
-    private string $html;
-
     private function __construct(string $html)
     {
-        $this->html = $html;
+        parent::__construct($html);
     }
 
     /**
@@ -64,34 +62,10 @@ final class SafeHtml implements Htmlable
     }
 
     /**
-     * Return the sanitized HTML string.
-     */
-    public function toHtml(): string
-    {
-        return $this->html;
-    }
-
-    /**
-     * Implicit conversion to string.
-     */
-    public function __toString(): string
-    {
-        return $this->html;
-    }
-
-    /**
-     * Check if the HTML is empty.
-     */
-    public function isEmpty(): bool
-    {
-        return $this->html === '';
-    }
-
-    /**
      * Concatenate with another SafeHtml instance.
      */
     public function append(self $other): self
     {
-        return new self($this->html.$other->html);
+        return new self($this->toHtml().$other->toHtml());
     }
 }

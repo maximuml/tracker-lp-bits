@@ -9,7 +9,7 @@ use App\Services\BitbucketService;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use App\Support\Path;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -41,11 +41,11 @@ class BitbucketUploadController extends Controller
         $this->currentUser->set($currentUser);
 
         if ($this->currentUser->value('parked')) {
-            LegacyResponse::abort((''), (''), false);
+            PageResponses::abort((''), (''), false);
         }
 
         if (! SiteConfig::current()->main->enableBitbucket()) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         $bucketDir = Path::resolve(SiteConfig::current()->main->bitbucket(), public_path());
@@ -75,11 +75,11 @@ class BitbucketUploadController extends Controller
         $this->currentUser->set($currentUser);
 
         if ($this->currentUser->value('parked')) {
-            LegacyResponse::abort((''), (''), false);
+            PageResponses::abort((''), (''), false);
         }
 
         if (! SiteConfig::current()->main->enableBitbucket()) {
-            LegacyResponse::permissionDenied();
+            PageResponses::permissionDenied();
         }
 
         /** @var UploadedFile|array<int, UploadedFile|null>|null $uploaded */
@@ -91,7 +91,7 @@ class BitbucketUploadController extends Controller
             ? array_values(array_filter($uploaded, fn ($f) => $f instanceof UploadedFile && $f->isValid()))
             : [];
         if ($files === []) {
-            LegacyResponse::abort(__('bitbucketupload.std_upload_failed'), __('bitbucketupload.std_nothing_received'), false);
+            PageResponses::abort(__('bitbucketupload.std_upload_failed'), __('bitbucketupload.std_nothing_received'), false);
         }
 
         $allowedMimes = ['image/gif', 'image/jpeg', 'image/png'];

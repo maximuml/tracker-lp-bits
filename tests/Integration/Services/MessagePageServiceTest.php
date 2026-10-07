@@ -142,7 +142,7 @@ final class MessagePageServiceTest extends TestCase
 
     /**
      * Call the service while suppressing E_NOTICE/E_WARNING from the
-     * legacy rendering system triggered by LegacyResponse::abort().
+     * legacy rendering system triggered by PageResponses::abort().
      */
     private function callBuild(Request $request): mixed
     {

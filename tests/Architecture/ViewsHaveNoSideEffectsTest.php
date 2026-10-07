@@ -12,7 +12,7 @@ use Tests\Attributes\TestCategory;
  * Enforces that Blade views do not contain side-effect calls.
  *
  * Views must be pure presentation: no auth checks, no POST reads,
- * no email sending, no LegacyResponse::abort(), no die/exit.
+ * no email sending, no PageResponses::abort(), no die/exit.
  * All such logic belongs in controllers or middleware.
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
@@ -27,8 +27,8 @@ final class ViewsHaveNoSideEffectsTest extends TestCase
     private const FORBIDDEN_PATTERNS = [
         // Auth / permission checks — belong in controllers/middleware
         ['UserDisplay::currentClass\\(\\)', 'auth check (UserDisplay::currentClass) — move to controller/middleware'],
-        ['LegacyResponse::permissionDenied', 'permission denied call — move to controller/middleware'],
-        ['LegacyResponse::abort\\(', 'LegacyResponse::abort() — move to controller'],
+        ['PageResponses::permissionDenied', 'permission denied call — move to controller/middleware'],
+        ['PageResponses::abort\\(', 'PageResponses::abort() — move to controller'],
 
         // POST/request reads — data should be passed from controller
         ['request\\(\\)->post\\(', 'request()->post() — pass data from controller'],

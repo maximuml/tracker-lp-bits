@@ -70,7 +70,7 @@ final class UserDisplay
         $id = app(AuthRepositoryInterface::class)->getUserIdByUsername($username);
 
         if ($id === null) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 (string) (__('functions.std_error')),
                 (string) (__('functions.std_no_user_named'))."'".$username."'",
             );

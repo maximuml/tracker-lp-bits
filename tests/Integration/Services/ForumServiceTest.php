@@ -59,7 +59,7 @@ final class ForumServiceTest extends TestCase
 
     protected function tearDown(): void
     {
-        // Clean up any output buffers left open by LegacyResponse::abort($die=false)
+        // Clean up any output buffers left open by PageResponses::abort($die=false)
         while (ob_get_level() > $this->initialObLevel) {
             ob_end_clean();
         }
@@ -71,7 +71,7 @@ final class ForumServiceTest extends TestCase
     /**
      * Call the service while suppressing E_NOTICE/E_WARNING from the
      * legacy rendering system (PageRenderer, Html::stdhead) that is
-     * triggered by LegacyResponse::abort()/permissionDenied().
+     * triggered by PageResponses::abort()/permissionDenied().
      */
     private function callService(Request $request): mixed
     {
@@ -89,7 +89,7 @@ final class ForumServiceTest extends TestCase
     /**
      * Assert that calling the service with $request triggers an abort/guard.
      *
-     * LegacyResponse::abort()/permissionDenied() throws HttpResponseException,
+     * PageResponses::abort()/permissionDenied() throws HttpResponseException,
      * but the legacy rendering (Html::stdhead → PageRenderer) may also throw
      * TypeError or ErrorException when language/user data is incomplete in
      * the test environment. Any Throwable from the guard path indicates the

@@ -18,8 +18,8 @@ use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Input;
-use App\Support\LegacyResponse;
 use App\Support\Locale;
+use App\Support\PageResponses;
 use App\Support\Pagination;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -115,7 +115,7 @@ class MyController extends Controller
         $requestedUserId = request()->query('userid');
         if (! empty($requestedUserId)) {
             if (! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId) && (int) $requestedUserId != $viewerId) {
-                LegacyResponse::permissionDenied();
+                PageResponses::permissionDenied();
             }
             $userid = (int) $requestedUserId;
             $pagerParams['userid'] = $userid;
@@ -123,7 +123,7 @@ class MyController extends Controller
 
         $userInfo = $this->userRepository->findById($userid, User::$commonFields);
         if (! $userInfo instanceof User) {
-            LegacyResponse::abort('Error', 'User not exists.');
+            PageResponses::abort('Error', 'User not exists.');
         }
 
         $status = request()->query('status') ?? HitAndRunStatus::INSPECTING->value;

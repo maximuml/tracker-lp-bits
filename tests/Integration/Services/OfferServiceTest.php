@@ -131,7 +131,7 @@ final class OfferServiceTest extends TestCase
 
     /**
      * Call the service while suppressing E_NOTICE/E_WARNING from the
-     * legacy rendering system triggered by LegacyResponse::abort().
+     * legacy rendering system triggered by PageResponses::abort().
      */
     private function callService(Request $request): mixed
     {
@@ -149,7 +149,7 @@ final class OfferServiceTest extends TestCase
     /**
      * Assert that calling the service with $request triggers an abort/guard.
      *
-     * LegacyResponse::abort() throws HttpResponseException, but the legacy
+     * PageResponses::abort() throws HttpResponseException, but the legacy
      * rendering may also throw TypeError or ErrorException in the test
      * environment. Any Throwable from the guard path indicates the abort
      * was triggered.

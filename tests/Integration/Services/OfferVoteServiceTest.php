@@ -118,7 +118,7 @@ final class OfferVoteServiceTest extends TestCase
 
     /**
      * Call the service while suppressing E_NOTICE/E_WARNING from the
-     * legacy rendering system triggered by LegacyResponse::abort().
+     * legacy rendering system triggered by PageResponses::abort().
      */
     /** @param array<string, mixed> $params */
     private function callVote(array $params): mixed

@@ -139,7 +139,7 @@ final class MessageServiceTest extends TestCase
 
     /**
      * Call the service while suppressing E_NOTICE/E_WARNING from the
-     * legacy rendering system triggered by LegacyResponse::abort().
+     * legacy rendering system triggered by PageResponses::abort().
      */
     private function callService(callable $callback): mixed
     {
@@ -155,7 +155,7 @@ final class MessageServiceTest extends TestCase
     }
 
     /**
-     * Assert that calling the service throws (LegacyResponse::abort or
+     * Assert that calling the service throws (PageResponses::abort or
      * any Throwable from the legacy rendering system).
      */
     private function assertServiceThrows(callable $callback): void

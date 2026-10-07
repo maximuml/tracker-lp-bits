@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Support\CurrentUser;
 use App\Support\HeaderBag;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -107,7 +107,7 @@ abstract class LegacyController extends Controller
 
     protected function legacyAbortResponse(string $heading, string $text, bool $htmlstrip = true): Response
     {
-        return response(LegacyResponse::captureAbort($heading, $text, $htmlstrip));
+        return response(PageResponses::captureAbort($heading, $text, $htmlstrip));
     }
 
     private function legacyViewName(string $page): string

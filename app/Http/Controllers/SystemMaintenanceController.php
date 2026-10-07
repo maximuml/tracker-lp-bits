@@ -70,13 +70,13 @@ class SystemMaintenanceController extends LegacyController
         }
 
         if (UserDisplay::currentClass() < UC_SYSOP) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         if ($request->post('action') === 'sendmail') {
             $email = Email::sanitizeForDisplay((string) trim((string) $request->post('email', '')));
             if (! Email::isWellFormed($email)) {
-                return $this->legacyAbortResponse(
+                return $this->abortResponse(
                     (string) (__('mailtest.std_error')),
                     (string) (__('mailtest.std_invalid_email_address')),
                 );
@@ -84,7 +84,7 @@ class SystemMaintenanceController extends LegacyController
 
             $smtpType = SiteConfig::current()->smtp->type('');
             if ($smtpType === '' || $smtpType === 'none') {
-                return $this->legacyAbortResponse(
+                return $this->abortResponse(
                     (string) (__('functions.std_error')),
                     (string) (__('functions.text_unable_to_send_mail')).' (SMTP disabled)',
                     false,
@@ -98,20 +98,20 @@ class SystemMaintenanceController extends LegacyController
             $sendResult = Mail::queueLegacy($email, $siteName, $siteEmail, $title, $body, 'mailtest', false, false, '', 'UTF-8');
 
             if ($sendResult === true) {
-                return $this->legacyAbortResponse(
+                return $this->abortResponse(
                     (string) (__('mailtest.std_success')),
                     (string) (__('mailtest.std_success_note')),
                 );
             }
 
-            return $this->legacyAbortResponse(
+            return $this->abortResponse(
                 (string) (__('functions.std_error')),
                 (string) (__('functions.text_unable_to_send_mail')).' (SMTP disabled or mail not sent)',
                 false,
             );
         }
 
-        return $this->legacyPage($request, 'mailtest', true, [
+        return $this->renderPage($request, 'mailtest', true, [
         ]);
     }
 
@@ -173,7 +173,7 @@ class SystemMaintenanceController extends LegacyController
             }
         }
 
-        return $this->legacyPage($request, 'mysql_stats', true, [
+        return $this->renderPage($request, 'mysql_stats', true, [
             'serverRunningText' => 'This MySQL server has been running for '.$rep->timespanFormat($uptimeSeconds).'. It started up on '.$rep->localisedDate($status['startTime']),
             'receivedTotal' => $byteTotal($status['bytesReceived']),
             'receivedPerHour' => $byteTotal($status['bytesReceived'] * 3600 / $uptimeSeconds),

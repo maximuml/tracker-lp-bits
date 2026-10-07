@@ -91,7 +91,7 @@ class OfferController extends LegacyController
 
         $data = $this->pageService->build($request)->toArray();
 
-        return $this->legacyPage($request, 'offers', true, $data);
+        return $this->renderPage($request, 'offers', true, $data);
     }
 
     public function store(StoreOfferRequest $request): RedirectResponse

@@ -72,7 +72,7 @@ class InfoController extends LegacyController
         if ($action === 'viewposts') {
             $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($this->currentUser->classId()), $perpage, $phpSelf);
             if (empty($result['posts'])) {
-                return $this->legacyAbortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_posts_found')));
+                return $this->abortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_posts_found')));
             }
             $data = array_merge($data, $result);
             $data['items'] = $this->decorateHistoryPosts(
@@ -84,7 +84,7 @@ class InfoController extends LegacyController
         } elseif ($action === 'viewcomments') {
             $result = $this->infoRepository->getUserHistoryComments($userid, $perpage, $phpSelf);
             if (empty($result['comments'])) {
-                return $this->legacyAbortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_comments_found')));
+                return $this->abortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_comments_found')));
             }
             $data = array_merge($data, $result);
             $data['items'] = $this->decorateHistoryComments(
@@ -92,12 +92,12 @@ class InfoController extends LegacyController
                 (array) ($result['commentPageMap'] ?? []),
             );
         } elseif ($action === '') {
-            return $this->legacyAbortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')), false);
+            return $this->abortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')), false);
         } else {
-            return $this->legacyAbortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')));
+            return $this->abortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')));
         }
 
-        return $this->legacyPage($request, 'userhistory', true, $data);
+        return $this->renderPage($request, 'userhistory', true, $data);
     }
 
     /**
@@ -171,7 +171,7 @@ class InfoController extends LegacyController
         $data = $this->infoRepository->donationPageData();
         $data['thanks'] = $request->query('do') === 'thanks';
 
-        return $this->legacyPage($request, 'donate', false, $data);
+        return $this->renderPage($request, 'donate', false, $data);
     }
 
     public function donatePost(Request $request): RedirectResponse
@@ -192,7 +192,7 @@ class InfoController extends LegacyController
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
-            return $this->legacyAbortResponse('Sorry', 'Permission denied.');
+            return $this->abortResponse('Sorry', 'Permission denied.');
         }
 
         return $this->donatedPage($request, '');
@@ -211,7 +211,7 @@ class InfoController extends LegacyController
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
-            return $this->legacyAbortResponse('Sorry', 'Permission denied.');
+            return $this->abortResponse('Sorry', 'Permission denied.');
         }
 
         $error = '';
@@ -235,7 +235,7 @@ class InfoController extends LegacyController
 
     private function donatedPage(Request $request, string $error): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'donated', true, [
+        return $this->renderPage($request, 'donated', true, [
             'error' => $error,
         ]);
     }
@@ -246,14 +246,14 @@ class InfoController extends LegacyController
         $currentClass = (int) UserDisplay::currentClass();
 
         if ($currentClass < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {
-            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+            return $this->abortResponse('Sorry', 'Access denied.');
         }
 
         $bucketPath = public_path('bitbucket');
 
         $delete = (int) $request->input('delete', 0);
         if ($currentClass >= (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0) && $delete > 0) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $count = $this->usercpLookupRepository->countBitbucket();
@@ -311,7 +311,7 @@ class InfoController extends LegacyController
             ];
         }
 
-        return $this->legacyPage($request, 'bitbucketlog', true, [
+        return $this->renderPage($request, 'bitbucketlog', true, [
             'items' => $items,
             'count' => $count,
             'pagertop' => $pagertop,
@@ -334,7 +334,7 @@ class InfoController extends LegacyController
         $currentClass = (int) UserDisplay::currentClass();
 
         if ($currentClass < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {
-            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+            return $this->abortResponse('Sorry', 'Access denied.');
         }
 
         $bucketPath = public_path('bitbucket');
@@ -344,7 +344,7 @@ class InfoController extends LegacyController
             $name = $this->bitbucketService->getBitbucketName($delete);
             $ok = $this->bitbucketService->deleteBitbucket($delete, $bucketPath);
             if (! $ok && $name !== null) {
-                return $this->legacyAbortResponse('Warning', 'Unable to unlink file: '.htmlspecialchars($name).'. You should contact an administrator about this error.', false);
+                return $this->abortResponse('Warning', 'Unable to unlink file: '.htmlspecialchars($name).'. You should contact an administrator about this error.', false);
             }
 
             return redirect($request->url());

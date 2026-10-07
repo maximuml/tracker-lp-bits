@@ -34,7 +34,7 @@ class RssController extends LegacyController
             return redirect('/web/getrss');
         }
 
-        return $this->legacyPage($request, 'getrss', true, $this->getrssData());
+        return $this->renderPage($request, 'getrss', true, $this->getrssData());
     }
 
     public function getrssPost(Request $request): RedirectResponse

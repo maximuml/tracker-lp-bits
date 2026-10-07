@@ -97,7 +97,7 @@ document.querySelectorAll('.claim').forEach(function (btn) {
 JS;
         AssetAppender::js($js, 'footer', false);
 
-        return $this->legacyPage($request, 'task', true, [
+        return $this->renderPage($request, 'task', true, [
             'title' => $title,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
@@ -120,7 +120,7 @@ JS;
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Access denied.');
+            return $this->abortResponse('Error', 'Access denied.');
         }
 
         $action = trim((string) (request()->post('action') ?? request()->query('action') ?? 'main'));
@@ -136,7 +136,7 @@ JS;
         ];
 
         if (isset($stateMap[$action])) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $links = [
@@ -153,7 +153,7 @@ JS;
             $message .= 'Click <a class=altlink href=/web/freeleech?action='.$key.'>here</a> to '.$label.'..<br />';
         }
 
-        return $this->legacyAbortResponse('Select action', $message, false);
+        return $this->abortResponse('Select action', $message, false);
 
     }
 
@@ -170,7 +170,7 @@ JS;
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Access denied.');
+            return $this->abortResponse('Error', 'Access denied.');
         }
 
         $action = trim((string) (request()->post('action') ?? request()->query('action') ?? 'main'));
@@ -198,7 +198,7 @@ JS;
             Promotion::setGlobalSpecialState($stateMap[$action]);
             $this->cache?->forget('global_promotion_state');
 
-            return $this->legacyAbortResponse('Success', $messages[$action]);
+            return $this->abortResponse('Success', $messages[$action]);
         }
 
         return $this->freeleech($request);

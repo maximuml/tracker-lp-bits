@@ -12,6 +12,7 @@ use App\Support\LegacyResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class TorrentBookmarkController extends LegacyController
 {
@@ -68,7 +69,7 @@ class TorrentBookmarkController extends LegacyController
         return redirect()->to('/web/torrents/thanks'.$suffix, 308);
     }
 
-    public function thanksSubmit(ThanksTorrentRequest $request): Response|RedirectResponse
+    public function thanksSubmit(ThanksTorrentRequest $request): Response|RedirectResponse|View
     {
         if ($this->currentUser->get() === null) {
             return redirect('/thanks'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
@@ -88,7 +89,7 @@ class TorrentBookmarkController extends LegacyController
             LegacyResponse::abort('Error', $e->getMessage());
         }
 
-        return $this->legacyPageRaw($request, 'thanks', true, [
+        return $this->renderPage($request, 'thanks', true, [
             'torrentid' => $torrentid,
             'message' => 'Thank you has been recorded.',
         ]);

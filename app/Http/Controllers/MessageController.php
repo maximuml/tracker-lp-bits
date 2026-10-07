@@ -60,7 +60,7 @@ class MessageController extends LegacyController
 
         $data = $this->pageService->build($request)->toArray();
 
-        return $this->legacyPage($request, 'messages', true, $data);
+        return $this->renderPage($request, 'messages', true, $data);
     }
 
     public function messagesAction(Request $request): RedirectResponse
@@ -98,18 +98,18 @@ class MessageController extends LegacyController
 
         $receiver = (int) $request->input('receiver', 0);
         if ($receiver <= 0) {
-            return $this->legacyAbortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
+            return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
         }
 
         $replyto = $request->input('replyto');
         if ($replyto !== null && $replyto !== '' && ! Validators::isId($replyto)) {
-            return $this->legacyAbortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
+            return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
         }
         $replyto = $replyto !== null && $replyto !== '' ? (int) $replyto : 0;
 
         $user = $this->userRepository->findById($receiver);
         if (! $user) {
-            return $this->legacyAbortResponse(__('sendmessage.std_error'), __('sendmessage.std_no_user_id'));
+            return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_no_user_id'));
         }
 
         $subject = '';
@@ -117,11 +117,11 @@ class MessageController extends LegacyController
         if ($replyto > 0) {
             $msg = $this->repository->findById($replyto);
             if (! $msg) {
-                return $this->legacyAbortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
+                return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
             }
             $msga = $msg->toArray();
             if ((int) ($msga['receiver'] ?? 0) !== (int) ($this->currentUser->id())) {
-                return $this->legacyAbortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
+                return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
             }
             $body .= ($msga['msg'] ?? '')."\n\n-------- [url=/userdetails?id=".$this->currentUser->id().']'.$this->currentUser->username().'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
             $subject = (string) ($msga['subject'] ?? '');
@@ -148,7 +148,7 @@ class MessageController extends LegacyController
         $title = $messageTo.$user->username;
         $frameTitle = new HtmlString($messageTo.UserDisplay::username($receiver));
 
-        return $this->legacyPageRaw($request, 'sendmessage', true, [
+        return $this->renderPage($request, 'sendmessage', true, [
             'receiver' => $receiver,
             'replyto' => $replyto,
             'subject' => $subject,

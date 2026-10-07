@@ -59,7 +59,7 @@ class AdminToolsController extends LegacyController
             'created_at' => 'Created at',
         ];
 
-        return $this->legacyPage($request, 'user-ban-log', true, [
+        return $this->renderPage($request, 'user-ban-log', true, [
             'q' => $q,
             'header' => $header,
             'rows' => $rows,
@@ -86,13 +86,13 @@ class AdminToolsController extends LegacyController
     public function clearCache(Request $request): View|RedirectResponse|Response
     {
         if (UserDisplay::currentClass() < (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $done = false;
         $error = '';
 
-        return $this->legacyPage($request, 'clearcache', true, [
+        return $this->renderPage($request, 'clearcache', true, [
             'done' => $done,
             'error' => $error,
         ]);
@@ -110,7 +110,7 @@ class AdminToolsController extends LegacyController
     public function clearCacheSubmit(ClearCacheRequest $request): View|RedirectResponse|Response
     {
         if (UserDisplay::currentClass() < (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $done = false;
@@ -127,7 +127,7 @@ class AdminToolsController extends LegacyController
             $done = true;
         }
 
-        return $this->legacyPage($request, 'clearcache', true, [
+        return $this->renderPage($request, 'clearcache', true, [
             'done' => $done,
             'error' => $error,
         ]);
@@ -137,7 +137,7 @@ class AdminToolsController extends LegacyController
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
-            return $this->legacyAbortResponse('Error', 'Access denied.');
+            return $this->abortResponse('Error', 'Access denied.');
         }
 
         $actionUrl = '/web/location';
@@ -152,16 +152,16 @@ class AdminToolsController extends LegacyController
         $sure = (string) (request()->query('sure') ?? '');
         $delid = (int) (request()->query('delid') ?? 0);
         if ($sure === 'yes' && $delid > 0) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         if ($delid > 0) {
-            return $this->legacyAbortResponse('Confirm', 'Are you sure you would like to delete this Location?(<strong><a href="'.$actionUrl.'?delid='.$delid.'&sure=yes">Yes!</a></strong> / <strong><a href="'.$actionUrl.'">No</a></strong>)', false);
+            return $this->abortResponse('Confirm', 'Are you sure you would like to delete this Location?(<strong><a href="'.$actionUrl.'?delid='.$delid.'&sure=yes">Yes!</a></strong> / <strong><a href="'.$actionUrl.'">No</a></strong>)', false);
         }
 
         $edited = (string) (request()->query('edited') ?? '');
         if ($edited === '1') {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $editid = (int) (request()->query('editid') ?? 0);
@@ -172,7 +172,7 @@ class AdminToolsController extends LegacyController
             } else {
                 $mode = 'edit';
 
-                return $this->legacyPage($request, 'location', true, [
+                return $this->renderPage($request, 'location', true, [
                     'mode' => $mode,
                     'editRow' => $editRow,
                     'actionUrl' => $actionUrl,
@@ -182,7 +182,7 @@ class AdminToolsController extends LegacyController
 
         $add = (string) (request()->query('add') ?? '');
         if ($add === 'true') {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         return $this->renderLocationList($request, $success, $error, $rangeStartIp, $rangeEndIp);
@@ -201,7 +201,7 @@ class AdminToolsController extends LegacyController
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
-            return $this->legacyAbortResponse('Error', 'Access denied.');
+            return $this->abortResponse('Error', 'Access denied.');
         }
 
         $actionUrl = '/web/location';
@@ -218,7 +218,7 @@ class AdminToolsController extends LegacyController
                 $this->locationService->deleteLocation($delid);
             }
 
-            return $this->legacyAbortResponse('Success', 'Location successfully removed, click <a class=altlink href="'.$actionUrl.'">here</a> to go back.', false);
+            return $this->abortResponse('Success', 'Location successfully removed, click <a class=altlink href="'.$actionUrl.'">here</a> to go back.', false);
         }
 
         $edited = (string) (request()->query('edited') ?? '');
@@ -253,7 +253,7 @@ class AdminToolsController extends LegacyController
                     'practical_downspeed' => $practicalDownspeed,
                 ]);
 
-                return $this->legacyAbortResponse('Success!', 'Location has been edited, click <a class=altlink href="'.$actionUrl.'">here</a> to go back', false);
+                return $this->abortResponse('Success!', 'Location has been edited, click <a class=altlink href="'.$actionUrl.'">here</a> to go back', false);
             }
 
             return $this->renderLocationList($request, $success, $error, $rangeStartIp, $rangeEndIp);
@@ -336,7 +336,7 @@ class AdminToolsController extends LegacyController
             $rows[] = $row;
         }
 
-        return $this->legacyPage($request, 'location', true, [
+        return $this->renderPage($request, 'location', true, [
             'mode' => 'list',
             'success' => $success,
             'error' => $error,
@@ -370,7 +370,7 @@ class AdminToolsController extends LegacyController
     {
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
         if (UserDisplay::currentClass() < $moderatorClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied');
+            return $this->abortResponse('Error', 'Permission denied');
         }
 
         if ($request->isMethod('post')) {
@@ -386,7 +386,7 @@ class AdminToolsController extends LegacyController
         if ($ip !== '') {
             $nip = ip2long($ip);
             if ($nip === false || $nip === -1) {
-                return $this->legacyAbortResponse('Error', 'Bad IP.');
+                return $this->abortResponse('Error', 'Bad IP.');
             }
             $rows = $this->moderationRepository->findMatchingBans((int) $nip);
             $hasResult = true;
@@ -401,7 +401,7 @@ class AdminToolsController extends LegacyController
             }
         }
 
-        return $this->legacyPage($request, 'testip', true, [
+        return $this->renderPage($request, 'testip', true, [
             'ip' => $ip,
             'isBanned' => $isBanned,
             'banRows' => $banRows,

@@ -51,7 +51,7 @@ class PollController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $action = (string) $request->input('action', '');
@@ -60,11 +60,11 @@ class PollController extends LegacyController
 
         if ($action === 'edit') {
             if ($pollid <= 0) {
-                return $this->legacyAbortResponse('Error', 'Invalid poll id.');
+                return $this->abortResponse('Error', 'Invalid poll id.');
             }
             $poll = $this->pollRepository->findForEdit($pollid);
             if (! $poll) {
-                return $this->legacyAbortResponse('Error', 'No poll with that ID.');
+                return $this->abortResponse('Error', 'No poll with that ID.');
             }
         }
 
@@ -85,7 +85,7 @@ class PollController extends LegacyController
 
         $pollid = (int) ($poll['id'] ?? $pollid);
 
-        return $this->legacyPage($request, 'makepoll', true, [
+        return $this->renderPage($request, 'makepoll', true, [
             'poll' => $poll,
             'pollid' => $pollid,
             'returnto' => htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
@@ -109,7 +109,7 @@ class PollController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $pollid = (int) $request->input('pollid', 0);
@@ -122,7 +122,7 @@ class PollController extends LegacyController
         }
 
         if ($question === '' || $options['option0'] === '' || $options['option1'] === '') {
-            return $this->legacyAbortResponse('Error', 'Missing form data.');
+            return $this->abortResponse('Error', 'Missing form data.');
         }
 
         $data = array_merge(['question' => $question], $options);
@@ -158,7 +158,7 @@ class PollController extends LegacyController
         if ($pollid > 0) {
             $poll = $this->pollRepository->findWithOptions($pollid);
             if (! $poll) {
-                return $this->legacyAbortResponse(__('polloverview.std_error'), __('polloverview.text_no_poll_id'));
+                return $this->abortResponse(__('polloverview.std_error'), __('polloverview.text_no_poll_id'));
             }
 
             $count = $this->pollRepository->countAnswers($pollid);
@@ -189,7 +189,7 @@ class PollController extends LegacyController
                 }
             }
 
-            return $this->legacyPage($request, 'polloverview', true, [
+            return $this->renderPage($request, 'polloverview', true, [
                 'mode' => 'detail',
                 'poll' => $poll,
                 'pollAdded' => SafeHtml::fromTrustedHtml((string) Time::format($poll['added'] ?? '')),
@@ -203,7 +203,7 @@ class PollController extends LegacyController
 
         $polls = $this->pollRepository->listAll();
         if (empty($polls)) {
-            return $this->legacyAbortResponse(__('polloverview.std_error'), __('polloverview.text_no_users_voted'));
+            return $this->abortResponse(__('polloverview.std_error'), __('polloverview.text_no_users_voted'));
         }
 
         $pollRows = array_map(static function ($pollRow) {
@@ -213,7 +213,7 @@ class PollController extends LegacyController
             return $row;
         }, $polls);
 
-        return $this->legacyPage($request, 'polloverview', true, [
+        return $this->renderPage($request, 'polloverview', true, [
             'mode' => 'list',
             'polls' => $pollRows,
         ]);

@@ -63,7 +63,7 @@ final class StaffPageControllerTest extends TestCase
 
     /**
      * Set up the legacy environment: bind NexusCache to null so that
-     * legacyAbortResponse() can render without Redis.
+     * abortResponse() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {

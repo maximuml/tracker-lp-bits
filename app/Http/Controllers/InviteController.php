@@ -57,12 +57,12 @@ class InviteController extends LegacyController
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
 
         if (! Validators::isId($id) || ($currentUserId !== $id && ! Permission::can(PermissionEnum::VIEW_INVITE))) {
-            return $this->legacyAbortResponse(__('invite.std_sorry'), __('invite.std_permission_denied'));
+            return $this->abortResponse(__('invite.std_sorry'), __('invite.std_permission_denied'));
         }
 
         $user = $this->userRepository->findById($id);
         if (! $user) {
-            return $this->legacyAbortResponse(__('invite.std_sorry'), 'Invalid id');
+            return $this->abortResponse(__('invite.std_sorry'), 'Invalid id');
         }
 
         $type = htmlspecialchars((string) ($request->input('type') ?? ''));
@@ -90,14 +90,14 @@ class InviteController extends LegacyController
 
         if ($type === 'new') {
             if ($currentUserId !== $id) {
-                return $this->legacyAbortResponse(__('invite.std_sorry'), __('invite.std_permission_denied'));
+                return $this->abortResponse(__('invite.std_sorry'), __('invite.std_permission_denied'));
             }
 
             try {
                 $sendBtnText = $this->userModerationRepository->getInviteBtnText($currentUserId);
                 $disabled = '';
             } catch (\Exception $exception) {
-                return $this->legacyAbortResponse(
+                return $this->abortResponse(
                     __('invite.std_sorry'),
                     view('invite._back_message', [
                         'message' => $exception->getMessage(),
@@ -150,7 +150,7 @@ class InviteController extends LegacyController
             }
         }
 
-        return $this->legacyPage($request, 'invite', true, $data);
+        return $this->renderPage($request, 'invite', true, $data);
     }
 
     /**

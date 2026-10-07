@@ -34,14 +34,14 @@ class FriendsController extends LegacyController
         $currentUser = (array) ($this->currentUser->get() ?? []);
         $userid = (int) ($request->input('id') ?? $this->currentUser->id());
         if ($userid <= 0 || ! Validators::isId($userid)) {
-            return $this->legacyAbortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
+            return $this->abortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
         }
 
         $action = (string) ($request->input('action') ?? '');
 
         if ($action === 'add') {
             if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse(__('friends.std_error'), ('Permission denied.'));
+                return $this->abortResponse(__('friends.std_error'), ('Permission denied.'));
             }
 
             return $this->handleAdd($request, $userid);
@@ -49,7 +49,7 @@ class FriendsController extends LegacyController
 
         if ($action === 'delete') {
             if (! $request->isMethod('post')) {
-                return $this->legacyAbortResponse(__('friends.std_error'), ('Permission denied.'));
+                return $this->abortResponse(__('friends.std_error'), ('Permission denied.'));
             }
 
             return $this->handleDelete($request, $userid);
@@ -103,7 +103,7 @@ class FriendsController extends LegacyController
             $titleRow = [];
         }
 
-        return $this->legacyPageRaw($request, 'friends', true, [
+        return $this->renderPage($request, 'friends', true, [
             'userid' => $userid,
             'friendsList' => $friendsList,
             'blocks' => $blocks,
@@ -132,7 +132,7 @@ class FriendsController extends LegacyController
     {
         $userid = $this->listOwnerId($request);
         if ($userid <= 0 || ! Validators::isId($userid)) {
-            return $this->legacyAbortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
+            return $this->abortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
         }
 
         return $this->handleAdd($request, $userid);
@@ -142,7 +142,7 @@ class FriendsController extends LegacyController
     {
         $userid = $this->listOwnerId($request);
         if ($userid <= 0 || ! Validators::isId($userid)) {
-            return $this->legacyAbortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
+            return $this->abortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
         }
 
         return $this->handleDelete($request, $userid);
@@ -161,17 +161,17 @@ class FriendsController extends LegacyController
         $type = (string) ($request->input('type') ?? '');
 
         if (! Validators::isId($targetid)) {
-            return $this->legacyAbortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$targetid.'.');
+            return $this->abortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$targetid.'.');
         }
         $targetid = (int) $targetid;
 
         [$tableIs, $frag, $fieldIs] = $this->resolveType($type);
         if ($tableIs === '') {
-            return $this->legacyAbortResponse(__('friends.std_error'), (__('friends.std_unknown_type')).$type);
+            return $this->abortResponse(__('friends.std_error'), (__('friends.std_unknown_type')).$type);
         }
 
         if ($this->friendsRepository->exists($userid, $type, $targetid)) {
-            return $this->legacyAbortResponse(__('friends.std_error'), (__('friends.std_user_id')).$targetid.(__('friends.std_already_in')).$tableIs.(__('friends.std_list')));
+            return $this->abortResponse(__('friends.std_error'), (__('friends.std_user_id')).$targetid.(__('friends.std_already_in')).$tableIs.(__('friends.std_list')));
         }
 
         $this->friendsRepository->add($userid, $type, $targetid);
@@ -188,13 +188,13 @@ class FriendsController extends LegacyController
 
         [$tableIs, $frag] = $this->resolveType($type);
         if ($tableIs === '') {
-            return $this->legacyAbortResponse(__('friends.std_error'), (__('friends.std_unknown_type')).$type);
+            return $this->abortResponse(__('friends.std_error'), (__('friends.std_unknown_type')).$type);
         }
 
         $typename = $type === 'friend' ? (__('friends.text_friend')) : (__('friends.text_block'));
 
         if (! Validators::isId($targetid)) {
-            return $this->legacyAbortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
+            return $this->abortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
         }
         $targetid = (int) $targetid;
 
@@ -210,14 +210,14 @@ class FriendsController extends LegacyController
                     'sureSuffix' => $sureSuffix,
                 ])->render();
 
-            return $this->legacyAbortResponse((__('friends.std_delete')).$type, $confirm, false);
+            return $this->abortResponse((__('friends.std_delete')).$type, $confirm, false);
         }
 
         $deleted = $this->friendsRepository->delete($userid, $type, $targetid);
         if ($deleted === 0) {
             $notFoundKey = $type === 'friend' ? 'std_no_friend_found' : 'std_no_block_found';
 
-            return $this->legacyAbortResponse(__('friends.std_error'), __('friends.'.$notFoundKey).$targetid);
+            return $this->abortResponse(__('friends.std_error'), __('friends.'.$notFoundKey).$targetid);
         }
 
         $this->purgeNeighborsCache();

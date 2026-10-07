@@ -107,7 +107,7 @@ class UsercpController extends LegacyController
 
         $data = $this->pageService->build($action, $type)->toArray();
 
-        return $this->legacyPage($request, 'usercp', true, $data);
+        return $this->renderPage($request, 'usercp', true, $data);
     }
 
     /**
@@ -213,7 +213,7 @@ class UsercpController extends LegacyController
 
         $data = $this->pageService->build('security', 'save')->toArray();
 
-        return $this->legacyPage($request, 'usercp', true, $data);
+        return $this->renderPage($request, 'usercp', true, $data);
     }
 
     public function confirmSecurity(UpdateSecuritySettingsRequest $request): RedirectResponse

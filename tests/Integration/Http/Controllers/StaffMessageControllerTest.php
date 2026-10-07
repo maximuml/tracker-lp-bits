@@ -190,7 +190,7 @@ final class StaffMessageControllerTest extends TestCase
 
         $response = $controller->sendContactStaff($request);
 
-        // Without returnto, the controller falls through to legacyPage('takecontact')
+        // Without returnto, the controller falls through to renderPage('takecontact')
         // which renders a View for an authed user.
         $this->assertInstanceOf(View::class, $response);
         $this->assertSame('takecontact.index', $response->name());
@@ -286,7 +286,7 @@ final class StaffMessageControllerTest extends TestCase
 
     /**
      * Set up the legacy environment: bind NexusCache to null so that
-     * legacyAbortResponse() can render without Redis.
+     * abortResponse() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {

@@ -51,14 +51,14 @@ class SearchController extends LegacyController
             (int) SearchBox::getBrowseMode(),
         );
 
-        return $this->legacyPage($request, 'search', true, $data);
+        return $this->renderPage($request, 'search', true, $data);
     }
 
     public function usersearch(Request $request): View|Response|RedirectResponse
     {
         $data = $this->usersearchPageService->build($request)->toArray();
 
-        return $this->legacyPage($request, 'usersearch', true, $data);
+        return $this->renderPage($request, 'usersearch', true, $data);
     }
 
     public function tags(Request $request): View|RedirectResponse
@@ -66,7 +66,7 @@ class SearchController extends LegacyController
         $siteName = Setting::getSiteName();
         $username = (string) (($this->currentUser->get() ?? [])['username'] ?? '');
 
-        return $this->legacyPage($request, 'tags', false, [
+        return $this->renderPage($request, 'tags', false, [
             'test' => (string) $request->post('test', ''),
             'siteName' => $siteName,
             'tagItems' => $this->tagItems($siteName, $username),

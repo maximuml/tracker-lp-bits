@@ -61,7 +61,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $dict = Bencode::load($filePath);
 
-        return $this->legacyPage($request, 'torrent_info', true, [
+        return $this->renderPage($request, 'torrent_info', true, [
             'torrentName' => (string) $torrent->name,
             'structureHtml' => SafeHtml::fromTrustedHtml($this->torrentStructureBuilder(['root' => $dict])),
         ]);
@@ -120,7 +120,7 @@ class TorrentMaintenanceController extends LegacyController
     {
         $id = (int) $request->input('id', 0);
         if ($id <= 0) {
-            return $this->legacyAbortResponse('Error', 'Invalid ID.');
+            return $this->abortResponse('Error', 'Invalid ID.');
         }
 
         $currentUser = $this->currentUser->get() ?? [];
@@ -132,13 +132,13 @@ class TorrentMaintenanceController extends LegacyController
             $lastAction = date('Y-m-d H:i:s', $deadtime);
             $effected = $this->peerRepository->deleteInactiveForUser($id, $lastAction);
 
-            return $this->legacyAbortResponse(
+            return $this->abortResponse(
                 __('takeflush.std_success'),
                 $effected.' '.(__('takeflush.std_ghost_torrents_cleaned'))
             );
         }
 
-        return $this->legacyAbortResponse(
+        return $this->abortResponse(
             __('takeflush.std_failed'),
             __('takeflush.std_cannot_flush_others')
         );
@@ -164,7 +164,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $currentUserId = (int) ($this->currentUser->id());
         if (! $this->permissionChecker->userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
-            return $this->legacyAbortResponse(__('takereseed.std_error'), ('Permission denied.'));
+            return $this->abortResponse(__('takereseed.std_error'), ('Permission denied.'));
         }
 
         $reseedid = (int) (request()->query('reseedid') ?? request()->query('id') ?? 0);
@@ -173,12 +173,12 @@ class TorrentMaintenanceController extends LegacyController
 
         $seederCount = $this->peerRepository->countForTorrent($reseedid);
         if ($seederCount > 0) {
-            return $this->legacyAbortResponse(__('takereseed.std_error'), __('takereseed.std_torrent_not_dead'));
+            return $this->abortResponse(__('takereseed.std_error'), __('takereseed.std_torrent_not_dead'));
         }
 
         $timeNow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
         if ($row !== null && strtotime((string) ($row['last_reseed'] ?? '')) > ($timeNow - 900)) {
-            return $this->legacyAbortResponse(__('takereseed.std_error'), __('takereseed.std_reseed_sent_recently'));
+            return $this->abortResponse(__('takereseed.std_error'), __('takereseed.std_reseed_sent_recently'));
         }
 
         $snatchedRows = $this->torrentAjaxRepository->listFinishedSnatchersForReseed($reseedid);
@@ -206,7 +206,7 @@ class TorrentMaintenanceController extends LegacyController
             'seeders' => $seederCount,
         ]);
 
-        return $this->legacyPage($request, 'takereseed', true, [
+        return $this->renderPage($request, 'takereseed', true, [
             'message' => __('takereseed.std_it_worked'),
         ]);
     }

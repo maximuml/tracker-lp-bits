@@ -36,7 +36,7 @@ class RulesController extends LegacyController
 
     public function userAgreement(Request $request): View|RedirectResponse|Response
     {
-        return $this->legacyPage($request, 'useragreement', false, [
+        return $this->renderPage($request, 'useragreement', false, [
             'SITENAME' => Setting::getSiteName(),
             'BASEURL' => Url::schemeAndHost(false),
         ]);
@@ -44,6 +44,6 @@ class RulesController extends LegacyController
 
     public function aboutNexus(Request $request): View|RedirectResponse|Response
     {
-        return $this->legacyPage($request, 'aboutnexus', false, $this->infoRepository->aboutNexus());
+        return $this->renderPage($request, 'aboutnexus', false, $this->infoRepository->aboutNexus());
     }
 }

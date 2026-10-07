@@ -49,7 +49,7 @@ class StaffModerationController extends LegacyController
             return $deny;
         }
 
-        return $this->legacyAbortResponse('Error', 'Invalid action.');
+        return $this->abortResponse('Error', 'Invalid action.');
     }
 
     public function modtaskPost(Request $request): RedirectResponse
@@ -78,7 +78,7 @@ class StaffModerationController extends LegacyController
             $userId = (int) request()->post('userid');
             $confirm = (string) request()->post('confirm');
             if (! in_array($confirm, ['pending', 'confirmed'], true)) {
-                return $this->legacyAbortResponse('Error', 'Invalid confirmation status.');
+                return $this->abortResponse('Error', 'Invalid confirmation status.');
             }
             $this->modtaskRepository->confirmUser($userId, $confirm);
 
@@ -86,7 +86,7 @@ class StaffModerationController extends LegacyController
         }
 
         if ($action !== 'edituser') {
-            return $this->legacyAbortResponse('Error', 'Invalid action.');
+            return $this->abortResponse('Error', 'Invalid action.');
         }
 
         $userId = (int) request()->post('userid');
@@ -112,10 +112,10 @@ class StaffModerationController extends LegacyController
         $stafffor = (string) (request()->post('staffduties') ?? '');
 
         if (! Validators::isId($userId) || ! SupportUser::isValidUserClass($class)) {
-            return $this->legacyAbortResponse('Error', 'Bad user ID or class ID.');
+            return $this->abortResponse('Error', 'Bad user ID or class ID.');
         }
         if (UserDisplay::currentClass() <= $class) {
-            return $this->legacyAbortResponse('Error', "You have no permission to change user's class to ".UserClass::name((int) $class, false, false, true).'. BTW, how do you get here?');
+            return $this->abortResponse('Error', "You have no permission to change user's class to ".UserClass::name((int) $class, false, false, true).'. BTW, how do you get here?');
         }
 
         $arr = $this->modtaskRepository->getUserArray($userId);
@@ -125,7 +125,7 @@ class StaffModerationController extends LegacyController
                 'mod'
             );
 
-            return $this->legacyAbortResponse('Error', 'Permission denied. For security reason, we logged this action');
+            return $this->abortResponse('Error', 'Permission denied. For security reason, we logged this action');
         }
 
         $curUploadpos = $arr['uploadpos'];
@@ -235,7 +235,7 @@ class StaffModerationController extends LegacyController
                 'mod'
             );
 
-            return $this->legacyAbortResponse('Error', 'Permission denied. For security reason, we logged this action');
+            return $this->abortResponse('Error', 'Permission denied. For security reason, we logged this action');
         }
 
         if ($warned !== '' && (bool) $curWarned !== ($warned === 'yes')) {
@@ -388,20 +388,20 @@ class StaffModerationController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
+            return $this->abortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
         }
 
         $act = (string) (request()->query('act') ?? 'list');
 
         if ($act === 'del') {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         if ($act === 'newsect') {
             $langs = Locale::languageList('rule_lang', null);
             $defLang = SiteConfig::current()->main->defaultLang();
 
-            return $this->legacyPage($request, 'modrules', true, [
+            return $this->renderPage($request, 'modrules', true, [
                 'mode' => 'newsect',
                 'langs' => $langs,
                 'deflang' => $defLang,
@@ -413,7 +413,7 @@ class StaffModerationController extends LegacyController
             $rule = $this->ruleRepository->findById($id) ?? [];
             $langs = Locale::languageList('site_lang', null);
 
-            return $this->legacyPage($request, 'modrules', true, [
+            return $this->renderPage($request, 'modrules', true, [
                 'mode' => 'edit',
                 'rule' => $rule,
                 'langs' => $langs,
@@ -426,7 +426,7 @@ class StaffModerationController extends LegacyController
             return $arr;
         }, $this->ruleRepository->listAllWithLang());
 
-        return $this->legacyPage($request, 'modrules', true, [
+        return $this->renderPage($request, 'modrules', true, [
             'mode' => 'list',
             'rows' => $rules,
         ]);
@@ -444,7 +444,7 @@ class StaffModerationController extends LegacyController
                 'mod'
             );
 
-            return $this->legacyAbortResponse('Error', 'Permission denied. For security reason, we logged this action');
+            return $this->abortResponse('Error', 'Permission denied. For security reason, we logged this action');
         }
 
         return null;
@@ -463,7 +463,7 @@ class StaffModerationController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
+            return $this->abortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
         }
 
         $act = (string) (request()->query('act') ?? 'list');
@@ -501,7 +501,7 @@ class StaffModerationController extends LegacyController
             $id = (int) (request()->post('id') ?? 0);
             $sure = (int) (request()->post('sure') ?? 0);
             if (! $sure) {
-                return $this->legacyAbortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href="?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
+                return $this->abortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href="?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
             }
             $this->ruleRepository->deleteById($id);
             Cache::forgetWithLocales('rules');

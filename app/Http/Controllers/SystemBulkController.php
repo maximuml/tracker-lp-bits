@@ -81,7 +81,7 @@ class SystemBulkController extends LegacyController
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
-            return $this->legacyAbortResponse('Sorry', 'Permission denied.');
+            return $this->abortResponse('Sorry', 'Permission denied.');
         }
 
         if ($request->isMethod('get')) {
@@ -89,7 +89,7 @@ class SystemBulkController extends LegacyController
                 return response(LegacyResponse::captureAbort('Success', 'Upload amount has been added successfully.', true, 'Add Upload'));
             }
 
-            return $this->legacyAbortResponse('Error', 'Permission denied!');
+            return $this->abortResponse('Error', 'Permission denied!');
         }
 
         $curUser = $this->currentUser->get() ?? [];
@@ -99,16 +99,16 @@ class SystemBulkController extends LegacyController
         $amount = request()->post('amount');
 
         if ($msg === '' || $amount === null || $amount === '') {
-            return $this->legacyAbortResponse('Error', 'Don\'t leave any fields blank.');
+            return $this->abortResponse('Error', 'Don\'t leave any fields blank.');
         }
         if (! is_numeric($amount)) {
-            return $this->legacyAbortResponse('Error', 'amount must be numeric');
+            return $this->abortResponse('Error', 'amount must be numeric');
         }
 
         $classSet = (array) request()->post('clases');
         foreach ($classSet as $class) {
             if (! Validators::isId($class) && $class != 0) {
-                return $this->legacyAbortResponse('Error', 'Invalid Class');
+                return $this->abortResponse('Error', 'Invalid Class');
             }
         }
 
@@ -159,7 +159,7 @@ class SystemBulkController extends LegacyController
         if (! $lock->get()) {
             $errMsg = Locale::trans('nexus.do_not_repeat', [], null);
 
-            return $this->legacyAbortResponse($errMsg, $errMsg);
+            return $this->abortResponse($errMsg, $errMsg);
         }
 
         try {
@@ -170,7 +170,7 @@ class SystemBulkController extends LegacyController
                 $sendText = $userRep->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {
 
-                return $this->legacyAbortResponse(__('takeinvite.std_error'), $exception->getMessage());
+                return $this->abortResponse(__('takeinvite.std_error'), $exception->getMessage());
             }
 
             $email = Input::unescape(htmlspecialchars(trim((string) request()->post('email'))));
@@ -179,35 +179,35 @@ class SystemBulkController extends LegacyController
             $isPreRegisterEmailAndUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
 
             if (strlen($preRegisterUsername) > 12) {
-                return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_username_too_long'));
+                return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_username_too_long'));
             }
             if (! $email) {
-                return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_must_enter_email'));
+                return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_must_enter_email'));
             }
             if (! Email::isWellFormed($email)) {
-                return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_invalid_email_address'));
+                return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_invalid_email_address'));
             }
 
             $body = trim(strip_tags((string) request()->post('body')));
             if (! $body) {
-                return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_must_enter_personal_message'));
+                return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_must_enter_personal_message'));
             }
 
             if ($isPreRegisterEmailAndUsername) {
                 if (empty($preRegisterUsername)) {
-                    return $this->legacyAbortResponse(
+                    return $this->abortResponse(
                         __('takeinvite.head_invitation_failed'),
                         Locale::trans('invite.require_pre_register_username', [], null)
                     );
                 }
                 if (! Validators::isUsername($preRegisterUsername)) {
-                    return $this->legacyAbortResponse(
+                    return $this->abortResponse(
                         __('takeinvite.head_invitation_failed'),
                         Locale::trans('user.username_invalid', ['username' => $preRegisterUsername], null)
                     );
                 }
                 if ($this->userDetailRepository->findByUsername($preRegisterUsername, ['id']) !== null) {
-                    return $this->legacyAbortResponse(
+                    return $this->abortResponse(
                         __('takeinvite.head_invitation_failed'),
                         Locale::trans('user.username_already_exists', ['username' => $preRegisterUsername], null)
                     );
@@ -215,15 +215,15 @@ class SystemBulkController extends LegacyController
             }
 
             if ($this->userDetailRepository->findByEmail($email, ['id']) !== null) {
-                return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_email_address').htmlspecialchars($email).__('takeinvite.std_is_in_use'));
+                return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_email_address').htmlspecialchars($email).__('takeinvite.std_is_in_use'));
             }
             if ($this->inviteRepository->existsForInvitee($email)) {
-                return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_invitation_already_sent_to').htmlspecialchars($email).__('takeinvite.std_await_user_registeration'));
+                return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_invitation_already_sent_to').htmlspecialchars($email).__('takeinvite.std_await_user_registeration'));
             }
 
             $hashPost = (string) request()->post('hash');
             if ($hashPost === '') {
-                return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_must_select_invite'));
+                return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_must_select_invite'));
             }
 
             $hashRecord = null;
@@ -235,13 +235,13 @@ class SystemBulkController extends LegacyController
             } else {
                 $hashRecord = $this->inviteRepository->findByInviterAndHash($currentUserId, $hashPost);
                 if (! $hashRecord instanceof Invite) {
-                    return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), ('Hash does not exist.'));
+                    return $this->abortResponse(__('takeinvite.head_invitation_failed'), ('Hash does not exist.'));
                 }
                 if ($hashRecord->invitee !== '') {
-                    return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), 'hash '.__('takeinvite.std_is_in_use'));
+                    return $this->abortResponse(__('takeinvite.head_invitation_failed'), 'hash '.__('takeinvite.std_is_in_use'));
                 }
                 if ($hashRecord->expired_at !== null && $hashRecord->expired_at->lt(now())) {
-                    return $this->legacyAbortResponse(__('takeinvite.head_invitation_failed'), ('Hash expired.'));
+                    return $this->abortResponse(__('takeinvite.head_invitation_failed'), ('Hash expired.'));
                 }
                 $hash = $hashPost;
             }
@@ -326,18 +326,18 @@ class SystemBulkController extends LegacyController
 
         $currentUserId = (int) ($this->currentUser->id());
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $delreport = (array) request()->post('delreport');
         if (empty($delreport)) {
 
-            return $this->legacyAbortResponse('Error', __('functions.select_at_least_one_record'));
+            return $this->abortResponse('Error', __('functions.select_at_least_one_record'));
         }
 
         $delreportIds = array_map('intval', array_filter($delreport, 'is_numeric'));
         if (empty($delreportIds)) {
-            return $this->legacyAbortResponse('Error', 'Invalid report ids.');
+            return $this->abortResponse('Error', 'Invalid report ids.');
         }
 
         if (request()->post('setdealt')) {
@@ -362,7 +362,7 @@ class SystemBulkController extends LegacyController
         }
 
         if (UserDisplay::currentClass() < UC_SYSOP) {
-            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+            return $this->abortResponse('Sorry', 'Access denied.');
         }
 
         $validTypeMap = (array) (__('incrementbulk.types'));
@@ -373,7 +373,7 @@ class SystemBulkController extends LegacyController
         $sent = $request->query('sent');
         $returnto = $request->query('returnto', '');
 
-        return $this->legacyPage($request, 'increment-bulk', true, [
+        return $this->renderPage($request, 'increment-bulk', true, [
             'stdheadMsgalert' => false,
             'validTypeMap' => $validTypeMap,
             'type' => $type,
@@ -428,11 +428,11 @@ class SystemBulkController extends LegacyController
     public function incrementBulkSend(IncrementBulkRequest $request): Response|RedirectResponse
     {
         if (! $request->isMethod('POST')) {
-            return $this->legacyAbortResponse('Error', 'Permission denied!');
+            return $this->abortResponse('Error', 'Permission denied!');
         }
 
         if ((int) UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
-            return $this->legacyAbortResponse('Sorry', 'Permission denied.');
+            return $this->abortResponse('Sorry', 'Permission denied.');
         }
 
         $validTypeMap = (array) (__('incrementbulk.types'));
@@ -445,15 +445,15 @@ class SystemBulkController extends LegacyController
         $type = (string) $request->input('type', '');
 
         if ($msg === '' || $amount === '' || $amount === null || $type === '') {
-            return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
+            return $this->abortResponse('Error', "Don't leave any fields blank.");
         }
 
         if (! is_numeric($amount)) {
-            return $this->legacyAbortResponse('Error', 'amount must be numeric');
+            return $this->abortResponse('Error', 'amount must be numeric');
         }
 
         if (! isset($validTypeMap[$type])) {
-            return $this->legacyAbortResponse('Error', 'Invalid type');
+            return $this->abortResponse('Error', 'Invalid type');
         }
 
         if ($type === 'uploaded') {
@@ -473,13 +473,13 @@ class SystemBulkController extends LegacyController
         }
 
         if (empty($classIds)) {
-            return $this->legacyAbortResponse('Error', 'No valid filter');
+            return $this->abortResponse('Error', 'No valid filter');
         }
 
         if ($isTypeTmpInvite) {
             $duration = (int) $request->input('duration', 0);
             if ($duration <= 0) {
-                return $this->legacyAbortResponse('Sorry', 'Invalid duration: '.$duration);
+                return $this->abortResponse('Sorry', 'Invalid duration: '.$duration);
             }
         }
 

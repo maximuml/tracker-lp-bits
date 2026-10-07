@@ -116,7 +116,7 @@ class SettingsController extends LegacyController
         }
 
         if (UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $action = (string) ($request->query('action') ?? 'showmenu');
@@ -209,7 +209,7 @@ class SettingsController extends LegacyController
         }
 
         if (UserDisplay::currentClass() < UserClassEnum::SYSOP->value) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $action = (string) ($request->post('action') ?? '');
@@ -315,7 +315,7 @@ class SettingsController extends LegacyController
                 if (in_array($config, Setting::$permissionMustHaveClass, true)) {
                     $classValue = is_string($data[$config] ?? null) || is_int($data[$config] ?? null) ? (string) ($data[$config] ?? '') : '';
                     if (! isset(User::$classes[$classValue])) {
-                        return $this->legacyAbortResponse('Error', 'Invalid user class: '.$classValue);
+                        return $this->abortResponse('Error', 'Invalid user class: '.$classValue);
                     }
                 }
             }
@@ -335,7 +335,7 @@ class SettingsController extends LegacyController
             }
             $normalized = is_string($value) ? Url::normalize($value) : null;
             if ($normalized === null) {
-                return $this->legacyAbortResponse('Error', "Invalid URL: {$urlField}");
+                return $this->abortResponse('Error', "Invalid URL: {$urlField}");
             }
             $data[$urlField] = $normalized;
         }
@@ -344,7 +344,7 @@ class SettingsController extends LegacyController
         if ($section === 'misc') {
             $protectedForum = is_string($data['protected_forum'] ?? null) ? (string) $data['protected_forum'] : '';
             if (! empty($protectedForum) && ! preg_match('/^[,\d]*\d+$/', $protectedForum)) {
-                return $this->legacyAbortResponse('Error', 'Forum format error: use comma-separated IDs.');
+                return $this->abortResponse('Error', 'Forum format error: use comma-separated IDs.');
             }
         }
 

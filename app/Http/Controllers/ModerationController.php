@@ -72,11 +72,11 @@ class ModerationController extends LegacyController
         $repo = $this->moderationRepository;
         $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $cache, $repo): Response {
             if (! Validators::isId($reportid) || $reason === '') {
-                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_missing_reason'));
+                return $this->abortResponse(__('report.std_error'), __('report.std_missing_reason'));
             }
 
             if ($repo->reportExists($currentUserId, $reportid, $type)) {
-                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_already_reported_this'));
+                return $this->abortResponse(__('report.std_error'), __('report.std_already_reported_this'));
             }
 
             $repo->createReport([
@@ -90,7 +90,7 @@ class ModerationController extends LegacyController
             $cache?->forget('staff_report_count');
             $cache?->forget('staff_new_report_count');
 
-            return $this->legacyAbortResponse(__('report.std_message'), __('report.std_successfully_reported'), false);
+            return $this->abortResponse(__('report.std_message'), __('report.std_successfully_reported'), false);
         };
 
         if ($takereportofferid && Validators::isId($takereportofferid)) {
@@ -111,17 +111,17 @@ class ModerationController extends LegacyController
 
         if ($user && Validators::isId($user)) {
             if ($user == $currentUserId) {
-                return $this->legacyAbortResponse(__('report.std_sorry'), __('report.std_cannot_report_oneself'));
+                return $this->abortResponse(__('report.std_sorry'), __('report.std_cannot_report_oneself'));
             }
             $userRow = $this->userRepository->findById((int) $user, ['username', 'class']);
             if (! $userRow) {
-                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_user_id'));
+                return $this->abortResponse(__('report.std_error'), __('report.std_invalid_user_id'));
             }
             $arr = $userRow->toArray();
             if ((int) ($arr['class'] ?? 0) >= $staffmemClass) {
                 $msg = (__('report.std_cannot_report')).UserClass::name((int) ($arr['class'] ?? 0), false, true, true);
 
-                return $this->legacyAbortResponse(__('report.std_sorry'), $msg);
+                return $this->abortResponse(__('report.std_sorry'), $msg);
             }
 
             $form = view('moderation._confirm', [
@@ -134,13 +134,13 @@ class ModerationController extends LegacyController
                 'id' => $user,
             ])->render();
 
-            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
+            return $this->abortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
         if ($torrent && Validators::isId($torrent)) {
             $name = $this->torrentRepository->getNameById((int) $torrent);
             if (! $name) {
-                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_torrent_id'));
+                return $this->abortResponse(__('report.std_error'), __('report.std_invalid_torrent_id'));
             }
             $form = view('moderation._confirm', [
                 'pre' => (string) __('report.text_are_you_sure_torrent'),
@@ -152,13 +152,13 @@ class ModerationController extends LegacyController
                 'field' => 'taketorrent',
             ])->render();
 
-            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
+            return $this->abortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
         if ($forumpost && Validators::isId($forumpost)) {
             $arr = $this->moderationRepository->getForumPost($forumpost);
             if ($arr === null) {
-                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_post_id'));
+                return $this->abortResponse(__('report.std_error'), __('report.std_invalid_post_id'));
             }
             $form = view('moderation._confirm', [
                 'pre' => (string) __('report.text_are_you_sure_post'),
@@ -172,13 +172,13 @@ class ModerationController extends LegacyController
                 'field' => 'takeforumpost',
             ])->render();
 
-            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
+            return $this->abortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
         if ($commentid && Validators::isId($commentid)) {
             $comment = $this->commentRepository->findById((int) $commentid, ['id', 'user', 'torrent', 'offer']);
             if (! $comment) {
-                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_comment_id'));
+                return $this->abortResponse(__('report.std_error'), __('report.std_invalid_comment_id'));
             }
             $arr = $comment->toArray();
             if ($arr['torrent'] ?? null) {
@@ -190,7 +190,7 @@ class ModerationController extends LegacyController
                 $url = '/web/offers?id='.$arr['offer'].'&off_details=1#'.$commentid;
                 $of = __('report.text_of_offer');
             } else {
-                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_orphaned_comment'));
+                return $this->abortResponse(__('report.std_error'), __('report.std_orphaned_comment'));
             }
             $form = view('moderation._confirm', [
                 'pre' => (string) __('report.text_are_you_sure_comment'),
@@ -205,13 +205,13 @@ class ModerationController extends LegacyController
                 'field' => 'takecommentid',
             ])->render();
 
-            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
+            return $this->abortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
         if ($reportofferid && Validators::isId($reportofferid)) {
             $offer = $this->offerRepository->findOffer((int) $reportofferid, ['id', 'name']);
             if (! $offer) {
-                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_offer_id'));
+                return $this->abortResponse(__('report.std_error'), __('report.std_invalid_offer_id'));
             }
             $arr = $offer->toArray();
             $form = view('moderation._confirm', [
@@ -224,10 +224,10 @@ class ModerationController extends LegacyController
                 'field' => 'takereportofferid',
             ])->render();
 
-            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
+            return $this->abortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
-        return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_action'));
+        return $this->abortResponse(__('report.std_error'), __('report.std_invalid_action'));
 
     }
 
@@ -237,13 +237,13 @@ class ModerationController extends LegacyController
         $currentUserId = (int) ($this->currentUser->id());
 
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $repo = $this->moderationRepository;
         $count = $repo->countReports();
         if (! $count) {
-            return $this->legacyAbortResponse(__('reports.std_oho'), __('reports.std_no_report'));
+            return $this->abortResponse(__('reports.std_oho'), __('reports.std_no_report'));
         }
 
         $perpage = 10;
@@ -359,7 +359,7 @@ class ModerationController extends LegacyController
             $rows[] = $row;
         }
 
-        return $this->legacyPage($request, 'reports', true, [
+        return $this->renderPage($request, 'reports', true, [
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,

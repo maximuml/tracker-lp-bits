@@ -35,7 +35,7 @@ class StaffMessageController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+            return $this->abortResponse('Sorry', 'Access denied.');
         }
 
         $currentUser = $this->currentUser->get() ?? [];
@@ -43,7 +43,7 @@ class StaffMessageController extends LegacyController
         $returntoQuery = $request->query('returnto');
         $httpReferer = Input::serverValue('HTTP_REFERER');
 
-        return $this->legacyPage($request, 'staffmess', true, [
+        return $this->renderPage($request, 'staffmess', true, [
             'stdheadMsgalert' => false,
             'classes' => $classes,
             'body' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) request()->query('body'))),
@@ -82,7 +82,7 @@ class StaffMessageController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $currentUser = $this->currentUser->get() ?? [];
@@ -91,17 +91,17 @@ class StaffMessageController extends LegacyController
         $msg = trim((string) request()->post('msg'));
 
         if ($msg === '') {
-            return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
+            return $this->abortResponse('Error', "Don't leave any fields blank.");
         }
 
         $selectedClasses = (array) request()->post('classes');
         if (empty($selectedClasses)) {
-            return $this->legacyAbortResponse('Error', 'No valid filter');
+            return $this->abortResponse('Error', 'No valid filter');
         }
         foreach ($selectedClasses as $class) {
             $classId = (int) $class;
             if (! Validators::isId($classId) && $classId !== 0) {
-                return $this->legacyAbortResponse('Error', 'Invalid Class');
+                return $this->abortResponse('Error', 'Invalid Class');
             }
         }
 
@@ -125,7 +125,7 @@ class StaffMessageController extends LegacyController
 
     public function contactstaff(Request $request): View|RedirectResponse|Response
     {
-        return $this->legacyPage($request, 'contactstaff', true, [
+        return $this->renderPage($request, 'contactstaff', true, [
         ]);
 
     }
@@ -161,10 +161,10 @@ class StaffMessageController extends LegacyController
         $subject = trim((string) request()->post('subject'));
 
         if ($msg === '') {
-            return $this->legacyAbortResponse(__('takecontact.std_error'), __('takecontact.std_please_enter_something'));
+            return $this->abortResponse(__('takecontact.std_error'), __('takecontact.std_please_enter_something'));
         }
         if ($subject === '') {
-            return $this->legacyAbortResponse(__('takecontact.std_error'), __('takecontact.std_please_define_subject'));
+            return $this->abortResponse(__('takecontact.std_error'), __('takecontact.std_please_define_subject'));
         }
 
         $currentUserId = (int) ($this->currentUser->id());
@@ -176,7 +176,7 @@ class StaffMessageController extends LegacyController
             if ($last !== null && strtotime((string) $last) > ($timeNow - 60)) {
                 $secs = 60 - ($timeNow - strtotime((string) $last));
 
-                return $this->legacyAbortResponse(
+                return $this->abortResponse(
                     __('takecontact.std_error'),
                     (__('takecontact.std_message_flooding')).$secs.(__('takecontact.std_second')).($secs == 1 ? '' : (__('takecontact.std_s'))).(__('takecontact.std_before_sending_pm'))
                 );
@@ -193,7 +193,7 @@ class StaffMessageController extends LegacyController
             return redirect(SafeReturnUrl::filter($returnto));
         }
 
-        return $this->legacyPage($request, 'takecontact', true, [
+        return $this->renderPage($request, 'takecontact', true, [
         ]);
     }
 }

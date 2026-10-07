@@ -53,12 +53,12 @@ class TorrentDeleteController extends LegacyController
 
         $id = (int) request()->input('id');
         if ($id <= 0) {
-            return $this->legacyAbortResponse(__('fastdelete.std_delete_failed'), __('fastdelete.std_missing_form_data'));
+            return $this->abortResponse(__('fastdelete.std_delete_failed'), __('fastdelete.std_missing_form_data'));
         }
 
         if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)
             || ! $this->permissionChecker->userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
-            return $this->legacyAbortResponse(__('fastdelete.std_delete_failed'), __('fastdelete.text_no_permission'));
+            return $this->abortResponse(__('fastdelete.std_delete_failed'), __('fastdelete.text_no_permission'));
         }
 
         $torrent = $this->torrentRepository->findById($id, ['name', 'owner', 'seeders', 'anonymous']);
@@ -72,7 +72,7 @@ class TorrentDeleteController extends LegacyController
 
         $sure = request()->input('sure');
         if (empty($sure)) {
-            return $this->legacyAbortResponse(
+            return $this->abortResponse(
                 __('fastdelete.std_delete_torrent'),
                 view('fastdelete.confirm-form', ['id' => $id])->render(),
                 false
@@ -130,26 +130,26 @@ class TorrentDeleteController extends LegacyController
         $currentUserId = (int) ($this->currentUser->id());
 
         if ($request->query('id') !== null) {
-            return $this->legacyAbortResponse('Party is over!', "This trick doesn't work anymore. You need to click the button!");
+            return $this->abortResponse('Party is over!', "This trick doesn't work anymore. You need to click the button!");
         }
 
         $id = request()->post('id');
         if ($id === null) {
-            return $this->legacyAbortResponse(__('delete.std_delete_failed'), __('delete.std_missing_form_date'));
+            return $this->abortResponse(__('delete.std_delete_failed'), __('delete.std_missing_form_date'));
         }
 
         $id = (int) $id;
         if ($id <= 0) {
-            return $this->legacyPage($request, 'delete', true);
+            return $this->renderPage($request, 'delete', true);
         }
 
         if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
-            return $this->legacyAbortResponse(__('delete.std_delete_failed'), __('delete.std_not_owner'));
+            return $this->abortResponse(__('delete.std_delete_failed'), __('delete.std_not_owner'));
         }
 
         $torrent = $this->torrentRepository->findById($id, ['name', 'owner', 'seeders', 'anonymous']);
         if ($torrent === null) {
-            return $this->legacyPage($request, 'delete', true);
+            return $this->renderPage($request, 'delete', true);
         }
         $row = $torrent->toArray();
         $ownerId = (int) ($row['owner'] ?? 0);
@@ -157,12 +157,12 @@ class TorrentDeleteController extends LegacyController
         $anonymous = (int) ($row['anonymous'] ?? 0);
 
         if ($currentUserId != $ownerId && ! $this->permissionChecker->userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)) {
-            return $this->legacyAbortResponse(__('delete.std_delete_failed'), __('delete.std_not_owner'));
+            return $this->abortResponse(__('delete.std_delete_failed'), __('delete.std_not_owner'));
         }
 
         $rt = (int) request()->post('reasontype');
         if ($rt < 1 || $rt > 5) {
-            return $this->legacyAbortResponse(__('delete.std_delete_failed'), (__('delete.std_invalid_reason')).$rt.'.');
+            return $this->abortResponse(__('delete.std_delete_failed'), (__('delete.std_invalid_reason')).$rt.'.');
         }
 
         $reason = (array) request()->post('reason');
@@ -174,13 +174,13 @@ class TorrentDeleteController extends LegacyController
             $reasonstr = 'Nuked'.(! empty($reason[1]) ? ': '.trim($reason[1]) : '!');
         } elseif ($rt == 4) {
             if (empty($reason[2])) {
-                return $this->legacyAbortResponse(__('delete.std_delete_failed'), __('delete.std_describe_violated_rule'));
+                return $this->abortResponse(__('delete.std_delete_failed'), __('delete.std_describe_violated_rule'));
             }
             $siteName = SiteConfig::current()->basic->siteName();
             $reasonstr = $siteName.' rules broken: '.trim($reason[2]);
         } else {
             if (empty($reason[3])) {
-                return $this->legacyAbortResponse(__('delete.std_delete_failed'), __('delete.std_enter_reason'));
+                return $this->abortResponse(__('delete.std_delete_failed'), __('delete.std_enter_reason'));
             }
             $reasonstr = trim($reason[3]);
         }
@@ -215,7 +215,7 @@ class TorrentDeleteController extends LegacyController
             ]);
         }
 
-        return $this->legacyPage($request, 'delete', true, [
+        return $this->renderPage($request, 'delete', true, [
             'returnto' => (string) request()->post('returnto'),
             'message' => __('delete.text_torrent_deleted'),
         ]);

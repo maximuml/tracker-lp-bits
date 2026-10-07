@@ -128,7 +128,7 @@ class ShoutboxController extends LegacyController
             ? '/web/shoutbox_history?'.http_build_query(array_filter($filters, fn ($v) => $v !== '')).'&page='
             : '';
 
-        return $this->legacyPage($request, 'shoutbox_history', true, [
+        return $this->renderPage($request, 'shoutbox_history', true, [
             'items' => $this->decorateHistoryRows($rows, $currentUserId, $isStaff, $reactionData, $userDisplayMap),
             'page' => (int) ($result['page'] ?? 1),
             'totalPages' => $totalPages,

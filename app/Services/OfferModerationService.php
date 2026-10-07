@@ -56,17 +56,17 @@ final class OfferModerationService
     public function handleAllow(Request $request): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            $this->abort(__('legacy/offers.std_access_denied'), __('legacy/offers.std_mans_job'));
+            $this->abort(__('offers.std_access_denied'), __('offers.std_mans_job'));
         }
 
         $offid = (int) $request->input('offerid');
         if (! Validators::isId($offid)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
+            $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offid);
         if (! $offer) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.text_nothing_found'));
+            $this->abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
         if ($offer === null) {
             throw new LogicException('Expected non-null offer.');
@@ -107,17 +107,17 @@ final class OfferModerationService
     public function handleFinish(Request $request): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            $this->abort(__('legacy/offers.std_access_denied'), __('legacy/offers.std_have_no_permission'));
+            $this->abort(__('offers.std_access_denied'), __('offers.std_have_no_permission'));
         }
 
         $offid = (int) $request->input('finish');
         if (! Validators::isId($offid)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
+            $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offid);
         if (! $offer) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.text_nothing_found'));
+            $this->abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
         if ($offer === null) {
             throw new LogicException('Expected non-null offer.');
@@ -135,7 +135,7 @@ final class OfferModerationService
         $no = (int) $voteCounts['against'];
 
         if ($yes === 0 && $no === 0) {
-            $this->abort(__('legacy/offers.std_sorry'), __('legacy/offers.std_no_votes_yet').view('offers._details_link', ['url' => "/web/offers?id={$offid}&off_details=1"])->render(), false);
+            $this->abort(__('offers.std_sorry'), __('offers.std_no_votes_yet').view('offers._details_link', ['url' => "/web/offers?id={$offid}&off_details=1"])->render(), false);
         }
 
         $finishvotetime = date('Y-m-d H:i:s');

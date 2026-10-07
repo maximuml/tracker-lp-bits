@@ -45,10 +45,10 @@ final class OfferVoteService
         }
 
         if ($vote === 'against' && ! Permission::can(PermissionEnum::AGAINST_OFFER)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
+            $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
         if ($vote !== 'yeah' && $vote !== 'against') {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
+            $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $offerid = $request->integer('id');
@@ -56,15 +56,15 @@ final class OfferVoteService
         $userid = (int) ($curuser['id'] ?? 0);
 
         if ($this->offerRepository->getOfferOwner($offerid) === $userid) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_cannot_vote_youself'));
+            $this->abort(__('offers.std_error'), __('offers.std_cannot_vote_youself'));
         }
         if ($this->offerVoteRepository->userVoted($offerid, $userid)) {
-            $this->abort(__('legacy/offers.std_already_voted'), view('offers._back_to_details', ['note' => __('legacy/offers.std_already_voted_note'), 'url' => "/web/offers?id={$offerid}&off_details=1"])->render(), false);
+            $this->abort(__('offers.std_already_voted'), view('offers._back_to_details', ['note' => __('offers.std_already_voted_note'), 'url' => "/web/offers?id={$offerid}&off_details=1"])->render(), false);
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offerid);
         if ($offer === null) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.text_nothing_found'));
+            $this->abort(__('offers.std_error'), __('offers.text_nothing_found'));
             throw new LogicException('Expected non-null offer.');
         }
 

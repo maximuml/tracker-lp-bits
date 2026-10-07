@@ -31,12 +31,12 @@ final class OfferEditBuilder
         $id = (int) $request->query('id', 0);
         $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
-            LegacyResponse::abort((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.text_nothing_found')));
+            LegacyResponse::abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
         $num = $offer->toArray();
 
         if ($userId !== (int) ($num['userid'] ?? 0) && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            LegacyResponse::abort((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.std_cannot_edit_others_offer')));
+            LegacyResponse::abort(__('offers.std_error'), __('offers.std_cannot_edit_others_offer'));
         }
 
         $body = htmlspecialchars(Input::unescape((string) ($num['descr'] ?? '')));

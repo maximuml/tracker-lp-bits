@@ -60,7 +60,7 @@ final class OfferListBuilder
         if (in_array($sortParam, $allowedSorts, true)) {
             $sort = $sortParam;
         } elseif ($sortParam !== '') {
-            LegacyResponse::abort((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.std_smell_rat')));
+            LegacyResponse::abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $catOrderType = 'desc';
@@ -148,8 +148,8 @@ final class OfferListBuilder
         $emptyState = SafeHtml::fromTrustedHtml('');
         if (! $num) {
             $emptyState = SafeHtml::fromTrustedHtml(view('partials.std-message', [
-                'heading' => (string) (__('legacy/offers.text_nothing_found')),
-                'text' => (string) (__('legacy/offers.text_nothing_found')),
+                'heading' => __('offers.text_nothing_found'),
+                'text' => __('offers.text_nothing_found'),
                 'htmlstrip' => false,
                 'body' => null,
             ])->render());
@@ -227,7 +227,7 @@ final class OfferListBuilder
                         count: 0,
                         href: '/comment?action=add&pid='.$offerId.'&type=offer',
                         hasNew: false,
-                        title: (string) (__('legacy/offers.title_add_comments')),
+                        title: __('offers.title_add_comments'),
                         tooltipId: null,
                     );
                 } else {
@@ -239,9 +239,9 @@ final class OfferListBuilder
                     if ($showlastcom) {
                         if (! empty($lastcom)) {
                             if (($curUser['timetype'] ?? 1) !== UserTimeType::TIMEALIVE->value) {
-                                $lastcomtime = (string) (__('legacy/offers.text_at_time')).($lastcom['added'] ?? '');
+                                $lastcomtime = __('offers.text_at_time').($lastcom['added'] ?? '');
                             } else {
-                                $lastcomtime = (string) (__('legacy/offers.text_blank')).Time::format((string) ($lastcom['added'] ?? 'now'), true, false, true);
+                                $lastcomtime = __('offers.text_blank').Time::format((string) ($lastcom['added'] ?? 'now'), true, false, true);
                             }
                             $tooltipId = 'lastcom_'.$i;
                             $tooltips[] = new OfferTooltip(
@@ -257,7 +257,7 @@ final class OfferListBuilder
                             );
                         }
                     } else {
-                        $title = (string) ($hasnewcom ? (__('legacy/offers.title_has_new_comment')) : (__('legacy/offers.title_no_new_comment')));
+                        $title = (string) ($hasnewcom ? (__('offers.title_has_new_comment')) : (__('offers.title_no_new_comment')));
                     }
                     $comment = new OfferCommentCell(
                         count: $comms,
@@ -269,9 +269,9 @@ final class OfferListBuilder
                 }
 
                 $allowed = match ((int) ($arr['allowed'] ?? 1)) {
-                    OfferAllowed::ALLOWED->value => new OfferAllowedBadge((string) (__('legacy/offers.text_allowed')), 'nx-color-green'),
-                    OfferAllowed::DENIED->value => new OfferAllowedBadge((string) (__('legacy/offers.text_denied')), 'nx-color-red'),
-                    default => new OfferAllowedBadge((string) (__('legacy/offers.text_pending')), 'nx-color-orange'),
+                    OfferAllowed::ALLOWED->value => new OfferAllowedBadge(__('offers.text_allowed'), 'nx-color-green'),
+                    OfferAllowed::DENIED->value => new OfferAllowedBadge(__('offers.text_denied'), 'nx-color-red'),
+                    default => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-orange'),
                 };
 
                 $yeah = (int) ($arr['yeah'] ?? 0);

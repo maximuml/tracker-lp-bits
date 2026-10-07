@@ -13,6 +13,7 @@ use App\Repositories\OfferVoteRepository;
 use App\Services\OfferVoteService;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -152,8 +153,12 @@ final class OfferVoteServiceTest extends TestCase
     public function test_missing_offer_aborts(): void
     {
         $this->authenticatedUser(['id' => 1]);
-        $this->expectException(Throwable::class);
-        $this->callVote(['id' => 999, 'vote' => 'yeah']);
+        try {
+            $this->callVote(['id' => 999, 'vote' => 'yeah']);
+            $this->fail('Expected abort');
+        } catch (HttpResponseException $e) {
+            $this->assertStringContainsString(e((string) __('offers.text_nothing_found')), (string) $e->getResponse()->getContent());
+        }
     }
 
     public function test_missing_id_aborts(): void

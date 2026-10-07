@@ -36,6 +36,8 @@ class UsersLegacyHashReportCommandTest extends TestCase
 
     public function test_list_option_filters_by_algorithm(): void
     {
+        User::query()->where('passhash_algo', PasswordHasher::ALGO_MD5)->delete();
+
         $md5User = User::factory()->create(['passhash_algo' => PasswordHasher::ALGO_MD5]);
         $argonUser = User::factory()->create(['passhash_algo' => PasswordHasher::ALGO_ARGON2ID]);
 

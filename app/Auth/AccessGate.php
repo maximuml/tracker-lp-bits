@@ -14,7 +14,7 @@ use Illuminate\Http\JsonResponse;
 /**
  * Access-gate checks carried over from the legacy auth helpers
  * (`parked()`, `loggedinorreturn()`, `registration_check()`). Each
- * method takes an {@see AuthContext} and aborts via PageResponses when
+ * method takes an {@see AuthContext} and aborts via LegacyResponse when
  * the gate denies access.
  */
 final class AccessGate

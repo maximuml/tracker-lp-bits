@@ -8,7 +8,7 @@ use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Repositories\BookmarkRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Support\Bonus;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -24,7 +24,7 @@ final class TorrentBookmarkService
         private readonly BookmarkRepository $bookmarkRepository,
         private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly TorrentDetailRepository $torrentDetailRepository,
-        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+        private readonly ?NexusCache $cache = null,
     ) {}
 
     /**
@@ -50,8 +50,8 @@ final class TorrentBookmarkService
             $status = 'added';
         }
 
-        if ($this->legacyRedisCache !== null) {
-            $this->legacyRedisCache->delete_value('user_'.$userId.'_bookmark_array');
+        if ($this->cache !== null) {
+            $this->cache->forget('user_'.$userId.'_bookmark_array');
         }
 
         return $status;

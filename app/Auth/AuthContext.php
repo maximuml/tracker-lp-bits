@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Input;
@@ -67,7 +67,7 @@ final class AuthContext
 
         return new self(
             user: CurrentUser::instance()->get(),
-            cache: LegacyRedisCache::instance(),
+            cache: NexusCache::instance(),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
             requestUri: Input::serverValue('REQUEST_URI'),
             requestBody: request()->post(),

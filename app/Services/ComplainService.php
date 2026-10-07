@@ -7,7 +7,7 @@ namespace App\Services;
 use App\Contracts\Repositories\ComplainRepositoryInterface;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Repositories\UserAccountRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Lock;
 use App\Support\Logger;
@@ -26,7 +26,7 @@ final class ComplainService
         private readonly ComplainRepositoryInterface $complainRepository,
         private readonly ToolRepositoryInterface $toolRepository,
         private readonly UserAccountRepository $userAccountRepository,
-        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+        private readonly ?NexusCache $cache = null,
     ) {}
 
     /**
@@ -116,8 +116,8 @@ final class ComplainService
 
     private function clearCountCache(): void
     {
-        if ($this->legacyRedisCache !== null) {
-            $this->legacyRedisCache->delete_value('COMPLAINTS_COUNT_CACHE');
+        if ($this->cache !== null) {
+            $this->cache->forget('COMPLAINTS_COUNT_CACHE');
         }
     }
 }

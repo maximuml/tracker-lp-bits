@@ -100,22 +100,22 @@ final class OfferService
         $curuser = $this->curUser();
         $userId = (int) ($curuser['id'] ?? 0);
         if (! Validators::isId($userId)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
+            $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $name = (string) $request->input('name');
         if ($name === '') {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_must_enter_name'));
+            $this->abort(__('offers.std_error'), __('offers.std_must_enter_name'));
         }
 
         $cat = (int) ($request->input('type') ?? $request->input('category'));
         if (! Validators::isId($cat)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_must_select_category'));
+            $this->abort(__('offers.std_error'), __('offers.std_must_select_category'));
         }
 
         $descrmain = (string) Input::unescape($request->input('body') ?? $request->input('descr'));
         if (! $descrmain) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_must_enter_description'));
+            $this->abort(__('offers.std_error'), __('offers.std_must_enter_description'));
         }
 
         $pic = '';
@@ -123,7 +123,7 @@ final class OfferService
         if ($picture !== '') {
             $picture = (string) Input::unescape($picture);
             if (! preg_match('/^https?:\/\/[^\s\'"<>]+\.(jpg|gif|png)$/i', $picture)) {
-                $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_wrong_image_format'));
+                $this->abort(__('offers.std_error'), __('offers.std_wrong_image_format'));
             }
             $pic = '[img]'.$picture."[/img]\n";
         }
@@ -131,7 +131,7 @@ final class OfferService
         $descr = $pic.$descrmain;
 
         if ($this->offerRepository->offerNameExists($name)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_offer_exists').view('components.altlink', ['class' => 'altlink', 'url' => '/web/offers', 'text' => __('legacy/offers.text_view_all_offers')])->render(), false);
+            $this->abort(__('offers.std_error'), __('offers.std_offer_exists').view('components.altlink', ['class' => 'altlink', 'url' => '/web/offers', 'text' => __('offers.text_view_all_offers')])->render(), false);
         }
 
         $id = $this->offerRepository->createOffer([
@@ -147,7 +147,7 @@ final class OfferService
         ]);
 
         if (! $id) {
-            $this->abort(__('legacy/offers.std_error'), 'mysql puked');
+            $this->abort(__('offers.std_error'), 'mysql puked');
         }
 
         $this->offerRepository->addStaffMessage($userId, (string) ($curuser['username'] ?? ''), $name, $id);
@@ -161,12 +161,12 @@ final class OfferService
     {
         $offerId = (int) $request->input('id');
         if (! Validators::isId($offerId)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
+            $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $offerRecord = $this->offerRepository->findOffer($offerId);
         if (! $offerRecord) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.text_nothing_found'));
+            $this->abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
         if ($offerRecord === null) {
             throw new LogicException('Expected non-null offer record.');
@@ -177,16 +177,16 @@ final class OfferService
         $userId = (int) ($curuser['id'] ?? 0);
 
         if ($userId !== (int) ($num['userid'] ?? 0) && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_cannot_delete_others_offer'));
+            $this->abort(__('offers.std_error'), __('offers.std_cannot_delete_others_offer'));
         }
 
         $sure = (int) $request->input('sure');
         if ($sure !== 0 && $sure !== 1) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
+            $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         if ($sure === 0) {
-            $this->abort(__('legacy/offers.std_delete_offer'), __('legacy/offers.std_delete_offer_note').view('offers.delete-confirm-form', ['url' => "/web/offers/delete?id={$offerId}&sure=1"])->render(), false);
+            $this->abort(__('offers.std_delete_offer'), __('offers.std_delete_offer_note').view('offers.delete-confirm-form', ['url' => "/web/offers/delete?id={$offerId}&sure=1"])->render(), false);
         }
 
         $reason = (string) $request->input('reason');
@@ -217,7 +217,7 @@ final class OfferService
     {
         $id = (int) $request->input('id');
         if (! Validators::isId($id)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_smell_rat'));
+            $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $offerOwner = $this->offerRepository->getOfferOwner($id);
@@ -225,7 +225,7 @@ final class OfferService
         $userId = (int) ($curuser['id'] ?? 0);
 
         if ($offerOwner !== $userId && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_access_denied'));
+            $this->abort(__('offers.std_error'), __('offers.std_access_denied'));
         }
 
         $name = (string) $request->input('name');
@@ -235,22 +235,22 @@ final class OfferService
         if ($picture !== '') {
             $picture = (string) Input::unescape($picture);
             if (! preg_match('/^https?:\/\/[^\s\'"<>]+\.(jpg|gif|png)$/i', $picture)) {
-                $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_wrong_image_format'));
+                $this->abort(__('offers.std_error'), __('offers.std_wrong_image_format'));
             }
             $pic = '[img]'.$picture."[/img]\n";
         }
 
         $descr = $pic.(string) Input::unescape($request->input('body'));
         if ($name === '') {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_must_enter_name'));
+            $this->abort(__('offers.std_error'), __('offers.std_must_enter_name'));
         }
         if ($descr === '') {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_must_enter_description'));
+            $this->abort(__('offers.std_error'), __('offers.std_must_enter_description'));
         }
 
         $cat = (int) $request->input('category');
         if (! Validators::isId($cat)) {
-            $this->abort(__('legacy/offers.std_error'), __('legacy/offers.std_must_select_category'));
+            $this->abort(__('offers.std_error'), __('offers.std_must_select_category'));
         }
 
         $this->offerRepository->updateOffer($id, [

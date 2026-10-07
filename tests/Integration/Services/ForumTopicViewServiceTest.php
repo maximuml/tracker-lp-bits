@@ -22,6 +22,7 @@ use App\ViewModels\Forum\ViewTopicViewModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -283,18 +284,15 @@ final class ForumTopicViewServiceTest extends TestCase
 
         $this->topicRepo->shouldReceive('getTopic')->with(999)->andReturn(null);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
+        $this->assertAbortContains(
+            fn () => $this->service->buildViewTopic(
                 ['id' => 1, 'username' => 'test', 'class' => 10],
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 999]),
                 10,
-            ));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when topic does not exist');
+            ),
+            (string) __('forums.std_topic_not_found'),
+        );
     }
 
     // --- buildViewTopic: permission denied ---
@@ -321,18 +319,15 @@ final class ForumTopicViewServiceTest extends TestCase
             1 => ['id' => 1, 'name' => 'Test Forum', 'minclassread' => 50, 'minclasswrite' => 50, 'minclasscreate' => 50],
         ]);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
+        $this->assertAbortContains(
+            fn () => $this->service->buildViewTopic(
                 ['id' => 1, 'username' => 'test', 'class' => 0],
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 1]),
                 10,
-            ));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when user class is below minclassread');
+            ),
+            (string) __('forums.std_unpermitted_viewing_topic'),
+        );
     }
 
     // --- buildViewTopic: valid topic with no posts ---
@@ -511,14 +506,29 @@ final class ForumTopicViewServiceTest extends TestCase
      * @param  array<string, mixed>  $topicAttrs
      * @param  array<string, mixed>  $posterAttrs
      */
-    private function viewTopicVm(array $curUser = [], array $forumRow = [], array $topicAttrs = [], array $posterAttrs = []): ViewTopicViewModel
+    private function assertAbortContains(callable $fn, string ...$needles): void
+    {
+        try {
+            $this->callWithSuppressedErrors($fn);
+            $this->fail('Expected abort');
+        } catch (HttpResponseException $e) {
+            $html = (string) $e->getResponse()->getContent();
+            foreach ($needles as $needle) {
+                $this->assertStringContainsString(e($needle), $html);
+            }
+        } catch (\Throwable $e) {
+            $this->fail('Expected HttpResponseException, got '.$e::class);
+        }
+    }
+
+    private function viewTopicVm(array $curUser = [], array $forumRow = [], array $topicAttrs = [], array $posterAttrs = [], array $query = ['topicid' => 1]): ViewTopicViewModel
     {
         $repo = $this->mockForumRepo();
         $this->mockCache();
         $curUser = array_merge(['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
             'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes', 'last_catchup' => 0], $curUser);
         $userId = $this->setUser($curUser);
-        $this->setRequest(['topicid' => 1]);
+        $this->setRequest($query);
 
         $topic = new Topic;
         $topic->id = 1;
@@ -564,7 +574,7 @@ final class ForumTopicViewServiceTest extends TestCase
             1 => array_merge(['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0], $forumRow),
         ]);
         $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
-        $this->postRepo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(1);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, isset($query['authorid']) ? (int) $query['authorid'] : null)->andReturn(1);
         $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection([$post]));
         $repo->shouldReceive('getUsersByIds')->andReturn(new EloquentCollection([$userId => $user]));
         $this->postRepo->shouldReceive('countUserPosts')->andReturn(0);
@@ -574,7 +584,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
             $curUser,
             (int) $curUser['id'],
-            Request::create('/forums.php', 'GET', ['topicid' => 1]),
+            Request::create('/forums.php', 'GET', $query),
             10,
         ));
 
@@ -602,6 +612,8 @@ final class ForumTopicViewServiceTest extends TestCase
         $vm = $this->viewTopicVm(['forumpost' => 'no']);
 
         $this->assertFalse($vm->mayPost);
+        $this->assertNull($vm->quickReply);
+        $this->assertNotNull($vm->deniedNotice);
     }
 
     public function test_viewtopic_maypost_true_when_class_equals_minwrite(): void
@@ -616,6 +628,8 @@ final class ForumTopicViewServiceTest extends TestCase
         $vm = $this->viewTopicVm(['class' => 0], ['minclasswrite' => null]);
 
         $this->assertTrue($vm->mayPost);
+        $this->assertNotNull($vm->quickReply);
+        $this->assertNull($vm->deniedNotice);
     }
 
     public function test_viewtopic_maypost_true_for_mod_despite_locked(): void
@@ -640,5 +654,21 @@ final class ForumTopicViewServiceTest extends TestCase
         $vm = $this->viewTopicVm(['avatars' => 'no'], [], [], ['avatar' => 'pic/custom.png']);
 
         $this->assertStringContainsString('default_avatar', (string) $vm->posts[0]->avatarImage);
+    }
+
+    public function test_viewtopic_post_author_toggle_links_this_author_only(): void
+    {
+        $vm = $this->viewTopicVm();
+
+        $this->assertSame(__('forums.text_view_this_author_only'), $vm->posts[0]->authorToggleLabel);
+        $this->assertStringContainsString('topicid=1&authorid=', $vm->posts[0]->authorToggleUrl);
+    }
+
+    public function test_viewtopic_post_author_toggle_links_all_posts_when_filtered(): void
+    {
+        $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1, 'authorid' => 42]);
+
+        $this->assertSame(__('forums.text_view_all_posts'), $vm->posts[0]->authorToggleLabel);
+        $this->assertSame('?action=viewtopic&topicid=1', $vm->posts[0]->authorToggleUrl);
     }
 }

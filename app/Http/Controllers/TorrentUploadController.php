@@ -56,11 +56,11 @@ class TorrentUploadController extends Controller
         $this->currentUser->set($currentUser);
 
         if ($this->currentUser->value('parked')) {
-            LegacyResponse::abort(__('legacy/upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
+            LegacyResponse::abort(__('upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
         }
 
         if (! $this->currentUser->value('uploadpos')) {
-            LegacyResponse::abort(__('legacy/upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
+            LegacyResponse::abort(__('upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
         }
 
         $enableoffer = SiteConfig::current()->main->showOffer(false) ? 'yes' : 'no';
@@ -75,7 +75,7 @@ class TorrentUploadController extends Controller
         $uploadFreely = LegacyResponse::canUpload('torrents');
         $allowtorrents = $has_allowed_offer || $uploadFreely;
         if (! $allowtorrents) {
-            LegacyResponse::abort(__('legacy/upload.std_sorry'), view('upload._please-offer')->render(), false);
+            LegacyResponse::abort(__('upload.std_sorry'), view('upload._please-offer')->render(), false);
         }
 
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
@@ -149,7 +149,7 @@ class TorrentUploadController extends Controller
             'uploadFreely' => $uploadFreely,
             'allowtorrents' => $allowtorrents,
             'offerRows' => $offerRows,
-            'pageTitle' => __('legacy/upload.head_upload'),
+            'pageTitle' => __('upload.head_upload'),
             'cats' => Category::listByModeWithContext($browsecatmode),
             'trackerUrl' => Tracker::schemaAndHost((int) ($this->currentUser->value('tracker_url_id', 0)), true),
             'torrentDirWritable' => is_writable(Path::resolve(SiteConfig::current()->main->torrentDir(), ROOT_PATH)),

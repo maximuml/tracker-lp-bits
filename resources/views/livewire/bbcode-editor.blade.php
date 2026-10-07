@@ -6,6 +6,6 @@
         <x-bbcode-editor :form="$form" :text="$text" :content="$body" :invalid="$invalid" :described-by="$describedBy" :label="$label" :wire-model="'body'" />
     </div>
     <div class="text-center mt-2">
-        <input type="button" class="btn2" value="{{ $previewMode ? __('legacy/functions.submit_edit') : __('legacy/functions.submit_preview') }}" wire:click="{{ $previewMode ? 'unpreview' : 'preview' }}" />
+        <input type="button" class="btn2" value="{{ $previewMode ? __('functions.submit_edit') : __('functions.submit_preview') }}" wire:click="{{ $previewMode ? 'unpreview' : 'preview' }}" />
     </div>
 </div>

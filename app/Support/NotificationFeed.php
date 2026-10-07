@@ -257,7 +257,7 @@ final class NotificationFeed
             $items[] = [
                 'id' => 'shout_'.$mention['id'],
                 'type' => 'shoutbox-mention',
-                'title' => (string) __('legacy/notifications.title_shoutbox_mention'),
+                'title' => (string) __('notifications.title_shoutbox_mention'),
                 'body' => $this->truncate((string) $mention['text']),
                 'from' => (string) ($mention['author_name'] ?? 'System'),
                 'url' => '/web/shoutbox_history',
@@ -280,7 +280,7 @@ final class NotificationFeed
             $items[] = [
                 'id' => 'comment_'.$row['id'],
                 'type' => 'comment',
-                'title' => (string) __('legacy/notifications.title_comment'),
+                'title' => (string) __('notifications.title_comment'),
                 'body' => $this->truncate((string) ($row['text'] ?? '')),
                 'from' => (string) ($row['author_name'] ?? ''),
                 'url' => '/web/details/'.(int) $row['torrent'].'#comments',
@@ -304,7 +304,7 @@ final class NotificationFeed
             $items[] = [
                 'id' => 'reply_'.$row['id'],
                 'type' => 'topic_reply',
-                'title' => (string) __('legacy/notifications.title_topic_reply'),
+                'title' => (string) __('notifications.title_topic_reply'),
                 'body' => $this->truncate((string) ($row['body'] ?? '')),
                 'from' => (string) ($row['author_name'] ?? ''),
                 'url' => '/forums?action=viewtopic&topicid='.(int) $row['topicid'].'&page=last',
@@ -349,7 +349,7 @@ final class NotificationFeed
             $items[] = [
                 'id' => 'staff_'.$row->id,
                 'type' => 'staff',
-                'title' => (string) __('legacy/notifications.title_staff'),
+                'title' => (string) __('notifications.title_staff'),
                 'body' => $this->truncate((string) $row->msg),
                 'from' => (string) ($row->sender_username ?? 'System'),
                 'url' => '/staffbox?action=viewanswer&msgid='.(int) $row->id,

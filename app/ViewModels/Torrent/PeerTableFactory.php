@@ -51,7 +51,7 @@ final class PeerTableFactory
                 $ratioText = number_format($ratio, 3);
             } elseif ($uploaded) {
                 $ratioClass = null;
-                $ratioText = (string) (__('legacy/viewpeerlist.text_inf'));
+                $ratioText = (string) (__('viewpeerlist.text_inf'));
             } else {
                 $ratioClass = null;
                 $ratioText = '---';
@@ -64,7 +64,7 @@ final class PeerTableFactory
                 username: $usernameHtmlMap[$e['userid']] ?? SafeHtml::fromPlainText(''),
                 revealLocation: ! $isStrongPrivacy || $canView,
                 locationTitle: $enablelocationTweak === 'yes'
-                    ? ($canView ? sprintf('%s%s%s', self::plainTitle('legacy/functions.text_user_ip'), ":\u{00A0}", implode(', ', array_column($peerIpInfo[$e['id']] ?? [], 'ip'))) : '')
+                    ? ($canView ? sprintf('%s%s%s', self::plainTitle('functions.text_user_ip'), ":\u{00A0}", implode(', ', array_column($peerIpInfo[$e['id']] ?? [], 'ip'))) : '')
                     : null,
                 locationLines: $enablelocationTweak === 'yes'
                     ? array_column($peerIpInfo[$e['id']] ?? [], 'public')

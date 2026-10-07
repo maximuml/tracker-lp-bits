@@ -1,6 +1,6 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', __('legacy/rules.head_rules'))
+@section('title', __('rules.head_rules'))
 
 @section('content')
 @if (! empty($rules))

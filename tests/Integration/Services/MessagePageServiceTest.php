@@ -518,4 +518,21 @@ final class MessagePageServiceTest extends TestCase
         $this->assertArrayHasKey('baseUrl', $data);
         $this->assertArrayHasKey('contentWidth', $data);
     }
+
+    public function test_build_viewmailbox_jump_to_boxes_pin_inbox_then_sentbox(): void
+    {
+        $userId = $this->createUser();
+        $this->authenticatedUser(['id' => $userId]);
+        $this->seedSettings();
+
+        $data = $this->callBuild(Request::create('/messages.php', 'GET', ['box' => 1]));
+
+        $options = $data['viewmailbox']['jumpToBoxes'];
+        $this->assertSame(1, $options[0]->value);
+        $this->assertSame((string) __('messages.select_inbox'), $options[0]->label);
+        $this->assertTrue($options[0]->selected);
+        $this->assertSame(-1, $options[1]->value);
+        $this->assertSame((string) __('messages.select_sentbox'), $options[1]->label);
+        $this->assertFalse($options[1]->selected);
+    }
 }

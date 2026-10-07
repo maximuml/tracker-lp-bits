@@ -11,6 +11,7 @@ use App\Services\ForumComposeService;
 use App\Support\CurrentUser;
 use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Redis;
@@ -135,6 +136,21 @@ final class ForumComposeServiceTest extends TestCase
      * Call a callable while suppressing E_NOTICE/E_WARNING from the
      * legacy rendering system.
      */
+    private function assertAbortContains(callable $fn, string ...$needles): void
+    {
+        try {
+            $this->callWithSuppressedErrors($fn);
+            $this->fail('Expected abort');
+        } catch (HttpResponseException $e) {
+            $html = (string) $e->getResponse()->getContent();
+            foreach ($needles as $needle) {
+                $this->assertStringContainsString(e($needle), $html);
+            }
+        } catch (\Throwable $e) {
+            $this->fail('Expected HttpResponseException, got '.$e::class);
+        }
+    }
+
     private function callWithSuppressedErrors(callable $fn): mixed
     {
         set_error_handler(function (int $severity): bool {
@@ -169,13 +185,10 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->mockPostRepo()->shouldReceive('getPostForQuote')->with(999)->andReturn(null);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(999, 'quote'));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when quote post not found');
+        $this->assertAbortContains(
+            fn () => $this->service()->buildComposeFrame(999, 'quote'),
+            (string) __('forums.std_no_post_id'),
+        );
     }
 
     // --- buildComposeFrame: edit with post not found ---
@@ -204,7 +217,10 @@ final class ForumComposeServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'new'));
 
         $this->assertInstanceOf(ForumComposeViewModel::class, $result);
-        $this->assertStringContainsString('Test Forum', (string) $result->titleHtml);
+        $this->assertSame(
+            __('forums.text_new_topic_in').' <a href="?action=viewforum&amp;forumid=1">Test Forum</a> '.__('forums.text_forum'),
+            rtrim((string) $result->titleHtml, "\n"),
+        );
         $this->assertTrue($result->hasSubject);
         $this->assertSame('new', $result->hiddenType);
         $this->assertSame(1, $result->hiddenId);
@@ -223,7 +239,10 @@ final class ForumComposeServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'reply'));
 
         $this->assertInstanceOf(ForumComposeViewModel::class, $result);
-        $this->assertStringContainsString('Test Topic', (string) $result->titleHtml);
+        $this->assertSame(
+            __('forums.text_reply_to_topic').' <a href="?action=viewtopic&amp;topicid=1">Test Topic</a> ',
+            rtrim((string) $result->titleHtml, "\n"),
+        );
         $this->assertFalse($result->hasSubject);
         $this->assertSame('reply', $result->hiddenType);
     }
@@ -245,7 +264,10 @@ final class ForumComposeServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'quote'));
 
         $this->assertInstanceOf(ForumComposeViewModel::class, $result);
-        $this->assertStringContainsString('Quoted Topic', (string) $result->titleHtml);
+        $this->assertSame(
+            __('forums.text_reply_to_topic').' <a href="?action=viewtopic&amp;topicid=5">Quoted Topic</a> ',
+            rtrim((string) $result->titleHtml, "\n"),
+        );
         $this->assertStringContainsString('[quote=poster]', $result->body);
         $this->assertStringContainsString('Quoted text', $result->body);
         $this->assertSame(1, $result->postid);
@@ -270,7 +292,7 @@ final class ForumComposeServiceTest extends TestCase
         $result = $this->callWithSuppressedErrors(fn () => $this->service()->buildComposeFrame(1, 'edit'));
 
         $this->assertInstanceOf(ForumComposeViewModel::class, $result);
-        $this->assertStringContainsString('Edit Post', (string) $result->titleHtml);
+        $this->assertSame(__('forums.text_edit_post'), rtrim((string) $result->titleHtml, "\n"));
         $this->assertSame('Edit text', $result->body);
         $this->assertTrue($result->hasSubject);
         $this->assertSame('Edit Topic', $result->subject);
@@ -285,13 +307,10 @@ final class ForumComposeServiceTest extends TestCase
 
         $repo->shouldReceive('forumExists')->with(999)->andReturn(false);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'forum'));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when forum not found');
+        $this->assertAbortContains(
+            fn () => $this->service()->checkWhetherExist(999, 'forum'),
+            (string) __('forums.std_no_forum_id'),
+        );
     }
 
     public function test_check_whether_exist_topic_not_found_aborts(): void
@@ -301,13 +320,10 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->mockTopicRepo()->shouldReceive('topicExists')->with(999)->andReturn(null);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'topic'));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when topic not found');
+        $this->assertAbortContains(
+            fn () => $this->service()->checkWhetherExist(999, 'topic'),
+            (string) __('forums.std_bad_topic_id'),
+        );
     }
 
     public function test_check_whether_exist_post_not_found_aborts(): void
@@ -317,13 +333,10 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->mockPostRepo()->shouldReceive('postExists')->with(999)->andReturn(null);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service()->checkWhetherExist(999, 'post'));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when post not found');
+        $this->assertAbortContains(
+            fn () => $this->service()->checkWhetherExist(999, 'post'),
+            (string) __('forums.std_no_post_id'),
+        );
     }
 
     public function test_check_whether_exist_invalid_id_aborts(): void

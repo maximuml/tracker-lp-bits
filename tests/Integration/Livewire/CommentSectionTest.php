@@ -61,7 +61,7 @@ final class CommentSectionTest extends TestCase
         Livewire::test(CommentSection::class, ['parentId' => $torrent->id])
             ->set('text', '   ')
             ->call('post')
-            ->assertSet('status', (string) __('legacy/comment.std_comment_body_empty'));
+            ->assertSet('status', (string) __('comment.std_comment_body_empty'));
 
         $this->assertSame(0, Comment::query()->where('torrent', $torrent->id)->count());
     }

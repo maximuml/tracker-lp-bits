@@ -5,74 +5,74 @@
 @section('content')
 @if ($mode === 'list')
     @if ($page === null)
-        <x-frame :caption="__('legacy/complains.pending_complaints')" :center="false">
+        <x-frame :caption="__('complains.pending_complaints')" :center="false">
             @if (! empty($pendingRows))
-                <x-data-table :caption="__('legacy/complains.pending_complaints')" captionHidden><x-slot:head><thead><tr>
-                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
-                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
-                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_action_view') ?? 'View' }}</th>
+                <x-data-table :caption="__('complains.pending_complaints')" captionHidden><x-slot:head><thead><tr>
+                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') ?? 'Added' }}</th>
+                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') ?? 'Account' }}</th>
+                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_action_view') ?? 'View' }}</th>
                 </tr></thead></x-slot:head>
                 @foreach ($pendingRows as $row)
                     <tr>
                         <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
                         <td class="align-top px-2.5 py-1.5">{{ $row['email'] ?? '' }}</td>
-                        <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
+                        <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('complains.th_action_view') ?? 'View' }}</a></td>
                     </tr>
                 @endforeach
                 </x-data-table>
             @else
-                {{ __('legacy/complains.no_pending_complaints') ?? 'No pending complaints.' }}
+                {{ __('complains.no_pending_complaints') ?? 'No pending complaints.' }}
             @endif
         </x-frame>
     @endif
 
-    <x-frame :caption="__('legacy/complains.complaints_processed')" :center="false">
+    <x-frame :caption="__('complains.complaints_processed')" :center="false">
         @if (! empty($processedRows))
             {{ $pagertop ?? '' }}
-            <x-data-table :caption="__('legacy/complains.complaints_processed')" captionHidden><x-slot:head><thead><tr>
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_complain_at') ?? 'Added' }}</th>
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_complain_account') ?? 'Account' }}</th>
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/complains.th_action_view') ?? 'View' }}</th>
+            <x-data-table :caption="__('complains.complaints_processed')" captionHidden><x-slot:head><thead><tr>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') ?? 'Added' }}</th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') ?? 'Account' }}</th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_action_view') ?? 'View' }}</th>
             </tr></thead></x-slot:head>
             @foreach ($processedRows as $row)
                 <tr>
                     <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
                     <td class="align-top px-2.5 py-1.5">{{ $row['email'] ?? '' }}</td>
-                    <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('legacy/complains.th_action_view') ?? 'View' }}</a></td>
+                    <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('complains.th_action_view') ?? 'View' }}</a></td>
                 </tr>
             @endforeach
             </x-data-table>
             {{ $pagerbottom ?? '' }}
         @else
-            {{ __('legacy/complains.no_complaints_have_been_processed') ?? 'No complaints have been processed.' }}
+            {{ __('complains.no_complaints_have_been_processed') ?? 'No complaints have been processed.' }}
         @endif
     </x-frame>
 
 @elseif ($mode === 'view')
     @if (! $isLogin)
-        <x-frame :caption="__('legacy/complains.text_created_title')" :center="false">
-            <p>{{ __('legacy/complains.text_created_note') ?? '' }}</p>
+        <x-frame :caption="__('complains.text_created_title')" :center="false">
+            <p>{{ __('complains.text_created_note') ?? '' }}</p>
         </x-frame>
     @endif
 
-    <x-frame :caption="__('legacy/complains.text_new_body')" :center="false">
-        {{ __('legacy/complains.text_added') ?? 'Added' }}：<x-time :value="$complain['added'] ?? ''" /><br />{{ __('legacy/complains.text_new_email') ?? 'Email' }} {{ $complain['email'] ?? '' }}
+    <x-frame :caption="__('complains.text_new_body')" :center="false">
+        {{ __('complains.text_added') ?? 'Added' }}：<x-time :value="$complain['added'] ?? ''" /><br />{{ __('complains.text_new_email') ?? 'Email' }} {{ $complain['email'] ?? '' }}
         @if ($isAdmin)
             @if (! empty($user))
                 [<a href="/userdetails?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ $user['username'] ?? '' }}</a>]
-                [<a href="/web/user-ban-log?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank">{{ __('legacy/complains.text_view_band_log') ?? 'View ban log' }}</a>]
+                [<a href="/web/user-ban-log?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank">{{ __('complains.text_view_band_log') ?? 'View ban log' }}</a>]
             @else
-                [<a href="/web/usersearch?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank">{{ __('legacy/complains.text_search_account') ?? 'Search account' }}</a>]
+                [<a href="/web/usersearch?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank">{{ __('complains.text_search_account') ?? 'Search account' }}</a>]
             @endif
             <br />IP: {{ $complain['ip'] ?? '' }}
         @endif
         <hr />{{ \App\Support\Format::formatComment($complain['body'] ?? '') }}
     </x-frame>
 
-    <x-frame :caption="__('legacy/complains.text_replies')" :center="false">
+    <x-frame :caption="__('complains.text_replies')" :center="false">
         @if (! empty($replyRows))
             @foreach ($replyRows as $row)
-                <b>{{ (int) ($row['userid'] ?? 0) !== 0 ? ($replyUserMap[(int) $row['userid']] ?? \App\Support\UserDisplay::plainUsername((int) $row['userid'])) : (__('legacy/complains.text_complainer')) }} @ <x-time :value="$row['added'] ?? ''" />
+                <b>{{ (int) ($row['userid'] ?? 0) !== 0 ? ($replyUserMap[(int) $row['userid']] ?? \App\Support\UserDisplay::plainUsername((int) $row['userid'])) : (__('complains.text_complainer')) }} @ <x-time :value="$row['added'] ?? ''" />
                 @if ($isAdmin)
                     ({{ $row['ip'] ?? '' }})
                 @endif
@@ -80,31 +80,31 @@
                 {{ \App\Support\Format::formatComment($row['body'] ?? '') }}<hr />
             @endforeach
         @else
-            <p class="text-center">{{ __('legacy/complains.text_no_replies') ?? 'No replies.' }}</p>
+            <p class="text-center">{{ __('complains.text_no_replies') ?? 'No replies.' }}</p>
         @endif
     </x-frame>
 
     @if (! empty($complain['answered']) && (int) $complain['answered'] !== 0)
-        <p class="text-center">{{ __('legacy/complains.text_closed') ?? 'This complain has been closed.' }}</p>
+        <p class="text-center">{{ __('complains.text_closed') ?? 'This complain has been closed.' }}</p>
     @else
-        <br /><br /><div class="nx-box text-center"><b>{{ __('legacy/complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action="/web/complains/reply"><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $complain['uuid'] ?? '' }}" /><br />
+        <br /><br /><div class="nx-box text-center"><b>{{ __('complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action="/web/complains/reply"><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $complain['uuid'] ?? '' }}" /><br />
         {{ $replyBoxHtml }}
         </form></div>
     @endif
 
     @if ($isAdmin)
-        <form action="{{ ! empty($complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post"><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button>{{ ! empty($complain['answered']) ? (__('legacy/complains.text_unanswer_it')) : (__('legacy/complains.text_answer_it')) }}</button></form>
+        <form action="{{ ! empty($complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post"><input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button>{{ ! empty($complain['answered']) ? (__('complains.text_unanswer_it')) : (__('complains.text_answer_it')) }}</button></form>
     @endif
 
 @else
     <section class="nx-idx-card">
-    <h2>{{ __('legacy/complains.text_new_complain') ?? 'New complain' }}</h2>
+    <h2>{{ __('complains.text_new_complain') ?? 'New complain' }}</h2>
     <form action="/web/complains/new" method="post">
         <div class="nx-fgrid nx-fgrid--flat">
-            <div class="nx-fhead">{{ __('legacy/complains.text_new_email') ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" autocomplete="email" /></div>
-            <div class="nx-fhead">{{ __('legacy/complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('legacy/complains.text_new_body_placeholder') ?? '' }}"></textarea></div>
+            <div class="nx-fhead">{{ __('complains.text_new_email') ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" autocomplete="email" /></div>
+            <div class="nx-fhead">{{ __('complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('complains.text_new_body_placeholder') ?? '' }}"></textarea></div>
             {{ $captchaHtml }}
-            <div class="nx-ffull text-center"><input type="submit" value="{{ __('legacy/complains.text_new_submit') ?? 'Submit' }}" class="btn" /></div>
+            <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') ?? 'Submit' }}" class="btn" /></div>
         </div>
     </form>
 </section>

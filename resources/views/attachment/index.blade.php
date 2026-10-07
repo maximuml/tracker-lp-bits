@@ -12,16 +12,16 @@
     <form enctype="multipart/form-data" name="attachment" method="post" action="/web/attachments/upload?callback_func={{ $callback_func }}">
     @csrf
     <div class="nx-attach-controls">
-    <input type="file" name="file[]" multiple aria-label="{{ __('legacy/attachment.submit_upload') }}" @if (! $count_left) disabled="disabled"@endif />
-    <label><input type="checkbox" name="altsize" value="yes"@if ($altsize == 'yes') checked="checked"@endif /> {{ __('legacy/attachment.text_small_thumbnail')}}</label>
-    <input type="submit" class="nx-postbtn" name="submit" value="{{ __('legacy/attachment.submit_upload')}}"@if (! $count_left) disabled="disabled"@endif />
+    <input type="file" name="file[]" multiple aria-label="{{ __('attachment.submit_upload') }}" @if (! $count_left) disabled="disabled"@endif />
+    <label><input type="checkbox" name="altsize" value="yes"@if ($altsize == 'yes') checked="checked"@endif /> {{ __('attachment.text_small_thumbnail')}}</label>
+    <input type="submit" class="nx-postbtn" name="submit" value="{{ __('attachment.submit_upload')}}"@if (! $count_left) disabled="disabled"@endif />
     </div>
     <div class="nx-attach-info">
     @if ($warning)
         <span class="striking">{{ $warning }}</span>
     @else
-        <b>{{ __('legacy/attachment.text_left')}}</b><span class="text-nxm-danger">{{ $count_left }}</span>{{ __('legacy/attachment.text_of')}}{{ $count_limit }}&nbsp;&nbsp;<b>{{ __('legacy/attachment.text_size_limit')}}</b>{{ \App\Support\Format::size($size_limit) }}&nbsp;&nbsp;<b>{{ __('legacy/attachment.text_file_extensions')}}</b>
-        <span title="{{ $allowedextsblock }}"><i>{{ __('legacy/attachment.text_mouse_over_here')}}</i></span>
+        <b>{{ __('attachment.text_left')}}</b><span class="text-nxm-danger">{{ $count_left }}</span>{{ __('attachment.text_of')}}{{ $count_limit }}&nbsp;&nbsp;<b>{{ __('attachment.text_size_limit')}}</b>{{ \App\Support\Format::size($size_limit) }}&nbsp;&nbsp;<b>{{ __('attachment.text_file_extensions')}}</b>
+        <span title="{{ $allowedextsblock }}"><i>{{ __('attachment.text_mouse_over_here')}}</i></span>
     @endif
     </div>
     </form>

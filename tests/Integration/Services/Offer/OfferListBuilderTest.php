@@ -10,7 +10,9 @@ use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Services\Offer\OfferListBuilder;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Time;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -160,14 +162,14 @@ final class OfferListBuilderTest extends TestCase
         return array_merge(['id' => 7, 'timetype' => 1, 'appendnew' => 'yes', 'last_offer' => '2000-01-01 00:00:00'], $overrides);
     }
 
-    private function assertAborts(callable $fn): void
+    private function assertAbortContains(callable $fn, string $needle): void
     {
         set_error_handler(static fn (int $severity): bool => true, E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
         try {
             $fn();
             $this->fail('Expected abort');
-        } catch (\Throwable) {
-            $this->addToAssertionCount(1);
+        } catch (HttpResponseException $e) {
+            $this->assertStringContainsString(e($needle), (string) $e->getResponse()->getContent());
         } finally {
             restore_error_handler();
         }
@@ -175,7 +177,10 @@ final class OfferListBuilderTest extends TestCase
 
     public function test_invalid_sort_aborts(): void
     {
-        $this->assertAborts(fn () => $this->builder()->build($this->curUser(), 7, $this->request(['sort' => 'evil']), $this->globalData()));
+        $this->assertAbortContains(
+            fn () => $this->builder()->build($this->curUser(), 7, $this->request(['sort' => 'evil']), $this->globalData()),
+            (string) __('offers.std_smell_rat'),
+        );
     }
 
     public function test_sort_name_desc_flips_to_asc_order_clause(): void
@@ -230,7 +235,7 @@ final class OfferListBuilderTest extends TestCase
 
         $this->assertSame(0, $s->count);
         $this->assertNull($s->table);
-        $this->assertStringContainsString((string) __('legacy/offers.text_nothing_found'), (string) $s->emptyState);
+        $this->assertStringContainsString((string) __('offers.text_nothing_found'), (string) $s->emptyState);
         $this->assertNotEmpty($s->categories);
     }
 
@@ -299,6 +304,26 @@ final class OfferListBuilderTest extends TestCase
         $this->assertStringContainsString('action=add', (string) $c->comment->href);
     }
 
+    public function test_timealive_user_sees_formatted_lastcom_tooltip(): void
+    {
+        $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
+            $this->row(['id' => 1, 'comments' => 2]),
+        ], 1));
+        $this->cache->shouldReceive('get_values')->andReturn([
+            'offer_1_last_comment_content' => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'cached comment'],
+        ]);
+
+        $s = $this->builder()->build($this->curUser(['timetype' => 1]), 7, $this->request(), $this->globalData());
+
+        $this->assertNotNull($s->table);
+        $tooltip = $s->table->tooltips[0] ?? null;
+        $this->assertNotNull($tooltip);
+        $this->assertStringContainsString(
+            (string) __('offers.text_blank').Time::format('2024-06-01 00:00:00', true, false, true),
+            (string) $tooltip->content,
+        );
+    }
+
     public function test_showlastcom_disabled_uses_title_tooltips(): void
     {
         $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
@@ -313,7 +338,7 @@ final class OfferListBuilderTest extends TestCase
         $table = $s->table;
         $this->assertNotNull($table);
         $this->assertSame([], $table->tooltips);
-        $this->assertSame((string) __('legacy/offers.title_has_new_comment'), $table->rows[0]->comment->title);
+        $this->assertSame((string) __('offers.title_has_new_comment'), $table->rows[0]->comment->title);
     }
 
     public function test_appendnew_no_marks_nothing_new(): void

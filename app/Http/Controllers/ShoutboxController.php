@@ -159,7 +159,7 @@ class ShoutboxController extends LegacyController
             $uid = (int) ($arr['userid'] ?? 0);
             $username = $uid > 0
                 ? (string) ($userDisplayMap[$uid] ?? '')
-                : (string) (__('legacy/shoutbox.text_guest'));
+                : (string) (__('shoutbox.text_guest'));
             $mentionsMe = false;
             $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
             $editedTime = '';

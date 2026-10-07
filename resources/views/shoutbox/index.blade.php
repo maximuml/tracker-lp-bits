@@ -92,7 +92,7 @@ function shoutAttachToggleHandler() {
     @if (! $isAjax)
         <div id="shoutbox-content">
     @endif
-    <x-data-table :caption="__('legacy/index.text_shoutbox')" captionHidden>
+    <x-data-table :caption="__('index.text_shoutbox')" captionHidden>
     @foreach ($items as $item)
         <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[{{ $item['time'] }}]</span> {{ $item['actions'] }} @include('shoutbox._avatar', ['url' => $item['avatarUrl'], 'userId' => $item['avatarUserId'], 'tooltip' => $item['avatarTooltip'], 'spacer' => $item['avatarSpacer']]) {{ $item['classBadge'] }}@if (! empty($item['isGuest']))<b>{{ $item['username'] }}</b>@else{{ $item['username'] }}@endif {{ $item['reactions'] }} @include('shoutbox._message', ['id' => $item['msgId'], 'isLong' => $item['msgLong'], 'raw' => $item['msgRaw'], 'formatted' => $item['msgFormatted'], 'editedTime' => $item['editedTime'], 'labelMore' => $item['labelMore'], 'labelLess' => $item['labelLess']])
 </td></tr>

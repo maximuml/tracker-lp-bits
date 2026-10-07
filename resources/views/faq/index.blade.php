@@ -1,18 +1,18 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', __('legacy/faq.head_faq'))
+@section('title', __('faq.head_faq'))
 
 @section('content')
-<h1 class="nx-sr-only">{{ __('legacy/faq.head_faq') }}</h1>
+<h1 class="nx-sr-only">{{ __('faq.head_faq') }}</h1>
 @if (! empty($faqCategories))
-    <x-frame :caption="__('legacy/faq.text_welcome_to').$SITENAME.' - '.$SLOGAN" :center="false">
-    {{ __('legacy/faq.text_welcome_content_one') }} <a class="faqlink" href="/web/contactstaff">{{ __('legacy/faq.text_contact') }}</a> {{ __('legacy/faq.text_welcome_content_one_end') }}<br /><br />{{ __('legacy/faq.text_welcome_content_one_two') }}
-    {{ sprintf(__('legacy/faq.text_welcome_content_two'), $SITENAME) }} <a class="faqlink" href="/web/rules">{{ __('legacy/faq.text_rules') }}</a>{{ __('legacy/faq.text_welcome_content_two_two') }}<br /><br />{{ sprintf(__('legacy/faq.text_welcome_content_two_three'), $SITENAME) }} <a class="faqlink" href="/web/useragreement">{{ __('legacy/faq.text_user_agreement') }}</a>.
+    <x-frame :caption="__('faq.text_welcome_to').$SITENAME.' - '.$SLOGAN" :center="false">
+    {{ __('faq.text_welcome_content_one') }} <a class="faqlink" href="/web/contactstaff">{{ __('faq.text_contact') }}</a> {{ __('faq.text_welcome_content_one_end') }}<br /><br />{{ __('faq.text_welcome_content_one_two') }}
+    {{ sprintf(__('faq.text_welcome_content_two'), $SITENAME) }} <a class="faqlink" href="/web/rules">{{ __('faq.text_rules') }}</a>{{ __('faq.text_welcome_content_two_two') }}<br /><br />{{ sprintf(__('faq.text_welcome_content_two_three'), $SITENAME) }} <a class="faqlink" href="/web/useragreement">{{ __('faq.text_user_agreement') }}</a>.
     </x-frame>
 
-    <x-frame :center="false"><x-slot:caption><span id="top">{{ __('legacy/faq.text_contents') }}</span></x-slot>
+    <x-frame :center="false"><x-slot:caption><span id="top">{{ __('faq.text_contents') }}</span></x-slot>
     <p class="nx-faq__search">
-        <input type="search" class="nx-faq__search-input" data-faq-search placeholder="{{ __('legacy/faq.text_search_faq') }}" aria-label="{{ __('legacy/faq.text_search_faq') }}" />
+        <input type="search" class="nx-faq__search-input" data-faq-search placeholder="{{ __('faq.text_search_faq') }}" aria-label="{{ __('faq.text_search_faq') }}" />
         <span class="nx-faq__search-count" data-faq-count hidden></span>
     </p>
     <ul>

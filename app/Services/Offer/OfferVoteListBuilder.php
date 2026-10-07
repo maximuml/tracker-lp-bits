@@ -50,7 +50,7 @@ final class OfferVoteListBuilder
             'offerId' => $offerId,
             'offerName' => htmlspecialchars($offerName),
             'hasVotes' => ! $voteRows->isEmpty(),
-            'noVotesNote' => (string) (__('legacy/offers.std_no_votes_yet')),
+            'noVotesNote' => __('offers.std_no_votes_yet'),
             'pagerTop' => $pagerTop,
             'pagerBottom' => $pagerBottom,
             'rows' => $rows,

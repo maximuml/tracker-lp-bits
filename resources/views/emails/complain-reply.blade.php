@@ -1,1 +1,1 @@
-{{ __('legacy/complains.reply_notify_body', ['site' => $siteName]) }}<a href="{{ $url }}" target="_blank">{{ __('legacy/complains.reply_notify_link') }}</a>{{ __('legacy/complains.reply_notify_tail') }}
+{{ __('complains.reply_notify_body', ['site' => $siteName]) }}<a href="{{ $url }}" target="_blank">{{ __('complains.reply_notify_link') }}</a>{{ __('complains.reply_notify_tail') }}

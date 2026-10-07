@@ -1,6 +1,6 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', __('legacy/staff.head_staff'))
+@section('title', __('staff.head_staff'))
 
 @section('content')
 @include('staff._staff')

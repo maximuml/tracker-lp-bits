@@ -4,20 +4,20 @@
     <x-slot:head>
         <thead>
             <tr>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_user_ip') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_user_ip') }}</th>
                 @if ($table->showLocationColumn)
-                    <th scope="col">{{ __('legacy/viewpeerlist.col_location') }}</th>
+                    <th scope="col">{{ __('viewpeerlist.col_location') }}</th>
                 @endif
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_connectable') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_uploaded') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_rate') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_downloaded') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_rate') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_ratio') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_complete') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_connected') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_idle') }}</th>
-                <th class="w-[1%]" scope="col">{{ __('legacy/viewpeerlist.col_client') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_connectable') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_uploaded') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_rate') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_downloaded') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_rate') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_ratio') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_complete') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_connected') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_idle') }}</th>
+                <th class="w-[1%]" scope="col">{{ __('viewpeerlist.col_client') }}</th>
             </tr>
         </thead>
     </x-slot:head>
@@ -25,7 +25,7 @@
         <tr @if ($row->highlighted) class="bg-[#BBAF9B]" @endif>
             <td class="w-[1%]">
                 @if ($row->anonymous)
-                    <i>{{ __('legacy/viewpeerlist.text_anonymous') }}</i>
+                    <i>{{ __('viewpeerlist.text_anonymous') }}</i>
                     @if ($row->revealUsername)
                         <br />({{ $row->username }})
                     @endif
@@ -43,11 +43,11 @@
                         @endif
                     @endif
                     @if ($row->anonymous)
-                        <div><i>{{ __('legacy/viewpeerlist.text_anonymous') }}</i></div>
+                        <div><i>{{ __('viewpeerlist.text_anonymous') }}</i></div>
                     @endif
                 </div></td>
             @endif
-            <td class="w-[1%] whitespace-nowrap text-center">@if ($row->connectableYes){{ __('legacy/viewpeerlist.text_yes') }}@else<span class="text-nxm-danger">{{ __('legacy/viewpeerlist.text_no') }}</span>@endif</td>
+            <td class="w-[1%] whitespace-nowrap text-center">@if ($row->connectableYes){{ __('viewpeerlist.text_yes') }}@else<span class="text-nxm-danger">{{ __('viewpeerlist.text_no') }}</span>@endif</td>
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->uploaded }}</td>
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->uploadRate }}/s</td>
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->downloaded }}</td>

@@ -10,6 +10,7 @@ use App\Services\Offer\OfferAddBuilder;
 use App\Services\Offer\OfferEditBuilder;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -78,14 +79,14 @@ final class OfferEditBuilderTest extends TestCase
         return Request::create('/web/offers?id='.$id, 'GET');
     }
 
-    private function assertAborts(callable $fn): void
+    private function assertAbortContains(callable $fn, string $needle): void
     {
         set_error_handler(static fn (int $severity): bool => true, E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
         try {
             $fn();
             $this->fail('Expected abort');
-        } catch (\Throwable) {
-            $this->addToAssertionCount(1);
+        } catch (HttpResponseException $e) {
+            $this->assertStringContainsString(e($needle), (string) $e->getResponse()->getContent());
         } finally {
             restore_error_handler();
         }
@@ -95,14 +96,20 @@ final class OfferEditBuilderTest extends TestCase
     {
         $this->offerRepo->shouldReceive('findOffer')->with(5)->andReturn(null);
 
-        $this->assertAborts(fn () => $this->editBuilder()->build(['id' => 7], 7, $this->request(), 1));
+        $this->assertAbortContains(
+            fn () => $this->editBuilder()->build(['id' => 7], 7, $this->request(), 1),
+            (string) __('offers.text_nothing_found'),
+        );
     }
 
     public function test_non_owner_low_class_aborts(): void
     {
         $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['userid' => 10]));
 
-        $this->assertAborts(fn () => $this->editBuilder()->build(['id' => 7], 7, $this->request(), 1));
+        $this->assertAbortContains(
+            fn () => $this->editBuilder()->build(['id' => 7], 7, $this->request(), 1),
+            (string) __('offers.std_cannot_edit_others_offer'),
+        );
     }
 
     public function test_owner_gets_form_data(): void

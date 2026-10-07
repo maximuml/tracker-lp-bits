@@ -30,7 +30,7 @@ final class UsercpPersonalBuilder
      */
     public function build(array $curUser): UsercpPersonalSection
     {
-        $countryOptions = ['0' => '---- '.__('legacy/usercp.select_none_selected').' ----'];
+        $countryOptions = ['0' => '---- '.__('usercp.select_none_selected').' ----'];
         foreach ($this->usercpLookupRepository->getCountryOptions() as $ct) {
             $countryOptions[(string) $ct->id] = (string) $ct->name;
         }
@@ -53,7 +53,7 @@ final class UsercpPersonalBuilder
             $notifCheckboxes[] = [
                 'name' => 'notifs['.$option.']',
                 'checked' => is_null($curUser['notifs'] ?? null) || str_contains($notifs, "[{$option}]"),
-                'label' => (string) __('legacy/usercp.checkbox_pm_on_'.$option),
+                'label' => (string) __('usercp.checkbox_pm_on_'.$option),
             ];
         }
 

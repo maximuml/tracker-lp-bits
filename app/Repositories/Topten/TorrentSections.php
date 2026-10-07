@@ -29,7 +29,7 @@ final class TorrentSections extends SectionQueries
             $sections[] = [
                 'view' => 'torrents',
                 'data' => $this->toArray((clone $base)->orderByRaw('seeders + leechers DESC, seeders DESC, added ASC')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_active_torrents')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_active_torrents')),
                 'limits' => [25, 50],
                 'subtype' => 'act',
             ];
@@ -39,7 +39,7 @@ final class TorrentSections extends SectionQueries
             $sections[] = [
                 'view' => 'torrents',
                 'data' => $this->toArray((clone $base)->orderBy('times_completed', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_snatched_torrents')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_snatched_torrents')),
                 'limits' => [25, 50],
                 'subtype' => 'sna',
             ];
@@ -49,7 +49,7 @@ final class TorrentSections extends SectionQueries
             $sections[] = [
                 'view' => 'torrents',
                 'data' => $this->toArray((clone $base)->where('times_completed', '>', 0)->orderBy('data', 'desc')->orderBy('added', 'asc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_data_transferred_torrents')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_data_transferred_torrents')),
                 'limits' => [25, 50],
                 'subtype' => 'mdt',
             ];
@@ -59,7 +59,7 @@ final class TorrentSections extends SectionQueries
             $sections[] = [
                 'view' => 'torrents',
                 'data' => $this->toArray((clone $base)->where('seeders', '>=', 5)->orderByRaw('seeders / leechers DESC, seeders DESC, added ASC')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_best_seeded_torrents'), __('legacy/topten.text_best_seeded_torrents_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_best_seeded_torrents'), __('topten.text_best_seeded_torrents_note')),
                 'limits' => [25, 50],
                 'subtype' => 'bse',
             ];
@@ -77,7 +77,7 @@ final class TorrentSections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_worst_seeded_torrents'), __('legacy/topten.text_worst_seeded_torrents_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_worst_seeded_torrents'), __('topten.text_worst_seeded_torrents_note')),
                 'limits' => [25, 50],
                 'subtype' => 'wse',
             ];

@@ -91,7 +91,7 @@ class EmailConfirmation
     public function resendConfirmation(array $data, string $ip, string $langFolder): string
     {
         if (SiteConfig::current()->main->verification('email') === 'admin') {
-            throw new AuthenticationException(__('legacy/confirm_resend.std_need_admin_verification'));
+            throw new AuthenticationException(__('confirm_resend.std_need_admin_verification'));
         }
 
         $this->authService->assertNotBanned($ip);
@@ -102,24 +102,24 @@ class EmailConfirmation
         $passAgain = trim((string) ($data['passagain'] ?? ''));
 
         if ($email === '' || $password === '' || $passAgain === '') {
-            throw new AuthenticationException(__('legacy/confirm_resend.std_fields_blank'));
+            throw new AuthenticationException(__('confirm_resend.std_fields_blank'));
         }
 
         if (! Email::isWellFormed($email)) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/confirm_resend.std_invalid_email_address'));
+            throw new AuthenticationException(__('confirm_resend.std_invalid_email_address'));
         }
 
         $user = $this->userAccountRepository->findByEmail($email);
 
         if (! $user) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/confirm_resend.std_email_not_found'));
+            throw new AuthenticationException(__('confirm_resend.std_email_not_found'));
         }
 
         if ($user->status !== UserStatus::PENDING) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/confirm_resend.std_user_already_confirm'));
+            throw new AuthenticationException(__('confirm_resend.std_user_already_confirm'));
         }
 
         $this->passwordSetup->validate($password, $passAgain, (string) $user->username, 'confirm_resend');
@@ -138,7 +138,7 @@ class EmailConfirmation
         ]);
 
         if (! $affected) {
-            throw new AuthenticationException(__('legacy/confirm_resend.std_database_error'));
+            throw new AuthenticationException(__('confirm_resend.std_database_error'));
         }
 
         Cache::clearUser($user->id, '');
@@ -175,7 +175,7 @@ class EmailConfirmation
 
         if (! $verified) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/functions.std_invalid_image_code'));
+            throw new AuthenticationException(__('functions.std_invalid_image_code'));
         }
     }
 
@@ -230,7 +230,7 @@ class EmailConfirmation
         $siteName = SiteConfig::current()->basic->siteName();
         $reportEmail = SiteConfig::current()->main->reportEmail('');
 
-        $title = $siteName.(__('legacy/confirm_resend.mail_title'));
+        $title = $siteName.(__('confirm_resend.mail_title'));
 
         $body = view('emails.confirm-resend', [
             'username' => $username,

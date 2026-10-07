@@ -69,7 +69,7 @@ class AttendanceController extends LegacyController
         }
         $attendance = $repository->attend($uid);
         if (! $attendance->is_updated) {
-            LegacyResponse::abort(__('legacy/attendance.sorry'), __('legacy/attendance.already_attended'));
+            LegacyResponse::abort(__('attendance.sorry'), __('attendance.already_attended'));
         }
 
         return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);
@@ -134,7 +134,7 @@ class AttendanceController extends LegacyController
         $eventStr = (string) json_encode($data['events'] ?? []);
         $validRangeStr = (string) json_encode($data['validRange'] ?? []);
         $localeJs = (string) ($data['localeJs'] ?? '');
-        $confirmTip = (string) (__('legacy/attendance.retroactive_confirm_tip'));
+        $confirmTip = (string) (__('attendance.retroactive_confirm_tip'));
 
         return <<<EOP
 let events = JSON.parse('$eventStr')
@@ -182,13 +182,13 @@ EOP;
         $continuous = SiteConfig::current()->bonus->attendanceContinuous(Attendance::CONTINUOUS_BONUS);
         $continuousLines = [];
         foreach ($continuous as $day => $value) {
-            $continuousLines[] = sprintf((string) (__('legacy/attendance.continuous')), $day, $value);
+            $continuousLines[] = sprintf((string) (__('attendance.continuous')), $day, $value);
         }
 
         return [
             'lines' => [
-                sprintf((string) (__('legacy/attendance.initial')), $initial),
-                sprintf((string) (__('legacy/attendance.steps')), $step, $max),
+                sprintf((string) (__('attendance.initial')), $initial),
+                sprintf((string) (__('attendance.steps')), $step, $max),
             ],
             'continuous' => $continuousLines,
         ];

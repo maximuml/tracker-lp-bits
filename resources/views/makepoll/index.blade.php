@@ -1,15 +1,15 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', $title ?? (__('legacy/makepoll.head_new_poll')))
+@section('title', $title ?? (__('makepoll.head_new_poll')))
 
 @section('content')
 @if (($pollid ?? 0) > 0)
-    <h1>{{ __('legacy/makepoll.text_edit_poll')}}</h1>
+    <h1>{{ __('makepoll.text_edit_poll')}}</h1>
 @else
     @if (($pollAge['question'] ?? '') !== '')
-        <p><span class="striking"><b>{{ __('legacy/makepoll.text_current_poll') }}(<i>{{ $pollAge['question'] }}</i>){{ __('legacy/makepoll.text_is_only') }}{{ $pollAge['age'] }}{{ __('legacy/makepoll.text_old') }}</b></span></p>
+        <p><span class="striking"><b>{{ __('makepoll.text_current_poll') }}(<i>{{ $pollAge['question'] }}</i>){{ __('makepoll.text_is_only') }}{{ $pollAge['age'] }}{{ __('makepoll.text_old') }}</b></span></p>
     @endif
-    <h1>{{ __('legacy/makepoll.text_make_poll')}}</h1>
+    <h1>{{ __('makepoll.text_make_poll')}}</h1>
 @endif
 
 <form method="post" action="/web/polls/create">@csrf
@@ -17,13 +17,13 @@
 input.mp { width: 450px; }
 </style>
 <div class="nx-fgrid">
-<div class="nx-fhead">{{ __('legacy/makepoll.text_question')}} <span class="text-nxm-danger">*</span></div><div class="nx-fcell"><input name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></div>
+<div class="nx-fhead">{{ __('makepoll.text_question')}} <span class="text-nxm-danger">*</span></div><div class="nx-fcell"><input name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></div>
 @for ($i = 0; $i <= 19; $i++)
-<div class="nx-fhead">{{ (__('legacy/makepoll.text_option')).($i + 1) }}@if ($i < 2) <span class="text-nxm-danger">*</span>@endif</div><div class="nx-fcell"><input name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></div>
+<div class="nx-fhead">{{ (__('makepoll.text_option')).($i + 1) }}@if ($i < 2) <span class="text-nxm-danger">*</span>@endif</div><div class="nx-fcell"><input name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></div>
 @endfor
-<div class="nx-ffull text-center"><input type=submit value="{{ $pollid ? (__('legacy/makepoll.submit_edit_poll')) : (__('legacy/makepoll.submit_create_poll')) }}"></div>
+<div class="nx-ffull text-center"><input type=submit value="{{ $pollid ? (__('makepoll.submit_edit_poll')) : (__('makepoll.submit_create_poll')) }}"></div>
 </div>
-<p><span class="text-nxm-danger">*</span>{{ __('legacy/makepoll.text_required')}}</p>
+<p><span class="text-nxm-danger">*</span>{{ __('makepoll.text_required')}}</p>
 @if ($pollid > 0)
 <input type=hidden name=pollid value="{{ $pollid }}">
 @endif

@@ -1,1 +1,1 @@
-{{ __('legacy/forums.std_unauthorized_to_post') }}(<a href="/web/messages">{{ __('legacy/forums.text_inbox') }}</a>)
+{{ __('forums.std_unauthorized_to_post') }}(<a href="/web/messages">{{ __('forums.text_inbox') }}</a>)

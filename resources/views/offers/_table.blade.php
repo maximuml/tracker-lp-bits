@@ -1,18 +1,18 @@
-<x-data-table :caption="__('legacy/offers.head_offers')" captionHidden class="torrents">
+<x-data-table :caption="__('offers.head_offers')" captionHidden class="torrents">
 <x-slot:head>
 <thead>
 <tr>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCatUrl }}">{{ __('legacy/offers.col_type') }}</a></th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortNameUrl }}">{{ __('legacy/offers.col_title') }}</a></th>
-    <th colspan="3" class="bg-nxm-surface-alt font-semibold" scope="colgroup"><a href="{{ $table->sortVResUrl }}">{{ __('legacy/offers.col_vote_results') }}</a></th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCommentsUrl }}"><img class="comments" src="pic/trans.gif" alt="comments" title="{{ __('legacy/offers.title_comment') }}" /></a></th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortAddedUrl }}"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('legacy/offers.title_time_added') }}" /></a></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCatUrl }}">{{ __('offers.col_type') }}</a></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortNameUrl }}">{{ __('offers.col_title') }}</a></th>
+    <th colspan="3" class="bg-nxm-surface-alt font-semibold" scope="colgroup"><a href="{{ $table->sortVResUrl }}">{{ __('offers.col_vote_results') }}</a></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCommentsUrl }}"><img class="comments" src="pic/trans.gif" alt="comments" title="{{ __('offers.title_comment') }}" /></a></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortAddedUrl }}"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('offers.title_time_added') }}" /></a></th>
     @if ($table->showTimeout)
-    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/offers.col_timeout') }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('offers.col_timeout') }}</th>
     @endif
-    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/offers.col_offered_by') }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('offers.col_offered_by') }}</th>
     @if ($table->canManage)
-    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/offers.col_act') }}</th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('offers.col_act') }}</th>
     @endif
 </tr>
 </thead>
@@ -23,19 +23,19 @@
     <td class="align-top px-2.5 py-1.5"><x-torrent.category-icon :icon="$row->categoryIcon" /></td>
     <td><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;off_details=1" title="{{ $row->fullName }}"><b>{{ $row->displayName }}</b></a>
         @if ($row->isNew)
-        <b> (<span class="new">{{ __('legacy/offers.text_new') }}</span>)</b>
+        <b> (<span class="new">{{ __('offers.text_new') }}</span>)</b>
         @endif
         &nbsp;<b>[<span class="{{ $row->allowed->cssClass }}">{{ $row->allowed->label }}</span>]</b></td>
     <td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center">
         @if ($row->voteResults === null)
         0
         @else
-        <b><a href="{{ $row->voteResults->href }}" title="{{ __('legacy/offers.title_show_vote_details') }}"><span class="text-nxm-success">{{ $row->voteResults->yeah }}</span> - <span class="text-nxm-danger">{{ $row->voteResults->against }}</span> = {{ $row->voteResults->yeah - $row->voteResults->against }}</a></b>
+        <b><a href="{{ $row->voteResults->href }}" title="{{ __('offers.title_show_vote_details') }}"><span class="text-nxm-success">{{ $row->voteResults->yeah }}</span> - <span class="text-nxm-danger">{{ $row->voteResults->against }}</span> = {{ $row->voteResults->yeah - $row->voteResults->against }}</a></b>
         @endif
     </td>
-    <td class="align-top px-2.5 py-1.5 whitespace-nowrap" @if (! $table->canAgainst) colspan="2" @endif><form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="yeah" /><button type="submit" class="nx-btn-link" title="{{ __('legacy/offers.title_i_want_this') }}"><span class="text-nxm-success"><b>{{ __('legacy/offers.text_yep') }}</b></span></button></form></td>
+    <td class="align-top px-2.5 py-1.5 whitespace-nowrap" @if (! $table->canAgainst) colspan="2" @endif><form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="yeah" /><button type="submit" class="nx-btn-link" title="{{ __('offers.title_i_want_this') }}"><span class="text-nxm-success"><b>{{ __('offers.text_yep') }}</b></span></button></form></td>
     @if ($table->showAgainstCell)
-    <td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center"><form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="against" /><button type="submit" class="nx-btn-link" title="{{ __('legacy/offers.title_do_not_want_it') }}"><span class="text-nxm-danger"><b>{{ __('legacy/offers.text_nah') }}</b></span></button></form></td>
+    <td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center"><form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="against" /><button type="submit" class="nx-btn-link" title="{{ __('offers.title_do_not_want_it') }}"><span class="text-nxm-danger"><b>{{ __('offers.text_nah') }}</b></span></button></form></td>
     @endif
     <td class="align-top px-2.5 py-1.5">
         @if ($row->comment->count === 0)
@@ -50,7 +50,7 @@
     @endif
     <td class="align-top px-2.5 py-1.5">{{ $row->offeredBy }}</td>
     @if ($table->canManage)
-    <td class="align-top px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nxm-linkbtn" title="{{ __('legacy/offers.title_delete') }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('legacy/offers.title_delete') }}" /></button></form><br /><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('legacy/offers.title_edit') }}" /></a></td>
+    <td class="align-top px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nxm-linkbtn" title="{{ __('offers.title_delete') }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('offers.title_delete') }}" /></button></form><br /><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('offers.title_edit') }}" /></a></td>
     @endif
 </tr>
 @endforeach

@@ -1,1 +1,1 @@
-@if ($locked)<p>{{ __('legacy/forums.text_topic_locked_new_denied') }}</p>@else<p><i>{{ __('legacy/forums.text_unpermitted_posting_here') }}</i></p>@endif
+@if ($locked)<p>{{ __('forums.text_topic_locked_new_denied') }}</p>@else<p><i>{{ __('forums.text_unpermitted_posting_here') }}</i></p>@endif

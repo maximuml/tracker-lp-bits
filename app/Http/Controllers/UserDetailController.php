@@ -78,15 +78,15 @@ class UserDetailController extends Controller
 
         if ($user === null) {
             LegacyResponse::abort(
-                __('legacy/userdetails.std_error'),
-                __('legacy/userdetails.std_no_such_user')
+                __('userdetails.std_error'),
+                __('userdetails.std_no_such_user')
             );
         }
 
         if (($user['status'] ?? null) === UserStatus::PENDING->stringValue()) {
             LegacyResponse::abort(
-                __('legacy/userdetails.std_sorry'),
-                __('legacy/userdetails.std_user_not_confirmed')
+                __('userdetails.std_sorry'),
+                __('userdetails.std_user_not_confirmed')
             );
         }
 
@@ -181,7 +181,7 @@ class UserDetailController extends Controller
         $userManageSystemUrl = sprintf('%s/%s/user/users/%s', Url::schemeAndHost(false), Env::get('FILAMENT_PATH', 'nexusphp'), $user['id']);
 
         [$migratedHelpPre, $migratedHelpPost] = array_pad(
-            explode('%s', (string) __('legacy/userdetails.change_field_value_migrated'), 2),
+            explode('%s', (string) __('userdetails.change_field_value_migrated'), 2),
             2,
             ''
         );
@@ -189,7 +189,7 @@ class UserDetailController extends Controller
             'pre' => $migratedHelpPre,
             'post' => $migratedHelpPost,
             'url' => $userManageSystemUrl,
-            'linkLabel' => (string) __('legacy/functions.text_management_system'),
+            'linkLabel' => (string) __('functions.text_management_system'),
         ])->render();
 
         $usernameHtml = UserDisplay::username($user['id'], true, false);
@@ -249,7 +249,7 @@ document.getElementById('remove-leech-warn').addEventListener('click', function 
         }
     })
 })
-JS, \json_encode(__('legacy/userdetails.sure_to_remove_leech_warn'))), 'footer', false);
+JS, \json_encode(__('userdetails.sure_to_remove_leech_warn'))), 'footer', false);
         }
 
         $warnedByHtml = '';
@@ -321,15 +321,15 @@ JS, 'footer', false);
             $userProps[] = SafeHtml::fromTrustedHtml(view('userdetails._prop', [
                 'name' => $cardName,
                 'detail' => $changeUsernameCards->count(),
-                'consumeLabel' => (string) __('legacy/userdetails.consume'),
+                'consumeLabel' => (string) __('userdetails.consume'),
                 'triggerId' => $isOwner ? $triggerId : '',
             ])->render());
             if ($isOwner) {
-                $consumeLabel = __('legacy/userdetails.consume');
+                $consumeLabel = __('userdetails.consume');
                 AssetAppender::html(
                     view('userdetails._consume_template', [
                         'metaKey' => $metaKey,
-                        'metaKeyLabel' => (string) __('legacy/userdetails.meta_key_change_username_username'),
+                        'metaKeyLabel' => (string) __('userdetails.meta_key_change_username_username'),
                     ])->render(),
                     'footer',
                 );

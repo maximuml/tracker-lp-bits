@@ -49,12 +49,12 @@ final class ChromeAlerts
         $timeline = TorrentState::resolveTimeline();
         $currentPromotion = $timeline['current'] ?? null;
         $upcomingPromotion = $timeline['upcoming'] ?? null;
-        $remarkTpl = (string) (__('legacy/functions.full_site_promotion_remark'));
+        $remarkTpl = (string) (__('functions.full_site_promotion_remark'));
         if ($currentPromotion) {
             $promotionText = TorrentPromotion::fromIntSafe((int) ($currentPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
-            $lines = [sprintf((string) (__('legacy/functions.full_site_promotion_in_effect')), $promotionText)];
+            $lines = [sprintf((string) (__('functions.full_site_promotion_in_effect')), $promotionText)];
             if (! empty($currentPromotion['begin']) || ! empty($currentPromotion['deadline'])) {
-                $lines[] = sprintf((string) (__('legacy/functions.full_site_promotion_time_range')), $currentPromotion['begin'] ?? '-∞', $currentPromotion['deadline'] ?? '∞');
+                $lines[] = sprintf((string) (__('functions.full_site_promotion_time_range')), $currentPromotion['begin'] ?? '-∞', $currentPromotion['deadline'] ?? '∞');
             }
             if (! empty($currentPromotion['remark'])) {
                 $lines[] = sprintf($remarkTpl, $currentPromotion['remark']);
@@ -63,9 +63,9 @@ final class ChromeAlerts
         }
         if ($upcomingPromotion) {
             $promotionText = TorrentPromotion::fromIntSafe((int) ($upcomingPromotion['global_sp_state'] ?? TorrentPromotion::NORMAL->value))->label();
-            $lines = [sprintf((string) (__('legacy/functions.full_site_promotion_upcoming')), $promotionText)];
+            $lines = [sprintf((string) (__('functions.full_site_promotion_upcoming')), $promotionText)];
             if (! empty($upcomingPromotion['begin']) || ! empty($upcomingPromotion['deadline'])) {
-                $lines[] = sprintf((string) (__('legacy/functions.full_site_promotion_time_range')), $upcomingPromotion['begin'] ?? '-∞', $upcomingPromotion['deadline'] ?? '∞');
+                $lines[] = sprintf((string) (__('functions.full_site_promotion_time_range')), $upcomingPromotion['begin'] ?? '-∞', $upcomingPromotion['deadline'] ?? '∞');
             }
             if (! empty($upcomingPromotion['remark'])) {
                 $lines[] = sprintf($remarkTpl, $upcomingPromotion['remark']);
@@ -76,7 +76,7 @@ final class ChromeAlerts
             $kicktimeout = Time::format($user['leechwarnuntil'], false, false, true);
             $alerts[] = [
                 'url' => '/web/faq#id17',
-                'text' => (string) (__('legacy/functions.text_please_improve_ratio_within')).$kicktimeout.(string) (__('legacy/functions.text_or_you_will_be_banned')),
+                'text' => (string) (__('functions.text_please_improve_ratio_within')).$kicktimeout.(string) (__('functions.text_or_you_will_be_banned')),
                 'color' => 'orange',
             ];
         }
@@ -90,7 +90,7 @@ final class ChromeAlerts
                         $kicktimeout = Time::format(date('Y-m-d H:i:s', $addedtime + $secs), false, false, true);
                         $alerts[] = [
                             'url' => '/web/rules',
-                            'text' => (string) (__('legacy/functions.text_please_download_something_within')).$kicktimeout.(string) (__('legacy/functions.text_inactive_account_be_deleted')),
+                            'text' => (string) (__('functions.text_please_download_something_within')).$kicktimeout.(string) (__('functions.text_inactive_account_be_deleted')),
                             'color' => 'gray',
                         ];
                     }
@@ -98,7 +98,7 @@ final class ChromeAlerts
             }
         }
         if ($user['showclienterror'] ?? false) {
-            $alerts[] = ['url' => '/web/faq#id29', 'text' => (string) (__('legacy/functions.text_banned_client_warning')), 'color' => 'black'];
+            $alerts[] = ['url' => '/web/faq#id29', 'text' => (string) (__('functions.text_banned_client_warning')), 'color' => 'black'];
         }
         foreach (MsgAlert::pendingAlerts() as $alert) {
             $alerts[] = $alert;
@@ -114,7 +114,7 @@ final class ChromeAlerts
             if ($newNews > 0) {
                 $alerts[] = [
                     'url' => '/web/index',
-                    'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($newNews).$newNews.(string) (__('legacy/functions.text_new_news')),
+                    'text' => (string) (__('functions.text_there_is')).Strings::isOrAre($newNews).$newNews.(string) (__('functions.text_new_news')),
                     'color' => 'green',
                 ];
             }
@@ -129,7 +129,7 @@ final class ChromeAlerts
         if ($staffMessages > 0) {
             $alerts[] = [
                 'url' => '/staffbox',
-                'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($staffMessages).$staffMessages.(string) (__('legacy/functions.text_new_staff_message')).Strings::addS($staffMessages),
+                'text' => (string) (__('functions.text_there_is')).Strings::isOrAre($staffMessages).$staffMessages.(string) (__('functions.text_new_staff_message')).Strings::addS($staffMessages),
                 'color' => 'blue',
             ];
         }
@@ -144,7 +144,7 @@ final class ChromeAlerts
             if ($toApprovalCounts) {
                 $alerts[] = [
                     'url' => '/web/torrents?approval_status=0&incldead=0',
-                    'text' => sprintf((string) (__('legacy/functions.text_torrent_to_approval')), Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)),
+                    'text' => sprintf((string) (__('functions.text_torrent_to_approval')), Strings::isOrAre($toApprovalCounts), $toApprovalCounts, Strings::addS($toApprovalCounts)),
                     'color' => 'darkred',
                 ];
             }
@@ -160,7 +160,7 @@ final class ChromeAlerts
             if ($complaints) {
                 $alerts[] = [
                     'url' => '/web/complains?action=list',
-                    'text' => sprintf((string) (__('legacy/functions.text_complains')), Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)),
+                    'text' => sprintf((string) (__('functions.text_complains')), Strings::isOrAre($complaints), $complaints, Strings::addS($complaints)),
                     'color' => 'darkred',
                 ];
             }
@@ -173,7 +173,7 @@ final class ChromeAlerts
             if ($numReports) {
                 $alerts[] = [
                     'url' => '/web/reports',
-                    'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($numReports).$numReports.(string) (__('legacy/functions.text_new_report')).Strings::addS($numReports),
+                    'text' => (string) (__('functions.text_there_is')).Strings::isOrAre($numReports).$numReports.(string) (__('functions.text_new_report')).Strings::addS($numReports),
                     'color' => 'blue',
                 ];
             }
@@ -186,7 +186,7 @@ final class ChromeAlerts
             if ($numCheaters) {
                 $alerts[] = [
                     'url' => '/cheaterbox',
-                    'text' => (string) (__('legacy/functions.text_there_is')).Strings::isOrAre($numCheaters).$numCheaters.(string) (__('legacy/functions.text_new_suspected_cheater')).Strings::addS($numCheaters),
+                    'text' => (string) (__('functions.text_there_is')).Strings::isOrAre($numCheaters).$numCheaters.(string) (__('functions.text_new_suspected_cheater')).Strings::addS($numCheaters),
                     'color' => 'blue',
                 ];
             }

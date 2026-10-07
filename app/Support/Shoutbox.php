@@ -254,10 +254,10 @@ final class Shoutbox
             $text .= ($text === '' ? '' : ', ').'+'.$remaining.' more';
         }
         if ($text === '') {
-            return (string) __('legacy/shoutbox.title_react');
+            return (string) __('shoutbox.title_react');
         }
 
-        return ((string) __('legacy/shoutbox.title_reacted_by')).': '.$text;
+        return ((string) __('shoutbox.title_reacted_by')).': '.$text;
     }
 
     /**
@@ -301,8 +301,8 @@ final class Shoutbox
                 }
                 $cls = $isMe ? 'shout-mention shout-mention-me' : 'shout-mention';
                 $name = $cache[$key]['name'];
-                $tooltip = __('legacy/shoutbox.tooltip_nick_reply');
-                $title = $tooltip !== 'legacy/shoutbox.tooltip_nick_reply' ? (string) $tooltip : '';
+                $tooltip = __('shoutbox.tooltip_nick_reply');
+                $title = $tooltip !== 'shoutbox.tooltip_nick_reply' ? (string) $tooltip : '';
 
                 return trim(view('support._shout-mention', [
                     'cls' => $cls,
@@ -361,10 +361,10 @@ final class Shoutbox
         $reactionMine = (array) ($reactionData['mine'] ?? []);
         $reactionUsers = (array) ($reactionData['users'] ?? []);
         $showAvatars = YesNo::isYes($currentUser['avatars'] ?? null);
-        $tooltipAvatar = (string) (__('legacy/shoutbox.tooltip_avatar'));
-        $tooltipReply = (string) (__('legacy/shoutbox.tooltip_nick_reply'));
-        $labelMore = (string) (__('legacy/shoutbox.shout_show_more'));
-        $labelLess = (string) (__('legacy/shoutbox.shout_show_less'));
+        $tooltipAvatar = (string) (__('shoutbox.tooltip_avatar'));
+        $tooltipReply = (string) (__('shoutbox.tooltip_nick_reply'));
+        $labelMore = (string) (__('shoutbox.shout_show_more'));
+        $labelLess = (string) (__('shoutbox.shout_show_less'));
         $groupWindowSec = 120;
 
         $items = [];
@@ -408,7 +408,7 @@ final class Shoutbox
                     );
                 }
             } else {
-                $username = (string) (__('legacy/shoutbox.text_guest'));
+                $username = (string) (__('shoutbox.text_guest'));
                 $classBadge = '';
             }
 

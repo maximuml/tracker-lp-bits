@@ -149,5 +149,6 @@ final class UsercpTrackerBuilderTest extends TestCase
         $this->assertSame('dark', $s->currentTheme);
         $this->assertSame(2, $s->currentStylesheet);
         $this->assertNotEmpty($s->themeOptions);
+        $this->assertSame((string) __('usercp.select_theme_dark'), $s->themeOptions['dark']);
     }
 }

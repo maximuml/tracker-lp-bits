@@ -37,7 +37,7 @@ final class CommentService
 
         $parent = $this->commentRepository->getParent($parentId, $type);
         if (! $parent) {
-            abort(404, __('legacy/comment.std_no_torrent_id'));
+            abort(404, __('comment.std_no_torrent_id'));
         }
 
         $newId = $this->commentRepository->create($parentId, $type, $body, (int) $user->id);
@@ -51,13 +51,13 @@ final class CommentService
     public function authorizeComment(User $user, string $type, int $parentId): void
     {
         if ($user->parked) {
-            abort(403, __('legacy/comment.std_permission_denied'));
+            abort(403, __('comment.std_permission_denied'));
         }
 
         if ($type === 'torrent') {
             $torrent = $this->torrentRepository->findById((int) $parentId);
             if (! $torrent) {
-                abort(404, __('legacy/comment.std_no_torrent_id'));
+                abort(404, __('comment.std_no_torrent_id'));
             }
             Gate::authorize('comment', $torrent);
         }
@@ -80,7 +80,7 @@ final class CommentService
         }
 
         $secs = 10 - (TIMENOW - $ts);
-        abort(403, __('legacy/comment.std_comment_flooding_denied').$secs.__('legacy/comment.std_before_posting_another'));
+        abort(403, __('comment.std_comment_flooding_denied').$secs.__('comment.std_before_posting_another'));
     }
 
     public function deleteCache(string $type, int $parentId): void

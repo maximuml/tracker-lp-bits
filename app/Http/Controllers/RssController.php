@@ -132,7 +132,7 @@ class RssController extends LegacyController
         $allowedShowrows = ['10', '50'];
         $showrows = (string) $request->input('showrows', '10');
         if (! in_array($showrows, $allowedShowrows, true)) {
-            return $this->getrssMessageResponse(__('legacy/getrss.std_error'), __('legacy/getrss.std_no_row'));
+            return $this->getrssMessageResponse(__('getrss.std_error'), __('getrss.std_no_row'));
         }
 
         $query = ['passkey' => $this->currentUser->passkey(), 'rows' => (int) $showrows];
@@ -215,10 +215,10 @@ class RssController extends LegacyController
         }
 
         $link = Url::absolute($baseUrl).'/web/torrentrss?'.http_build_query($query).$addinclbm;
-        $msg = (__('legacy/getrss.std_use_following_url'))."\n".$link."\n\n"
-            .(__('legacy/getrss.std_utorrent_feed_url'))."\n".$link.'&linktype=dl'.$addinclbm;
+        $msg = (__('getrss.std_use_following_url'))."\n".$link."\n\n"
+            .(__('getrss.std_utorrent_feed_url'))."\n".$link.'&linktype=dl'.$addinclbm;
 
-        return $this->getrssMessageResponse(__('legacy/getrss.std_done'), (string) Format::formatComment($msg), __('legacy/getrss.head_rss_feeds'));
+        return $this->getrssMessageResponse(__('getrss.std_done'), (string) Format::formatComment($msg), __('getrss.head_rss_feeds'));
     }
 
     private function getrssMessageResponse(string $heading, string $text, string $title = ''): Response

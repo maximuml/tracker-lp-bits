@@ -1,14 +1,14 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', __('legacy/users.text_users'))
+@section('title', __('users.text_users'))
 
 @section('content')
-<h1>{{ __('legacy/users.text_users') }}</h1>
+<h1>{{ __('users.text_users') }}</h1>
 
 <form method=get action=?>
-{{ __('legacy/users.text_search')}} <input type=text name=search value="{{ $search }}">
+{{ __('users.text_search')}} <input type=text name=search value="{{ $search }}">
 <select name=class>
-<option value='-'>{{ __('legacy/users.select_any_class')}}</option>
+<option value='-'>{{ __('users.select_any_class')}}</option>
 @foreach ($classOptions as $opt)
 <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
 @endforeach
@@ -18,7 +18,7 @@
 <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
 @endforeach
 </select>
-<input type=submit value="{{ __('legacy/users.submit_okay')}}">
+<input type=submit value="{{ __('users.submit_okay')}}">
 </form>
 
 <p>
@@ -33,12 +33,12 @@
 
 {{ $pagertop ?? '' }}
 
-<x-data-table :caption="__('legacy/users.text_users')" :caption-hidden="true" :headers="[
-    __('legacy/users.col_user_name'),
-    __('legacy/users.col_registered'),
-    __('legacy/users.col_last_access'),
-    __('legacy/users.col_class'),
-    __('legacy/users.col_country'),
+<x-data-table :caption="__('users.text_users')" :caption-hidden="true" :headers="[
+    __('users.col_user_name'),
+    __('users.col_registered'),
+    __('users.col_last_access'),
+    __('users.col_class'),
+    __('users.col_country'),
 ]">
 @foreach ($rows as $row)
 <tr>

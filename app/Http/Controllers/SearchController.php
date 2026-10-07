@@ -79,7 +79,7 @@ class SearchController extends LegacyController
     private function tagItems(string $siteName, string $username): array
     {
         $schemeHost = Url::schemeAndHost(false);
-        $t = fn (string $key): string => (string) __('legacy/tags.'.$key);
+        $t = fn (string $key): string => (string) __('tags.'.$key);
         $ph = function (string $raw): string|ViewContract {
             $parts = explode('|', $raw);
             if (count($parts) === 1) {

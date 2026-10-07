@@ -84,7 +84,7 @@ class AttachmentController extends LegacyController
                 $countLeft = isset($result['count_left']) ? (int) $result['count_left'] : $countLeft;
             }
             if ($uploaded === []) {
-                $warnings[] = (string) __('legacy/attachment.text_nothing_received');
+                $warnings[] = (string) __('attachment.text_nothing_received');
             }
             $warning = implode(' ', $warnings);
         }

@@ -1,20 +1,20 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', __('legacy/attendance.title'))
+@section('title', __('attendance.title'))
 
 @section('content')
 @if ($hasAttendedToday)
-    <x-frame :caption="__('legacy/attendance.success')" :center="false">
+    <x-frame :caption="__('attendance.success')" :center="false">
     <p>{{ $headerLeft ?? '' }}<span>{{ $headerRight ?? '' }}</span></p>
     </x-frame>
 @else
-    <x-frame :caption="__('legacy/attendance.title')" :center="false">
+    <x-frame :caption="__('attendance.title')" :center="false">
     <div class="nx-box">
     <div>
     <form method="post" action="/web/user/attendance" class="nx-inline-block">@csrf
     <div class="nx-fgrid nx-fgrid--flat">
     {{ $captchaHtml ?? '' }}
-    <div class="nx-ffull text-center"><input type="submit" value="{{ __('legacy/attendance.attend_button')}}" class="btn" /></div>
+    <div class="nx-ffull text-center"><input type="submit" value="{{ __('attendance.attend_button')}}" class="btn" /></div>
     </div>
     </form>
     </div>

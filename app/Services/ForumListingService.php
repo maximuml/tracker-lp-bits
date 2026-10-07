@@ -57,7 +57,7 @@ final class ForumListingService
         $row = $this->index->getForumRow($forumid);
         if (! $row) {
             Log::writeWithContext('User '.($curUser['username'] ?? '').','.($curUser['ip'] ?? '')." is trying to visit forum that doesn't exist", 'mod');
-            LegacyResponse::abort(__('legacy/forums.std_forum_error'), __('legacy/forums.std_forum_not_found'));
+            LegacyResponse::abort(__('forums.std_forum_error'), __('forums.std_forum_not_found'));
         }
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
             LegacyResponse::permissionDenied();
@@ -193,15 +193,15 @@ final class ForumListingService
             $tooltipId = null;
             if ($tooltipsEnabled) {
                 if (($curUser['timetype'] ?? 1) != UserTimeType::TIMEALIVE->value) {
-                    $lastposttime = __('legacy/forums.text_at_time').$lpadded;
+                    $lastposttime = __('forums.text_at_time').$lpadded;
                 } else {
-                    $lastposttime = __('legacy/forums.text_blank').Time::format($lpadded, true, false, true);
+                    $lastposttime = __('forums.text_blank').Time::format($lpadded, true, false, true);
                 }
                 $lptext = $renderTt((string) ($arr['body'] ?? ''));
                 $tooltipId = 'lastpost_'.$counter;
                 $tooltips[] = [
                     'id' => $tooltipId,
-                    'content' => SafeHtml::fromTrustedHtml(__('legacy/forums.text_last_posted_by').UserDisplay::username($lpuserid).$lastposttime),
+                    'content' => SafeHtml::fromTrustedHtml(__('forums.text_last_posted_by').UserDisplay::username($lpuserid).$lastposttime),
                     'contentTail' => SafeHtml::fromTrustedHtml($lptext),
                 ];
             }

@@ -100,8 +100,8 @@ class UsercpController extends LegacyController
         $allowedActions = ['personal', 'tracker', 'forum', 'security'];
         if ($action !== '' && ! in_array($action, $allowedActions, true)) {
             LegacyResponse::abort(
-                (string) (__('legacy/usercp.std_error')),
-                (string) (__('legacy/usercp.std_invalid_action'))
+                (string) (__('usercp.std_error')),
+                (string) (__('usercp.std_invalid_action'))
             );
         }
 

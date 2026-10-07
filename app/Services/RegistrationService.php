@@ -47,31 +47,31 @@ class RegistrationService
         try {
             $this->authService->assertNotBanned($ip);
         } catch (AuthenticationException $exception) {
-            throw new AuthenticationException(__('legacy/functions.std_your_ip_banned'));
+            throw new AuthenticationException(__('functions.std_your_ip_banned'));
         }
 
         $isInvite = $type === 'invite';
         $isNormal = $type === 'normal';
 
         if ($isInvite && ! SiteConfig::current()->main->inviteSystem()) {
-            throw new AuthenticationException(__('legacy/functions.std_invite_system_disabled'));
+            throw new AuthenticationException(__('functions.std_invite_system_disabled'));
         }
 
         if ($isNormal && ! SiteConfig::current()->main->registration()) {
-            throw new AuthenticationException(__('legacy/functions.std_open_registration_disabled'));
+            throw new AuthenticationException(__('functions.std_open_registration_disabled'));
         }
 
         $maxUsers = (int) SiteConfig::current()->main->maxUsers(0);
         if ($maxUsers > 0 && $this->repositories->userAccount->countUsers() >= $maxUsers) {
-            throw new AuthenticationException(__('legacy/functions.std_account_limit_reached'));
+            throw new AuthenticationException(__('functions.std_account_limit_reached'));
         }
 
         $maxIp = (int) SiteConfig::current()->security->maxIp(0);
         if ($maxIp > 0 && $this->repositories->userAccount->countByIp($ip) > $maxIp) {
             throw new AuthenticationException(
-                __('legacy/functions.std_the_ip')
+                __('functions.std_the_ip')
                 .htmlspecialchars($ip)
-                .__('legacy/functions.std_used_many_times')
+                .__('functions.std_used_many_times')
                 .htmlspecialchars(SiteConfig::current()->basic->siteName())
                 .'.'
             );
@@ -127,18 +127,18 @@ class RegistrationService
         $faqVerify = ($data['faqverify'] ?? '') === 'yes';
         $ageVerify = ($data['ageverify'] ?? '') === 'yes';
         if (! $rulesVerify || ! $faqVerify || ! $ageVerify) {
-            throw new AuthenticationException(__('legacy/takesignup.std_unqualified'));
+            throw new AuthenticationException(__('takesignup.std_unqualified'));
         }
 
         if ($this->repositories->userAccount->existsByUsername($username)) {
-            throw new AuthenticationException(__('legacy/takesignup.std_username_exists'));
+            throw new AuthenticationException(__('takesignup.std_username_exists'));
         }
 
         if ($this->repositories->userAccount->existsByEmail($email)) {
             throw new AuthenticationException(
-                __('legacy/takesignup.std_email_address')
+                __('takesignup.std_email_address')
                 .$email
-                .__('legacy/takesignup.std_in_use')
+                .__('takesignup.std_in_use')
             );
         }
 
@@ -223,13 +223,13 @@ class RegistrationService
 
     private function sendWelcomeMessage(User $user): void
     {
-        $subject = __('legacy/takesignup.msg_subject').SiteConfig::current()->basic->siteName().'!';
+        $subject = __('takesignup.msg_subject').SiteConfig::current()->basic->siteName().'!';
         $msg = MessageTemplate::forRegisterWelcome($user->lang, ['username' => $user->username]);
 
         if (empty($msg)) {
-            $msg = __('legacy/takesignup.msg_congratulations')
+            $msg = __('takesignup.msg_congratulations')
                 .$user->username
-                .sprintf(__('legacy/takesignup.msg_you_are_a_member'), SiteConfig::current()->basic->siteName(), SiteConfig::current()->basic->siteName());
+                .sprintf(__('takesignup.msg_you_are_a_member'), SiteConfig::current()->basic->siteName(), SiteConfig::current()->basic->siteName());
         }
 
         $this->messageRepository->add([
@@ -281,30 +281,30 @@ class RegistrationService
         bool $preRegistered,
     ): void {
         if (! $preRegistered && ($username === '' || $password === '' || $email === '' || $country === 0 || $gender === '')) {
-            throw new AuthenticationException(__('legacy/takesignup.std_blank_field'));
+            throw new AuthenticationException(__('takesignup.std_blank_field'));
         }
 
         if (strlen($username) > self::MAX_USERNAME_LENGTH) {
-            throw new AuthenticationException(__('legacy/takesignup.std_username_too_long'));
+            throw new AuthenticationException(__('takesignup.std_username_too_long'));
         }
 
         if (! $preRegistered && ! Validators::isUsername($username)) {
-            throw new AuthenticationException(__('legacy/takesignup.std_invalid_username'));
+            throw new AuthenticationException(__('takesignup.std_invalid_username'));
         }
 
         if (! Email::isWellFormed($email)) {
-            throw new AuthenticationException(__('legacy/takesignup.std_wrong_email_address_format'));
+            throw new AuthenticationException(__('takesignup.std_wrong_email_address_format'));
         }
 
         $this->passwordSetup->validate($password, $passAgain, $username, 'takesignup');
 
         $allowedGenders = [UserGender::MALE->stringValue(), UserGender::FEMALE->stringValue()];
         if (! in_array($gender, $allowedGenders, true)) {
-            throw new AuthenticationException(__('legacy/takesignup.std_invalid_gender'));
+            throw new AuthenticationException(__('takesignup.std_invalid_gender'));
         }
 
         if (! $this->repositories->usercpLookup->countryExists((int) $country)) {
-            throw new AuthenticationException(__('legacy/takesignup.std_invalid_gender'));
+            throw new AuthenticationException(__('takesignup.std_invalid_gender'));
         }
     }
 }

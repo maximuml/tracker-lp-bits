@@ -5,7 +5,7 @@
             <img class="{{ $row->stateIcon()[0] }}" src="pic/trans.gif" alt="{{ $row->stateIcon()[1] }}" title="{{ $row->stateIcon()[2] }}" />
             <div>
                 @if ($row->sticky)
-                    <img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ __('legacy/forums.title_sticky') }}" />&nbsp;&nbsp;
+                    <img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ __('forums.title_sticky') }}" />&nbsp;&nbsp;
                 @endif
                 <a href="{{ request()->getPathInfo() }}?action=viewtopic&amp;forumid={{ $row->forumId }}&amp;topicid={{ $row->id }}"@if ($row->tooltipId !== null) data-domtt-src="{{ $row->tooltipId }}"@endif>@if ($row->hlcolor > 0)<b class="nx-hl-{{ $row->hlcolor }}">{{ $row->subject }}</b>@else{{ $row->subject }}@endif</a>
                 @if ($row->visiblePages !== [])
@@ -16,7 +16,7 @@
                     ]
                 @endif
                 @if ($row->jumpToPostId !== null)
-                    &nbsp;&nbsp;<a href="{{ request()->getPathInfo() }}?action=viewtopic&amp;forumid={{ $row->forumId }}&amp;topicid={{ $row->id }}&amp;page=p{{ $row->jumpToPostId }}#pid{{ $row->jumpToPostId }}" title="{{ __('legacy/forums.title_jump_to_unread') }}"><span class="small new"><b>{{ __('legacy/forums.text_new') }}</b></span></a>
+                    &nbsp;&nbsp;<a href="{{ request()->getPathInfo() }}?action=viewtopic&amp;forumid={{ $row->forumId }}&amp;topicid={{ $row->id }}&amp;page=p{{ $row->jumpToPostId }}#pid{{ $row->jumpToPostId }}" title="{{ __('forums.title_jump_to_unread') }}"><span class="small new"><b>{{ __('forums.text_new') }}</b></span></a>
                 @endif
             </div>
         </div>

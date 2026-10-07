@@ -348,6 +348,10 @@ final class IndexPageServiceTest extends TestCase
         $this->assertIsArray($result->stats->userStats);
         $this->assertIsArray($result->stats->torrentStats);
         $this->assertContainsOnlyInstancesOf(IndexClassStatRow::class, $result->stats->classStats);
+        $this->assertArrayHasKey('activeToday', $result->stats->userStats);
+        $this->assertArrayHasKey('activeThisWeek', $result->stats->userStats);
+        $this->assertArrayHasKey('rowUsersActiveToday', $result->stats->labels);
+        $this->assertArrayHasKey('rowRegisteredUsers', $result->stats->labels);
     }
 
     // ─── Always-on sections ───────────────────────────────────────────

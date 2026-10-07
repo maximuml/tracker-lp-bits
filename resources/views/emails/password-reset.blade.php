@@ -1,1 +1,1 @@
-{{ __('legacy/recover.mail_one') }}({{ $email }}){{ __('legacy/recover.mail_two') }}{{ $ip }}{{ __('legacy/recover.mail_three') }}<b><a href="{{ $resetUrl }}" target="_blank"> {{ __('legacy/recover.mail_this_link') }} </a></b><br />{{ $resetUrl }}{{ sprintf(__('legacy/recover.mail_four'), $siteName) }}
+{{ __('recover.mail_one') }}({{ $email }}){{ __('recover.mail_two') }}{{ $ip }}{{ __('recover.mail_three') }}<b><a href="{{ $resetUrl }}" target="_blank"> {{ __('recover.mail_this_link') }} </a></b><br />{{ $resetUrl }}{{ sprintf(__('recover.mail_four'), $siteName) }}

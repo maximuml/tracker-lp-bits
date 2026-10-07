@@ -11,7 +11,7 @@
     @endif
 </h2>
 @if(! $polls->exists)
-<x-empty-state :title="__('legacy/index.std_no_poll')" />
+<x-empty-state :title="__('index.std_no_poll')" />
 @endif
 @if($polls->exists)
 <div class="p-[10pt] text-center">

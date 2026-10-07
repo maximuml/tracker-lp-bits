@@ -1,1 +1,1 @@
-{{ __('legacy/mybonus.text_download_note') }}<span data-color="#ff4500">{{ __('legacy/mybonus.text_download_label') }}</span>{{ __('legacy/mybonus.text_download_note_mid') }}<span data-color="#ff4500">{{ __('legacy/mybonus.text_downloaded_lower') }}</span>{{ __('legacy/mybonus.text_download_note_tail') }}
+{{ __('mybonus.text_download_note') }}<span data-color="#ff4500">{{ __('mybonus.text_download_label') }}</span>{{ __('mybonus.text_download_note_mid') }}<span data-color="#ff4500">{{ __('mybonus.text_downloaded_lower') }}</span>{{ __('mybonus.text_download_note_tail') }}

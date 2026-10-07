@@ -12,6 +12,7 @@ use App\Services\OfferModerationService;
 use App\Services\OfferService;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -164,6 +165,26 @@ final class OfferServiceTest extends TestCase
         $this->assertTrue($threw, 'Expected exception was not thrown');
     }
 
+    /**
+     * Same as assertServiceThrows but pins the abort's rendered body —
+     * distinguishes a removed guard abort from the downstream aborts that
+     * would otherwise mask it.
+     */
+    private function assertAbortContent(Request $request, string ...$needles): void
+    {
+        try {
+            $this->callService($request);
+            $this->fail('Expected abort');
+        } catch (HttpResponseException $e) {
+            $html = (string) $e->getResponse()->getContent();
+            foreach ($needles as $needle) {
+                $this->assertStringContainsString(e($needle), $html);
+            }
+        } catch (\Throwable $e) {
+            $this->fail('Expected HttpResponseException, got '.$e::class);
+        }
+    }
+
     // --- handleActionPublic: routing ---
 
     public function test_handle_action_returns_null_for_empty_action(): void
@@ -228,7 +249,7 @@ final class OfferServiceTest extends TestCase
             'offerid' => 1,
         ]);
 
-        $this->assertServiceThrows($request);
+        $this->assertAbortContent($request, (string) __('offers.std_access_denied'), (string) __('offers.std_mans_job'));
     }
 
     // --- handleFinish: permission denied ---
@@ -243,7 +264,17 @@ final class OfferServiceTest extends TestCase
             'finish' => 1,
         ]);
 
-        $this->assertServiceThrows($request);
+        $this->assertAbortContent($request, (string) __('offers.std_access_denied'), (string) __('offers.std_have_no_permission'));
+    }
+
+    public function test_delete_and_edit_are_public_entrypoints(): void
+    {
+        foreach (['handleDelete', 'handleEdit'] as $method) {
+            $this->assertTrue(
+                (new \ReflectionMethod(OfferService::class, $method))->isPublic(),
+                "{$method} must stay public — OfferController calls it directly",
+            );
+        }
     }
 
     // --- handleDelete: invalid del_offer value ---

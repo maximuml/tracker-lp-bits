@@ -39,19 +39,19 @@ final class ThanksSectionFactory
 
         $thanksAll = count($thanksInfo['thanks']);
         $andMore = $thanksAll < $thanksInfo['count']
-            ? (string) __('legacy/details.text_and_more').$thanksInfo['count'].(string) __('legacy/details.text_users_in_total')
+            ? (string) __('details.text_and_more').$thanksInfo['count'].(string) __('details.text_users_in_total')
             : '';
 
         return new ThanksSection(
             torrentId: $id,
             hasThanked: $hasThanked,
             buttonLabel: (string) __($hasThanked
-                ? 'legacy/details.submit_you_said_thanks'
-                : 'legacy/details.submit_say_thanks'),
-            addedLabel: (string) __('legacy/details.text_thanks_added'),
+                ? 'details.submit_you_said_thanks'
+                : 'details.submit_say_thanks'),
+            addedLabel: (string) __('details.text_thanks_added'),
             thanksBy: $thanksBy,
             noThanks: $thanksAll === 0,
-            noThanksLabel: (string) __('legacy/details.text_no_thanks_added'),
+            noThanksLabel: (string) __('details.text_no_thanks_added'),
             andMore: $andMore,
             currentUser: $currentUserHtml,
         );

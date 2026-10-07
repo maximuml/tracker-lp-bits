@@ -75,18 +75,18 @@ final class UsercpSecurityBuilder
         } else {
             AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
 
-            $savedMessage = (string) (__('legacy/usercp.text_saved'));
+            $savedMessage = __('usercp.text_saved');
             if ($savedFlags['mail']) {
-                $savedMessage .= ' '.(__('legacy/usercp.std_confirmation_email_sent'));
+                $savedMessage .= ' '.(__('usercp.std_confirmation_email_sent'));
             }
             if ($savedFlags['passkey']) {
-                $savedMessage .= ' '.(__('legacy/usercp.std_passkey_reset'));
+                $savedMessage .= ' '.(__('usercp.std_passkey_reset'));
             }
             if ($savedFlags['password']) {
-                $savedMessage .= ' '.(__('legacy/usercp.std_password_changed'));
+                $savedMessage .= ' '.(__('usercp.std_password_changed'));
             }
             if ($savedFlags['privacy']) {
-                $savedMessage .= ' '.(__('legacy/usercp.std_privacy_level_updated'));
+                $savedMessage .= ' '.(__('usercp.std_privacy_level_updated'));
             }
         }
 

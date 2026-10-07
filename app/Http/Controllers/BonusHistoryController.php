@@ -243,7 +243,7 @@ JS;
             ];
         }
 
-        $naText = __('legacy/uploaders.text_not_available');
+        $naText = __('uploaders.text_not_available');
         foreach ($rows as &$row) {
             $row['usernameHtml'] = SafeHtml::fromTrustedHtml((string) UserDisplay::username($row['userid'], false, true, true, false, false, true));
             $row['sizeFormatted'] = $row['torrent_size'] ? Format::size($row['torrent_size']) : '0';

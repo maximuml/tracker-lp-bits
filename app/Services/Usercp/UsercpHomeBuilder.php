@@ -150,10 +150,10 @@ final class UsercpHomeBuilder
             userId: $userId,
             // Link titles: decode `&nbsp;`-style entities so the view can
             // put them in `title` attributes through plain `{{ }}`.
-            invitesLinkTitle: html_entity_decode((string) __('legacy/usercp.link_send_invitation'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            karmaLinkTitle: html_entity_decode((string) __('legacy/usercp.link_use_karma_points'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            commentsLinkTitle: html_entity_decode((string) __('legacy/usercp.link_view_comments'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            postsLinkTitle: html_entity_decode((string) __('legacy/usercp.link_view_posts'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            invitesLinkTitle: html_entity_decode((string) __('usercp.link_send_invitation'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            karmaLinkTitle: html_entity_decode((string) __('usercp.link_use_karma_points'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            commentsLinkTitle: html_entity_decode((string) __('usercp.link_view_comments'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            postsLinkTitle: html_entity_decode((string) __('usercp.link_view_posts'), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
         );
     }
 
@@ -244,8 +244,8 @@ final class UsercpHomeBuilder
         $columnCreatedAt = Locale::trans('label.created_at', [], null);
         $actionLabel = Locale::trans('label.action', [], null);
         $actionCreate = Locale::trans('label.create', [], null);
-        $deleteLabel = __('legacy/functions.text_delete');
-        $confirmRemoveLabel = __('legacy/functions.std_confirm_remove');
+        $deleteLabel = __('functions.text_delete');
+        $confirmRemoveLabel = __('functions.std_confirm_remove');
 
         $tokLabel = addslashes($label);
         $tokCreate = addslashes($actionCreate);

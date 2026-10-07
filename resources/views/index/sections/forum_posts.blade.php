@@ -2,7 +2,7 @@
 <section class="nx-idx-card">
 <h2>{{ $forumPosts->title }}</h2>
 @if(count($forumPosts->items) === 0)
-<x-empty-state :title="__('legacy/index.text_no_topics')" />
+<x-empty-state :title="__('index.text_no_topics')" />
 @else
 <x-data-table :caption="$forumPosts->title" captionHidden>
     <x-slot:head>

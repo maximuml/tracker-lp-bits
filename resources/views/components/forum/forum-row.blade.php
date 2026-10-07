@@ -4,11 +4,11 @@
         <div class="flex items-start gap-2">
             <img class="{{ $row->hasUnread ? 'unlockednew' : 'unlocked' }}" src="pic/trans.gif"
                  alt="{{ $row->hasUnread ? 'unread' : 'read' }}"
-                 title="{{ $row->hasUnread ? __('legacy/forums.title_unread') : __('legacy/forums.title_read') }}" />
+                 title="{{ $row->hasUnread ? __('forums.title_unread') : __('forums.title_read') }}" />
             <div>
                 <a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $row->id }}"><b class="big">{{ $row->name }}</b></a>
                 @if ($row->postsToday > 0)
-                    <span class="ml-1.5">({{ __('legacy/forums.text_today') }}<b class="new">{{ $row->postsToday }}</b>)</span>
+                    <span class="ml-1.5">({{ __('forums.text_today') }}<b class="new">{{ $row->postsToday }}</b>)</span>
                 @endif
                 <br />{{ $row->description }}
             </div>
@@ -21,7 +21,7 @@
         @if ($row->moderators !== null)
             {{ $row->moderators }}
         @else
-            <a href="/web/contactstaff"><i>{{ __('legacy/forums.text_apply_now') }}</i></a>
+            <a href="/web/contactstaff"><i>{{ __('forums.text_apply_now') }}</i></a>
         @endif
     </td>
 </tr>

@@ -7,7 +7,9 @@ namespace Tests\Integration\Services;
 use App\Repositories\BonusCalculationRepository;
 use App\Services\BonusPageService;
 use App\Support\CurrentUser;
+use App\Support\Strings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -397,5 +399,183 @@ final class BonusPageServiceTest extends TestCase
         $this->assertNotEmpty($result['allBonus']);
         $arts = array_column($result['allBonus'], 'art');
         $this->assertContains('invite', $arts);
+    }
+
+    private function assertAbortContains(callable $fn, string ...$needles): void
+    {
+        try {
+            $fn();
+            $this->fail('Expected abort');
+        } catch (HttpResponseException $e) {
+            $html = (string) $e->getResponse()->getContent();
+            foreach ($needles as $needle) {
+                $this->assertStringContainsString(e($needle), $html);
+            }
+        } catch (\Throwable $e) {
+            $this->fail('Expected HttpResponseException, got '.$e::class);
+        }
+    }
+
+    public function test_build_aborts_with_disabled_message_when_bonus_disabled(): void
+    {
+        $this->seedSettings([
+            'bonus_tweak' => 'disable',
+            'oneinvite_bonus' => 0.0,
+        ]);
+        $this->setCurrentUser();
+
+        $this->assertAbortContains(
+            fn () => $this->service->build($this->requestWithQuery(['action' => 'exchange'])),
+            (string) __('mybonus.std_karma_system_disabled'),
+        );
+    }
+
+    public function test_build_aborts_with_points_active_message_when_save_disabled(): void
+    {
+        $this->seedSettings([
+            'bonus_tweak' => 'disablesave',
+            'oneinvite_bonus' => 0.0,
+        ]);
+        $this->setCurrentUser();
+
+        $this->assertAbortContains(
+            fn () => $this->service->build($this->requestWithQuery(['action' => 'exchange'])),
+            (string) __('mybonus.std_karma_system_disabled'),
+            (string) __('mybonus.std_points_active'),
+        );
+    }
+
+    public function test_build_all_bonus_pins_transfer_sizes_and_arts_in_order(): void
+    {
+        $this->seedSettings([
+            'bonus_tweak' => '',
+            'oneinvite_bonus' => 500.0,
+            'basictax_bonus' => 0.0,
+            'taxpercentage_bonus' => 0.0,
+        ]);
+        $this->setCurrentUser();
+
+        $result = $this->service->build($this->requestWithQuery(['action' => 'exchange']))->toArray();
+
+        $expected = [
+            ['traffic', 1073741824],
+            ['traffic', 5368709120],
+            ['traffic', 10737418240],
+            ['traffic', 107374182400],
+            ['traffic_downloaded', 10737418240],
+            ['traffic_downloaded', 107374182400],
+            ['invite', 1],
+            ['tmp_invite', 1],
+            ['title', 0],
+            ['class', 0],
+            ['gift_1', 0],
+            ['attendance_card', 0],
+            ['rainbow_id', 0],
+            ['change_username_card', 0],
+            ['gift_2', 0],
+            ['cancel_hr', 0],
+        ];
+        $this->assertSame($expected, array_map(
+            static fn (array $item): array => [$item['art'], $item['menge']],
+            $result['allBonus'],
+        ));
+
+        $byArt = collect($result['allBonus'])->keyBy('art');
+        $this->assertSame(100.0, (float) $byArt->get('gift_1')['points']);
+        $this->assertSame(1000.0, (float) $byArt->get('gift_2')['points']);
+    }
+
+    public function test_build_downloaded_item_names_contain_size_labels(): void
+    {
+        $this->seedSettings([
+            'bonus_tweak' => '',
+            'oneinvite_bonus' => 0.0,
+        ]);
+        $this->setCurrentUser();
+
+        $result = $this->service->build($this->requestWithQuery(['action' => 'exchange']))->toArray();
+
+        $downloaded = collect($result['allBonus'])->where('art', 'traffic_downloaded')->values();
+        $this->assertCount(2, $downloaded);
+        $this->assertStringContainsString(
+            (string) __('mybonus.text_downloaded_ten_gb'),
+            (string) $downloaded[0]['name']->render(),
+        );
+        $this->assertStringContainsString(
+            (string) __('mybonus.text_downloaded_hundred_gb'),
+            (string) $downloaded[1]['name']->render(),
+        );
+    }
+
+    public function test_build_gift_tax_composes_amounts_and_rest(): void
+    {
+        $this->seedSettings([
+            'bonus_tweak' => '',
+            'oneinvite_bonus' => 0.0,
+            'basictax_bonus' => 2.0,
+            'taxpercentage_bonus' => 5.0,
+        ]);
+        $this->setCurrentUser();
+
+        $result = $this->service->build($this->requestWithQuery(['action' => 'exchange']))->toArray();
+
+        $gift = collect($result['allBonus'])->firstWhere('art', 'gift_1');
+        $this->assertNotNull($gift);
+        $giftTax = $gift['giftTax'];
+        $this->assertArrayHasKey('charges', $giftTax);
+        $this->assertArrayHasKey('amounts', $giftTax);
+        $this->assertArrayHasKey('rest', $giftTax);
+        $this->assertSame(
+            '2'.(__('mybonus.text_tax_bonus_point')).Strings::addS(2.0).(__('mybonus.text_tax_plus'))
+                .'5'.(__('mybonus.text_percent_of_transfered_amount')),
+            (string) $giftTax['amounts'],
+        );
+        $this->assertSame(
+            (__('mybonus.text_as_tax')).'93'.(__('mybonus.text_tax_example_note')),
+            (string) $giftTax['rest'],
+        );
+    }
+
+    public function test_build_resolves_all_do_message_arms(): void
+    {
+        $this->seedSettings([
+            'bonus_tweak' => '',
+            'oneinvite_bonus' => 0.0,
+        ]);
+        $this->setCurrentUser(['title' => 'My Title']);
+
+        $lockText = sprintf((string) __('mybonus.lock_text'), 10);
+        $expect = [
+            'upload' => (string) __('mybonus.text_success_upload'),
+            'download' => (string) __('mybonus.text_success_download'),
+            'invite' => (string) __('mybonus.text_success_invites'),
+            'tmp_invite' => (string) __('mybonus.text_success_tmp_invites'),
+            'vip' => (string) __('mybonus.text_success_vip'),
+            'vipfalse' => (string) __('mybonus.text_error_bang'),
+            'title' => (string) __('mybonus.text_success_custom_title'),
+            'transfer' => 'You have spread the',
+            'charity' => (string) __('mybonus.text_success_charity'),
+            'cancel_hr' => (string) __('mybonus.text_success_cancel_hr'),
+            'attendance_card' => (string) __('mybonus.text_success_buy_attendance_card'),
+            'rainbow_id' => (string) __('mybonus.text_success_buy_rainbow_id'),
+            'change_username_card' => (string) __('mybonus.text_success_buy_change_username_card'),
+            'duplicated' => $lockText,
+        ];
+
+        foreach ($expect as $do => $needle) {
+            $result = $this->service->build(
+                $this->requestWithQuery(['action' => 'exchange', 'do' => $do]),
+            )->toArray();
+            $this->assertStringContainsString(
+                $needle,
+                (string) $result['msg'],
+                "do={$do} must render its message arm",
+            );
+        }
+
+        $titleMsg = (string) $this->service->build(
+            $this->requestWithQuery(['action' => 'exchange', 'do' => 'title']),
+        )->toArray()['msg'];
+        $this->assertStringContainsString('My Title', $titleMsg);
     }
 }

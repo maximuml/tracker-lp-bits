@@ -80,7 +80,7 @@ final class CommentSection extends Component
 
         $body = trim($this->text);
         if ($body === '') {
-            $this->status = (string) __('legacy/comment.std_comment_body_empty');
+            $this->status = (string) __('comment.std_comment_body_empty');
 
             return;
         }
@@ -88,7 +88,7 @@ final class CommentSection extends Component
         try {
             $this->comments()->post($user, $this->type, $this->parentId, $body);
         } catch (HttpExceptionInterface $e) {
-            $this->status = $e->getMessage() !== '' ? $e->getMessage() : (string) __('legacy/comment.std_permission_denied');
+            $this->status = $e->getMessage() !== '' ? $e->getMessage() : (string) __('comment.std_permission_denied');
 
             return;
         }

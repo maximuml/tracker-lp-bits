@@ -63,16 +63,16 @@ class InfoController extends LegacyController
             'userid' => $userid,
             'subject' => SafeHtml::fromTrustedHtml($subject),
             'title' => match ($action) {
-                'viewposts' => (string) (__('legacy/userhistory.head_posts_history')),
-                'viewcomments' => (string) (__('legacy/userhistory.head_comments_history')),
-                default => (string) (__('legacy/userhistory.head_user_history')),
+                'viewposts' => (string) (__('userhistory.head_posts_history')),
+                'viewcomments' => (string) (__('userhistory.head_comments_history')),
+                default => (string) (__('userhistory.head_user_history')),
             },
         ];
 
         if ($action === 'viewposts') {
             $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($this->currentUser->classId()), $perpage, $phpSelf);
             if (empty($result['posts'])) {
-                return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_error')), (string) (__('legacy/userhistory.std_no_posts_found')));
+                return $this->legacyAbortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_posts_found')));
             }
             $data = array_merge($data, $result);
             $data['items'] = $this->decorateHistoryPosts(
@@ -84,7 +84,7 @@ class InfoController extends LegacyController
         } elseif ($action === 'viewcomments') {
             $result = $this->infoRepository->getUserHistoryComments($userid, $perpage, $phpSelf);
             if (empty($result['comments'])) {
-                return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_error')), (string) (__('legacy/userhistory.std_no_comments_found')));
+                return $this->legacyAbortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_comments_found')));
             }
             $data = array_merge($data, $result);
             $data['items'] = $this->decorateHistoryComments(
@@ -92,9 +92,9 @@ class InfoController extends LegacyController
                 (array) ($result['commentPageMap'] ?? []),
             );
         } elseif ($action === '') {
-            return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_history_error')), (string) (__('legacy/userhistory.std_unkown_action')), false);
+            return $this->legacyAbortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')), false);
         } else {
-            return $this->legacyAbortResponse((string) (__('legacy/userhistory.std_history_error')), (string) (__('legacy/userhistory.std_unkown_action')));
+            return $this->legacyAbortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')));
         }
 
         return $this->legacyPage($request, 'userhistory', true, $data);

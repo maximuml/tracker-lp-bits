@@ -41,24 +41,24 @@ final class OfferDetailsBuilder
     {
         $id = (int) $request->query('id', 0);
         if (! $id) {
-            LegacyResponse::abort((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.std_smell_rat')));
+            LegacyResponse::abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
         $offer = $this->offerRepository->findOffer($id);
         if (! $offer) {
-            LegacyResponse::abort((string) (__('legacy/offers.std_error')), (string) (__('legacy/offers.text_nothing_found')));
+            LegacyResponse::abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
         $num = $offer->toArray();
 
         $timeFormat = Time::format((string) ($num['added'] ?? ''), true, false);
         $offertime = ($curUser['timetype'] ?? 1) !== UserTimeType::TIMEALIVE->value
-            ? (string) (__('legacy/offers.text_at')).$timeFormat
-            : (string) (__('legacy/offers.text_blank')).$timeFormat;
+            ? __('offers.text_at').$timeFormat
+            : __('offers.text_blank').$timeFormat;
 
         $status = match ((int) ($num['allowed'] ?? 1)) {
-            OfferAllowed::PENDING->value => new OfferAllowedBadge((string) (__('legacy/offers.text_pending')), 'nx-color-red'),
-            OfferAllowed::ALLOWED->value => new OfferAllowedBadge((string) (__('legacy/offers.text_allowed')), 'nx-color-green'),
-            default => new OfferAllowedBadge((string) (__('legacy/offers.text_denied')), 'nx-color-red'),
+            OfferAllowed::PENDING->value => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-red'),
+            OfferAllowed::ALLOWED->value => new OfferAllowedBadge(__('offers.text_allowed'), 'nx-color-green'),
+            default => new OfferAllowedBadge(__('offers.text_denied'), 'nx-color-red'),
         };
 
         $voteCounts = $this->offerVoteRepository->getVoteCounts($id);
@@ -70,10 +70,10 @@ final class OfferDetailsBuilder
 
         $allowedNote = '';
         if ($allowed && $userId !== (int) ($num['userid'] ?? 0)) {
-            $allowedNote = (string) (__('legacy/offers.text_voter_receives_pm_note'));
+            $allowedNote = __('offers.text_voter_receives_pm_note');
         }
         if ($allowed && $userId === (int) ($num['userid'] ?? 0)) {
-            $allowedNote = (string) (__('legacy/offers.text_urge_upload_offer_note'));
+            $allowedNote = __('offers.text_urge_upload_offer_note');
         }
 
         $description = '';

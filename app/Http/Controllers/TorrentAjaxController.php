@@ -80,8 +80,8 @@ class TorrentAjaxController extends LegacyController
         $data = $this->torrentAjaxRepository->peerList($torrentId, $currentUser);
         $curUserArr = $curUser;
 
-        $data['seederTable'] = $this->peerTableFactory->buildTable((string) (__('legacy/viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
-        $data['leecherTable'] = $this->peerTableFactory->buildTable((string) (__('legacy/viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
+        $data['seederTable'] = $this->peerTableFactory->buildTable((string) (__('viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
+        $data['leecherTable'] = $this->peerTableFactory->buildTable((string) (__('viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
 
         return response()->view('viewpeerlist.index', $data, 200, $headers);
     }
@@ -111,7 +111,7 @@ class TorrentAjaxController extends LegacyController
      */
     private function decorateSnatchRows(iterable $snatchedRows, int $currentUserId): array
     {
-        $perSecond = (string) (__('legacy/viewsnatches.text_per_second'));
+        $perSecond = (string) (__('viewsnatches.text_per_second'));
         $snatchedRows = collect($snatchedRows);
         UserDisplay::preload($snatchedRows->pluck('userid')->map(fn ($id) => (int) $id)->all());
         $rows = [];
@@ -123,7 +123,7 @@ class TorrentAjaxController extends LegacyController
                 $ratioText = number_format($arr['uploaded'] / $arr['downloaded'], 3);
                 $ratioClass = Ratio::colorClass($ratioText);
             } elseif ($arr['uploaded'] > 0) {
-                $ratioText = (string) (__('legacy/viewsnatches.text_inf'));
+                $ratioText = (string) (__('viewsnatches.text_inf'));
             }
             $uprate = $arr['seedtime'] > 0
                 ? Format::size($arr['uploaded'] / ($arr['seedtime'] + $arr['leechtime']))
@@ -193,9 +193,9 @@ class TorrentAjaxController extends LegacyController
             : null;
 
         $hasData = (bool) ($data['total_size'] || $data['count']);
-        $summaryText = (__('legacy/getusertorrentlistajax.text_record')).Strings::addS($data['count']);
+        $summaryText = (__('getusertorrentlistajax.text_record')).Strings::addS($data['count']);
         if ($data['total_size']) {
-            $summaryText .= (__('legacy/getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
+            $summaryText .= (__('getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
         }
 
         $data['hasData'] = $hasData;

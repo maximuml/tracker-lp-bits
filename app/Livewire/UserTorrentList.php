@@ -91,9 +91,9 @@ final class UserTorrentList extends Component
                     : null;
 
                 $hasData = (bool) ($data['total_size'] || $data['count']);
-                $summaryText = (__('legacy/getusertorrentlistajax.text_record')).Strings::addS($data['count']);
+                $summaryText = (__('getusertorrentlistajax.text_record')).Strings::addS($data['count']);
                 if ($data['total_size']) {
-                    $summaryText .= (__('legacy/getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
+                    $summaryText .= (__('getusertorrentlistajax.text_total_size')).Format::size((float) $data['total_size']);
                 }
                 $data['hasData'] = $hasData;
                 $data['summaryCount'] = (int) $data['count'];

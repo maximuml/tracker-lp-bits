@@ -42,20 +42,20 @@ final class InfoRepository implements InfoRepositoryInterface
                 ->all(),
             'siteName' => $siteName,
             'captions' => [
-                'version' => (string) (__('legacy/aboutnexus.text_version')),
-                'nexus' => (__('legacy/aboutnexus.text_nexus')).PROJECTNAME,
-                'authorization' => (string) (__('legacy/aboutnexus.text_authorization')),
-                'translation' => (string) (__('legacy/aboutnexus.text_translation')),
-                'stylesheet' => (__('legacy/aboutnexus.text_stylesheet')).PROJECTNAME,
-                'contact' => (__('legacy/aboutnexus.text_contact')).PROJECTNAME,
+                'version' => (string) (__('aboutnexus.text_version')),
+                'nexus' => (__('aboutnexus.text_nexus')).PROJECTNAME,
+                'authorization' => (string) (__('aboutnexus.text_authorization')),
+                'translation' => (string) (__('aboutnexus.text_translation')),
+                'stylesheet' => (__('aboutnexus.text_stylesheet')).PROJECTNAME,
+                'contact' => (__('aboutnexus.text_contact')).PROJECTNAME,
             ],
             'notes' => [
-                'version' => SafeHtml::fromTrustedHtml(sprintf(__('legacy/aboutnexus.text_version_note'), $siteName, PROJECTNAME)),
+                'version' => SafeHtml::fromTrustedHtml(sprintf(__('aboutnexus.text_version_note'), $siteName, PROJECTNAME)),
                 'nexus' => view('aboutnexus._nexus', ['projectName' => PROJECTNAME]),
                 'authorization' => view('aboutnexus._authorization', ['projectName' => PROJECTNAME]),
                 'translation' => view('aboutnexus._translation', ['projectName' => PROJECTNAME]),
                 'stylesheet' => view('aboutnexus._stylesheet', ['projectName' => PROJECTNAME, 'siteName' => $siteName]),
-                'contact' => SafeHtml::fromTrustedHtml(__('legacy/aboutnexus.text_contact_note')),
+                'contact' => SafeHtml::fromTrustedHtml(__('aboutnexus.text_contact_note')),
             ],
         ];
     }

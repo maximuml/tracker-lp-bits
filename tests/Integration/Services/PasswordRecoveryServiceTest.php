@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\Exceptions\AuthenticationException;
+use App\Jobs\SendLegacyMail;
 use App\Models\User;
 use App\Repositories\UserAccountRepository;
 use App\Repositories\UserDetailRepository;
@@ -13,10 +14,12 @@ use App\Services\PasswordRecoveryService;
 use App\Services\PasswordSetup;
 use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
+use App\Support\Config\SiteConfig;
 use App\Support\PasswordHasher;
 use App\Support\Token;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
@@ -458,5 +461,50 @@ final class PasswordRecoveryServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->service->resetPassword($userId, $token, 'NewPass123', 'NewPass123');
+    }
+
+    public function test_request_reset_queues_mail_with_composed_subject(): void
+    {
+        Queue::fake();
+        $this->createUser(['email' => 'subj@test.com']);
+
+        $this->service->requestReset(['email' => 'subj@test.com'], '127.0.0.1', [], []);
+
+        $siteName = (string) SiteConfig::current()->basic->siteName();
+        Queue::assertPushed(SendLegacyMail::class, static function (SendLegacyMail $job) use ($siteName): bool {
+            return $job->subject === $siteName.(string) (__('recover.mail_title'));
+        });
+    }
+
+    public function test_reset_password_queues_password_changed_mail_with_composed_subject(): void
+    {
+        Queue::fake();
+        $userId = $this->createUser();
+        $tokenService = app(SecureTokenService::class);
+        $token = $tokenService->generate();
+        $tokenService->store('password_recovery_tokens', $token, [
+            'user_id' => $userId,
+            'ip' => '127.0.0.1',
+        ]);
+
+        $this->service->resetPassword($userId, $token, 'NewPass123', 'NewPass123');
+
+        $siteName = (string) SiteConfig::current()->basic->siteName();
+        Queue::assertPushed(SendLegacyMail::class, static function (SendLegacyMail $job) use ($siteName): bool {
+            return $job->subject === $siteName.(string) (__('recover.mail_password_changed_title'));
+        });
+    }
+
+    public function test_password_setup_validate_uses_composed_lang_key(): void
+    {
+        try {
+            app(PasswordSetup::class)->validate('first-pass', 'other-pass', 'user', 'takesignup');
+            $this->fail('Expected AuthenticationException');
+        } catch (AuthenticationException $e) {
+            $this->assertSame(
+                (string) (__('takesignup.std_passwords_unmatched')),
+                $e->getMessage(),
+            );
+        }
     }
 }

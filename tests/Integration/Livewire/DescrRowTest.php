@@ -22,7 +22,7 @@ final class DescrRowTest extends TestCase
         ])
             ->assertSee('class="minus"', false)
             ->assertSee('bold')
-            ->assertSee(__('legacy/details.row_description'))
+            ->assertSee(__('details.row_description'))
             ->assertDontSee('nx-hidden');
     }
 

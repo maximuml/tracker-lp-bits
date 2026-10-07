@@ -1,1 +1,1 @@
-<b>{{ __('legacy/mybonus.text_note_colon') }}</b> {{ __('legacy/mybonus.text_system_charges_receiver') }}
+<b>{{ __('mybonus.text_note_colon') }}</b> {{ __('mybonus.text_system_charges_receiver') }}

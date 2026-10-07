@@ -32,8 +32,8 @@ final class ThanksSectionTest extends TestCase
         $this->actingAs($user, 'nexus-web');
 
         Livewire::test(ThanksSection::class, ['torrentId' => $torrent->id])
-            ->assertSee(__('legacy/details.submit_say_thanks'))
-            ->assertSee(__('legacy/details.text_no_thanks_added'))
+            ->assertSee(__('details.submit_say_thanks'))
+            ->assertSee(__('details.text_no_thanks_added'))
             ->assertOk();
     }
 
@@ -47,7 +47,7 @@ final class ThanksSectionTest extends TestCase
         Livewire::test(ThanksSection::class, ['torrentId' => $torrent->id])
             ->call('thank')
             ->assertSet('status', '')
-            ->assertSee(__('legacy/details.submit_you_said_thanks'));
+            ->assertSee(__('details.submit_you_said_thanks'));
 
         $this->assertSame(1, DB::table('thanks')->where('torrentid', $torrent->id)->count());
     }

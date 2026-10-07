@@ -30,8 +30,8 @@ final class AccessGate
     {
         if (($context->user['parked'] ?? false)) {
             LegacyResponse::abort(
-                (string) (__('legacy/functions.std_access_denied')),
-                (string) (__('legacy/functions.std_your_account_parked')),
+                __('functions.std_access_denied'),
+                __('functions.std_your_account_parked'),
             );
         }
     }
@@ -81,8 +81,8 @@ final class AccessGate
         if ($type === 'invitesystem') {
             if ($settings['invitesystem'] === 'no') {
                 LegacyResponse::abort(
-                    (string) (__('legacy/functions.std_oops')),
-                    (string) (__('legacy/functions.std_invite_system_disabled')),
+                    __('functions.std_oops'),
+                    __('functions.std_invite_system_disabled'),
                     false,
                     true,
                 );
@@ -92,8 +92,8 @@ final class AccessGate
         if ($type === 'normal') {
             if ($settings['registration'] === 'no') {
                 LegacyResponse::abort(
-                    (string) (__('legacy/functions.std_sorry')),
-                    (string) (__('legacy/functions.std_open_registration_disabled')),
+                    __('functions.std_sorry'),
+                    __('functions.std_open_registration_disabled'),
                     false,
                     true,
                 );
@@ -104,8 +104,8 @@ final class AccessGate
             $userCount = $this->authRepository->countUsers();
             if ($userCount >= $settings['maxusers']) {
                 LegacyResponse::abort(
-                    (string) (__('legacy/functions.std_sorry')),
-                    (string) (__('legacy/functions.std_account_limit_reached')),
+                    __('functions.std_sorry'),
+                    __('functions.std_account_limit_reached'),
                     false,
                     true,
                 );
@@ -117,7 +117,7 @@ final class AccessGate
             $ipCount = $this->authRepository->countUsersByIp($ip);
             if ($ipCount > $settings['maxip']) {
                 LegacyResponse::abort(
-                    (string) (__('legacy/functions.std_sorry')),
+                    __('functions.std_sorry'),
                     view('auth._ip_used_many_times', ['ip' => $ip, 'siteName' => Setting::getSiteName()])->render(),
                     false,
                     true,

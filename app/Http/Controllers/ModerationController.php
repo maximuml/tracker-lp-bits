@@ -72,11 +72,11 @@ class ModerationController extends LegacyController
         $repo = $this->moderationRepository;
         $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $cache, $repo): Response {
             if (! Validators::isId($reportid) || $reason === '') {
-                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_missing_reason'));
+                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_missing_reason'));
             }
 
             if ($repo->reportExists($currentUserId, $reportid, $type)) {
-                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_already_reported_this'));
+                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_already_reported_this'));
             }
 
             $repo->createReport([
@@ -90,7 +90,7 @@ class ModerationController extends LegacyController
             $cache?->delete_value('staff_report_count');
             $cache?->delete_value('staff_new_report_count');
 
-            return $this->legacyAbortResponse(__('legacy/report.std_message'), __('legacy/report.std_successfully_reported'), false);
+            return $this->legacyAbortResponse(__('report.std_message'), __('report.std_successfully_reported'), false);
         };
 
         if ($takereportofferid && Validators::isId($takereportofferid)) {
@@ -111,123 +111,123 @@ class ModerationController extends LegacyController
 
         if ($user && Validators::isId($user)) {
             if ($user == $currentUserId) {
-                return $this->legacyAbortResponse(__('legacy/report.std_sorry'), __('legacy/report.std_cannot_report_oneself'));
+                return $this->legacyAbortResponse(__('report.std_sorry'), __('report.std_cannot_report_oneself'));
             }
             $userRow = $this->userRepository->findById((int) $user, ['username', 'class']);
             if (! $userRow) {
-                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_user_id'));
+                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_user_id'));
             }
             $arr = $userRow->toArray();
             if ((int) ($arr['class'] ?? 0) >= $staffmemClass) {
-                $msg = (__('legacy/report.std_cannot_report')).UserClass::name((int) ($arr['class'] ?? 0), false, true, true);
+                $msg = (__('report.std_cannot_report')).UserClass::name((int) ($arr['class'] ?? 0), false, true, true);
 
-                return $this->legacyAbortResponse(__('legacy/report.std_sorry'), $msg);
+                return $this->legacyAbortResponse(__('report.std_sorry'), $msg);
             }
 
             $form = view('moderation._confirm', [
-                'pre' => (string) __('legacy/report.text_are_you_sure_user'),
+                'pre' => (string) __('report.text_are_you_sure_user'),
                 'kind' => 'user',
                 'userHtml' => UserDisplay::username($user),
-                'mid' => (string) __('legacy/report.text_to_staff'),
-                'extraNote' => (string) __('legacy/report.text_not_for_leechers'),
+                'mid' => (string) __('report.text_to_staff'),
+                'extraNote' => (string) __('report.text_not_for_leechers'),
                 'field' => 'takeuser',
                 'id' => $user,
             ])->render();
 
-            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
+            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
         if ($torrent && Validators::isId($torrent)) {
             $name = $this->torrentRepository->getNameById((int) $torrent);
             if (! $name) {
-                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_torrent_id'));
+                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_torrent_id'));
             }
             $form = view('moderation._confirm', [
-                'pre' => (string) __('legacy/report.text_are_you_sure_torrent'),
+                'pre' => (string) __('report.text_are_you_sure_torrent'),
                 'kind' => 'torrent',
                 'id' => $torrent,
                 'name' => (string) $name,
-                'mid' => (string) __('legacy/report.text_to_staff'),
+                'mid' => (string) __('report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'taketorrent',
             ])->render();
 
-            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
+            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
         if ($forumpost && Validators::isId($forumpost)) {
             $arr = $this->moderationRepository->getForumPost($forumpost);
             if ($arr === null) {
-                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_post_id'));
+                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_post_id'));
             }
             $form = view('moderation._confirm', [
-                'pre' => (string) __('legacy/report.text_are_you_sure_post'),
+                'pre' => (string) __('report.text_are_you_sure_post'),
                 'kind' => 'post',
                 'id' => $forumpost,
                 'topicid' => $arr['topicid'],
                 'subject' => (string) $arr['subject'],
                 'userHtml' => UserDisplay::username($arr['postuserid']),
-                'mid' => (string) __('legacy/report.text_to_staff'),
+                'mid' => (string) __('report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'takeforumpost',
             ])->render();
 
-            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
+            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
         if ($commentid && Validators::isId($commentid)) {
             $comment = $this->commentRepository->findById((int) $commentid, ['id', 'user', 'torrent', 'offer']);
             if (! $comment) {
-                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_comment_id'));
+                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_comment_id'));
             }
             $arr = $comment->toArray();
             if ($arr['torrent'] ?? null) {
                 $name = $this->torrentRepository->getNameById((int) $arr['torrent']);
                 $url = '/web/details/'.$arr['torrent'].'#'.$commentid;
-                $of = __('legacy/report.text_of_torrent');
+                $of = __('report.text_of_torrent');
             } elseif ($arr['offer'] ?? null) {
                 $name = $this->offerRepository->getOfferName((int) $arr['offer']);
                 $url = '/web/offers?id='.$arr['offer'].'&off_details=1#'.$commentid;
-                $of = __('legacy/report.text_of_offer');
+                $of = __('report.text_of_offer');
             } else {
-                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_orphaned_comment'));
+                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_orphaned_comment'));
             }
             $form = view('moderation._confirm', [
-                'pre' => (string) __('legacy/report.text_are_you_sure_comment'),
+                'pre' => (string) __('report.text_are_you_sure_comment'),
                 'kind' => 'comment',
                 'id' => $commentid,
                 'of' => (string) $of,
                 'url' => $url,
                 'name' => (string) $name,
                 'userHtml' => UserDisplay::username((int) ($arr['user'] ?? 0)),
-                'mid' => (string) __('legacy/report.text_to_staff'),
+                'mid' => (string) __('report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'takecommentid',
             ])->render();
 
-            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
+            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
         if ($reportofferid && Validators::isId($reportofferid)) {
             $offer = $this->offerRepository->findOffer((int) $reportofferid, ['id', 'name']);
             if (! $offer) {
-                return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_offer_id'));
+                return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_offer_id'));
             }
             $arr = $offer->toArray();
             $form = view('moderation._confirm', [
-                'pre' => (string) __('legacy/report.text_are_you_sure_offer'),
+                'pre' => (string) __('report.text_are_you_sure_offer'),
                 'kind' => 'offer',
                 'id' => $arr['id'] ?? 0,
                 'name' => (string) ($arr['name'] ?? ''),
-                'mid' => (string) __('legacy/report.text_to_staff'),
+                'mid' => (string) __('report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'takereportofferid',
             ])->render();
 
-            return $this->legacyAbortResponse(__('legacy/report.std_are_you_sure'), $form, false);
+            return $this->legacyAbortResponse(__('report.std_are_you_sure'), $form, false);
         }
 
-        return $this->legacyAbortResponse(__('legacy/report.std_error'), __('legacy/report.std_invalid_action'));
+        return $this->legacyAbortResponse(__('report.std_error'), __('report.std_invalid_action'));
 
     }
 
@@ -243,7 +243,7 @@ class ModerationController extends LegacyController
         $repo = $this->moderationRepository;
         $count = $repo->countReports();
         if (! $count) {
-            return $this->legacyAbortResponse(__('legacy/reports.std_oho'), __('legacy/reports.std_no_report'));
+            return $this->legacyAbortResponse(__('reports.std_oho'), __('reports.std_no_report'));
         }
 
         $perpage = 10;
@@ -266,10 +266,10 @@ class ModerationController extends LegacyController
             $typeString = $typeEnum?->stringValue() ?? (string) $row['type'];
             switch ($typeString) {
                 case 'torrent':
-                    $type = __('legacy/reports.text_torrent');
+                    $type = __('reports.text_torrent');
                     $torrent = $this->torrentRepository->findById((int) $row['reportid'], ['id', 'name']);
                     if (! $torrent) {
-                        $reporting = (string) (__('legacy/reports.text_torrent_does_not_exist'));
+                        $reporting = (string) (__('reports.text_torrent_does_not_exist'));
                     } else {
                         $arr = $torrent->toArray();
                         $reporting = view('moderation._reporting_cell', [
@@ -280,10 +280,10 @@ class ModerationController extends LegacyController
                     }
                     break;
                 case 'user':
-                    $type = __('legacy/reports.text_user');
+                    $type = __('reports.text_user');
                     $userId = $this->userRepository->existsById((int) $row['reportid']) ? (int) $row['reportid'] : null;
                     if (! $userId) {
-                        $reporting = (string) (__('legacy/reports.text_user_does_not_exist'));
+                        $reporting = (string) (__('reports.text_user_does_not_exist'));
                     } else {
                         $reporting = view('moderation._reporting_cell', [
                             'kind' => 'user',
@@ -292,10 +292,10 @@ class ModerationController extends LegacyController
                     }
                     break;
                 case 'offer':
-                    $type = __('legacy/reports.text_offer');
+                    $type = __('reports.text_offer');
                     $offer = $this->offerRepository->findOffer((int) $row['reportid'], ['id', 'name']);
                     if (! $offer) {
-                        $reporting = (string) (__('legacy/reports.text_offer_does_not_exist'));
+                        $reporting = (string) (__('reports.text_offer_does_not_exist'));
                     } else {
                         $arr = $offer->toArray();
                         $reporting = view('moderation._reporting_cell', [
@@ -306,10 +306,10 @@ class ModerationController extends LegacyController
                     }
                     break;
                 case 'post':
-                    $type = __('legacy/reports.text_forum_post');
+                    $type = __('reports.text_forum_post');
                     $arr = $this->moderationRepository->getForumPost((int) $row['reportid']);
                     if ($arr === null) {
-                        $reporting = (string) (__('legacy/reports.text_post_does_not_exist'));
+                        $reporting = (string) (__('reports.text_post_does_not_exist'));
                     } else {
                         $reporting = view('moderation._reporting_cell', [
                             'kind' => 'post',
@@ -321,20 +321,20 @@ class ModerationController extends LegacyController
                     }
                     break;
                 case 'comment':
-                    $type = __('legacy/reports.text_comment');
+                    $type = __('reports.text_comment');
                     $comment = $this->commentRepository->findById((int) $row['reportid'], ['id', 'user', 'torrent', 'offer']);
                     if (! $comment) {
-                        $reporting = (string) (__('legacy/reports.text_comment_does_not_exist'));
+                        $reporting = (string) (__('reports.text_comment_does_not_exist'));
                     } else {
                         $arr = $comment->toArray();
                         if ($arr['torrent'] ?? null) {
                             $name = $this->torrentRepository->getNameById((int) $arr['torrent']);
                             $url = '/web/details/'.$arr['torrent'].'#cid'.$row['reportid'];
-                            $of = __('legacy/reports.text_of_torrent');
+                            $of = __('reports.text_of_torrent');
                         } elseif ($arr['offer'] ?? null) {
                             $name = $this->offerRepository->getOfferName((int) $arr['offer']);
                             $url = '/web/offers?id='.$arr['offer'].'&off_details=1#cid'.$row['reportid'];
-                            $of = __('legacy/reports.text_of_offer');
+                            $of = __('reports.text_of_offer');
                         } else {
                             $name = '';
                             $url = '';

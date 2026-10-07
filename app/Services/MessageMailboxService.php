@@ -43,13 +43,13 @@ final class MessageMailboxService
                 $updated = $this->messageRepository->markAsRead($pmId, $userId);
             } else {
                 if ($pmMessages === []) {
-                    LegacyResponse::abort('Error', __('legacy/functions.select_at_least_one_record'));
+                    LegacyResponse::abort('Error', __('functions.select_at_least_one_record'));
                 }
                 $updated = $this->messageRepository->markAsRead($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
             if ($updated == 0) {
-                LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_cannot_mark_messages'));
+                LegacyResponse::abort(__('messages.std_error'), __('messages.std_cannot_mark_messages'));
             }
 
             return redirect("/web/messages?action=viewmailbox&box={$pmBox}");
@@ -62,7 +62,7 @@ final class MessageMailboxService
                 $updated = $this->messageRepository->moveMessages($pmMessages, $userId, $pmBox);
             }
             if ($updated == 0) {
-                LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_cannot_move_messages'));
+                LegacyResponse::abort(__('messages.std_error'), __('messages.std_cannot_move_messages'));
             }
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
@@ -75,19 +75,19 @@ final class MessageMailboxService
                 $deletedCount = $this->messageRepository->deleteSingleMessage($pmId, $userId) ? 1 : 0;
             } else {
                 if ($pmMessages === []) {
-                    LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_message_selected'));
+                    LegacyResponse::abort(__('messages.std_error'), __('messages.std_no_message_selected'));
                 }
                 $deletedCount = $this->messageRepository->deleteMultipleMessages($pmMessages, $userId);
             }
             Cache::clearInboxCount($userId);
             Cache::forgetWithLocales('user_'.$userId.'_outbox_count');
             if ($deletedCount == 0) {
-                LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_cannot_delete_messages'));
+                LegacyResponse::abort(__('messages.std_error'), __('messages.std_cannot_delete_messages'));
             }
 
             return redirect('/web/messages?action=viewmailbox');
         }
-        LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_action'));
+        LegacyResponse::abort(__('messages.std_error'), __('messages.std_no_action'));
     }
 
     public function handleEditMailboxes(Request $request): RedirectResponse
@@ -113,7 +113,7 @@ final class MessageMailboxService
         if ($action2 === 'edit') {
             $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
             if ($pmBoxes->isEmpty()) {
-                LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.text_no_mailboxes_to_edit'));
+                LegacyResponse::abort(__('messages.std_error'), __('messages.text_no_mailboxes_to_edit'));
             }
             foreach ($pmBoxes as $pmBox) {
                 $newValue = (string) ($request->input('edit'.$pmBox->id) ?? '');
@@ -127,7 +127,7 @@ final class MessageMailboxService
             return redirect('/web/messages?action=editmailboxes');
         }
 
-        LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_action'));
+        LegacyResponse::abort(__('messages.std_error'), __('messages.std_no_action'));
     }
 
     public function handleDeleteMessage(Request $request): RedirectResponse
@@ -141,7 +141,7 @@ final class MessageMailboxService
         $pmId = (int) $request->input('id', 0);
         $message = $this->messageRepository->deleteSingleMessage($pmId, $userId);
         if (! $message) {
-            LegacyResponse::abort(__('legacy/messages.std_error'), __('legacy/messages.std_no_message_id'));
+            LegacyResponse::abort(__('messages.std_error'), __('messages.std_no_message_id'));
         }
         Cache::clearInboxCount($userId);
         Cache::forgetWithLocales('user_'.$userId.'_outbox_count');

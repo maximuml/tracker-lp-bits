@@ -106,6 +106,26 @@ final class ForumServiceTest extends TestCase
         $this->assertTrue($threw, 'Expected exception was not thrown');
     }
 
+    /**
+     * Like assertServiceThrows but pins the rendered abort body —
+     * distinguishes a removed guard abort from the downstream aborts that
+     * would otherwise mask it.
+     */
+    private function assertAbortContent(Request $request, string ...$needles): void
+    {
+        try {
+            $this->callService($request);
+            $this->fail('Expected abort');
+        } catch (HttpResponseException $e) {
+            $html = (string) $e->getResponse()->getContent();
+            foreach ($needles as $needle) {
+                $this->assertStringContainsString(e($needle), $html);
+            }
+        } catch (\Throwable $e) {
+            $this->fail('Expected HttpResponseException, got '.$e::class);
+        }
+    }
+
     /** @return ForumRepository&Mockery\MockInterface */
     private function mockForumRepo(): mixed
     {
@@ -281,7 +301,7 @@ final class ForumServiceTest extends TestCase
             'topicid' => 1,
         ]);
 
-        $this->assertServiceThrows($request);
+        $this->assertAbortContent($request, (string) __('forums.std_topic_not_found'));
     }
 
     public function test_legacy_routes_deletetopic_action(): void
@@ -316,7 +336,14 @@ final class ForumServiceTest extends TestCase
             'postid' => 1,
         ]);
 
-        $this->assertServiceThrows($request);
+        $this->assertAbortContent($request, (string) __('forums.std_post_not_found'));
+    }
+
+    public function test_moderation_entrypoints_are_public(): void
+    {
+        foreach (['moveTopic', 'deletePost', 'deleteTopic', 'setLocked', 'highlightTopic', 'setSticky'] as $method) {
+            $this->assertTrue((new \ReflectionMethod(ForumModerationService::class, $method))->isPublic(), "$method must stay public");
+        }
     }
 
     public function test_legacy_routes_setlocked_action(): void
@@ -384,7 +411,7 @@ final class ForumServiceTest extends TestCase
             'body' => 'Test body',
         ]);
 
-        $this->assertServiceThrows($request);
+        $this->assertAbortContent($request, (string) __('forums.std_no_forum_id'));
     }
 
     public function test_handle_post_reply_aborts_when_topic_not_found(): void
@@ -403,7 +430,7 @@ final class ForumServiceTest extends TestCase
             'body' => 'Test body',
         ]);
 
-        $this->assertServiceThrows($request);
+        $this->assertAbortContent($request, (string) __('forums.std_bad_topic_id'));
     }
 
     public function test_handle_post_edit_redirects_when_post_not_found(): void
@@ -450,14 +477,14 @@ final class ForumServiceTest extends TestCase
             'body' => 'Test body',
         ]);
 
-        $this->assertServiceThrows($request);
+        $this->assertAbortContent($request, (string) __('forums.std_must_enter_subject'));
     }
 
     public function test_handle_post_aborts_when_subject_too_long(): void
     {
         $repo = $this->mockForumRepo();
         $this->authenticatedUser();
-        $this->seedSettings(['maxsubjectlength' => 10]);
+        $this->seedSettings();
         $this->mockCache();
 
         $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
@@ -471,11 +498,11 @@ final class ForumServiceTest extends TestCase
             'action' => 'post',
             'type' => 'new',
             'id' => 1,
-            'subject' => 'This subject is way too long and exceeds the limit',
+            'subject' => str_repeat('x', 120),
             'body' => 'Test body',
         ]);
 
-        $this->assertServiceThrows($request);
+        $this->assertAbortContent($request, (string) __('forums.std_subject_limited'));
     }
 
     public function test_handle_post_aborts_when_body_empty(): void
@@ -501,6 +528,42 @@ final class ForumServiceTest extends TestCase
         ]);
 
         $this->assertServiceThrows($request);
+    }
+
+    public function test_handle_post_aborts_when_forumpost_disabled(): void
+    {
+        $this->mockForumRepo();
+        $this->authenticatedUser(['forumpost' => false]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
+        $this->mockCache();
+
+        $request = Request::create('/forums.php', 'POST', [
+            'action' => 'post',
+            'type' => 'new',
+            'id' => 1,
+            'subject' => 'Valid subject',
+            'body' => 'Test body',
+        ]);
+
+        $this->assertAbortContent($request, (string) __('forums.std_sorry'));
+    }
+
+    public function test_handle_post_proceeds_when_forumpost_flag_absent(): void
+    {
+        $this->mockForumRepo();
+        // null coalesces through `?? true` — the flag defaults to allowed
+        $this->authenticatedUser(['forumpost' => null]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
+        $this->mockCache();
+
+        $request = Request::create('/forums.php', 'POST', [
+            'action' => 'post',
+            'type' => 'unknown-kind',
+            'id' => 1,
+            'body' => 'Test body',
+        ]);
+
+        $this->assertInstanceOf(RedirectResponse::class, $this->callService($request));
     }
 
     public function test_handle_post_unknown_type_redirects_to_forums(): void

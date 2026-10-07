@@ -11,8 +11,10 @@ use App\Models\Offer;
 use App\Services\Offer\OfferDetailsBuilder;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
+use App\Support\Time;
 use App\ViewModels\Offer\OfferDetailsViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
@@ -131,14 +133,14 @@ final class OfferDetailsBuilderTest extends TestCase
         return Request::create('/web/offers?'.http_build_query($query), 'GET');
     }
 
-    private function assertAborts(callable $fn): void
+    private function assertAbortContains(callable $fn, string $needle): void
     {
         set_error_handler(static fn (int $severity): bool => true, E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
         try {
             $fn();
             $this->fail('Expected abort');
-        } catch (\Throwable) {
-            $this->addToAssertionCount(1);
+        } catch (HttpResponseException $e) {
+            $this->assertStringContainsString(e($needle), (string) $e->getResponse()->getContent());
         } finally {
             restore_error_handler();
         }
@@ -146,14 +148,14 @@ final class OfferDetailsBuilderTest extends TestCase
 
     public function test_zero_id_aborts(): void
     {
-        $this->assertAborts(fn () => $this->callBuild(request: $this->request(['id' => 0])));
+        $this->assertAbortContains(fn () => $this->callBuild(request: $this->request(['id' => 0])), (string) __('offers.std_smell_rat'));
     }
 
     public function test_missing_offer_aborts(): void
     {
         $this->offerRepo->shouldReceive('findOffer')->with(5)->andReturn(null);
 
-        $this->assertAborts(fn () => $this->callBuild());
+        $this->assertAbortContains(fn () => $this->callBuild(), (string) __('offers.text_nothing_found'));
     }
 
     public function test_pending_offer_badge_and_note(): void
@@ -166,12 +168,30 @@ final class OfferDetailsBuilderTest extends TestCase
 
         $this->assertTrue($s->isPending);
         $this->assertSame('nx-color-red', $s->status->cssClass);
-        $this->assertSame((string) __('legacy/offers.text_pending'), $s->status->label);
+        $this->assertSame((string) __('offers.text_pending'), $s->status->label);
         $this->assertSame(4, $s->yeah);
         $this->assertSame(2, $s->against);
         $this->assertSame('', $s->allowedNote);
         $this->assertSame('', (string) $s->pagerTop);
         $this->assertSame('', (string) $s->pagerBottom);
+        $this->assertSame(
+            (string) __('offers.text_blank').Time::format('2024-01-02 03:04:05', true, false),
+            (string) $s->offerTime,
+        );
+    }
+
+    public function test_non_timealive_user_gets_at_prefix(): void
+    {
+        $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['allowed' => 1]));
+        $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
+        $this->commentRepo->shouldReceive('countComments')->andReturn(0);
+
+        $s = $this->builder()->build(['id' => 7, 'timetype' => 0], 7, $this->request());
+
+        $this->assertSame(
+            (string) __('offers.text_at').Time::format('2024-01-02 03:04:05', true, false),
+            (string) $s->offerTime,
+        );
     }
 
     public function test_allowed_offer_owner_gets_urge_upload_note(): void
@@ -183,7 +203,9 @@ final class OfferDetailsBuilderTest extends TestCase
         $s = $this->builder()->build(['id' => 7], 7, $this->request());
 
         $this->assertFalse($s->isPending);
-        $this->assertSame((string) __('legacy/offers.text_urge_upload_offer_note'), $s->allowedNote);
+        $this->assertSame((string) __('offers.text_allowed'), $s->status->label);
+        $this->assertSame('nx-color-green', $s->status->cssClass);
+        $this->assertSame((string) __('offers.text_urge_upload_offer_note'), $s->allowedNote);
         $this->assertTrue($s->showEditDelete);
     }
 
@@ -195,7 +217,7 @@ final class OfferDetailsBuilderTest extends TestCase
 
         $s = $this->builder()->build(['id' => 7], 7, $this->request());
 
-        $this->assertSame((string) __('legacy/offers.text_voter_receives_pm_note'), $s->allowedNote);
+        $this->assertSame((string) __('offers.text_voter_receives_pm_note'), $s->allowedNote);
         $this->assertFalse($s->showEditDelete);
     }
 
@@ -208,7 +230,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $s = $this->builder()->build(['id' => 7], 7, $this->request());
 
         $this->assertSame('nx-color-red', $s->status->cssClass);
-        $this->assertSame((string) __('legacy/offers.text_denied'), $s->status->label);
+        $this->assertSame((string) __('offers.text_denied'), $s->status->label);
     }
 
     public function test_descr_format_cache_miss_then_hit(): void

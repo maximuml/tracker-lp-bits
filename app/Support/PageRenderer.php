@@ -71,7 +71,7 @@ final class PageRenderer
         $context->cache?->setLanguage($context->langDir);
         if ($context->siteOnline == 'no') {
             if ($context->userClass() < $context->adminClass) {
-                throw new HttpResponseException(new Response((string) (__('legacy/functions.std_site_down_for_maintenance')), 503));
+                throw new HttpResponseException(new Response((string) (__('functions.std_site_down_for_maintenance')), 503));
             } else {
                 $context->offlineMsg = true;
             }

@@ -1,18 +1,18 @@
 @props(['search'])
 <div class="search">
-    <div class="search_title">{{ __('legacy/forums.text_search_on_forum') }}
+    <div class="search_title">{{ __('forums.text_search_on_forum') }}
         @if ($search->searched)
             @if ($search->hits > 0)
-                [<b class="striking"> {{ __('legacy/forums.text_found') }}{{ $search->hits }}{{ __('legacy/forums.text_num_posts') }} </b>]
+                [<b class="striking"> {{ __('forums.text_found') }}{{ $search->hits }}{{ __('forums.text_num_posts') }} </b>]
             @else
-                [<b class="striking"> {{ __('legacy/forums.text_nothing_found') }} </b>]
+                [<b class="striking"> {{ __('forums.text_nothing_found') }} </b>]
             @endif
         @endif
     </div>
     <div class="nx-search-form">
         <form method="get" action="/forums" id="search_form" class="nx-search-form__inner">
             <input type="hidden" name="action" value="search" />
-            <div>{{ __('legacy/forums.text_by_keyword') }}</div>
+            <div>{{ __('forums.text_by_keyword') }}</div>
             <div class="nx-search-form__row">
                 <input name="keywords" type="text" value="{{ $search->keywords }}" class="nx-search-form__input" />
                 <input name="image" type="image" class="nx-search-form__submit" src="{{ $search->imageUrl }}" alt="Search" />
@@ -22,14 +22,14 @@
 </div>
 @if ($search->searched && $search->hits > 0)
     <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" label="Pagination top" />
-    <x-data-table :caption="__('legacy/forums.head_forum_search')" captionHidden>
+    <x-data-table :caption="__('forums.head_forum_search')" captionHidden>
         <x-slot:head>
             <thead>
                 <tr>
-                    <th class="text-center" scope="col">{{ __('legacy/forums.col_post') }}</th>
-                    <th class="w-[99%]" scope="col">{{ __('legacy/forums.col_topic') }}</th>
-                    <th scope="col">{{ __('legacy/forums.col_forum') }}</th>
-                    <th class="whitespace-nowrap" scope="col">{{ __('legacy/forums.col_posted_by') }}</th>
+                    <th class="text-center" scope="col">{{ __('forums.col_post') }}</th>
+                    <th class="w-[99%]" scope="col">{{ __('forums.col_topic') }}</th>
+                    <th scope="col">{{ __('forums.col_forum') }}</th>
+                    <th class="whitespace-nowrap" scope="col">{{ __('forums.col_posted_by') }}</th>
                 </tr>
             </thead>
         </x-slot:head>

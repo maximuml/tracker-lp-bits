@@ -1,7 +1,7 @@
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="color-scheme" content="light dark">
-<title>{{ __('legacy/moresmilies.head_more_smilies') }}</title>
+<title>{{ __('moresmilies.head_more_smilies') }}</title>
 <base href="{{ url('/') }}/" />
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 img {border: none;}
@@ -39,7 +39,7 @@ document.addEventListener('click', function (e) {
 @endfor
 </div>
 <div class="text-center">
- <a href="#" data-window-close>{{ __('legacy/moresmilies.text_close') }}</a>
+ <a href="#" data-window-close>{{ __('moresmilies.text_close') }}</a>
 </div>
 </body>
 </html>

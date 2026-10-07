@@ -52,7 +52,7 @@ class BitbucketUploadController extends Controller
         $bucketWritable = is_dir($bucketDir) ? is_writable($bucketDir) : is_writable(public_path());
 
         return view('bitbucket.upload', [
-            'pageTitle' => __('legacy/bitbucketupload.head_avatar_upload'),
+            'pageTitle' => __('bitbucketupload.head_avatar_upload'),
             'maxFileSize' => 256 * 1024,
             'scaleHeight' => 200,
             'scaleWidth' => 150,
@@ -91,7 +91,7 @@ class BitbucketUploadController extends Controller
             ? array_values(array_filter($uploaded, fn ($f) => $f instanceof UploadedFile && $f->isValid()))
             : [];
         if ($files === []) {
-            LegacyResponse::abort(__('legacy/bitbucketupload.std_upload_failed'), __('legacy/bitbucketupload.std_nothing_received'), false);
+            LegacyResponse::abort(__('bitbucketupload.std_upload_failed'), __('bitbucketupload.std_nothing_received'), false);
         }
 
         $allowedMimes = ['image/gif', 'image/jpeg', 'image/png'];
@@ -102,12 +102,12 @@ class BitbucketUploadController extends Controller
         foreach ($files as $file) {
             $originalName = $file->getClientOriginalName();
             if ($file->getSize() > 256 * 1024) {
-                $errors[] = ['filename' => $originalName, 'message' => __('legacy/bitbucketupload.std_file_too_large')];
+                $errors[] = ['filename' => $originalName, 'message' => __('bitbucketupload.std_file_too_large')];
 
                 continue;
             }
             if (! in_array($file->getMimeType(), $allowedMimes, true)) {
-                $errors[] = ['filename' => $originalName, 'message' => __('legacy/bitbucketupload.std_invalid_image_format')];
+                $errors[] = ['filename' => $originalName, 'message' => __('bitbucketupload.std_invalid_image_format')];
 
                 continue;
             }
@@ -128,19 +128,19 @@ class BitbucketUploadController extends Controller
     {
         $message = $e->getMessage();
         if (str_starts_with($message, 'Bad file name')) {
-            return __('legacy/bitbucketupload.std_bad_file_name');
+            return __('bitbucketupload.std_bad_file_name');
         }
         if (str_starts_with($message, 'File already exists')) {
-            return __('legacy/bitbucketupload.std_already_exists');
+            return __('bitbucketupload.std_already_exists');
         }
         if (str_starts_with($message, 'Upload directory is not writable')) {
-            return __('legacy/bitbucketupload.text_upload_directory_unwritable');
+            return __('bitbucketupload.text_upload_directory_unwritable');
         }
         if (str_starts_with($message, 'Invalid image format')) {
-            return __('legacy/bitbucketupload.std_invalid_image_format');
+            return __('bitbucketupload.std_invalid_image_format');
         }
         if (str_starts_with($message, 'Image processing failed') || str_starts_with($message, 'Thumbnail creation failed')) {
-            return __('legacy/bitbucketupload.std_sorry_the_uploaded').__('legacy/bitbucketupload.std_failed_processing');
+            return __('bitbucketupload.std_sorry_the_uploaded').__('bitbucketupload.std_failed_processing');
         }
         throw $e;
     }

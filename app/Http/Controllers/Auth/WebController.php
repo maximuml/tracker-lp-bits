@@ -69,8 +69,8 @@ class WebController extends Controller
 
             $captchaMarkup = $driver->render([
                 'labels' => [
-                    'image' => __('legacy/functions.'.$imageLabelKey),
-                    'code' => __('legacy/functions.row_security_code'),
+                    'image' => __('functions.'.$imageLabelKey),
+                    'code' => __('functions.row_security_code'),
                 ],
                 'secret' => $secret,
                 'layout' => 'grid',

@@ -35,6 +35,6 @@ final readonly class ForumComposeViewModel
             default => 'text_new',
         };
 
-        return (string) __('legacy/functions.'.$typeKey);
+        return (string) __('functions.'.$typeKey);
     }
 }

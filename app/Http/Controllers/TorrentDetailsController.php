@@ -97,8 +97,8 @@ class TorrentDetailsController extends Controller
         $this->currentUser->set($currentUser);
 
         $headTitle = empty($request->input('cmtpage'))
-            ? (__('legacy/details.head_details_for_torrent')).'"'.$row['name'].'"'
-            : (__('legacy/details.head_comments_for_torrent')).'"'.$row['name'].'"';
+            ? (__('details.head_details_for_torrent')).'"'.$row['name'].'"'
+            : (__('details.head_comments_for_torrent')).'"'.$row['name'].'"';
 
         $denyLog = $row['approval_status'] == TorrentApprovalStatus::DENY->value
             ? $this->torrentDetailRepository->getLatestApprovalDenyLog($id)

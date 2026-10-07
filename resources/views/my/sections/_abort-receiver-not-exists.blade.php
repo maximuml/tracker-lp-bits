@@ -1,1 +1,1 @@
-{{ __('legacy/mybonus.text_receiver_not_exists') }}<br />{{ __('legacy/mybonus.text_no_user_with_name') }}<br /><br />{{ __('legacy/mybonus.text_click_back') }}<a class="altlink" href="/web/mybonus">{{ __('legacy/mybonus.text_karma_bonus_point') }}</a>{{ __('legacy/mybonus.text_page') }}
+{{ __('mybonus.text_receiver_not_exists') }}<br />{{ __('mybonus.text_no_user_with_name') }}<br /><br />{{ __('mybonus.text_click_back') }}<a class="altlink" href="/web/mybonus">{{ __('mybonus.text_karma_bonus_point') }}</a>{{ __('mybonus.text_page') }}

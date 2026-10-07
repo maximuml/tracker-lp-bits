@@ -166,7 +166,7 @@ final class OfferDetailsBuilderTest extends TestCase
 
         $this->assertTrue($s->isPending);
         $this->assertSame('nx-color-red', $s->status->cssClass);
-        $this->assertSame((string) __('legacy/offers.text_pending'), $s->status->label);
+        $this->assertSame((string) __('offers.text_pending'), $s->status->label);
         $this->assertSame(4, $s->yeah);
         $this->assertSame(2, $s->against);
         $this->assertSame('', $s->allowedNote);
@@ -183,7 +183,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $s = $this->builder()->build(['id' => 7], 7, $this->request());
 
         $this->assertFalse($s->isPending);
-        $this->assertSame((string) __('legacy/offers.text_urge_upload_offer_note'), $s->allowedNote);
+        $this->assertSame((string) __('offers.text_urge_upload_offer_note'), $s->allowedNote);
         $this->assertTrue($s->showEditDelete);
     }
 
@@ -195,7 +195,7 @@ final class OfferDetailsBuilderTest extends TestCase
 
         $s = $this->builder()->build(['id' => 7], 7, $this->request());
 
-        $this->assertSame((string) __('legacy/offers.text_voter_receives_pm_note'), $s->allowedNote);
+        $this->assertSame((string) __('offers.text_voter_receives_pm_note'), $s->allowedNote);
         $this->assertFalse($s->showEditDelete);
     }
 
@@ -208,7 +208,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $s = $this->builder()->build(['id' => 7], 7, $this->request());
 
         $this->assertSame('nx-color-red', $s->status->cssClass);
-        $this->assertSame((string) __('legacy/offers.text_denied'), $s->status->label);
+        $this->assertSame((string) __('offers.text_denied'), $s->status->label);
     }
 
     public function test_descr_format_cache_miss_then_hit(): void

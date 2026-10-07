@@ -224,13 +224,13 @@ final class Promotion
                 }
                 $timeoutStr = Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
                 if ($timeoutStr) {
-                    $text = (string) __('legacy/functions.'.$config['text']);
+                    $text = (string) __('functions.'.$config['text']);
                     $timeout = SafeHtml::fromTrustedHtml((string) $timeoutStr);
                     $subColor = $config['subColor'];
                     $domttHtml = SafeHtml::fromTrustedHtml(trim(view('support._promo-domtt', [
                         'cls' => $config['class'],
                         'text' => $text,
-                        'endIn' => (string) __('legacy/functions.text_will_end_in'),
+                        'endIn' => (string) __('functions.text_will_end_in'),
                         'timeout' => SafeHtml::fromTrustedHtml($timeoutStr),
                     ])->render()));
                 } else {
@@ -251,7 +251,7 @@ final class Promotion
                 cssClass: (string) $config['class'],
                 iconClass: (string) $config['icon'],
                 alt: (string) $config['alt'],
-                text: (string) __('legacy/functions.'.$config['text']),
+                text: (string) __('functions.'.$config['text']),
                 timeout: $timeout,
                 subColor: $subColor,
                 domttHtml: $domttHtml,
@@ -317,7 +317,7 @@ final class Promotion
             if ($badge->timeout === null) {
                 return '';
             }
-            $endIn = (string) __('legacy/functions.text_will_end_in');
+            $endIn = (string) __('functions.text_will_end_in');
 
             return $badge->subColor !== null
                 ? ltrim(view('support._promo-sub', [

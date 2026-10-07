@@ -45,27 +45,27 @@ final class Menu
         $normalSectionName = SearchBox::value($cache, (int) (Settings::get('main.browsecat') ?? 1), 'section_name');
 
         $items = [];
-        $items[] = $this->item($selected, 'home', 'index.php', __('legacy/functions.text_home'));
-        $items[] = $this->item($selected, 'forums', '/forums', __('legacy/functions.text_forums'));
-        $items[] = $this->item($selected, 'latestcomments', '/web/latestcomments', __('legacy/functions.text_latest_comments'));
-        $items[] = $this->item($selected, 'torrents', '/web/torrents', $normalSectionName[$langDir] ?? (__('legacy/functions.text_torrents')), true);
+        $items[] = $this->item($selected, 'home', 'index.php', __('functions.text_home'));
+        $items[] = $this->item($selected, 'forums', '/forums', __('functions.text_forums'));
+        $items[] = $this->item($selected, 'latestcomments', '/web/latestcomments', __('functions.text_latest_comments'));
+        $items[] = $this->item($selected, 'torrents', '/web/torrents', $normalSectionName[$langDir] ?? (__('functions.text_torrents')), true);
 
         if ($enableOffer === 'yes') {
-            $items[] = $this->item($selected, 'offers', '/web/offers', __('legacy/functions.text_offers'));
+            $items[] = $this->item($selected, 'offers', '/web/offers', __('functions.text_offers'));
         }
-        $items[] = $this->item($selected, 'upload', '/web/upload', __('legacy/functions.text_upload'));
+        $items[] = $this->item($selected, 'upload', '/web/upload', __('functions.text_upload'));
         if (PermissionChecker::instance()->userCan('topten', false, $userId)) {
-            $items[] = $this->item($selected, 'topten', '/web/topten', __('legacy/functions.text_top_ten'));
+            $items[] = $this->item($selected, 'topten', '/web/topten', __('functions.text_top_ten'));
         }
         if (PermissionChecker::instance()->userCan('log', false, $userId)) {
-            $items[] = $this->item($selected, 'log', '/web/log', __('legacy/functions.text_log'));
+            $items[] = $this->item($selected, 'log', '/web/log', __('functions.text_log'));
         }
-        $items[] = $this->item($selected, 'rules', '/web/rules', __('legacy/functions.text_rules'));
-        $items[] = $this->item($selected, 'faq', '/web/faq', __('legacy/functions.text_faq'));
+        $items[] = $this->item($selected, 'rules', '/web/rules', __('functions.text_rules'));
+        $items[] = $this->item($selected, 'faq', '/web/faq', __('functions.text_faq'));
         if (PermissionChecker::instance()->userCan('staffmem', false, $userId)) {
-            $items[] = $this->item($selected, 'staff', '/web/staff', __('legacy/functions.text_staff'));
+            $items[] = $this->item($selected, 'staff', '/web/staff', __('functions.text_staff'));
         }
-        $items[] = $this->item($selected, 'contactstaff', '/web/contactstaff', __('legacy/functions.text_contactstaff'));
+        $items[] = $this->item($selected, 'contactstaff', '/web/contactstaff', __('functions.text_contactstaff'));
 
         $html = view('support._menu', ['items' => $items])->render();
 

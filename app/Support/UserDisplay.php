@@ -71,8 +71,8 @@ final class UserDisplay
 
         if ($id === null) {
             LegacyResponse::abort(
-                (string) (__('legacy/functions.std_error')),
-                (string) (__('legacy/functions.std_no_user_named'))."'".$username."'",
+                (string) (__('functions.std_error')),
+                (string) (__('functions.std_no_user_named'))."'".$username."'",
             );
         }
 

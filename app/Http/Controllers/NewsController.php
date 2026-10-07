@@ -42,36 +42,36 @@ class NewsController extends LegacyController
 
         if ($action === 'delete') {
             if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
-                return $this->legacyAbortResponse(__('legacy/news.std_error'), ('Permission denied.'));
+                return $this->legacyAbortResponse(__('news.std_error'), ('Permission denied.'));
             }
 
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), ('Permission denied.'));
+            return $this->legacyAbortResponse(__('news.std_error'), ('Permission denied.'));
         }
 
         if ($action === 'add') {
             if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
-                return $this->legacyAbortResponse(__('legacy/news.std_error'), ('Permission denied.'));
+                return $this->legacyAbortResponse(__('news.std_error'), ('Permission denied.'));
             }
 
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_news_body_empty'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_news_body_empty'));
         }
 
         if ($action === 'edit') {
             if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
-                return $this->legacyAbortResponse(__('legacy/news.std_error'), ('Permission denied.'));
+                return $this->legacyAbortResponse(__('news.std_error'), ('Permission denied.'));
             }
             $newsid = (int) $request->input('newsid', 0);
             if ($newsid <= 0) {
-                return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_invalid_news_id'));
+                return $this->legacyAbortResponse(__('news.std_error'), __('news.std_invalid_news_id'));
             }
 
             $news = $this->newsRepository->findById($newsid);
             if (! $news) {
-                return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_invalid_news_id').$newsid);
+                return $this->legacyAbortResponse(__('news.std_error'), __('news.std_invalid_news_id').$newsid);
             }
 
             $arr = $news->toArray();
-            $newsTitle = __('legacy/news.text_edit_site_news');
+            $newsTitle = __('news.text_edit_site_news');
             $returnto = (string) ($request->input('returnto') ?? $request->headers->get('referer', ''));
 
             return $this->legacyPageRaw($request, 'news', true, [
@@ -90,9 +90,9 @@ class NewsController extends LegacyController
 
         // Default: show compose form
         if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), ('Permission denied.'));
+            return $this->legacyAbortResponse(__('news.std_error'), ('Permission denied.'));
         }
-        $composeTitle = __('legacy/news.text_submit_news_item');
+        $composeTitle = __('news.text_submit_news_item');
 
         return $this->legacyPageRaw($request, 'news', true, [
             'mode' => 'add',
@@ -216,15 +216,15 @@ class NewsController extends LegacyController
     public function newsAdd(NewsAddRequest $request): Response|RedirectResponse
     {
         if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), ('Permission denied.'));
+            return $this->legacyAbortResponse(__('news.std_error'), ('Permission denied.'));
         }
         $body = (string) $request->input('body', '');
         if ($body === '') {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_news_body_empty'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_news_body_empty'));
         }
         $title = (string) $request->input('subject', '');
         if ($title === '') {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_news_title_empty'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_news_title_empty'));
         }
         $added = (int) $request->input('added', 0);
         if ($added <= 0) {
@@ -242,14 +242,14 @@ class NewsController extends LegacyController
         ]);
 
         if (! $newsId) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_something_weird_happened'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_something_weird_happened'));
         }
 
         $this->invalidateNewsCache();
 
         $news = $this->newsRepository->findById($newsId);
         if (! $news) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_something_weird_happened'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_something_weird_happened'));
         }
         event(new NewsCreated($news));
 
@@ -259,25 +259,25 @@ class NewsController extends LegacyController
     public function newsEdit(NewsEditRequest $request): Response|RedirectResponse
     {
         if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), ('Permission denied.'));
+            return $this->legacyAbortResponse(__('news.std_error'), ('Permission denied.'));
         }
         $newsid = (int) $request->input('newsid', 0);
         if ($newsid <= 0) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_invalid_news_id'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_invalid_news_id'));
         }
 
         $news = $this->newsRepository->findById($newsid);
         if (! $news) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_invalid_news_id').$newsid);
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_invalid_news_id').$newsid);
         }
 
         $body = (string) $request->input('body', '');
         if ($body === '') {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_news_body_empty'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_news_body_empty'));
         }
         $title = (string) $request->input('subject', '');
         if ($title === '') {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_news_title_empty'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_news_title_empty'));
         }
         $notify = $request->input('notify') === 'yes';
 
@@ -295,11 +295,11 @@ class NewsController extends LegacyController
     public function newsDelete(NewsDeleteRequest $request): Response|RedirectResponse
     {
         if (! Permission::can(PermissionEnum::NEWS_MANAGE)) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), ('Permission denied.'));
+            return $this->legacyAbortResponse(__('news.std_error'), ('Permission denied.'));
         }
         $newsid = (int) $request->input('newsid', 0);
         if ($newsid <= 0) {
-            return $this->legacyAbortResponse(__('legacy/news.std_error'), __('legacy/news.std_invalid_news_id'));
+            return $this->legacyAbortResponse(__('news.std_error'), __('news.std_invalid_news_id'));
         }
 
         $returnto = $request->input('returnto') !== null && $request->input('returnto') !== ''
@@ -313,7 +313,7 @@ class NewsController extends LegacyController
                 'returnto' => $returnto,
             ])->render();
 
-            return $this->legacyAbortResponse(__('legacy/news.std_delete_news_item'), $confirm, false);
+            return $this->legacyAbortResponse(__('news.std_delete_news_item'), $confirm, false);
         }
 
         $this->newsRepository->deleteById($newsid);

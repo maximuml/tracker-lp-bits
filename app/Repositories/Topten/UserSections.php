@@ -25,7 +25,7 @@ final class UserSections extends SectionQueries
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('uploaded', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_uploaders')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_uploaders')),
                 'limits' => [100, 250],
                 'subtype' => 'ul',
             ];
@@ -35,29 +35,29 @@ final class UserSections extends SectionQueries
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('downloaded', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_downloaders')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_downloaders')),
                 'limits' => [100, 250],
                 'subtype' => 'dl',
             ];
         }
 
         if ($limit === 10 || $subtype === 'uls') {
-            $note = __('legacy/topten.text_fastest_up_note');
+            $note = __('topten.text_fastest_up_note');
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('uploaded', '>', 53687091200)->orderBy('upspeed', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_fastest_uploaders'), $note),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_fastest_uploaders'), $note),
                 'limits' => [100, 250],
                 'subtype' => 'uls',
             ];
         }
 
         if ($limit === 10 || $subtype === 'dls') {
-            $note = __('legacy/topten.text_fastest_note');
+            $note = __('topten.text_fastest_note');
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->orderBy('downspeed', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_fastest_downloaders'), $note),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_fastest_downloaders'), $note),
                 'limits' => [100, 250],
                 'subtype' => 'dls',
             ];
@@ -67,7 +67,7 @@ final class UserSections extends SectionQueries
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('downloaded', '>', 53687091200)->orderByRaw('uploaded / downloaded DESC')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_best_sharers'), __('legacy/topten.text_sharers_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_best_sharers'), __('topten.text_sharers_note')),
                 'limits' => [100, 250],
                 'subtype' => 'bsh',
             ];
@@ -77,7 +77,7 @@ final class UserSections extends SectionQueries
             $sections[] = [
                 'view' => 'usershare',
                 'data' => $this->toArray((clone $base)->where('downloaded', '>', 53687091200)->orderByRaw('uploaded / downloaded ASC, downloaded DESC')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_worst_sharers'), __('legacy/topten.text_sharers_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_worst_sharers'), __('topten.text_sharers_note')),
                 'limits' => [100, 250],
                 'subtype' => 'wsh',
             ];

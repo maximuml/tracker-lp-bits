@@ -49,10 +49,10 @@ final class TopicRow
     public function stateIcon(): array
     {
         return match ($this->state) {
-            'unread' => ['unlockednew', 'unread', __('legacy/forums.title_unread')],
-            'locked' => ['locked', 'locked', __('legacy/forums.title_locked')],
-            'lockednew' => ['lockednew', 'lockednew', __('legacy/forums.title_locked_new')],
-            default => ['unlocked', 'read', __('legacy/forums.title_read')],
+            'unread' => ['unlockednew', 'unread', __('forums.title_unread')],
+            'locked' => ['locked', 'locked', __('forums.title_locked')],
+            'lockednew' => ['lockednew', 'lockednew', __('forums.title_locked_new')],
+            default => ['unlocked', 'read', __('forums.title_read')],
         };
     }
 }

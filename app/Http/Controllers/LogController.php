@@ -53,7 +53,7 @@ class LogController extends LegacyController
         $action = (string) ($request->input('action', 'dailylog'));
         $allowed = ['dailylog', 'chronicle', 'news', 'poll'];
         if (! in_array($action, $allowed, true)) {
-            return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_invalid_action'));
+            return $this->legacyAbortResponse(__('log.std_error'), __('log.std_invalid_action'));
         }
 
         return match ($action) {
@@ -76,7 +76,7 @@ class LogController extends LegacyController
         $action = (string) ($request->input('action', 'dailylog'));
         $allowed = ['dailylog', 'chronicle', 'news', 'poll'];
         if (! in_array($action, $allowed, true)) {
-            return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_invalid_action'));
+            return $this->legacyAbortResponse(__('log.std_error'), __('log.std_invalid_action'));
         }
 
         // View-mode POSTs are idempotent — replay them as GET on the
@@ -150,7 +150,7 @@ class LogController extends LegacyController
             'pagerbottom' => $pagerbottom,
             'userDisplayMap' => $userDisplayMap,
             'canConfidentialLog' => $canConfidential,
-            'title' => __('legacy/log.head_site_log'),
+            'title' => __('log.head_site_log'),
         ]);
     }
 
@@ -165,7 +165,7 @@ class LogController extends LegacyController
         // 'add', 'update', 'del' are state-changing and require POST.
         if ($do === 'edit') {
             if (! $canManage) {
-                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+                return $this->legacyAbortResponse(__('log.std_error'), __('log.std_permission_denied'));
             }
             $id = (int) $request->input('id', 0);
             $editItem = $id > 0 ? $this->logRepository->getChronicleById($id) : null;
@@ -192,7 +192,7 @@ class LogController extends LegacyController
 
         if ($do !== '') {
             if (! $canManage) {
-                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+                return $this->legacyAbortResponse(__('log.std_error'), __('log.std_permission_denied'));
             }
 
             // Legacy forms can carry params in the URL (?do=del&id=N) —
@@ -273,10 +273,10 @@ class LogController extends LegacyController
         $pollid = (int) $request->input('pollid', 0);
         $returnto = htmlspecialchars((string) ($request->input('returnto') ?? ''));
         if ($pollid <= 0) {
-            return $this->legacyAbortResponse(__('legacy/log.std_error'), ('Invalid poll ID.'));
+            return $this->legacyAbortResponse(__('log.std_error'), ('Invalid poll ID.'));
         }
         if ((int) $request->input('sure', 0) !== 1) {
-            return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+            return $this->legacyAbortResponse(__('log.std_error'), __('log.std_permission_denied'));
         }
         $this->logRepository->deletePoll($pollid);
 
@@ -301,8 +301,8 @@ class LogController extends LegacyController
         $logClass = (int) SiteConfig::current()->authority->permission('log', 0);
 
         return $this->legacyAbortResponse(
-            __('legacy/log.std_sorry'),
-            (__('legacy/log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).__('legacy/log.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => Setting::getSiteName()])->render(),
+            __('log.std_sorry'),
+            (__('log.std_permission_denied_only')).UserClass::name($logClass, false, true, true).__('log.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => Setting::getSiteName()])->render(),
             false
         );
     }
@@ -314,7 +314,7 @@ class LogController extends LegacyController
         }
 
         if (! Permission::can($permission)) {
-            return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+            return $this->legacyAbortResponse(__('log.std_error'), __('log.std_permission_denied'));
         }
 
         return null;
@@ -347,7 +347,7 @@ class LogController extends LegacyController
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'canManage' => $canManage,
-            'title' => __('legacy/log.head_chronicle'),
+            'title' => __('log.head_chronicle'),
         ]);
     }
 
@@ -379,7 +379,7 @@ class LogController extends LegacyController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
-            'title' => __('legacy/log.head_news'),
+            'title' => __('log.head_news'),
         ]);
     }
 
@@ -391,13 +391,13 @@ class LogController extends LegacyController
 
         if ($do === 'delete') {
             if (! Permission::can(PermissionEnum::POLL_MANAGE)) {
-                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+                return $this->legacyAbortResponse(__('log.std_error'), __('log.std_permission_denied'));
             }
             if ($pollid <= 0) {
-                return $this->legacyAbortResponse(__('legacy/log.std_error'), ('Invalid poll ID.'));
+                return $this->legacyAbortResponse(__('log.std_error'), ('Invalid poll ID.'));
             }
-            $sureLinkText = (string) __('legacy/log.std_here');
-            $sureSuffix = (string) __('legacy/log.std_if_sure');
+            $sureLinkText = (string) __('log.std_here');
+            $sureSuffix = (string) __('log.std_if_sure');
             $confirm = view('log._delete_poll_confirm', [
                 'pollid' => $pollid,
                 'returnto' => $returnto,
@@ -406,12 +406,12 @@ class LogController extends LegacyController
                 'sureSuffix' => $sureSuffix,
             ])->render();
 
-            return $this->legacyAbortResponse(__('legacy/log.std_delete_poll'), $confirm, false);
+            return $this->legacyAbortResponse(__('log.std_delete_poll'), $confirm, false);
         }
 
         $pollcount = $this->logRepository->getPollCount();
         if ($pollcount === 0) {
-            return $this->legacyAbortResponse(__('legacy/log.std_sorry'), __('legacy/log.std_no_polls'));
+            return $this->legacyAbortResponse(__('log.std_sorry'), __('log.std_no_polls'));
         }
 
         $polls = $this->logRepository->getPollsExceptFirst();
@@ -451,7 +451,7 @@ class LogController extends LegacyController
             'mode' => 'poll',
             'pollData' => $pollData,
             'canPollManage' => Permission::can(PermissionEnum::POLL_MANAGE),
-            'title' => __('legacy/log.head_previous_polls'),
+            'title' => __('log.head_previous_polls'),
         ]);
     }
 
@@ -461,7 +461,7 @@ class LogController extends LegacyController
 
         if ($do === 'delete') {
             if (! Permission::can(PermissionEnum::POLL_MANAGE)) {
-                return $this->legacyAbortResponse(__('legacy/log.std_error'), __('legacy/log.std_permission_denied'));
+                return $this->legacyAbortResponse(__('log.std_error'), __('log.std_permission_denied'));
             }
 
             // The confirm form carries pollid/returnto in the URL — forward

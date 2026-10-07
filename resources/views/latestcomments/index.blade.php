@@ -1,20 +1,20 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', $title ?? (__('legacy/functions.text_latest_comments')))
+@section('title', $title ?? (__('functions.text_latest_comments')))
 
 @section('content')
 @if ($count == 0)
-    <x-std-message heading="Sorry" :text="__('legacy/functions.text_no_comments')" :htmlstrip="false" />
+    <x-std-message heading="Sorry" :text="__('functions.text_no_comments')" :htmlstrip="false" />
 @else
     {{ $pagertop }}
-    <h1 class="text-center">{{ __('legacy/functions.text_latest_comments')}}</h1>
+    <h1 class="text-center">{{ __('functions.text_latest_comments')}}</h1>
     @foreach ($rows as $row)
         <div>
             <div id="cid{{ $row['id'] }}" class="nx-embedded">
                         #{{ $row['id'] }}&nbsp;&nbsp;
-                        <span class="text-nxm-text-dim">{{ __('legacy/functions.text_by')}}</span>
+                        <span class="text-nxm-text-dim">{{ __('functions.text_by')}}</span>
                         {{ $row['usernameHtml'] ?? '' }}
-                        &nbsp;&nbsp;<span class="text-nxm-text-dim">{{ __('legacy/functions.text_at')}}</span>
+                        &nbsp;&nbsp;<span class="text-nxm-text-dim">{{ __('functions.text_at')}}</span>
                         {{ $row['timeHtml'] ?? '' }}
                         @if(($row['parentUrl'] ?? '') !== '') <span class="text-nxm-text-dim">on</span> <a href="{{ $row['parentUrl'] }}">{{ $row['parent_name'] ?? '' }}</a>@endif
             </div>

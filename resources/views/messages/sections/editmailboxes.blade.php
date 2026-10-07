@@ -1,27 +1,27 @@
-<h1>{{ __('legacy/messages.text_editing_mailboxes') }}</h1>
+<h1>{{ __('messages.text_editing_mailboxes') }}</h1>
 <div>
-<div class="nx-colhead">{{ __('legacy/messages.text_add_mailboxes') }}</div>
-<div>{{ __('legacy/messages.text_extra_mailboxes_note') }}<br />
+<div class="nx-colhead">{{ __('messages.text_add_mailboxes') }}</div>
+<div>{{ __('messages.text_extra_mailboxes_note') }}<br />
 <form action="/web/messages/mailboxes" method="post">
 @csrf
 <input type="hidden" name="action2" value="add">
 <input type="text" name="new1" size="40" maxlength="14"><br />
 <input type="text" name="new2" size="40" maxlength="14"><br />
 <input type="text" name="new3" size="40" maxlength="14"><br />
-<input type="submit" value="{{ __('legacy/messages.submit_add') }}">
+<input type="submit" value="{{ __('messages.submit_add') }}">
 </form></div>
-<div class="nx-colhead">{{ __('legacy/messages.text_edit_mailboxes') }}</div>
-<div>{{ __('legacy/messages.text_edit_mailboxes_note') }}<br />{{ __('legacy/messages.text_edit_mailboxes_note_two') }}
+<div class="nx-colhead">{{ __('messages.text_edit_mailboxes') }}</div>
+<div>{{ __('messages.text_edit_mailboxes_note') }}<br />{{ __('messages.text_edit_mailboxes_note_two') }}
 <form action="/web/messages/mailboxes" method="post">
 @csrf
 <input type="hidden" name="action2" value="edit">
 @if (! $editmailboxes['hasBoxes'])
-<span><b>{{ __('legacy/messages.text_no_mailboxes_to_edit') }}</b></span>
+<span><b>{{ __('messages.text_no_mailboxes_to_edit') }}</b></span>
 @else
 @foreach ($editmailboxes['boxes'] as $box)
 <input type="text" name="edit{{ $box['id'] }}" value="{{ $box['name'] }}" size="40" maxlength="14"><br />
 @endforeach
-<input type="submit" value={{ __('legacy/messages.submit_edit') }}>
+<input type="submit" value={{ __('messages.submit_edit') }}>
 @endif
 </form></div>
 </div>

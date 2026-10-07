@@ -65,7 +65,7 @@ final class Strings
     public static function addS(int|float $num, bool $es = false): string
     {
 
-        return self::pluralize($num, '', $es ? (('')) : (__('legacy/functions.text_s')));
+        return self::pluralize($num, '', $es ? (('')) : (__('functions.text_s')));
     }
 
     /**
@@ -74,7 +74,7 @@ final class Strings
     public static function isOrAre(int|float $num): string
     {
 
-        return self::pluralize($num, __('legacy/functions.text_is'), __('legacy/functions.text_are'));
+        return self::pluralize($num, __('functions.text_is'), __('functions.text_are'));
     }
 
     /**

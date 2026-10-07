@@ -85,24 +85,24 @@ final class UsercpSecurityCommand
         $response = (string) $request->input('response', '');
         $oldPassword = (string) $request->input('oldpassword', '');
         if ($response === '' && $oldPassword === '') {
-            LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_enter_old_password')));
+            LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_enter_old_password')));
         }
 
         // For argon2id users, verify via plaintext password (sent over HTTPS)
         $userAlgo = (string) ($user->passhash_algo ?? PasswordHasher::ALGO_SHA256);
         if ($oldPassword !== '' && $userAlgo === PasswordHasher::ALGO_ARGON2ID) {
             if (! password_verify($oldPassword, (string) $user->passhash)) {
-                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_wrong_password_note')));
+                LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_password_note')));
             }
         } else {
             $challenge = $this->getChallenge((string) $user->username);
             if (empty($challenge)) {
-                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), 'expired!');
+                LegacyResponse::abort((string) (__('usercp.std_error')), 'expired!');
             }
 
             $expectedResponse = hash_hmac('sha256', (string) $user->passhash, (string) $challenge);
             if (! hash_equals($expectedResponse, $response)) {
-                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_wrong_password_note')));
+                LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_password_note')));
             }
         }
 
@@ -130,7 +130,7 @@ final class UsercpSecurityCommand
             }
 
             if (! TwoFactorAuthHelper::verifyCode($secretToVerify, $twoStepSecretHash)) {
-                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), 'Invalid two step code');
+                LegacyResponse::abort((string) (__('usercp.std_error')), 'Invalid two step code');
             }
         }
 
@@ -149,11 +149,11 @@ final class UsercpSecurityCommand
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
-                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_wrong_email_address_format')));
+                LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_email_address_format')));
             }
 
             if ($this->emailExistsForOther($email, (int) $user->id)) {
-                LegacyResponse::abort((string) (__('legacy/usercp.std_error')), (string) (__('legacy/usercp.std_email_in_use')));
+                LegacyResponse::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_email_in_use')));
             }
 
             $changedemail = 1;
@@ -172,7 +172,7 @@ final class UsercpSecurityCommand
             $obemail = rawurlencode($email);
             $data['editsecret'] = $this->secureTokenService->emailChangeDigest($hash, $email);
 
-            $subject = $siteName.(__('legacy/usercp.mail_profile_change_confirmation'));
+            $subject = $siteName.(__('usercp.mail_profile_change_confirmation'));
             $body = view('emails.profile-change-confirm', [
                 'username' => $user->username,
                 'email' => $email,
@@ -257,11 +257,11 @@ final class UsercpSecurityCommand
 
         if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
-                throw ValidationException::withMessages(['email' => [__('legacy/usercp.std_wrong_email_address_format')]]);
+                throw ValidationException::withMessages(['email' => [__('usercp.std_wrong_email_address_format')]]);
             }
 
             if ($this->emailExistsForOther($email, (int) $user->id)) {
-                throw ValidationException::withMessages(['email' => [__('legacy/usercp.std_email_in_use')]]);
+                throw ValidationException::withMessages(['email' => [__('usercp.std_email_in_use')]]);
             }
 
             $hash = $this->secureTokenService->generate();
@@ -269,7 +269,7 @@ final class UsercpSecurityCommand
             $data['editsecret'] = $this->secureTokenService->emailChangeDigest($hash, $email);
             $changedemail = 1;
 
-            $subject = $siteName.(__('legacy/usercp.mail_profile_change_confirmation'));
+            $subject = $siteName.(__('usercp.mail_profile_change_confirmation'));
             $body = view('emails.profile-change-confirm', [
                 'username' => $user->username,
                 'email' => $email,

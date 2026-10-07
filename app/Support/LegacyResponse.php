@@ -106,16 +106,16 @@ final class LegacyResponse
 
         if ($allowMinimumClass === null) {
             self::abort(
-                (string) (__('legacy/functions.std_error')),
-                (string) (__('legacy/functions.std_permission_denied')),
+                (string) (__('functions.std_error')),
+                (string) (__('functions.std_permission_denied')),
             );
         }
 
         self::abort(
-            (string) (__('legacy/functions.std_sorry')),
-            (string) (__('legacy/functions.std_permission_denied_only'))
+            (string) (__('functions.std_sorry')),
+            (string) (__('functions.std_permission_denied_only'))
                 .UserClass::name($allowMinimumClass, false, true, true)
-                .(string) (__('legacy/functions.std_or_above_can_view'))
+                .(string) (__('functions.std_or_above_can_view'))
                 .view('components.permission-faq-note', ['siteName' => SiteConfig::current()->basic->siteName()])->render(),
             false,
         );
@@ -160,14 +160,14 @@ final class LegacyResponse
 
         if ($stdhead) {
             self::abort(
-                (string) (__('legacy/functions.std_error')),
-                (string) (__('legacy/functions.std_invalid_id')),
+                (string) (__('functions.std_error')),
+                (string) (__('functions.std_invalid_id')),
             );
         }
 
         $errorHtml = view('partials.int-error', [
-            'heading' => (string) (__('legacy/functions.std_error')),
-            'text' => (string) (__('legacy/functions.std_invalid_id')),
+            'heading' => (string) (__('functions.std_error')),
+            'text' => (string) (__('functions.std_invalid_id')),
         ])->render();
 
         $renderer = self::pageRenderer();
@@ -197,8 +197,8 @@ final class LegacyResponse
 
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             self::abort(
-                (string) (__('legacy/functions.std_sorry')),
-                \sprintf((string) (__('legacy/functions.approval_deny_reach_upper_limit')), $uploadDenyApprovalDenyCount),
+                (string) (__('functions.std_sorry')),
+                \sprintf((string) (__('functions.approval_deny_reach_upper_limit')), $uploadDenyApprovalDenyCount),
                 false,
             );
         }

@@ -29,7 +29,7 @@ final class CommunitySections extends SectionQueries
             $sections[] = [
                 'view' => 'posts',
                 'data' => $this->toArray((clone $postBase)->orderBy('usertopics', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_topic'), __('legacy/topten.text_most_topic_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_topic'), __('topten.text_most_topic_note')),
                 'limits' => [100, 250],
                 'subtype' => 'mtop',
             ];
@@ -39,7 +39,7 @@ final class CommunitySections extends SectionQueries
             $sections[] = [
                 'view' => 'posts',
                 'data' => $this->toArray((clone $postBase)->orderBy('userposts', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_post'), __('legacy/topten.text_most_post_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_post'), __('topten.text_most_post_note')),
                 'limits' => [100, 250],
                 'subtype' => 'mpos',
             ];
@@ -57,10 +57,10 @@ final class CommunitySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_commenter'), __('legacy/topten.text_most_commenter_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_commenter'), __('topten.text_most_commenter_note')),
                 'limits' => [100, 250],
                 'subtype' => 'mcmt',
-                'what' => __('legacy/topten.col_comments'),
+                'what' => __('topten.col_comments'),
             ];
         }
 
@@ -79,7 +79,7 @@ final class CommunitySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_biggest_topics'), __('legacy/topten.text_biggest_topics_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_biggest_topics'), __('topten.text_biggest_topics_note')),
                 'limits' => [100, 250],
                 'subtype' => 'btop',
             ];

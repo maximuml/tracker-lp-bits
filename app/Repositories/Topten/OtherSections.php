@@ -23,7 +23,7 @@ final class OtherSections extends SectionQueries
             $sections[] = [
                 'view' => 'bonus',
                 'data' => $this->toArray(DB::table('users')->select('id', 'seedbonus')->orderBy('seedbonus', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_bonuses')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_bonuses')),
                 'limits' => [100, 250],
                 'subtype' => 'bo',
             ];
@@ -33,7 +33,7 @@ final class OtherSections extends SectionQueries
             $sections[] = [
                 'view' => 'charity',
                 'data' => $this->toArray(DB::table('users')->select('id', 'charity')->orderBy('charity', 'desc')->limit($limit)->get()),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_charity_giver')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_charity_giver')),
                 'limits' => [100, 250],
                 'subtype' => 'charity',
             ];
@@ -51,7 +51,7 @@ final class OtherSections extends SectionQueries
                             ->limit($limit)
                             ->get()
                     ),
-                    'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_donated_USD')),
+                    'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_donated_USD')),
                     'limits' => [100, 250],
                     'subtype' => 'do_usd',
                 ];
@@ -68,7 +68,7 @@ final class OtherSections extends SectionQueries
                             ->limit($limit)
                             ->get()
                     ),
-                    'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_donated_CNY')),
+                    'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_donated_CNY')),
                     'limits' => [100, 250],
                     'subtype' => 'do_cny',
                 ];
@@ -87,7 +87,7 @@ final class OtherSections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_client'), __('legacy/topten.text_most_client_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_client'), __('topten.text_most_client_note')),
                 'limits' => [100, 250],
                 'subtype' => 'mcli',
             ];
@@ -105,7 +105,7 @@ final class OtherSections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_stylesheet')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_stylesheet')),
                 'limits' => [25, 50],
                 'subtype' => 'ss',
             ];
@@ -124,7 +124,7 @@ final class OtherSections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_most_language')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_most_language')),
                 'limits' => [25],
                 'subtype' => 'lang',
             ];

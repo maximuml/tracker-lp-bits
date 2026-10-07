@@ -77,36 +77,36 @@ class SystemMaintenanceController extends LegacyController
             $email = Email::sanitizeForDisplay((string) trim((string) $request->post('email', '')));
             if (! Email::isWellFormed($email)) {
                 return $this->legacyAbortResponse(
-                    (string) (__('legacy/mailtest.std_error')),
-                    (string) (__('legacy/mailtest.std_invalid_email_address')),
+                    (string) (__('mailtest.std_error')),
+                    (string) (__('mailtest.std_invalid_email_address')),
                 );
             }
 
             $smtpType = SiteConfig::current()->smtp->type('');
             if ($smtpType === '' || $smtpType === 'none') {
                 return $this->legacyAbortResponse(
-                    (string) (__('legacy/functions.std_error')),
-                    (string) (__('legacy/functions.text_unable_to_send_mail')).' (SMTP disabled)',
+                    (string) (__('functions.std_error')),
+                    (string) (__('functions.text_unable_to_send_mail')).' (SMTP disabled)',
                     false,
                 );
             }
 
             $siteName = SiteConfig::current()->basic->siteName();
             $siteEmail = SiteConfig::current()->main->siteEmail();
-            $title = $siteName.(__('legacy/mailtest.text_smtp_testing_mail'));
-            $body = (string) (__('legacy/mailtest.mail_test_mail_content'));
+            $title = $siteName.(__('mailtest.text_smtp_testing_mail'));
+            $body = (string) (__('mailtest.mail_test_mail_content'));
             $sendResult = Mail::queueLegacy($email, $siteName, $siteEmail, $title, $body, 'mailtest', false, false, '', 'UTF-8');
 
             if ($sendResult === true) {
                 return $this->legacyAbortResponse(
-                    (string) (__('legacy/mailtest.std_success')),
-                    (string) (__('legacy/mailtest.std_success_note')),
+                    (string) (__('mailtest.std_success')),
+                    (string) (__('mailtest.std_success_note')),
                 );
             }
 
             return $this->legacyAbortResponse(
-                (string) (__('legacy/functions.std_error')),
-                (string) (__('legacy/functions.text_unable_to_send_mail')).' (SMTP disabled or mail not sent)',
+                (string) (__('functions.std_error')),
+                (string) (__('functions.text_unable_to_send_mail')).' (SMTP disabled or mail not sent)',
                 false,
             );
         }

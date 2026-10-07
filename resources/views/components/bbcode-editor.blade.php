@@ -13,15 +13,15 @@
             <input class="codebuttons bbcode-btn-u" type="button" name="u" value="U" data-bbcode-action="simpletag" data-bbcode-tag="u" />
             </span>
             <span class="bbcode-group">
-            <input class="codebuttons" type="button" name="url" value="URL" data-bbcode-action="tag_url" data-prompt1="{{ __('legacy/functions.js_prompt_enter_url')}}" data-prompt2="{{ __('legacy/functions.js_prompt_enter_title')}}" data-prompt3="{{ __('legacy/functions.js_prompt_error')}}" />
-            <input class="codebuttons" type="button" name="IMG" value="IMG" data-bbcode-action="tag_image" data-prompt1="{{ __('legacy/functions.js_prompt_enter_image_url')}}" data-prompt2="{{ __('legacy/functions.js_prompt_error')}}" />
-            <input type="button" name="list" value="List" data-bbcode-action="tag_list" data-prompt1="{{ __('legacy/functions.js_prompt_enter_item')}}" data-prompt2="{{ __('legacy/functions.js_prompt_error')}}" />
+            <input class="codebuttons" type="button" name="url" value="URL" data-bbcode-action="tag_url" data-prompt1="{{ __('functions.js_prompt_enter_url')}}" data-prompt2="{{ __('functions.js_prompt_enter_title')}}" data-prompt3="{{ __('functions.js_prompt_error')}}" />
+            <input class="codebuttons" type="button" name="IMG" value="IMG" data-bbcode-action="tag_image" data-prompt1="{{ __('functions.js_prompt_enter_image_url')}}" data-prompt2="{{ __('functions.js_prompt_error')}}" />
+            <input type="button" name="list" value="List" data-bbcode-action="tag_list" data-prompt1="{{ __('functions.js_prompt_enter_item')}}" data-prompt2="{{ __('functions.js_prompt_error')}}" />
             <input class="codebuttons" type="button" name="quote" value="QUOTE" data-bbcode-action="simpletag" data-bbcode-tag="quote" />
             <input type="button" name="tagcount" value="Close all tags" data-bbcode-action="closeall" />
             </span>
             <span class="bbcode-group">
-            <select class="med codebuttons" name="color" data-bbcode-alterfont="color" aria-label="{{ __('legacy/functions.select_color') }}">
-                <option value="0">--- {{ __('legacy/functions.select_color')}} ---</option>
+            <select class="med codebuttons" name="color" data-bbcode-alterfont="color" aria-label="{{ __('functions.select_color') }}">
+                <option value="0">--- {{ __('functions.select_color')}} ---</option>
                 <option value="Black">Black</option>
                 <option value="Sienna">Sienna</option>
                 <option value="DarkOliveGreen">Dark Olive Green</option>
@@ -63,8 +63,8 @@
                 <option value="Plum">Plum</option>
                 <option value="White">White</option>
             </select>
-            <select class="med codebuttons" name="font" data-bbcode-alterfont="font" aria-label="{{ __('legacy/functions.select_font') }}">
-                <option value="0">--- {{ __('legacy/functions.select_font')}} ---</option>
+            <select class="med codebuttons" name="font" data-bbcode-alterfont="font" aria-label="{{ __('functions.select_font') }}">
+                <option value="0">--- {{ __('functions.select_font')}} ---</option>
                 <option value="Arial">Arial</option>
                 <option value="Arial Black">Arial Black</option>
                 <option value="Arial Narrow">Arial Narrow</option>
@@ -86,8 +86,8 @@
                 <option value="Trebuchet MS">Trebuchet MS</option>
                 <option value="Verdana">Verdana</option>
             </select>
-            <select class="med codebuttons" name="size" data-bbcode-alterfont="size" aria-label="{{ __('legacy/functions.select_size') }}">
-                <option value="0">--- {{ __('legacy/functions.select_size')}} ---</option>
+            <select class="med codebuttons" name="size" data-bbcode-alterfont="size" aria-label="{{ __('functions.select_size') }}">
+                <option value="0">--- {{ __('functions.select_size')}} ---</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -109,7 +109,7 @@
                         <span class="bbcode-smile">{{ \App\Support\Smilies::link($form, $text, (int) $smily) }}</span>
                     @endforeach
                 </div>
-                <a href="#" data-bbcode-action="winop">{{ __('legacy/functions.text_more_smilies')}}</a>
+                <a href="#" data-bbcode-action="winop">{{ __('functions.text_more_smilies')}}</a>
             </div>
         </div>
     </div>

@@ -4,23 +4,23 @@
 
 @section('content')
 @if ($action === 'viewposts')
-    <h1>{{ __('legacy/userhistory.text_posts_history_for')}}{{ $subject }}</h1>
+    <h1>{{ __('userhistory.text_posts_history_for')}}{{ $subject }}</h1>
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
     <x-frame :center="false">
     @foreach ($items ?? [] as $item)
         <p class=sub>
-        {{ $item['added'] }}&nbsp;--&nbsp;<b>{{ __('legacy/userhistory.text_forum') }}&nbsp;</b>
+        {{ $item['added'] }}&nbsp;--&nbsp;<b>{{ __('userhistory.text_forum') }}&nbsp;</b>
         <a href=/forums?action=viewforum&forumid={{ $item['forumid'] }}>{{ $item['forumname'] }}</a>
-        &nbsp;--&nbsp;<b>{{ __('legacy/userhistory.text_topic') }}&nbsp;</b>
+        &nbsp;--&nbsp;<b>{{ __('userhistory.text_topic') }}&nbsp;</b>
         <a href=/forums?action=viewtopic&topicid={{ $item['topicid'] }}>{{ $item['topicname'] }}</a>
-        &nbsp;--&nbsp;<b>{{ __('legacy/userhistory.text_post') }}&nbsp;</b>
+        &nbsp;--&nbsp;<b>{{ __('userhistory.text_post') }}&nbsp;</b>
         <a href=/forums?action=viewtopic&topicid={{ $item['topicid'] }}&page=p{{ $item['postid'] }}#pid{{ $item['postid'] }}>#{{ $item['postid'] }}</a>
-        @if ($item['isNew']) &nbsp;<b>(<span class="new">{{ __('legacy/userhistory.text_new')}}</span>)</b>@endif
+        @if ($item['isNew']) &nbsp;<b>(<span class="new">{{ __('userhistory.text_new')}}</span>)</b>@endif
         </p>
         <br />
-        <x-data-table :caption="__('legacy/userhistory.text_posts_history_for') . $subject" captionHidden class="nx-main">
+        <x-data-table :caption="__('userhistory.text_posts_history_for') . $subject" captionHidden class="nx-main">
         <tr class="align-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
         </x-data-table>
         <br />
@@ -30,23 +30,23 @@
         {{ $pagerbottom ?? '' }}
     @endif
 @elseif ($action === 'viewcomments')
-    <h1>{{ __('legacy/userhistory.text_comments_history_for')}}{{ $subject }}</h1>
+    <h1>{{ __('userhistory.text_comments_history_for')}}{{ $subject }}</h1>
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
     <x-frame :center="false">
     @foreach ($items ?? [] as $item)
         <p class=sub>
-        {{ $item['added'] }}&nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_torrent') }}&nbsp;</b>
+        {{ $item['added'] }}&nbsp;---&nbsp;<b>{{ __('userhistory.text_torrent') }}&nbsp;</b>
         @if ($item['torrentName'] !== '')
             <a href=/web/details/{{ $item['torrentid'] }}&tocomm=1&hit=1>{{ $item['torrentName'] }}</a>
         @else
             [Deleted]
         @endif
-        &nbsp;---&nbsp;<b>{{ __('legacy/userhistory.text_comment') }}&nbsp;</b>#<a href=/web/details/{{ $item['torrentid'] }}&tocomm=1&hit=1{{ $item['pageUrl'] }}>{{ $item['commentid'] }}</a>
+        &nbsp;---&nbsp;<b>{{ __('userhistory.text_comment') }}&nbsp;</b>#<a href=/web/details/{{ $item['torrentid'] }}&tocomm=1&hit=1{{ $item['pageUrl'] }}>{{ $item['commentid'] }}</a>
         </p>
         <br />
-        <x-data-table :caption="__('legacy/userhistory.text_comments_history_for') . $subject" captionHidden class="nx-main">
+        <x-data-table :caption="__('userhistory.text_comments_history_for') . $subject" captionHidden class="nx-main">
         <tr class="align-top"><td class="comment">{{ $item['bodyHtml'] }}</td></tr>
         </x-data-table>
         <br />

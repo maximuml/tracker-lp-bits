@@ -1,42 +1,4 @@
 <?php
 
-return [
-    'std_recover_failed' => 'Recover Failed! (See Below)',
-    'std_missing_email_address' => 'You must enter an email address!',
-    'std_invalid_email_address' => 'Invalid email address!',
-    'std_email_not_in_database' => "The email address was not found in the database.\n",
-    'std_error' => 'Error',
-    'std_database_error' => 'Database error. Please contact an administrator about this.',
-    'std_unable_updating_user_data' => 'Unable to update user data. Please contact an administrator about this error.',
-    'std_invalid_reset_link' => 'This password reset link is invalid, expired, or already used. Request a new one below.',
-    'text_recover_user' => 'Recover lost user name or password.',
-    'text_use_form_below' => 'Use the form below to receive a password reset link by email.',
-    'text_reply_to_confirmation_email' => '(The link lets you choose a new password.)',
-    'text_reset_password' => 'Choose a new password',
-    'text_choose_new_password' => 'Enter and confirm a new password for this account.',
-    'row_new_password' => 'New password: ',
-    'row_confirm_password' => 'Confirm password: ',
-    'submit_reset_password' => 'Reset password',
-    'text_password_reset_success' => 'Your password has been changed. You can now log in.',
-    'text_note' => 'Note: ',
-    'text_ban_ip' => ' failed attempts in a row will result in banning your ip!',
-    'row_registered_email' => 'Registered email: ',
-    'submit_recover_it' => 'Recover It!',
-    'text_you_have' => 'You have ',
-    'text_remaining_tries' => ' remaining tries.',
-
-    'mail_this_link' => 'THIS LINK',
-    'mail_here' => 'HERE',
-
-    'mail_title' => ' password reset confirmation',
-    'mail_one' => "Hi,\n\nSomeone, hopefully you, requested that the password for the account\nassociated with this email address ",
-    'mail_two' => " be reset.\n\nThe request originated from ",
-    'mail_three' => ".\n\nIf you did not do this ignore this email. Please do not reply.\n\nShould you wish to confirm this request, please follow ",
-    'mail_four' => "\nAfter you do this, you can choose a new password.\n\n------\nYours,\nThe %s Team.",
-
-    'mail_password_changed_title' => ' password changed',
-    'mail_password_changed_one' => "Hi,\n\nThe password for the account ",
-    'mail_password_changed_two' => " was changed.\n\nIf you did not make this change, contact staff immediately.\n\nYou may login from ",
-    'mail_password_changed_three' => "\n\n------\nYours,\nThe %s Team.",
-    'text_select_lang' => 'Select Site Language: ',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/recover.php';

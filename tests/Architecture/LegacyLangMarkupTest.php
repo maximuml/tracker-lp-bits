@@ -11,7 +11,7 @@ use Tests\Attributes\TestCategory;
  * Stage-0 ratchet: markup-bearing legacy language values must not be
  * rendered through escaping contexts.
  *
- * Some `resources/lang/en/legacy/*.php` values still contain HTML tags
+ * Some `resources/lang/en/*.php` values still contain HTML tags
  * or `&nbsp;`-style entities (legacy string-building heritage — they are
  * concatenated into raw HTML in services, which renders them fine).
  * Passing such a value through an escaping channel produces visible
@@ -30,29 +30,41 @@ use Tests\Attributes\TestCategory;
  *     double-escapes the markup into visible text.
  *
  * To list markup-bearing values:
- *   grep -rnoE "['\"][a-z_]+['\"] *=> *['\"][^'\"]*<[^>]+>" resources/lang/en/legacy
+ *   grep -rnoE "['\"][a-z_]+['\"] *=> *['\"][^'\"]*<[^>]+>" resources/lang/en
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class LegacyLangMarkupTest extends TestCase
 {
     private const BASE_DIR = __DIR__.'/../..';
 
-    private const LANG_DIR = self::BASE_DIR.'/resources/lang/en/legacy';
+    private const LANG_DIR = self::BASE_DIR.'/resources/lang/en';
 
-    /** Baseline: markup-bearing values across resources/lang/en/legacy. */
+    /**
+     * Files whose values may intentionally carry markup (Filament/admin
+     * strings rendered via Htmlable). Shrink-only.
+     */
+    private const MARKUP_ALLOWED_FILES = ['attendance.php', 'exam.php', 'label.php', 'token.php', 'upload.php'];
+
+    /** Baseline: markup-bearing values across resources/lang/en. */
     private const BASELINE_MARKUP_VALUES = 0;
 
     private const MARKUP_PATTERN = '/<[a-zA-Z\/][^>]*>|&(?:nbsp|lt|gt|amp|quot);/';
 
     /**
      * @var array<string, true>|null
-     *                               Cache of `legacy/group.key` identifiers whose value carries markup.
+     *                               Cache of `group.key` identifiers whose value carries markup.
      */
     private ?array $markupKeys = null;
 
     public function test_markup_value_count_does_not_exceed_baseline(): void
     {
-        $count = count($this->markupKeys());
+        $count = 0;
+        foreach (array_keys($this->markupKeys()) as $key) {
+            $group = substr($key, 0, (int) strpos($key, '.'));
+            if (! in_array($group.'.php', self::MARKUP_ALLOWED_FILES, true)) {
+                $count++;
+            }
+        }
 
         $this->assertLessThanOrEqual(
             self::BASELINE_MARKUP_VALUES,
@@ -181,7 +193,7 @@ final class LegacyLangMarkupTest extends TestCase
 
             foreach (array_merge($single, $double) as $m) {
                 if (preg_match(self::MARKUP_PATTERN, (string) $m[2]) === 1) {
-                    $keys['legacy/'.$group.'.'.$m[1]] = true;
+                    $keys[''.$group.'.'.$m[1]] = true;
                 }
             }
         }

@@ -1,6 +1,4 @@
 <?php
 
-return [
-    'head_more_smilies' => 'More Clickable Smilies',
-    'text_close' => 'Close',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/moresmilies.php';

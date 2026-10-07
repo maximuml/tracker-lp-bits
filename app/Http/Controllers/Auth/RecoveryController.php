@@ -50,7 +50,7 @@ class RecoveryController extends Controller
             $id > 0 ? $id : null,
             $resetToken !== null ? $secret : null,
             $hasResetLink && $resetToken === null
-                ? (string) __('legacy/recover.std_invalid_reset_link')
+                ? (string) __('recover.std_invalid_reset_link')
                 : null,
             $hasResetLink,
         );

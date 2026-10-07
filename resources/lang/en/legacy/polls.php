@@ -1,16 +1,4 @@
 <?php
 
-return [
-    'std_error' => 'Error',
-    'std_permission_denied' => 'Permission denied.',
-    'std_delete_poll' => 'Delete poll',
-    'std_delete_poll_confirmation' => "Do you really want to delete a poll? Click\n",
-    'std_sorry' => 'Sorry...',
-    'std_no_polls' => 'There are no polls!',
-    'head_previous_polls' => 'Previous polls',
-    'text_previous_polls' => 'Previous polls',
-    'text_ago' => ' ago',
-    'text_edit' => 'Edit',
-    'text_delete' => 'Delete',
-    'text_votes' => 'Votes: ',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/polls.php';

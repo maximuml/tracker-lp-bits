@@ -83,8 +83,8 @@ final class TorrentBookmark
         $cache = LegacyRedisCache::instance();
 
         return self::stateMarkup($cache, $userId, $torrentId, $text, [
-            'title_bookmark_torrent' => __('legacy/functions.title_bookmark_torrent'),
-            'title_delbookmark_torrent' => __('legacy/functions.title_delbookmark_torrent'),
+            'title_bookmark_torrent' => __('functions.title_bookmark_torrent'),
+            'title_delbookmark_torrent' => __('functions.title_delbookmark_torrent'),
         ]);
     }
 }

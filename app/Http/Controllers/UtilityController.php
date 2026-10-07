@@ -198,10 +198,10 @@ class UtilityController extends LegacyController
         }
 
         $title = match ($type) {
-            'adminactivate', 'inviter', 'signup' => __('legacy/ok.head_user_signup'),
-            'sysop' => __('legacy/ok.head_sysop_activation'),
-            'confirmed' => __('legacy/ok.head_already_confirmed'),
-            'confirm' => __('legacy/ok.head_signup_confirmation'),
+            'adminactivate', 'inviter', 'signup' => __('ok.head_user_signup'),
+            'sysop' => __('ok.head_sysop_activation'),
+            'confirmed' => __('ok.head_already_confirmed'),
+            'confirm' => __('ok.head_signup_confirmation'),
             default => '',
         };
 

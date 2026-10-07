@@ -1,8 +1,4 @@
 <?php
 
-return [
-    'std_failed' => 'Failed',
-    'std_success' => 'Success',
-    'std_ghost_torrents_cleaned' => 'ghost torrents were sucessfully cleaned.',
-    'std_cannot_flush_others' => 'You can only clean your own ghost torrents',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/takeflush.php';

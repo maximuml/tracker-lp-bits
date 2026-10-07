@@ -37,12 +37,12 @@ final class MagicSectionFactory
 
         $disabledValue = null;
         if ($lowBonus) {
-            $disabledValue = (string) __('legacy/details.magic_have_no_enough_bonus_value');
+            $disabledValue = (string) __('details.magic_have_no_enough_bonus_value');
         } elseif ((int) $magicInfo['whether_have_give_value'] !== 0) {
             $disabledValue = str_replace(
                 'Number',
                 (string) $magicInfo['add_value'],
-                (string) __('legacy/details.magic_value_number')
+                (string) __('details.magic_value_number')
             );
         }
 
@@ -56,23 +56,23 @@ final class MagicSectionFactory
             $givers[] = UserDisplay::username((int) ($giver->userid ?? 0), false, true, true, false, false, true);
         }
 
-        [$haveGotPre, $haveGotPost] = self::splitNumberPlaceholder((string) __('legacy/details.magic_haveGotBonus'));
-        [$sumGivePre, $sumGivePost] = self::splitNumberPlaceholder((string) __('legacy/details.magic_sum_user_give_number'));
+        [$haveGotPre, $haveGotPost] = self::splitNumberPlaceholder((string) __('details.magic_haveGotBonus'));
+        [$sumGivePre, $sumGivePost] = self::splitNumberPlaceholder((string) __('details.magic_sum_user_give_number'));
 
         return new MagicSection(
             torrentId: $id,
             options: $options,
             disabledValue: $disabledValue,
-            givenLabel: (string) __('legacy/details.span_description_have_given'),
+            givenLabel: (string) __('details.span_description_have_given'),
             sumValue: (int) $magicInfo['sum_value'],
             countUserNumber: (int) $magicInfo['count_user_number'],
             visibleGivers: array_slice($givers, 0, self::MAGIC_VISIBLE_GIVERS),
             hiddenGivers: array_slice($givers, self::MAGIC_VISIBLE_GIVERS),
             currentUser: UserDisplay::username((int) ($currentUser['id'] ?? 0), false, true, true, false, false, true),
-            newestRecordText: (string) __('legacy/details.magic_newest_record'),
+            newestRecordText: (string) __('details.magic_newest_record'),
             sumGivePre: $sumGivePre,
             sumGivePost: $sumGivePost,
-            showAllText: (string) __('legacy/details.magic_show_all_description'),
+            showAllText: (string) __('details.magic_show_all_description'),
             haveGotBonusPre: $haveGotPre,
             haveGotBonusPost: $haveGotPost,
         );

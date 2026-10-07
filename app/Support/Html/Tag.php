@@ -292,7 +292,7 @@ final class Tag
     public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
     {
         $items = SearchBox::itemList(LegacyRedisCache::instance(), $listName, $mode);
-        $chooseOne = __('legacy/functions.select_choose_one');
+        $chooseOne = __('functions.select_choose_one');
 
         return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);
     }
@@ -304,13 +304,13 @@ final class Tag
     public static function promotionSelection(int $selected = 0, int $hide = 0): string
     {
         $labels = [
-            'normal' => (string) (__('legacy/functions.text_normal')),
-            'free' => (string) (__('legacy/functions.text_free')),
-            'two_times_up' => (string) (__('legacy/functions.text_two_times_up')),
-            'free_two_times_up' => (string) (__('legacy/functions.text_free_two_times_up')),
-            'half_down' => (string) (__('legacy/functions.text_half_down')),
-            'half_down_two_up' => (string) (__('legacy/functions.text_half_down_two_up')),
-            'thirty_percent_down' => (string) (__('legacy/functions.text_thirty_percent_down')),
+            'normal' => (string) (__('functions.text_normal')),
+            'free' => (string) (__('functions.text_free')),
+            'two_times_up' => (string) (__('functions.text_two_times_up')),
+            'free_two_times_up' => (string) (__('functions.text_free_two_times_up')),
+            'half_down' => (string) (__('functions.text_half_down')),
+            'half_down_two_up' => (string) (__('functions.text_half_down_two_up')),
+            'thirty_percent_down' => (string) (__('functions.text_thirty_percent_down')),
         ];
 
         return self::promotionSelectOptions($selected, $hide, $labels);
@@ -397,7 +397,7 @@ final class Tag
     {
         return trim(view('support.tag._quick-reply', [
             'name' => $textareaName,
-            'label' => (string) (__('legacy/functions.row_body')),
+            'label' => (string) (__('functions.row_body')),
             'smileRow' => SafeHtml::fromTrustedHtml(Smilies::quickRow($formName, $textareaName)),
             'submitLabel' => $submitLabel,
         ])->render());
@@ -450,7 +450,7 @@ final class Tag
      */
     public static function formatSpoiler(string $content, string $title = '', bool $defaultCollapsed = true): string
     {
-        $defaultTitle = __('legacy/functions.spoiler_default_title');
+        $defaultTitle = __('functions.spoiler_default_title');
 
         return Comment::addTempCode(BBCode::spoiler($content, $title, $defaultTitle, $defaultCollapsed));
     }

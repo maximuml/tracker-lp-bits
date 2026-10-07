@@ -90,7 +90,7 @@ final class OfferVoteListBuilderTest extends TestCase
 
         $this->assertFalse($r['hasVotes']);
         $this->assertSame([], $r['rows']);
-        $this->assertSame((string) __('legacy/offers.std_no_votes_yet'), $r['noVotesNote']);
+        $this->assertSame((string) __('offers.std_no_votes_yet'), $r['noVotesNote']);
         $this->assertNotNull($r['pagerTop']);
     }
 }

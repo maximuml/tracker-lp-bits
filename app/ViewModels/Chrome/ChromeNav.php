@@ -45,27 +45,27 @@ final class ChromeNav
         $normalSectionName = SearchBox::value($context->cache, (int) (Settings::get('main.browsecat') ?? 1), 'section_name');
 
         $items = [
-            ['key' => 'home', 'href' => '/web/index', 'label' => __('legacy/functions.text_home')],
-            ['key' => 'forums', 'href' => '/forums', 'label' => __('legacy/functions.text_forums')],
-            ['key' => 'latestcomments', 'href' => '/web/latestcomments', 'label' => __('legacy/functions.text_latest_comments')],
-            ['key' => 'torrents', 'href' => '/web/torrents', 'label' => $normalSectionName[$context->langDir] ?? (__('legacy/functions.text_torrents'))],
+            ['key' => 'home', 'href' => '/web/index', 'label' => __('functions.text_home')],
+            ['key' => 'forums', 'href' => '/forums', 'label' => __('functions.text_forums')],
+            ['key' => 'latestcomments', 'href' => '/web/latestcomments', 'label' => __('functions.text_latest_comments')],
+            ['key' => 'torrents', 'href' => '/web/torrents', 'label' => $normalSectionName[$context->langDir] ?? (__('functions.text_torrents'))],
         ];
         if ($context->enableOffer === 'yes') {
-            $items[] = ['key' => 'offers', 'href' => '/web/offers', 'label' => __('legacy/functions.text_offers')];
+            $items[] = ['key' => 'offers', 'href' => '/web/offers', 'label' => __('functions.text_offers')];
         }
-        $items[] = ['key' => 'upload', 'href' => '/web/upload', 'label' => __('legacy/functions.text_upload')];
+        $items[] = ['key' => 'upload', 'href' => '/web/upload', 'label' => __('functions.text_upload')];
         if ($chrome->permissionChecker->userCan('topten', false, $userId)) {
-            $items[] = ['key' => 'topten', 'href' => '/web/topten', 'label' => __('legacy/functions.text_top_ten')];
+            $items[] = ['key' => 'topten', 'href' => '/web/topten', 'label' => __('functions.text_top_ten')];
         }
         if ($chrome->permissionChecker->userCan('log', false, $userId)) {
-            $items[] = ['key' => 'log', 'href' => '/web/log', 'label' => __('legacy/functions.text_log')];
+            $items[] = ['key' => 'log', 'href' => '/web/log', 'label' => __('functions.text_log')];
         }
-        $items[] = ['key' => 'rules', 'href' => '/web/rules', 'label' => __('legacy/functions.text_rules')];
-        $items[] = ['key' => 'faq', 'href' => '/web/faq', 'label' => __('legacy/functions.text_faq')];
+        $items[] = ['key' => 'rules', 'href' => '/web/rules', 'label' => __('functions.text_rules')];
+        $items[] = ['key' => 'faq', 'href' => '/web/faq', 'label' => __('functions.text_faq')];
         if ($chrome->permissionChecker->userCan('staffmem', false, $userId)) {
-            $items[] = ['key' => 'staff', 'href' => '/web/staff', 'label' => __('legacy/functions.text_staff')];
+            $items[] = ['key' => 'staff', 'href' => '/web/staff', 'label' => __('functions.text_staff')];
         }
-        $items[] = ['key' => 'contactstaff', 'href' => '/web/contactstaff', 'label' => __('legacy/functions.text_contactstaff')];
+        $items[] = ['key' => 'contactstaff', 'href' => '/web/contactstaff', 'label' => __('functions.text_contactstaff')];
 
         return array_values(array_map(
             fn (array $item): array => $item + ['selected' => $item['key'] === $selected, 'attrs' => ''],

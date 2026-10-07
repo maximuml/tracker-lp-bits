@@ -201,7 +201,7 @@ final class UserClass
 
         $langKey = self::langKey((int) $class);
         $className = $langKey !== null ? (string) __(
-            'legacy/functions.'.$langKey,
+            'functions.'.$langKey,
             [],
             $I18N ? null : 'en'
         ) : '';
@@ -213,7 +213,7 @@ final class UserClass
             }
         }
 
-        $classNameColor = $langKey !== null ? (string) __('legacy/functions.'.$langKey, [], 'en') : '';
+        $classNameColor = $langKey !== null ? (string) __('functions.'.$langKey, [], 'en') : '';
         $className = $compact ? str_replace(' ', '', $className) : $className;
 
         if (isset($options['uid'], $options['with_role'])) {
@@ -293,7 +293,7 @@ final class UserClass
             $minClass,
             $includeNoClass,
             $disabled,
-            ['select_an_user_class' => __('legacy/functions.select_an_user_class')],
+            ['select_an_user_class' => __('functions.select_an_user_class')],
         );
     }
 }

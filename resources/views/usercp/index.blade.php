@@ -1,12 +1,12 @@
 
 @extends('layouts.app')
 
-@section('title', $title ?? (__('legacy/usercp.head_control_panel')))
+@section('title', $title ?? (__('usercp.head_control_panel')))
 
 @section('content')
-<h1 class="nx-sr-only">{{ $title ?? __('legacy/usercp.head_control_panel') }}</h1>
+<h1 class="nx-sr-only">{{ $title ?? __('usercp.head_control_panel') }}</h1>
 @if ($errors->any())
-<x-alert type="error" :title="__('legacy/functions.std_error')">
+<x-alert type="error" :title="__('functions.std_error')">
     @foreach ($errors->all() as $message)<div>{{ $message }}</div>@endforeach
 </x-alert>
 @endif

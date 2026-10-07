@@ -78,9 +78,9 @@ final class TopicListViewModel
 
         return [
             'first' => $firstDesc ? 'firstpostasc' : 'firstpostdesc',
-            'firstTitle' => $firstDesc ? __('legacy/forums.title_order_topic_asc') : __('legacy/forums.title_order_topic_desc'),
+            'firstTitle' => $firstDesc ? __('forums.title_order_topic_asc') : __('forums.title_order_topic_desc'),
             'last' => $lastAsc ? 'lastpostdesc' : 'lastpostasc',
-            'lastTitle' => $lastAsc ? __('legacy/forums.title_order_post_desc') : __('legacy/forums.title_order_post_asc'),
+            'lastTitle' => $lastAsc ? __('forums.title_order_post_desc') : __('forums.title_order_post_asc'),
         ];
     }
 }

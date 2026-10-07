@@ -71,7 +71,7 @@ class TorrentEditController extends Controller
         $currentUser = $this->currentUser->get();
         $this->currentUser->set($currentUser);
 
-        $headTitle = (__('legacy/edit.head_edit_torrent')).'"'.$row['name'].'"';
+        $headTitle = (__('edit.head_edit_torrent')).'"'.$row['name'].'"';
         $cats = Category::listByModeWithContext($sectionmode);
 
         $canEdit = (int) ($this->currentUser->id()) === (int) ($row['owner'] ?? 0)
@@ -126,8 +126,8 @@ class TorrentEditController extends Controller
                 posStates: $posStates,
                 posStateSelected: (string) $row['pos_state'],
                 posStateUntil: (string) $row['pos_state_until'],
-                specialLabel: (string) (__('legacy/edit.row_special_torrent')),
-                positionLabel: html_entity_decode((string) (__('legacy/edit.row_torrent_position')), ENT_QUOTES | ENT_HTML401, 'UTF-8'),
+                specialLabel: (string) (__('edit.row_special_torrent')),
+                positionLabel: html_entity_decode((string) (__('edit.row_torrent_position')), ENT_QUOTES | ENT_HTML401, 'UTF-8'),
                 deadlineLabel: SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).'&nbsp;'),
             );
         }

@@ -61,12 +61,12 @@ final class TorrentDetailsViewFactory
             peers: new PeersRow($id, (int) $row['seeders'], (int) $row['leechers']),
             denyBanner: $this->buildDenyBanner($row, $denyLog),
             uploadTimePrefix: ($currentUser['timetype'] ?? '') !== 'timealive'
-                ? (string) __('legacy/details.text_at')
-                : (string) __('legacy/details.text_blank'),
+                ? (string) __('details.text_at')
+                : (string) __('details.text_blank'),
             uploadTime: ($currentUser['timetype'] ?? '') !== 'timealive'
                 ? SafeHtml::fromTrustedHtml((string) $row['added'])
                 : SafeHtml::fromTrustedHtml((string) Time::format((string) $row['added'], true, false)),
-            showOrHideTitle: self::plainTitle('legacy/details.title_show_or_hide'),
+            showOrHideTitle: self::plainTitle('details.title_show_or_hide'),
             downloadAllowed: $downloadAllowed,
             saveAs: (string) $row['save_as'],
         );
@@ -165,14 +165,14 @@ final class TorrentDetailsViewFactory
         if ($downloadAllowed) {
             if ($row['price'] > 0) {
                 $downloadLabel = $hasBuy
-                    ? (string) __('legacy/details.text_download_bought_torrent')
-                    : sprintf((string) __('legacy/details.text_download_paid_torrent'), number_format((float) $row['price']));
+                    ? (string) __('details.text_download_bought_torrent')
+                    : sprintf((string) __('details.text_download_paid_torrent'), number_format((float) $row['price']));
             } else {
-                $downloadLabel = (string) __('legacy/details.text_download_torrent');
+                $downloadLabel = (string) __('details.text_download_torrent');
             }
             $actions[] = new TorrentAction(
                 url: "/download?id={$id}",
-                title: self::plainTitle('legacy/details.title_download_torrent'),
+                title: self::plainTitle('details.title_download_torrent'),
                 iconClass: 'dt_download',
                 iconAlt: 'download',
                 label: $downloadLabel,
@@ -186,22 +186,22 @@ final class TorrentDetailsViewFactory
             }
             $actions[] = new TorrentAction(
                 url: $editUrl,
-                title: self::plainTitle('legacy/details.title_edit_torrent'),
+                title: self::plainTitle('details.title_edit_torrent'),
                 iconClass: 'dt_edit',
                 iconAlt: 'edit',
                 label: Permission::can(PermissionEnum::TORRENT_MANAGE)
-                    ? (string) __('legacy/details.text_edit_and_delete_torrent')
-                    : (string) __('legacy/details.text_edit_torrent'),
+                    ? (string) __('details.text_edit_and_delete_torrent')
+                    : (string) __('details.text_edit_torrent'),
             );
         }
 
         if (Permission::can(PermissionEnum::ASK_RESEED) && (int) $row['seeders'] === 0) {
             $actions[] = new TorrentAction(
                 url: '/web/torrents/reseed',
-                title: self::plainTitle('legacy/details.title_ask_for_reseed'),
+                title: self::plainTitle('details.title_ask_for_reseed'),
                 iconClass: 'dt_reseed',
                 iconAlt: 'reseed',
-                label: (string) __('legacy/details.text_ask_for_reseed'),
+                label: (string) __('details.text_ask_for_reseed'),
                 isPost: true,
                 postFields: ['reseedid' => $id],
             );
@@ -216,7 +216,7 @@ final class TorrentDetailsViewFactory
                 title: '',
                 iconClass: '',
                 iconAlt: '',
-                label: (string) __('legacy/details.action_approval'),
+                label: (string) __('details.action_approval'),
                 spanClass: 'small approval',
                 spanId: 'approval',
                 dataTorrentId: $id,
@@ -238,10 +238,10 @@ JS, \json_encode($approvalTitle)), 'footer', false);
 
         $actions[] = new TorrentAction(
             url: "/web/report?torrent={$id}",
-            title: self::plainTitle('legacy/details.title_report_torrent'),
+            title: self::plainTitle('details.title_report_torrent'),
             iconClass: 'dt_report',
             iconAlt: 'report',
-            label: (string) __('legacy/details.text_report_torrent'),
+            label: (string) __('details.text_report_torrent'),
         );
 
         return $actions;
@@ -265,8 +265,8 @@ JS, \json_encode($approvalTitle)), 'footer', false);
      */
     private function buildHotMeter(int $id, array $row): HotMeterRow
     {
-        $snatchesPre = (string) __('legacy/details.text_view_snatches_pre');
-        $snatchesPost = (string) __('legacy/details.text_view_snatches_post');
+        $snatchesPre = (string) __('details.text_view_snatches_pre');
+        $snatchesPost = (string) __('details.text_view_snatches_post');
 
         return new HotMeterRow(
             views: $row['views'],
@@ -274,7 +274,7 @@ JS, \json_encode($approvalTitle)), 'footer', false);
             timesCompleted: $row['times_completed'],
             torrentId: $id,
             lastSeeder: SafeHtml::fromTrustedHtml((string) Time::format((string) $row['last_action'])),
-            lastSeederLabel: self::plainTitle('legacy/details.row_last_seeder'),
+            lastSeederLabel: self::plainTitle('details.row_last_seeder'),
             snatchesPre: $snatchesPre,
             snatchesPost: $snatchesPost,
         );

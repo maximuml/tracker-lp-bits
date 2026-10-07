@@ -1,5 +1,4 @@
 <?php
 
-return [
-    'head_rules' => 'Rules',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/rules.php';

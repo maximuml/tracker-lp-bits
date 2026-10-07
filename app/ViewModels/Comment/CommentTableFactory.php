@@ -68,7 +68,7 @@ final class CommentTableFactory
                 editedBy: ! empty($row['editedby']) ? UserDisplay::username((int) $row['editedby']) : null,
                 editedAt: ! empty($row['editedby']) ? SafeHtml::fromTrustedHtml((string) Time::format((string) $row['editdate'], true, false)) : null,
                 online: ($userRow['last_access'] ?? '') > $dt,
-                pmTitle: self::plainTitle('legacy/functions.title_send_message_to').(string) ($userRow['username'] ?? ''),
+                pmTitle: self::plainTitle('functions.title_send_message_to').(string) ($userRow['username'] ?? ''),
                 canDelete: $canManage,
                 canEdit: (int) $row['user'] === (int) ($this->currentUser->id()) || UserDisplay::currentClass() >= $commanageClass,
             );
@@ -79,8 +79,8 @@ final class CommentTableFactory
             $type,
             $parentId,
             $contentWidth,
-            self::plainTitle('legacy/functions.title_report_this_comment'),
-            self::plainTitle('legacy/functions.title_add_reply'),
+            self::plainTitle('functions.title_report_this_comment'),
+            self::plainTitle('functions.title_add_reply'),
         );
     }
 

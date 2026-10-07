@@ -118,10 +118,10 @@ final class UsercpSecurityBuilderTest extends TestCase
         $this->assertNotEmpty($base);
 
         $sentences = [
-            'mail' => (string) __('legacy/usercp.std_confirmation_email_sent'),
-            'passkey' => (string) __('legacy/usercp.std_passkey_reset'),
-            'password' => (string) __('legacy/usercp.std_password_changed'),
-            'privacy' => (string) __('legacy/usercp.std_privacy_level_updated'),
+            'mail' => (string) __('usercp.std_confirmation_email_sent'),
+            'passkey' => (string) __('usercp.std_passkey_reset'),
+            'password' => (string) __('usercp.std_password_changed'),
+            'privacy' => (string) __('usercp.std_privacy_level_updated'),
         ];
         foreach ($sentences as $flag => $sentence) {
             $this->bindRequest([$flag => '1']);

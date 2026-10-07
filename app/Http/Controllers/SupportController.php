@@ -44,7 +44,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(('Error'), 'Permission denied.');
         }
         if (! $isAdmin && ! Setting::getIsComplainEnabled()) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.complain_not_enabled'));
+            return $this->legacyAbortResponse(__('functions.std_error'), __('complains.complain_not_enabled'));
         }
 
         $action = filter_var((string) ($request->input('action') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -120,7 +120,7 @@ class SupportController extends LegacyController
             return $this->legacyAbortResponse(('Error'), 'Permission denied.');
         }
         if (! $isAdmin && ! Setting::getIsComplainEnabled()) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.complain_not_enabled'));
+            return $this->legacyAbortResponse(__('functions.std_error'), __('complains.complain_not_enabled'));
         }
 
         return null;
@@ -139,7 +139,7 @@ class SupportController extends LegacyController
             'reply' => redirect()->to('/web/complains/reply'.$suffix, 308),
             'answered' => redirect()->to('/web/complains/answered'.$suffix, 308),
             'unanswered' => redirect()->to('/web/complains/unanswered'.$suffix, 308),
-            default => $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Permission denied.'),
+            default => $this->legacyAbortResponse(__('functions.std_error'), 'Permission denied.'),
         };
     }
 
@@ -152,18 +152,18 @@ class SupportController extends LegacyController
             false,
             true,
         )) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
+            return $this->legacyAbortResponse(__('functions.std_error'), __('complains.text_new_failure'));
         }
 
         $email = filter_var((string) ($request->input('email') ?? ''), FILTER_VALIDATE_EMAIL);
         $body = filter_var((string) ($request->input('body') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         if (empty($email) || empty($body)) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
+            return $this->legacyAbortResponse(__('functions.std_error'), __('complains.text_new_failure'));
         }
 
         $uuid = $this->complainService->createComplain($email, $body, Network::clientIp());
         if ($uuid === null) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
+            return $this->legacyAbortResponse(__('functions.std_error'), __('complains.text_new_failure'));
         }
 
         return redirect('/web/complains?action=view&id='.urlencode($uuid));
@@ -174,7 +174,7 @@ class SupportController extends LegacyController
         $id = (int) $request->input('id', 0);
         $body = filter_var((string) ($request->input('body') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         if ($id <= 0 || empty($body)) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), __('legacy/complains.text_new_failure'));
+            return $this->legacyAbortResponse(__('functions.std_error'), __('complains.text_new_failure'));
         }
 
         if ($uid <= 0) {
@@ -187,7 +187,7 @@ class SupportController extends LegacyController
 
         $ok = $this->complainService->replyToComplain($id, $uid, $body, Network::clientIp());
         if (! $ok) {
-            return $this->legacyAbortResponse(__('legacy/functions.std_error'), 'Complain not found.');
+            return $this->legacyAbortResponse(__('functions.std_error'), 'Complain not found.');
         }
 
         return redirect()->to($request->headers->get('referer') ?: '/web/complains');
@@ -232,7 +232,7 @@ class SupportController extends LegacyController
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'page' => $request->input('page'),
-            'title' => __('legacy/complains.text_complain'),
+            'title' => __('complains.text_complain'),
             'isAdmin' => $isAdmin,
             'isLogin' => true,
         ]);
@@ -260,7 +260,7 @@ class SupportController extends LegacyController
             $replyUserMap[(int) $rUid] = UserDisplay::plainUsername((int) $rUid);
         }
 
-        $replyBoxHtml = Html::quickReply('reply', 'body', __('legacy/complains.text_reply'));
+        $replyBoxHtml = Html::quickReply('reply', 'body', __('complains.text_reply'));
 
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'view',
@@ -270,7 +270,7 @@ class SupportController extends LegacyController
             'replyUserMap' => $replyUserMap,
             'isAdmin' => $isAdmin,
             'isLogin' => $uid > 0,
-            'title' => __('legacy/complains.text_complain'),
+            'title' => __('complains.text_complain'),
             'replyBoxHtml' => SafeHtml::fromTrustedHtml($replyBoxHtml),
         ]);
     }
@@ -281,7 +281,7 @@ class SupportController extends LegacyController
 
         return $this->legacyPage($request, 'complains', false, [
             'mode' => 'compose',
-            'title' => __('legacy/complains.text_complain'),
+            'title' => __('complains.text_complain'),
             'captchaHtml' => SafeHtml::fromTrustedHtml($captchaHtml),
         ]);
     }

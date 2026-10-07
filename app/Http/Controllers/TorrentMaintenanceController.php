@@ -133,14 +133,14 @@ class TorrentMaintenanceController extends LegacyController
             $effected = $this->peerRepository->deleteInactiveForUser($id, $lastAction);
 
             return $this->legacyAbortResponse(
-                __('legacy/takeflush.std_success'),
-                $effected.' '.(__('legacy/takeflush.std_ghost_torrents_cleaned'))
+                __('takeflush.std_success'),
+                $effected.' '.(__('takeflush.std_ghost_torrents_cleaned'))
             );
         }
 
         return $this->legacyAbortResponse(
-            __('legacy/takeflush.std_failed'),
-            __('legacy/takeflush.std_cannot_flush_others')
+            __('takeflush.std_failed'),
+            __('takeflush.std_cannot_flush_others')
         );
     }
 
@@ -164,7 +164,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $currentUserId = (int) ($this->currentUser->id());
         if (! $this->permissionChecker->userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
-            return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), ('Permission denied.'));
+            return $this->legacyAbortResponse(__('takereseed.std_error'), ('Permission denied.'));
         }
 
         $reseedid = (int) (request()->query('reseedid') ?? request()->query('id') ?? 0);
@@ -173,12 +173,12 @@ class TorrentMaintenanceController extends LegacyController
 
         $seederCount = $this->peerRepository->countForTorrent($reseedid);
         if ($seederCount > 0) {
-            return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), __('legacy/takereseed.std_torrent_not_dead'));
+            return $this->legacyAbortResponse(__('takereseed.std_error'), __('takereseed.std_torrent_not_dead'));
         }
 
         $timeNow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
         if ($row !== null && strtotime((string) ($row['last_reseed'] ?? '')) > ($timeNow - 900)) {
-            return $this->legacyAbortResponse(__('legacy/takereseed.std_error'), __('legacy/takereseed.std_reseed_sent_recently'));
+            return $this->legacyAbortResponse(__('takereseed.std_error'), __('takereseed.std_reseed_sent_recently'));
         }
 
         $snatchedRows = $this->torrentAjaxRepository->listFinishedSnatchersForReseed($reseedid);
@@ -207,7 +207,7 @@ class TorrentMaintenanceController extends LegacyController
         ]);
 
         return $this->legacyPage($request, 'takereseed', true, [
-            'message' => __('legacy/takereseed.std_it_worked'),
+            'message' => __('takereseed.std_it_worked'),
         ]);
     }
 }

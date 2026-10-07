@@ -57,7 +57,7 @@ final class MagicSectionTest extends TestCase
         $this->actingAs($user, 'nexus-web');
 
         Livewire::test(MagicSection::class, ['torrentId' => $torrent->id])
-            ->assertSee(__('legacy/details.magic_have_no_enough_bonus_value'))
+            ->assertSee(__('details.magic_have_no_enough_bonus_value'))
             ->assertOk();
     }
 
@@ -71,7 +71,7 @@ final class MagicSectionTest extends TestCase
         Livewire::test(MagicSection::class, ['torrentId' => $torrent->id])
             ->call('give', 50)
             ->assertSet('status', '')
-            ->assertSee((string) str_replace('Number', '50', __('legacy/details.magic_value_number')));
+            ->assertSee((string) str_replace('Number', '50', __('details.magic_value_number')));
 
         $this->assertSame(1, DB::table('magic')->where('torrentid', $torrent->id)->where('userid', $user->id)->count());
         $this->assertSame(450.0, (float) $user->fresh()->seedbonus);

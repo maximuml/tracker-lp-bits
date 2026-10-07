@@ -245,11 +245,11 @@ class TorrentSearchRepository
         }
 
         if ($searchstr !== null) {
-            $pageTitle = __('legacy/torrents.head_search_results_for').$searchstr_ori;
+            $pageTitle = __('torrents.head_search_results_for').$searchstr_ori;
         } elseif ($sectiontype == $browsecatmode) {
-            $pageTitle = __('legacy/torrents.head_torrents');
+            $pageTitle = __('torrents.head_torrents');
         } else {
-            $pageTitle = __('legacy/torrents.head_special');
+            $pageTitle = __('torrents.head_special');
         }
 
         $hotSearches = $this->hotSearchKeywords();
@@ -257,11 +257,11 @@ class TorrentSearchRepository
         $emptyBody = '';
         if (! $count) {
             if (isset($searchstr)) {
-                $emptyTitle = __('legacy/torrents.std_search_results_for').$searchstr_ori.'"';
-                $emptyBody = __('legacy/torrents.std_try_again');
+                $emptyTitle = __('torrents.std_search_results_for').$searchstr_ori.'"';
+                $emptyBody = __('torrents.std_try_again');
             } else {
-                $emptyTitle = __('legacy/torrents.std_nothing_found');
-                $emptyBody = __('legacy/torrents.std_no_active_torrents');
+                $emptyTitle = __('torrents.std_nothing_found');
+                $emptyBody = __('torrents.std_no_active_torrents');
             }
         }
         if ($CURUSER !== []) {

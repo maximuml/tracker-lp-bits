@@ -1,6 +1,6 @@
 @if ($commentCount)
     <br /><br />
-    <h1 class="text-center" id="startcomments">{{ __('legacy/details.h1_user_comments') }}</h1>
+    <h1 class="text-center" id="startcomments">{{ __('details.h1_user_comments') }}</h1>
 
     {{ $commentPagerTop }}
 @endif
@@ -11,4 +11,4 @@
     {{ $commentPagerBottom }}
 @endif
 
-<p class="text-center"><a class="index" href="{{ '/comment/add?pid=' . $id . '&type=torrent' }}">{{ __('legacy/details.text_add_a_comment') }}</a></p>
+<p class="text-center"><a class="index" href="{{ '/comment/add?pid=' . $id . '&type=torrent' }}">{{ __('details.text_add_a_comment') }}</a></p>

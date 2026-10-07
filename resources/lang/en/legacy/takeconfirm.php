@@ -1,7 +1,4 @@
 <?php
 
-return [
-    'std_sorry' => 'Sorry...',
-    'mail_title' => ' Account Confirmed',
-    'mail_here' => 'HERE',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/takeconfirm.php';

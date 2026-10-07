@@ -183,11 +183,11 @@ final class ChromeUserBar
             'shoutboxMention' => __('index.toast_shoutbox_mention'),
             'from' => __('index.toast_from'),
             'close' => __('index.toast_close'),
-            'bell' => __('legacy/notifications.title_bell'),
-            'markAllRead' => __('legacy/notifications.mark_all_read'),
-            'showMore' => __('legacy/notifications.show_more'),
-            'empty' => __('legacy/notifications.empty'),
-            'loadError' => __('legacy/notifications.load_error'),
+            'bell' => __('notifications.title_bell'),
+            'markAllRead' => __('notifications.mark_all_read'),
+            'showMore' => __('notifications.show_more'),
+            'empty' => __('notifications.empty'),
+            'loadError' => __('notifications.load_error'),
             'userId' => $userId,
         ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
         AssetAppender::js("window.TOAST_LANG = $toastLang;", 'footer', false, 'toast-lang');

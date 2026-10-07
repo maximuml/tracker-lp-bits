@@ -74,12 +74,12 @@ final class PeerList extends Component
                 : null;
             $peerData = $this->torrentAjaxRepository()->peerList($this->torrentId, $currentUser);
             $data['seederTable'] = $this->peerTableFactory()->buildTable(
-                (string) __('legacy/viewpeerlist.text_seeders'), $peerData['seeders'], $peerData['torrent'],
+                (string) __('viewpeerlist.text_seeders'), $peerData['seeders'], $peerData['torrent'],
                 $peerData['privacyData'], $peerData['showLocationColumn'], $peerData['enablelocationTweak'],
                 $peerData['peerIpInfo'], $peerData['usernameHtmlMap'], $curUser
             );
             $data['leecherTable'] = $this->peerTableFactory()->buildTable(
-                (string) __('legacy/viewpeerlist.text_leechers'), $peerData['leechers'], $peerData['torrent'],
+                (string) __('viewpeerlist.text_leechers'), $peerData['leechers'], $peerData['torrent'],
                 $peerData['privacyData'], $peerData['showLocationColumn'], $peerData['enablelocationTweak'],
                 $peerData['peerIpInfo'], $peerData['usernameHtmlMap'], $curUser
             );

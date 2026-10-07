@@ -6,7 +6,7 @@
 					<x-settings-row layout="grid" :label="__('upload.row_announce_url')">
 						<span class="nx-copyfield">
 							<input type="text" class="nx-copyfield__input" id="announce-url" readonly value="{{ $trackerUrl }}" aria-label="{{ __('upload.row_announce_url') }}" />
-							<button type="button" class="nx-postbtn" data-copy="#announce-url" data-copy-done="{{ __('legacy/functions.text_copied') }}">{{ __('legacy/functions.text_copy') }}</button>
+							<button type="button" class="nx-postbtn" data-copy="#announce-url" data-copy-done="{{ __('functions.text_copied') }}">{{ __('functions.text_copy') }}</button>
 						</span>
 						@unless ($torrentDirWritable)
 							<div class="nx-field__error" role="alert"><b>ATTENTION</b>: Torrent directory isn't writable. Please contact the administrator about this problem!</div>
@@ -60,9 +60,9 @@
 				<div class="nx-fsection">{{ __('upload.section_media') }}</div>
 
 				@if ($enableTechnicalInfo)
-					<div class="nx-fhead whitespace-nowrap">{{ __('legacy/functions.text_technical_info') }}</div>
+					<div class="nx-fhead whitespace-nowrap">{{ __('functions.text_technical_info') }}</div>
 					<div class="nx-ffull">
-						<textarea name="technical_info" id="technical_info" rows="8" aria-label="{{ __('legacy/functions.text_technical_info') }}"@error('technical_info') aria-invalid="true" aria-describedby="technical_info-error"@enderror>{{ old('technical_info') }}</textarea><br/><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('legacy/functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('legacy/functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('legacy/functions.text_technical_info_help_text_two_end') }}
+						<textarea name="technical_info" id="technical_info" rows="8" aria-label="{{ __('functions.text_technical_info') }}"@error('technical_info') aria-invalid="true" aria-describedby="technical_info-error"@enderror>{{ old('technical_info') }}</textarea><br/><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}
 						@error('technical_info')<div class="nx-field__error" id="technical_info-error" role="alert">{{ $message }}</div>@enderror
 					</div>
 				@endif
@@ -92,7 +92,7 @@
 					{{ $customFieldsHtml ?? '' }}
 					{{ $hitAndRunHtml ?? '' }}
 					@error('hr')<div class="nx-ffull"><div class="nx-field__error" id="hr-error" role="alert">{{ $message }}</div></div>@enderror
-					<x-settings-row layout="grid" :label="__('legacy/functions.text_tags')" :relation="'mode_'.$browsecatmode">
+					<x-settings-row layout="grid" :label="__('functions.text_tags')" :relation="'mode_'.$browsecatmode">
 						{{ $tagsHtml ?? '' }}
 						@error('tags')<div class="nx-field__error" id="tags-error" role="alert">{{ $message }}</div>@enderror
 					</x-settings-row>
@@ -113,8 +113,8 @@
 				@endif
 
 				@if ($pickEnabled ?? false)
-					<x-settings-row layout="grid" :label="__('legacy/edit.row_pick')">
-						<b>{{ __('legacy/edit.row_torrent_position') }}:&nbsp;</b><select name="pos_state" id="pos_state" aria-label="{{ __('legacy/edit.row_pick') }}"@if($posStateInvalid ?? false) aria-invalid="true" aria-describedby="pos_state-error"@endif>@foreach($posStates as $posKey => $posState)<option value="{{ $posKey }}"@if((string) $posKey === (string) $posStateOld) selected @endif>{{ $posState['text'] }}</option>@endforeach</select>&nbsp;&nbsp;&nbsp;@include('components.datetime-input', ['label' => new \Illuminate\Support\HtmlString(App\Support\Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => $posStateUntil ?? ''])
+					<x-settings-row layout="grid" :label="__('edit.row_pick')">
+						<b>{{ __('edit.row_torrent_position') }}:&nbsp;</b><select name="pos_state" id="pos_state" aria-label="{{ __('edit.row_pick') }}"@if($posStateInvalid ?? false) aria-invalid="true" aria-describedby="pos_state-error"@endif>@foreach($posStates as $posKey => $posState)<option value="{{ $posKey }}"@if((string) $posKey === (string) $posStateOld) selected @endif>{{ $posState['text'] }}</option>@endforeach</select>&nbsp;&nbsp;&nbsp;@include('components.datetime-input', ['label' => new \Illuminate\Support\HtmlString(App\Support\Locale::trans('label.deadline', [], null).':&nbsp;'), 'name' => 'pos_state_until', 'value' => $posStateUntil ?? ''])
 						@error('pos_state')<div class="nx-field__error" id="pos_state-error" role="alert">{{ $message }}</div>@enderror
 						@error('pos_state_until')<div class="nx-field__error" id="pos_state_until-error" role="alert">{{ $message }}</div>@enderror
 					</x-settings-row>

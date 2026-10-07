@@ -246,17 +246,17 @@ final class Time
     private static function elapsedLabels(): array
     {
         return [
-            'year' => (string) (__('legacy/functions.text_year')),
-            'year_short' => (string) (__('legacy/functions.text_short_year')),
-            'month' => (string) (__('legacy/functions.text_month')),
-            'month_short' => (string) (__('legacy/functions.text_short_month')),
-            'day' => (string) (__('legacy/functions.text_day')),
-            'day_short' => (string) (__('legacy/functions.text_short_day')),
-            'hour' => (string) (__('legacy/functions.text_hour')),
-            'hour_short' => (string) (__('legacy/functions.text_short_hour')),
-            'min' => (string) (__('legacy/functions.text_min')),
-            'min_short' => (string) (__('legacy/functions.text_short_min')),
-            'plural_suffix' => (string) (__('legacy/functions.text_s')),
+            'year' => (string) (__('functions.text_year')),
+            'year_short' => (string) (__('functions.text_short_year')),
+            'month' => (string) (__('functions.text_month')),
+            'month_short' => (string) (__('functions.text_short_month')),
+            'day' => (string) (__('functions.text_day')),
+            'day_short' => (string) (__('functions.text_short_day')),
+            'hour' => (string) (__('functions.text_hour')),
+            'hour_short' => (string) (__('functions.text_short_hour')),
+            'min' => (string) (__('functions.text_min')),
+            'min_short' => (string) (__('functions.text_short_min')),
+            'plural_suffix' => (string) (__('functions.text_s')),
         ];
     }
 
@@ -307,8 +307,8 @@ final class Time
                 $withago,
                 $twoline,
                 $oneunit,
-                (string) (__('legacy/functions.text_space')),
-                (string) (__('legacy/functions.text_ago')),
+                (string) (__('functions.text_space')),
+                (string) (__('functions.text_ago')),
             ),
             'title' => $timeStr,
         ];

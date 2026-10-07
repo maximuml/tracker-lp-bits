@@ -1,17 +1,4 @@
 <?php
 
-return [
-    'head_users' => 'Users',
-    'text_users' => 'Users',
-    'text_search' => 'Search:',
-    'select_any_class' => '(any class)',
-    'submit_okay' => 'Okay',
-    'text_prev' => 'Prev',
-    'text_next' => 'Next',
-    'col_user_name' => 'User name',
-    'col_registered' => 'Registered',
-    'col_last_access' => 'Last access',
-    'col_class' => 'Class',
-    'col_country' => 'Country',
-    'select_any_country' => '(any country)',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/users.php';

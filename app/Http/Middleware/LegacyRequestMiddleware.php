@@ -117,9 +117,9 @@ final class LegacyRequestMiddleware
         $script = RequestContext::instance()->getScript();
         if (! in_array($script, ['announce', 'scrape'], true)) {
             // Legacy per-page language arrays resolve through Laravel's
-            // translator (resources/lang/en/legacy/*.php). The language
-            // folder cookie is still read by Locale::currentFolder() and
-            // a few repositories.
+            // translator (resources/lang/en/*.php). The language folder
+            // cookie is still read by Locale::currentFolder() and a few
+            // repositories.
             PageState::instance()->setLangDir(Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
         }
 

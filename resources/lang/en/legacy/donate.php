@@ -1,31 +1,4 @@
 <?php
 
-return [
-    'std_sorry' => 'Sorry',
-    'std_do_not_accept_donation' => "We don't accept donation at the moment.",
-    'std_success' => 'Success',
-    'std_donation_success_note_one' => 'Thank you for your donation! Your transaction has been completed. Please click ',
-    'std_here' => 'here',
-    'std_donation_success_note_two' => ' to send us the transaction information so we can credit your account!',
-    'head_donation' => 'Donation',
-    'text_donate' => 'Donate',
-    'std_error' => 'Error',
-    'std_no_donation_account_available' => 'No donation accounts are defined. Please report this to the staff.',
-    'text_donation_note' => 'Thanks for your interest in donating. Anything you could donate would be gratefully received no matter how small.',
-    'text_donate_with_paypal' => 'Donate with PayPal',
-    'text_donate_paypal_note' => '1. Select your donation amount.',
-    'text_donate_paypal_note_two' => '2. Click PayPal button.',
-    'text_donate_paypal_note_three' => '3. Finish your payment at PayPal.',
-    'text_select_donation_amount' => 'Please select a donation amount: ',
-    'select_choose_donation_amount' => '---Choose Donation Amount---',
-    'select_other_donation_amount' => 'Other Donation Amount',
-    'text_usd_mark' => '$',
-    'text_donation' => ' Donation',
-    'text_donate_with_crypto' => 'Donate with Crypto',
-    'text_donate_crypto_note' => 'Send the amount to one of the addresses below. Include your username in a message to us afterwards so we can credit your account.',
-    'text_after_donation_note_one' => 'After you have donated, make sure to ',
-    'text_send_us' => 'Send Us',
-    'text_after_donation_note_two' => ' the',
-    'text_transaction_information' => 'transaction information',
-    'text_after_donation_note_two_end' => ' so we can credit your account!',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/donate.php';

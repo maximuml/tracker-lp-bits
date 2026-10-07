@@ -214,17 +214,17 @@ final class Format
     {
 
         return Time::elapsedSince((int) $ts, (int) TIMENOW, [
-            'year' => __('legacy/functions.text_year'),
-            'year_short' => __('legacy/functions.text_short_year'),
-            'month' => __('legacy/functions.text_month'),
-            'month_short' => __('legacy/functions.text_short_month'),
-            'day' => __('legacy/functions.text_day'),
-            'day_short' => __('legacy/functions.text_short_day'),
-            'hour' => __('legacy/functions.text_hour'),
-            'hour_short' => __('legacy/functions.text_short_hour'),
-            'min' => __('legacy/functions.text_min'),
-            'min_short' => __('legacy/functions.text_short_min'),
-            'plural_suffix' => __('legacy/functions.text_s'),
+            'year' => __('functions.text_year'),
+            'year_short' => __('functions.text_short_year'),
+            'month' => __('functions.text_month'),
+            'month_short' => __('functions.text_short_month'),
+            'day' => __('functions.text_day'),
+            'day_short' => __('functions.text_short_day'),
+            'hour' => __('functions.text_hour'),
+            'hour_short' => __('functions.text_short_hour'),
+            'min' => __('functions.text_min'),
+            'min_short' => __('functions.text_short_min'),
+            'plural_suffix' => __('functions.text_s'),
         ], $shortunit);
     }
 
@@ -281,6 +281,6 @@ final class Format
     public static function prettyTimeWithLocale(int|float $s): string
     {
 
-        return self::prettyTime($s, (string) (__('legacy/functions.text_day')));
+        return self::prettyTime($s, (string) (__('functions.text_day')));
     }
 }

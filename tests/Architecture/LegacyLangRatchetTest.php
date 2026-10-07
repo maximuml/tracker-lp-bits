@@ -12,9 +12,9 @@ use Tests\Attributes\TestCategory;
  *
  * The custom system — lang/en/lang_<script>.php files required into
  * $lang_<script> globals — was converted to Laravel translations under
- * resources/lang/en/legacy/*.php. Reads still go through array access
+ * resources/lang/en/*.php (en/legacy/*.php shims alias the old paths). Reads still go through array access
  * ($lang_x['key'] in PHP / views) until each section is converted to
- * __('legacy/x.key'). This test keeps the remaining count from growing.
+ * __('x.key'). This test keeps the remaining count from growing.
  *
  * Baselines captured on 2026-09-17 (post-conversion): 3205
  * Lowered on 2026-09-17 after forums + messages sections: 2883
@@ -30,7 +30,7 @@ use Tests\Attributes\TestCategory;
  * Hard rules (not baselines):
  *   - lang/ directory must not come back
  *   - globals->get('lang_…') reads are banned —
- *     use trans('legacy/<suffix>') for the whole array or __('legacy/x.k')
+ *     use trans('<suffix>') for the whole array or __('x.k')
  *     for a single key.
  *
  * To check the current count:
@@ -63,7 +63,7 @@ final class LegacyLangRatchetTest extends TestCase
     {
         $this->assertDirectoryDoesNotExist(
             self::BASE_DIR.'/lang',
-            'lang/en/lang_*.php was replaced by resources/lang/en/legacy/*.php — do not reintroduce the custom loader.',
+            'lang/en/lang_*.php was replaced by resources/lang/en/*.php — do not reintroduce the custom loader.',
         );
     }
 

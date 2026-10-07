@@ -161,10 +161,10 @@ class StaffMessageController extends LegacyController
         $subject = trim((string) request()->post('subject'));
 
         if ($msg === '') {
-            return $this->legacyAbortResponse(__('legacy/takecontact.std_error'), __('legacy/takecontact.std_please_enter_something'));
+            return $this->legacyAbortResponse(__('takecontact.std_error'), __('takecontact.std_please_enter_something'));
         }
         if ($subject === '') {
-            return $this->legacyAbortResponse(__('legacy/takecontact.std_error'), __('legacy/takecontact.std_please_define_subject'));
+            return $this->legacyAbortResponse(__('takecontact.std_error'), __('takecontact.std_please_define_subject'));
         }
 
         $currentUserId = (int) ($this->currentUser->id());
@@ -177,8 +177,8 @@ class StaffMessageController extends LegacyController
                 $secs = 60 - ($timeNow - strtotime((string) $last));
 
                 return $this->legacyAbortResponse(
-                    __('legacy/takecontact.std_error'),
-                    (__('legacy/takecontact.std_message_flooding')).$secs.(__('legacy/takecontact.std_second')).($secs == 1 ? '' : (__('legacy/takecontact.std_s'))).(__('legacy/takecontact.std_before_sending_pm'))
+                    __('takecontact.std_error'),
+                    (__('takecontact.std_message_flooding')).$secs.(__('takecontact.std_second')).($secs == 1 ? '' : (__('takecontact.std_s'))).(__('takecontact.std_before_sending_pm'))
                 );
             }
         }

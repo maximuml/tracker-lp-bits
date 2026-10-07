@@ -74,12 +74,6 @@ def main() -> None:
                 text = (Path(root) / f).read_text(errors='ignore')
                 vars.update(parse_global_vars(text))
 
-    # Language variables: legacy/<suffix>.php -> $lang_<suffix> global
-    legacy_lang_dir = BASE / 'resources' / 'lang' / 'en' / 'legacy'
-    if legacy_lang_dir.exists():
-        for f in legacy_lang_dir.glob('*.php'):
-            vars.add(f'lang_{f.stem}')
-
     # Config sections loaded dynamically into $GLOBALS
     config_file = include_dir / 'config.php'
     if config_file.exists():

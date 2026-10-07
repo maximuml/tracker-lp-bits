@@ -260,7 +260,7 @@ class MessageRepository extends BaseRepository
             $notifications[] = [
                 'id' => 'pm_'.$row->id,
                 'type' => 'pm',
-                'title' => (string) __('legacy/notifications.title_pm'),
+                'title' => (string) __('notifications.title_pm'),
                 'body' => $row->subject,
                 'from' => (string) ($row->send_user->username ?? 'System'),
                 'url' => '/web/messages?action=viewmessage&id='.$row->id,

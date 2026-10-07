@@ -6,7 +6,7 @@
     <ul class="nx-pagination__list">
         @if ($page > 0)
             <li class="nx-pagination__item">
-                <a class="nx-pagination__link" href="{{ $href }}page={{ $page - 1 }}" rel="prev">{{ __('legacy/functions.text_prev') }}</a>
+                <a class="nx-pagination__link" href="{{ $href }}page={{ $page - 1 }}" rel="prev">{{ __('functions.text_prev') }}</a>
             </li>
         @endif
         @foreach ($items as $item)
@@ -24,7 +24,7 @@
         @endforeach
         @if ($page < $pages - 1)
             <li class="nx-pagination__item">
-                <a class="nx-pagination__link" href="{{ $href }}page={{ $page + 1 }}" rel="next">{{ __('legacy/functions.text_next') }}</a>
+                <a class="nx-pagination__link" href="{{ $href }}page={{ $page + 1 }}" rel="next">{{ __('functions.text_next') }}</a>
             </li>
         @endif
     </ul>

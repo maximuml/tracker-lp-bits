@@ -122,7 +122,7 @@
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
         <x-data-table :caption="$menuSelected == 'sent' ? __('invite.text_sent_invites_status') : __('invite.text_tmp_status')" captionHidden>
         @if (! $sentTmpCount)
-            <tr class="text-center"><td colspan=6>{{ __('legacy/functions.text_none')}}</tr>
+            <tr class="text-center"><td colspan=6>{{ __('functions.text_none')}}</tr>
         @else
             <tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_email')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_hash')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_send_date')}}</th>
             @if ($menuSelected == 'sent')

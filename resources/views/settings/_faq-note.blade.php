@@ -1,2 +1,2 @@
 @props(['pre', 'anchor'])
-{{ $pre }}<a href="/web/faq#{{ $anchor }}"><b>{{ __('legacy/functions.text_faq') }}</b></a>).
+{{ $pre }}<a href="/web/faq#{{ $anchor }}"><b>{{ __('functions.text_faq') }}</b></a>).

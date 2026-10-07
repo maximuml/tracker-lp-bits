@@ -1,1 +1,1 @@
-{{ __('legacy/functions.std_invalid_image_code') }} <br /><b>{{ __('legacy/functions.std_do_not_go_back') }}</b> <br /><br />{{ __('legacy/functions.std_please_click') }}<a href="{{ $where }}"><b>{{ __('legacy/functions.std_here') }}</b></a>{{ __('legacy/functions.std_to_request_new_image') }}
+{{ __('functions.std_invalid_image_code') }} <br /><b>{{ __('functions.std_do_not_go_back') }}</b> <br /><br />{{ __('functions.std_please_click') }}<a href="{{ $where }}"><b>{{ __('functions.std_here') }}</b></a>{{ __('functions.std_to_request_new_image') }}

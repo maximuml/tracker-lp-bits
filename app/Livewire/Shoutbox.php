@@ -130,12 +130,12 @@ final class Shoutbox extends Component
         }
         $this->status = '';
         if (mb_strlen($text) > ShoutboxSupport::MAX_MESSAGE_LENGTH) {
-            $this->status = __('legacy/shoutbox.js_request_failed');
+            $this->status = __('shoutbox.js_request_failed');
 
             return;
         }
         if (! ($this->shoutboxService ?? throw new \LogicException('Shoutbox component used before boot()'))->postMessage($this->actor(), $text)) {
-            $this->status = __('legacy/shoutbox.js_request_failed');
+            $this->status = __('shoutbox.js_request_failed');
 
             return;
         }

@@ -418,8 +418,8 @@ final class Network
 
         return self::ipLocation(
             $ip,
-            (string) (__('legacy/functions.text_unknown')),
-            (string) (__('legacy/functions.text_user_ip')),
+            (string) (__('functions.text_unknown')),
+            (string) (__('functions.text_user_ip')),
         );
     }
 }

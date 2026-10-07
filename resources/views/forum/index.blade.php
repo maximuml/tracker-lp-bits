@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $title ?? __('legacy/forums.head_forums'))
+@section('title', $title ?? __('forums.head_forums'))
 
 @section('content')
 @if ($action === 'newtopic' || $action === 'reply' || $action === 'quotepost' || $action === 'editpost')

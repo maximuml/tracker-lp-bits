@@ -243,9 +243,9 @@ final class TorrentListViewFactory
                 $elapsed = floor((TIMENOW - strtotime((string) $row['added'])) / 3600);
                 if ($elapsed < $wait) {
                     $waitClass = Palette::waitRampClass((int) ($wait - $elapsed));
-                    $waitText = number_format($wait - $elapsed).__('legacy/functions.text_h');
+                    $waitText = number_format($wait - $elapsed).__('functions.text_h');
                 } else {
-                    $waitText = (string) __('legacy/functions.text_none');
+                    $waitText = (string) __('functions.text_none');
                 }
             }
 
@@ -256,16 +256,16 @@ final class TorrentListViewFactory
                 if ($lastcom) {
                     $commentIsNew = $lastcom['user'] != $this->currentUser->id() && strtotime($lastcom['added']) >= $lastBrowse;
                     $lastcomtime = $timeAlive
-                        ? __('legacy/functions.text_blank').Time::format($lastcom['added'], true, false, true)
-                        : __('legacy/functions.text_at_time').$lastcom['added'];
+                        ? __('functions.text_blank').Time::format($lastcom['added'], true, false, true)
+                        : __('functions.text_at_time').$lastcom['added'];
                     $tooltipId = 'lastcom_'.$counter;
                     $lastcomTooltip[] = [
                         'id' => $tooltipId,
                         'content' => SafeHtml::fromTrustedHtml(
                             trim(view('support._last-comment', [
                                 'isNew' => $commentIsNew,
-                                'newLabel' => (string) __('legacy/functions.text_new_uppercase'),
-                                'byLabel' => (string) __('legacy/functions.text_last_commented_by'),
+                                'newLabel' => (string) __('functions.text_new_uppercase'),
+                                'byLabel' => (string) __('functions.text_last_commented_by'),
                                 'user' => SafeHtml::fromTrustedHtml(UserDisplay::username($lastcom['user'])->toHtml()),
                                 'time' => SafeHtml::fromTrustedHtml((string) $lastcomtime),
                             ])->render())
@@ -389,21 +389,21 @@ final class TorrentListViewFactory
         };
 
         $columns = [
-            ['key' => 'type', 'label' => (string) __('legacy/functions.col_type'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null],
-            ['key' => 'name', 'label' => (string) __('legacy/functions.col_name'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(1), 'thClass' => ltrim($sortedClass(1))],
+            ['key' => 'type', 'label' => (string) __('functions.col_type'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null],
+            ['key' => 'name', 'label' => (string) __('functions.col_name'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(1), 'thClass' => ltrim($sortedClass(1))],
         ];
         if ($showWait) {
-            $columns[] = ['key' => 'wait', 'label' => (string) __('legacy/functions.col_wait'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null];
+            $columns[] = ['key' => 'wait', 'label' => (string) __('functions.col_wait'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null];
         }
         if ($showComments) {
-            $columns[] = ['key' => 'comments', 'label' => '', 'shortLabel' => 'Com', 'iconClass' => 'comments', 'iconTitle' => (string) __('legacy/functions.title_number_of_comments'), 'sortUrl' => $sortUrl(3), 'thClass' => ltrim($sortedClass(3))];
+            $columns[] = ['key' => 'comments', 'label' => '', 'shortLabel' => 'Com', 'iconClass' => 'comments', 'iconTitle' => (string) __('functions.title_number_of_comments'), 'sortUrl' => $sortUrl(3), 'thClass' => ltrim($sortedClass(3))];
         }
-        $columns[] = ['key' => 'time', 'label' => '', 'shortLabel' => 'Added', 'iconClass' => 'time', 'iconTitle' => $timetype != UserTimeType::TIMEALIVE->value ? (string) __('legacy/functions.title_time_added') : (string) __('legacy/functions.title_time_alive'), 'sortUrl' => $sortUrl(4), 'thClass' => ltrim($sortedClass(4))];
-        $columns[] = ['key' => 'size', 'label' => '', 'shortLabel' => (string) __('legacy/functions.text_size'), 'iconClass' => 'size', 'iconTitle' => (string) __('legacy/functions.title_size'), 'sortUrl' => $sortUrl(5), 'thClass' => ltrim($sortedClass(5))];
-        $columns[] = ['key' => 'seeders', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center'.$sortedClass(7), 'iconClass' => 'seeders', 'iconTitle' => (string) __('legacy/functions.title_number_of_seeders'), 'sortUrl' => $sortUrl(7)];
-        $columns[] = ['key' => 'leechers', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center'.$sortedClass(8), 'iconClass' => 'leechers', 'iconTitle' => (string) __('legacy/functions.title_number_of_leechers'), 'sortUrl' => $sortUrl(8)];
-        $columns[] = ['key' => 'snatched', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center'.$sortedClass(6), 'iconClass' => 'snatched', 'iconTitle' => (string) __('legacy/functions.title_number_of_snatched'), 'sortUrl' => $sortUrl(6)];
-        $columns[] = ['key' => 'uploader', 'label' => (string) __('legacy/functions.col_uploader'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(9), 'thClass' => ltrim($sortedClass(9))];
+        $columns[] = ['key' => 'time', 'label' => '', 'shortLabel' => 'Added', 'iconClass' => 'time', 'iconTitle' => $timetype != UserTimeType::TIMEALIVE->value ? (string) __('functions.title_time_added') : (string) __('functions.title_time_alive'), 'sortUrl' => $sortUrl(4), 'thClass' => ltrim($sortedClass(4))];
+        $columns[] = ['key' => 'size', 'label' => '', 'shortLabel' => (string) __('functions.text_size'), 'iconClass' => 'size', 'iconTitle' => (string) __('functions.title_size'), 'sortUrl' => $sortUrl(5), 'thClass' => ltrim($sortedClass(5))];
+        $columns[] = ['key' => 'seeders', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center'.$sortedClass(7), 'iconClass' => 'seeders', 'iconTitle' => (string) __('functions.title_number_of_seeders'), 'sortUrl' => $sortUrl(7)];
+        $columns[] = ['key' => 'leechers', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center'.$sortedClass(8), 'iconClass' => 'leechers', 'iconTitle' => (string) __('functions.title_number_of_leechers'), 'sortUrl' => $sortUrl(8)];
+        $columns[] = ['key' => 'snatched', 'label' => '', 'shortLabel' => '', 'thClass' => 'nx-center'.$sortedClass(6), 'iconClass' => 'snatched', 'iconTitle' => (string) __('functions.title_number_of_snatched'), 'sortUrl' => $sortUrl(6)];
+        $columns[] = ['key' => 'uploader', 'label' => (string) __('functions.col_uploader'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(9), 'thClass' => ltrim($sortedClass(9))];
 
         return $columns;
     }

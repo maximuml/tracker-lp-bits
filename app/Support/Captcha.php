@@ -83,8 +83,8 @@ final class Captcha
 
         return $driver->render([
             'labels' => [
-                'image' => __('legacy/functions.'.$labelKey),
-                'code' => __('legacy/functions.row_security_code'),
+                'image' => __('functions.'.$labelKey),
+                'code' => __('functions.row_security_code'),
             ],
             'secret' => $secret,
             'layout' => $layout,
@@ -164,14 +164,14 @@ final class Captcha
 
         if ($type === 'login') {
             LegacyResponse::abort(
-                (string) (__('legacy/functions.std_login_failed')),
+                (string) (__('functions.std_login_failed')),
                 view('components.login-failed-note')->render(),
                 false,
                 $head,
             );
         } else {
             LegacyResponse::abort(
-                (string) (__('legacy/functions.'.$failedLangKey)),
+                (string) (__('functions.'.$failedLangKey)),
                 $type,
                 false,
                 $head,

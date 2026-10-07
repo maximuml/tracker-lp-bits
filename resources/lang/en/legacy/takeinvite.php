@@ -1,25 +1,4 @@
 <?php
 
-return [
-    'head_invitation_failed' => 'Invitation failed!',
-    'std_username_too_long' => 'Sorry, the username is too long (up to 12 characters)',
-    'std_must_enter_email' => 'You must enter an email address!',
-    'std_must_select_invite' => 'You must select an invite!',
-    'std_invalid_email_address' => 'Invalid email address!',
-    'std_must_enter_personal_message' => 'Please add a personal message.',
-    'std_email_address' => 'The email address ',
-    'std_is_in_use' => ' is already in use.',
-    'mail_here' => 'HERE',
-    'mail_tilte' => ' Invitation',
-    'mail_one' => "Hi,\n\nYou have been invited to join the %s community by ",
-    'mail_two' => ".\nThis is a private community which has very knowledgeable members. \nIf you are interested in joining the community please read over \nthe rules and confirm the invite.\n\nIf you want to accept this invitation, you'll need to click this link:",
-    'mail_three' => "You'll need to accept the invitation within ",
-    'mail_four' => " days, or else the link will become inactive.\nWe on %s hope that you'll accept the invitation and join our great community!\n\nPersonal message from ",
-    'mail_five' => ':',
-    'mail_six' => "If you do not know the person who has invited you, please forward this email to %s\n\n------\nYours,\nThe %s Team.",
-    'std_error' => 'Error',
-    'std_invite_denied' => 'Users of your class are not allowed to send invitation. How do you get here?',
-    'std_no_invite' => 'You have no invitation. How do you get here?',
-    'std_invitation_already_sent_to' => 'Invitation failed! The email address ',
-    'std_await_user_registeration' => ' has already received an invitation. Please wait for the user to register.',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/takeinvite.php';

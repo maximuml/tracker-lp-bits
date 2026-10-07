@@ -1,4 +1,4 @@
-<x-data-table :caption="__('legacy/functions.text_bonus')" captionHidden>
+<x-data-table :caption="__('functions.text_bonus')" captionHidden>
     <x-slot:head>
         <thead>
             <tr>@foreach ($headers as $header)<th scope="col">{{ $header }}</th>@endforeach</tr>

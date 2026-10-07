@@ -1,1 +1,1 @@
-{{ __('legacy/recover.mail_password_changed_one') }}{{ $username }}{{ __('legacy/recover.mail_password_changed_two') }}<b><a href="{{ $loginUrl }}">{{ __('legacy/recover.mail_here') }}</a></b>{{ sprintf(__('legacy/recover.mail_password_changed_three'), $siteName) }}
+{{ __('recover.mail_password_changed_one') }}{{ $username }}{{ __('recover.mail_password_changed_two') }}<b><a href="{{ $loginUrl }}">{{ __('recover.mail_here') }}</a></b>{{ sprintf(__('recover.mail_password_changed_three'), $siteName) }}

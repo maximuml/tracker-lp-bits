@@ -1,6 +1,6 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', $title ?? (__('legacy/sendmessage.head_send_message')))
+@section('title', $title ?? (__('sendmessage.head_send_message')))
 
 @section('content')
 <form id="compose" name="compose" method="post" action="/web/messages/send">
@@ -12,10 +12,10 @@
 <x-compose :title="$frameTitle ?? $title" :type="$replyto ? 'reply' : 'new'" :body="$body" :has-subject="true" :subject="$subject">
 <tr><td class="toolbox text-center" colspan="2">
 @if ($replyto)
-    <input type="checkbox" name="delete" value="yes"{{ $deleteChecked }}> {{ __('legacy/sendmessage.checkbox_delete_message_replying_to')}}
+    <input type="checkbox" name="delete" value="yes"{{ $deleteChecked }}> {{ __('sendmessage.checkbox_delete_message_replying_to')}}
     <input type="hidden" name="origmsg" value="{{ $replyto }}">
 @endif
-    <input type="checkbox" name="save" value="yes"{{ $saveChecked }}> {{ __('legacy/sendmessage.checkbox_save_message_to_sendbox')}}
+    <input type="checkbox" name="save" value="yes"{{ $saveChecked }}> {{ __('sendmessage.checkbox_save_message_to_sendbox')}}
 </td></tr>
 </x-compose>
 </form>

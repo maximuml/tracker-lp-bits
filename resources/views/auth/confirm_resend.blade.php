@@ -1,6 +1,6 @@
 @extends('layouts.app', ['chromeVariant' => 'auth'])
 
-@section('title', __('legacy/confirm_resend.resend_confirmation_email_failed'))
+@section('title', __('confirm_resend.resend_confirmation_email_failed'))
 
 @section('content')
     @if ($error)
@@ -17,7 +17,7 @@
 
     <form method="get" action="/confirm_resend" class="nx-auth__lang">
         <input type="hidden" name="secret" value="{{ $secret }}" />
-        <label for="sitelanguage">{{ __('legacy/confirm_resend.text_select_lang')}}</label>
+        <label for="sitelanguage">{{ __('confirm_resend.text_select_lang')}}</label>
         <select id="sitelanguage" name="sitelanguage">
             @foreach ($languages as $row)
                 <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
@@ -27,23 +27,23 @@
         </select>
     </form>
 
-    <h1>{{ __('legacy/confirm_resend.text_resend_confirmation_mail_note') }} </h1><p>{{ __('legacy/confirm_resend.text_resend_confirmation_mail_note_two') }}</p><p>{{ __('legacy/confirm_resend.text_resend_confirmation_mail_note_three') }}<br />{{ __('legacy/confirm_resend.text_resend_confirmation_mail_note_four') }}</p><p><b>{{ __('legacy/confirm_resend.text_note') }}</b> {{ sprintf(__('legacy/confirm_resend.text_resend_confirmation_mail_attempts'), $maxAttempts) }}</p>
+    <h1>{{ __('confirm_resend.text_resend_confirmation_mail_note') }} </h1><p>{{ __('confirm_resend.text_resend_confirmation_mail_note_two') }}</p><p>{{ __('confirm_resend.text_resend_confirmation_mail_note_three') }}<br />{{ __('confirm_resend.text_resend_confirmation_mail_note_four') }}</p><p><b>{{ __('confirm_resend.text_note') }}</b> {{ sprintf(__('confirm_resend.text_resend_confirmation_mail_attempts'), $maxAttempts) }}</p>
 
-    <p>{{ __('legacy/confirm_resend.text_you_have')}} <b>{{ $remaining }}</b> {{ __('legacy/confirm_resend.text_remaining_tries')}}</p>
+    <p>{{ __('confirm_resend.text_you_have')}} <b>{{ $remaining }}</b> {{ __('confirm_resend.text_remaining_tries')}}</p>
 
     <form method="post" action="/confirm_resend">
         @csrf
         <input type="hidden" name="secret" value="{{ $secret }}" />
-        <x-form-field :label="__('legacy/confirm_resend.row_registered_email')" name="email" type="email" :value="old('email')" autocomplete="email" />
-        <x-form-field :label="__('legacy/confirm_resend.row_new_password')" name="wantpassword" type="password" autocomplete="new-password" :help="__('legacy/confirm_resend.text_password_note')" />
-        <x-form-field :label="__('legacy/confirm_resend.row_enter_password_again')" name="passagain" type="password" autocomplete="new-password" />
+        <x-form-field :label="__('confirm_resend.row_registered_email')" name="email" type="email" :value="old('email')" autocomplete="email" />
+        <x-form-field :label="__('confirm_resend.row_new_password')" name="wantpassword" type="password" autocomplete="new-password" :help="__('confirm_resend.text_password_note')" />
+        <x-form-field :label="__('confirm_resend.row_enter_password_again')" name="passagain" type="password" autocomplete="new-password" />
 
         @if ($captchaEnabled && $captchaMarkup !== '')
             {{ $captchaMarkup }}
         @endif
 
         <div class="nx-auth__actions">
-            <x-button type="submit" variant="primary">{{ __('legacy/confirm_resend.submit_send_it')}}</x-button>
+            <x-button type="submit" variant="primary">{{ __('confirm_resend.submit_send_it')}}</x-button>
         </div>
     </form>
 @endsection

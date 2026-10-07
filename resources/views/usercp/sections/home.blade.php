@@ -2,37 +2,37 @@
 
 <div class="nx-ucards">
 <div class="nx-ucard">
-	<div class="nx-ucard__title">{{ __('legacy/usercp.section_account') }}</div>
+	<div class="nx-ucard__title">{{ __('usercp.section_account') }}</div>
 	<div class="nx-fgrid nx-fgrid--flat">
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_join_date')">@if ($home->joinDate === null) N/A @else {{ $home->joinDate }} (<x-time :value="$home->joinDate" :force="true" />) @endif</x-settings-row-small>
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_email_address')">{{ $home->email }}</x-settings-row-small>
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_ip_location')">{{ $home->ipLocation }}</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_join_date')">@if ($home->joinDate === null) N/A @else {{ $home->joinDate }} (<x-time :value="$home->joinDate" :force="true" />) @endif</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_email_address')">{{ $home->email }}</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_ip_location')">{{ $home->ipLocation }}</x-settings-row-small>
 	@if ($home->showAvatar)
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_avatar')"><img src="{{ $home->avatarUrl }}" alt=""></x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_avatar')"><img src="{{ $home->avatarUrl }}" alt=""></x-settings-row-small>
 	@endif
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_invitations')">{{ $home->invites }} [<a href="/web/invite?id={{ $home->userId }}" title="{{ $home->invitesLinkTitle }}">{{ __('legacy/usercp.text_send') }}</a>]</x-settings-row-small>
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_karma_points')">{{ $home->seedbonus }} [<a href="/web/mybonus" title="{{ $home->karmaLinkTitle }}">{{ __('legacy/usercp.text_use') }}</a>]</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_invitations')">{{ $home->invites }} [<a href="/web/invite?id={{ $home->userId }}" title="{{ $home->invitesLinkTitle }}">{{ __('usercp.text_send') }}</a>]</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_karma_points')">{{ $home->seedbonus }} [<a href="/web/mybonus" title="{{ $home->karmaLinkTitle }}">{{ __('usercp.text_use') }}</a>]</x-settings-row-small>
 	</div>
 </div>
 
 <div class="nx-ucard">
-	<div class="nx-ucard__title">{{ __('legacy/usercp.section_security') }}</div>
+	<div class="nx-ucard__title">{{ __('usercp.section_security') }}</div>
 	<div class="nx-fgrid nx-fgrid--flat">
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_passkey')">
+	<x-settings-row-small layout="grid" :label="__('usercp.row_passkey')">
 		<span class="nx-copyfield">
-			<input type="text" class="nx-copyfield__input" id="ucp-passkey" readonly aria-label="{{ __('legacy/usercp.row_passkey') }}" value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" data-copy-value="{{ (string) ($curUser['passkey'] ?? '') }}" data-mask-value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" />
-			<button type="button" class="nx-postbtn" data-reveal="#ucp-passkey" data-label-show="{{ __('legacy/functions.text_show') }}" data-label-hide="{{ __('legacy/functions.text_hide') }}">{{ __('legacy/functions.text_show') }}</button>
-			<button type="button" class="nx-postbtn" data-copy="#ucp-passkey" data-copy-done="{{ __('legacy/functions.text_copied') }}">{{ __('legacy/functions.text_copy') }}</button>
+			<input type="text" class="nx-copyfield__input" id="ucp-passkey" readonly aria-label="{{ __('usercp.row_passkey') }}" value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" data-copy-value="{{ (string) ($curUser['passkey'] ?? '') }}" data-mask-value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" />
+			<button type="button" class="nx-postbtn" data-reveal="#ucp-passkey" data-label-show="{{ __('functions.text_show') }}" data-label-hide="{{ __('functions.text_hide') }}">{{ __('functions.text_show') }}</button>
+			<button type="button" class="nx-postbtn" data-copy="#ucp-passkey" data-copy-done="{{ __('functions.text_copied') }}">{{ __('functions.text_copy') }}</button>
 		</span>
 	</x-settings-row-small>
 	@if ($home->passkeyLogin !== null)
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_passkey_login_url')"><form method="POST" action="{{ $home->passkeyLogin->action }}"><input type="hidden" name="passkey" value="{{ $home->passkeyLogin->passkey }}"><input type="hidden" name="timestamp" value="{{ $home->passkeyLogin->timestamp }}"><input type="hidden" name="signature" value="{{ $home->passkeyLogin->signature }}"><button type="submit" class="btn">Login</button></form></x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_passkey_login_url')"><form method="POST" action="{{ $home->passkeyLogin->action }}"><input type="hidden" name="passkey" value="{{ $home->passkeyLogin->passkey }}"><input type="hidden" name="timestamp" value="{{ $home->passkeyLogin->timestamp }}"><input type="hidden" name="signature" value="{{ $home->passkeyLogin->signature }}"><button type="submit" class="btn">Login</button></form></x-settings-row-small>
 	@endif
 	</div>
 </div>
 
 <div class="nx-ucard">
-	<div class="nx-ucard__title">{{ __('legacy/usercp.section_tokens') }}</div>
+	<div class="nx-ucard__title">{{ __('usercp.section_tokens') }}</div>
 	<div class="nx-fgrid nx-fgrid--flat">
 	<x-settings-row-small layout="grid" :label="$home->tokens->label">
 		@if ($home->tokens->items !== [])
@@ -55,19 +55,19 @@
 </div>
 
 <div class="nx-ucard">
-	<div class="nx-ucard__title">{{ __('legacy/usercp.section_activity') }}</div>
+	<div class="nx-ucard__title">{{ __('usercp.section_activity') }}</div>
 	<div class="nx-fgrid nx-fgrid--flat">
-	<x-settings-row-small layout="grid" :label="__('legacy/usercp.row_written_comments')">{{ $home->commentCount }} [<a href="/web/userhistory?action=viewcomments&id={{ $home->userId }}" title="{{ $home->commentsLinkTitle }}">{{ __('legacy/usercp.text_view') }}</a>]</x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_written_comments')">{{ $home->commentCount }} [<a href="/web/userhistory?action=viewcomments&id={{ $home->userId }}" title="{{ $home->commentsLinkTitle }}">{{ __('usercp.text_view') }}</a>]</x-settings-row-small>
 	@if ($home->forumPosts !== null)
-	<x-settings-row layout="grid" :label="__('legacy/usercp.row_forum_posts')">{{ $home->forumPosts->posts }} [<a href="/web/userhistory?action=viewposts&id={{ $home->userId }}" title="{{ $home->postsLinkTitle }}">{{ __('legacy/usercp.text_view') }}</a>] ({{ $home->forumPosts->dayPosts }}{{ __('legacy/usercp.text_posts_per_day') }}; {{ $home->forumPosts->percentages }}{{ __('legacy/usercp.text_of_total_posts') }})</x-settings-row>
+	<x-settings-row layout="grid" :label="__('usercp.row_forum_posts')">{{ $home->forumPosts->posts }} [<a href="/web/userhistory?action=viewposts&id={{ $home->userId }}" title="{{ $home->postsLinkTitle }}">{{ __('usercp.text_view') }}</a>] ({{ $home->forumPosts->dayPosts }}{{ __('usercp.text_posts_per_day') }}; {{ $home->forumPosts->percentages }}{{ __('usercp.text_of_total_posts') }})</x-settings-row>
 	@endif
 	</div>
 </div>
 </div>
 
 <div class="nx-ucard">
-	<div class="nx-ucard__title">{{ __('legacy/usercp.text_recently_read_topics') }}</div>
-<x-data-table :headers="[__('legacy/usercp.col_topic_title'), __('legacy/usercp.col_replies').'/'.__('legacy/usercp.col_views'), __('legacy/usercp.col_topic_starter'), __('legacy/usercp.col_last_post')]">
+	<div class="nx-ucard__title">{{ __('usercp.text_recently_read_topics') }}</div>
+<x-data-table :headers="[__('usercp.col_topic_title'), __('usercp.col_replies').'/'.__('usercp.col_views'), __('usercp.col_topic_starter'), __('usercp.col_last_post')]">
 @foreach ($home->readTopics as $topic)
 <tr>
     <td><a href="/forums?action=viewtopic&amp;topicid={{ $topic->id }}"><b>{{ $topic->subject }}</b></a></td>

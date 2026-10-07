@@ -230,7 +230,7 @@ final class OfferListBuilderTest extends TestCase
 
         $this->assertSame(0, $s->count);
         $this->assertNull($s->table);
-        $this->assertStringContainsString((string) __('legacy/offers.text_nothing_found'), (string) $s->emptyState);
+        $this->assertStringContainsString((string) __('offers.text_nothing_found'), (string) $s->emptyState);
         $this->assertNotEmpty($s->categories);
     }
 
@@ -313,7 +313,7 @@ final class OfferListBuilderTest extends TestCase
         $table = $s->table;
         $this->assertNotNull($table);
         $this->assertSame([], $table->tooltips);
-        $this->assertSame((string) __('legacy/offers.title_has_new_comment'), $table->rows[0]->comment->title);
+        $this->assertSame((string) __('offers.title_has_new_comment'), $table->rows[0]->comment->title);
     }
 
     public function test_appendnew_no_marks_nothing_new(): void

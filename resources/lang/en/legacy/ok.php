@@ -1,30 +1,4 @@
 <?php
 
-return [
-    'head_user_signup' => 'User signup',
-    'std_account_activated' => 'Signup successful but Account not activated!',
-    'account_activated_note' => 'Your account successfully created however Admin must validate new members before they are classified as registered members and are allowed to access site, thank you for your understanding.',
-    'account_activated_note_two' => 'Your account successfully created however your inviter must validate new members before they are classified as registered members and are allowed to access site, thank you for your understanding.',
-    'std_signup_successful' => 'Signup successful!',
-    'std_confirmation_email_note' => 'A confirmation email has been sent to the address you specified (',
-    'std_confirmation_email_note_end' => "). You need to read and respond to this email before you can use your account. If you don't do this, the new account will be deleted automatically after a short while.",
-    'head_sysop_activation' => 'Sysop Account activation',
-    'std_sysop_activation_note' => 'Sysop Account successfully activated!',
-    'std_auto_logged_in_note' => 'Your account has been activated! You have been automatically logged in. You can now continue to the',
-    'link_main_page' => 'main page',
-    'std_auto_logged_in_note_end' => 'and start using your account.',
-    'std_cookies_disabled_note' => 'Your account has been activated! However, it appears that you could not be logged in automatically. Maybe you need to open a new window in your browser.',
-    'std_cookies_disabled_note_two' => 'Another possible reason is that you disabled cookies in your browser. You have to enable cookies to use your account. Please do that and then',
-    'link_log_in' => 'log in',
-    'std_cookies_disabled_note_end' => 'and try again.',
-    'head_already_confirmed' => 'Already confirmed',
-    'std_already_confirmed' => 'Already confirmed',
-    'std_already_confirmed_note' => 'This user account has already been confirmed. You can proceed to',
-    'std_already_confirmed_note_end' => 'with it.',
-    'head_signup_confirmation' => 'Signup confirmation',
-    'std_account_confirmed' => 'Account successfully confirmed!',
-    'std_read_rules_faq' => 'Before you start using %s we urge you to read the',
-    'text_rules' => 'RULES',
-    'std_read_rules_faq_and' => 'and the',
-    'text_faq' => 'FAQ',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/ok.php';

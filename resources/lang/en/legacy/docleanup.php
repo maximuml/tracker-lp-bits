@@ -1,8 +1,4 @@
 <?php
 
-return [
-    'title' => 'Do Clean-up',
-    'running' => 'clean-up in progress...please wait',
-    'time_consumed' => 'Time consumed：%f sec',
-    'done' => 'Done',
-];
+// Root-copy alias while app/Services call sites still reference legacy/*.
+return require dirname(__DIR__).'/docleanup.php';

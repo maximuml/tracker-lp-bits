@@ -75,9 +75,9 @@ class PollController extends LegacyController
                 $hours = (int) floor((time() - strtotime((string) $lastPoll['added'])) / 3600);
                 $days = (int) floor($hours / 24);
                 if ($days >= 1) {
-                    $t = $days.(__('legacy/makepoll.text_day')).Strings::addS($days);
+                    $t = $days.(__('makepoll.text_day')).Strings::addS($days);
                 } else {
-                    $t = $hours.(__('legacy/makepoll.text_hour')).Strings::addS($hours);
+                    $t = $hours.(__('makepoll.text_hour')).Strings::addS($hours);
                 }
                 $pollAge = ['question' => (string) $lastPoll['question'], 'age' => $t];
             }
@@ -91,8 +91,8 @@ class PollController extends LegacyController
             'returnto' => htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
             'pollAge' => $pollAge,
             'title' => $pollid > 0
-                ? (__('legacy/makepoll.head_edit_poll'))
-                : (__('legacy/makepoll.head_new_poll')),
+                ? (__('makepoll.head_edit_poll'))
+                : (__('makepoll.head_new_poll')),
         ]);
     }
 
@@ -158,7 +158,7 @@ class PollController extends LegacyController
         if ($pollid > 0) {
             $poll = $this->pollRepository->findWithOptions($pollid);
             if (! $poll) {
-                return $this->legacyAbortResponse(__('legacy/polloverview.std_error'), __('legacy/polloverview.text_no_poll_id'));
+                return $this->legacyAbortResponse(__('polloverview.std_error'), __('polloverview.text_no_poll_id'));
             }
 
             $count = $this->pollRepository->countAnswers($pollid);
@@ -203,7 +203,7 @@ class PollController extends LegacyController
 
         $polls = $this->pollRepository->listAll();
         if (empty($polls)) {
-            return $this->legacyAbortResponse(__('legacy/polloverview.std_error'), __('legacy/polloverview.text_no_users_voted'));
+            return $this->legacyAbortResponse(__('polloverview.std_error'), __('polloverview.text_no_users_voted'));
         }
 
         $pollRows = array_map(static function ($pollRow) {

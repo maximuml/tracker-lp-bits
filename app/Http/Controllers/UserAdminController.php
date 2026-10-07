@@ -97,7 +97,7 @@ class UserAdminController extends LegacyController
             $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => $class !== '-' && $class == $i];
         }
 
-        $countryOptions = [['value' => 0, 'label' => __('legacy/users.select_any_country'), 'selected' => $country === 0]];
+        $countryOptions = [['value' => 0, 'label' => __('users.select_any_country'), 'selected' => $country === 0]];
         foreach ($this->userListingRepository->getCountries() as $ct) {
             $countryOptions[] = ['value' => (int) $ct['id'], 'label' => (string) $ct['name'], 'selected' => $country === (int) $ct['id']];
         }

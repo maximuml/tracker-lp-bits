@@ -31,10 +31,10 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_users')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_countries_users')),
                 'limits' => [25],
                 'subtype' => 'us',
-                'what' => __('legacy/topten.col_users'),
+                'what' => __('topten.col_users'),
             ];
         }
 
@@ -51,10 +51,10 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_uploaded')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_countries_uploaded')),
                 'limits' => [25],
                 'subtype' => 'ul',
-                'what' => __('legacy/topten.col_uploaded'),
+                'what' => __('topten.col_uploaded'),
             ];
         }
 
@@ -72,10 +72,10 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_per_user'), __('legacy/topten.text_countries_per_user_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_countries_per_user'), __('topten.text_countries_per_user_note')),
                 'limits' => [25],
                 'subtype' => 'avg',
-                'what' => __('legacy/topten.col_average'),
+                'what' => __('topten.col_average'),
             ];
         }
 
@@ -93,10 +93,10 @@ final class CountrySections extends SectionQueries
                         ->limit($limit)
                         ->get()
                 ),
-                'caption' => $this->caption(__('legacy/topten.text_top'), $limit, __('legacy/topten.text_countries_ratio'), __('legacy/topten.text_countries_ratio_note')),
+                'caption' => $this->caption(__('topten.text_top'), $limit, __('topten.text_countries_ratio'), __('topten.text_countries_ratio_note')),
                 'limits' => [25],
                 'subtype' => 'r',
-                'what' => __('legacy/topten.col_ratio'),
+                'what' => __('topten.col_ratio'),
             ];
         }
 

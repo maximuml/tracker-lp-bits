@@ -1,1 +1,1 @@
-{{ __('legacy/usercp.row_browse_default_categories') }}<br />{{ __('legacy/usercp.row_browse_categories') }}
+{{ __('usercp.row_browse_default_categories') }}<br />{{ __('usercp.row_browse_categories') }}

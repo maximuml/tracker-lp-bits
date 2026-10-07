@@ -239,7 +239,7 @@ final class LegacyResponse
             $url = Url::schemeAndHost().'/'.trim($url, '/');
         }
 
-        // T-11: Use LegacyHeaderBag instead of SAPI headers_sent() to avoid
+        // T-11: Use HeaderBag instead of SAPI headers_sent() to avoid
         // cross-request state leakage under Octane. If output has already
         // been emitted (ob_get_level() > 0 with content), use a JS redirect.
         if (ob_get_level() > 0 && (string) ob_get_status()['name'] !== '') {

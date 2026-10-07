@@ -2,8 +2,8 @@
 
 use App\Exceptions\Handler;
 use App\Http\Kernel;
-use App\Support\LegacyRuntime;
 use App\Support\RequestContext;
+use App\Support\RuntimeContext;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Application;
 
@@ -37,7 +37,7 @@ $app = new Application(
 // so the instance is shared for the whole process; per-request mutations
 // happen in LegacyRequestMiddleware / TrackerThrottle and are flushed by
 // ResetNexus on Octane lifecycle events.
-$app->instance(LegacyRuntime::class, new LegacyRuntime(
+$app->instance(RuntimeContext::class, new RuntimeContext(
     defined('IN_NEXUS') && IN_NEXUS,
     defined('IN_TRACKER') && IN_TRACKER,
 ));

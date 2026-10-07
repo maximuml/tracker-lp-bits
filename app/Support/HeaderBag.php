@@ -13,14 +13,14 @@ namespace App\Support;
  *
  * Legacy code that previously called `header('Location: ...')` or
  * `header('Content-Type: ...')` should now call
- * `LegacyHeaderBag::set()` / `LegacyHeaderBag::setStatusCode()`.
+ * `HeaderBag::set()` / `HeaderBag::setStatusCode()`.
  * The legacy controller reads and clears the bag at the end of each
- * request via {@see LegacyHeaderBag::flush()}.
+ * request via {@see HeaderBag::flush()}.
  *
  * The bag is bound as a singleton in the container and reset by
  * {@see ResetNexus} between requests, so it is safe under Octane.
  */
-class LegacyHeaderBag
+class HeaderBag
 {
     /** @var array<string, list<string>> */
     private array $headers = [];

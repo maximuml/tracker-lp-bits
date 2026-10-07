@@ -99,7 +99,7 @@ final class Permissions
     private static function permissionFail(string $log, string $permission = ''): bool
     {
         Logger::writeWithContext("$log, [FAIL]");
-        $runtime = LegacyRuntime::instance();
+        $runtime = RuntimeContext::instance();
         if ($runtime->isLegacy() && ! $runtime->isTracker()) {
             $requireClass = SiteConfig::current()->authority->permission($permission);
             if ($requireClass !== null && isset(User::$classes[$requireClass])) {

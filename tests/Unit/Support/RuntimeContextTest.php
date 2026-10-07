@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Support;
 
-use App\Support\LegacyRuntime;
+use App\Support\RuntimeContext;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::PURE_UNIT)]
-class LegacyRuntimeTest extends TestCase
+class RuntimeContextTest extends TestCase
 {
     public function test_defaults_to_non_legacy_non_tracker(): void
     {
-        $runtime = new LegacyRuntime;
+        $runtime = new RuntimeContext;
 
         $this->assertFalse($runtime->isLegacy());
         $this->assertFalse($runtime->isTracker());
@@ -21,7 +21,7 @@ class LegacyRuntimeTest extends TestCase
 
     public function test_constructor_captures_entry_state(): void
     {
-        $runtime = new LegacyRuntime(entryLegacy: true, entryTracker: true);
+        $runtime = new RuntimeContext(entryLegacy: true, entryTracker: true);
 
         $this->assertTrue($runtime->isLegacy());
         $this->assertTrue($runtime->isTracker());
@@ -29,7 +29,7 @@ class LegacyRuntimeTest extends TestCase
 
     public function test_mark_flags_independently(): void
     {
-        $runtime = new LegacyRuntime;
+        $runtime = new RuntimeContext;
 
         $runtime->markLegacy();
         $this->assertTrue($runtime->isLegacy());
@@ -42,7 +42,7 @@ class LegacyRuntimeTest extends TestCase
 
     public function test_mark_can_unset_flag(): void
     {
-        $runtime = new LegacyRuntime(entryLegacy: true);
+        $runtime = new RuntimeContext(entryLegacy: true);
 
         $runtime->markLegacy(false);
 
@@ -51,7 +51,7 @@ class LegacyRuntimeTest extends TestCase
 
     public function test_reset_restores_entry_state(): void
     {
-        $runtime = new LegacyRuntime(entryLegacy: false, entryTracker: false);
+        $runtime = new RuntimeContext(entryLegacy: false, entryTracker: false);
 
         $runtime->markLegacy();
         $runtime->markTracker();
@@ -63,7 +63,7 @@ class LegacyRuntimeTest extends TestCase
 
     public function test_reset_restores_non_default_entry_state(): void
     {
-        $runtime = new LegacyRuntime(entryLegacy: true, entryTracker: true);
+        $runtime = new RuntimeContext(entryLegacy: true, entryTracker: true);
 
         $runtime->markLegacy(false);
         $runtime->markTracker(false);
@@ -75,7 +75,7 @@ class LegacyRuntimeTest extends TestCase
 
     public function test_boot_entry_updates_defaults_and_resets(): void
     {
-        $runtime = new LegacyRuntime;
+        $runtime = new RuntimeContext;
 
         $runtime->bootEntry(legacy: true, tracker: true);
 
@@ -91,10 +91,10 @@ class LegacyRuntimeTest extends TestCase
 
     public function test_container_resolves_shared_instance(): void
     {
-        $first = $this->app->make(LegacyRuntime::class);
+        $first = $this->app->make(RuntimeContext::class);
         $first->markLegacy();
 
-        $second = $this->app->make(LegacyRuntime::class);
+        $second = $this->app->make(RuntimeContext::class);
 
         $this->assertSame($first, $second);
         $this->assertTrue($second->isLegacy());

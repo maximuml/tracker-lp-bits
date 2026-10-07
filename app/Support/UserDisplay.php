@@ -49,7 +49,7 @@ final class UserDisplay
     public static function currentClass(): string|int
     {
         $user = CurrentUser::instance()->get();
-        if (LegacyRuntime::instance()->isLegacy()) {
+        if (RuntimeContext::instance()->isLegacy()) {
             return CurrentUser::instance()->value('class', '');
         }
 
@@ -87,7 +87,7 @@ final class UserDisplay
     public static function currentId(): int
     {
         $user = CurrentUser::instance()->get();
-        if (LegacyRuntime::instance()->isLegacy()) {
+        if (RuntimeContext::instance()->isLegacy()) {
             return (int) (CurrentUser::instance()->id());
         }
 
@@ -106,7 +106,7 @@ final class UserDisplay
     public static function currentUsername(): string
     {
         $user = CurrentUser::instance()->get();
-        if (LegacyRuntime::instance()->isLegacy()) {
+        if (RuntimeContext::instance()->isLegacy()) {
             return CurrentUser::instance()->username();
         }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Support;
 
 use App\Support\Html\SafeHtml;
-use App\Support\LegacyRuntime;
+use App\Support\RuntimeContext;
 use App\Support\Time;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
@@ -17,7 +17,7 @@ use Tests\TestCase;
  * Legacy-runtime branch of {@see Time::format()},
  * {@see Time::timeParts()} and {@see Time::formatText()}.
  *
- * `LegacyRuntime::isLegacy()` is false in the test environment, so the
+ * `RuntimeContext::isLegacy()` is false in the test environment, so the
  * legacy branch — the code that runs in production via public/index.php —
  * would be invisible to the suite without an explicit `bootEntry(true)`.
  * That is exactly how the `{{ Time::format() }}` escaped-markup
@@ -45,7 +45,7 @@ final class TimeLegacyFormatTest extends TestCase
             define('TIMENOW', self::TIMENOW_TS);
         }
         parent::setUp();
-        app(LegacyRuntime::class)->bootEntry(true);
+        app(RuntimeContext::class)->bootEntry(true);
     }
 
     private function legacyTime(): string

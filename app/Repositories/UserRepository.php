@@ -18,10 +18,10 @@ use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Environment;
-use App\Support\LegacyRuntime;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\PasswordHasher;
+use App\Support\RuntimeContext;
 use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
 use App\Support\UserDisplay;
@@ -46,7 +46,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         private readonly UserStatsService $statsService,
         private readonly UserMetaRepository $metaRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
-        private readonly LegacyRuntime $legacyRuntime,
+        private readonly RuntimeContext $runtimeContext,
     ) {
         //
     }
@@ -177,7 +177,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         }
         if (! empty($params['class'])) {
             $class = intval($params['class']);
-            if (! $this->legacyRuntime->isLegacy()) {
+            if (! $this->runtimeContext->isLegacy()) {
                 $authUser = Auth::user();
                 if ($authUser && $class >= $authUser->class) {
                     throw new InsufficientPermissionException('No permission');

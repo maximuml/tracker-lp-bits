@@ -46,7 +46,7 @@ class EnvTest extends TestCase
      * Real environment overrides the .env file — the same precedence as
      * Laravel's env(). Without this, phpunit <server> values (REDIS_DB=15,
      * APP_ENV=testing) and docker -e overrides never reach nexus.* config:
-     * LegacyRedisCache kept writing test rows into the dev Redis keyspace.
+     * NexusCache kept writing test rows into the dev Redis keyspace.
      */
     public function test_server_and_env_superglobals_beat_dotenv_file(): void
     {

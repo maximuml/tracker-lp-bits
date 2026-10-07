@@ -13,7 +13,7 @@ use App\Http\Resources\PollResource;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
 use App\Repositories\PollRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
@@ -33,18 +33,18 @@ class PollController extends LegacyController
 
     private CurrentUser $currentUser;
 
-    private ?LegacyRedisCache $legacyRedisCache;
+    private ?NexusCache $cache;
 
     public function __construct(
         PollRepository $pollRepository,
         IndexRepository $indexRepository,
         CurrentUser $currentUser,
-        ?LegacyRedisCache $legacyRedisCache,
+        ?NexusCache $cache,
     ) {
         $this->pollRepository = $pollRepository;
         $this->indexRepository = $indexRepository;
         $this->currentUser = $currentUser;
-        $this->legacyRedisCache = $legacyRedisCache;
+        $this->cache = $cache;
     }
 
     public function makepoll(Request $request): Response|RedirectResponse|View
@@ -326,9 +326,9 @@ class PollController extends LegacyController
 
         // Invalidate legacy poll cache so the index page shows fresh results
         // after an API vote — mirrors IndexController::handlePollVote().
-        if ($this->legacyRedisCache !== null) {
-            $this->legacyRedisCache->delete_value('current_poll_content');
-            $this->legacyRedisCache->delete_value('current_poll_result', true);
+        if ($this->cache !== null) {
+            $this->cache->forget('current_poll_content');
+            $this->cache->forget('current_poll_result', true);
         }
 
         return $this->success(['success' => true], 'Vote recorded');

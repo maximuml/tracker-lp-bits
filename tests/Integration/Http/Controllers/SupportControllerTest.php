@@ -10,7 +10,7 @@ use App\Http\Requests\ComplainReplyRequest;
 use App\Http\Requests\ComplainToggleRequest;
 use App\Models\User;
 use App\Repositories\ToolRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Permissions;
 use Illuminate\Contracts\View\View;
@@ -329,13 +329,13 @@ final class SupportControllerTest extends TestCase
     }
 
     /**
-     * Set up the legacy environment: bind LegacyRedisCache to null so that
+     * Set up the legacy environment: bind NexusCache to null so that
      * legacyAbortResponse() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {
 
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         /** @var ToolRepository&MockInterface $repo */
         $repo = Mockery::mock(ToolRepository::class);

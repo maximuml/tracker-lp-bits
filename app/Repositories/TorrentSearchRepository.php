@@ -6,7 +6,7 @@ namespace App\Repositories;
 
 use App\Models\Torrent;
 use App\Repositories\TorrentSearch\SearchEngine;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -24,7 +24,7 @@ class TorrentSearchRepository
         private readonly TagRepository $tagRepository,
         private readonly SearchEngine $engine,
         private readonly TorrentListingRepository $listingRepository,
-        private readonly LegacyRedisCache $cache,
+        private readonly NexusCache $cache,
         private readonly UserUpdateBatch $userUpdateBatch,
     ) {}
 
@@ -279,7 +279,7 @@ class TorrentSearchRepository
      */
     private function hotSearchKeywords(): array
     {
-        $cached = $this->cache->get_value('hot_search_keywords');
+        $cached = $this->cache->get('hot_search_keywords');
         if (is_array($cached)) {
             return array_values(array_map('strval', $cached));
         }
@@ -297,7 +297,7 @@ class TorrentSearchRepository
                 break;
             }
         }
-        $this->cache->cache_value('hot_search_keywords', $keywords, 3670);
+        $this->cache->put('hot_search_keywords', $keywords, 3670);
 
         return $keywords;
     }

@@ -16,7 +16,7 @@ use App\Jobs\BulkUserIncrementJob;
 use App\Jobs\BulkUserMessageJob;
 use App\Jobs\SendLegacyMail;
 use App\Models\User;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -508,7 +508,7 @@ final class SystemBulkControllerTest extends TestCase
     private function setupLegacyEnvironment(): void
     {
 
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         /** @var ToolRepositoryInterface&MockInterface $repo */
         $repo = Mockery::mock(ToolRepositoryInterface::class);

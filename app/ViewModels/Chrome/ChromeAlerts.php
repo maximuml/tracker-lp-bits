@@ -105,10 +105,10 @@ final class ChromeAlerts
         }
 
         if (! preg_match('/index/i', $context->scriptFileName)) {
-            $newNews = $context->cache?->get_value('user_'.$userId.'_unread_news_count');
+            $newNews = $context->cache?->get('user_'.$userId.'_unread_news_count');
             if ($newNews == '') {
                 $newNews = $repo->getUnreadNewsCount($user['last_home'] ?? null);
-                $context->cache?->cache_value('user_'.$userId.'_unread_news_count', $newNews, 300);
+                $context->cache?->put('user_'.$userId.'_unread_news_count', $newNews, 300);
             }
             $newNews = (int) $newNews;
             if ($newNews > 0) {
@@ -135,10 +135,10 @@ final class ChromeAlerts
         }
 
         if ($chrome->permissionChecker->userCan('torrent-approval', false, $userId) && Settings::get('torrent.approval_status_none_visible') == 'no') {
-            $toApprovalCounts = $context->cache?->get_value('TORRENT_APPROVAL_NONE');
+            $toApprovalCounts = $context->cache?->get('TORRENT_APPROVAL_NONE');
             if ($toApprovalCounts === false) {
                 $toApprovalCounts = $repo->getTorrentApprovalNoneCount();
-                $context->cache?->cache_value('TORRENT_APPROVAL_NONE', $toApprovalCounts, 60);
+                $context->cache?->put('TORRENT_APPROVAL_NONE', $toApprovalCounts, 60);
             }
             $toApprovalCounts = (int) $toApprovalCounts;
             if ($toApprovalCounts) {
@@ -151,10 +151,10 @@ final class ChromeAlerts
         }
 
         if ($chrome->permissionChecker->userCan('staffmem', false, $userId)) {
-            $complaints = $context->cache?->get_value('COMPLAINTS_COUNT_CACHE');
+            $complaints = $context->cache?->get('COMPLAINTS_COUNT_CACHE');
             if ($complaints === false) {
                 $complaints = $repo->getOpenComplaintsCount();
-                $context->cache?->cache_value('COMPLAINTS_COUNT_CACHE', $complaints, 600);
+                $context->cache?->put('COMPLAINTS_COUNT_CACHE', $complaints, 600);
             }
             $complaints = (int) $complaints;
             if ($complaints) {
@@ -164,10 +164,10 @@ final class ChromeAlerts
                     'color' => 'darkred',
                 ];
             }
-            $numReports = $context->cache?->get_value('staff_new_report_count');
+            $numReports = $context->cache?->get('staff_new_report_count');
             if ($numReports == '') {
                 $numReports = $repo->getOpenReportsCount();
-                $context->cache?->cache_value('staff_new_report_count', $numReports, 900);
+                $context->cache?->put('staff_new_report_count', $numReports, 900);
             }
             $numReports = (int) $numReports;
             if ($numReports) {
@@ -177,10 +177,10 @@ final class ChromeAlerts
                     'color' => 'blue',
                 ];
             }
-            $numCheaters = $context->cache?->get_value('staff_new_cheater_count');
+            $numCheaters = $context->cache?->get('staff_new_cheater_count');
             if ($numCheaters == '') {
                 $numCheaters = $repo->getOpenCheatersCount();
-                $context->cache?->cache_value('staff_new_cheater_count', $numCheaters, 900);
+                $context->cache?->put('staff_new_cheater_count', $numCheaters, 900);
             }
             $numCheaters = (int) $numCheaters;
             if ($numCheaters) {

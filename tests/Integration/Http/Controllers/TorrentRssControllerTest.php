@@ -6,7 +6,7 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\TorrentRssController;
 use App\Repositories\TorrentRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -31,7 +31,7 @@ final class TorrentRssControllerTest extends TestCase
     {
         $this->bindTorrentRepository();
         $this->mockCurrentUser(null);
-        app()->instance(LegacyRedisCache::class, Mockery::mock(LegacyRedisCache::class));
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class));
 
         $controller = app(TorrentRssController::class);
         $request = Request::create('/torrentrss', 'GET');
@@ -48,7 +48,7 @@ final class TorrentRssControllerTest extends TestCase
     {
         $this->bindTorrentRepository();
         $this->mockCurrentUser(['passkey' => '']);
-        app()->instance(LegacyRedisCache::class, Mockery::mock(LegacyRedisCache::class));
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class));
 
         $controller = app(TorrentRssController::class);
         $request = Request::create('/torrentrss', 'GET', ['passkey' => '']);
@@ -65,7 +65,7 @@ final class TorrentRssControllerTest extends TestCase
     {
         $this->bindTorrentRepository();
         $this->mockCurrentUser(['passkey' => '']);
-        app()->instance(LegacyRedisCache::class, Mockery::mock(LegacyRedisCache::class));
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class));
 
         $controller = app(TorrentRssController::class);
         $request = Request::create('/torrentrss', 'GET');
@@ -82,7 +82,7 @@ final class TorrentRssControllerTest extends TestCase
     {
         $this->bindTorrentRepository();
         $this->mockCurrentUser(null);
-        app()->instance(LegacyRedisCache::class, Mockery::mock(LegacyRedisCache::class));
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class));
         Cache::flush();
 
         $controller = app(TorrentRssController::class);

@@ -6,7 +6,7 @@ namespace App\Repositories;
 
 use App\Models\Torrent;
 use App\Models\User;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Database;
 use App\Support\Format;
 use App\Support\Input;
@@ -21,7 +21,7 @@ class DashboardRepository extends BaseRepository
 {
     public function __construct(
         private readonly DashboardStatsRepository $statsRepository,
-        private readonly LegacyRedisCache $cache,
+        private readonly NexusCache $cache,
         private readonly RequestContext $requestContext,
     ) {}
 
@@ -103,7 +103,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' => sprintf('%d reads, %d writes', $this->cache->getCacheReadTimes(), $this->cache->getCacheWriteTimes()),
+            'value' => sprintf('%d reads, %d writes', $this->cache->readCount(), $this->cache->writeCount()),
         ];
         $name = 'memory_usage';
         $result[$name] = [

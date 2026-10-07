@@ -12,7 +12,7 @@ use App\Models\Setting;
 use App\Repositories\UsercpSecurityCommand;
 use App\Services\SecureTokenService;
 use App\Support\Api;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
 use App\Support\LegacyAjaxRedirects;
@@ -32,7 +32,7 @@ class UtilityController extends LegacyController
         private readonly UsercpSecurityCommand $usercpSecurityCommand,
         private readonly UserRepositoryInterface $userRepository,
         private readonly CurrentUser $currentUser,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
         private readonly LegacyHeaderBag $legacyHeaderBag,
         private readonly SecureTokenService $secureTokenService,
         private readonly AccessGate $accessGate,
@@ -40,7 +40,7 @@ class UtilityController extends LegacyController
 
     public function ajax(Request $request): JsonResponse|RedirectResponse
     {
-        if ($this->legacyRedisCache === null) {
+        if ($this->cache === null) {
             $qs = $request->getQueryString();
 
             return redirect('/ajax'.($qs ? '?'.$qs : ''));

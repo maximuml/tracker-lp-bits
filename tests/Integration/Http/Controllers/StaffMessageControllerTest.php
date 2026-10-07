@@ -10,7 +10,7 @@ use App\Http\Requests\SendContactStaffRequest;
 use App\Http\Requests\SendStaffMessageRequest;
 use App\Jobs\BulkUserMessageJob;
 use App\Models\User;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
@@ -285,13 +285,13 @@ final class StaffMessageControllerTest extends TestCase
     }
 
     /**
-     * Set up the legacy environment: bind LegacyRedisCache to null so that
+     * Set up the legacy environment: bind NexusCache to null so that
      * legacyAbortResponse() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {
 
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
     }
 
     /**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Services\TorrentStatsService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 
 /**
  * Legacy torrent-bookmark helpers extracted from `include/functions.php`.
@@ -21,23 +21,18 @@ final class TorrentBookmark
      *
      * @return array<int, int>
      */
-    public static function bookmarkArray(mixed $cache, int|string $userId): array
+    public static function bookmarkArray(?NexusCache $cache, int|string $userId): array
     {
         $userId = (int) $userId;
         $cacheKey = 'user_'.$userId.'_bookmark_array';
 
-        if (is_object($cache) && method_exists($cache, 'get_value')) {
-            $ret = $cache->get_value($cacheKey);
-            if ($ret !== false && is_array($ret)) {
-                return $ret;
-            }
+        $ret = $cache?->get($cacheKey);
+        if (is_array($ret)) {
+            return $ret;
         }
 
         $ret = app(TorrentStatsService::class)->getBookmarkTorrentIds($userId);
-
-        if (is_object($cache) && method_exists($cache, 'cache_value')) {
-            $cache->cache_value($cacheKey, $ret, 132800);
-        }
+        $cache?->put($cacheKey, $ret, 132800);
 
         return $ret;
     }
@@ -50,7 +45,7 @@ final class TorrentBookmark
     /**
      * @param  array<string, string>  $labels
      */
-    public static function stateMarkup(mixed $cache, int|string $userId, int|string $torrentId, bool $text = false, array $labels = []): string
+    public static function stateMarkup(?NexusCache $cache, int|string $userId, int|string $torrentId, bool $text = false, array $labels = []): string
     {
         $bookmarked = self::isBookmarked($cache, $userId, $torrentId);
 
@@ -69,7 +64,7 @@ final class TorrentBookmark
      * Whether the torrent is in the user's bookmark list — typed
      * counterpart of {@see stateMarkup()} for view-model assembly.
      */
-    public static function isBookmarked(mixed $cache, int|string $userId, int|string $torrentId): bool
+    public static function isBookmarked(?NexusCache $cache, int|string $userId, int|string $torrentId): bool
     {
         return in_array((int) $torrentId, self::bookmarkArray($cache, (int) $userId), false);
     }
@@ -80,7 +75,7 @@ final class TorrentBookmark
      */
     public static function stateMarkupWithContext(int|string $userId, int|string $torrentId, bool $text = false): string
     {
-        $cache = LegacyRedisCache::instance();
+        $cache = NexusCache::instance();
 
         return self::stateMarkup($cache, $userId, $torrentId, $text, [
             'title_bookmark_torrent' => __('functions.title_bookmark_torrent'),

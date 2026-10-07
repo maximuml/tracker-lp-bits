@@ -8,7 +8,7 @@ use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Support\AssetAppender;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Env;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
@@ -195,12 +195,12 @@ final class ChromeUserBar
         AssetAppender::js('js/toast.js', 'footer', true);
     }
 
-    private static function cachedCount(?LegacyRedisCache $cache, string $key, callable $producer, int $ttl): mixed
+    private static function cachedCount(?NexusCache $cache, string $key, callable $producer, int $ttl): mixed
     {
-        $value = $cache?->get_value($key);
+        $value = $cache?->get($key);
         if ($value === false || $value === null || $value === '') {
             $value = $producer();
-            $cache?->cache_value($key, $value, $ttl);
+            $cache?->put($key, $value, $ttl);
         }
 
         return $value;

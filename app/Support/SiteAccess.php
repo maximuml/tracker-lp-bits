@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Auth\AuthContext;
 use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Models\User;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Security\PasskeyGenerator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -175,8 +176,8 @@ final class SiteAccess
         $row['ip'] = $ip;
         $row['seedbonus'] = floatval($row['seedbonus']);
 
-        if (isset($context->queryParams['clearcache']) && $context->queryParams['clearcache'] && (int) ($row['class'] ?? 0) >= $context->moderatorClass && $cache !== null && method_exists($cache, 'setClearCache')) {
-            $cache->setClearCache(1);
+        if (isset($context->queryParams['clearcache']) && $context->queryParams['clearcache'] && (int) ($row['class'] ?? 0) >= $context->moderatorClass && $cache instanceof NexusCache) {
+            $cache->setBypass(1);
         }
 
         return $row;

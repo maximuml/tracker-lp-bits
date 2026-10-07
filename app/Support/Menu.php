@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Services\PermissionChecker;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Html\SafeHtml;
 
 /**
@@ -29,7 +29,7 @@ final class Menu
         string $enableOffer,
         ?string $customMenu,
         ?array $user = null,
-        ?LegacyRedisCache $cache = null,
+        ?NexusCache $cache = null,
         string $langDir = '',
     ): array {
         $selected = $this->selectedItem($scriptName);

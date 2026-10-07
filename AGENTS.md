@@ -113,7 +113,7 @@ docker compose exec -T php composer audit
 - **Events:** `Events::fire()` → `ModelEventEnum` → event classes (legacy event system, not Laravel's Event::dispatch)
 - **Settings:** `settings` table → `App\Support\Settings` → typed `SiteConfig` (cached in Redis); per-request page state (language folder, menu, key shortcuts) lives in `PageState`
 - **Auth:** custom `NexusWebGuard` + challenge-response authentication + HMAC passkey login
-- **Cache:** `LegacyRedisCache` with `allowed_classes: false` (Sprint 19 hardening)
+- **Cache:** `NexusCache` (phpredis via the default Redis connection) with `allowed_classes: false` (Sprint 19 hardening)
 
 ## Architecture Decision Records
 
@@ -246,7 +246,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   (half-open, via `flock`-guarded probe window) instead of a stampede.
   Noncritical Redis touches are wrapped: `TrackerThrottle` (bypasses the
   limiter), `TrackerUrl` (reads the table directly), `Setting::get`,
-  `AgentAllowRepository`, `LegacyRedisCache`, announce/scrape internals,
+  `AgentAllowRepository`, `NexusCache`, announce/scrape internals,
   metrics, IP log, purchase flow. Domain exceptions still propagate.
 - **Consequences:** With Redis stopped, announce/scrape keep answering
   HTTP 200 in ~100–150 ms from the database path (measured by the k6

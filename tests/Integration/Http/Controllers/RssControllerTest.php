@@ -8,7 +8,7 @@ use App\Enums\UserClass;
 use App\Http\Controllers\RssController;
 use App\Http\Requests\GetrssRequest;
 use App\Models\User;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -39,7 +39,7 @@ final class RssControllerTest extends TestCase
     public function test_getrss_redirects_guest_to_getrss_on_get(): void
     {
         $this->mockCurrentUser(null);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(RssController::class);
         $request = Request::create('/getrss', 'GET');
@@ -54,7 +54,7 @@ final class RssControllerTest extends TestCase
     public function test_getrss_redirects_guest_to_getrss_on_post(): void
     {
         $this->mockCurrentUser(null);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(RssController::class);
         $request = Request::create('/getrss', 'POST', [
@@ -74,7 +74,7 @@ final class RssControllerTest extends TestCase
         $user = User::factory()->create(['class' => UserClass::USER->value]);
         $this->actingAs($user);
         $this->mockCurrentUserWithDefaults($user);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
         Settings::saveBatch('basic', ['BASEURL' => 'http://localhost']);
         Settings::saveBatch('main', ['browsecat' => 1]);
         Settings::resetCache();
@@ -195,12 +195,12 @@ final class RssControllerTest extends TestCase
     }
 
     /**
-     * Set up the legacy environment: bind LegacyRedisCache to null so that
+     * Set up the legacy environment: bind NexusCache to null so that
      * legacyAbortResponse() and Html::stdhead() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {
 
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
     }
 }

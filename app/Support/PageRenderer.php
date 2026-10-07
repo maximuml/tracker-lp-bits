@@ -68,7 +68,6 @@ final class PageRenderer
 
     private function renderHeader(PageLayoutContext $context, string $title, bool $msgalert, string $script, string $place): string
     {
-        $context->cache?->setLanguage($context->langDir);
         if ($context->siteOnline == 'no') {
             if ($context->userClass() < $context->adminClass) {
                 throw new HttpResponseException(new Response((string) (__('functions.std_site_down_for_maintenance')), 503));

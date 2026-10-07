@@ -9,7 +9,7 @@ use App\Http\LegacyScriptContext;
 use App\Http\LegacyUrlRewriter;
 use App\Support\AssetAppender;
 use App\Support\Bootstrap;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config;
 use App\Support\CurrentUser;
 use App\Support\Input;
@@ -103,10 +103,10 @@ final class LegacyRequestMiddleware
             RequestContext::boot();
         }
 
-        // LegacyRedisCache is registered as a singleton in
+        // NexusCache is registered as a singleton in
         // AppServiceProvider::register() — resolving it triggers the
         // connection + language folder setup.
-        LegacyRedisCache::instance();
+        NexusCache::instance();
 
         if (class_exists(Sanctum::class)) {
             Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);

@@ -13,7 +13,7 @@ use App\Http\Requests\ReportRequest;
 use App\Repositories\CommentRepository;
 use App\Repositories\ModerationRepository;
 use App\Services\PermissionChecker;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
@@ -30,7 +30,7 @@ class ModerationController extends LegacyController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker, private readonly OfferRepositoryInterface $offerRepository, private readonly CommentRepository $commentRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserRepositoryInterface $userRepository,
         private readonly CurrentUser $currentUser,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
         private readonly ModerationRepository $moderationRepository,
     ) {}
 
@@ -54,7 +54,7 @@ class ModerationController extends LegacyController
         $currentUserId = (int) ($this->currentUser->id());
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
-        $cache = $this->legacyRedisCache;
+        $cache = $this->cache;
 
         $reportofferid = (int) (request()->query('reportofferid') ?? 0);
         $user = (int) (request()->query('user') ?? 0);
@@ -87,8 +87,8 @@ class ModerationController extends LegacyController
                 'added' => date('Y-m-d H:i:s'),
             ]);
 
-            $cache?->delete_value('staff_report_count');
-            $cache?->delete_value('staff_new_report_count');
+            $cache?->forget('staff_report_count');
+            $cache?->forget('staff_new_report_count');
 
             return $this->legacyAbortResponse(__('report.std_message'), __('report.std_successfully_reported'), false);
         };

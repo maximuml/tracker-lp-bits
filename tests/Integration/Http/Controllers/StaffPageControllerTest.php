@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\StaffPageController;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -62,13 +62,13 @@ final class StaffPageControllerTest extends TestCase
     }
 
     /**
-     * Set up the legacy environment: bind LegacyRedisCache to null so that
+     * Set up the legacy environment: bind NexusCache to null so that
      * legacyAbortResponse() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {
 
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
     }
 
     /**

@@ -6,7 +6,7 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\BitbucketUploadController;
 use App\Models\User;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Settings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -28,7 +28,7 @@ final class BitbucketUploadControllerTest extends TestCase
 
     public function test_create_redirects_to_legacy_when_redis_cache_unavailable(): void
     {
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(BitbucketUploadController::class);
         $request = Request::create('/bitbucket-upload', 'GET', ['foo' => 'bar']);

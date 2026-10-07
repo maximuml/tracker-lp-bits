@@ -60,10 +60,6 @@ final class UsercpPageServiceTest extends TestCase
     {
         parent::setUp();
         Redis::connection()->flushdb();
-        // LegacyRedisCache lives in the nexus.redis connection (DB 0),
-        // not the Laravel default — stale user_*_post_count keys would
-        // otherwise leak between dev and test runs.
-        (new LegacyRedisCache)->redis?->flushDB();
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');

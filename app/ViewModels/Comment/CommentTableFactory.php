@@ -9,7 +9,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Support\Avatar;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -26,7 +26,7 @@ final class CommentTableFactory
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly UserRepositoryInterface $userRepository,
-        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+        private readonly ?NexusCache $cache = null,
     ) {}
 
     /**
@@ -46,8 +46,8 @@ final class CommentTableFactory
         $canManage = Permission::can(PermissionEnum::COM_MANAGE);
         $dt = date('Y-m-d H:i:s', TIMENOW - 900);
 
-        $renderedFmt = $this->legacyRedisCache !== null && $rows !== []
-            ? $this->legacyRedisCache->get_values(array_map(static fn ($row) => 'fmt_comment_'.md5((string) $row['text']), $rows))
+        $renderedFmt = $this->cache !== null && $rows !== []
+            ? $this->cache->getMany(array_map(static fn ($row) => 'fmt_comment_'.md5((string) $row['text']), $rows))
             : [];
 
         $viewRows = [];
@@ -95,7 +95,7 @@ final class CommentTableFactory
             return SafeHtml::fromTrustedHtml($hit);
         }
         $html = Format::formatComment($text);
-        $this->legacyRedisCache?->cache_value($key, (string) $html, 86400);
+        $this->cache?->put($key, (string) $html, 86400);
         $renderedFmt[$key] = (string) $html;
 
         return $html;

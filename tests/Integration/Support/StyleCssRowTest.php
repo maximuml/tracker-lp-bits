@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Support;
 
 use App\Contracts\Repositories\StyleRepositoryInterface;
+use App\Support\Cache\NexusCache;
 use App\Support\Style;
 use Mockery;
 use Mockery\MockInterface;
@@ -107,12 +108,11 @@ final class StyleCssRowTest extends TestCase
     }
 
     /**
-     * Minimal stand-in for the legacy Cache wrapper: cssRow only relies
-     * on get_value()/cache_value() duck-typing.
+     * Minimal stand-in for NexusCache: cssRow only relies on get()/put().
      */
-    private function fakeCache(array $initial): object
+    private function fakeCache(array $initial): NexusCache
     {
-        return new class($initial)
+        return new class($initial) extends NexusCache
         {
             /** @var array<string, mixed> */
             public array $stored = [];
@@ -124,14 +124,14 @@ final class StyleCssRowTest extends TestCase
                 }
             }
 
-            public function get_value(string $key): mixed
+            public function get(string $Key): mixed
             {
-                return $this->stored[$key] ?? false;
+                return $this->stored[$Key] ?? false;
             }
 
-            public function cache_value(string $key, mixed $value, int $ttl): void
+            public function put(string $Key, mixed $Value, int $Duration = 3600): void
             {
-                $this->stored[$key] = $value;
+                $this->stored[$Key] = $Value;
             }
         };
     }

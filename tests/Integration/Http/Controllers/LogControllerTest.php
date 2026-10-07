@@ -13,7 +13,7 @@ use App\Http\Requests\PollDeleteRequest;
 use App\Models\User;
 use App\Repositories\LogRepository;
 use App\Repositories\ToolRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -334,13 +334,13 @@ final class LogControllerTest extends TestCase
     }
 
     /**
-     * Set up the legacy environment: bind LegacyRedisCache to null so that
+     * Set up the legacy environment: bind NexusCache to null so that
      * legacyAbortResponse() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {
 
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
     }
 
     /**

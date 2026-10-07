@@ -24,7 +24,7 @@ final class Env
             // Real environment wins over the .env file — LaravelEnv reads
             // the same $_ENV/$_SERVER adapters as env(), so phpunit <server>
             // overrides (e.g. REDIS_DB=15) and docker -e variables actually
-            // reach nexus.* config. Without this, LegacyRedisCache kept
+            // reach nexus.* config. Without this, NexusCache kept
             // writing test data into the dev Redis keyspace. `has()` first:
             // Env normalizes 'null' to real null, which must not fall through.
             if (LaravelEnv::getRepository()->has($key)) {

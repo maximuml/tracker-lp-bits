@@ -13,7 +13,7 @@ use App\Models\TorrentOperationLog;
 use App\Models\User;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentPurchaseRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
@@ -44,7 +44,7 @@ class TorrentDetailsController extends Controller
 
     private TorrentDetailsViewFactory $detailsViewFactory;
 
-    private ?LegacyRedisCache $legacyRedisCache;
+    private ?NexusCache $cache;
 
     public function __construct(private readonly TorrentPurchaseRepository $torrentPurchaseRepository, private readonly TorrentRepositoryInterface $torrentRepository,
         TorrentDownloadRepositoryInterface $downloadRepository,
@@ -52,14 +52,14 @@ class TorrentDetailsController extends Controller
         TorrentDetailRepository $torrentDetailRepository,
         CurrentUser $currentUser,
         TorrentDetailsViewFactory $detailsViewFactory,
-        ?LegacyRedisCache $legacyRedisCache = null
+        ?NexusCache $cache = null
     ) {
         $this->downloadRepository = $downloadRepository;
         $this->tagRepository = $tagRepository;
         $this->torrentDetailRepository = $torrentDetailRepository;
         $this->currentUser = $currentUser;
         $this->detailsViewFactory = $detailsViewFactory;
-        $this->legacyRedisCache = $legacyRedisCache;
+        $this->cache = $cache;
     }
 
     public function show(Request $request, int $id, CustomField $customField): View|RedirectResponse|Response
@@ -80,7 +80,7 @@ class TorrentDetailsController extends Controller
 
         Gate::forUser($user)->authorize('view', $torrent);
 
-        if ($this->legacyRedisCache === null) {
+        if ($this->cache === null) {
             $query = $request->query->all();
             unset($query['id']);
 

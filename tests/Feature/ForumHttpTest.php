@@ -9,7 +9,7 @@ use App\Models\Forum;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -194,9 +194,9 @@ final class ForumHttpTest extends TestCase
         ]);
         $post = Post::factory()->topic($topic)->author($user)->create();
         $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
-        // forums_list is cached for a day in LegacyRedisCache's own
-        // connection (nexus.redis.database), not the Laravel Redis DB.
-        app(LegacyRedisCache::class)->redis?->flushDB();
+        // forums_list is cached for a day in NexusCache (the
+        // default Redis connection / REDIS_DB keyspace).
+        app(NexusCache::class)->redis?->flushDB();
 
         $response = $this->withNexusCookie($user)
             ->get('/forums?action=viewforum&forumid='.$forum->id);
@@ -218,7 +218,7 @@ final class ForumHttpTest extends TestCase
         ]);
         $post = Post::factory()->topic($topic)->author($user)->create();
         $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
-        app(LegacyRedisCache::class)->redis?->flushDB();
+        app(NexusCache::class)->redis?->flushDB();
 
         $response = $this->withNexusCookie($user)
             ->get('/forums?action=viewunread');

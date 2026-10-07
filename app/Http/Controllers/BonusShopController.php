@@ -10,7 +10,7 @@ use App\Http\Requests\FreeleechRequest;
 use App\Models\User;
 use App\Repositories\UserDetailRepository;
 use App\Support\AssetAppender;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
@@ -27,7 +27,7 @@ class BonusShopController extends LegacyController
 {
     public function __construct(private readonly UserDetailRepository $userDetailRepository, private readonly ExamRepositoryInterface $examRepository,
         private readonly CurrentUser $currentUser,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
     ) {}
 
     public function task(Request $request): View|RedirectResponse|Response
@@ -196,7 +196,7 @@ JS;
 
         if (isset($stateMap[$action])) {
             Promotion::setGlobalSpecialState($stateMap[$action]);
-            $this->legacyRedisCache?->delete_value('global_promotion_state');
+            $this->cache?->forget('global_promotion_state');
 
             return $this->legacyAbortResponse('Success', $messages[$action]);
         }

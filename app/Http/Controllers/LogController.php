@@ -12,7 +12,7 @@ use App\Http\Requests\ChronicleUpdateRequest;
 use App\Http\Requests\PollDeleteRequest;
 use App\Models\Setting;
 use App\Repositories\LogRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -32,13 +32,13 @@ class LogController extends LegacyController
 
     private CurrentUser $currentUser;
 
-    private ?LegacyRedisCache $legacyRedisCache;
+    private ?NexusCache $cache;
 
-    public function __construct(LogRepository $logRepository, CurrentUser $currentUser, ?LegacyRedisCache $legacyRedisCache)
+    public function __construct(LogRepository $logRepository, CurrentUser $currentUser, ?NexusCache $cache)
     {
         $this->logRepository = $logRepository;
         $this->currentUser = $currentUser;
-        $this->legacyRedisCache = $legacyRedisCache;
+        $this->cache = $cache;
     }
 
     public function legacy(Request $request): View|RedirectResponse|Response
@@ -280,9 +280,9 @@ class LogController extends LegacyController
         }
         $this->logRepository->deletePoll($pollid);
 
-        if ($this->legacyRedisCache !== null) {
-            $this->legacyRedisCache->delete_value('current_poll_content');
-            $this->legacyRedisCache->delete_value('current_poll_result', true);
+        if ($this->cache !== null) {
+            $this->cache->forget('current_poll_content');
+            $this->cache->forget('current_poll_result', true);
         }
 
         if ($returnto === 'main') {

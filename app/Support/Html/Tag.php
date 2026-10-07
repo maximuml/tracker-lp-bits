@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Html;
 
 use App\Support\BBCode;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Comment;
 use App\Support\SearchBox;
 use App\Support\Security;
@@ -291,7 +291,7 @@ final class Tag
      */
     public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
     {
-        $items = SearchBox::itemList(LegacyRedisCache::instance(), $listName, $mode);
+        $items = SearchBox::itemList(NexusCache::instance(), $listName, $mode);
         $chooseOne = __('functions.select_choose_one');
 
         return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);

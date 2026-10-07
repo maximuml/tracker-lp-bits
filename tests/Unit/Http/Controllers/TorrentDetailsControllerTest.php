@@ -8,7 +8,7 @@ use App\Http\Controllers\TorrentDetailsController;
 use App\Repositories\SearchBoxSchemaBuilder;
 use App\Repositories\TagRepository;
 use App\Repositories\TorrentRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CustomField;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,7 +55,7 @@ final class TorrentDetailsControllerTest extends TestCase
     public function test_show_redirects_guest_to_login(): void
     {
         $this->bindRepositories();
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(TorrentDetailsController::class);
         $request = Request::create('/details', 'GET', ['id' => 5]);
@@ -71,7 +71,7 @@ final class TorrentDetailsControllerTest extends TestCase
     public function test_show_redirects_guest_to_login_with_full_url(): void
     {
         $this->bindRepositories();
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(TorrentDetailsController::class);
         $request = Request::create('/details', 'GET', ['id' => 10, 'hit' => 1]);

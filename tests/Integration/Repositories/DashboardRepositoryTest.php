@@ -10,7 +10,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\DashboardRepository;
 use App\Repositories\DashboardStatsRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\RequestContext;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +40,7 @@ final class DashboardRepositoryTest extends TestCase
         DB::table('users')->delete();
         DB::table('categories')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-        $this->repository = new DashboardRepository(new DashboardStatsRepository, app(LegacyRedisCache::class), app(RequestContext::class));
+        $this->repository = new DashboardRepository(new DashboardStatsRepository, app(NexusCache::class), app(RequestContext::class));
     }
 
     public function test_get_system_info_returns_expected_keys(): void

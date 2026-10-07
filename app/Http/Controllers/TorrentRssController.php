@@ -12,7 +12,7 @@ use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Models\SearchBox;
 use App\Services\PermissionChecker;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -39,7 +39,7 @@ class TorrentRssController extends LegacyController
         TorrentRepositoryInterface $torrentRepository,
         TorrentDownloadRepositoryInterface $downloadRepository,
         private readonly CurrentUser $currentUser,
-        private readonly LegacyRedisCache $legacyRedisCache,
+        private readonly NexusCache $cache,
     ) {
         $this->torrentRepository = $torrentRepository;
         $this->downloadRepository = $downloadRepository;
@@ -47,7 +47,7 @@ class TorrentRssController extends LegacyController
 
     public function torrentrss(Request $request): Response
     {
-        $cache = $this->legacyRedisCache;
+        $cache = $this->cache;
         $currentUser = $this->currentUser->get() ?? [];
         $passkey = (string) ($request->input('passkey') ?? $this->currentUser->passkey());
 

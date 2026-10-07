@@ -6,7 +6,7 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Models\Invite;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Input;
@@ -22,7 +22,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         private readonly CurrentUser $currentUser,
         private readonly PageState $pageState,
         private readonly IpLogRepository $ipLogRepository,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
         private readonly UserUpdateBatch $userUpdateBatch,
         private readonly RequestContext $requestContext,
         private readonly Menu $menu = new Menu,
@@ -160,7 +160,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
             SiteConfig::current()->main->showOffer() ? 'yes' : 'no',
             null,
             $user,
-            $this->legacyRedisCache,
+            $this->cache,
             $this->pageState->langDir(),
         );
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\CategoryRepositoryInterface;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Html\SafeHtml;
 
 /**
@@ -45,18 +45,18 @@ final class Category
     /**
      * @return array<string, mixed>|null
      */
-    public static function iconRow(?LegacyRedisCache $cache, int|string $typeId): ?array
+    public static function iconRow(?NexusCache $cache, int|string $typeId): ?array
     {
         $typeId = (int) $typeId ?: 1;
 
         if (self::$iconRows === null) {
-            $cached = $cache !== null ? $cache->get_value('category_icon_content') : false;
+            $cached = $cache !== null ? $cache->get('category_icon_content') : false;
             if ($cached !== false && is_array($cached)) {
                 self::$iconRows = $cached;
             } else {
                 self::$iconRows = self::categoryRepository()->getIconRows();
                 if ($cache !== null) {
-                    $cache->cache_value('category_icon_content', self::$iconRows, 156400);
+                    $cache->put('category_icon_content', self::$iconRows, 156400);
                 }
             }
         }
@@ -71,16 +71,16 @@ final class Category
      *
      * @return array<string, mixed>|null
      */
-    public static function row(?LegacyRedisCache $cache, int|string|null $catId = null): ?array
+    public static function row(?NexusCache $cache, int|string|null $catId = null): ?array
     {
         if (self::$categoryRows === null) {
-            $cached = $cache !== null ? $cache->get_value('category_content') : false;
+            $cached = $cache !== null ? $cache->get('category_content') : false;
             if ($cached !== false && is_array($cached)) {
                 self::$categoryRows = $cached;
             } else {
                 self::$categoryRows = self::categoryRepository()->getCategoryRows();
                 if ($cache !== null) {
-                    $cache->cache_value('category_content', self::$categoryRows, 126400);
+                    $cache->put('category_content', self::$categoryRows, 126400);
                 }
             }
         }
@@ -99,7 +99,7 @@ final class Category
      */
     public static function rowWithContext(int|string|null $catId = null): ?array
     {
-        return self::row(LegacyRedisCache::instance(), $catId);
+        return self::row(NexusCache::instance(), $catId);
     }
 
     /**
@@ -109,7 +109,7 @@ final class Category
      */
     public static function iconRowWithContext(int|string $typeId): ?array
     {
-        return self::iconRow(LegacyRedisCache::instance(), $typeId);
+        return self::iconRow(NexusCache::instance(), $typeId);
     }
 
     /**
@@ -119,7 +119,7 @@ final class Category
      */
     public static function listByModeWithContext(int|string $catmode = 1): array
     {
-        return self::listByMode(LegacyRedisCache::instance(), $catmode);
+        return self::listByMode(NexusCache::instance(), $catmode);
     }
 
     /**
@@ -132,13 +132,13 @@ final class Category
     /**
      * @return array<int, array<string, mixed>>
      */
-    public static function listByMode(?LegacyRedisCache $cache, int|string $catmode = 1): array
+    public static function listByMode(?NexusCache $cache, int|string $catmode = 1): array
     {
         $catmode = (int) $catmode;
         $cacheKey = 'category_list_mode_'.$catmode;
 
         if ($cache !== null) {
-            $ret = $cache->get_value($cacheKey);
+            $ret = $cache->get($cacheKey);
             if ($ret !== false && is_array($ret)) {
                 return $ret;
             }
@@ -147,7 +147,7 @@ final class Category
         $ret = self::categoryRepository()->getCategoriesByMode($catmode);
 
         if ($cache !== null) {
-            $cache->cache_value($cacheKey, $ret, 3600);
+            $cache->put($cacheKey, $ret, 3600);
         }
 
         return $ret;
@@ -200,7 +200,7 @@ final class Category
      */
     public static function secondIconData(array $row): array
     {
-        $cache = LegacyRedisCache::instance();
+        $cache = NexusCache::instance();
         $source = $row['source'] ?? '';
         $medium = $row['medium'] ?? '';
         $codec = $row['codec'] ?? '';
@@ -210,13 +210,13 @@ final class Category
         $mode = $row['search_box_id'] ?? 0;
 
         $cacheKey = 'secondicon_'.$source.'_'.$medium.'_'.$codec.'_'.$standard.'_'.$processing.'_'.$audiocodec.'_content';
-        $sirow = $cache !== null ? $cache->get_value($cacheKey) : false;
+        $sirow = $cache !== null ? $cache->get($cacheKey) : false;
 
         if ($sirow === false) {
             $sirowData = self::categoryRepository()->findSecondIcon($row);
             $sirow = $sirowData ?? 'not allowed';
             if ($cache !== null) {
-                $cache->cache_value($cacheKey, $sirow, 600);
+                $cache->put($cacheKey, $sirow, 600);
             }
         }
 

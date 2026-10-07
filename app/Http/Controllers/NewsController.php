@@ -16,7 +16,7 @@ use App\Http\Resources\NewsResource;
 use App\Models\News;
 use App\Repositories\IndexRepository;
 use App\Repositories\NewsRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Http\SafeReturnUrl;
@@ -29,7 +29,7 @@ class NewsController extends LegacyController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
         private readonly IndexRepository $indexRepository,
         private readonly NewsRepository $newsRepository,
     ) {}
@@ -192,7 +192,7 @@ class NewsController extends LegacyController
 
     private function invalidateNewsCache(): void
     {
-        $this->legacyRedisCache?->delete_value('recent_news', true);
+        $this->cache?->forget('recent_news', true);
         $this->indexRepository->forgetLatestNews(SiteConfig::current()->main->maxNewsNum(5));
     }
 

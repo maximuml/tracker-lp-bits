@@ -6,7 +6,7 @@ namespace App\Support;
 
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -32,14 +32,14 @@ final class PageLayoutContext
 
     /**
      * @param  array<string, mixed>|null  $user  Current user row.
-     * @param  LegacyRedisCache|null  $cache  Legacy Redis cache wrapper.
+     * @param  NexusCache|null  $cache  Legacy Redis cache wrapper.
      * @param  array<string, mixed>  $queryName  Legacy SQL debug query list.
      * @param  int  $defaultStylesheet  Default stylesheet id.
      * @param  array<string, mixed>  $userUpdateSet  Mutable user update set.
      */
     public function __construct(
         public ?array $user,
-        public ?LegacyRedisCache $cache,
+        public ?NexusCache $cache,
         public int $defaultStylesheet,
         public string $langDir,
         public string $siteName,
@@ -106,7 +106,7 @@ final class PageLayoutContext
 
         return new self(
             user: CurrentUser::instance()->get(),
-            cache: LegacyRedisCache::instance(),
+            cache: NexusCache::instance(),
             defaultStylesheet: $main->defStylesheet(0),
             langDir: Locale::currentLangDir(),
             siteName: $basic->siteName(),

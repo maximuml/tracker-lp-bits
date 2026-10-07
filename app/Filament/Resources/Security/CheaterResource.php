@@ -8,7 +8,7 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\Security\CheaterResource\Pages\ListCheaters;
 use App\Models\Cheater;
 use App\Models\User;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Format;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -102,8 +102,8 @@ class CheaterResource extends Resource
                             'dealtwith' => 1,
                             'dealtby' => Auth::id() ?? 0,
                         ]);
-                        $cache = LegacyRedisCache::instance();
-                        $cache?->delete_value('staff_new_cheater_count', true);
+                        $cache = NexusCache::instance();
+                        $cache?->forget('staff_new_cheater_count', true);
                     }),
                 DeleteAction::make(),
             ])
@@ -122,8 +122,8 @@ class CheaterResource extends Resource
                                 'dealtby' => Auth::id() ?? 0,
                             ]);
                         });
-                        $cache = LegacyRedisCache::instance();
-                        $cache?->delete_value('staff_new_cheater_count', true);
+                        $cache = NexusCache::instance();
+                        $cache?->forget('staff_new_cheater_count', true);
                     }),
             ]);
     }

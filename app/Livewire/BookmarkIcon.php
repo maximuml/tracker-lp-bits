@@ -6,7 +6,7 @@ namespace App\Livewire;
 
 use App\Models\User;
 use App\Services\TorrentBookmarkService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\TorrentBookmark;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -37,7 +37,7 @@ final class BookmarkIcon extends Component
         $user = Auth::guard('nexus-web')->user();
         if ($user instanceof User) {
             $this->bookmarked = TorrentBookmark::isBookmarked(
-                LegacyRedisCache::instance(),
+                NexusCache::instance(),
                 (int) $user->id,
                 $torrentId
             );

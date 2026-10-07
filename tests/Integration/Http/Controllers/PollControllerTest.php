@@ -10,7 +10,7 @@ use App\Http\Requests\PollUpdateRequest;
 use App\Http\Requests\PollVoteRequest;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
@@ -122,9 +122,9 @@ final class PollControllerTest extends TestCase
         $indexRepo->shouldReceive('recordPollVote')->once()->with($poll->id, 999, 0);
         app()->instance(IndexRepository::class, $indexRepo);
 
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('delete_value')->twice();
-        app()->instance(LegacyRedisCache::class, $cache);
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('forget')->twice();
+        app()->instance(NexusCache::class, $cache);
 
         $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
@@ -156,9 +156,9 @@ final class PollControllerTest extends TestCase
         $indexRepo->shouldReceive('recordPollVote')->once()->with($poll->id, 998, 255);
         app()->instance(IndexRepository::class, $indexRepo);
 
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('delete_value')->twice();
-        app()->instance(LegacyRedisCache::class, $cache);
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('forget')->twice();
+        app()->instance(NexusCache::class, $cache);
 
         $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
@@ -266,14 +266,14 @@ final class PollControllerTest extends TestCase
         $indexRepo->shouldReceive('recordPollVote')->once();
         app()->instance(IndexRepository::class, $indexRepo);
 
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('delete_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('forget')
             ->with('current_poll_content')
             ->once();
-        $cache->shouldReceive('delete_value')
+        $cache->shouldReceive('forget')
             ->with('current_poll_result', true)
             ->once();
-        app()->instance(LegacyRedisCache::class, $cache);
+        app()->instance(NexusCache::class, $cache);
 
         $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [

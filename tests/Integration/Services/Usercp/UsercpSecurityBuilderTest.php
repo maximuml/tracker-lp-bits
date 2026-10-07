@@ -126,8 +126,7 @@ final class UsercpSecurityBuilderTest extends TestCase
         foreach ($sentences as $flag => $sentence) {
             $this->bindRequest([$flag => '1']);
             $msg = $this->builder()->build(['id' => 1], '')->savedMessage;
-            $this->assertStringContainsString($base, $msg);
-            $this->assertStringContainsString($sentence, $msg);
+            $this->assertSame($base.' '.$sentence, $msg);
         }
     }
 

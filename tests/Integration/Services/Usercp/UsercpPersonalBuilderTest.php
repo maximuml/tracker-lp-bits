@@ -83,6 +83,10 @@ final class UsercpPersonalBuilderTest extends TestCase
 
         $this->assertTrue($checked['notifs[topic_reply]']);
         $this->assertFalse($checked['notifs[hr_reached]']);
+
+        $labels = array_column($s->notifCheckboxes, 'label', 'name');
+        $this->assertSame((string) __('usercp.checkbox_pm_on_topic_reply'), $labels['notifs[topic_reply]']);
+        $this->assertSame((string) __('usercp.checkbox_pm_on_hr_reached'), $labels['notifs[hr_reached]']);
     }
 
     public function test_null_notifs_checks_everything(): void
@@ -103,6 +107,7 @@ final class UsercpPersonalBuilderTest extends TestCase
         $s = $this->section();
 
         $this->assertArrayHasKey('0', $s->countryOptions);
+        $this->assertSame('---- '.__('usercp.select_none_selected').' ----', $s->countryOptions['0']);
         $this->assertSame('Testland ZZ', $s->countryOptions[(string) $countryId]);
         $this->assertSame('zzgallery', $s->bitbucketOptions['http://test.com/bitbucket/zzgallery']);
         $this->assertArrayNotHasKey('http://test.com/bitbucket/zzhidden', $s->bitbucketOptions);

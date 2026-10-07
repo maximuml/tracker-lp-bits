@@ -51,7 +51,7 @@ final class UsercpTrackerBuilder
         $currentTheme = UserTheme::fromStringSafe(is_string($curUser['theme'] ?? null) ? $curUser['theme'] : null)->value;
         $themeOptions = [];
         foreach (UserTheme::cases() as $theme) {
-            $themeOptions[$theme->value] = (string) __('legacy/usercp.select_theme_'.$theme->value);
+            $themeOptions[$theme->value] = (string) __('usercp.select_theme_'.$theme->value);
         }
 
         $stylesheetOptions = [];

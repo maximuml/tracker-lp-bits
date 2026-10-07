@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Listeners\ResetNexus;
-use App\Support\LegacyHeaderBag;
+use App\Support\HeaderBag;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -13,7 +13,7 @@ use Tests\TestCase;
 /**
  * Cross-request isolation tests for the legacy header bag.
  *
- * Verifies that headers and status codes set via LegacyHeaderBag
+ * Verifies that headers and status codes set via HeaderBag
  * do not leak from one request to the next under Octane-style
  * sequential request handling.
  */
@@ -36,7 +36,7 @@ final class LegacyHeaderIsolationTest extends TestCase
 
     public function test_header_does_not_leak_between_requests(): void
     {
-        $bag = app(LegacyHeaderBag::class);
+        $bag = app(HeaderBag::class);
 
         // Request A: set a Location header
         $bag->set('Location', '/index.php');
@@ -51,7 +51,7 @@ final class LegacyHeaderIsolationTest extends TestCase
 
     public function test_status_code_does_not_leak_between_requests(): void
     {
-        $bag = app(LegacyHeaderBag::class);
+        $bag = app(HeaderBag::class);
 
         // Request A: set a 503 status code
         $bag->setStatusCode(503);
@@ -66,7 +66,7 @@ final class LegacyHeaderIsolationTest extends TestCase
 
     public function test_content_type_header_does_not_leak_between_requests(): void
     {
-        $bag = app(LegacyHeaderBag::class);
+        $bag = app(HeaderBag::class);
 
         // Request A: set Content-Type (e.g. from ImageCaptchaDriver)
         $bag->set('Content-Type', 'image/png');
@@ -81,7 +81,7 @@ final class LegacyHeaderIsolationTest extends TestCase
 
     public function test_multiple_headers_cleared_between_requests(): void
     {
-        $bag = app(LegacyHeaderBag::class);
+        $bag = app(HeaderBag::class);
 
         // Request A: set multiple headers + status
         $bag->set('Location', '/redirect');
@@ -101,7 +101,7 @@ final class LegacyHeaderIsolationTest extends TestCase
 
     public function test_alternating_requests_no_leak(): void
     {
-        $bag = app(LegacyHeaderBag::class);
+        $bag = app(HeaderBag::class);
 
         // Simulate alternating requests with different headers
         $sequence = [
@@ -140,7 +140,7 @@ final class LegacyHeaderIsolationTest extends TestCase
 
     public function test_consecutive_resets_are_idempotent(): void
     {
-        $bag = app(LegacyHeaderBag::class);
+        $bag = app(HeaderBag::class);
 
         $bag->set('Location', '/test');
         $bag->setStatusCode(302);
@@ -166,6 +166,6 @@ final class LegacyHeaderIsolationTest extends TestCase
      */
     private function resetState(): void
     {
-        app(LegacyHeaderBag::class)->flush();
+        app(HeaderBag::class)->flush();
     }
 }

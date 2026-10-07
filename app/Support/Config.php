@@ -19,7 +19,7 @@ final class Config
 
     public static function get(string $key, mixed $default = null): mixed
     {
-        if (! LegacyRuntime::instance()->isLegacy()) {
+        if (! RuntimeContext::instance()->isLegacy()) {
             return config($key, $default);
         }
 

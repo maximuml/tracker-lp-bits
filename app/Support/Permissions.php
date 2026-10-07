@@ -99,13 +99,13 @@ final class Permissions
     private static function permissionFail(string $log, string $permission = ''): bool
     {
         Logger::writeWithContext("$log, [FAIL]");
-        $runtime = LegacyRuntime::instance();
+        $runtime = RuntimeContext::instance();
         if ($runtime->isLegacy() && ! $runtime->isTracker()) {
             $requireClass = SiteConfig::current()->authority->permission($permission);
             if ($requireClass !== null && isset(User::$classes[$requireClass])) {
-                LegacyResponse::abort(__('functions.std_sorry'), __('functions.std_permission_denied_only').UserClass::name($requireClass, false, true, true).__('functions.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => SiteConfig::current()->basic->siteName()])->render(), false);
+                PageResponses::abort(__('functions.std_sorry'), __('functions.std_permission_denied_only').UserClass::name($requireClass, false, true, true).__('functions.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => SiteConfig::current()->basic->siteName()])->render(), false);
             } else {
-                LegacyResponse::abort(__('functions.std_error'), __('functions.std_permission_denied'));
+                PageResponses::abort(__('functions.std_error'), __('functions.std_permission_denied'));
             }
         }
 

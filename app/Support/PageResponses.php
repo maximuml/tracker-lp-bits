@@ -14,20 +14,19 @@ use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Temporary Phase 5 migration shim for legacy error / gate helpers.
+ * Page-level error / gate response helpers.
  *
- * The procedural helpers
+ * The procedural helpers these methods replace
  *
- *   - `stderr()`          legacy error page with stdhead/stdfoot/die
+ *   - `stderr()`          error page with stdhead/stdfoot/die
  *   - `permissiondenied()`  permission-denied error page
  *   - `int_check()`       positive-integer validation that aborts on failure
  *   - `user_can_upload()` upload permission gate that aborts on deny-limit
  *
- * are collected here because they all share the same side-effect contract
- * (stdhead, stdfoot, die / HttpResponseException). They will be dissolved
- * into context-appropriate services once the legacy bootstrap is gone.
+ * share the same side-effect contract (stdhead, stdfoot, die /
+ * HttpResponseException) and are collected here for that reason.
  */
-final class LegacyResponse
+final class PageResponses
 {
     /**
      * Render a legacy error page and stop execution.
@@ -239,7 +238,7 @@ final class LegacyResponse
             $url = Url::schemeAndHost().'/'.trim($url, '/');
         }
 
-        // T-11: Use LegacyHeaderBag instead of SAPI headers_sent() to avoid
+        // T-11: Use HeaderBag instead of SAPI headers_sent() to avoid
         // cross-request state leakage under Octane. If output has already
         // been emitted (ob_get_level() > 0 with content), use a JS redirect.
         if (ob_get_level() > 0 && (string) ob_get_status()['name'] !== '') {

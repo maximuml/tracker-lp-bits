@@ -72,7 +72,7 @@ final class Api
             $results['recordsFiltered'] = $count;
         }
 
-        if (! LegacyRuntime::instance()->isLegacy() && Config::get('app.debug')) {
+        if (! RuntimeContext::instance()->isLegacy() && Config::get('app.debug')) {
             $results['queries'] = QueryLog::all();
         }
 

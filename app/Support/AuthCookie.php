@@ -369,7 +369,7 @@ final class AuthCookie
     {
         $isAjax = RequestContext::instance()->isAjax();
         $selfEnableBonus = SiteConfig::current()->bonus->selfEnable();
-        $shouldIgnoreEnabled = LegacyRuntime::instance()->isLegacy() && ! $isAjax && $selfEnableBonus > 0;
+        $shouldIgnoreEnabled = RuntimeContext::instance()->isLegacy() && ! $isAjax && $selfEnableBonus > 0;
 
         if ($isArray) {
             $row = self::authRepository()->findUserArrayForCookie($id, $shouldIgnoreEnabled);

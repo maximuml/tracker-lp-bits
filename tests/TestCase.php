@@ -5,8 +5,8 @@ namespace Tests;
 use App\Models\User;
 use App\Support\AuthCookie;
 use App\Support\DestructiveEnvironmentGuard;
-use App\Support\LegacyRuntime;
 use App\Support\Permissions;
+use App\Support\RuntimeContext;
 use App\Support\Settings;
 use App\Support\UserDisplay;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -33,7 +33,7 @@ abstract class TestCase extends BaseTestCase
         // requests. bootEntry() sets the entry default so the flag survives
         // reset() inside the test (e.g. job lifecycle listeners).
         if (getenv('NEXUS_LEGACY_CONTEXT') === '1') {
-            $this->app->make(LegacyRuntime::class)->bootEntry(true);
+            $this->app->make(RuntimeContext::class)->bootEntry(true);
         }
 
         // Reset the static settings cache between tests so that changes

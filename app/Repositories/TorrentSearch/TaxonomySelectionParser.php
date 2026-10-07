@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\TorrentSearch;
 
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 
 /**
  * Resolve taxonomy selections (category + sub-taxonomies) from explicit
@@ -135,31 +135,31 @@ final class TaxonomySelectionParser
             }
             // when one clicked the cat, source, etc. name/image
             elseif ($category_get) {
-                LegacyResponse::assertId($category_get, true, true);
+                PageResponses::assertId($category_get, true, true);
                 $wherecatina[] = $category_get;
                 $addparam .= "cat=$category_get&";
             } elseif ($medium_get) {
-                LegacyResponse::assertId($medium_get, true, true);
+                PageResponses::assertId($medium_get, true, true);
                 $wheremediumina[] = $medium_get;
                 $addparam .= "medium=$medium_get&";
             } elseif ($source_get) {
-                LegacyResponse::assertId($source_get, true, true);
+                PageResponses::assertId($source_get, true, true);
                 $wheresourceina[] = $source_get;
                 $addparam .= "source=$source_get&";
             } elseif ($codec_get) {
-                LegacyResponse::assertId($codec_get, true, true);
+                PageResponses::assertId($codec_get, true, true);
                 $wherecodecina[] = $codec_get;
                 $addparam .= "codec=$codec_get&";
             } elseif ($standard_get) {
-                LegacyResponse::assertId($standard_get, true, true);
+                PageResponses::assertId($standard_get, true, true);
                 $wherestandardina[] = $standard_get;
                 $addparam .= "standard=$standard_get&";
             } elseif ($processing_get) {
-                LegacyResponse::assertId($processing_get, true, true);
+                PageResponses::assertId($processing_get, true, true);
                 $whereprocessingina[] = $processing_get;
                 $addparam .= "processing=$processing_get&";
             } elseif ($audiocodec_get) {
-                LegacyResponse::assertId($audiocodec_get, true, true);
+                PageResponses::assertId($audiocodec_get, true, true);
                 $whereaudiocodecina[] = $audiocodec_get;
                 $addparam .= "audiocodec=$audiocodec_get&";
             } else { // select and go

@@ -6,8 +6,8 @@ namespace App\Exceptions;
 
 use App\Http\Responses\ProblemDetails;
 use App\Support\Api;
-use App\Support\LegacyResponse;
 use App\Support\Logger;
+use App\Support\PageResponses;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -84,7 +84,7 @@ class Handler extends ExceptionHandler
                 return response()->json(Api::failWithContext($e->getMessage(), []), 403);
             }
             try {
-                LegacyResponse::permissionDenied();
+                PageResponses::permissionDenied();
             } catch (HttpResponseException $hre) {
                 return $hre->getResponse();
             }

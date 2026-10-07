@@ -14,6 +14,7 @@ use App\Repositories\UserAccountRepository;
 use App\Services\MessageMailboxService;
 use App\Services\MessageService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -139,7 +140,7 @@ final class MessageServiceTest extends TestCase
 
     /**
      * Call the service while suppressing E_NOTICE/E_WARNING from the
-     * legacy rendering system triggered by LegacyResponse::abort().
+     * legacy rendering system triggered by PageResponses::abort().
      */
     private function callService(callable $callback): mixed
     {
@@ -155,7 +156,7 @@ final class MessageServiceTest extends TestCase
     }
 
     /**
-     * Assert that calling the service throws (LegacyResponse::abort or
+     * Assert that calling the service throws (PageResponses::abort or
      * any Throwable from the legacy rendering system).
      */
     private function assertServiceThrows(callable $callback): void
@@ -167,6 +168,26 @@ final class MessageServiceTest extends TestCase
             $threw = true;
         }
         $this->assertTrue($threw, 'Expected exception was not thrown');
+    }
+
+    /**
+     * Assert the service aborts with the rendered page — pins the abort
+     * site: a removed guard falls into a downstream abort with different
+     * text, or a non-HttpResponseException error.
+     */
+    private function assertServiceAborts(callable $callback, string ...$needles): void
+    {
+        try {
+            $this->callService($callback);
+            $this->fail('Expected HttpResponseException');
+        } catch (HttpResponseException $e) {
+            $html = (string) $e->getResponse()->getContent();
+            foreach ($needles as $needle) {
+                $this->assertStringContainsString(e($needle), $html);
+            }
+        } catch (\Throwable $e) {
+            $this->fail('Expected HttpResponseException, got '.$e::class);
+        }
     }
 
     // ─── Instantiation ────────────────────────────────────────────────
@@ -207,7 +228,9 @@ final class MessageServiceTest extends TestCase
             'body' => 'Hello',
         ]);
 
-        $this->assertServiceThrows(fn () => $this->service->takeMessage($request));
+        // 'Permission Denied!' pins the unauthenticated abort — removing it
+        // falls into the nonexistent-recipient abort instead.
+        $this->assertServiceAborts(fn () => $this->service->takeMessage($request), 'Permission Denied!');
     }
 
     public function test_take_message_rejects_zero_receiver(): void
@@ -266,7 +289,9 @@ final class MessageServiceTest extends TestCase
             'subject' => 'Test',
         ]);
 
-        $this->assertServiceThrows(fn () => $this->service->takeMessage($request));
+        // 'This account is parked.' pins the parked-recipient abort —
+        // removing it falls into the acceptpms refusal branches instead.
+        $this->assertServiceAborts(fn () => $this->service->takeMessage($request), 'This account is parked.');
     }
 
     public function test_take_message_rejects_recipient_blocking_all_pms(): void
@@ -385,7 +410,9 @@ final class MessageServiceTest extends TestCase
             'type' => 'in',
         ]);
 
-        $this->assertServiceThrows(fn () => $this->service->deletemessage($request));
+        // 'Bad message ID' pins the unauthenticated abort — removing it
+        // falls into the not-suggested abort for the missing message.
+        $this->assertServiceAborts(fn () => $this->service->deletemessage($request), 'Bad message ID');
     }
 
     public function test_delete_message_inbox_deletes_message(): void

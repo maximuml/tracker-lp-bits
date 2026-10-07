@@ -10,7 +10,7 @@ use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumPageService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\PageState;
 use App\Support\Settings;
@@ -112,23 +112,23 @@ final class ForumPageServiceTest extends TestCase
 
     private function mockCache(): void
     {
-        /** @var LegacyRedisCache&MockInterface $cache */
-        $cache = Mockery::mock(LegacyRedisCache::class);
+        /** @var NexusCache&MockInterface $cache */
+        $cache = Mockery::mock(NexusCache::class);
         $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('cache_value')->andReturn(true);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $this->app->instance(LegacyRedisCache::class, $cache);
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('put')->andReturn(true);
+        $cache->shouldReceive('forget')->andReturn(true);
+        $this->app->instance(NexusCache::class, $cache);
         $this->rebuildService(null, $cache);
     }
 
-    private function rebuildService(?ForumRepository $repo = null, ?LegacyRedisCache $cache = null): void
+    private function rebuildService(?ForumRepository $repo = null, ?NexusCache $cache = null): void
     {
         if ($repo !== null) {
             $this->app->instance(ForumRepository::class, $repo);
         }
         if ($cache !== null) {
-            $this->app->instance(LegacyRedisCache::class, $cache);
+            $this->app->instance(NexusCache::class, $cache);
         }
     }
 

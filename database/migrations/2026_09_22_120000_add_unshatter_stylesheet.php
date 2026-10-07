@@ -1,6 +1,6 @@
 <?php
 
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +30,7 @@ return new class extends Migration
         // 'stylesheet_content' cache — drop it so the new pack is visible
         // immediately. Redis may legitimately be down during a migration.
         try {
-            app(LegacyRedisCache::class)->delete_value('stylesheet_content');
+            app(NexusCache::class)->forget('stylesheet_content');
         } catch (Throwable) {
             // non-critical: the entry expires on its own
         }
@@ -43,7 +43,7 @@ return new class extends Migration
         DB::table('stylesheets')->where('uri', 'styles/Unshatter/')->delete();
 
         try {
-            app(LegacyRedisCache::class)->delete_value('stylesheet_content');
+            app(NexusCache::class)->forget('stylesheet_content');
         } catch (Throwable) {
             // non-critical: the entry expires on its own
         }

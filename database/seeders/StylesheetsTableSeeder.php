@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -42,7 +42,7 @@ class StylesheetsTableSeeder extends Seeder
         // 'stylesheet_content' cache — drop it after the rewrite so a blob
         // cached before seeding does not hide the re-inserted rows.
         try {
-            app(LegacyRedisCache::class)->delete_value('stylesheet_content');
+            app(NexusCache::class)->forget('stylesheet_content');
         } catch (\Throwable) {
             // non-critical: the entry expires on its own
         }

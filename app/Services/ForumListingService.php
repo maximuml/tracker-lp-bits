@@ -7,7 +7,7 @@ namespace App\Services;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Enums\UserTimeType;
 use App\Repositories\TopicRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Forum;
@@ -39,7 +39,7 @@ final class ForumListingService
 {
     public function __construct(
         private readonly ForumIndexService $index,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
         private readonly TopicRepository $topicRepository,
         private readonly PostRepositoryInterface $postRepository,
     ) {}
@@ -95,7 +95,7 @@ final class ForumListingService
         $topicIds = $topicRows->map(fn ($topic) => (int) $topic->id)->all();
         $cachedCounts = $topicIds === []
             ? []
-            : ($this->legacyRedisCache?->get_values(array_map(fn ($id) => 'topic_'.$id.'_post_count', $topicIds)) ?? []);
+            : ($this->cache?->getMany(array_map(fn ($id) => 'topic_'.$id.'_post_count', $topicIds)) ?? []);
         foreach ($topicIds as $topicid) {
             $cached = $cachedCounts['topic_'.$topicid.'_post_count'] ?? false;
             if ($cached !== false) {
@@ -107,7 +107,7 @@ final class ForumListingService
         if ($uncachedTopicIds !== []) {
             $postCounts += $this->postRepository->countTopicPostsBatch($uncachedTopicIds);
             foreach ($uncachedTopicIds as $topicid) {
-                $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $postCounts[$topicid] ?? 0, 3600);
+                $this->cache?->put('topic_'.$topicid.'_post_count', $postCounts[$topicid] ?? 0, 3600);
             }
         }
 
@@ -122,7 +122,7 @@ final class ForumListingService
         }
         $postRows = $postIds === []
             ? []
-            : ($this->legacyRedisCache?->get_values(array_map(fn ($id) => 'post_'.$id.'_content', array_values(array_unique($postIds)))) ?? []);
+            : ($this->cache?->getMany(array_map(fn ($id) => 'post_'.$id.'_content', array_values(array_unique($postIds)))) ?? []);
         $resolvePost = static function (int $postId) use ($postRows): array {
             $row = $postRows['post_'.$postId.'_content'] ?? false;
             if (! is_array($row)) {
@@ -140,7 +140,7 @@ final class ForumListingService
         }
         $renderedTt = $ttKeys === []
             ? []
-            : ($this->legacyRedisCache?->get_values(array_values(array_unique($ttKeys))) ?? []);
+            : ($this->cache?->getMany(array_values(array_unique($ttKeys))) ?? []);
         $renderTt = function (string $body) use (&$renderedTt): string {
             $truncated = self::tooltipText($body);
             $key = 'fmt_tt_'.md5($truncated);
@@ -149,7 +149,7 @@ final class ForumListingService
                 return $hit;
             }
             $html = (string) Format::formatComment($truncated, true, false, false, true, 600, false, false);
-            $this->legacyRedisCache?->cache_value($key, $html, 86400);
+            $this->cache?->put($key, $html, 86400);
             $renderedTt[$key] = $html;
 
             return $html;

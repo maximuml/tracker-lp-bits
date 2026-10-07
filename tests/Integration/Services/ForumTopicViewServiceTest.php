@@ -15,7 +15,7 @@ use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumIndexService;
 use App\Services\ForumTopicViewService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\PageState;
 use App\ViewModels\Forum\ViewTopicViewModel;
@@ -69,7 +69,7 @@ final class ForumTopicViewServiceTest extends TestCase
             $this->app->make(CurrentUser::class),
             $this->app->make(ForumRepository::class),
             new OverforumRepository,
-            $this->app->make(LegacyRedisCache::class),
+            $this->app->make(NexusCache::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),
             $this->app->make(PostRepository::class),
@@ -77,7 +77,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->service = new ForumTopicViewService(
             $indexService,
             $this->app->make(ForumRepository::class),
-            $this->app->make(LegacyRedisCache::class),
+            $this->app->make(NexusCache::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),
             $this->app->make(PostRepository::class),
@@ -128,20 +128,20 @@ final class ForumTopicViewServiceTest extends TestCase
 
     private function mockCache(): void
     {
-        /** @var LegacyRedisCache&MockInterface $cache */
-        $cache = Mockery::mock(LegacyRedisCache::class);
+        /** @var NexusCache&MockInterface $cache */
+        $cache = Mockery::mock(NexusCache::class);
         $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('cache_value')->andReturn(true);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $this->app->instance(LegacyRedisCache::class, $cache);
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('put')->andReturn(true);
+        $cache->shouldReceive('forget')->andReturn(true);
+        $this->app->instance(NexusCache::class, $cache);
         $this->rebuildService(null, $cache);
     }
 
-    private function rebuildService(?ForumRepository $repo = null, ?LegacyRedisCache $cache = null): void
+    private function rebuildService(?ForumRepository $repo = null, ?NexusCache $cache = null): void
     {
         $forumRepo = $repo ?? $this->app->make(ForumRepository::class);
-        $cacheInstance = $cache ?? $this->app->make(LegacyRedisCache::class);
+        $cacheInstance = $cache ?? $this->app->make(NexusCache::class);
 
         $indexService = new ForumIndexService(
             $this->app->make(CurrentUser::class),
@@ -670,5 +670,271 @@ final class ForumTopicViewServiceTest extends TestCase
 
         $this->assertSame(__('forums.text_view_all_posts'), $vm->posts[0]->authorToggleLabel);
         $this->assertSame('?action=viewtopic&topicid=1', $vm->posts[0]->authorToggleUrl);
+    }
+
+    public function test_viewtopic_cache_key_and_ttl_contract(): void
+    {
+        $repo = $this->mockForumRepo();
+        $curUser = ['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+            'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes', 'last_catchup' => 0];
+        $userId = $this->setUser($curUser);
+        $this->setRequest(['topicid' => 1]);
+        $this->createDbUser($userId);
+
+        $puts = [];
+        $getManys = [];
+        $forgets = [];
+        /** @var NexusCache&MockInterface $cache */
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldIgnoreMissing();
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('getMany')->andReturnUsing(function (array $keys) use (&$getManys) {
+            $getManys[] = $keys;
+
+            return [];
+        });
+        $cache->shouldReceive('put')->andReturnUsing(function (string $key, $value, int $ttl) use (&$puts) {
+            $puts[] = [$key, $value, $ttl];
+
+            return true;
+        });
+        $cache->shouldReceive('forget')->andReturnUsing(function (string $key) use (&$forgets) {
+            $forgets[] = $key;
+
+            return true;
+        });
+        $this->rebuildService(null, $cache);
+
+        $topic = new Topic;
+        $topic->id = 1;
+        $topic->setAttribute('userid', $userId);
+        $topic->subject = 'Test Topic';
+        $topic->locked = false;
+        $topic->forumid = 1;
+        $topic->sticky = false;
+        $topic->hlcolor = 0;
+        $topic->views = 5;
+
+        $makePost = static function (int $id, int $authorId, string $body): Post {
+            $post = new Post;
+            $post->id = $id;
+            $post->topicid = 1;
+            $post->setAttribute('userid', $authorId);
+            $post->added = Carbon::parse('2024-01-01 12:00:00');
+            $post->body = $body;
+            $post->editedby = 0;
+
+            return $post;
+        };
+        $posts = new EloquentCollection([
+            $makePost(1, $userId, 'same body'),
+            $makePost(2, $userId, 'same body'),
+            $makePost(3, 888, 'different body'),
+        ]);
+
+        $makeUser = static function (int $id): User {
+            $user = new User;
+            $user->id = $id;
+            $user->username = 'user'.$id;
+            $user->class = 10;
+            $user->enabled = true;
+            $user->donor = false;
+            $user->leechwarn = false;
+            $user->warned = false;
+            $user->avatar = '';
+            $user->signature = '';
+            $user->uploaded = 0;
+            $user->downloaded = 0;
+            $user->last_access = '2024-01-01 00:00:00';
+            $user->title = '';
+
+            return $user;
+        };
+
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn($topic);
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0],
+        ]);
+        $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(7);
+        $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn($posts);
+        $repo->shouldReceive('getUsersByIds')->andReturn(new EloquentCollection([$userId => $makeUser($userId), 888 => $makeUser(888)]));
+        $this->postRepo->shouldReceive('countUserPostsBatch')->with([$userId, 888])->andReturn([$userId => 42]);
+        $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
+        $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn([1 => 0]);
+        $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
+
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
+            $curUser,
+            $userId,
+            Request::create('/forums.php', 'GET', ['topicid' => 1]),
+            10,
+        ));
+
+        $this->assertInstanceOf(ViewTopicViewModel::class, $result);
+        $this->assertSame(42, $result->posts[0]->postCount);
+        $this->assertSame(0, $result->posts[2]->postCount);
+        $this->assertContains(['topic_1_post_count', 7, 3600], $puts);
+        $this->assertContains(['user_'.$userId.'_post_count', 42, 3600], $puts);
+        $this->assertContains(['user_888_post_count', 0, 3600], $puts);
+        $fmtPuts = array_values(array_filter($puts, fn (array $p): bool => str_starts_with($p[0], 'fmt_post_')));
+        $this->assertCount(2, $fmtPuts);
+        foreach ($fmtPuts as $p) {
+            $this->assertSame(86400, $p[2]);
+            $this->assertIsString($p[1]);
+        }
+        $this->assertSame('fmt_post_'.md5('same body'), $fmtPuts[0][0]);
+        $this->assertSame('fmt_post_'.md5('different body'), $fmtPuts[1][0]);
+        $this->assertContains(['user_'.$userId.'_post_count', 'user_888_post_count'], $getManys);
+        $this->assertContains(['fmt_post_'.md5('same body'), 'fmt_post_'.md5('different body')], $getManys);
+        $this->assertContains('user_'.$userId.'_last_read_post_list', $forgets);
+    }
+
+    public function test_viewtopic_forgets_user_zero_key_when_curuser_id_missing(): void
+    {
+        $repo = $this->mockForumRepo();
+        $curUser = ['username' => 'noid', 'class' => 10, 'forumpost' => 'yes',
+            'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes', 'last_catchup' => 0];
+        $userId = $this->setUser($curUser + ['id' => 999]);
+        $this->setRequest(['topicid' => 1]);
+        $this->createDbUser($userId);
+
+        $forgets = [];
+        /** @var NexusCache&MockInterface $cache */
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldIgnoreMissing();
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('getMany')->andReturn([]);
+        $cache->shouldReceive('put')->andReturn(true);
+        $cache->shouldReceive('forget')->andReturnUsing(function (string $key) use (&$forgets) {
+            $forgets[] = $key;
+
+            return true;
+        });
+        $this->rebuildService(null, $cache);
+
+        $topic = new Topic;
+        $topic->id = 1;
+        $topic->setAttribute('userid', $userId);
+        $topic->subject = 'Test Topic';
+        $topic->locked = false;
+        $topic->forumid = 1;
+        $topic->sticky = false;
+        $topic->hlcolor = 0;
+        $topic->views = 5;
+
+        $post = new Post;
+        $post->id = 1;
+        $post->topicid = 1;
+        $post->setAttribute('userid', $userId);
+        $post->added = Carbon::parse('2024-01-01 12:00:00');
+        $post->body = 'Hello world';
+        $post->editedby = 0;
+
+        $user = new User;
+        $user->id = $userId;
+        $user->username = 'user'.$userId;
+        $user->class = 10;
+        $user->enabled = true;
+        $user->donor = false;
+        $user->leechwarn = false;
+        $user->warned = false;
+        $user->avatar = '';
+        $user->signature = '';
+        $user->uploaded = 0;
+        $user->downloaded = 0;
+        $user->last_access = '2024-01-01 00:00:00';
+        $user->title = '';
+
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn($topic);
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0],
+        ]);
+        $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(1);
+        $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection([$post]));
+        $repo->shouldReceive('getUsersByIds')->andReturn(new EloquentCollection([$userId => $user]));
+        $this->postRepo->shouldReceive('countUserPostsBatch')->with([$userId])->andReturn([$userId => 1]);
+        $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
+        $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn([1 => 0]);
+        $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
+
+        $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
+            $curUser,
+            $userId,
+            Request::create('/forums.php', 'GET', ['topicid' => 1]),
+            10,
+        ));
+
+        $this->assertContains('user_0_last_read_post_list', $forgets);
+    }
+
+    public function test_viewtopic_runs_with_null_cache(): void
+    {
+        $repo = $this->mockForumRepo();
+        $curUser = ['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+            'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes', 'last_catchup' => 0];
+        $userId = $this->setUser($curUser);
+        $this->setRequest(['topicid' => 1]);
+        $this->createDbUser($userId);
+
+        $indexService = new ForumIndexService(
+            $this->app->make(CurrentUser::class),
+            $repo,
+            new OverforumRepository,
+            $this->app->make(NexusCache::class),
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
+        );
+        $service = new ForumTopicViewService(
+            $indexService,
+            $repo,
+            null,
+            $this->app->make(TopicRepository::class),
+            $this->app->make(TopicReadStateRepository::class),
+            $this->app->make(PostRepository::class),
+        );
+
+        $topic = new Topic;
+        $topic->id = 1;
+        $topic->setAttribute('userid', $userId);
+        $topic->subject = 'Test Topic';
+        $topic->locked = false;
+        $topic->forumid = 1;
+        $topic->sticky = false;
+        $topic->hlcolor = 0;
+        $topic->views = 5;
+
+        $post = new Post;
+        $post->id = 1;
+        $post->topicid = 1;
+        $post->setAttribute('userid', $userId);
+        $post->added = Carbon::parse('2024-01-01 12:00:00');
+        $post->body = 'Hello world';
+        $post->editedby = 0;
+
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn($topic);
+        $repo->shouldReceive('getForumsList')->andReturn([
+            1 => ['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0],
+        ]);
+        $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, null)->andReturn(1);
+        $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection([$post]));
+        $repo->shouldReceive('getUsersByIds')->andReturn(new EloquentCollection);
+        $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
+        $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn(null);
+        $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
+
+        $result = $this->callWithSuppressedErrors(fn () => $service->buildViewTopic(
+            $curUser,
+            $userId,
+            Request::create('/forums.php', 'GET', ['topicid' => 1]),
+            10,
+        ));
+
+        $this->assertInstanceOf(ViewTopicViewModel::class, $result);
+        $this->assertCount(1, $result->posts);
+        $this->assertStringContainsString('Hello world', (string) $result->posts[0]->body);
     }
 }

@@ -69,13 +69,6 @@ return [
         ]) : [],
     ],
 
-    'redis' => [
-        'host' => Env::get('REDIS_HOST', '127.0.0.1'),
-        'port' => (int) Env::get('REDIS_PORT', 6379),
-        'database' => Env::get('REDIS_DB', 0),
-        'password' => Env::get('REDIS_PASSWORD', null),
-    ],
-
     'meilisearch' => [
         'scheme' => Env::get('MEILISEARCH_SCHEME', 'http'),
         'host' => Env::get('MEILISEARCH_HOST', 'meilisearch'),

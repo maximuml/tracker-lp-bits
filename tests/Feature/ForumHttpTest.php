@@ -194,8 +194,8 @@ final class ForumHttpTest extends TestCase
         ]);
         $post = Post::factory()->topic($topic)->author($user)->create();
         $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
-        // forums_list is cached for a day in LegacyRedisCache's own
-        // connection (nexus.redis.database), not the Laravel Redis DB.
+        // forums_list is cached for a day in LegacyRedisCache (the
+        // default Redis connection / REDIS_DB keyspace).
         app(LegacyRedisCache::class)->redis?->flushDB();
 
         $response = $this->withNexusCookie($user)

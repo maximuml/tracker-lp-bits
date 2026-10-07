@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace App\Support\Cache;
 
-use App\Support\Config;
-use App\Support\Environment;
-use App\Support\Logger;
 use App\Support\RedisGuard;
+use Illuminate\Support\Facades\Redis;
 
 class LegacyRedisCache
 {
     public bool $isEnabled = false;
 
     public int $clearCache = 0;
-
-    public string $language = 'en';
 
     public int $cacheReadTimes = 0;
 
@@ -36,83 +32,21 @@ class LegacyRedisCache
 
     public function __construct()
     {
-        $connectResult = $this->connect(); // Connect to Redis
-        if ($connectResult) {
-            $this->isEnabled = true;
-        } else {
-            $this->isEnabled = false;
-        }
-    }
-
-    private function connect(): bool
-    {
         // Skip the connection attempt entirely while the shared breaker is
         // open — a dead Redis costs ~5-10s of DNS/connect stalls otherwise.
         if (! RedisGuard::available()) {
-            $this->isEnabled = false;
-
-            return false;
-        }
-        $config = Config::get('nexus.redis', null);
-        $redis = new \Redis;
-        $params = [
-            $config['host'],
-        ];
-        if (! empty($config['port'])) {
-            $params[] = $config['port'];
-        }
-        if (isset($config['timeout']) && is_numeric($config['timeout'])) {
-            $params[] = $config['timeout'];
-        }
-        if (Environment::isFpm()) {
-            try {
-                $connectResult = $redis->pconnect(...$params);
-            } catch (\Exception $e) {
-                Logger::writeWithContext((string) "redis pconnect failed: {$e->getMessage()}, retry one time", (string) 'error', (bool) false);
-                $redis->close();
-                $redis = new \Redis;
-                try {
-                    $connectResult = $redis->pconnect(...$params);
-                } catch (\Exception) {
-                    $connectResult = false;
-                }
-            }
-            Logger::writeWithContext((string) "redis pconnect: {$connectResult}", (string) 'debug', (bool) false);
-        } else {
-            try {
-                $connectResult = $redis->connect(...$params);
-            } catch (\Exception $e) {
-                $connectResult = false;
-            }
-            Logger::writeWithContext((string) "redis connect: {$connectResult}", (string) 'debug', (bool) false);
-        }
-        if ($connectResult) {
-            try {
-                if (! empty($config['password'])) {
-                    $connectResult = (bool) $redis->auth($config['password']);
-                }
-                if ($connectResult) {
-                    $this->redis = $redis;
-                    if (is_numeric($config['database'])) {
-                        $redis->select((int) $config['database']);
-                    }
-                }
-            } catch (\Exception) {
-                $connectResult = false;
-                $this->redis = null;
-            }
-        }
-        if (! $connectResult) {
-            RedisGuard::markDown();
-            // A cache that cannot connect is a disabled cache — callers
-            // already treat isEnabled=false as a miss and fall back to the
-            // database. Throwing here 500s every request during an outage.
-            $this->isEnabled = false;
-
-            return false;
+            return;
         }
 
-        return true;
+        $client = RedisGuard::attempt(static fn () => Redis::connection('default')->client());
+        if (! $client instanceof \Redis) {
+            return;
+        }
+
+        $this->isEnabled = (bool) RedisGuard::attempt(static fn () => $client->ping(), false);
+        if ($this->isEnabled) {
+            $this->redis = $client;
+        }
     }
 
     public function getIsEnabled(): bool
@@ -140,16 +74,6 @@ class LegacyRedisCache
     public function getClearCache(): int
     {
         return $this->clearCache;
-    }
-
-    public function setLanguage(string $language): void
-    {
-        $this->language = $language;
-    }
-
-    public function getLanguage(): string
-    {
-        return $this->language;
     }
 
     // Wrapper for Memcache::set, with the zlib option removed and default duration of 1 hour

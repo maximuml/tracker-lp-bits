@@ -10,6 +10,7 @@ use App\Services\MessagePageService;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -169,6 +170,20 @@ final class MessagePageServiceTest extends TestCase
             $threw = true;
         }
         $this->assertTrue($threw, 'Expected exception was not thrown');
+    }
+
+    /**
+     * Assert the guard aborts with the rendered page response — a removed
+     * abort falls through to a null deref (Error), not this exception.
+     */
+    private function assertBuildAborts(Request $request): void
+    {
+        try {
+            $this->callBuild($request);
+            $this->fail('Expected HttpResponseException');
+        } catch (HttpResponseException) {
+            $this->addToAssertionCount(1);
+        }
     }
 
     // --- build: default action (viewmailbox) ---
@@ -492,7 +507,7 @@ final class MessagePageServiceTest extends TestCase
             'id' => 99999,
         ]);
 
-        $this->assertBuildThrows($request);
+        $this->assertBuildAborts($request);
     }
 
     // --- build: editmailboxes ---

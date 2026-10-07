@@ -16,7 +16,7 @@ use App\Repositories\TopicRepository;
 use App\Services\ForumDataRepositories;
 use App\Services\ForumModerationService;
 use App\Services\ForumService;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
@@ -163,7 +163,7 @@ final class ForumServiceTest extends TestCase
         return new ForumService(
             $this->app->make(ForumDataRepositories::class),
             $this->app->make(CurrentUser::class),
-            $this->app->make(NexusCache::class),
+            $this->app->make(LegacyRedisCache::class),
             $this->app->make(TopicPolicy::class),
             $this->app->make(PostPolicy::class),
             $this->app->make(ForumModerationService::class),
@@ -223,11 +223,11 @@ final class ForumServiceTest extends TestCase
 
     private function mockCache(): void
     {
-        $cache = Mockery::mock(NexusCache::class);
+        $cache = Mockery::mock(LegacyRedisCache::class);
         $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get')->andReturn(false);
-        $cache->shouldReceive('forget')->andReturn(true);
-        $this->app->instance(NexusCache::class, $cache);
+        $cache->shouldReceive('get_value')->andReturn(false);
+        $cache->shouldReceive('delete_value')->andReturn(true);
+        $this->app->instance(LegacyRedisCache::class, $cache);
     }
 
     // ─── legacy() action router ───────────────────────────────────────

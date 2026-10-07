@@ -10,7 +10,7 @@ use App\Models\Passkey;
 use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Services\Usercp\UsercpHomeBuilder;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Settings;
 use App\ViewModels\Usercp\UsercpHomeSection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -42,8 +42,8 @@ final class UsercpHomeBuilderTest extends TestCase
     /** @var TokenRepository&MockInterface */
     private TokenRepository $tokenRepo;
 
-    /** @var NexusCache&MockInterface */
-    private NexusCache $cache;
+    /** @var LegacyRedisCache&MockInterface */
+    private LegacyRedisCache $cache;
 
     protected function setUp(): void
     {
@@ -57,8 +57,8 @@ final class UsercpHomeBuilderTest extends TestCase
         /** @var TokenRepository&MockInterface $tokenRepo */
         $tokenRepo = Mockery::mock(TokenRepository::class);
         $this->tokenRepo = $tokenRepo;
-        /** @var NexusCache&MockInterface $cache */
-        $cache = Mockery::mock(NexusCache::class);
+        /** @var LegacyRedisCache&MockInterface $cache */
+        $cache = Mockery::mock(LegacyRedisCache::class);
         $this->cache = $cache;
 
         $this->seedTestSettings([
@@ -71,9 +71,9 @@ final class UsercpHomeBuilderTest extends TestCase
         $this->lookup->shouldReceive('getReadTopics')->andReturn([])->byDefault();
         $this->tokenRepo->shouldReceive('listUserTokenPermissionAllowed')->andReturn([])->byDefault();
         $this->usercpRepo->shouldReceive('getUserTokens')->andReturn([])->byDefault();
-        $this->cache->shouldReceive('get')->andReturn(false)->byDefault();
-        $this->cache->shouldReceive('getMany')->andReturn([])->byDefault();
-        $this->cache->shouldReceive('put')->byDefault();
+        $this->cache->shouldReceive('get_value')->andReturn(false)->byDefault();
+        $this->cache->shouldReceive('get_values')->andReturn([])->byDefault();
+        $this->cache->shouldReceive('cache_value')->byDefault();
     }
 
     protected function tearDown(): void
@@ -136,10 +136,10 @@ final class UsercpHomeBuilderTest extends TestCase
         $this->lookup->shouldReceive('getForumPostCount')->once()->with(5)->andReturn(50);
         $this->lookup->shouldReceive('getTotalPostCount')->once()->andReturn(1000);
         // cache misses for both counters
-        $this->cache->shouldReceive('get')->with('user_5_post_count')->andReturn(false);
-        $this->cache->shouldReceive('get')->with('total_posts_count')->andReturn(false);
-        $this->cache->shouldReceive('put')->with('user_5_post_count', 50, 3600)->once();
-        $this->cache->shouldReceive('put')->with('total_posts_count', 1000, 96400)->once();
+        $this->cache->shouldReceive('get_value')->with('user_5_post_count')->andReturn(false);
+        $this->cache->shouldReceive('get_value')->with('total_posts_count')->andReturn(false);
+        $this->cache->shouldReceive('cache_value')->with('user_5_post_count', 50, 3600)->once();
+        $this->cache->shouldReceive('cache_value')->with('total_posts_count', 1000, 96400)->once();
 
         $s = $this->builder()->build($this->curUser(), $this->userInfo());
 
@@ -152,8 +152,8 @@ final class UsercpHomeBuilderTest extends TestCase
 
     public function test_cached_forum_post_count_skips_db(): void
     {
-        $this->cache->shouldReceive('get')->with('user_5_post_count')->andReturn(9);
-        $this->cache->shouldReceive('get')->with('total_posts_count')->andReturn(90);
+        $this->cache->shouldReceive('get_value')->with('user_5_post_count')->andReturn(9);
+        $this->cache->shouldReceive('get_value')->with('total_posts_count')->andReturn(90);
         $this->lookup->shouldReceive('getForumPostCount')->never();
         $this->lookup->shouldReceive('getTotalPostCount')->never();
 
@@ -182,8 +182,8 @@ final class UsercpHomeBuilderTest extends TestCase
     {
         $this->lookup->shouldReceive('getForumPostCount')->andReturn(10);
         $this->lookup->shouldReceive('getTotalPostCount')->andReturn(100);
-        $this->cache->shouldReceive('get')->with('user_5_post_count')->andReturn(false);
-        $this->cache->shouldReceive('get')->with('total_posts_count')->andReturn(false);
+        $this->cache->shouldReceive('get_value')->with('user_5_post_count')->andReturn(false);
+        $this->cache->shouldReceive('get_value')->with('total_posts_count')->andReturn(false);
 
         $s = $this->builder()->build($this->curUser(['added' => now()->toDateTimeString()]), $this->userInfo());
 
@@ -283,7 +283,7 @@ final class UsercpHomeBuilderTest extends TestCase
             ['id' => 8, 'subject' => 'World', 'views' => 1, 'lastpost' => 9, 'userid' => 5],
         ]);
         // topic_7 post count + post_9 content come from cache; topic_8 goes to DB
-        $this->cache->shouldReceive('getMany')->andReturnUsing(function (array $keys) {
+        $this->cache->shouldReceive('get_values')->andReturnUsing(function (array $keys) {
             if ($keys === ['topic_7_post_count', 'topic_8_post_count']) {
                 return ['topic_7_post_count' => 4];
             }
@@ -294,7 +294,7 @@ final class UsercpHomeBuilderTest extends TestCase
             return [];
         });
         $this->lookup->shouldReceive('getTopicPostCounts')->once()->with([8])->andReturn([8 => 2]);
-        $this->cache->shouldReceive('put')->with('topic_8_post_count', 2, 3600)->once();
+        $this->cache->shouldReceive('cache_value')->with('topic_8_post_count', 2, 3600)->once();
 
         $s = $this->callBuild($this->curUser());
 

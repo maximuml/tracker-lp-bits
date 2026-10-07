@@ -9,7 +9,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\ViewModels\Index\IndexBrowserNoteSection;
 use App\ViewModels\Index\IndexClassStatRow;
@@ -51,7 +51,7 @@ final class IndexPageServiceTest extends TestCase
 
     private CurrentUser $currentUser;
 
-    private NexusCache $cache;
+    private LegacyRedisCache $cache;
 
     /** @var IndexRepository&MockInterface */
     private IndexRepository $indexRepository;
@@ -65,7 +65,7 @@ final class IndexPageServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->currentUser = new CurrentUser;
-        $this->cache = new NexusCache;
+        $this->cache = new LegacyRedisCache;
 
         /** @var IndexRepository&MockInterface $repo */
         $repo = Mockery::mock(IndexRepository::class);

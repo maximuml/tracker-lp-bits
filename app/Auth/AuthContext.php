@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Input;
@@ -24,7 +24,7 @@ final class AuthContext
 
     /**
      * @param  array<string, mixed>|null  $user  Current user row.
-     * @param  NexusCache|null  $cache  Request cache store.
+     * @param  object|null  $cache  Legacy Redis cache wrapper.
      * @param  array<string, mixed>  $requestBody  POST data.
      * @param  array<string, mixed>  $queryParams  Query data.
      * @param  array<string, mixed>  $request  Merged POST + query data.
@@ -34,7 +34,7 @@ final class AuthContext
      */
     public function __construct(
         public ?array $user,
-        public ?NexusCache $cache,
+        public ?object $cache,
         public string $ip,
         public ?string $requestUri,
         public array $requestBody,
@@ -67,7 +67,7 @@ final class AuthContext
 
         return new self(
             user: CurrentUser::instance()->get(),
-            cache: NexusCache::instance(),
+            cache: LegacyRedisCache::instance(),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
             requestUri: Input::serverValue('REQUEST_URI'),
             requestBody: request()->post(),

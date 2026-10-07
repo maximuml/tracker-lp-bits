@@ -9,7 +9,7 @@ use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Support\AssetAppender;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
@@ -34,7 +34,7 @@ final class UsercpHomeBuilder
         private readonly UsercpLookupRepositoryInterface $usercpLookupRepository,
         private readonly UsercpRepositoryInterface $usercpRepository,
         private readonly TokenRepository $tokenRepository,
-        private readonly ?NexusCache $cache
+        private readonly ?LegacyRedisCache $cache
     ) {}
 
     /**
@@ -56,7 +56,7 @@ final class UsercpHomeBuilder
         $dayPosts = 0;
         $percentages = '';
         if ($cache !== null) {
-            $cached = $cache->get('user_'.$userId.'_post_count');
+            $cached = $cache->get_value('user_'.$userId.'_post_count');
             if ($cached !== false) {
                 $forumPosts = (int) $cached;
             }
@@ -64,7 +64,7 @@ final class UsercpHomeBuilder
         if ($forumPosts === 0) {
             $forumPosts = $this->usercpLookupRepository->getForumPostCount($userId);
             if ($cache !== null) {
-                $cache->put('user_'.$userId.'_post_count', $forumPosts, 3600);
+                $cache->cache_value('user_'.$userId.'_post_count', $forumPosts, 3600);
             }
         }
         if ($forumPosts > 0) {
@@ -75,7 +75,7 @@ final class UsercpHomeBuilder
             }
             $postCount = 0;
             if ($cache !== null) {
-                $cachedTotal = $cache->get('total_posts_count');
+                $cachedTotal = $cache->get_value('total_posts_count');
                 if ($cachedTotal !== false) {
                     $postCount = (int) $cachedTotal;
                 }
@@ -83,7 +83,7 @@ final class UsercpHomeBuilder
             if ($postCount === 0) {
                 $postCount = $this->usercpLookupRepository->getTotalPostCount();
                 if ($cache !== null) {
-                    $cache->put('total_posts_count', $postCount, 96400);
+                    $cache->cache_value('total_posts_count', $postCount, 96400);
                 }
             }
             if ($postCount > 0) {
@@ -162,7 +162,7 @@ final class UsercpHomeBuilder
      *
      * @return list<ReadTopicItem>
      */
-    private function buildReadTopics(int $userId, ?NexusCache $cache): array
+    private function buildReadTopics(int $userId, ?LegacyRedisCache $cache): array
     {
         $topicRows = $this->usercpLookupRepository->getReadTopics($userId);
         $postCounts = [];
@@ -170,7 +170,7 @@ final class UsercpHomeBuilder
         $readTopicIds = array_map(fn ($topicArr) => (int) $topicArr['id'], $topicRows);
         $cachedCounts = $readTopicIds === []
             ? []
-            : ($cache?->getMany(array_map(fn ($id) => 'topic_'.$id.'_post_count', $readTopicIds)) ?? []);
+            : ($cache?->get_values(array_map(fn ($id) => 'topic_'.$id.'_post_count', $readTopicIds)) ?? []);
         foreach ($readTopicIds as $topicId) {
             $cached = $cachedCounts['topic_'.$topicId.'_post_count'] ?? false;
             if ($cached !== false) {
@@ -182,7 +182,7 @@ final class UsercpHomeBuilder
         if ($uncachedTopicIds !== []) {
             $postCounts += $this->usercpLookupRepository->getTopicPostCounts($uncachedTopicIds);
             foreach ($uncachedTopicIds as $topicId) {
-                $cache?->put('topic_'.$topicId.'_post_count', $postCounts[$topicId] ?? 0, 3600);
+                $cache?->cache_value('topic_'.$topicId.'_post_count', $postCounts[$topicId] ?? 0, 3600);
             }
         }
         $lastPostIds = [];
@@ -193,7 +193,7 @@ final class UsercpHomeBuilder
         }
         $lastPostRows = $lastPostIds === []
             ? []
-            : ($cache?->getMany(array_map(fn ($id) => 'post_'.$id.'_content', array_values(array_unique($lastPostIds)))) ?? []);
+            : ($cache?->get_values(array_map(fn ($id) => 'post_'.$id.'_content', array_values(array_unique($lastPostIds)))) ?? []);
         $items = [];
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];

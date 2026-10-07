@@ -11,7 +11,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\OverforumRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Forum;
@@ -36,7 +36,7 @@ final class ForumIndexService
         private readonly CurrentUser $currentUser,
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly OverforumRepository $overforumRepository,
-        private readonly NexusCache $cache,
+        private readonly LegacyRedisCache $cache,
         private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
         private readonly PostRepositoryInterface $postRepository,
@@ -59,9 +59,9 @@ final class ForumIndexService
         $SITENAME = SiteConfig::current()->basic->siteName();
         $showforumstatsMain = SiteConfig::current()->main->showForumStats();
 
-        if (! $overforums = $Cache->get('overforums_list')) {
+        if (! $overforums = $Cache->get_value('overforums_list')) {
             $overforums = $this->overforumRepository->getOverforumsList();
-            $Cache->put('overforums_list', $overforums, 86400);
+            $Cache->cache_value('overforums_list', $overforums, 86400);
         }
         $forums = $this->getForumRow(0) ?? [];
         $overforumIds = array_map(static fn (array $a): int => (int) ($a['id'] ?? 0), $overforums);
@@ -81,7 +81,7 @@ final class ForumIndexService
             $prefetchKeys[] = 'forum_'.$fid.'_last_replied_topic_content';
             $prefetchKeys[] = 'forum_'.$fid.'_post_'.$todayDate.'_count';
         }
-        $prefetched = $prefetchKeys === [] ? [] : $Cache->getMany($prefetchKeys);
+        $prefetched = $prefetchKeys === [] ? [] : $Cache->get_values($prefetchKeys);
         $postIdKeys = [];
         foreach ($visibleForums as $f) {
             $arr = $prefetched['forum_'.((int) ($f['id'] ?? 0)).'_last_replied_topic_content'] ?? false;
@@ -89,7 +89,7 @@ final class ForumIndexService
                 $postIdKeys[] = 'post_'.((int) $arr['lastpost']).'_content';
             }
         }
-        $postRows = $postIdKeys === [] ? [] : $Cache->getMany(array_values(array_unique($postIdKeys)));
+        $postRows = $postIdKeys === [] ? [] : $Cache->get_values(array_values(array_unique($postIdKeys)));
 
         $posterIds = [];
         foreach ($postRows as $row) {
@@ -152,7 +152,7 @@ final class ForumIndexService
         if (! $arr) {
             $lastTopic = $this->topicRepository->getLastTopicByForum($forumid);
             $arr = $lastTopic ? $lastTopic->toArray() : false;
-            $Cache->put($repliedKey, $arr, 900);
+            $Cache->cache_value($repliedKey, $arr, 900);
         }
 
         $lastPost = null;
@@ -184,7 +184,7 @@ final class ForumIndexService
         $posttodaycount = $prefetched[$todayKey] ?? false;
         if (! is_numeric($posttodaycount)) {
             $posttodaycount = $this->postRepository->getForumTodayPostCount($forumid, date('Y-m-d'));
-            $Cache->put($todayKey, $posttodaycount, 1800);
+            $Cache->cache_value($todayKey, $posttodaycount, 1800);
         }
 
         return new ForumRow(
@@ -207,21 +207,21 @@ final class ForumIndexService
     {
         $Cache = $this->cache;
 
-        if (! $activeforumuser_num = $Cache->get('active_forum_user_count')) {
+        if (! $activeforumuser_num = $Cache->get_value('active_forum_user_count')) {
             $activeforumuser_num = $this->forumRepository->getActiveForumUserCount();
-            $Cache->put('active_forum_user_count', $activeforumuser_num, 300);
+            $Cache->cache_value('active_forum_user_count', $activeforumuser_num, 300);
         }
-        if (! $postcount = $Cache->get('total_posts_count')) {
+        if (! $postcount = $Cache->get_value('total_posts_count')) {
             $postcount = $this->postRepository->getTotalPostsCount();
-            $Cache->put('total_posts_count', $postcount, 96400);
+            $Cache->cache_value('total_posts_count', $postcount, 96400);
         }
-        if (! $topiccount = $Cache->get('total_topics_count')) {
+        if (! $topiccount = $Cache->get_value('total_topics_count')) {
             $topiccount = $this->topicRepository->getTotalTopicsCount();
-            $Cache->put('total_topics_count', $topiccount, 96500);
+            $Cache->cache_value('total_topics_count', $topiccount, 96500);
         }
-        if (! $todaypostcount = $Cache->get('today_'.$todayDate.'_posts_count')) {
+        if (! $todaypostcount = $Cache->get_value('today_'.$todayDate.'_posts_count')) {
             $todaypostcount = $this->postRepository->getTodayPostsCount($todayDate);
-            $Cache->put('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
+            $Cache->cache_value('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
         }
 
         return new ForumStatsViewModel(
@@ -244,7 +244,7 @@ final class ForumIndexService
             return;
         }
         $this->readStateRepository->clearReadPosts((int) $CURUSER['id']);
-        $Cache->forget('user_'.$CURUSER['id'].'_last_read_post_list');
+        $Cache->delete_value('user_'.$CURUSER['id'].'_last_read_post_list');
         $lastpostid = $this->postRepository->getLastPostId();
         if ($lastpostid) {
             $CURUSER['last_catchup'] = $lastpostid;
@@ -258,9 +258,9 @@ final class ForumIndexService
     public function getForumRow(int $forumid = 0): ?array
     {
         $Cache = $this->cache;
-        if (! $forums = $Cache->get('forums_list')) {
+        if (! $forums = $Cache->get_value('forums_list')) {
             $forums = $this->forumRepository->getForumsList();
-            $Cache->put('forums_list', $forums, 86400);
+            $Cache->cache_value('forums_list', $forums, 86400);
         }
         if (! $forumid) {
             return $forums;
@@ -276,12 +276,12 @@ final class ForumIndexService
     {
         $Cache = $this->cache;
         $ret = $this->lastReadPostList;
-        if (! $ret && ! $ret = $Cache->get('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
+        if (! $ret && ! $ret = $Cache->get_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
             $ret = $this->readStateRepository->getLastReadPosts((int) ($curUser['id'] ?? 0));
             if ($ret !== null) {
-                $Cache->put('user_'.($curUser['id'] ?? 0).'_last_read_post_list', $ret, 900);
+                $Cache->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', $ret, 900);
             } else {
-                $Cache->put('user_'.($curUser['id'] ?? 0).'_last_read_post_list', 'no record', 900);
+                $Cache->cache_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list', 'no record', 900);
             }
         }
         $this->lastReadPostList = $ret;

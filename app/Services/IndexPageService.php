@@ -9,7 +9,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Repositories\IndexRepository;
 use App\Support\AssetAppender;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
 use App\Support\CurrentUser;
@@ -49,7 +49,7 @@ final class IndexPageService
 
     public function __construct(
         private readonly CurrentUser $currentUser,
-        private readonly NexusCache $cache,
+        private readonly LegacyRedisCache $cache,
         private readonly IndexRepository $indexRepository,
         private readonly IndexPollsSectionFactory $indexPollsSectionFactory,
         ?CoverThumb $coverThumb = null,
@@ -82,7 +82,7 @@ final class IndexPageService
 
         // Reset unread news count
         if (! empty($curUser['id'])) {
-            $this->cache->forget('user_'.(int) $curUser['id'].'_unread_news_count');
+            $this->cache->delete_value('user_'.(int) $curUser['id'].'_unread_news_count');
         }
 
         return new IndexPageViewModel(
@@ -192,7 +192,7 @@ final class IndexPageService
 
         $cacheKey = Locale::currentLangDir('en').'_index_latest_torrents_grid_v3';
         $cacheTtl = 120;
-        $html = $this->cache->get($cacheKey);
+        $html = $this->cache->get_value($cacheKey);
 
         if ($html === false || $html === null || $html === '') {
             $torrents = $this->indexRepository->getLatestTorrents(12);
@@ -222,10 +222,10 @@ final class IndexPageService
                     'colSeeder' => __('index.col_seeder'),
                     'colLeecher' => __('index.col_leecher'),
                 ])->render();
-                $this->cache->put($cacheKey, $html, $cacheTtl);
+                $this->cache->cache_value($cacheKey, $html, $cacheTtl);
             } else {
                 $html = '';
-                $this->cache->put($cacheKey, $html, $cacheTtl);
+                $this->cache->cache_value($cacheKey, $html, $cacheTtl);
             }
         }
 

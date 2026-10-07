@@ -78,6 +78,7 @@ use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\UserSearchRepository;
 use App\Services\CleanupService;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
@@ -119,12 +120,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // The singleton object is the LegacyRedisCache subclass so both
+        // ?NexusCache and ?LegacyRedisCache type hints resolve to one instance.
         $this->app->singleton(NexusCache::class, static function (): NexusCache {
-            $cache = new NexusCache;
+            $cache = new LegacyRedisCache;
             $cache->setLangFolders(Locale::available());
 
             return $cache;
         });
+        $this->app->alias(NexusCache::class, LegacyRedisCache::class);
         $this->app->singleton(CurrentUser::class);
         $this->app->singleton(UserUpdateBatch::class);
         // T-20: ActorContext is a per-request singleton — the instance is

@@ -27,7 +27,7 @@ class NexusCache
 
     public static function instance(): ?self
     {
-        return app(self::class);
+        return app(static::class);
     }
 
     public function __construct()
@@ -183,6 +183,95 @@ class NexusCache
     public function keyHits(string $type = 'read'): array
     {
         return $this->keyHits[$type] ?? [];
+    }
+
+    /** @deprecated use enabled() — kept until gated call sites migrate */
+    public function getIsEnabled(): bool
+    {
+        return $this->enabled();
+    }
+
+    /** @deprecated use setBypass() */
+    public function setClearCache(int $isEnabled): void
+    {
+        $this->setBypass($isEnabled);
+    }
+
+    /** @deprecated use bypasses() */
+    public function getClearCache(): int
+    {
+        return $this->bypasses();
+    }
+
+    /**
+     * @deprecated use langFolders()
+     *
+     * @return array<int, string>
+     */
+    public function getLanguageFolderArray(): array
+    {
+        return $this->langFolders();
+    }
+
+    /**
+     * @deprecated use setLangFolders()
+     *
+     * @param  array<int, string>  $languageFolderArray
+     */
+    public function setLanguageFolderArray(array $languageFolderArray): void
+    {
+        $this->setLangFolders($languageFolderArray);
+    }
+
+    /** @deprecated use put() */
+    public function cache_value(string $Key, mixed $Value, int $Duration = 3600): void
+    {
+        $this->put($Key, $Value, $Duration);
+    }
+
+    /** @deprecated use get() */
+    public function get_value(string $Key): mixed
+    {
+        return $this->get($Key);
+    }
+
+    /**
+     * @deprecated use getMany()
+     *
+     * @param  array<int, string>  $Keys
+     * @return array<string, mixed>
+     */
+    public function get_values(array $Keys): array
+    {
+        return $this->getMany($Keys);
+    }
+
+    /** @deprecated use forget() */
+    public function delete_value(string $Key, bool $AllLang = false): int
+    {
+        return $this->forget($Key, $AllLang);
+    }
+
+    /** @deprecated use readCount() */
+    public function getCacheReadTimes(): int
+    {
+        return $this->readCount();
+    }
+
+    /** @deprecated use writeCount() */
+    public function getCacheWriteTimes(): int
+    {
+        return $this->writeCount();
+    }
+
+    /**
+     * @deprecated use keyHits()
+     *
+     * @return array<string, int>
+     */
+    public function getKeyHits(string $type = 'read'): array
+    {
+        return $this->keyHits($type);
     }
 
     /**

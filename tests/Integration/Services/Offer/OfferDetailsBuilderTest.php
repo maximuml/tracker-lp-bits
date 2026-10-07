@@ -9,7 +9,7 @@ use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Models\Offer;
 use App\Services\Offer\OfferDetailsBuilder;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Time;
 use App\ViewModels\Offer\OfferDetailsViewModel;
@@ -44,8 +44,8 @@ final class OfferDetailsBuilderTest extends TestCase
     /** @var OfferCommentRepositoryInterface&MockInterface */
     private OfferCommentRepositoryInterface $commentRepo;
 
-    /** @var NexusCache&MockInterface */
-    private NexusCache $cache;
+    /** @var LegacyRedisCache&MockInterface */
+    private LegacyRedisCache $cache;
 
     private int $initialObLevel;
 
@@ -64,11 +64,11 @@ final class OfferDetailsBuilderTest extends TestCase
         /** @var OfferCommentRepositoryInterface&MockInterface $commentRepo */
         $commentRepo = Mockery::mock(OfferCommentRepositoryInterface::class);
         $this->commentRepo = $commentRepo;
-        /** @var NexusCache&MockInterface $cache */
-        $cache = Mockery::mock(NexusCache::class);
+        /** @var LegacyRedisCache&MockInterface $cache */
+        $cache = Mockery::mock(LegacyRedisCache::class);
         $this->cache = $cache;
         $this->cache->shouldIgnoreMissing();
-        $this->cache->shouldReceive('get')->andReturn(false)->byDefault();
+        $this->cache->shouldReceive('get_value')->andReturn(false)->byDefault();
 
         $currentUser = new CurrentUser;
         $currentUser->set(['id' => 7, 'username' => 'u', 'class' => 0]);
@@ -241,8 +241,8 @@ final class OfferDetailsBuilderTest extends TestCase
 
         $key = 'fmt_offer_'.md5('hello [b]world[/b]');
         // Sequential answers on the same key: miss → render+cache, then hit → verbatim.
-        $this->cache->shouldReceive('get')->with($key)->andReturn(false, '<b>cached</b>');
-        $this->cache->shouldReceive('put')->with($key, Mockery::type('string'), 86400)->once();
+        $this->cache->shouldReceive('get_value')->with($key)->andReturn(false, '<b>cached</b>');
+        $this->cache->shouldReceive('cache_value')->with($key, Mockery::type('string'), 86400)->once();
 
         $s = $this->callBuild();
         $this->assertNotEmpty((string) $s->description);
@@ -256,7 +256,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['descr' => '']));
         $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
         $this->commentRepo->shouldReceive('countComments')->andReturn(0);
-        $this->cache->shouldReceive('put')->never();
+        $this->cache->shouldReceive('cache_value')->never();
 
         $s = $this->builder()->build(['id' => 7], 7, $this->request());
         $this->assertSame('', (string) $s->description);

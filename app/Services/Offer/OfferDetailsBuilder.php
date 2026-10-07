@@ -11,7 +11,7 @@ use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserTimeType;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\LegacyResponse;
@@ -31,7 +31,7 @@ final class OfferDetailsBuilder
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
         private readonly OfferCommentRepositoryInterface $offerCommentRepository,
-        private readonly NexusCache $cache,
+        private readonly LegacyRedisCache $cache,
     ) {}
 
     /**
@@ -79,12 +79,12 @@ final class OfferDetailsBuilder
         $description = '';
         if (! empty($num['descr'])) {
             $descrKey = 'fmt_offer_'.md5((string) $num['descr']);
-            $cachedDescr = $this->cache->get($descrKey);
+            $cachedDescr = $this->cache->get_value($descrKey);
             if (is_string($cachedDescr)) {
                 $description = SafeHtml::fromTrustedHtml($cachedDescr);
             } else {
                 $description = Format::formatComment((string) $num['descr']);
-                $this->cache->put($descrKey, (string) $description, 86400);
+                $this->cache->cache_value($descrKey, (string) $description, 86400);
             }
         }
 

@@ -8,7 +8,7 @@ use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicMaintenanceRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -20,7 +20,7 @@ final class ForumMaintenanceTask implements CleanupTask
         private readonly ForumRepositoryInterface $forums,
         private readonly TopicMaintenanceRepository $topics,
         private readonly PostRepository $posts,
-        private readonly ?NexusCache $cache = null,
+        private readonly ?LegacyRedisCache $legacyRedisCache = null,
     ) {}
 
     /**
@@ -57,8 +57,8 @@ final class ForumMaintenanceTask implements CleanupTask
             }
         });
 
-        if ($this->cache !== null) {
-            $this->cache->forget('forums_list');
+        if ($this->legacyRedisCache !== null) {
+            $this->legacyRedisCache->delete_value('forums_list');
         }
 
         return 'update forum post/topic count';

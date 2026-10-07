@@ -8,7 +8,7 @@ use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Services\Offer\OfferListBuilder;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Time;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -44,8 +44,8 @@ final class OfferListBuilderTest extends TestCase
     /** @var UsercpRepositoryInterface&MockInterface */
     private UsercpRepositoryInterface $usercpRepo;
 
-    /** @var NexusCache&MockInterface */
-    private NexusCache $cache;
+    /** @var LegacyRedisCache&MockInterface */
+    private LegacyRedisCache $cache;
 
     private int $initialObLevel;
 
@@ -65,12 +65,12 @@ final class OfferListBuilderTest extends TestCase
         $usercpRepo = Mockery::mock(UsercpRepositoryInterface::class);
         $this->usercpRepo = $usercpRepo;
         $this->usercpRepo->shouldReceive('updateLastOffer')->andReturn(true)->byDefault();
-        /** @var NexusCache&MockInterface $cache */
-        $cache = Mockery::mock(NexusCache::class);
+        /** @var LegacyRedisCache&MockInterface $cache */
+        $cache = Mockery::mock(LegacyRedisCache::class);
         $this->cache = $cache;
         $this->cache->shouldIgnoreMissing();
-        $this->cache->shouldReceive('get')->andReturn(false)->byDefault();
-        $this->cache->shouldReceive('getMany')->andReturn([])->byDefault();
+        $this->cache->shouldReceive('get_value')->andReturn(false)->byDefault();
+        $this->cache->shouldReceive('get_values')->andReturn([])->byDefault();
 
         $currentUser = new CurrentUser;
         $currentUser->set(['id' => 7, 'username' => 'u', 'class' => 0]);
@@ -271,7 +271,7 @@ final class OfferListBuilderTest extends TestCase
         ], 3));
 
         // offer 1 cached, offer 2 needs DB fetch; post_9-style tt cache miss
-        $this->cache->shouldReceive('getMany')->andReturnUsing(function (array $keys) {
+        $this->cache->shouldReceive('get_values')->andReturnUsing(function (array $keys) {
             if (in_array('offer_1_last_comment_content', $keys, true)) {
                 return ['offer_1_last_comment_content' => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'cached comment']];
             }
@@ -281,8 +281,8 @@ final class OfferListBuilderTest extends TestCase
         $this->commentRepo->shouldReceive('getLastComments')->once()->with([2])->andReturn([
             2 => ['user' => 7, 'added' => '2024-06-02 00:00:00', 'text' => 'fresh comment'],
         ]);
-        $this->cache->shouldReceive('put')->with('offer_2_last_comment_content', Mockery::type('array'), 1855)->once();
-        $this->cache->shouldReceive('put')->with('offer_1_last_comment_content', Mockery::any(), Mockery::any())->never();
+        $this->cache->shouldReceive('cache_value')->with('offer_2_last_comment_content', Mockery::type('array'), 1855)->once();
+        $this->cache->shouldReceive('cache_value')->with('offer_1_last_comment_content', Mockery::any(), Mockery::any())->never();
 
         $s = $this->builder()->build($this->curUser(), 7, $this->request(), $this->globalData());
 
@@ -309,7 +309,7 @@ final class OfferListBuilderTest extends TestCase
         $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
             $this->row(['id' => 1, 'comments' => 2]),
         ], 1));
-        $this->cache->shouldReceive('getMany')->andReturn([
+        $this->cache->shouldReceive('get_values')->andReturn([
             'offer_1_last_comment_content' => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'cached comment'],
         ]);
 
@@ -329,7 +329,7 @@ final class OfferListBuilderTest extends TestCase
         $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
             $this->row(['id' => 1, 'comments' => 2]),
         ]));
-        $this->cache->shouldReceive('getMany')->andReturn([
+        $this->cache->shouldReceive('get_values')->andReturn([
             'offer_1_last_comment_content' => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'x'],
         ]);
 

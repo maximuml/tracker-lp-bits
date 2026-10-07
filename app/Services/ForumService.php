@@ -13,7 +13,7 @@ use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\MessageRepository;
 use App\Support\Bonus;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Http\SafeReturnUrl;
@@ -111,7 +111,7 @@ final class ForumService
     public function __construct(
         private readonly ForumDataRepositories $data,
         private readonly CurrentUser $currentUser,
-        private readonly NexusCache $cache,
+        private readonly LegacyRedisCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
         private readonly ForumModerationService $moderation,
@@ -128,12 +128,12 @@ final class ForumService
 
     private function cacheDelete(string $key): void
     {
-        $this->cache->forget($key);
+        $this->cache->delete_value($key);
     }
 
     private function cacheGet(string $key): mixed
     {
-        return $this->cache->get($key);
+        return $this->cache->get_value($key);
     }
 
     private function redirectTo(string $path): RedirectResponse

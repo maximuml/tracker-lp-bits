@@ -9,7 +9,7 @@ use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\TopicModerationRepository;
 use App\Support\Bonus;
-use App\Support\Cache\NexusCache;
+use App\Support\Cache\LegacyRedisCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\LegacyResponse;
@@ -28,7 +28,7 @@ final class ForumModerationService
 {
     public function __construct(
         private readonly ForumDataRepositories $data,
-        private readonly NexusCache $cache,
+        private readonly LegacyRedisCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
         private readonly TopicModerationRepository $topicModerationRepository,
@@ -36,12 +36,12 @@ final class ForumModerationService
 
     private function cacheDelete(string $key): void
     {
-        $this->cache->forget($key);
+        $this->cache->delete_value($key);
     }
 
     private function cacheGet(string $key): mixed
     {
-        return $this->cache->get($key);
+        return $this->cache->get_value($key);
     }
 
     private function redirectTo(string $path): RedirectResponse

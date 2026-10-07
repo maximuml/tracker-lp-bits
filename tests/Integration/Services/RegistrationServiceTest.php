@@ -7,9 +7,11 @@ namespace Tests\Integration\Services;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
 use App\Exceptions\AuthenticationException;
+use App\Services\EmailConfirmation;
 use App\Services\RegistrationService;
 use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
+use App\Support\Config\SiteConfig;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -192,10 +194,27 @@ final class RegistrationServiceTest extends TestCase
             ->with('10.0.0.99')
             ->once();
 
-        $this->expectException(AuthenticationException::class);
+        try {
+            $this->serviceWithAuth($authService)
+                ->assertCanRegister('normal', '10.0.0.99', $this->emptyLang(), $this->emptyLang());
+            $this->fail('Expected AuthenticationException');
+        } catch (AuthenticationException $e) {
+            $this->assertSame(
+                (string) (__('functions.std_the_ip'))
+                .htmlspecialchars('10.0.0.99')
+                .(string) (__('functions.std_used_many_times'))
+                .htmlspecialchars((string) SiteConfig::current()->basic->siteName())
+                .'.',
+                $e->getMessage(),
+            );
+        }
+    }
 
-        $this->serviceWithAuth($authService)
-            ->assertCanRegister('normal', '10.0.0.99', $this->emptyLang(), $this->emptyLang());
+    public function test_email_confirmation_verify_captcha_stays_public(): void
+    {
+        $this->assertTrue(
+            (new \ReflectionMethod(EmailConfirmation::class, 'verifyCaptcha'))->isPublic(),
+        );
     }
 
     // --- confirm ---

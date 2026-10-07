@@ -78,7 +78,7 @@ class PasswordSetup
 
     private function msg(string $langGroup, string $key, string $fallback): string
     {
-        $full = 'legacy/'.$langGroup.'.'.$key;
+        $full = $langGroup.'.'.$key;
 
         return Lang::has($full) ? (string) __($full) : $fallback;
     }

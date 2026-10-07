@@ -51,12 +51,12 @@ class PasswordRecoveryService
 
         if ($email === '') {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/recover.std_missing_email_address'));
+            throw new AuthenticationException(__('recover.std_missing_email_address'));
         }
 
         if (! Email::isWellFormed($email)) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/recover.std_invalid_email_address'));
+            throw new AuthenticationException(__('recover.std_invalid_email_address'));
         }
 
         $user = $this->userDetailRepository->findByEmailBinary($email)?->getAttributes() ?? [];
@@ -117,12 +117,12 @@ class PasswordRecoveryService
             ]);
 
             if ($tokenRow === null || (int) $tokenRow['user_id'] !== $id) {
-                throw new AuthenticationException(__('legacy/recover.std_invalid_reset_link'));
+                throw new AuthenticationException(__('recover.std_invalid_reset_link'));
             }
 
             $user = $this->userAccountRepository->findConfirmedById($id, ['id', 'username', 'email', 'status'], true);
             if (! $user instanceof User) {
-                throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
+                throw new AuthenticationException(__('recover.std_unable_updating_user_data'));
             }
 
             $this->passwordSetup->validate($password, $passwordConfirmation, (string) $user->username, 'recover');
@@ -137,7 +137,7 @@ class PasswordRecoveryService
             ]);
 
             if (! $affected) {
-                throw new AuthenticationException(__('legacy/recover.std_unable_updating_user_data'));
+                throw new AuthenticationException(__('recover.std_unable_updating_user_data'));
             }
 
             $this->revokeActiveTokens($id);
@@ -185,7 +185,7 @@ class PasswordRecoveryService
                 $email,
                 $siteName,
                 SiteConfig::current()->main->siteEmail(''),
-                $siteName.__('legacy/recover.mail_title'),
+                $siteName.__('recover.mail_title'),
                 nl2br($body),
                 'confirmation',
                 true,
@@ -222,7 +222,7 @@ class PasswordRecoveryService
                 (string) $user->email,
                 $siteName,
                 SiteConfig::current()->main->siteEmail(''),
-                $siteName.__('legacy/recover.mail_password_changed_title'),
+                $siteName.__('recover.mail_password_changed_title'),
                 nl2br($body),
                 'details',
                 true,
@@ -266,7 +266,7 @@ class PasswordRecoveryService
 
         if (! $verified) {
             $this->authService->recordFailedAttempt($ip);
-            throw new AuthenticationException(__('legacy/functions.std_invalid_image_code'));
+            throw new AuthenticationException(__('functions.std_invalid_image_code'));
         }
     }
 }

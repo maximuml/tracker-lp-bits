@@ -9,6 +9,7 @@ use App\Repositories\RegImageRepository;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Support\HeaderBag;
 use Illuminate\Support\Facades\DB;
+use ReflectionMethod;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -77,5 +78,19 @@ final class ImageCaptchaDriverTest extends TestCase
 
         $this->assertSame('', $bytes);
         $this->assertSame(404, $this->headerBag->getStatusCode());
+    }
+
+    public function test_output_image_is_public_entrypoint(): void
+    {
+        $this->assertTrue(
+            (new ReflectionMethod(ImageCaptchaDriver::class, 'outputImage'))->isPublic()
+        );
+    }
+
+    public function test_render_fallback_is_overridable(): void
+    {
+        $this->assertTrue(
+            (new ReflectionMethod(ImageCaptchaDriver::class, 'renderFallback'))->isProtected()
+        );
     }
 }

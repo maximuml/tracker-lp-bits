@@ -367,7 +367,7 @@ PR #299 converts the remaining `resources/views/**/_*_legacy.php` partials to `*
 - `/shoutbox_sse.php` streams `text/event-stream` `event: ping` messages.
 - `/ajax.php` actions return JSON without PHP worker fatals; `clearShoutBox` should load the `User` model from `SupportContext` and pass it to `Permission::can` to avoid relying on Laravel's `Auth::user()` in legacy AJAX paths.
 - `/messages.php` (inbox) should render: `messagemenu()` and `insertJumpTo()` must be defined before they are called in `resources/views/messages/_messages.blade.php`.
-- `/delete.php?id=<torrent>`, `/takeinvite.php`, `/checkuser.php` no longer call a missing `bark()` helper; use `\App\Support\LegacyResponse::abort($title, $msg)` instead.
+- `/delete.php?id=<torrent>`, `/takeinvite.php`, `/checkuser.php` no longer call a missing `bark()` helper; use `\App\Support\PageResponses::abort($title, $msg)` instead.
 - `/takeconfirm.php` loads `lang/en/lang_takeconfirm.php` which references `$SITENAME`/`$REPORTMAIL`; ensure `LegacyRequestMiddleware` sets these as local variables before requiring language files.
 - `/takereseed.php?id=<torrent>` falls back to `id` when `reseedid` is absent and guards against `null` torrent.
 - `/ajax.php?action=saveUserMedal` handles string-encoded `params` and validates each entry before indexing.
@@ -418,7 +418,7 @@ PR #308 removes `app/Support/Legacy/functions.php` and inlines helpers into type
 
 ### Common gotchas
 
-- The `InsufficientPermissionException` thrown inside Blade partials is wrapped in nested `Illuminate\View\ViewException` objects; the exception handler must recursively unwrap `ViewException::getPrevious()` and catch `HttpResponseException` from `LegacyResponse::permissionDenied()`.
+- The `InsufficientPermissionException` thrown inside Blade partials is wrapped in nested `Illuminate\View\ViewException` objects; the exception handler must recursively unwrap `ViewException::getPrevious()` and catch `HttpResponseException` from `PageResponses::permissionDenied()`.
 - After `CriticalPathTest`, restore `basic.BASEURL='localhost'` and clear the Redis keys `nexus_settings_in_nexus` and `nexus_settings_in_laravel` plus Laravel caches before host-side tests.
 - The Unit suite may need `php -d memory_limit=1G` to avoid exhausting the default 128 M limit in `RouteServiceProvider`.
 - `php -l` on changed files must run from the host because `.git` is not mounted in the `php` container:

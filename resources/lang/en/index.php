@@ -2,9 +2,8 @@
 
 return [
 
-
     // migrated from legacy/index
-'std_no_poll' => 'No poll',
+    'std_no_poll' => 'No poll',
     'std_error' => 'Error',
     'std_duplicate_votes_denied' => 'No duplicate votes allowed!',
     'std_vote_not_counted' => 'An error occured. Your vote has not been counted.',

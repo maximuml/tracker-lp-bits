@@ -7,7 +7,7 @@ return [
     'downloads' => 'Downloads',
 
     // migrated from legacy/attachment
-'text_nothing_received' => 'Failure! Nothing received!',
+    'text_nothing_received' => 'Failure! Nothing received!',
     'text_file_number_limit_reached' => 'Failure! You cannot upload more files for the moment. Please wait some time.',
     'text_file_size_too_big' => 'Failure! The file size is too big.',
     'text_file_extension_not_allowed' => 'Failure! The file extension is not allowed.',

@@ -7,7 +7,7 @@ return [
     'password_equals_username' => 'Sorry, password cannot be same as user name.',
 
     // migrated from legacy/signup
-'head_signup' => 'Signup',
+    'head_signup' => 'Signup',
     'text_cookies_note' => 'You need cookies enabled to sign up or log in.',
     'text_note' => 'Note',
     'row_desired_username' => 'Desired username',

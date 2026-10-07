@@ -7,7 +7,7 @@ return [
     'msg_request_receive_comment' => 'You have received a comment on your request ',
 
     // migrated from legacy/comment
-'std_error' => 'Error',
+    'std_error' => 'Error',
     'std_comment_flooding_denied' => 'Comment Flooding Not Allowed. Please wait ',
     'std_before_posting_another' => ' second(s) before posting another comment.',
     'std_no_torrent_id' => 'No torrent with this ID.',

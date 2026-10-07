@@ -25,7 +25,7 @@ return [
     'require_pre_register_username' => "Pre-register username can't be empty",
 
     // migrated from legacy/invite
-'std_sorry' => 'Sorry',
+    'std_sorry' => 'Sorry',
     'std_permission_denied' => 'Permission Denied!',
     'head_invites' => 'Invites',
     'std_here' => 'here',

@@ -13,7 +13,7 @@ return [
     ],
 
     // migrated from legacy/attendance
-'title' => 'Attendance',
+    'title' => 'Attendance',
     'success' => 'Success',
     'attend_info' => 'You have already attended ',
     'attend_info_days' => ' days, Continuous ',

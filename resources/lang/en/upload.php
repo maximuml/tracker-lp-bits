@@ -64,7 +64,7 @@ View more detailed information and download it (you may need to log in), please 
     'email_notification_subject' => ':site_name New torrent notification',
 
     // migrated from legacy/upload
-'head_upload' => 'Upload',
+    'head_upload' => 'Upload',
     'std_sorry' => 'Sorry...',
     'std_unauthorized_to_upload' => 'You are not authorized to upload torrents. Read ',
     'text_inbox' => 'Inbox',

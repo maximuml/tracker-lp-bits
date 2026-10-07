@@ -7,8 +7,8 @@ namespace App\Services\Offer;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\OfferVote;
-use App\Support\RequestValues;
 use App\Support\Pagination;
+use App\Support\RequestValues;
 use App\Support\UserDisplay;
 use Illuminate\Http\Request;
 

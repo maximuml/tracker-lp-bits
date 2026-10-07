@@ -6,10 +6,10 @@ namespace App\Repositories;
 
 use App\Models\IpLog;
 use App\Support\Environment;
-use App\Support\RequestValues;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\RedisGuard;
+use App\Support\RequestValues;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
 

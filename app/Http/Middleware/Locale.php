@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Support\Config\SiteConfig;
-use App\Support\RequestValues;
 use App\Support\LegacyRuntime;
 use App\Support\Logger;
 use App\Support\RequestContext;
+use App\Support\RequestValues;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\JsonResponse;

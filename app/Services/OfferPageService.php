@@ -13,8 +13,8 @@ use App\Services\Offer\OfferListBuilder;
 use App\Services\Offer\OfferVoteListBuilder;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\RequestValues;
 use App\Support\LegacyResponse;
+use App\Support\RequestValues;
 use App\ViewModels\OfferPageViewModel;
 use Illuminate\Http\Request;
 

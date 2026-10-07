@@ -7,8 +7,8 @@ namespace App\Repositories\TorrentSearch;
 use App\Auth\Permission;
 use App\Enums\TorrentApprovalStatus;
 use App\Support\Config\SiteConfig;
-use App\Support\RequestValues;
 use App\Support\Log;
+use App\Support\RequestValues;
 use Carbon\Carbon;
 
 /**

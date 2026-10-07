@@ -14,9 +14,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
-use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\RedisGuard;
+use App\Support\RequestValues;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;

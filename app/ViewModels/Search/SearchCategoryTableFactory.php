@@ -6,9 +6,9 @@ namespace App\ViewModels\Search;
 
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Models\SearchBox;
-use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\Path;
+use App\Support\RequestValues;
 
 /**
  * Builds {@see SearchCategoryTableViewModel} — the typed counterpart of

@@ -7,10 +7,10 @@ namespace App\Auth;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\RequestContext;
+use App\Support\RequestValues;
 
 /**
  * Context bundle for the access-gate checks.

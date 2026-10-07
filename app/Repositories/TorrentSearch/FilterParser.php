@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Repositories\TorrentSearch;
 
 use App\Auth\Permission;
-use App\Support\RequestValues;
 use App\Support\Log;
 use App\Support\Promotion;
+use App\Support\RequestValues;
 
 /**
  * Parse search query parameters and user notification preferences into

@@ -7,10 +7,10 @@ namespace App\ViewModels;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Models\Category;
 use App\Models\SearchBox;
-use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Path;
+use App\Support\RequestValues;
 
 /**
  * Builds TorrentSearchPanelViewModel — the data half of

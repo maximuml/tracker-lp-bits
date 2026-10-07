@@ -16,7 +16,7 @@ use App\Support\Cache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -41,7 +41,7 @@ class StaffMessageController extends LegacyController
         $currentUser = $this->currentUser->get() ?? [];
         $classes = array_chunk(User::$classes, 4, true);
         $returntoQuery = $request->query('returnto');
-        $httpReferer = Input::serverValue('HTTP_REFERER');
+        $httpReferer = RequestValues::serverValue('HTTP_REFERER');
 
         return $this->legacyPage($request, 'staffmess', true, [
             'stdheadMsgalert' => false,

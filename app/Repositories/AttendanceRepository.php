@@ -8,7 +8,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceLog;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Json;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -298,7 +298,7 @@ class AttendanceRepository extends BaseRepository
             }
         }
 
-        $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), false);
+        $lang = Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), false);
         $localesMap = ['en' => null];
         $localeJs = $localesMap[$lang] ?? null;
 

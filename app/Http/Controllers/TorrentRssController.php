@@ -16,7 +16,7 @@ use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\RedisGuard;
@@ -218,7 +218,7 @@ class TorrentRssController extends LegacyController
         }
 
         $torrentRep = $this->torrentRepository;
-        $baseUrl = Url::absolute(SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'));
+        $baseUrl = Url::absolute(SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost'));
         $siteName = SiteConfig::current()->basic->siteName();
         $slogan = SiteConfig::current()->main->slogan();
         $siteEmail = SiteConfig::current()->main->siteEmail();

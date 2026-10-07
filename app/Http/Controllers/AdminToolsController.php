@@ -14,7 +14,7 @@ use App\Services\LocationService;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
@@ -65,7 +65,7 @@ class AdminToolsController extends LegacyController
             'rows' => $rows,
             'paginationTop' => $paginationTop,
             'paginationBottom' => $paginationBottom,
-            'serverRequestUri' => Input::serverValue('REQUEST_URI'),
+            'serverRequestUri' => RequestValues::serverValue('REQUEST_URI'),
         ]);
     }
 

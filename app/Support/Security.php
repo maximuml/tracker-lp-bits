@@ -34,7 +34,7 @@ final class Security
             return $src;
         }
 
-        $documentRoot = Input::serverValue('DOCUMENT_ROOT');
+        $documentRoot = RequestValues::serverValue('DOCUMENT_ROOT');
         if ($documentRoot !== '') {
             $guessScriptFilename = sprintf('%s/%s', $documentRoot, trim($path, '/'));
             if (! file_exists($guessScriptFilename)) {

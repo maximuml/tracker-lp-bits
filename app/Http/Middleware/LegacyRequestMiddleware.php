@@ -12,7 +12,7 @@ use App\Support\Bootstrap;
 use App\Support\Cache\NexusCache;
 use App\Support\Config;
 use App\Support\CurrentUser;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\LegacyRuntime;
 use App\Support\Locale;
 use App\Support\NexusContext;
@@ -120,7 +120,7 @@ final class LegacyRequestMiddleware
             // translator (resources/lang/en/*.php). The language folder
             // cookie is still read by Locale::currentFolder() and a few
             // repositories.
-            PageState::instance()->setLangDir(Locale::folderFromCookie(Input::cookieValue('c_lang_folder')));
+            PageState::instance()->setLangDir(Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder')));
         }
 
         if (! in_array($script, ['announce', 'scrape', 'torrentrss', 'download'], true)) {

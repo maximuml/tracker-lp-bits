@@ -12,7 +12,7 @@ use App\Http\Requests\FaqPostRequest;
 use App\Support\Config\SiteConfig;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\RedisGuard;
 use App\Support\Url;
@@ -107,7 +107,7 @@ class FaqController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
         }
 
-        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         $redirectBase = Url::absolute($baseUrl);
         $action = (string) (request()->query('action') ?? '');
 
@@ -179,7 +179,7 @@ class FaqController extends LegacyController
             return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
         }
 
-        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         $redirectBase = Url::absolute($baseUrl);
         $action = (string) (request()->query('action') ?? '');
 

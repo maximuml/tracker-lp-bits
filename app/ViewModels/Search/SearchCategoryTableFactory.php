@@ -6,7 +6,7 @@ namespace App\ViewModels\Search;
 
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Models\SearchBox;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\Path;
 
@@ -44,7 +44,7 @@ final class SearchCategoryTableFactory
 
         parse_str($checkedValues, $checkedValuesArr);
         $searchBox = $this->searchBoxRep->findForCategoryTable($mode);
-        $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder'));
+        $lang = Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder'));
 
         $withTaxonomies = [];
         if ($searchBox->showsubcat) {

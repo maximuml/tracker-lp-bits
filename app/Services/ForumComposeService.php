@@ -12,7 +12,6 @@ use App\Repositories\TopicRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\LegacyResponse;
 use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Http\Request;
@@ -64,7 +63,7 @@ final class ForumComposeService
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
                 $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$topicid, 'text' => $topicname, 'after' => ' '])->render();
-                $body = '[quote='.Input::unescape((string) $post['username']).']'.Input::unescape((string) $post['body']).'[/quote]';
+                $body = '[quote='.(string) $post['username'].']'.(string) $post['body'].'[/quote]';
                 $postid = $id;
                 $hiddenId = $topicid;
                 $hiddenType = 'reply';
@@ -79,7 +78,7 @@ final class ForumComposeService
                     $subject = (string) ($post['topic_subject'] ?? '');
                     $hassubject = true;
                 }
-                $body = Input::unescape((string) $post['body']);
+                $body = (string) $post['body'];
                 $title = __('forums.text_edit_post');
                 break;
 

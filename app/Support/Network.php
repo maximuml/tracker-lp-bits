@@ -198,7 +198,7 @@ final class Network
 
     private static function serverVar(string $key): string
     {
-        $value = Input::serverValue($key);
+        $value = RequestValues::serverValue($key);
         if ($value === '') {
             $env = getenv($key);
             $value = is_string($env) ? $env : '';
@@ -309,7 +309,7 @@ final class Network
     public static function geoIpInfo(string $ip): array|false
     {
         $locationInfo = Cache::remember("locations_{$ip}", 864000, function () use ($ip) {
-            $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) false);
+            $lang = Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) false);
             $langMap = [
                 'chs' => 'zh-CN',
                 'cht' => 'zh-CN',

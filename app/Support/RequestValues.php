@@ -7,28 +7,15 @@ namespace App\Support;
 use Illuminate\Container\Container;
 
 /**
- * Legacy request-input helpers extracted from `include/functions.php`.
+ * Request-input accessors with type narrowing so callers don't cast
+ * mixed request()/cookie()/server() values.
  *
- * Backs `mkglobal()` and `unesc()`. Values are written into the request
- * context only; no PHP superglobals are mutated.
+ * Previously `Input` (legacy `mkglobal()`/`unesc()` helpers; both gone).
  */
-final class Input
+final class RequestValues
 {
     /**
-     * Return the value unchanged.
-     *
-     * Mirrors the legacy `unesc()` no-op.
-     */
-    public static function unescape(mixed $value): mixed
-    {
-        return $value;
-    }
-
-    /**
      * Get a server variable as string (or default).
-     *
-     * Wraps request()->server() with type narrowing so callers don't
-     * need to cast mixed return values.
      */
     public static function serverValue(string $key, string $default = ''): string
     {
@@ -42,9 +29,6 @@ final class Input
 
     /**
      * Get a cookie value as string|null (or default).
-     *
-     * Wraps request()->cookie() with type narrowing so callers don't
-     * need to cast mixed return values.
      */
     public static function cookieValue(string $key, ?string $default = null): ?string
     {

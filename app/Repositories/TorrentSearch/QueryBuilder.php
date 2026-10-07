@@ -7,7 +7,7 @@ namespace App\Repositories\TorrentSearch;
 use App\Auth\Permission;
 use App\Enums\TorrentApprovalStatus;
 use App\Support\Config\SiteConfig;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Log;
 use Carbon\Carbon;
 
@@ -155,7 +155,7 @@ final class QueryBuilder
              */
             if (! in_array($search_mode, [0, 2])) {
                 $search_mode = 0;
-                Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_mode field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
+                Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_mode field in'.RequestValues::serverValue('SCRIPT_NAME', ''), 'mod');
             }
 
             $search_area = intval($searchParams['search_area'] ?? 0);
@@ -219,7 +219,7 @@ final class QueryBuilder
 
                 if ($search_area !== 0 && $search_area !== 1) {
                     $search_area = 0;
-                    Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_area field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
+                    Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking search_area field in'.RequestValues::serverValue('SCRIPT_NAME', ''), 'mod');
                 }
 
                 $this->pushWhere($wherea, $whereBindings, '('.implode($ANDOR, $likeClauses).')', $likePatterns);

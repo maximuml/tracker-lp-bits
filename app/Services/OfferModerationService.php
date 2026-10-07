@@ -11,7 +11,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Log;
@@ -45,7 +45,7 @@ final class OfferModerationService
 
     private function baseUrl(): string
     {
-        return SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        return SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
     }
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void

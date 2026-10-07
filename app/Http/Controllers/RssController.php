@@ -9,7 +9,7 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\SearchBox;
@@ -127,7 +127,7 @@ class RssController extends LegacyController
         }
 
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
-        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
 
         $allowedShowrows = ['10', '50'];
         $showrows = (string) $request->input('showrows', '10');

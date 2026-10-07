@@ -8,7 +8,7 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Http\Middleware\Filament;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Locale;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -85,7 +85,7 @@ class AppPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 NavigationItem::make('Horizon')
-                    ->label(fn () => Locale::trans('admin.sidebar.queue_monitor', [], Auth::user() ? Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) true) : 'en'))
+                    ->label(fn () => Locale::trans('admin.sidebar.queue_monitor', [], Auth::user() ? Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) true) : 'en'))
                     ->icon('heroicon-o-presentation-chart-line')
                     ->group('System')
                     ->sort(99)

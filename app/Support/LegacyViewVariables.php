@@ -55,7 +55,7 @@ final class LegacyViewVariables
 
         return [
             'SITENAME' => $config->basic->siteName(),
-            'BASEURL' => $config->basic->baseUrl() ?: (string) Input::serverValue('HTTP_HOST', 'localhost'),
+            'BASEURL' => $config->basic->baseUrl() ?: (string) RequestValues::serverValue('HTTP_HOST', 'localhost'),
             'SLOGAN' => $main->slogan(),
             'altname_main' => $main->altName(),
             'browsecatmode' => $browseCat,

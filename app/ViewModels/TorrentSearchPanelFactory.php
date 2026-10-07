@@ -7,7 +7,7 @@ namespace App\ViewModels;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Models\Category;
 use App\Models\SearchBox;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Path;
@@ -32,7 +32,7 @@ final class TorrentSearchPanelFactory
     public function create(int $mode, string $checkedValues, ?string $userNotifs, array $hotSearches): TorrentSearchPanelViewModel
     {
         $searchBox = $this->searchBoxes->findForCategoryTable($mode);
-        $lang = Locale::folderFromCookie(Input::cookieValue('c_lang_folder'));
+        $lang = Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder'));
 
         parse_str($checkedValues, $checkedValuesArr);
 

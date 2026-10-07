@@ -29,7 +29,7 @@ use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\LegacyResponse;
 use App\Support\Locale;
 use App\Support\Lock;
@@ -173,7 +173,7 @@ class SystemBulkController extends LegacyController
                 return $this->legacyAbortResponse(__('takeinvite.std_error'), $exception->getMessage());
             }
 
-            $email = Input::unescape(htmlspecialchars(trim((string) request()->post('email'))));
+            $email = htmlspecialchars(trim((string) request()->post('email')));
             $email = Email::sanitizeForDisplay($email);
             $preRegisterUsername = (string) request()->post('pre_register_username');
             $isPreRegisterEmailAndUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
@@ -382,7 +382,7 @@ class SystemBulkController extends LegacyController
             'body' => $body,
             'sent' => $sent,
             'returnto' => $returnto,
-            'httpReferer' => Input::serverValue('HTTP_REFERER'),
+            'httpReferer' => RequestValues::serverValue('HTTP_REFERER'),
             'submitLabel' => Locale::trans('label.submit', [], null),
             'CURUSER' => $curUser,
         ]);

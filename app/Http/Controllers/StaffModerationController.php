@@ -18,7 +18,7 @@ use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Network;
@@ -70,7 +70,7 @@ class StaffModerationController extends LegacyController
 
         $currentUser = $this->currentUser->get() ?? [];
         $currentUserId = (int) ($this->currentUser->id());
-        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
 
         $action = (string) request()->post('action');
 

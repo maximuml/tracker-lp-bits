@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Support\Cache\NexusCache;
 use App\Support\Database;
 use App\Support\Format;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Locale;
 use App\Support\QueryLog;
 use App\Support\RequestContext;
@@ -77,7 +77,7 @@ class DashboardRepository extends BaseRepository
         $result[$name] = [
             'name' => $name,
             'text' => Locale::trans("dashboard.system_info.{$name}", [], null),
-            'value' => Input::serverValue('SERVER_SOFTWARE', ''),
+            'value' => RequestValues::serverValue('SERVER_SOFTWARE', ''),
         ];
 
         $name = 'load_average';

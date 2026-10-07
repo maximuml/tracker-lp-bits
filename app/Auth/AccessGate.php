@@ -7,7 +7,7 @@ namespace App\Auth;
 use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Models\Setting;
 use App\Support\Api;
-use App\Support\LegacyResponse;
+use App\Support\PageResponses;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
@@ -29,7 +29,7 @@ final class AccessGate
     public function parked(AuthContext $context): void
     {
         if (($context->user['parked'] ?? false)) {
-            LegacyResponse::abort(
+            PageResponses::abort(
                 __('functions.std_access_denied'),
                 __('functions.std_your_account_parked'),
             );
@@ -53,17 +53,17 @@ final class AccessGate
             }
 
             if ($mainPage) {
-                LegacyResponse::redirect('/login');
+                PageResponses::redirect('/login');
             } else {
                 $returnTo = $context->requestUri !== null && $context->requestUri !== ''
                     ? rawurlencode(basename($context->requestUri))
                     : '';
-                LegacyResponse::redirect('/login?returnto='.$returnTo);
+                PageResponses::redirect('/login?returnto='.$returnTo);
             }
         }
 
         if (! ($context->user['enabled'] ?? false) && $context->script !== 'self-enable') {
-            LegacyResponse::redirect('/web/self-enable');
+            PageResponses::redirect('/web/self-enable');
         }
     }
 
@@ -80,7 +80,7 @@ final class AccessGate
 
         if ($type === 'invitesystem') {
             if ($settings['invitesystem'] === 'no') {
-                LegacyResponse::abort(
+                PageResponses::abort(
                     __('functions.std_oops'),
                     __('functions.std_invite_system_disabled'),
                     false,
@@ -91,7 +91,7 @@ final class AccessGate
 
         if ($type === 'normal') {
             if ($settings['registration'] === 'no') {
-                LegacyResponse::abort(
+                PageResponses::abort(
                     __('functions.std_sorry'),
                     __('functions.std_open_registration_disabled'),
                     false,
@@ -103,7 +103,7 @@ final class AccessGate
         if ($maxuserscheck) {
             $userCount = $this->authRepository->countUsers();
             if ($userCount >= $settings['maxusers']) {
-                LegacyResponse::abort(
+                PageResponses::abort(
                     __('functions.std_sorry'),
                     __('functions.std_account_limit_reached'),
                     false,
@@ -116,7 +116,7 @@ final class AccessGate
             $ip = $context->ip;
             $ipCount = $this->authRepository->countUsersByIp($ip);
             if ($ipCount > $settings['maxip']) {
-                LegacyResponse::abort(
+                PageResponses::abort(
                     __('functions.std_sorry'),
                     view('auth._ip_used_many_times', ['ip' => $ip, 'siteName' => Setting::getSiteName()])->render(),
                     false,

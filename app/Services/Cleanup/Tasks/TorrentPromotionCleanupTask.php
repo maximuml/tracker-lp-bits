@@ -10,8 +10,8 @@ use App\Enums\TorrentPromotion;
 use App\Repositories\TorrentCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Log;
+use App\Support\ModelEventPublisher;
 
 /**
  * Priority Class 3: expire time-based torrent promotions.
@@ -116,7 +116,7 @@ final class TorrentPromotionCleanupTask implements CleanupTask
         foreach ($torrents as $torrent) {
             $arr = (array) $torrent;
 
-            Events::publishModel(ModelEvent::TorrentUpdated, (int) $arr['id']);
+            ModelEventPublisher::publish(ModelEvent::TorrentUpdated, (int) $arr['id']);
 
             if ($targetState === TorrentPromotion::NORMAL->value) {
                 Log::write("Torrent {$arr['id']} ({$arr['name']}) is no longer on promotion (time expired)", 'normal');
@@ -139,7 +139,7 @@ final class TorrentPromotionCleanupTask implements CleanupTask
         }
 
         foreach ($torrents as $torrent) {
-            Events::publishModel(ModelEvent::TorrentUpdated, $torrent->id);
+            ModelEventPublisher::publish(ModelEvent::TorrentUpdated, $torrent->id);
         }
     }
 

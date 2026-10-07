@@ -7,8 +7,8 @@ namespace App\Repositories;
 use App\Enums\ModelEvent;
 use App\Models\Snatch;
 use App\Models\TorrentBuyLog;
-use App\Support\Events;
 use App\Support\Logger;
+use App\Support\ModelEventPublisher;
 use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Redis;
 
@@ -71,7 +71,7 @@ class TorrentPurchaseRepository extends BaseRepository
         if ($record) {
             $record->buy_log_id = $buyLogId;
             $record->save();
-            Events::publishModel(ModelEvent::SnatchedUpdated, $record->id, '');
+            ModelEventPublisher::publish(ModelEvent::SnatchedUpdated, $record->id, '');
         } else {
             Logger::writeWithContext((string) "addBuySuccessCache, uid: {$uid}, torrentId: {$torrentId}, buyLogId: {$buyLogId}, snatched not exists", (string) 'error', (bool) false);
         }

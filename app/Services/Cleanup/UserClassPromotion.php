@@ -10,9 +10,9 @@ use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserCleanupRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\ModelEventPublisher;
 use App\Support\UserOps;
 use Illuminate\Support\Facades\DB;
 
@@ -101,7 +101,7 @@ final class UserClassPromotion
                 'msg' => Locale::trans('cleanup.msg_your_ratio_warning_removed', [], $locale),
             ];
 
-            Events::publishModel(ModelEvent::UserUpdated, $uid);
+            ModelEventPublisher::publish(ModelEvent::UserUpdated, $uid);
         }
 
         $this->userCleanupRepository->updateWhereInIds($uidArr, [
@@ -204,7 +204,7 @@ final class UserClassPromotion
                     'msg' => $msg,
                 ];
 
-                Events::publishModel(ModelEvent::UserUpdated, $uid);
+                ModelEventPublisher::publish(ModelEvent::UserUpdated, $uid);
             }
         });
 

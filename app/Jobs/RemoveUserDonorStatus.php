@@ -9,9 +9,9 @@ use App\Repositories\MessageRepository;
 use App\Repositories\UserCleanupRepository;
 use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
-use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\ModelEventPublisher;
 
 class RemoveUserDonorStatus
 {
@@ -42,7 +42,7 @@ class RemoveUserDonorStatus
             Logger::writeWithContext((string) sprintf('update user %s => %s', $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
             $user->save();
             Cache::clearUser($user->id, '');
-            Events::publishModel(ModelEvent::UserUpdated, $user->id, '');
+            ModelEventPublisher::publish(ModelEvent::UserUpdated, $user->id, '');
             $subject = Locale::trans('cleanup.msg_donor_status_removed', [], $locale);
             $msg = Locale::trans('cleanup.msg_donor_status_removed_body', [], $locale);
             $messageRepository->add([

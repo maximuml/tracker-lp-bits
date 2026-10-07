@@ -12,9 +12,9 @@ use App\Repositories\UserCleanupRepository;
 use App\Repositories\UserDetailRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\ModelEventPublisher;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -193,7 +193,7 @@ final class InactiveUserCleanupTask implements CleanupTask
         Logger::writeWithContext((string) ("[DISABLE_USER]({$reasonKey}): ".implode(', ', $uidArr)), (string) 'info', (bool) false);
 
         foreach ($uidArr as $uid) {
-            Events::publishModel(ModelEvent::UserDisabled, $uid);
+            ModelEventPublisher::publish(ModelEvent::UserDisabled, $uid);
         }
     }
 

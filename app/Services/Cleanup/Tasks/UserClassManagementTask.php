@@ -11,9 +11,9 @@ use App\Repositories\UserCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Services\Cleanup\UserClassPromotion;
 use App\Support\Config\SiteConfig;
-use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\ModelEventPublisher;
 use App\Support\User;
 use App\Support\UserOps;
 
@@ -107,7 +107,7 @@ final class UserClassManagementTask implements CleanupTask
                 'msg' => $msg,
             ];
 
-            Events::publishModel(ModelEvent::UserUpdated, $uid);
+            ModelEventPublisher::publish(ModelEvent::UserUpdated, $uid);
         }
 
         $this->userCleanupRepository->updateWhereInIds($uidArr, ['class' => (string) $newclass]);
@@ -178,7 +178,7 @@ final class UserClassManagementTask implements CleanupTask
                 'msg' => $msg,
             ];
 
-            Events::publishModel(ModelEvent::UserUpdated, $uid);
+            ModelEventPublisher::publish(ModelEvent::UserUpdated, $uid);
         }
 
         $this->userCleanupRepository->updateWhereInIds($uidArr, [
@@ -228,7 +228,7 @@ final class UserClassManagementTask implements CleanupTask
         Logger::writeWithContext((string) ('ban user: '.implode(', ', $uidArr)), (string) 'info', (bool) false);
 
         foreach ($uidArr as $uid) {
-            Events::publishModel(ModelEvent::UserUpdated, $uid);
+            ModelEventPublisher::publish(ModelEvent::UserUpdated, $uid);
         }
     }
 

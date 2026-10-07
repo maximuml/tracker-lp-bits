@@ -18,8 +18,8 @@ use App\Enums\TorrentPromotion;
 use App\Enums\TorrentStateNotice;
 use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Cache as AppCache;
-use App\Support\Events;
 use App\Support\Logger;
+use App\Support\ModelEventPublisher;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -138,7 +138,7 @@ class TorrentState extends NexusModel
         Logger::writeWithContext((string) ('cache_del: '.Setting::TORRENT_GLOBAL_STATE_CACHE_KEY), (string) 'info', (bool) false);
         AppCache::forgetWithLocales(Setting::TORRENT_GLOBAL_STATE_CACHE_KEY);
         Logger::writeWithContext((string) 'publish_model_event: global_promotion_state_updated', (string) 'info', (bool) false);
-        Events::publishModel(ModelEvent::GlobalPromotionStateUpdated, 0, '');
+        ModelEventPublisher::publish(ModelEvent::GlobalPromotionStateUpdated, 0, '');
     }
 
     /**

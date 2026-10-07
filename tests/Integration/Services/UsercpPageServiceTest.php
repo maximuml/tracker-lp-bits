@@ -15,7 +15,7 @@ use App\Services\Usercp\UsercpPersonalBuilder;
 use App\Services\Usercp\UsercpSecurityBuilder;
 use App\Services\Usercp\UsercpTrackerBuilder;
 use App\Services\UsercpPageService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\ViewModels\Search\SearchCategoryTableFactory;
 use App\ViewModels\Usercp\TwoStepState;
@@ -83,7 +83,7 @@ final class UsercpPageServiceTest extends TestCase
                 $lookup,
                 app(UsercpRepository::class),
                 $this->tokenRepository ?? Mockery::mock(TokenRepository::class),
-                new LegacyRedisCache,
+                new NexusCache,
             ),
             new UsercpPersonalBuilder($lookup),
             new UsercpTrackerBuilder(app(SearchCategoryTableFactory::class)),

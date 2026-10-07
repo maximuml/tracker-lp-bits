@@ -12,7 +12,7 @@ use App\Enums\UserClickTopic;
 use App\Models\User;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Forum;
@@ -38,7 +38,7 @@ final class ForumTopicViewService
     public function __construct(
         private readonly ForumIndexService $index,
         private readonly ForumRepositoryInterface $forumRepository,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
         private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
         private readonly PostRepositoryInterface $postRepository,
@@ -88,7 +88,7 @@ final class ForumTopicViewService
 
         $postcount = $this->postRepository->countTopicPosts($topicid, $authorid ?: null);
         if (! $authorid) {
-            $this->legacyRedisCache?->cache_value('topic_'.$topicid.'_post_count', $postcount, 3600);
+            $this->cache?->put('topic_'.$topicid.'_post_count', $postcount, 3600);
         }
 
         $perpage = $postsperpage;
@@ -137,7 +137,7 @@ final class ForumTopicViewService
         $uncachedPosterIds = [];
         $cachedCounts = $uidArr === []
             ? []
-            : ($this->legacyRedisCache?->get_values(array_map(fn ($id) => 'user_'.$id.'_post_count', $uidArr)) ?? []);
+            : ($this->cache?->getMany(array_map(fn ($id) => 'user_'.$id.'_post_count', $uidArr)) ?? []);
         foreach ($uidArr as $posterId) {
             $cached = $cachedCounts['user_'.$posterId.'_post_count'] ?? false;
             if ($cached !== false) {
@@ -149,13 +149,13 @@ final class ForumTopicViewService
         if ($uncachedPosterIds !== []) {
             $postCounts += $this->postRepository->countUserPostsBatch($uncachedPosterIds);
             foreach ($uncachedPosterIds as $posterId) {
-                $this->legacyRedisCache?->cache_value('user_'.$posterId.'_post_count', $postCounts[$posterId] ?? 0, 3600);
+                $this->cache?->put('user_'.$posterId.'_post_count', $postCounts[$posterId] ?? 0, 3600);
             }
         }
         $lpr = $this->index->getLastReadPostId($topicid, $curUser);
 
         $renderedFmt = [];
-        if ($this->legacyRedisCache !== null && $allPosts !== []) {
+        if ($this->cache !== null && $allPosts !== []) {
             $fmtKeys = array_map(static fn ($p) => 'fmt_post_'.md5((string) ($p['body'] ?? '')), $allPosts);
             if (YesNo::isYes($curUser['signatures'] ?? null)) {
                 foreach ($allPosts as $p) {
@@ -165,7 +165,7 @@ final class ForumTopicViewService
                     }
                 }
             }
-            $renderedFmt = $this->legacyRedisCache->get_values(array_values(array_unique($fmtKeys)));
+            $renderedFmt = $this->cache->getMany(array_values(array_unique($fmtKeys)));
         }
         $renderFmt = function (string $key, callable $render) use (&$renderedFmt): SafeHtml {
             $hit = $renderedFmt[$key] ?? false;
@@ -173,7 +173,7 @@ final class ForumTopicViewService
                 return SafeHtml::fromTrustedHtml($hit);
             }
             $html = $render();
-            $this->legacyRedisCache?->cache_value($key, (string) $html, 86400);
+            $this->cache?->put($key, (string) $html, 86400);
             $renderedFmt[$key] = (string) $html;
 
             return $html;
@@ -200,7 +200,7 @@ final class ForumTopicViewService
             $isLast = $pn === $pc;
             if ($isLast && $postid > $lpr) {
                 $this->readStateRepository->markPostRead($userId, $topicid, $postid, (int) ($curUser['last_catchup'] ?? 0));
-                $this->legacyRedisCache?->delete_value('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
+                $this->cache?->forget('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
             }
 
             $canViewProtected = $pn + $offset <= 1 || Forum::canViewPost($userId, $arr);

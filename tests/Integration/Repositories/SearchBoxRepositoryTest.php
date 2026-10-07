@@ -11,7 +11,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\SearchBoxRepository;
 use App\Support\Cache;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -422,22 +422,22 @@ final class SearchBoxRepositoryTest extends TestCase
             'sort_index' => 0,
         ]);
 
-        $cache = app(LegacyRedisCache::class);
-        if (! $cache->getIsEnabled()) {
+        $cache = app(NexusCache::class);
+        if (! $cache->enabled()) {
             $this->markTestSkipped('Redis cache is disabled in this environment.');
         }
 
         // Drop any stale payload from earlier tests, then prime the caches
         // exactly as the runtime does.
-        $cache->delete_value('category_content');
+        $cache->forget('category_content');
         Category::resetState();
         $this->assertNotNull(Category::row($cache, $catId));
-        $this->assertIsArray($cache->get_value('category_content'));
+        $this->assertIsArray($cache->get('category_content'));
 
         $this->repository->deleteCategory($catId);
 
         // Both the raw Redis key and every locale variant are gone.
-        $this->assertFalse((bool) $cache->get_value('category_content'));
+        $this->assertFalse((bool) $cache->get('category_content'));
 
         // After the per-request reset the deleted row is no longer served.
         Category::resetState();
@@ -449,19 +449,19 @@ final class SearchBoxRepositoryTest extends TestCase
         /** @var SearchBox $box */
         $box = SearchBox::factory()->create();
 
-        $cache = app(LegacyRedisCache::class);
-        if (! $cache->getIsEnabled()) {
+        $cache = app(NexusCache::class);
+        if (! $cache->enabled()) {
             $this->markTestSkipped('Redis cache is disabled in this environment.');
         }
 
-        $cache->cache_value('search_box_content', ['box' => $box->id], 3600);
-        $cache->cache_value('category_list_mode_'.$box->id, ['cat'], 3600);
-        $this->assertNotFalse($cache->get_value('search_box_content'));
+        $cache->put('search_box_content', ['box' => $box->id], 3600);
+        $cache->put('category_list_mode_'.$box->id, ['cat'], 3600);
+        $this->assertNotFalse($cache->get('search_box_content'));
 
         $this->repository->delete($box->id);
 
-        $this->assertFalse((bool) $cache->get_value('search_box_content'));
-        $this->assertFalse((bool) $cache->get_value('category_list_mode_'.$box->id));
+        $this->assertFalse((bool) $cache->get('search_box_content'));
+        $this->assertFalse((bool) $cache->get('category_list_mode_'.$box->id));
     }
 
     public function test_category_row_memoization_resets_between_requests(): void
@@ -476,8 +476,8 @@ final class SearchBoxRepositoryTest extends TestCase
             'sort_index' => 0,
         ]);
 
-        $cache = app(LegacyRedisCache::class);
-        $cache->delete_value('category_content');
+        $cache = app(NexusCache::class);
+        $cache->forget('category_content');
         Category::resetState();
         $this->assertSame('Before', Category::row($cache, $catId)['name']);
 

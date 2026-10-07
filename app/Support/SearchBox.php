@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Arr;
 
@@ -24,16 +24,16 @@ final class SearchBox
      *
      * Mirrors `get_searchbox_value($mode, $item)`.
      */
-    public static function value(?LegacyRedisCache $cache, int|string $mode, string $item): mixed
+    public static function value(?NexusCache $cache, int|string $mode, string $item): mixed
     {
         if (self::$rows === null) {
-            $cached = $cache !== null ? $cache->get_value('search_box_content') : false;
+            $cached = $cache !== null ? $cache->get('search_box_content') : false;
             if ($cached !== false && is_array($cached)) {
                 self::$rows = $cached;
             } else {
                 self::$rows = self::searchBoxRepository()->getAllRows();
                 if ($cache !== null) {
-                    $cache->cache_value('search_box_content', self::$rows, 100500);
+                    $cache->put('search_box_content', self::$rows, 100500);
                 }
             }
         }
@@ -48,13 +48,13 @@ final class SearchBox
      *
      * @return array<int, array<string, mixed>>
      */
-    public static function itemList(?LegacyRedisCache $cache, string $table, int|string $mode): array
+    public static function itemList(?NexusCache $cache, string $table, int|string $mode): array
     {
         $mode = (int) $mode;
         $cacheKey = "{$table}_list_mode_{$mode}";
 
         if ($cache !== null) {
-            $ret = $cache->get_value($cacheKey);
+            $ret = $cache->get($cacheKey);
             if ($ret !== false && is_array($ret)) {
                 return $ret;
             }
@@ -67,7 +67,7 @@ final class SearchBox
         }
 
         if ($cache !== null) {
-            $cache->cache_value($cacheKey, $ret, 3600);
+            $cache->put($cacheKey, $ret, 3600);
         }
 
         return $ret;
@@ -104,7 +104,7 @@ final class SearchBox
      */
     public static function valueWithContext(int|string $mode, string $item = 'showsubcat'): mixed
     {
-        return self::value(LegacyRedisCache::instance(), $mode, $item);
+        return self::value(NexusCache::instance(), $mode, $item);
     }
 
     /**
@@ -116,7 +116,7 @@ final class SearchBox
      */
     public static function itemListWithContext(string $table, int|string $mode): array
     {
-        return self::itemList(LegacyRedisCache::instance(), $table, $mode);
+        return self::itemList(NexusCache::instance(), $table, $mode);
     }
 
     private static function searchBoxRepository(): SearchBoxRepositoryInterface

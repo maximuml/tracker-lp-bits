@@ -7,7 +7,7 @@ namespace Tests\Integration\Services;
 use App\Repositories\OfferRepository;
 use App\Repositories\UsercpRepository;
 use App\Services\OfferPageService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\ViewModels\Offer\OfferListViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -151,10 +151,10 @@ final class OfferPageServiceTest extends TestCase
 
     private function mockCache(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
+        $cache = Mockery::mock(NexusCache::class);
         $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $this->app->instance(LegacyRedisCache::class, $cache);
+        $cache->shouldReceive('get')->andReturn(false);
+        $this->app->instance(NexusCache::class, $cache);
     }
 
     /**

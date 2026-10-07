@@ -8,7 +8,7 @@ use App\Exceptions\NexusException;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Requests\DownloadNoticeRequest;
 use App\Repositories\TorrentDownloadRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -106,7 +106,7 @@ final class TorrentDownloadControllerTest extends TestCase
     public function test_downloadnotice_redirects_guest_to_downloadnotice(): void
     {
         $this->mockCurrentUser(null);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(TorrentDownloadController::class);
         $request = Request::create('/downloadnotice', 'GET', ['torrentid' => 5, 'type' => 'client']);
@@ -121,7 +121,7 @@ final class TorrentDownloadControllerTest extends TestCase
     public function test_downloadnotice_post_returns_error_for_missing_torrentid(): void
     {
         $this->mockCurrentUser(['id' => 1, 'class' => 1]);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(TorrentDownloadController::class);
         $request = DownloadNoticeRequest::create('/web/torrents/download-notice', 'POST', [
@@ -139,7 +139,7 @@ final class TorrentDownloadControllerTest extends TestCase
     public function test_downloadnotice_post_returns_error_for_invalid_type(): void
     {
         $this->mockCurrentUser(['id' => 1, 'class' => 1]);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(TorrentDownloadController::class);
         $request = DownloadNoticeRequest::create('/web/torrents/download-notice', 'POST', [

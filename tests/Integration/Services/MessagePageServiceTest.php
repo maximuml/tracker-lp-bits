@@ -7,7 +7,7 @@ namespace Tests\Integration\Services;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -53,7 +53,7 @@ final class MessagePageServiceTest extends TestCase
             $this->app->make(MessageRepository::class),
             $this->app->make(MailboxRepository::class),
             $this->app->make(CurrentUser::class),
-            $this->app->make(LegacyRedisCache::class),
+            $this->app->make(NexusCache::class),
         );
     }
 
@@ -68,11 +68,11 @@ final class MessagePageServiceTest extends TestCase
 
     private function mockCache(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
+        $cache = Mockery::mock(NexusCache::class);
         $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $this->app->instance(LegacyRedisCache::class, $cache);
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('forget')->andReturn(true);
+        $this->app->instance(NexusCache::class, $cache);
     }
 
     /** @param array<string, mixed> $overrides */

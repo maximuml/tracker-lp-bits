@@ -18,7 +18,7 @@ use Tests\TestCase;
  *
  * The remaining Support classes are properly separated by responsibility:
  * - Cache: main cache facade (App\Support\Cache)
- * - Cache\LegacyRedisCache: Redis implementation
+ * - Cache\NexusCache: Redis implementation
  * - Html: HTML helpers (App\Support\Html) — now includes formatHidden/formatTextAlign
  * - Html\SafeHtml: HTML sanitization VO
  * - Html\HtmlSanitizer: sanitizer implementation
@@ -121,7 +121,7 @@ final class AbstractionConsolidationTest extends TestCase
     public function test_core_support_classes_exist(): void
     {
         $this->assertFileExists(app_path('Support/Cache.php'));
-        $this->assertFileExists(app_path('Support/Cache/LegacyRedisCache.php'));
+        $this->assertFileExists(app_path('Support/Cache/NexusCache.php'));
         $this->assertFileExists(app_path('Support/Html.php'));
         $this->assertFileExists(app_path('Support/Html/SafeHtml.php'));
         $this->assertFileExists(app_path('Support/Html/HtmlSanitizer.php'));

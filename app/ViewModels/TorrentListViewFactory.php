@@ -11,7 +11,7 @@ use App\Enums\UserTimeType;
 use App\Models\Torrent;
 use App\Repositories\TorrentModerationRepository;
 use App\Services\TorrentStatsService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
@@ -44,7 +44,7 @@ final class TorrentListViewFactory
     private const MAX_NAME_LENGTH = 200;
 
     public function __construct(
-        private readonly ?LegacyRedisCache $cache,
+        private readonly ?NexusCache $cache,
         private readonly CurrentUser $currentUser,
         private readonly TorrentModerationRepository $moderationRep,
         private readonly TorrentStatsService $statsService,
@@ -129,7 +129,7 @@ final class TorrentListViewFactory
             }
             $cachedLastcoms = $commentedTorrentIds === []
                 ? []
-                : $cache->get_values(array_map(fn ($id) => 'torrent_'.$id.'_last_comment_content', $commentedTorrentIds));
+                : $cache->getMany(array_map(fn ($id) => 'torrent_'.$id.'_last_comment_content', $commentedTorrentIds));
             $uncachedTorrentIds = [];
             foreach ($commentedTorrentIds as $id) {
                 $cached = $cachedLastcoms['torrent_'.$id.'_last_comment_content'] ?? false;
@@ -142,7 +142,7 @@ final class TorrentListViewFactory
             if ($uncachedTorrentIds !== []) {
                 $lastcoms += $this->statsService->getLastComments($uncachedTorrentIds);
                 foreach ($uncachedTorrentIds as $id) {
-                    $cache->cache_value('torrent_'.$id.'_last_comment_content', $lastcoms[$id] ?? null, 1855);
+                    $cache->put('torrent_'.$id.'_last_comment_content', $lastcoms[$id] ?? null, 1855);
                 }
             }
             UserDisplay::preload(array_map(fn ($l) => (int) ($l['user'] ?? 0), $lastcoms));
@@ -150,7 +150,7 @@ final class TorrentListViewFactory
 
         $renderedTt = $lastcoms === []
             ? []
-            : $cache->get_values(array_map(
+            : $cache->getMany(array_map(
                 static fn ($l) => 'fmt_tt_'.md5(self::tooltipText((string) ($l['text'] ?? ''))),
                 array_values($lastcoms)
             ));
@@ -162,7 +162,7 @@ final class TorrentListViewFactory
                 return $hit;
             }
             $html = (string) Format::formatComment($truncated, true, false, false, true, 600, false, false);
-            $cache->cache_value($key, $html, 86400);
+            $cache->put($key, $html, 86400);
             $renderedTt[$key] = $html;
 
             return $html;

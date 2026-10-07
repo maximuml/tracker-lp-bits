@@ -8,7 +8,7 @@ use App\Enums\UserClass;
 use App\Http\Controllers\SystemMaintenanceController;
 use App\Jobs\SendLegacyMail;
 use App\Models\User;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -29,7 +29,7 @@ final class SystemMaintenanceControllerTest extends TestCase
     {
         parent::setUp();
 
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
     }
 
     protected function tearDown(): void

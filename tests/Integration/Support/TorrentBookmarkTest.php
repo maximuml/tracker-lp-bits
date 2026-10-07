@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Support;
 
 use App\Services\TorrentStatsService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\TorrentBookmark;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
@@ -40,8 +40,8 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_bookmark_array_returns_cached_value(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('get_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('get')
             ->with('user_42_bookmark_array')
             ->once()
             ->andReturn([10, 20, 30]);
@@ -53,12 +53,12 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_bookmark_array_falls_back_to_repository(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('get_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('get')
             ->with('user_99_bookmark_array')
             ->once()
             ->andReturn(false);
-        $cache->shouldReceive('cache_value')
+        $cache->shouldReceive('put')
             ->with('user_99_bookmark_array', Mockery::type('array'), Mockery::type('int'))
             ->once();
 
@@ -90,8 +90,8 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_state_markup_unbookmarked_icon(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('get_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('get')
             ->with('user_1_bookmark_array')
             ->once()
             ->andReturn([10, 20]);
@@ -105,8 +105,8 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_state_markup_bookmarked_icon(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('get_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('get')
             ->with('user_1_bookmark_array')
             ->once()
             ->andReturn([10, 20, 30]);
@@ -120,8 +120,8 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_state_markup_unbookmarked_text(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('get_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('get')
             ->with('user_1_bookmark_array')
             ->once()
             ->andReturn([]);
@@ -133,8 +133,8 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_state_markup_bookmarked_text(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('get_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('get')
             ->with('user_1_bookmark_array')
             ->once()
             ->andReturn([30]);
@@ -146,8 +146,8 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_state_markup_with_empty_labels(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('get_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('get')
             ->with('user_1_bookmark_array')
             ->once()
             ->andReturn([]);
@@ -159,8 +159,8 @@ final class TorrentBookmarkTest extends TestCase
 
     public function test_state_markup_accepts_string_user_id(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('get_value')
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('get')
             ->with('user_42_bookmark_array')
             ->once()
             ->andReturn([30]);

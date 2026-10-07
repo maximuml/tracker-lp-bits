@@ -12,7 +12,7 @@ use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumIndexService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -40,8 +40,8 @@ final class ForumIndexServiceTest extends TestCase
     /** @var ForumRepository&MockInterface */
     private ForumRepository $forumRepo;
 
-    /** @var LegacyRedisCache&MockInterface */
-    private LegacyRedisCache $cache;
+    /** @var NexusCache&MockInterface */
+    private NexusCache $cache;
 
     /** @var TopicRepository&MockInterface */
     private TopicRepository $topicRepo;
@@ -65,12 +65,12 @@ final class ForumIndexServiceTest extends TestCase
         $repo->shouldIgnoreMissing(false);
         $this->forumRepo = $repo;
 
-        /** @var LegacyRedisCache&MockInterface $cache */
-        $cache = Mockery::mock(LegacyRedisCache::class);
+        /** @var NexusCache&MockInterface $cache */
+        $cache = Mockery::mock(NexusCache::class);
         $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $cache->shouldReceive('cache_value')->andReturn(true);
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('forget')->andReturn(true);
+        $cache->shouldReceive('put')->andReturn(true);
         $this->cache = $cache;
 
         /** @var TopicRepository&MockInterface $topicRepo */

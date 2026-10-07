@@ -23,7 +23,7 @@ use App\Repositories\ModerationRepository;
 use App\Repositories\UserDetailRepository;
 use App\Repositories\UserListingRepository;
 use App\Services\PermissionChecker;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Email;
@@ -55,17 +55,17 @@ class SystemBulkController extends LegacyController
 
     private CurrentUser $currentUser;
 
-    private ?LegacyRedisCache $legacyRedisCache;
+    private ?NexusCache $cache;
 
     public function __construct(private readonly ModerationRepository $moderationRepository, private readonly UserListingRepository $userListingRepository, private readonly PermissionChecker $permissionChecker, private readonly InviteRepository $inviteRepository, private readonly UserDetailRepository $userDetailRepository,
         UserModerationRepositoryInterface $userModerationRepository,
         CurrentUser $currentUser,
-        ?LegacyRedisCache $legacyRedisCache,
+        ?NexusCache $cache,
         private readonly AccessGate $accessGate,
     ) {
         $this->userModerationRepository = $userModerationRepository;
         $this->currentUser = $currentUser;
-        $this->legacyRedisCache = $legacyRedisCache;
+        $this->cache = $cache;
     }
 
     public function takeamountupload(Request $request): RedirectResponse
@@ -342,11 +342,11 @@ class SystemBulkController extends LegacyController
 
         if (request()->post('setdealt')) {
             $this->moderationRepository->markReportsDealt($delreportIds, $currentUserId);
-            $this->legacyRedisCache?->delete_value('staff_new_report_count', true);
+            $this->cache?->forget('staff_new_report_count', true);
         } elseif (request()->post('delete')) {
             $this->moderationRepository->deleteReports($delreportIds);
-            $this->legacyRedisCache?->delete_value('staff_new_report_count', true);
-            $this->legacyRedisCache?->delete_value('staff_report_count', true);
+            $this->cache?->forget('staff_new_report_count', true);
+            $this->cache?->forget('staff_report_count', true);
         }
 
         return redirect('/web/reports');

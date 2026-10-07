@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Jobs\GenerateCoverThumbnail;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -19,11 +19,11 @@ use App\Support\Config\SiteConfig;
 final class CoverThumb
 {
     public function __construct(
-        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+        private readonly ?NexusCache $cache = null,
     ) {}
 
     /**
-     * @param  object|null  $cache  Legacy cache object with a public `$redis` property.
+     * @param  NexusCache|null  $cache  Cache exposing the phpredis client for the NX lock.
      */
     public function url(
         string $url,
@@ -33,7 +33,7 @@ final class CoverThumb
         string $saveDir,
         string $httpDir,
         string $rootPath,
-        ?object $cache = null,
+        ?NexusCache $cache = null,
     ): string {
         $url = trim($url);
         if ($url === '') {
@@ -81,7 +81,7 @@ final class CoverThumb
             $saveDirectory ?: 'attachments',
             $httpDirectory ?: 'attachments',
             defined('ROOT_PATH') ? (string) ROOT_PATH : '',
-            $this->legacyRedisCache,
+            $this->cache,
         );
     }
 
@@ -91,10 +91,10 @@ final class CoverThumb
         int $maxWidth,
         int $maxHeight,
         int $quality,
-        ?object $cache,
+        ?NexusCache $cache,
     ): void {
         $lockSet = false;
-        if ($cache !== null && property_exists($cache, 'redis')) {
+        if ($cache?->redis !== null) {
             $lockKey = 'cover_thumb:'.$absolutePath;
             $lockSet = (bool) $cache->redis->set($lockKey, 1, ['nx', 'ex' => 300]);
         }

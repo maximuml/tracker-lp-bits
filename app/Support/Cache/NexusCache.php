@@ -7,21 +7,21 @@ namespace App\Support\Cache;
 use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Redis;
 
-class LegacyRedisCache
+class NexusCache
 {
     public bool $isEnabled = false;
 
-    public int $clearCache = 0;
+    public int $bypass = 0;
 
-    public int $cacheReadTimes = 0;
+    public int $readCount = 0;
 
-    public int $cacheWriteTimes = 0;
+    public int $writeCount = 0;
 
     /** @var array<string, array<string, int>> */
     public array $keyHits = [];
 
     /** @var array<int, string> */
-    public array $languageFolderArray = [];
+    public array $langFolders = [];
 
     public ?\Redis $redis = null;
 
@@ -49,54 +49,54 @@ class LegacyRedisCache
         }
     }
 
-    public function getIsEnabled(): bool
+    public function enabled(): bool
     {
         return $this->isEnabled;
     }
 
-    public function setClearCache(int $isEnabled): void
+    public function setBypass(int $isEnabled): void
     {
-        $this->clearCache = $isEnabled;
+        $this->bypass = $isEnabled;
     }
 
     /** @return array<int, string> */
-    public function getLanguageFolderArray(): array
+    public function langFolders(): array
     {
-        return $this->languageFolderArray;
+        return $this->langFolders;
     }
 
-    /** @param array<int, string> $languageFolderArray */
-    public function setLanguageFolderArray(array $languageFolderArray): void
+    /** @param array<int, string> $langFolders */
+    public function setLangFolders(array $langFolders): void
     {
-        $this->languageFolderArray = $languageFolderArray;
+        $this->langFolders = $langFolders;
     }
 
-    public function getClearCache(): int
+    public function bypasses(): int
     {
-        return $this->clearCache;
+        return $this->bypass;
     }
 
     // Wrapper for Memcache::set, with the zlib option removed and default duration of 1 hour
-    public function cache_value(string $Key, mixed $Value, int $Duration = 3600): void
+    public function put(string $Key, mixed $Value, int $Duration = 3600): void
     {
-        if (! $this->getIsEnabled() || $this->redis === null) {
+        if (! $this->enabled() || $this->redis === null) {
             return;
         }
         $Value = $this->serialize($Value);
         $redis = $this->redis;
         RedisGuard::attempt(fn () => $redis->set($Key, $Value, $Duration));
-        $this->cacheWriteTimes++;
+        $this->writeCount++;
         $this->keyHits['write'][$Key] = ! isset($this->keyHits['write'][$Key]) ? 1 : $this->keyHits['write'][$Key] + 1;
     }
 
     // Wrapper for Memcache::get. Why? Because wrappers are cool.
-    public function get_value(string $Key): mixed
+    public function get(string $Key): mixed
     {
-        if (! $this->getIsEnabled()) {
+        if (! $this->enabled()) {
             return false;
         }
-        if ($this->getClearCache()) {
-            $this->delete_value($Key);
+        if ($this->bypasses()) {
+            $this->forget($Key);
 
             return false;
         }
@@ -108,7 +108,7 @@ class LegacyRedisCache
         $redis = $this->redis;
         $Return = RedisGuard::attempt(fn () => $redis->get($Key), false);
         $Return = $Return !== null ? $this->unserialize($Return) : null;
-        $this->cacheReadTimes++;
+        $this->readCount++;
         $this->keyHits['read'][$Key] = ! isset($this->keyHits['read'][$Key]) ? 1 : $this->keyHits['read'][$Key] + 1;
 
         return $Return;
@@ -120,15 +120,15 @@ class LegacyRedisCache
      * @param  array<int, string>  $Keys
      * @return array<string, mixed> key => unserialized value (false on miss)
      */
-    public function get_values(array $Keys): array
+    public function getMany(array $Keys): array
     {
         $result = array_fill_keys($Keys, false);
-        if ($Keys === [] || ! $this->getIsEnabled()) {
+        if ($Keys === [] || ! $this->enabled()) {
             return $result;
         }
-        if ($this->getClearCache()) {
+        if ($this->bypasses()) {
             foreach ($Keys as $Key) {
-                $this->delete_value($Key);
+                $this->forget($Key);
             }
 
             return $result;
@@ -146,21 +146,21 @@ class LegacyRedisCache
             $result[$Key] = $this->unserialize($rows[$i] ?? false);
             $this->keyHits['read'][$Key] = ! isset($this->keyHits['read'][$Key]) ? 1 : $this->keyHits['read'][$Key] + 1;
         }
-        $this->cacheReadTimes += count($keys);
+        $this->readCount += count($keys);
 
         return $result;
     }
 
     // Wrapper for Memcache::delete. For a reason, see above.
-    public function delete_value(string $Key, bool $AllLang = false): int
+    public function forget(string $Key, bool $AllLang = false): int
     {
-        if (! $this->getIsEnabled() || $this->redis === null) {
+        if (! $this->enabled() || $this->redis === null) {
             return 0;
         }
         $redis = $this->redis;
         $deleted = (int) RedisGuard::attempt(fn () => $redis->del($Key), 0);
         if ($AllLang) {
-            $langfolder_array = $this->getLanguageFolderArray();
+            $langfolder_array = $this->langFolders();
             foreach ($langfolder_array as $lf) {
                 RedisGuard::attempt(fn () => $redis->del($lf.'_'.$Key));
             }
@@ -169,18 +169,18 @@ class LegacyRedisCache
         return $deleted;
     }
 
-    public function getCacheReadTimes(): int
+    public function readCount(): int
     {
-        return $this->cacheReadTimes;
+        return $this->readCount;
     }
 
-    public function getCacheWriteTimes(): int
+    public function writeCount(): int
     {
-        return $this->cacheWriteTimes;
+        return $this->writeCount;
     }
 
     /** @return array<string, int> */
-    public function getKeyHits(string $type = 'read'): array
+    public function keyHits(string $type = 'read'): array
     {
         return $this->keyHits[$type] ?? [];
     }

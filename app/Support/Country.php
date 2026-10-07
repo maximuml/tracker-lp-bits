@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\CountryRepositoryInterface;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 
 /**
  * Legacy country helper extracted from `include/functions.php`.
@@ -22,16 +22,14 @@ final class Country
     /**
      * @return array<string, mixed>|null
      */
-    public static function row(mixed $cache, int|string $id): ?array
+    public static function row(?NexusCache $cache, int|string $id): ?array
     {
         $cacheKey = 'country_'.$id.'_content';
-        $row = is_object($cache) && method_exists($cache, 'get_value') ? $cache->get_value($cacheKey) : false;
+        $row = $cache?->get($cacheKey) ?? false;
 
         if ($row === false) {
             $row = app(CountryRepositoryInterface::class)->findById($id);
-            if (is_object($cache) && method_exists($cache, 'cache_value')) {
-                $cache->cache_value($cacheKey, $row, 86400);
-            }
+            $cache?->put($cacheKey, $row, 86400);
         }
 
         return $row ?: null;
@@ -44,6 +42,6 @@ final class Country
      */
     public static function rowWithContext(int|string $id): ?array
     {
-        return self::row(LegacyRedisCache::instance(), $id);
+        return self::row(NexusCache::instance(), $id);
     }
 }

@@ -11,7 +11,7 @@ use App\Http\Requests\UserBanLogRequest;
 use App\Repositories\ModerationRepository;
 use App\Repositories\UserModerationRepository;
 use App\Services\LocationService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Input;
@@ -30,7 +30,7 @@ class AdminToolsController extends LegacyController
         private readonly ModerationRepository $moderationRepository,
         private readonly LocationService $locationService,
         private readonly CurrentUser $currentUser,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
     ) {}
 
     public function userBanLog(Request $request): View|RedirectResponse|Response
@@ -120,9 +120,9 @@ class AdminToolsController extends LegacyController
             $error = 'You must fill in cache name.';
         } else {
             $multilang = $request->input('multilang') === 'yes';
-            $cache = $this->legacyRedisCache;
+            $cache = $this->cache;
             if ($cache !== null) {
-                $cache->delete_value($cachename, $multilang);
+                $cache->forget($cachename, $multilang);
             }
             $done = true;
         }

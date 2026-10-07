@@ -14,7 +14,7 @@ use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumIndexService;
 use App\Services\ForumListingService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Settings;
 use App\Support\Time;
@@ -63,14 +63,14 @@ final class ForumListingServiceTest extends TestCase
             $this->app->make(CurrentUser::class),
             $this->app->make(ForumRepository::class),
             new OverforumRepository,
-            $this->app->make(LegacyRedisCache::class),
+            $this->app->make(NexusCache::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),
             $this->app->make(PostRepository::class),
         );
         $this->service = new ForumListingService(
             $indexService,
-            $this->app->make(LegacyRedisCache::class),
+            $this->app->make(NexusCache::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(PostRepository::class),
         );
@@ -111,21 +111,21 @@ final class ForumListingServiceTest extends TestCase
     /** @param  array<string, mixed>|null  $getValues */
     private function mockCache(?array $getValues = null): void
     {
-        /** @var LegacyRedisCache&MockInterface $cache */
-        $cache = Mockery::mock(LegacyRedisCache::class);
+        /** @var NexusCache&MockInterface $cache */
+        $cache = Mockery::mock(NexusCache::class);
         $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('get_values')->andReturn($getValues ?? []);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $cache->shouldReceive('cache_value')->andReturn(true);
-        $this->app->instance(LegacyRedisCache::class, $cache);
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('getMany')->andReturn($getValues ?? []);
+        $cache->shouldReceive('forget')->andReturn(true);
+        $cache->shouldReceive('put')->andReturn(true);
+        $this->app->instance(NexusCache::class, $cache);
         $this->rebuildService(null, $cache);
     }
 
-    private function rebuildService(?ForumRepository $repo = null, ?LegacyRedisCache $cache = null): void
+    private function rebuildService(?ForumRepository $repo = null, ?NexusCache $cache = null): void
     {
         $forumRepo = $repo ?? $this->app->make(ForumRepository::class);
-        $cacheInstance = $cache ?? $this->app->make(LegacyRedisCache::class);
+        $cacheInstance = $cache ?? $this->app->make(NexusCache::class);
 
         $indexService = new ForumIndexService(
             $this->app->make(CurrentUser::class),

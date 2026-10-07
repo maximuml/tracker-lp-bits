@@ -6,7 +6,7 @@ namespace App\Repositories;
 
 use App\Models\Poll;
 use App\Models\PollAnswer;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Html\SafeHtml;
 use App\Support\UserDisplay;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class PollRepository
 {
     public function __construct(
-        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+        private readonly ?NexusCache $cache = null,
     ) {}
 
     /**
@@ -48,9 +48,9 @@ class PollRepository
     {
         if ($id) {
             DB::table('polls')->where('id', $id)->update($data);
-            if ($this->legacyRedisCache !== null) {
-                $this->legacyRedisCache->delete_value('current_poll_content');
-                $this->legacyRedisCache->delete_value('current_poll_result', true);
+            if ($this->cache !== null) {
+                $this->cache->forget('current_poll_content');
+                $this->cache->forget('current_poll_result', true);
             }
 
             return $id;
@@ -59,9 +59,9 @@ class PollRepository
         $data['added'] = now()->toDateTimeString();
         $newId = (int) DB::table('polls')->insertGetId($data);
 
-        if ($this->legacyRedisCache !== null) {
-            $this->legacyRedisCache->delete_value('current_poll_content');
-            $this->legacyRedisCache->delete_value('current_poll_result', true);
+        if ($this->cache !== null) {
+            $this->cache->forget('current_poll_content');
+            $this->cache->forget('current_poll_result', true);
         }
 
         return $newId;

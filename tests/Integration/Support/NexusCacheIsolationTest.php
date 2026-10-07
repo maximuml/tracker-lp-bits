@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Support;
 
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -18,7 +18,7 @@ use Tests\TestCase;
  * row, emptying every category name in torrent lists (axe link-name).
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
-final class LegacyRedisCacheIsolationTest extends TestCase
+final class NexusCacheIsolationTest extends TestCase
 {
     public function test_redis_config_honors_server_env_overrides(): void
     {
@@ -30,17 +30,17 @@ final class LegacyRedisCacheIsolationTest extends TestCase
 
     public function test_cache_value_lands_in_test_db_not_dev_db0(): void
     {
-        $cache = app(LegacyRedisCache::class);
-        if (! $cache->getIsEnabled()) {
+        $cache = app(NexusCache::class);
+        if (! $cache->enabled()) {
             $this->markTestSkipped('Redis unavailable');
         }
         $testDb = (int) config('database.redis.default.database');
         $this->assertNotSame(0, $testDb, 'tests must not run against the dev Redis DB');
 
         $probe = 'ux03_isolation_probe';
-        $cache->cache_value($probe, 'probe', 60);
+        $cache->put($probe, 'probe', 60);
         try {
-            $this->assertSame('probe', $cache->get_value($probe));
+            $this->assertSame('probe', $cache->get($probe));
 
             // Raw client on the dev keyspace (DB 0) must NOT see the test key.
             $devRedis = new \Redis;
@@ -53,7 +53,7 @@ final class LegacyRedisCacheIsolationTest extends TestCase
             $this->assertFalse($devRedis->get($probe), 'test write leaked into dev Redis DB 0');
             $devRedis->close();
         } finally {
-            $cache->delete_value($probe);
+            $cache->forget($probe);
         }
     }
 }

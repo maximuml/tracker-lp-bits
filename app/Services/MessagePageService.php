@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
@@ -43,18 +43,18 @@ class MessagePageService
 
     private CurrentUser $currentUser;
 
-    private ?LegacyRedisCache $legacyRedisCache;
+    private ?NexusCache $cache;
 
     public function __construct(
         MessageRepository $messageRepository,
         MailboxRepository $mailboxRepository,
         CurrentUser $currentUser,
-        ?LegacyRedisCache $legacyRedisCache,
+        ?NexusCache $cache,
     ) {
         $this->messageRepository = $messageRepository;
         $this->mailboxRepository = $mailboxRepository;
         $this->currentUser = $currentUser;
-        $this->legacyRedisCache = $legacyRedisCache;
+        $this->cache = $cache;
     }
 
     /**
@@ -327,8 +327,8 @@ class MessagePageService
 
         // Mark message as read
         $this->messageRepository->markAsRead($pmId, $userId);
-        if ($this->legacyRedisCache !== null) {
-            $this->legacyRedisCache->delete_value('user_'.$userId.'_unread_message_count', true);
+        if ($this->cache !== null) {
+            $this->cache->forget('user_'.$userId.'_unread_message_count', true);
         }
 
         // Mailbox for menu highlight
@@ -403,12 +403,12 @@ class MessagePageService
     private function renderMessageBody(string $text, bool $stripHtml = false): SafeHtml
     {
         $key = 'fmt_pm_'.md5($text).($stripHtml ? '_s' : '');
-        $cached = $this->legacyRedisCache?->get_value($key);
+        $cached = $this->cache?->get($key);
         if (is_string($cached)) {
             return SafeHtml::fromTrustedHtml($cached);
         }
         $html = Format::formatComment($text, $stripHtml);
-        $this->legacyRedisCache?->cache_value($key, (string) $html, 86400);
+        $this->cache?->put($key, (string) $html, 86400);
 
         return $html;
     }

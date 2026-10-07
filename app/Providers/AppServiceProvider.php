@@ -78,7 +78,7 @@ use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\UserSearchRepository;
 use App\Services\CleanupService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\DestructiveEnvironmentGuard;
 use App\Support\Env;
@@ -119,9 +119,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(LegacyRedisCache::class, static function (): LegacyRedisCache {
-            $cache = new LegacyRedisCache;
-            $cache->setLanguageFolderArray(Locale::available());
+        $this->app->singleton(NexusCache::class, static function (): NexusCache {
+            $cache = new NexusCache;
+            $cache->setLangFolders(Locale::available());
 
             return $cache;
         });

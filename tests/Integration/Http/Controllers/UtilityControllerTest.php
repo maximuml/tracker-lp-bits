@@ -7,7 +7,7 @@ namespace Tests\Integration\Http\Controllers;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UtilityController;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +32,7 @@ final class UtilityControllerTest extends TestCase
 
     public function test_ajax_redirects_to_ajax_php_when_redis_cache_is_null(): void
     {
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(UtilityController::class);
         $request = Request::create('/ajax', 'GET', ['action' => 'getPasskeyGetArgs']);
@@ -46,7 +46,7 @@ final class UtilityControllerTest extends TestCase
 
     public function test_ajax_returns_error_for_invalid_action(): void
     {
-        $this->mockLegacyRedisCache();
+        $this->mockNexusCache();
         $this->mockCurrentUser(['id' => 1, 'enabled' => true, 'username' => 'testuser']);
 
         $controller = app(UtilityController::class);
@@ -63,7 +63,7 @@ final class UtilityControllerTest extends TestCase
 
     public function test_ajax_308_redirects_migrated_action(): void
     {
-        $this->mockLegacyRedisCache();
+        $this->mockNexusCache();
         $this->mockCurrentUser(['id' => 1, 'enabled' => true, 'username' => 'testuser']);
 
         $controller = app(UtilityController::class);
@@ -297,13 +297,13 @@ final class UtilityControllerTest extends TestCase
     }
 
     /**
-     * Bind a mock LegacyRedisCache so the controller's app() resolution
+     * Bind a mock NexusCache so the controller's app() resolution
      * returns a non-null cache without connecting to Redis.
      */
-    private function mockLegacyRedisCache(): void
+    private function mockNexusCache(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        app()->instance(LegacyRedisCache::class, $cache);
+        $cache = Mockery::mock(NexusCache::class);
+        app()->instance(NexusCache::class, $cache);
     }
 
     /**

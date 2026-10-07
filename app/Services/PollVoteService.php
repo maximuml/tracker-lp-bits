@@ -7,7 +7,7 @@ namespace App\Services;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
 use App\Support\Bonus;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -18,7 +18,7 @@ final class PollVoteService
 {
     public function __construct(
         private readonly IndexRepository $indexRepository,
-        private readonly ?LegacyRedisCache $legacyRedisCache = null,
+        private readonly ?NexusCache $cache = null,
     ) {}
 
     /**
@@ -49,10 +49,10 @@ final class PollVoteService
 
         $this->indexRepository->recordPollVote($pollId, $user['id'], $choice);
 
-        $cache = $this->legacyRedisCache;
+        $cache = $this->cache;
         if ($cache !== null) {
-            $cache->delete_value('current_poll_content');
-            $cache->delete_value('current_poll_result', true);
+            $cache->forget('current_poll_content');
+            $cache->forget('current_poll_result', true);
         }
 
         $pollvoteBonus = SiteConfig::current()->bonus->pollVote();

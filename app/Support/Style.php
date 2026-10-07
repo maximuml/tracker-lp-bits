@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\StyleRepositoryInterface;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 
@@ -33,19 +33,17 @@ final class Style
     /**
      * @return array<string, mixed>|null
      */
-    public static function cssRow(mixed $cache, int|string $cssId, int|string $defaultId): ?array
+    public static function cssRow(?NexusCache $cache, int|string $cssId, int|string $defaultId): ?array
     {
         $fromCache = false;
         if (self::$stylesheetRows === null) {
-            $cached = is_object($cache) && method_exists($cache, 'get_value') ? $cache->get_value('stylesheet_content') : false;
+            $cached = $cache?->get('stylesheet_content') ?? false;
             if ($cached !== false) {
                 self::$stylesheetRows = is_array($cached) ? $cached : [];
                 $fromCache = true;
             } else {
                 self::$stylesheetRows = self::styleRepository()->fetchAll();
-                if (is_object($cache) && method_exists($cache, 'cache_value')) {
-                    $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
-                }
+                $cache?->put('stylesheet_content', self::$stylesheetRows, 95400);
             }
         }
 
@@ -56,9 +54,7 @@ final class Style
         // once per request.)
         if ($fromCache && ! array_key_exists((int) $cssId, self::$stylesheetRows)) {
             self::$stylesheetRows = self::styleRepository()->fetchAll();
-            if (is_object($cache) && method_exists($cache, 'cache_value')) {
-                $cache->cache_value('stylesheet_content', self::$stylesheetRows, 95400);
-            }
+            $cache?->put('stylesheet_content', self::$stylesheetRows, 95400);
         }
 
         return self::$stylesheetRows[$cssId] ?? self::$stylesheetRows[$defaultId] ?? null;
@@ -78,7 +74,7 @@ final class Style
      *
      * Mirrors `get_css_uri()`.
      */
-    public static function cssUri(mixed $cache, int|string $cssId, int|string $defaultId, string $file = ''): string
+    public static function cssUri(?NexusCache $cache, int|string $cssId, int|string $defaultId, string $file = ''): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
         $uri = $row['uri'] ?? self::styleRepository()->uri($defaultId);
@@ -95,7 +91,7 @@ final class Style
      *
      * Mirrors `get_style_addicode()`.
      */
-    public static function addiCode(mixed $cache, int|string $cssId, int|string $defaultId): string
+    public static function addiCode(?NexusCache $cache, int|string $cssId, int|string $defaultId): string
     {
         $row = self::cssRow($cache, $cssId, $defaultId);
 
@@ -130,7 +126,7 @@ final class Style
         $user = CurrentUser::instance()->get() ?? [];
         $defaultId = self::defaultStylesheetId();
 
-        return self::cssUri(LegacyRedisCache::instance(), $user ? CurrentUser::instance()->value('stylesheet') : $defaultId, $defaultId, $file);
+        return self::cssUri(NexusCache::instance(), $user ? CurrentUser::instance()->value('stylesheet') : $defaultId, $defaultId, $file);
     }
 
     /**
@@ -142,7 +138,7 @@ final class Style
         $user = CurrentUser::instance()->get() ?? [];
         $defaultId = self::defaultStylesheetId();
 
-        return SafeHtml::fromTrustedHtml(self::addiCode(LegacyRedisCache::instance(), $user ? CurrentUser::instance()->value('stylesheet') : $defaultId, $defaultId));
+        return SafeHtml::fromTrustedHtml(self::addiCode(NexusCache::instance(), $user ? CurrentUser::instance()->value('stylesheet') : $defaultId, $defaultId));
     }
 
     /**

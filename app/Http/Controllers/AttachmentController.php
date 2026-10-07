@@ -10,7 +10,7 @@ use App\Enums\UserTheme;
 use App\Http\Requests\AttachmentUploadRequest;
 use App\Services\AttachmentMutationService;
 use App\Support\Attachment\AttachmentService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
@@ -26,7 +26,7 @@ class AttachmentController extends LegacyController
     public function __construct(
         private readonly AttachmentRepositoryInterface $attachmentRepository,
         private readonly CurrentUser $currentUser,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
     ) {}
 
     public function attachment(Request $request): Response
@@ -160,8 +160,8 @@ class AttachmentController extends LegacyController
 
         $this->attachmentRepository->incrementDownloads($id);
 
-        if ($this->legacyRedisCache !== null) {
-            $this->legacyRedisCache->delete_value('attachment_'.$dlkey.'_content');
+        if ($this->cache !== null) {
+            $this->cache->forget('attachment_'.$dlkey.'_content');
         }
 
         return new StreamedResponse(function () use ($realFile) {

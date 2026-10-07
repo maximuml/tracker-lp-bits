@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\BitbucketService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\LegacyResponse;
@@ -22,13 +22,13 @@ class BitbucketUploadController extends Controller
 {
     public function __construct(
         private readonly BitbucketService $bitbucketService,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
         private readonly CurrentUser $currentUser,
     ) {}
 
     public function create(Request $request): View|RedirectResponse
     {
-        if ($this->legacyRedisCache === null) {
+        if ($this->cache === null) {
             return redirect('/web/bitbucket-upload?'.$request->getQueryString());
         }
 
@@ -62,7 +62,7 @@ class BitbucketUploadController extends Controller
 
     public function store(Request $request): View|RedirectResponse
     {
-        if ($this->legacyRedisCache === null) {
+        if ($this->cache === null) {
             return redirect('/web/bitbucket-upload', 307);
         }
 

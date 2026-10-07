@@ -6,7 +6,7 @@ namespace App\ViewModels\Index;
 
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 
 /**
@@ -16,7 +16,7 @@ use App\Support\Config\SiteConfig;
 final class IndexPollsSectionFactory
 {
     public function __construct(
-        private readonly LegacyRedisCache $cache,
+        private readonly NexusCache $cache,
         private readonly IndexRepository $indexRepository,
     ) {}
 
@@ -31,11 +31,11 @@ final class IndexPollsSectionFactory
             return new IndexPollsSection;
         }
 
-        $pollArr = $this->cache->get_value('current_poll_content');
+        $pollArr = $this->cache->get('current_poll_content');
         if ($pollArr === false || $pollArr === null) {
             $pollArr = $this->indexRepository->getCurrentPoll();
             if ($pollArr) {
-                $this->cache->cache_value('current_poll_content', $pollArr, 7226);
+                $this->cache->put('current_poll_content', $pollArr, 7226);
             }
         }
 
@@ -71,10 +71,10 @@ final class IndexPollsSectionFactory
         $bars = [];
         $totalVotes = '';
         if ($uservote !== null) {
-            $results = $this->cache->get_value('current_poll_result');
+            $results = $this->cache->get('current_poll_result');
             if ($results === false || $results === null) {
                 $results = $this->indexRepository->getPollResults($pollid);
-                $this->cache->cache_value('current_poll_result', $results, 3652);
+                $this->cache->put('current_poll_result', $results, 3652);
             }
             $tvotes = array_sum(array_column($results, 'count'));
             foreach ($results as $item) {

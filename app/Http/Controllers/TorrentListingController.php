@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Repositories\TorrentSearchRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\RequestContext;
@@ -23,7 +23,7 @@ class TorrentListingController extends Controller
     public function __construct(
         private readonly CurrentUser $currentUser,
         private readonly TorrentSearchRepository $torrentSearchRepository,
-        private readonly ?LegacyRedisCache $legacyRedisCache,
+        private readonly ?NexusCache $cache,
         private readonly TorrentListViewFactory $torrentListFactory,
         private readonly TorrentSearchPanelFactory $searchPanelFactory,
         private readonly RequestContext $requestContext,
@@ -31,7 +31,7 @@ class TorrentListingController extends Controller
 
     public function index(Request $request): View|RedirectResponse
     {
-        if ($this->legacyRedisCache === null) {
+        if ($this->cache === null) {
             return redirect('/web/torrents?'.http_build_query($request->query->all()));
         }
 

@@ -10,7 +10,7 @@ use App\Http\Controllers\ModerationController;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\ModerationRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Permissions;
 use Illuminate\Http\Request;
@@ -41,7 +41,7 @@ final class ModerationControllerTest extends TestCase
     public function test_report_returns_invalid_action_for_guest_without_params(): void
     {
         $this->mockCurrentUser(null);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(ModerationController::class);
         $request = Request::create('/report', 'GET');
@@ -56,7 +56,7 @@ final class ModerationControllerTest extends TestCase
     public function test_report_returns_missing_reason_when_guest_posts_without_reason(): void
     {
         $this->mockCurrentUser(null);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         /** @var ModerationRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(ModerationRepository::class);
@@ -76,7 +76,7 @@ final class ModerationControllerTest extends TestCase
     public function test_report_returns_invalid_action_for_guest_with_invalid_params(): void
     {
         $this->mockCurrentUser(null);
-        app()->bind(LegacyRedisCache::class, fn () => null);
+        app()->bind(NexusCache::class, fn () => null);
 
         $controller = app(ModerationController::class);
         $request = Request::create('/report', 'GET', ['user' => 0, 'torrent' => 0]);

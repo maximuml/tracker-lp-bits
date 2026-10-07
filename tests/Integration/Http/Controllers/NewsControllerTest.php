@@ -5,7 +5,7 @@ namespace Tests\Integration\Http\Controllers;
 use App\Http\Controllers\NewsController;
 use App\Http\Requests\NewsUpdateRequest;
 use App\Models\News;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use Illuminate\Http\Request;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -21,13 +21,13 @@ final class NewsControllerTest extends TestCase
     }
 
     /**
-     * Bind a mock LegacyRedisCache so controller cache-clear calls do not hit Redis.
+     * Bind a mock NexusCache so controller cache-clear calls do not hit Redis.
      */
     private function mockCache(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
-        $cache->shouldReceive('delete_value')->andReturn(1);
-        app()->instance(LegacyRedisCache::class, $cache);
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldReceive('forget')->andReturn(1);
+        app()->instance(NexusCache::class, $cache);
     }
 
     public function test_destroy_deletes_news_and_returns_success(): void

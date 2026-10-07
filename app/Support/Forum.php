@@ -11,7 +11,7 @@ use App\Repositories\ForumModRepository;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\TopicRepository;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -45,18 +45,18 @@ final class Forum
      *
      * Mirrors `get_forum_moderators()`.
      */
-    public static function moderators(?LegacyRedisCache $cache, int|string $forumId, bool $plainText = true): string
+    public static function moderators(?NexusCache $cache, int|string $forumId, bool $plainText = true): string
     {
         static $moderatorsArray = null;
 
         if ($moderatorsArray === null) {
-            $cached = $cache !== null ? $cache->get_value('forum_moderator_array') : false;
+            $cached = $cache !== null ? $cache->get('forum_moderator_array') : false;
             if ($cached !== false && is_array($cached)) {
                 $moderatorsArray = $cached;
             } else {
                 $moderatorsArray = self::forumModRepository()->getModeratorArray();
                 if ($cache !== null) {
-                    $cache->cache_value('forum_moderator_array', $moderatorsArray, 86200);
+                    $cache->put('forum_moderator_array', $moderatorsArray, 86200);
                 }
             }
         }
@@ -181,15 +181,15 @@ final class Forum
     /**
      * @return array<string, mixed>|null
      */
-    public static function postRow(?LegacyRedisCache $cache, int|string $postId): ?array
+    public static function postRow(?NexusCache $cache, int|string $postId): ?array
     {
         $cacheKey = 'post_'.$postId.'_content';
-        $row = $cache !== null ? $cache->get_value($cacheKey) : false;
+        $row = $cache !== null ? $cache->get($cacheKey) : false;
 
         if ($row === false) {
             $row = self::postLookupRepository()->findPostArrayById((int) $postId);
             if ($cache !== null) {
-                $cache->cache_value($cacheKey, $row, 7200);
+                $cache->put($cacheKey, $row, 7200);
             }
         }
 
@@ -203,7 +203,7 @@ final class Forum
      */
     public static function postRowWithContext(int|string $postId): ?array
     {
-        return self::postRow(LegacyRedisCache::instance(), $postId);
+        return self::postRow(NexusCache::instance(), $postId);
     }
 
     /**
@@ -211,7 +211,7 @@ final class Forum
      */
     public static function moderatorsWithContext(int|string $forumId, bool $plainText = true): string
     {
-        return self::moderators(LegacyRedisCache::instance(), $forumId, $plainText);
+        return self::moderators(NexusCache::instance(), $forumId, $plainText);
     }
 
     private static function forumModRepository(): ForumModRepository

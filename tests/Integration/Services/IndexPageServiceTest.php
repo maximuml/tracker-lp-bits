@@ -9,7 +9,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\ViewModels\Index\IndexBrowserNoteSection;
 use App\ViewModels\Index\IndexClassStatRow;
@@ -51,7 +51,7 @@ final class IndexPageServiceTest extends TestCase
 
     private CurrentUser $currentUser;
 
-    private LegacyRedisCache $cache;
+    private NexusCache $cache;
 
     /** @var IndexRepository&MockInterface */
     private IndexRepository $indexRepository;
@@ -65,7 +65,7 @@ final class IndexPageServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->currentUser = new CurrentUser;
-        $this->cache = new LegacyRedisCache;
+        $this->cache = new NexusCache;
 
         /** @var IndexRepository&MockInterface $repo */
         $repo = Mockery::mock(IndexRepository::class);
@@ -322,6 +322,65 @@ final class IndexPageServiceTest extends TestCase
         $this->assertStringNotContainsString('Last 5', $html);
         $this->assertSame(1, substr_count($html, 'class="lt-card"'));
         $this->assertStringContainsString('lt-cover-empty', $html);
+    }
+
+    public function test_latest_torrents_section_caches_rendered_html(): void
+    {
+        $torrent = (new Torrent)->forceFill([
+            'id' => 42,
+            'name' => 'Some Torrent Name',
+            'cover' => '',
+            'anonymous' => 'yes',
+            'owner' => 0,
+            'seeders' => 3,
+            'leechers' => 1,
+            'size' => 1024,
+        ]);
+        $torrent->setRelation('basic_category', (new Category)->forceFill(['name' => 'Movies']));
+        $this->indexRepository->shouldReceive('getLatestTorrents')
+            ->with(12)
+            ->andReturn(new Collection([$torrent]));
+
+        $this->buildWithAllSectionsDisabled(['showlastxtorrents_main' => 'yes']);
+
+        $cached = Redis::connection()->get('en_index_latest_torrents_grid_v3');
+        $this->assertNotNull($cached);
+        $this->assertStringContainsString('lt-card', (string) $cached);
+    }
+
+    public function test_latest_torrents_section_caches_empty_html(): void
+    {
+        $this->indexRepository->shouldReceive('getLatestTorrents')
+            ->with(12)
+            ->andReturn(new Collection);
+
+        $this->buildWithAllSectionsDisabled(['showlastxtorrents_main' => 'yes']);
+
+        $this->assertNotNull(Redis::connection()->get('en_index_latest_torrents_grid_v3'));
+    }
+
+    public function test_build_forgets_unread_news_count_cache_key(): void
+    {
+        $this->mockIndexRepo();
+        $this->setCurrentUser(['id' => '007']);
+        $this->mockCache();
+        $this->seedSettings([
+            'showshoutbox_main' => 'no',
+            'showlastxforumposts_main' => 'no',
+            'showlastxtorrents_main' => 'no',
+            'showpolls_main' => 'no',
+            'showstats_main' => 'no',
+            'showtrackerload' => 'no',
+        ]);
+
+        $redis = Redis::connection();
+        $redis->set('user_7_unread_news_count', 'x');
+        $redis->set('user_007_unread_news_count', 'x');
+
+        $this->service->build();
+
+        $this->assertNull($redis->get('user_7_unread_news_count'));
+        $this->assertSame('x', $redis->get('user_007_unread_news_count'));
     }
 
     public function test_polls_hidden_when_setting_is_no(): void

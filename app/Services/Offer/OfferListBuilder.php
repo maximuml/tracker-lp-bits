@@ -11,7 +11,7 @@ use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserTimeType;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
@@ -43,7 +43,7 @@ final class OfferListBuilder
     public function __construct(
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferCommentRepositoryInterface $offerCommentRepository,
-        private readonly LegacyRedisCache $cache,
+        private readonly NexusCache $cache,
         private readonly UsercpRepositoryInterface $usercpRepository,
     ) {}
 
@@ -174,7 +174,7 @@ final class OfferListBuilder
             }
             $cachedLastcoms = $commentedOfferIds === []
                 ? []
-                : $this->cache->get_values(array_map(fn ($id) => 'offer_'.$id.'_last_comment_content', $commentedOfferIds));
+                : $this->cache->getMany(array_map(fn ($id) => 'offer_'.$id.'_last_comment_content', $commentedOfferIds));
             $uncachedOfferIds = [];
             foreach ($commentedOfferIds as $offerId) {
                 $lastcom = $cachedLastcoms['offer_'.$offerId.'_last_comment_content'] ?? false;
@@ -187,7 +187,7 @@ final class OfferListBuilder
             if ($uncachedOfferIds !== []) {
                 foreach ($this->offerCommentRepository->getLastComments($uncachedOfferIds) as $offerId => $lastcom) {
                     $lastcoms[$offerId] = $lastcom;
-                    $this->cache->cache_value('offer_'.$offerId.'_last_comment_content', $lastcom, 1855);
+                    $this->cache->put('offer_'.$offerId.'_last_comment_content', $lastcom, 1855);
                 }
             }
             foreach ($lastcoms as $lastcom) {
@@ -197,7 +197,7 @@ final class OfferListBuilder
 
             $renderedTt = $lastcoms === []
                 ? []
-                : $this->cache->get_values(array_map(
+                : $this->cache->getMany(array_map(
                     static fn ($l) => 'fmt_tt_'.md5(self::tooltipText((string) ($l['text'] ?? ''))),
                     array_values($lastcoms)
                 ));
@@ -209,7 +209,7 @@ final class OfferListBuilder
                     return $hit;
                 }
                 $html = (string) Format::formatComment($truncated, true, false, false, true, 600, false, false);
-                $this->cache->cache_value($key, $html, 86400);
+                $this->cache->put($key, $html, 86400);
                 $renderedTt[$key] = $html;
 
                 return $html;

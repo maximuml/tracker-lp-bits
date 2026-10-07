@@ -182,7 +182,7 @@ class MessagePageService
                     $username = UserDisplay::username((int) ($row['receiver'] ?? 0));
                 }
             } else {
-                $username = __('messages.text_system');
+                $username = (string) __('messages.text_system');
             }
 
             $subject = (string) ($row['subject'] ?? '');
@@ -308,7 +308,7 @@ class MessagePageService
         } else {
             $from = __('messages.text_from');
             if ((int) ($message['sender'] ?? 0) === 0) {
-                $sender = __('messages.text_system');
+                $sender = (string) __('messages.text_system');
             } else {
                 $sender = UserDisplay::username((int) ($message['sender'] ?? 0));
                 $replyHref = '/web/sendmessage?receiver='.(int) ($message['sender'] ?? 0).'&replyto='.$pmId;
@@ -382,7 +382,7 @@ class MessagePageService
 
         $fromName = UserDisplay::username($from);
         if ($orig === 0) {
-            $origName = __('messages.text_system');
+            $origName = (string) __('messages.text_system');
             $origName2 = __('messages.text_system');
         } else {
             $origName = UserDisplay::username($orig);

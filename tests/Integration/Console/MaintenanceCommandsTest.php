@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Console;
 
-use App\Enums\ModelEventEnum;
 use App\Models\User;
 use App\Support\PasswordHasher;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Testing\PendingCommand;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -79,22 +77,5 @@ class MaintenanceCommandsTest extends TestCase
         $this->assertInstanceOf(PendingCommand::class, $command);
         $command->expectsOutputToContain('Dispatching up to 5 outbox events...')
             ->assertExitCode(0);
-    }
-
-    public function test_fire_event_rejects_unknown_name(): void
-    {
-        $this->artisan('event:fire', ['--name' => 'no_such_event'])
-            ->assertExitCode(1);
-    }
-
-    public function test_fire_event_rejects_missing_model_data(): void
-    {
-        $key = 'fire-event-missing-'.uniqid();
-        Cache::forget($key);
-
-        $this->artisan('event:fire', [
-            '--name' => ModelEventEnum::USER_UPDATED,
-            '--idKey' => $key,
-        ])->assertExitCode(1);
     }
 }

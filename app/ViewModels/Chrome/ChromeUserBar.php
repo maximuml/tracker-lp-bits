@@ -179,10 +179,10 @@ final class ChromeUserBar
     private static function appendToastAssets(int $userId): void
     {
         $toastLang = json_encode([
-            'newMessage' => __('legacy/index.toast_new_message'),
-            'shoutboxMention' => __('legacy/index.toast_shoutbox_mention'),
-            'from' => __('legacy/index.toast_from'),
-            'close' => __('legacy/index.toast_close'),
+            'newMessage' => __('index.toast_new_message'),
+            'shoutboxMention' => __('index.toast_shoutbox_mention'),
+            'from' => __('index.toast_from'),
+            'close' => __('index.toast_close'),
             'bell' => __('legacy/notifications.title_bell'),
             'markAllRead' => __('legacy/notifications.mark_all_read'),
             'showMore' => __('legacy/notifications.show_more'),

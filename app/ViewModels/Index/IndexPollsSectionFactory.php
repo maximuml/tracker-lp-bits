@@ -43,12 +43,12 @@ final class IndexPollsSectionFactory
 
         $section = new IndexPollsSection(
             show: true,
-            title: __('legacy/index.text_polls'),
+            title: __('index.text_polls'),
             canManage: $canManage,
-            newLabel: __('legacy/index.text_new'),
-            editLabel: __('legacy/index.text_edit'),
-            deleteLabel: __('legacy/index.text_delete'),
-            detailLabel: __('legacy/index.text_detail'),
+            newLabel: __('index.text_new'),
+            editLabel: __('index.text_edit'),
+            deleteLabel: __('index.text_delete'),
+            detailLabel: __('index.text_detail'),
             exists: $pollExists,
         );
 
@@ -101,11 +101,11 @@ final class IndexPollsSectionFactory
             question: $question,
             options: $options,
             hasVoted: $uservote !== null,
-            blankVoteLabel: __('legacy/index.radio_blank_vote'),
-            submitVoteLabel: __('legacy/index.submit_vote'),
+            blankVoteLabel: __('index.radio_blank_vote'),
+            submitVoteLabel: __('index.submit_vote'),
             canLog: $canLog,
-            previousPollsLabel: __('legacy/index.text_previous_polls'),
-            votesLabel: __('legacy/index.text_votes'),
+            previousPollsLabel: __('index.text_previous_polls'),
+            votesLabel: __('index.text_votes'),
             bars: $bars,
             totalVotes: $totalVotes,
         );

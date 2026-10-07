@@ -57,12 +57,12 @@ class InviteController extends LegacyController
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
 
         if (! Validators::isId($id) || ($currentUserId !== $id && ! Permission::can(PermissionEnum::VIEW_INVITE))) {
-            return $this->legacyAbortResponse(__('legacy/invite.std_sorry'), __('legacy/invite.std_permission_denied'));
+            return $this->legacyAbortResponse(__('invite.std_sorry'), __('invite.std_permission_denied'));
         }
 
         $user = $this->userRepository->findById($id);
         if (! $user) {
-            return $this->legacyAbortResponse(__('legacy/invite.std_sorry'), 'Invalid id');
+            return $this->legacyAbortResponse(__('invite.std_sorry'), 'Invalid id');
         }
 
         $type = htmlspecialchars((string) ($request->input('type') ?? ''));
@@ -90,7 +90,7 @@ class InviteController extends LegacyController
 
         if ($type === 'new') {
             if ($currentUserId !== $id) {
-                return $this->legacyAbortResponse(__('legacy/invite.std_sorry'), __('legacy/invite.std_permission_denied'));
+                return $this->legacyAbortResponse(__('invite.std_sorry'), __('invite.std_permission_denied'));
             }
 
             try {
@@ -98,12 +98,12 @@ class InviteController extends LegacyController
                 $disabled = '';
             } catch (\Exception $exception) {
                 return $this->legacyAbortResponse(
-                    __('legacy/invite.std_sorry'),
+                    __('invite.std_sorry'),
                     view('invite._back_message', [
                         'message' => $exception->getMessage(),
                         'backUrl' => '/web/invite?id='.(string) $currentUserId,
-                        'backText' => (string) __('legacy/invite.std_here'),
-                        'backSuffix' => (string) __('legacy/invite.std_to_go_back'),
+                        'backText' => (string) __('invite.std_here'),
+                        'backSuffix' => (string) __('invite.std_to_go_back'),
                     ])->render(),
                     false
                 );
@@ -114,18 +114,18 @@ class InviteController extends LegacyController
 
             $inviteOptions = [];
             if ((int) ($inv['invites'] ?? 0) > 0) {
-                $inviteOptions[] = ['value' => 'permanent', 'text' => (string) __('legacy/invite.text_permanent')];
+                $inviteOptions[] = ['value' => 'permanent', 'text' => (string) __('invite.text_permanent')];
             }
             foreach ($temporaryInvites as $tmp) {
                 $inviteOptions[] = [
                     'value' => (string) $tmp->hash,
-                    'text' => sprintf('%s (%s: %s)', $tmp->hash, __('legacy/invite.text_expired_at'), $tmp->expired_at),
+                    'text' => sprintf('%s (%s: %s)', $tmp->hash, __('invite.text_expired_at'), $tmp->expired_at),
                 ];
             }
 
-            $invitation_body = sprintf(__('legacy/invite.text_invitation_body'), $SITENAME).$this->currentUser->username();
+            $invitation_body = sprintf(__('invite.text_invitation_body'), $SITENAME).$this->currentUser->username();
             $showPreUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
-            $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? (__('legacy/invite.text_s')) : '';
+            $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? (__('invite.text_s')) : '';
 
             $data = array_merge($data, [
                 'inv' => $inv,
@@ -193,7 +193,7 @@ class InviteController extends LegacyController
             $enabledOptions[] = ['value' => $item, 'text' => strtoupper($item), 'selected' => $enabled !== '' && $enabled == $item];
         }
         $statusOptions = [];
-        foreach (['pending' => __('legacy/invite.text_pending'), 'confirmed' => __('legacy/invite.text_confirmed')] as $name => $text) {
+        foreach (['pending' => __('invite.text_pending'), 'confirmed' => __('invite.text_confirmed')] as $name => $text) {
             $statusOptions[] = ['value' => $name, 'text' => (string) $text, 'selected' => $status !== '' && $status == $name];
         }
 

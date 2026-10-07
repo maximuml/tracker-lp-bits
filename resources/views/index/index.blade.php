@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', $title ?? __('legacy/index.head_home'))
+@section('title', $title ?? __('index.head_home'))
 
 @section('content')
-<h1 class="nx-sr-only">{{ __('legacy/index.head_home') }}</h1>
+<h1 class="nx-sr-only">{{ __('index.head_home') }}</h1>
 @include('index.sections.news')
 @if(!empty($extraModules))
 {{ ($extraModules ?? '') }}

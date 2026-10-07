@@ -114,13 +114,13 @@ final class IndexPageService
 
         return new IndexNewsSection(
             show: true,
-            title: __('legacy/index.text_recent_news'),
+            title: __('index.text_recent_news'),
             canManage: $canManage,
-            manageLink: __('legacy/index.text_news_page'),
+            manageLink: __('index.text_news_page'),
             items: $items,
-            showHideTitle: __('legacy/index.title_show_or_hide'),
-            editLabel: __('legacy/index.text_e'),
-            deleteLabel: __('legacy/index.text_d'),
+            showHideTitle: __('index.title_show_or_hide'),
+            editLabel: __('index.text_e'),
+            deleteLabel: __('index.text_d'),
         );
     }
 
@@ -140,18 +140,18 @@ final class IndexPageService
 
         return new IndexShoutboxSection(
             show: true,
-            title: __('legacy/index.text_shoutbox'),
-            autoRefreshLabel: __('legacy/index.text_auto_refresh_after'),
-            secondsLabel: __('legacy/index.text_seconds'),
-            historyLabel: __('legacy/index.text_shoutbox_history'),
+            title: __('index.text_shoutbox'),
+            autoRefreshLabel: __('index.text_auto_refresh_after'),
+            secondsLabel: __('index.text_seconds'),
+            historyLabel: __('index.text_shoutbox_history'),
             canManage: $canManage,
-            clearLabel: __('legacy/index.clear_shout_box'),
-            clearConfirm: __('legacy/index.sure_to_clear_shout_box'),
+            clearLabel: __('index.clear_shout_box'),
+            clearConfirm: __('index.sure_to_clear_shout_box'),
             toolbar: SafeHtml::fromTrustedHtml(Shoutbox::toolbar('shbox', 'shbox_text')),
-            messageLabel: __('legacy/index.text_message'),
-            submitLabel: __('legacy/index.sumbit_shout'),
-            clearButtonLabel: __('legacy/index.submit_clear'),
-            showHideTitle: __('legacy/index.title_show_or_hide'),
+            messageLabel: __('index.text_message'),
+            submitLabel: __('index.sumbit_shout'),
+            clearButtonLabel: __('index.submit_clear'),
+            showHideTitle: __('index.title_show_or_hide'),
             refreshSeconds: (int) ($curUser['sbrefresh'] ?? 120),
         );
     }
@@ -172,12 +172,12 @@ final class IndexPageService
 
         return new IndexForumPostsSection(
             show: count($posts) > 0,
-            title: __('legacy/index.text_last_five_posts'),
-            colTopicTitle: __('legacy/index.col_topic_title'),
-            colView: __('legacy/index.col_view'),
-            colAuthor: __('legacy/index.col_author'),
-            colPostedAt: __('legacy/index.col_posted_at'),
-            textIn: __('legacy/index.text_in'),
+            title: __('index.text_last_five_posts'),
+            colTopicTitle: __('index.col_topic_title'),
+            colView: __('index.col_view'),
+            colAuthor: __('index.col_author'),
+            colPostedAt: __('index.col_posted_at'),
+            textIn: __('index.text_in'),
             items: array_values(array_map(fn (array $row) => IndexForumPostItem::fromRow($row), $posts)),
         );
     }
@@ -218,9 +218,9 @@ final class IndexPageService
                 }
                 $html = view('index.sections.latest_torrents', [
                     'items' => $items,
-                    'title' => __('legacy/index.text_latest_torrents'),
-                    'colSeeder' => __('legacy/index.col_seeder'),
-                    'colLeecher' => __('legacy/index.col_leecher'),
+                    'title' => __('index.text_latest_torrents'),
+                    'colSeeder' => __('index.col_seeder'),
+                    'colLeecher' => __('index.col_leecher'),
                 ])->render();
                 $this->cache->cache_value($cacheKey, $html, $cacheTtl);
             } else {
@@ -260,13 +260,13 @@ final class IndexPageService
 
         return new IndexTopUploadersSection(
             show: true,
-            title: __('legacy/index.top_uploader_title'),
-            toggleHint: __('legacy/index.top_uploader_toggle_time_range_tab'),
-            recentlyLabel: __('legacy/index.top_uploader_toggle_time_range_recently'),
-            allLabel: __('legacy/index.top_uploader_toggle_time_range_all'),
-            colAuthor: __('legacy/index.col_author'),
-            colCounts: __('legacy/index.col_counts'),
-            colRanking: __('legacy/index.col_ranking'),
+            title: __('index.top_uploader_title'),
+            toggleHint: __('index.top_uploader_toggle_time_range_tab'),
+            recentlyLabel: __('index.top_uploader_toggle_time_range_recently'),
+            allLabel: __('index.top_uploader_toggle_time_range_all'),
+            colAuthor: __('index.col_author'),
+            colCounts: __('index.col_counts'),
+            colRanking: __('index.col_ranking'),
             allRows: $buildRows($allUploaders),
             recentRows: $buildRows($recentUploaders),
         );
@@ -278,8 +278,8 @@ final class IndexPageService
 
         return new IndexDisclaimerSection(
             show: true,
-            title: __('legacy/index.text_disclaimer'),
-            content: sprintf(__('legacy/index.text_disclaimer_content'), $siteName, $siteName),
+            title: __('index.text_disclaimer'),
+            content: sprintf(__('index.text_disclaimer_content'), $siteName, $siteName),
         );
     }
 
@@ -326,7 +326,7 @@ final class IndexPageService
 
         return new IndexStatsSection(
             show: true,
-            title: __('legacy/index.text_tracker_statistics'),
+            title: __('index.text_tracker_statistics'),
             userStats: [
                 'activeToday' => number_format($userStats['totalonlinetoday']),
                 'activeThisWeek' => number_format($userStats['totalonlineweek']),
@@ -335,15 +335,15 @@ final class IndexPageService
                 'vip' => number_format($userStats['vip']),
                 'vipLabel' => UserClass::name(UC_VIP, false, false, true),
                 'donors' => number_format($userStats['donated']),
-                'donorsLabel' => __('legacy/index.row_donors'),
+                'donorsLabel' => __('index.row_donors'),
                 'warned' => number_format($userStats['warned']),
-                'warnedLabel' => __('legacy/index.row_warned_users'),
+                'warnedLabel' => __('index.row_warned_users'),
                 'banned' => number_format($userStats['disabled']),
-                'bannedLabel' => __('legacy/index.row_banned_users'),
+                'bannedLabel' => __('index.row_banned_users'),
                 'male' => number_format($userStats['registered_male']),
-                'maleLabel' => __('legacy/index.row_male_users'),
+                'maleLabel' => __('index.row_male_users'),
                 'female' => number_format($userStats['registered_female']),
-                'femaleLabel' => __('legacy/index.row_female_users'),
+                'femaleLabel' => __('index.row_female_users'),
             ],
             torrentStats: [
                 'torrents' => number_format($torrentStats['torrents']),
@@ -376,22 +376,22 @@ final class IndexPageService
                 cards: $cards,
             ),
             labels: [
-                'rowUsersActiveToday' => __('legacy/index.row_users_active_today'),
-                'rowUsersActiveThisWeek' => __('legacy/index.row_users_active_this_week'),
-                'rowRegisteredUsers' => __('legacy/index.row_registered_users'),
-                'rowUnconfirmedUsers' => __('legacy/index.row_unconfirmed_users'),
-                'rowTorrents' => __('legacy/index.row_torrents'),
-                'rowDeadTorrents' => __('legacy/index.row_dead_torrents'),
-                'rowSeeders' => __('legacy/index.row_seeders'),
-                'rowLeechers' => __('legacy/index.row_leechers'),
-                'rowPeers' => __('legacy/index.row_peers'),
-                'rowSeederLeecherRatio' => __('legacy/index.row_seeder_leecher_ratio'),
-                'rowActiveBrowsingUsers' => __('legacy/index.row_active_browsing_users'),
-                'rowTrackerActiveUsers' => __('legacy/index.row_tracker_active_users'),
-                'rowTotalSizeOfTorrents' => __('legacy/index.row_total_size_of_torrents'),
-                'rowTotalUploaded' => __('legacy/index.row_total_uploaded'),
-                'rowTotalDownloaded' => __('legacy/index.row_total_downloaded'),
-                'rowTotalData' => __('legacy/index.row_total_data'),
+                'rowUsersActiveToday' => __('index.row_users_active_today'),
+                'rowUsersActiveThisWeek' => __('index.row_users_active_this_week'),
+                'rowRegisteredUsers' => __('index.row_registered_users'),
+                'rowUnconfirmedUsers' => __('index.row_unconfirmed_users'),
+                'rowTorrents' => __('index.row_torrents'),
+                'rowDeadTorrents' => __('index.row_dead_torrents'),
+                'rowSeeders' => __('index.row_seeders'),
+                'rowLeechers' => __('index.row_leechers'),
+                'rowPeers' => __('index.row_peers'),
+                'rowSeederLeecherRatio' => __('index.row_seeder_leecher_ratio'),
+                'rowActiveBrowsingUsers' => __('index.row_active_browsing_users'),
+                'rowTrackerActiveUsers' => __('index.row_tracker_active_users'),
+                'rowTotalSizeOfTorrents' => __('index.row_total_size_of_torrents'),
+                'rowTotalUploaded' => __('index.row_total_uploaded'),
+                'rowTotalDownloaded' => __('index.row_total_downloaded'),
+                'rowTotalData' => __('index.row_total_data'),
             ],
         );
     }

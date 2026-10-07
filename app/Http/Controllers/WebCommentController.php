@@ -34,7 +34,7 @@ class WebCommentController extends Controller
 
         $parent = $this->commentRepository->getParent($parentId, $type);
         if (! $parent) {
-            abort(404, __('legacy/comment.std_no_torrent_id'));
+            abort(404, __('comment.std_no_torrent_id'));
         }
 
         $composeType = 'reply';
@@ -42,19 +42,19 @@ class WebCommentController extends Controller
         if ($request->input('sub') === 'quote') {
             $commentId = (int) $request->input('cid', 0);
             if ($commentId <= 0) {
-                abort(404, __('legacy/comment.std_no_comment_id'));
+                abort(404, __('comment.std_no_comment_id'));
             }
             $quote = $this->commentRepository->getQuote($commentId);
             if (! $quote) {
-                abort(404, __('legacy/comment.std_no_comment_id'));
+                abort(404, __('comment.std_no_comment_id'));
             }
             $body = $this->buildQuote($quote);
             $composeType = 'quote';
         }
 
         $returnUrl = $this->buildScript($type, $parentId);
-        $headTitle = __('legacy/comment.head_add_comment_to').$parent['name'];
-        $pageTitle = view('components.title-link', ['before' => __('legacy/comment.text_add_comment_to'), 'url' => $returnUrl, 'text' => $parent['name']])->render();
+        $headTitle = __('comment.head_add_comment_to').$parent['name'];
+        $pageTitle = view('components.title-link', ['before' => __('comment.text_add_comment_to'), 'url' => $returnUrl, 'text' => $parent['name']])->render();
         $formAction = $this->legacyAction('add', ['type' => $type]);
 
         return view('comments.create', compact('headTitle', 'pageTitle', 'formAction', 'composeType', 'body', 'parentId'));
@@ -67,7 +67,7 @@ class WebCommentController extends Controller
         $body = trim($request->validated('body'));
 
         if ($body === '') {
-            abort(403, __('legacy/comment.std_comment_body_empty'));
+            abort(403, __('comment.std_comment_body_empty'));
         }
 
         $user = $this->currentUser();
@@ -83,18 +83,18 @@ class WebCommentController extends Controller
 
         $arr = $this->commentRepository->getForEdit($commentId, $type);
         if (! $arr) {
-            abort(404, __('legacy/comment.std_invalid_id'));
+            abort(404, __('comment.std_invalid_id'));
         }
 
         $user = $this->currentUser();
         if ((int) $arr['user'] !== (int) $user->id && ! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
-            abort(403, __('legacy/comment.std_permission_denied'));
+            abort(403, __('comment.std_permission_denied'));
         }
 
         $parentId = (int) $arr['parent_id'];
         $returnUrl = $this->buildScript($type, $parentId);
-        $headTitle = __('legacy/comment.head_edit_comment_to').$arr['name'];
-        $pageTitle = view('components.title-link', ['before' => __('legacy/comment.text_edit_comment_to'), 'url' => $returnUrl, 'text' => $arr['name']])->render();
+        $headTitle = __('comment.head_edit_comment_to').$arr['name'];
+        $pageTitle = view('components.title-link', ['before' => __('comment.text_edit_comment_to'), 'url' => $returnUrl, 'text' => $arr['name']])->render();
         $formAction = $this->legacyAction('edit', ['type' => $type, 'cid' => $commentId]);
         $returnto = SafeReturnUrl::filter((string) ($request->headers->get('referer') ?? ''), $returnUrl);
         $body = (string) $arr['text'];
@@ -109,17 +109,17 @@ class WebCommentController extends Controller
         $body = trim($request->validated('body'));
 
         if ($body === '') {
-            abort(403, __('legacy/comment.std_comment_body_empty'));
+            abort(403, __('comment.std_comment_body_empty'));
         }
 
         $user = $this->currentUser();
 
         $arr = $this->commentRepository->getForEdit($commentId, $type);
         if (! $arr) {
-            abort(404, __('legacy/comment.std_invalid_id'));
+            abort(404, __('comment.std_invalid_id'));
         }
         if ((int) $arr['user'] !== (int) $user->id && ! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
-            abort(403, __('legacy/comment.std_permission_denied'));
+            abort(403, __('comment.std_permission_denied'));
         }
 
         $this->commentRepository->update($commentId, $body, (int) $user->id);
@@ -137,20 +137,20 @@ class WebCommentController extends Controller
 
         $user = $this->currentUser();
         if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
-            abort(403, __('legacy/comment.std_permission_denied'));
+            abort(403, __('comment.std_permission_denied'));
         }
 
         $arr = $this->commentRepository->getForDelete($commentId, $type);
         if (! $arr) {
-            abort(404, __('legacy/comment.std_invalid_id'));
+            abort(404, __('comment.std_invalid_id'));
         }
 
         $referer = (string) ($request->headers->get('referer') ?? '');
         $formAction = $this->legacyAction('delete', ['type' => $type, 'cid' => $commentId]);
-        $heading = __('legacy/comment.std_delete_comment');
-        $message = __('legacy/comment.std_delete_comment_note');
-        $confirmLabel = (string) __('legacy/comment.std_here');
-        $confirmSuffix = (string) __('legacy/comment.std_if_sure');
+        $heading = __('comment.std_delete_comment');
+        $message = __('comment.std_delete_comment_note');
+        $confirmLabel = (string) __('comment.std_here');
+        $confirmSuffix = (string) __('comment.std_if_sure');
         $cancelLabel = $this->lang('text_back');
         $cancelUrl = $referer !== '' ? $referer : $this->buildScript($type, (int) $arr['pid']);
         $returnto = $referer;
@@ -164,12 +164,12 @@ class WebCommentController extends Controller
 
         $user = $this->currentUser();
         if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
-            abort(403, __('legacy/comment.std_permission_denied'));
+            abort(403, __('comment.std_permission_denied'));
         }
 
         $arr = $this->commentRepository->getForDelete($commentId, $type);
         if (! $arr) {
-            abort(404, __('legacy/comment.std_invalid_id'));
+            abort(404, __('comment.std_invalid_id'));
         }
 
         $parentId = (int) $arr['pid'];
@@ -195,12 +195,12 @@ class WebCommentController extends Controller
 
         $user = $this->currentUser();
         if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
-            abort(403, __('legacy/comment.std_permission_denied'));
+            abort(403, __('comment.std_permission_denied'));
         }
 
         $arr = $this->commentRepository->getForViewOriginal($commentId, $type);
         if (! $arr) {
-            abort(404, __('legacy/comment.std_invalid_id'));
+            abort(404, __('comment.std_invalid_id'));
         }
 
         $parentId = (int) ($arr[$type] ?? 0);
@@ -214,7 +214,7 @@ class WebCommentController extends Controller
     {
         $user = Auth::guard('nexus-web')->user();
         if (! $user instanceof User) {
-            abort(403, __('legacy/comment.std_permission_denied'));
+            abort(403, __('comment.std_permission_denied'));
         }
 
         return $user;
@@ -224,7 +224,7 @@ class WebCommentController extends Controller
     {
         $type = $request->input('type');
         if (! in_array($type, ['torrent', 'offer'], true)) {
-            abort(404, __('legacy/comment.std_unknown_action'));
+            abort(404, __('comment.std_unknown_action'));
         }
 
         return (string) $type;
@@ -234,7 +234,7 @@ class WebCommentController extends Controller
     {
         $pid = (int) $request->input('pid', 0);
         if ($pid <= 0) {
-            abort(404, __('legacy/comment.std_no_torrent_id'));
+            abort(404, __('comment.std_no_torrent_id'));
         }
 
         return $pid;
@@ -261,6 +261,6 @@ class WebCommentController extends Controller
 
     private function lang(string $key): string
     {
-        return (string) __('legacy/comment.'.$key);
+        return (string) __('comment.'.$key);
     }
 }

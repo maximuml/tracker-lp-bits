@@ -6,7 +6,7 @@
     @endif
 </h2>
 @if(count($news->items) === 0)
-<x-empty-state :title="__('legacy/index.text_no_news')" />
+<x-empty-state :title="__('index.text_no_news')" />
 @else
 <div class="p-[10pt]"><div>
 @foreach($news->items as $newsItem)

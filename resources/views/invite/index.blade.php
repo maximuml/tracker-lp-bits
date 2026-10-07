@@ -1,34 +1,34 @@
 @extends('layouts.app', ['chromeVariant' => 'legacy'])
 
-@section('title', __('legacy/invite.head_invites'))
+@section('title', __('invite.head_invites'))
 
 @section('content')
 <div class="nx-main nx-embedded">
 
-<h1 class="text-center"><a href="/web/invite?id={{ $id }}">{{ $user['username'] ?? '' }}{{ __('legacy/invite.text_invite_system')}}</a></h1>
+<h1 class="text-center"><a href="/web/invite?id={{ $id }}">{{ $user['username'] ?? '' }}{{ __('invite.text_invite_system')}}</a></h1>
 @if ($sent == 1)
-    <p class="text-center"><span class="text-nxm-danger">{{ __('legacy/invite.text_invite_code_sent') }}<br /></span></p>
+    <p class="text-center"><span class="text-nxm-danger">{{ __('invite.text_invite_code_sent') }}<br /></span></p>
 @endif
 
 @if ($type == 'new')
     <form method=post action="/web/invites/send?id={{ (string) $id }}">@csrf
     <div class="nx-fgrid">
-    <div class="nx-ffull text-center"><b>{{ __('legacy/invite.text_invite_someone')}}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ __('legacy/invite.text_invitation')}}{{ $_s }}{{ __('legacy/invite.text_left')}} + {{ sprintf(__('legacy/invite.text_temporary_left'), count($temporaryInvites)) }})</b></div>
-    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><span class="small">{{ __('legacy/invite.text_email_address_note') }}</span></div>
+    <div class="nx-ffull text-center"><b>{{ __('invite.text_invite_someone')}}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ __('invite.text_invitation')}}{{ $_s }}{{ __('invite.text_left')}} + {{ sprintf(__('invite.text_temporary_left'), count($temporaryInvites)) }})</b></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><span class="small">{{ __('invite.text_email_address_note') }}</span></div>
     @if ($showPreUsername)
     <div class="nx-fhead whitespace-nowrap">{{ $preUsernameLabel }}</div><div class="nx-fcell"><input type=text size=40 name=pre_register_username><br /><span class="small">{{ $preUsernameHelp }}</span></div>
     @endif
-    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
-    <div class="nx-fhead whitespace-nowrap">{{ __('legacy/invite.text_message')}}</div><div class="nx-fcell"><textarea name=body rows=10>{{ $invitation_body }}</textarea></div>
-    <div class="nx-ffull text-center"><input type=submit value='{{ __('legacy/invite.submit_invite')}}'></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_message')}}</div><div class="nx-fcell"><textarea name=body rows=10>{{ $invitation_body }}</textarea></div>
+    <div class="nx-ffull text-center"><input type=submit value='{{ __('invite.submit_invite')}}'></div>
     </form></div></div>
 
 @else
     {{-- Invite menu nav --}}
     <div id="invitenav"><ul id="invitemenu" class="menu">
-    <li{{ $menuSelected == 'invitee' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=invitee">{{ __('legacy/invite.text_invite_status')}}</a></li>
-    <li{{ $menuSelected == 'sent' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=sent">{{ __('legacy/invite.text_sent_invites_status')}}</a></li>
-    <li{{ $menuSelected == 'tmp' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=tmp">{{ __('legacy/invite.text_tmp_status')}}</a></li>
+    <li{{ $menuSelected == 'invitee' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=invitee">{{ __('invite.text_invite_status')}}</a></li>
+    <li{{ $menuSelected == 'sent' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=sent">{{ __('invite.text_sent_invites_status')}}</a></li>
+    <li{{ $menuSelected == 'tmp' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=tmp">{{ __('invite.text_tmp_status')}}</a></li>
     @if (($CURUSER['id'] ?? 0) == $id)
         </ul><form method=post action="/web/invites/submit?id={{ (string) $id }}&type=new">@csrf<input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
     @else
@@ -40,13 +40,13 @@
             <form id="filterForm" action="{{ $__server_REQUEST_URI }}" method="get">
                 <input type="hidden" name="menu" value="invitee" />
                 <input type="hidden" name="id" value="{{ $id }}" />
-                <span>{{ __('legacy/invite.text_enabled')}}:</span>
+                <span>{{ __('invite.text_enabled')}}:</span>
                 <select name="enabled">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
                     @foreach ($inviteeEnabledOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
                 </select>
                 &nbsp;&nbsp;
-                <span>{{ __('legacy/invite.text_status')}}:</span>
+                <span>{{ __('invite.text_status')}}:</span>
                 <select name="status">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
                     @foreach ($inviteeStatusOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
@@ -56,30 +56,30 @@
                 <input type="button" id="reset" value="{{ $resetText }}">
             </form>
         </div>
-        <x-data-table :caption="__('legacy/invite.text_invite_status')" captionHidden>
+        <x-data-table :caption="__('invite.text_invite_status')" captionHidden>
         <form method=post action=takeconfirm.php?id={{ (string) $id }}>
 
         @if (! $inviteeCount)
-            <tr><td colspan=7 class="text-center">{{ __('legacy/invite.text_no_invites')}}</tr>
+            <tr><td colspan=7 class="text-center">{{ __('invite.text_no_invites')}}</tr>
         @else
             <tr>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_username')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_email')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_enabled')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_uploaded_count')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_uploaded')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_downloaded')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_ratio')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_seed_torrent_count')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_seed_torrent_size')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" title="{{ __('legacy/invite.text_seed_torrent_bonus_per_hour_help')}}" scope="col"><b>{{ __('legacy/invite.text_seed_torrent_bonus_per_hour')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_username')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_email')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_enabled')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_uploaded_count')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_uploaded')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_downloaded')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_ratio')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_seed_torrent_count')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_seed_torrent_size')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" title="{{ __('invite.text_seed_torrent_bonus_per_hour_help')}}" scope="col"><b>{{ __('invite.text_seed_torrent_bonus_per_hour')}}</b></th>
             @if ($haremAdditionFactor > 0)
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/invite.harem_addition')}}</th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.harem_addition')}}</th>
             @endif
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_seed_torrent_last_announce_at')}}</b></th>
-            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_status')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_seed_torrent_last_announce_at')}}</b></th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_status')}}</b></th>
             @if ($canConfirm)
-                <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('legacy/invite.text_confirm')}}</b></th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_confirm')}}</b></th>
             @endif
             </tr>
             @foreach ($inviteeRows as $arr)
@@ -98,7 +98,7 @@
                     <td class="align-top px-2.5 py-1.5">{{ number_format(floatval($arr['seed_points_per_hour']) * $haremAdditionFactor, 3) }}</td>
                 @endif
                     <td class="align-top px-2.5 py-1.5">{{ $arr['last_announce_at'] }}</td>
-                    <td class="align-top px-2.5 py-1.5">@if (($arr['status'] ?? '') === 'confirmed')<a href=/userdetails?id={{ (int) $arr['id'] }}><span class="nx-color-1f7309">{{ __('legacy/invite.text_confirmed') }}</span></a>@else<a href=/checkuser?id={{ (int) $arr['id'] }}><span class="nx-color-ca0226">{{ __('legacy/invite.text_pending') }}</span></a>@endif</td>
+                    <td class="align-top px-2.5 py-1.5">@if (($arr['status'] ?? '') === 'confirmed')<a href=/userdetails?id={{ (int) $arr['id'] }}><span class="nx-color-1f7309">{{ __('invite.text_confirmed') }}</span></a>@else<a href=/checkuser?id={{ (int) $arr['id'] }}><span class="nx-color-ca0226">{{ __('invite.text_pending') }}</span></a>@endif</td>
                     @if ($canConfirm)
                         <td class="align-top px-2.5 py-1.5">
                         @if ($arr['status'] == 'pending')
@@ -112,7 +112,7 @@
 
         @if ($canConfirm)
             @if ($pendingCount)
-                <tr><td colspan={{ $inviteeColSpan }} class="text-right"><input type=submit value='{{ __('legacy/invite.submit_confirm_users')}}'></td></tr>
+                <tr><td colspan={{ $inviteeColSpan }} class="text-right"><input type=submit value='{{ __('invite.submit_confirm_users')}}'></td></tr>
             @endif
             </form>
         @endif
@@ -120,24 +120,24 @@
         </div>{{ $inviteePagertop }}
 
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
-        <x-data-table :caption="$menuSelected == 'sent' ? __('legacy/invite.text_sent_invites_status') : __('legacy/invite.text_tmp_status')" captionHidden>
+        <x-data-table :caption="$menuSelected == 'sent' ? __('invite.text_sent_invites_status') : __('invite.text_tmp_status')" captionHidden>
         @if (! $sentTmpCount)
             <tr class="text-center"><td colspan=6>{{ __('legacy/functions.text_none')}}</tr>
         @else
-            <tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/invite.text_email')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/invite.text_hash')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/invite.text_send_date')}}</th>
+            <tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_email')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_hash')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_send_date')}}</th>
             @if ($menuSelected == 'sent')
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/invite.text_hash_status')}}</th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_hash_status')}}</th>
             @endif
-            <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/invite.text_invitee_user')}}</th>
+            <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_invitee_user')}}</th>
             @if ($menuSelected == 'tmp')
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('legacy/invite.text_expired_at')}}</th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_expired_at')}}</th>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ \App\Support\Locale::trans('label.created_at', [], null) }}</th>
             @endif
             </tr>
             @foreach ($sentTmpRows as $arr1)
                 <tr>
                 <td class="align-top px-2.5 py-1.5">{{ $arr1['invitee'] }}</td>
-                <td class="align-top px-2.5 py-1.5">{{ $arr1['hash'] }}@if ($arr1['hashValid'] ?? false)&nbsp;<a href="/signup?type=invite&invitenumber={{ $arr1['hash'] }}" title="{{ __('legacy/invite.signup_link_help') }}" target="_blank"><small>[{{ __('legacy/invite.signup_link') }}]</small></a>@endif</td>
+                <td class="align-top px-2.5 py-1.5">{{ $arr1['hash'] }}@if ($arr1['hashValid'] ?? false)&nbsp;<a href="/signup?type=invite&invitenumber={{ $arr1['hash'] }}" title="{{ __('invite.signup_link_help') }}" target="_blank"><small>[{{ __('invite.signup_link') }}]</small></a>@endif</td>
                 <td class="align-top px-2.5 py-1.5">{{ $arr1['time_invited'] }}</td>
                 @if ($menuSelected == 'sent')
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['validText'] ?? '' }}</td>

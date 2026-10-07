@@ -30,14 +30,14 @@ class InviteValidator
     {
         if ($code === '') {
             throw new AuthenticationException(
-                __('legacy/signup.std_error').': '.__('legacy/signup.std_uninvited')
+                __('signup.std_error').': '.__('signup.std_uninvited')
             );
         }
 
         $invite = $this->inviteRepository->findValidByHash($code);
 
         if (! $invite) {
-            throw new AuthenticationException(__('legacy/signup.std_uninvited'));
+            throw new AuthenticationException(__('signup.std_uninvited'));
         }
 
         if ((int) $invite->inviter !== $inviter) {

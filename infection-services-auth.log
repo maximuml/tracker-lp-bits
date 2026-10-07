@@ -1,0 +1,74 @@
+Note: Pass `--log-verbosity=all` to log information about killed and errored mutants.
+Note: Pass `--debug` to log test-framework output.
+
+Escaped mutants:
+================
+
+1) /var/www/html/app/Services/AttachmentMutationService.php:89    [M] CastString [ID] c71bffe8d7db092f5bd77f8922720bbd
+
+@@ @@
+         $img_ext = Attachment::IMG_EXTENSIONS;
+
+         if ($filesize == 0 || $file['name'] == '') { // nothing received
+-            $warning = (string) __('attachment.text_nothing_received');
++            $warning = __('attachment.text_nothing_received');
+         } elseif (! $count_left) { // user cannot upload more files
+             $warning = (string) __('attachment.text_file_number_limit_reached');
+         } elseif ($filesize > $size_limit || $filesize >= 5242880) { // do not allow file bigger than 5 MB
+
+
+2) /var/www/html/app/Services/AttachmentMutationService.php:97    [M] CastString [ID] b4024ffd9f68da7e3f00224654f6dcce
+
+@@ @@
+         } elseif (! in_array($ext, $allowed_exts) || in_array($ext, $banned_ext)) { // the file extension is banned
+             $warning = (string) __('attachment.text_file_extension_not_allowed');
+         } elseif (self::isDangerousMimeType($file['tmp_name'])) { // actual file content is a script/executable
+-            $warning = (string) __('attachment.text_file_extension_not_allowed');
++            $warning = __('attachment.text_file_extension_not_allowed');
+         } else { // everythins is okay
+             if (in_array($ext, $img_ext)) {
+                 $isimage = true;
+
+
+3) /var/www/html/app/Services/AttachmentMutationService.php:205    [M] CastString [ID] a91682c1c36dc830aac53e2f00194087
+
+@@ @@
+                 }
+                 if (! $abandonorig) {
+                     if (! move_uploaded_file($file['tmp_name'], $file_location.'.'.$ext)) {
+-                        $warning = (string) __('attachment.text_cannot_move_file');
++                        $warning = __('attachment.text_cannot_move_file');
+                     }
+                 }
+                 $url = $httpdirectory_attachment.'/'.$db_file_location.".$ext";
+
+
+4) /var/www/html/app/Services/IndexPageService.php:330    [M] ArrayItemRemoval [ID] 8c9de5badcb912ce258f40a529ff89b8
+
+@@ @@
+             show: true,
+             title: __('index.text_tracker_statistics'),
+             userStats: [
+-                'activeToday' => number_format($userStats['totalonlinetoday']),
+                 'activeThisWeek' => number_format($userStats['totalonlineweek']),
+                 'registered' => number_format($userStats['registered']).' / '.number_format($maxusers),
+                 'unconfirmed' => number_format($userStats['unverified']),
+
+
+5) /var/www/html/app/Services/IndexPageService.php:378    [M] ArrayItemRemoval [ID] 73e2206a2118d29a917bcc3b5c788495
+
+@@ @@
+                 cards: $cards,
+             ),
+             labels: [
+-                'rowUsersActiveToday' => __('index.row_users_active_today'),
+                 'rowUsersActiveThisWeek' => __('index.row_users_active_this_week'),
+                 'rowRegisteredUsers' => __('index.row_registered_users'),
+                 'rowUnconfirmedUsers' => __('index.row_unconfirmed_users'),
+
+
+Timed Out mutants:
+==================
+
+Skipped mutants:
+================

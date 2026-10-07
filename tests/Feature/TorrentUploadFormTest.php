@@ -85,7 +85,7 @@ final class TorrentUploadFormTest extends TestCase
         $page->assertSee('id="descr-error"', false);
         $page->assertSee('selected', false);
         $page->assertSee('bg-nxm-danger-bg', false);
-        $page->assertSee(__('legacy/upload.reselect_file_note'), false);
+        $page->assertSee(__('upload.reselect_file_note'), false);
         $page->assertDontSee('/error?error=', false);
     }
 

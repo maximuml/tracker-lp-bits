@@ -60,7 +60,7 @@ final class ThanksSection extends Component
 
         $torrent = $this->torrents()->findById($this->torrentId);
         if (! $torrent) {
-            $this->status = (string) __('legacy/comment.std_no_torrent_id');
+            $this->status = (string) __('comment.std_no_torrent_id');
 
             return;
         }

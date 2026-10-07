@@ -105,8 +105,8 @@ class RegistrationController extends Controller
             'error' => $request->session()->get('error'),
             'siteName' => Setting::getSiteName(),
             'headTitle' => $isInvite
-                ? (__('legacy/signup.head_invite_signup'))
-                : (__('legacy/signup.head_signup')),
+                ? (__('signup.head_invite_signup'))
+                : (__('signup.head_signup')),
             'usernameValue' => $usernameValue,
             'usernameReadonly' => $preUsername !== '',
             'emailValue' => $emailValue,

@@ -7,7 +7,7 @@ namespace Tests\Integration\Services;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
-use App\Support\Cache\LegacyRedisCache;
+use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -53,7 +53,7 @@ final class MessagePageServiceTest extends TestCase
             $this->app->make(MessageRepository::class),
             $this->app->make(MailboxRepository::class),
             $this->app->make(CurrentUser::class),
-            $this->app->make(LegacyRedisCache::class),
+            $this->app->make(NexusCache::class),
         );
     }
 
@@ -68,11 +68,11 @@ final class MessagePageServiceTest extends TestCase
 
     private function mockCache(): void
     {
-        $cache = Mockery::mock(LegacyRedisCache::class);
+        $cache = Mockery::mock(NexusCache::class);
         $cache->shouldIgnoreMissing();
-        $cache->shouldReceive('get_value')->andReturn(false);
-        $cache->shouldReceive('delete_value')->andReturn(true);
-        $this->app->instance(LegacyRedisCache::class, $cache);
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('forget')->andReturn(true);
+        $this->app->instance(NexusCache::class, $cache);
     }
 
     /** @param array<string, mixed> $overrides */
@@ -398,6 +398,54 @@ final class MessagePageServiceTest extends TestCase
 
         $unread = DB::table('messages')->where('id', $msgId)->value('unread');
         $this->assertSame(0, (int) $unread);
+    }
+
+    public function test_viewmessage_caches_formatted_body_under_fmt_pm_key(): void
+    {
+        $userId = $this->createUser();
+        $this->authenticatedUser(['id' => $userId]);
+        $this->seedSettings();
+
+        $msgId = $this->insertMessage([
+            'sender' => 0,
+            'receiver' => $userId,
+            'subject' => 'Cached PM',
+            'msg' => 'Hello cache',
+            'location' => 1,
+            'unread' => 1,
+        ]);
+
+        $expectedKey = 'fmt_pm_'.md5('Hello cache').'_s';
+        $cache = Mockery::mock(NexusCache::class);
+        $cache->shouldIgnoreMissing();
+        $cache->shouldReceive('get')->andReturn(false);
+        $cache->shouldReceive('put')
+            ->with($expectedKey, Mockery::type('string'), 86400)
+            ->once();
+        $this->app->instance(NexusCache::class, $cache);
+
+        $service = new MessagePageService(
+            $this->app->make(MessageRepository::class),
+            $this->app->make(MailboxRepository::class),
+            $this->app->make(CurrentUser::class),
+            $cache,
+        );
+
+        $request = Request::create('/messages.php', 'GET', [
+            'action' => 'viewmessage',
+            'id' => $msgId,
+        ]);
+
+        set_error_handler(function (int $severity): bool {
+            return true;
+        }, E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
+        try {
+            $data = $service->build($request)->toArray();
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertArrayHasKey('viewmessage', $data);
     }
 
     // --- build: forward ---

@@ -59,7 +59,7 @@ final class ForumTopicViewService
 
         $topic = $this->topicRepository->getTopic($topicid);
         if (! $topic) {
-            LegacyResponse::abort(__('legacy/forums.std_forum_error'), __('legacy/forums.std_topic_not_found'));
+            LegacyResponse::abort(__('forums.std_forum_error'), __('forums.std_topic_not_found'));
         }
         $arr = $topic->toArray();
 
@@ -80,7 +80,7 @@ final class ForumTopicViewService
         $isMod = Permission::can(PermissionEnum::POST_MANAGE) || $isForummod;
 
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
-            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_unpermitted_viewing_topic'));
+            LegacyResponse::abort(__('forums.std_error'), __('forums.std_unpermitted_viewing_topic'));
         }
         $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && YesNo::isYes($curUser['forumpost'] ?? null);
 
@@ -206,7 +206,7 @@ final class ForumTopicViewService
             $canViewProtected = $pn + $offset <= 1 || Forum::canViewPost($userId, $arr);
             $bodyContent = $canViewProtected
                 ? $renderFmt('fmt_post_'.md5((string) ($arr['body'] ?? '')), static fn () => Format::formatComment((string) ($arr['body'] ?? '')))
-                : Format::formatComment((string) (__('legacy/forums.text_post_protected')));
+                : Format::formatComment((string) (__('forums.text_post_protected')));
             if ($highlight !== '') {
                 $bodyContent = SafeHtml::fromTrustedHtml(Format::highlight(htmlspecialchars($highlight), (string) $bodyContent));
             }
@@ -232,8 +232,8 @@ final class ForumTopicViewService
                     ? '?action=viewtopic&topicid='.$topicid
                     : '?action=viewtopic&topicid='.$topicid.'&authorid='.$posterid,
                 authorToggleLabel: (string) ($authorid
-                    ? __('legacy/forums.text_view_all_posts')
-                    : __('legacy/forums.text_view_this_author_only')),
+                    ? __('forums.text_view_all_posts')
+                    : __('forums.text_view_this_author_only')),
                 avatarImage: SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext(htmlspecialchars($avatar))),
                 classImage: UserClass::imagePath((int) ($arr2['class'] ?? 0)),
                 className: $className,
@@ -282,9 +282,9 @@ final class ForumTopicViewService
             pages: $pages,
             posts: $posts,
             moveForums: $moveForums,
-            highlightColorOptions: $this->index->highlightColorOptions((string) (__('legacy/forums.select_color'))),
+            highlightColorOptions: $this->index->highlightColorOptions((string) (__('forums.select_color'))),
             quickReply: $maypost
-                ? SafeHtml::fromTrustedHtml(Html::quickReply('compose', 'body', (string) (__('legacy/forums.submit_add_reply'))))
+                ? SafeHtml::fromTrustedHtml(Html::quickReply('compose', 'body', (string) (__('forums.submit_add_reply'))))
                 : null,
             deniedNotice: ! $maypost
                 ? SafeHtml::fromTrustedHtml(view('forums._denied-notice', ['locked' => $locked])->render())

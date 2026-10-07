@@ -121,7 +121,7 @@ final class ForumIndexService
             }
         }
         if ($orphans !== []) {
-            $sections[] = new OverforumGroup((string) __('legacy/forums.col_forums'), $orphans);
+            $sections[] = new OverforumGroup((string) __('forums.col_forums'), $orphans);
         }
 
         return new ForumIndexViewModel(

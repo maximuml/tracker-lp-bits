@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Enums\UserTimeType;
 use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
@@ -16,8 +17,11 @@ use App\Services\ForumListingService;
 use App\Support\Cache\LegacyRedisCache;
 use App\Support\CurrentUser;
 use App\Support\Settings;
+use App\Support\Time;
+use App\Support\UserDisplay;
 use App\ViewModels\Forum\TopicListViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Redis;
@@ -104,12 +108,14 @@ final class ForumListingServiceTest extends TestCase
         return $repo;
     }
 
-    private function mockCache(): void
+    /** @param  array<string, mixed>|null  $getValues */
+    private function mockCache(?array $getValues = null): void
     {
         /** @var LegacyRedisCache&MockInterface $cache */
         $cache = Mockery::mock(LegacyRedisCache::class);
         $cache->shouldIgnoreMissing();
         $cache->shouldReceive('get_value')->andReturn(false);
+        $cache->shouldReceive('get_values')->andReturn($getValues ?? []);
         $cache->shouldReceive('delete_value')->andReturn(true);
         $cache->shouldReceive('cache_value')->andReturn(true);
         $this->app->instance(LegacyRedisCache::class, $cache);
@@ -189,6 +195,21 @@ final class ForumListingServiceTest extends TestCase
         ], $attributes));
 
         return $topic;
+    }
+
+    private function assertAbortContains(callable $fn, string ...$needles): void
+    {
+        try {
+            $this->callWithSuppressedErrors($fn);
+            $this->fail('Expected abort');
+        } catch (HttpResponseException $e) {
+            $html = (string) $e->getResponse()->getContent();
+            foreach ($needles as $needle) {
+                $this->assertStringContainsString(e($needle), $html);
+            }
+        } catch (\Throwable $e) {
+            $this->fail('Expected HttpResponseException, got '.$e::class);
+        }
     }
 
     private function callWithSuppressedErrors(callable $fn): mixed
@@ -386,13 +407,10 @@ final class ForumListingServiceTest extends TestCase
 
         $repo->shouldReceive('getForumsList')->andReturn([]);
 
-        $threw = false;
-        try {
-            $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1'], Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10));
-        } catch (\Throwable) {
-            $threw = true;
-        }
-        $this->assertTrue($threw, 'Expected abort when forum does not exist');
+        $this->assertAbortContains(
+            fn () => $this->service->buildViewForum(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1'], Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10),
+            (string) __('forums.std_forum_not_found'),
+        );
     }
 
     public function test_build_view_forum_with_valid_forum_no_topics(): void
@@ -525,10 +543,14 @@ final class ForumListingServiceTest extends TestCase
      * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $forumRow
      */
-    private function viewForumVm(array $curUser = [], array $forumRow = []): TopicListViewModel
+    /**
+     * @param  array<string, mixed>  $topicAttrs
+     * @param  array<string, mixed>|null  $postRows
+     */
+    private function viewForumVm(array $curUser = [], array $forumRow = [], array $topicAttrs = [], ?array $postRows = null): TopicListViewModel
     {
         $repo = $this->mockForumRepo();
-        $this->mockCache();
+        $this->mockCache($postRows);
         $curUser = array_merge([
             'id' => 1, 'username' => 'test', 'class' => 10,
             'forumpost' => 'yes', 'ip' => '127.0.0.1',
@@ -544,7 +566,7 @@ final class ForumListingServiceTest extends TestCase
         ]);
         $this->topicRepo->shouldReceive('getTopicsByForum')->andReturn([
             'count' => 1,
-            'rows' => new Collection([$this->fakeTopic(['id' => 7, 'subject' => 'Topic'])]),
+            'rows' => new Collection([$this->fakeTopic(array_merge(['id' => 7, 'subject' => 'Topic'], $topicAttrs))]),
         ]);
         $this->postRepo->shouldReceive('countTopicPostsBatch')->with([7])->andReturn([7 => 3]);
 
@@ -569,6 +591,41 @@ final class ForumListingServiceTest extends TestCase
 
         $this->assertSame('lastpost_0', $vm->topics[0]->tooltipId);
         $this->assertCount(1, $vm->tooltips);
+    }
+
+    public function test_build_view_forum_tooltip_content_uses_at_time_by_default(): void
+    {
+        Settings::saveBatch('tweak', ['enabletooltip' => 'yes']);
+        Settings::resetCache();
+
+        $vm = $this->viewForumVm(
+            curUser: ['timetype' => UserTimeType::TIMEADDED->value],
+            topicAttrs: ['lastpost' => 100],
+            postRows: ['post_100_content' => ['id' => 100, 'userid' => 5, 'added' => '2024-06-01 00:00:00', 'body' => 'lp body']],
+        );
+
+        $this->assertSame('lastpost_0', $vm->tooltips[0]['id']);
+        $this->assertSame(
+            __('forums.text_last_posted_by').UserDisplay::username(5).__('forums.text_at_time').'2024-06-01 00:00:00',
+            (string) $vm->tooltips[0]['content'],
+        );
+    }
+
+    public function test_build_view_forum_tooltip_content_formats_timealive(): void
+    {
+        Settings::saveBatch('tweak', ['enabletooltip' => 'yes']);
+        Settings::resetCache();
+
+        $vm = $this->viewForumVm(
+            curUser: ['timetype' => UserTimeType::TIMEALIVE->value],
+            topicAttrs: ['lastpost' => 100],
+            postRows: ['post_100_content' => ['id' => 100, 'userid' => 5, 'added' => '2024-06-01 00:00:00', 'body' => 'lp body']],
+        );
+
+        $this->assertSame(
+            __('forums.text_last_posted_by').UserDisplay::username(5).__('forums.text_blank').Time::format('2024-06-01 00:00:00', true, false, true),
+            (string) $vm->tooltips[0]['content'],
+        );
     }
 
     public function test_build_view_forum_tooltips_disabled_when_showlastpost_no(): void

@@ -60,7 +60,7 @@ final class ForumModerationService
 
         $topic = $this->data->topics->getTopic((int) $topicid);
         if ($topic === null) {
-            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_not_found'));
+            LegacyResponse::abort(__('forums.std_error'), __('forums.std_topic_not_found'));
         }
 
         // W1-04: Use TopicPolicy for authorization
@@ -71,7 +71,7 @@ final class ForumModerationService
 
         $minclasswrite = $this->data->forums->getForumMinclasswrite($forumid);
         if ($minclasswrite === null) {
-            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_forum_not_found'));
+            LegacyResponse::abort(__('forums.std_error'), __('forums.std_forum_not_found'));
         }
 
         if (UserDisplay::currentClass() < $minclasswrite) {
@@ -80,7 +80,7 @@ final class ForumModerationService
 
         $oldForumid = $this->data->topics->getTopicForumId($topicid);
         if ($oldForumid === null) {
-            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_topic_not_found'));
+            LegacyResponse::abort(__('forums.std_error'), __('forums.std_topic_not_found'));
         }
 
         $postCount = $this->data->posts->countTopicPosts($topicid);
@@ -117,7 +117,7 @@ final class ForumModerationService
 
         $sure = (int) $request->input('sure', 0);
         if ($sure !== 1 || ! $request->isMethod('POST')) {
-            LegacyResponse::abort(__('legacy/forums.std_delete_topic'), (__('legacy/forums.std_delete_topic_note')).view('forums._confirm-form', ['action' => 'deletetopic', 'name' => 'topicid', 'value' => $topicid, 'text' => __('legacy/forums.std_here')])->render().__('legacy/forums.std_if_sure'), false);
+            LegacyResponse::abort(__('forums.std_delete_topic'), (__('forums.std_delete_topic_note')).view('forums._confirm-form', ['action' => 'deletetopic', 'name' => 'topicid', 'value' => $topicid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
         }
 
         $postCount = $this->data->posts->countTopicPosts($topicid);
@@ -145,7 +145,7 @@ final class ForumModerationService
 
         $post = $this->data->postLookup->getPost((int) $postid);
         if ($post === null) {
-            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_post_not_found'));
+            LegacyResponse::abort(__('forums.std_error'), __('forums.std_post_not_found'));
         }
 
         // W1-04: Use PostPolicy for authorization
@@ -159,11 +159,11 @@ final class ForumModerationService
         $prevPostId = $this->data->postLookup->getPreviousPostId($topicid, $postid);
 
         if ($prevPostId === null || $prevPostId === 0) {
-            LegacyResponse::abort(__('legacy/forums.std_error'), (__('legacy/forums.std_cannot_delete_post')).view('components.altlink', ['class' => 'altlink', 'url' => "?action=deletetopic&topicid={$topicid}&sure=1", 'text' => __('legacy/forums.std_delete_topic_link')])->render().__('legacy/forums.std_instead'), false);
+            LegacyResponse::abort(__('forums.std_error'), (__('forums.std_cannot_delete_post')).view('components.altlink', ['class' => 'altlink', 'url' => "?action=deletetopic&topicid={$topicid}&sure=1", 'text' => __('forums.std_delete_topic_link')])->render().__('forums.std_instead'), false);
         }
 
         if ($sure !== 1 || ! $request->isMethod('POST')) {
-            LegacyResponse::abort(__('legacy/forums.std_delete_post'), (__('legacy/forums.std_delete_post_note')).view('forums._confirm-form', ['action' => 'deletepost', 'name' => 'postid', 'value' => $postid, 'text' => __('legacy/forums.std_here')])->render().__('legacy/forums.std_if_sure'), false);
+            LegacyResponse::abort(__('forums.std_delete_post'), (__('forums.std_delete_post_note')).view('forums._confirm-form', ['action' => 'deletepost', 'name' => 'postid', 'value' => $postid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
         }
 
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;

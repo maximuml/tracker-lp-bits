@@ -47,23 +47,23 @@ final class ForumComposeService
         switch ($type) {
             case 'new':
                 $forumname = $this->forumRepository->getForumName((int) $id) ?? '';
-                $title = view('components.title-link', ['before' => __('legacy/forums.text_new_topic_in').' ', 'url' => '?action=viewforum&forumid='.$id, 'text' => $forumname, 'after' => ' '.__('legacy/forums.text_forum')])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_new_topic_in').' ', 'url' => '?action=viewforum&forumid='.$id, 'text' => $forumname, 'after' => ' '.__('forums.text_forum')])->render();
                 $hassubject = true;
                 break;
 
             case 'reply':
                 $topicname = $this->topicRepository->getTopicSubject((int) $id) ?? '';
-                $title = view('components.title-link', ['before' => __('legacy/forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$id, 'text' => $topicname, 'after' => ' '])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$id, 'text' => $topicname, 'after' => ' '])->render();
                 break;
 
             case 'quote':
                 $post = $this->postRepository->getPostForQuote((int) $id);
                 if (! $post) {
-                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
+                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_post_id'));
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
-                $title = view('components.title-link', ['before' => __('legacy/forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$topicid, 'text' => $topicname, 'after' => ' '])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$topicid, 'text' => $topicname, 'after' => ' '])->render();
                 $body = '[quote='.Input::unescape((string) $post['username']).']'.Input::unescape((string) $post['body']).'[/quote]';
                 $postid = $id;
                 $hiddenId = $topicid;
@@ -80,7 +80,7 @@ final class ForumComposeService
                     $hassubject = true;
                 }
                 $body = Input::unescape((string) $post['body']);
-                $title = __('legacy/forums.text_edit_post');
+                $title = __('forums.text_edit_post');
                 break;
 
             default:
@@ -139,7 +139,7 @@ final class ForumComposeService
 
         $post = $this->postRepository->getPostWithTopic((int) $postid);
         if (! $post) {
-            LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
+            LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_post_id'));
         }
 
         $locked = (bool) $post['locked'];
@@ -157,14 +157,14 @@ final class ForumComposeService
         switch ($place) {
             case 'forum':
                 if (! $this->forumRepository->forumExists((int) $id)) {
-                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_forum_id'));
+                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_forum_id'));
                 }
                 break;
 
             case 'topic':
                 $forumid = $this->topicRepository->topicExists((int) $id);
                 if (! $forumid) {
-                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_bad_topic_id'));
+                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_bad_topic_id'));
                 }
                 $this->checkWhetherExist((int) $forumid, 'forum');
                 break;
@@ -172,7 +172,7 @@ final class ForumComposeService
             case 'post':
                 $topicid = $this->postRepository->postExists((int) $id);
                 if (! $topicid) {
-                    LegacyResponse::abort(__('legacy/forums.std_error'), __('legacy/forums.std_no_post_id'));
+                    LegacyResponse::abort(__('forums.std_error'), __('forums.std_no_post_id'));
                 }
                 $this->checkWhetherExist((int) $topicid, 'topic');
                 break;

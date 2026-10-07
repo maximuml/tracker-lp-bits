@@ -102,7 +102,7 @@ final class ForumPageService
                 break;
             default:
                 if ($action !== '') {
-                    LegacyResponse::abort(__('legacy/forums.std_forum_error'), __('legacy/forums.std_unknown_action'));
+                    LegacyResponse::abort(__('forums.std_forum_error'), __('forums.std_unknown_action'));
                 }
                 $forums = $this->indexService->buildForumsIndex($curUser, $userId);
                 $action = 'forums';

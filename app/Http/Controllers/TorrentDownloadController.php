@@ -200,15 +200,6 @@ class TorrentDownloadController extends LegacyController
         ]);
     }
 
-    public function downloadnoticeAction(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/torrents/download-notice'.$suffix, 308);
-    }
-
     public function downloadnoticeSubmit(DownloadNoticeRequest $request): Response|RedirectResponse
     {
         $curUser = $this->currentUser->get();

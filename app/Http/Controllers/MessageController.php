@@ -10,7 +10,6 @@ use App\DTOs\Message\MessageListDto;
 use App\DTOs\Message\StoreMessageDto;
 use App\DTOs\Message\UpdateMessageDto;
 use App\Http\Requests\DeleteMailboxMessageRequest;
-use App\Http\Requests\DeleteMessageRequest;
 use App\Http\Requests\DeleteTypedMessageRequest;
 use App\Http\Requests\EditMailboxesRequest;
 use App\Http\Requests\MoveOrDeleteMessageRequest;
@@ -61,20 +60,6 @@ class MessageController extends LegacyController
         $data = $this->pageService->build($request)->toArray();
 
         return $this->renderPage($request, 'messages', true, $data);
-    }
-
-    public function messagesAction(Request $request): RedirectResponse
-    {
-        $action = (string) $request->input('action', '');
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return match ($action) {
-            'moveordel' => redirect()->to('/web/messages/move-or-delete'.$suffix, 308),
-            'editmailboxes2' => redirect()->to('/web/messages/mailboxes'.$suffix, 308),
-            'deletemessage' => redirect()->to('/web/messages/delete'.$suffix, 308),
-            default => redirect('/web/messages'),
-        };
     }
 
     public function moveOrDelete(MoveOrDeleteMessageRequest $request): RedirectResponse
@@ -162,28 +147,9 @@ class MessageController extends LegacyController
         ]);
     }
 
-    public function takeMessage(StoreMessageRequest $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the validated body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/messages/send'.$suffix, 308);
-    }
-
     public function send(StoreMessageRequest $request): Response|RedirectResponse
     {
         return $this->legacyService->takeMessage($request);
-    }
-
-    public function deletemessage(DeleteMessageRequest $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the validated body unchanged;
-        // the mailbox side moves into the URI.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/messages/delete/'.$request->input('type').$suffix, 308);
     }
 
     public function deleteTyped(DeleteTypedMessageRequest $request, string $type): Response|RedirectResponse

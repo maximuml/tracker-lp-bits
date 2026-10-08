@@ -9,7 +9,6 @@ use App\Repositories\NotificationFeedRepository;
 use App\Support\CurrentUser;
 use App\Support\NotificationFeed;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class NotificationController extends LegacyController
@@ -29,15 +28,6 @@ class NotificationController extends LegacyController
         $offset = max(0, (int) $request->query('offset', 0));
 
         return response()->json(['ret' => 0, 'data' => $this->feed->unread((int) $this->currentUser->id(), $offset)]);
-    }
-
-    public function markRead(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/notifications/mark-read'.$suffix, 308);
     }
 
     public function markReadSubmit(MarkReadRequest $request): JsonResponse

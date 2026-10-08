@@ -46,27 +46,9 @@ class TorrentBookmarkController extends LegacyController
         return response($status, 200, $headers);
     }
 
-    public function bookmarkToggle(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/torrents/bookmark'.$suffix, 308);
-    }
-
     public function bookmarkSubmit(BookmarkSubmitRequest $request): Response
     {
         return $this->bookmark($request);
-    }
-
-    public function thanks(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/torrents/thanks'.$suffix, 308);
     }
 
     public function thanksSubmit(ThanksTorrentRequest $request): Response|RedirectResponse|View

@@ -59,15 +59,6 @@ class SupportController extends LegacyController
         };
     }
 
-    public function complainsPost(Request $request): RedirectResponse|Response
-    {
-        if (($abort = $this->complainsGate()) !== null) {
-            return $abort;
-        }
-
-        return $this->handleComplainPost($request);
-    }
-
     public function complainNewPost(ComplainNewRequest $request): RedirectResponse|Response
     {
         if (($abort = $this->complainsGate()) !== null) {
@@ -124,23 +115,6 @@ class SupportController extends LegacyController
         }
 
         return null;
-    }
-
-    private function handleComplainPost(Request $request): RedirectResponse|Response
-    {
-        $action = filter_var((string) ($request->input('action') ?? ''), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        // Legacy callers can carry params in the URL — forward the query
-        // string so the target endpoint still sees them.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return match ($action) {
-            'new' => redirect()->to('/web/complains/new'.$suffix, 308),
-            'reply' => redirect()->to('/web/complains/reply'.$suffix, 308),
-            'answered' => redirect()->to('/web/complains/answered'.$suffix, 308),
-            'unanswered' => redirect()->to('/web/complains/unanswered'.$suffix, 308),
-            default => $this->abortResponse(__('functions.std_error'), 'Permission denied.'),
-        };
     }
 
     private function complainNew(Request $request): RedirectResponse|Response

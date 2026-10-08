@@ -19,7 +19,6 @@ use App\Support\Locale;
 use App\Support\Log;
 use App\Support\TorrentOps;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
@@ -30,15 +29,6 @@ class TorrentDeleteController extends LegacyController
         private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly UserRepositoryInterface $userRepository,
     ) {}
-
-    public function fastDelete(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/torrents/fast-delete'.$suffix, 308);
-    }
 
     public function fastDeleteTorrent(FastDeleteTorrentRequest $request): Response|RedirectResponse
     {
@@ -107,15 +97,6 @@ class TorrentDeleteController extends LegacyController
         }
 
         return redirect('/web/torrents');
-    }
-
-    public function delete(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/torrents/delete'.$suffix, 308);
     }
 
     public function deleteTorrent(DeleteTorrentRequest $request): View|RedirectResponse|Response

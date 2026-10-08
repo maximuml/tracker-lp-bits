@@ -68,15 +68,6 @@ class SystemBulkController extends LegacyController
         $this->cache = $cache;
     }
 
-    public function takeamountupload(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/system/amount-upload'.$suffix, 308);
-    }
-
     public function amountUpload(AmountUploadRequest $request): Response|RedirectResponse|View
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
@@ -133,15 +124,6 @@ class SystemBulkController extends LegacyController
 
         return redirect('takeamountupload.php?sent=1');
 
-    }
-
-    public function takeinvite(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/invites/send'.$suffix, 308);
     }
 
     public function sendInvite(SendInviteRequest $request): Response|RedirectResponse
@@ -306,15 +288,6 @@ class SystemBulkController extends LegacyController
         return redirect('/web/invite?id='.$currentUserId.'&sent=1');
     }
 
-    public function takeupdate(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/system/update'.$suffix, 308);
-    }
-
     public function systemUpdate(SystemUpdateRequest $request): Response|RedirectResponse
     {
         $curUser = $this->currentUser->get();
@@ -414,15 +387,6 @@ class SystemBulkController extends LegacyController
 
             return response()->json(['success' => false, 'error' => 'Setlist lookup failed.']);
         }
-    }
-
-    public function takeIncrementBulk(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/system/increment-bulk'.$suffix, 308);
     }
 
     public function incrementBulkSend(IncrementBulkRequest $request): Response|RedirectResponse

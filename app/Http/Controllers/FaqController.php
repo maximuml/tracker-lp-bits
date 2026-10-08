@@ -60,15 +60,6 @@ class FaqController extends LegacyController
         return response(view('faq.index', ['faqCategories' => $categories])->render());
     }
 
-    public function faqPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/faq/submit'.$suffix, 308);
-    }
-
     public function faqSubmit(FaqPostRequest $request): Response|RedirectResponse
     {
         return $this->faq($request);
@@ -84,15 +75,6 @@ class FaqController extends LegacyController
         $faqData = $this->infoRepository->faqManageData();
 
         return $this->renderPage($request, 'faqmanage', true, $faqData);
-    }
-
-    public function faqManagePost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/faq/manage'.$suffix, 308);
     }
 
     public function faqManageSubmit(FaqManageSubmitRequest $request): View|RedirectResponse|Response
@@ -161,15 +143,6 @@ class FaqController extends LegacyController
         }
 
         return redirect($redirectBase.'/web/faqmanage');
-    }
-
-    public function faqActionsPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/faq/actions'.$suffix, 308);
     }
 
     public function faqActionsSubmit(FaqActionsRequest $request): View|RedirectResponse|Response

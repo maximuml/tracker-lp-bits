@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\Http\Controllers\LegacyRedirectController;
 use App\Http\Controllers\SupportController;
 use App\Http\Requests\ComplainNewRequest;
 use App\Http\Requests\ComplainReplyRequest;
@@ -166,13 +167,13 @@ final class SupportControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(SupportController::class);
+        $controller = app(LegacyRedirectController::class);
         $request = Request::create('/complains', 'POST', [
             'action' => 'unknown',
         ]);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->post($request);
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
@@ -287,11 +288,11 @@ final class SupportControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(SupportController::class);
+        $controller = app(LegacyRedirectController::class);
         $request = Request::create('/complains', 'POST', ['action' => 'new']);
         app()->instance('request', $request);
 
-        $response = $controller->complainsPost($request);
+        $response = $controller->post($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame(308, $response->getStatusCode());
@@ -302,13 +303,13 @@ final class SupportControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(SupportController::class);
+        $controller = app(LegacyRedirectController::class);
 
         foreach (['reply' => 'reply', 'answered' => 'answered', 'unanswered' => 'unanswered'] as $action => $verb) {
             $request = Request::create('/complains', 'POST', ['action' => $action]);
             app()->instance('request', $request);
 
-            $response = $controller->complainsPost($request);
+            $response = $controller->post($request);
 
             $this->assertInstanceOf(RedirectResponse::class, $response);
             $this->assertSame(308, $response->getStatusCode());

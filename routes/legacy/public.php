@@ -1,10 +1,6 @@
 <?php
 
-use App\Http\Controllers\FaqController;
-use App\Http\Controllers\InfoController;
 use App\Http\Controllers\LegacyRedirectController;
-use App\Http\Controllers\SupportController;
-use App\Http\Controllers\TorrentBookmarkController;
 use App\Http\Controllers\UtilityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,9 +14,9 @@ $get301('/aboutnexus', '/web/aboutnexus');
 $get301('/rules', '/web/rules');
 $get301('/useragreement', '/web/useragreement');
 $get301('/faq', '/web/faq');
-Route::post('/faq', [FaqController::class, 'faqPost'])->middleware('auth.nexus:nexus-web');
+Route::post('/faq', [LegacyRedirectController::class, 'post'])->middleware('auth.nexus:nexus-web');
 $get301('/donate', '/web/donate');
-Route::post('/donate', [InfoController::class, 'donatePost'])->middleware('auth.nexus:nexus-web');
+Route::post('/donate', [LegacyRedirectController::class, 'post'])->middleware('auth.nexus:nexus-web');
 $get301('/getusertorrentlistajax', '/web/getusertorrentlistajax');
 $get301('/searchsuggest', '/web/searchsuggest');
 Route::post('/ajax', [UtilityController::class, 'ajax'])->middleware(['throttle:ajax', 'reject.get.mutations'])->name('ajax.legacy');
@@ -43,10 +39,10 @@ $get301('/cron', '/web/cron');
 $get301('/ok', '/web/ok');
 
 $get301('/complains', '/web/complains');
-Route::post('/complains', [SupportController::class, 'complainsPost']);
+Route::post('/complains', [LegacyRedirectController::class, 'post']);
 $get301('/shoutbox', '/web/shoutbox');
 
 $get301('/bookmark', '/web/bookmark');
-Route::post('/bookmark', [TorrentBookmarkController::class, 'bookmarkToggle'])->middleware(['auth.nexus:nexus-web', 'reject.get.mutations']);
+Route::post('/bookmark', [LegacyRedirectController::class, 'post'])->middleware(['auth.nexus:nexus-web', 'reject.get.mutations']);
 $get301('/viewfilelist', '/web/viewfilelist');
 $get301('/viewpeerlist', '/web/viewpeerlist');

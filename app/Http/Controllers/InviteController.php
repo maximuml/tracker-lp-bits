@@ -36,15 +36,6 @@ class InviteController extends LegacyController
         private readonly InviteRepository $inviteRepository,
     ) {}
 
-    public function inviteAction(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/invites/submit'.$suffix, 308);
-    }
-
     public function inviteSubmit(InviteActionRequest $request): View|RedirectResponse|Response
     {
         return $this->invite($request);

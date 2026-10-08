@@ -37,15 +37,6 @@ class RssController extends LegacyController
         return $this->renderPage($request, 'getrss', true, $this->getrssData());
     }
 
-    public function getrssPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/rss/generate'.$suffix, 308);
-    }
-
     public function getrssSubmit(GetrssRequest $request): Response|RedirectResponse
     {
         return $this->handleGetrssPost($request);

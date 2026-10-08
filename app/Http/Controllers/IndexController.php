@@ -41,15 +41,6 @@ class IndexController extends Controller
         return view('index.index', $data);
     }
 
-    public function legacyPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/index/submit'.$suffix, 308);
-    }
-
     public function indexSubmit(IndexPostRequest $request): View|Response|RedirectResponse
     {
         $user = $this->currentUser->get();

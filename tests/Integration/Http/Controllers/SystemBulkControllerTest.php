@@ -7,6 +7,7 @@ namespace Tests\Integration\Http\Controllers;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Enums\UserClass;
+use App\Http\Controllers\LegacyRedirectController;
 use App\Http\Controllers\SystemBulkController;
 use App\Http\Requests\AmountUploadRequest;
 use App\Http\Requests\IncrementBulkRequest;
@@ -233,11 +234,11 @@ final class SystemBulkControllerTest extends TestCase
 
     public function test_takeamountupload_legacy_uri_redirects_to_rest_endpoint(): void
     {
-        $controller = app(SystemBulkController::class);
+        $controller = app(LegacyRedirectController::class);
         $request = Request::create('/takeamountupload', 'POST', ['msg' => 'hi']);
         app()->instance('request', $request);
 
-        $response = $controller->takeamountupload($request);
+        $response = $controller->post($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame(308, $response->getStatusCode());
@@ -246,11 +247,11 @@ final class SystemBulkControllerTest extends TestCase
 
     public function test_take_increment_bulk_legacy_uri_redirects_to_rest_endpoint(): void
     {
-        $controller = app(SystemBulkController::class);
+        $controller = app(LegacyRedirectController::class);
         $request = Request::create('/take-increment-bulk', 'POST', ['msg' => 'hi']);
         app()->instance('request', $request);
 
-        $response = $controller->takeIncrementBulk($request);
+        $response = $controller->post($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame(308, $response->getStatusCode());
@@ -263,11 +264,11 @@ final class SystemBulkControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(SystemBulkController::class);
+        $controller = app(LegacyRedirectController::class);
         $request = Request::create('/takeupdate', 'POST');
         app()->instance('request', $request);
 
-        $response = $controller->takeupdate($request);
+        $response = $controller->post($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame(308, $response->getStatusCode());
@@ -358,11 +359,11 @@ final class SystemBulkControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(SystemBulkController::class);
+        $controller = app(LegacyRedirectController::class);
         $request = Request::create('/takeinvite', 'POST');
         app()->instance('request', $request);
 
-        $response = $controller->takeinvite($request);
+        $response = $controller->post($request);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame(308, $response->getStatusCode());

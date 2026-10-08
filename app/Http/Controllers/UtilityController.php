@@ -114,15 +114,6 @@ class UtilityController extends LegacyController
         return $this->renderPreview($request);
     }
 
-    public function previewSubmit(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/preview'.$suffix, 308);
-    }
-
     public function previewRender(PreviewRequest $request): View|RedirectResponse
     {
         return $this->renderPreview($request);

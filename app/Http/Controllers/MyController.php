@@ -64,23 +64,6 @@ class MyController extends Controller
         return view('my.bonus', $data);
     }
 
-    public function bonusExchange(Request $request): RedirectResponse
-    {
-        if ($this->currentUser->get() === null) {
-            $qs = $request->getQueryString();
-
-            return redirect('/web/mybonus'.($qs ? '?'.$qs : ''));
-        }
-
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-        if ($request->query('action') === 'exchange') {
-            return redirect()->to('/web/mybonus/exchange'.$suffix, 308);
-        }
-
-        return redirect('/web/mybonus');
-    }
-
     public function exchangeBonus(ExchangeBonusRequest $request): RedirectResponse
     {
         if ($this->currentUser->get() === null) {

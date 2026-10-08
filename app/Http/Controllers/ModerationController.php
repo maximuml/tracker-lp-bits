@@ -34,15 +34,6 @@ class ModerationController extends LegacyController
         private readonly ModerationRepository $moderationRepository,
     ) {}
 
-    public function reportAction(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/reports/create'.$suffix, 308);
-    }
-
     public function reportSubmit(ReportRequest $request): View|RedirectResponse|Response
     {
         return $this->report($request);

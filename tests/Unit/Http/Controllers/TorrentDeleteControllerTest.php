@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\Http\Controllers\LegacyRedirectController;
 use App\Http\Controllers\TorrentDeleteController;
 use App\Http\Requests\DeleteTorrentRequest;
 use App\Http\Requests\FastDeleteTorrentRequest;
@@ -25,10 +26,10 @@ final class TorrentDeleteControllerTest extends TestCase
 
     public function test_fast_delete_legacy_uri_redirects_to_rest_endpoint(): void
     {
-        $controller = App::make(TorrentDeleteController::class);
+        $controller = App::make(LegacyRedirectController::class);
         $request = Request::create('/fastdelete', 'POST', ['id' => 1]);
 
-        $response = $controller->fastDelete($request);
+        $response = $controller->post($request);
 
         $this->assertTrue($response->isRedirect());
         $this->assertSame(308, $response->getStatusCode());
@@ -51,10 +52,10 @@ final class TorrentDeleteControllerTest extends TestCase
 
     public function test_delete_legacy_uri_redirects_to_rest_endpoint(): void
     {
-        $controller = App::make(TorrentDeleteController::class);
+        $controller = App::make(LegacyRedirectController::class);
         $request = Request::create('/delete', 'POST', ['id' => 1]);
 
-        $response = $controller->delete($request);
+        $response = $controller->post($request);
 
         $this->assertTrue($response->isRedirect());
         $this->assertSame(308, $response->getStatusCode());

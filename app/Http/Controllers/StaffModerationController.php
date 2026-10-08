@@ -52,15 +52,6 @@ class StaffModerationController extends LegacyController
         return $this->abortResponse('Error', 'Invalid action.');
     }
 
-    public function modtaskPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/staff/modtask'.$suffix, 308);
-    }
-
     public function modtaskSubmit(ModtaskRequest $request): Response|RedirectResponse
     {
         $deny = $this->modtaskPreamble();
@@ -448,15 +439,6 @@ class StaffModerationController extends LegacyController
         }
 
         return null;
-    }
-
-    public function modrulesPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/staff/modrules'.$suffix, 308);
     }
 
     public function modrulesSubmit(ModrulesRequest $request): View|RedirectResponse|Response

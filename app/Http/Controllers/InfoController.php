@@ -174,15 +174,6 @@ class InfoController extends LegacyController
         return $this->renderPage($request, 'donate', false, $data);
     }
 
-    public function donatePost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/donate/submit'.$suffix, 308);
-    }
-
     public function donateSubmit(DonateSubmitRequest $request): View|RedirectResponse|Response
     {
         return $this->donate($request);
@@ -196,15 +187,6 @@ class InfoController extends LegacyController
         }
 
         return $this->donatedPage($request, '');
-    }
-
-    public function donatedPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/info/donated'.$suffix, 308);
     }
 
     public function donatedSubmit(DonatedRequest $request): Response|RedirectResponse|View
@@ -318,15 +300,6 @@ class InfoController extends LegacyController
             'pagerbottom' => $pagerbottom,
             'isModerator' => $isModerator,
         ]);
-    }
-
-    public function bitbucketlogPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/admin/bitbucket-log'.$suffix, 308);
     }
 
     public function bitbucketLogSubmit(BitbucketLogRequest $request): Response|RedirectResponse|View

@@ -192,15 +192,6 @@ class SettingsController extends LegacyController
         return view('settings.index', $data);
     }
 
-    public function settingsAction(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/settings/submit'.$suffix, 308);
-    }
-
     public function settingsSubmit(SettingsSubmitRequest $request): RedirectResponse|Response
     {
         $currentUser = $this->currentUser->get();

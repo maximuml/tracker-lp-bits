@@ -8,6 +8,7 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Support\Category;
+use App\Support\CurrentUser;
 use App\Support\PageResponses;
 use App\ViewModels\Offer\OfferCategoryOption;
 use Illuminate\Http\Request;
@@ -22,10 +23,9 @@ final class OfferEditBuilder
     ) {}
 
     /**
-     * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    public function build(array $curUser, int $userId, Request $request, mixed $browsecatmode): array
+    public function build(CurrentUser $curUser, int $userId, Request $request, mixed $browsecatmode): array
     {
         $id = (int) $request->query('id', 0);
         $offer = $this->offerRepository->findOffer($id);

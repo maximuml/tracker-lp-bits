@@ -36,13 +36,13 @@ final class OfferPageService
 
     public function build(Request $request): OfferPageViewModel
     {
-        $curUser = (array) ($this->currentUser->get() ?? []);
+        $curUser = $this->currentUser;
         $userId = $this->currentUser->id();
 
         $action = $this->resolveAction($request);
 
         $data = [
-            'curUser' => $curUser,
+            'curUser' => $curUser->get() ?? [],
             'userId' => $userId,
             'action' => $action,
             'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost'),

@@ -36,7 +36,7 @@ class AttendanceController extends BasePageController
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
         $attendance = $repository->getAttendance($uid);
 
-        return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);
+        return $this->renderAttendance($request, $repository, $this->currentUser, $uid, $attendance, $captchaEnabled);
     }
 
     public function attendanceSubmit(AttendanceRequest $request, AttendanceRepository $repository): View|RedirectResponse|Response
@@ -63,14 +63,13 @@ class AttendanceController extends BasePageController
             PageResponses::abort(__('attendance.sorry'), __('attendance.already_attended'));
         }
 
-        return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);
+        return $this->renderAttendance($request, $repository, $this->currentUser, $uid, $attendance, $captchaEnabled);
     }
 
-    /** @param array<string, mixed> $curUser */
     private function renderAttendance(
         Request $request,
         AttendanceRepository $repository,
-        array $curUser,
+        CurrentUser $curUser,
         int $uid,
         ?Attendance $attendance,
         bool $captchaEnabled

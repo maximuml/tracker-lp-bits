@@ -44,12 +44,12 @@ final class UsercpPageService
      */
     public function build(string $action, string $type): UsercpPageViewModel
     {
-        $curUser = (array) ($this->currentUser->get() ?? []);
-        $userInfo = (new User)->newFromBuilder($curUser);
+        $curUser = $this->currentUser;
+        $userInfo = (new User)->newFromBuilder($curUser->get() ?? []);
         $siteName = Setting::getSiteName();
 
         $data = [
-            'curUser' => $curUser,
+            'curUser' => $curUser->get() ?? [],
             'userInfo' => $userInfo,
             'siteName' => $siteName,
             'action' => $action,

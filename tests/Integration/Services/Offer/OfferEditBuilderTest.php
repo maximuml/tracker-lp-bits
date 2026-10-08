@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,7 @@ use Tests\TestCase;
 final class OfferEditBuilderTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     /** @var OfferRepositoryInterface&MockInterface */
     private OfferRepositoryInterface $offerRepo;
@@ -97,7 +99,7 @@ final class OfferEditBuilderTest extends TestCase
         $this->offerRepo->shouldReceive('findOffer')->with(5)->andReturn(null);
 
         $this->assertAbortContains(
-            fn () => $this->editBuilder()->build(['id' => 7], 7, $this->request(), 1),
+            fn () => $this->editBuilder()->build($this->curUser(['id' => 7]), 7, $this->request(), 1),
             (string) __('offers.text_nothing_found'),
         );
     }
@@ -107,7 +109,7 @@ final class OfferEditBuilderTest extends TestCase
         $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['userid' => 10]));
 
         $this->assertAbortContains(
-            fn () => $this->editBuilder()->build(['id' => 7], 7, $this->request(), 1),
+            fn () => $this->editBuilder()->build($this->curUser(['id' => 7]), 7, $this->request(), 1),
             (string) __('offers.std_cannot_edit_others_offer'),
         );
     }
@@ -116,7 +118,7 @@ final class OfferEditBuilderTest extends TestCase
     {
         $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['userid' => 7]));
 
-        $r = $this->editBuilder()->build(['id' => 7], 7, $this->request(), 1);
+        $r = $this->editBuilder()->build($this->curUser(['id' => 7]), 7, $this->request(), 1);
 
         $this->assertSame(5, $r['id']);
         $this->assertSame('&lt;b&gt;Offer&lt;/b&gt;', $r['title']);

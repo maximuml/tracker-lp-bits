@@ -11,6 +11,7 @@ use App\Repositories\TokenRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
@@ -37,19 +38,16 @@ final class UsercpHomeBuilder
         private readonly ?NexusCache $cache
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    public function build(array $curUser, User $userInfo): UsercpHomeSection
+    public function build(CurrentUser $curUser, User $userInfo): UsercpHomeSection
     {
         $cache = $this->cache;
-        $userId = (int) ($curUser['id'] ?? 0);
+        $userId = $curUser->id();
 
         // Comment count
         $commentCount = $this->usercpLookupRepository->getCommentCount($userId);
 
         // Join date (raw — the view renders it through <x-time>)
-        $added = (string) ($curUser['added'] ?? '');
+        $added = (string) $curUser->value('added', '');
 
         // Forum posts + percentage
         $forumPosts = 0;
@@ -95,10 +93,10 @@ final class UsercpHomeBuilder
         $enableLocationTweak = SiteConfig::current()->tweak->enableLocation();
         $ipLocation = '';
         if ($enableLocationTweak) {
-            [$locPub, $locMod] = Network::ipLocationWithContext((string) ($curUser['ip'] ?? ''));
-            $ipLocation = Strings::hidden(e((string) ($curUser['ip'] ?? ''))." <span title='".e($locMod, false)."'>[".e($locPub).']</span>');
+            [$locPub, $locMod] = Network::ipLocationWithContext((string) $curUser->value('ip', ''));
+            $ipLocation = Strings::hidden(e((string) $curUser->value('ip', ''))." <span title='".e($locMod, false)."'>[".e($locPub).']</span>');
         } else {
-            $ipLocation = Strings::hidden(e((string) ($curUser['ip'] ?? '')));
+            $ipLocation = Strings::hidden(e((string) $curUser->value('ip', '')));
         }
 
         // Passkey login form data (if passkey login enabled and deadline in
@@ -112,7 +110,7 @@ final class UsercpHomeBuilder
             && $loginSecretDeadline !== null
             && $loginSecretDeadline > date('Y-m-d H:i:s')
         ) {
-            $passkey = (string) ($curUser['passkey'] ?? '');
+            $passkey = $curUser->passkey();
             $timestamp = time();
             $signature = hash_hmac('sha256', $passkey.$timestamp, $siteConfig->security->loginSecret());
             $passkeyLoginForm = new PasskeyLoginForm(
@@ -133,14 +131,14 @@ final class UsercpHomeBuilder
 
         return new UsercpHomeSection(
             joinDate: ($added === '0000-00-00 00:00:00' || $added === '') ? null : $added,
-            email: (string) ($curUser['email'] ?? ''),
+            email: (string) $curUser->value('email', ''),
             ipLocation: SafeHtml::fromTrustedHtml($ipLocation),
-            showAvatar: ! empty($curUser['avatar']),
-            avatarUrl: (string) ($curUser['avatar'] ?? ''),
-            passkey: Strings::hidden(e((string) ($curUser['passkey'] ?? ''))),
+            showAvatar: ! empty($curUser->value('avatar')),
+            avatarUrl: (string) $curUser->value('avatar', ''),
+            passkey: Strings::hidden(e($curUser->passkey())),
             passkeyLogin: $passkeyLogin,
-            invites: (int) ($curUser['invites'] ?? 0),
-            seedbonus: (string) ($curUser['seedbonus'] ?? '0'),
+            invites: (int) $curUser->value('invites', 0),
+            seedbonus: (string) $curUser->value('seedbonus', '0'),
             commentCount: $commentCount,
             forumPosts: $forumPosts > 0
                 ? new UsercpPostStats(posts: $forumPosts, dayPosts: $dayPosts, percentages: $percentages)

@@ -155,11 +155,13 @@ final class OfferListBuilderTest extends TestCase
         ], $overrides);
     }
 
-    /** @param  array<string, mixed>  $overrides
-     * @return array<string, mixed> */
-    private function curUser(array $overrides = []): array
+    /** @param  array<string, mixed>  $overrides */
+    private function curUser(array $overrides = []): CurrentUser
     {
-        return array_merge(['id' => 7, 'timetype' => 1, 'appendnew' => 'yes', 'last_offer' => '2000-01-01 00:00:00'], $overrides);
+        $user = new CurrentUser;
+        $user->set(array_merge(['id' => 7, 'timetype' => 1, 'appendnew' => 'yes', 'last_offer' => '2000-01-01 00:00:00'], $overrides));
+
+        return $user;
     }
 
     private function assertAbortContains(callable $fn, string $needle): void

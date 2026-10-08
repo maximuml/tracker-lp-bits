@@ -37,8 +37,8 @@ final class ForumPageService
      */
     public function build(Request $request): ForumPageViewModel
     {
-        $curUser = (array) ($this->currentUser->get() ?? []);
-        $userId = $this->currentUser->id();
+        $curUser = $this->currentUser;
+        $userId = $curUser->id();
 
         $mainConfig = SiteConfig::current()->main;
         $postsperpage = (int) ($this->currentUser->value('postsperpage', 0));
@@ -110,7 +110,7 @@ final class ForumPageService
         }
 
         return new ForumPageViewModel(
-            curUser: $curUser,
+            curUser: $curUser->get() ?? [],
             userId: $userId,
             action: $action,
             sitename: $sitename,

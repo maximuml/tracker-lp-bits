@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -42,6 +43,7 @@ use Tests\TestCase;
 final class ForumTopicViewServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private ForumTopicViewService $service;
@@ -263,8 +265,7 @@ final class ForumTopicViewServiceTest extends TestCase
         // true) — removing the call lands on the topic-not-found abort, and
         // flipping stdhead renders the int-error partial instead.
         $this->assertAbortContains(
-            fn () => $this->service->buildViewTopic(
-                ['id' => 1, 'username' => 'test', 'class' => 10],
+            fn () => $this->service->buildViewTopic($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]),
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 0]),
                 10,
@@ -286,8 +287,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTopic')->with(999)->andReturn(null);
 
         $this->assertAbortContains(
-            fn () => $this->service->buildViewTopic(
-                ['id' => 1, 'username' => 'test', 'class' => 10],
+            fn () => $this->service->buildViewTopic($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]),
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 999]),
                 10,
@@ -321,8 +321,7 @@ final class ForumTopicViewServiceTest extends TestCase
         ]);
 
         $this->assertAbortContains(
-            fn () => $this->service->buildViewTopic(
-                ['id' => 1, 'username' => 'test', 'class' => 0],
+            fn () => $this->service->buildViewTopic($this->curUser(['id' => 1, 'username' => 'test', 'class' => 0]),
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 1]),
                 10,
@@ -362,10 +361,9 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
         $this->topicRepo->shouldReceive('getTopicById')->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            ['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
-                'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
-                'last_catchup' => 0],
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser(['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+            'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
+            'last_catchup' => 0]),
             999,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,
@@ -437,10 +435,9 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            ['id' => $userId, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
-                'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
-                'last_catchup' => 0],
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser(['id' => $userId, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+            'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
+            'last_catchup' => 0]),
             $userId,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,
@@ -487,10 +484,9 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
         $this->topicRepo->shouldReceive('getTopicById')->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            ['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
-                'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
-                'last_catchup' => 0],
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser(['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+            'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
+            'last_catchup' => 0]),
             999,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,
@@ -582,8 +578,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            $curUser,
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser($curUser),
             (int) $curUser['id'],
             Request::create('/forums.php', 'GET', $query),
             10,
@@ -765,8 +760,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn([1 => 0]);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            $curUser,
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser($curUser),
             $userId,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,
@@ -860,8 +854,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn([1 => 0]);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic(
-            $curUser,
+        $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser($curUser),
             $userId,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,
@@ -927,8 +920,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn(null);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $service->buildViewTopic(
-            $curUser,
+        $result = $this->callWithSuppressedErrors(fn () => $service->buildViewTopic($this->curUser($curUser),
             $userId,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,

@@ -110,7 +110,7 @@ docker compose exec -T php composer audit
 - **Install/upgrade:** `php artisan app:install` (fresh) / `php artisan app:upgrade` (post-pull housekeeping) — both plain `DB::`/`Schema::`; the legacy web installer and its `NexusDB` layer were removed
 - **PageServices:** `IndexPageService`, `UsercpPageService`, `MessagePageService`, etc. — render legacy pages via Blade
 - **Legacy i18n:** the old `lang/en/lang_*.php` files are gone — the same arrays live in `resources/lang/en/<group>.php` at root namespace and resolve via `trans('<group>[.key]')`/`__()`
-- **Events:** `Events::fire()` → `ModelEventEnum` → event classes (legacy event system, not Laravel's Event::dispatch)
+- **Events:** `App\Support\ModelEvent` enum + `ModelEventPublisher::publish()` for legacy-named channel events; Laravel `event()` listeners elsewhere
 - **Settings:** `settings` table → `App\Support\Settings` → typed `SiteConfig` (cached in Redis); per-request page state (language folder, menu, key shortcuts) lives in `PageState`
 - **Auth:** custom `NexusWebGuard` + challenge-response authentication + HMAC passkey login
 - **Cache:** `NexusCache` (phpredis via the default Redis connection) with `allowed_classes: false` (Sprint 19 hardening)
@@ -142,17 +142,17 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   of standard auth features. The legacy HMAC fallback should be removed once
   all cookies have rotated to the encrypted format (W1-04).
 
-### ADR 0002: LegacyRequestMiddleware for URL rewriting (Accepted, Sprint 17; Octane-safe since T-11)
+### ADR 0002: NexusRequestMiddleware for URL rewriting (Accepted, Sprint 17; Octane-safe since T-11)
 
 - **Context:** Legacy URLs (`/details.php?id=5`, `/torrents.php`, …) must
   keep working for bookmarks, search engines and announce URLs embedded in
   `.torrent` files. Web-server rewrite rules are untestable and differ per
   server; explicit routes per script would need hundreds of entries.
-- **Decision:** Global `LegacyRequestMiddleware` detects the script name
+- **Decision:** Global `NexusRequestMiddleware` detects the script name
   from `SCRIPT_FILENAME`/`SCRIPT_NAME`, rewrites `/foo.php?id=5` to `/foo?id=5`
   (or `/foo/5`), skips Laravel-only prefixes (`api/`, `livewire/`,
-  `filament/`, `horizon/`, `nexusphp/`, `web/`), boots the legacy context
-  (`LegacyBootstrap::boot`) and treats Octane worker scripts as `index.php`.
+  `filament/`, `horizon/`, `nexusphp/`, `web/`), boots the request context
+  (`NexusContext`) and treats Octane worker scripts as `index.php`.
 - **Consequences:** All legacy URLs work without web-server config; tested
   by `LegacySmokeTest` / `LegacyHeaderIsolationTest`; per-request reset via
   `CurrentUser::reset()`. Cost: ~0.1 ms regex per request and a 200+ line
@@ -334,7 +334,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   scheduler degradations → warnings, no exception messages in the
   response), `/health/diag` (authenticated via `auth.nexus:nexus-web`
   + sysop class: php/laravel/env, ping latencies, heartbeat age,
-  horizon masters, disk/memory). `LegacyUrlRewriter` was extended with
+  horizon masters, disk/memory). `NexusUrlRewriter` was extended with
   `LARAVEL_PATH_PREFIXES` so `/health/*` and `/metrics` are not
   collapsed into the legacy first-segment rewrite.
 - **Consequences:** Deploy scripts gate on `/health/ready`; staff get
@@ -367,10 +367,10 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   php recreate (documented in `release-notes.md`); zero-downtime needs
   ≥2 php containers behind the LB — future work.
 
-### ADR 0013: Keep URL rewriting in LegacyRequestMiddleware (Deferred, W2-11)
+### ADR 0013: Keep URL rewriting in NexusRequestMiddleware (Deferred, W2-11)
 
 - **Context:** W2-11 proposed moving the legacy `/foo.php` rewrite logic
-  out of `LegacyRequestMiddleware` into `RouteServiceProvider` or
+  out of `NexusRequestMiddleware` into `RouteServiceProvider` or
   OpenResty config, leaving the middleware to only boot the legacy
   context.
 - **Decision:** Deferred. The middleware is the one place where
@@ -380,7 +380,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   is ~0.1 ms regex per request — not a hot-path concern next to
   announce. Revisit only if Octane long-running mode or a dedicated
   edge tier makes the middleware the bottleneck.
-- **Consequences:** `LegacyRequestMiddleware` stays the single source of
+- **Consequences:** `NexusRequestMiddleware` stays the single source of
   truth for URL rewriting; `LARAVEL_PATH_PREFIXES` (ADR 0011) is the
   extension point for new Laravel-only prefixes. Risk accepted: a
   ~200-line middleware with edge cases remains, but its behaviour is
@@ -494,7 +494,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   entry-seeded `instance()` before providers register (seeding from the
   deprecated constants is the last allowed read; `AppServiceProvider`
   only registers a `bound()`-guarded fallback). Per request,
-  `LegacyRequestMiddleware` calls `markLegacy()` and `markTracker()`
+  `NexusRequestMiddleware` calls `markLegacy()` and `markTracker()`
   (announce/scrape URI match, same regex as `public/index.php`);
   `TrackerThrottle` marks tracker again on its route group.
   `ResetNexus::handle()` calls `reset()` on Octane lifecycle events,
@@ -602,7 +602,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   dependencies):
   `localStorage["nxm-theme"]` stores the choice for anonymous pages,
   and authenticated clicks POST to `/web/usercp/theme` (a
-  `LARAVEL_ONLY_PREFIXES` path so `LegacyUrlRewriter` does not
+  `LARAVEL_ONLY_PREFIXES` path so `NexusUrlRewriter` does not
   collapse it into `/usercp`). `PageLayoutContext::userTheme()` and
   `userFontSize()` feed `data-theme`/`data-fontsize` on `<html>` in
   `resources/views/layouts/partials/head-assets.blade.php`.
@@ -1003,7 +1003,7 @@ by final repository classes or static methods — see W2-01/W2-02).
   continue on the established Blade view-model path (stage 3.x) under
   the unified site chrome. Kept from the PR because they are
   orthogonal correctness fixes: the segment-exact prefix match in
-  `LegacyUrlRewriter::isLaravelOnlyPath()` (a loose `str_starts_with`
+  `NexusUrlRewriter::isLaravelOnlyPath()` (a loose `str_starts_with`
   could swallow same-prefix legacy pages) and Filament `Authenticate`
   recognition in `HttpContractTest`.
 - **Consequences:** No `/my` panel; `User::canAccessPanel()` keeps the
@@ -1039,7 +1039,7 @@ by final repository classes or static methods — see W2-01/W2-02).
   `passkey_login_v2_enabled` flag). `php artisan route:cache` runs in
   console, so the cached route table never contained them — verified
   empirically: `route:cache` in the dev container produced zero
-  `auth/passkey` matches. Independently, `LegacyUrlRewriter` collapsed
+  `auth/passkey` matches. Independently, `NexusUrlRewriter` collapsed
   `/auth/passkey` to `/auth` (`auth` was not in
   `LARAVEL_PATH_PREFIXES`), so the endpoint 404'd even without caching.
 - **Decision:** `POST /auth/passkey` is registered unconditionally; the

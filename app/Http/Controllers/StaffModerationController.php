@@ -34,7 +34,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class StaffModerationController extends LegacyController
+class StaffModerationController extends BasePageController
 {
     public function __construct(private readonly RuleRepositoryInterface $ruleRepository, private readonly MessageRepository $messageRepository, private readonly UserDetailRepository $userDetailRepository,
         private readonly CurrentUser $currentUser,

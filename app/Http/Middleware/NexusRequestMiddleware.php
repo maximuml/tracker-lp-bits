@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
-use App\Http\LegacyScriptContext;
-use App\Http\LegacyUrlRewriter;
+use App\Http\NexusScriptContext;
+use App\Http\NexusUrlRewriter;
 use App\Support\AssetAppender;
 use App\Support\Bootstrap;
 use App\Support\Cache\NexusCache;
@@ -36,11 +36,11 @@ use Symfony\Component\HttpFoundation\Response;
  * the periodic autoclean task. Because it runs inside the Laravel middleware
  * pipeline it is Octane-compatible and runs once per worker request.
  */
-final class LegacyRequestMiddleware
+final class NexusRequestMiddleware
 {
     public function __construct(
-        private readonly LegacyUrlRewriter $urlRewriter,
-        private readonly LegacyScriptContext $scriptContext,
+        private readonly NexusUrlRewriter $urlRewriter,
+        private readonly NexusScriptContext $scriptContext,
         private readonly CurrentUser $currentUser,
         private readonly PageLayoutRepositoryInterface $pageLayoutRepository,
         private readonly Application $app,

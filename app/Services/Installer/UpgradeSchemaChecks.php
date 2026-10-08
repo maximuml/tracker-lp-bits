@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
  * index detection used to decide whether a pre-Laravel database still
  * needs each conditional migration.
  */
-final class LegacySchemaChecks
+final class UpgradeSchemaChecks
 {
     /**
      * The unique (torrent, peer_id, userid) index the 2023_04_01 migration

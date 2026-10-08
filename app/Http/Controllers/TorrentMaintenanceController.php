@@ -29,7 +29,7 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Rhilip\Bencode\Bencode;
 
-class TorrentMaintenanceController extends LegacyController
+class TorrentMaintenanceController extends BasePageController
 {
     public function __construct(private readonly TorrentAjaxRepository $torrentAjaxRepository, private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository, private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly CurrentUser $currentUser,

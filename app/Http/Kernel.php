@@ -12,11 +12,11 @@ use App\Http\Middleware\CountLegacyShim;
 use App\Http\Middleware\CronToken;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\Filament;
-use App\Http\Middleware\LegacyRequestMiddleware;
 use App\Http\Middleware\Locale;
 use App\Http\Middleware\LogUserIp;
 use App\Http\Middleware\MetricsAccess;
 use App\Http\Middleware\NexusAuth;
+use App\Http\Middleware\NexusRequestMiddleware;
 use App\Http\Middleware\PasskeyV2Enabled;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RecordHttpMetrics;
@@ -65,7 +65,7 @@ class Kernel extends HttpKernel
         ValidatePostSize::class,
         TrimStrings::class,
         //        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        LegacyRequestMiddleware::class,
+        NexusRequestMiddleware::class,
         Locale::class,
         LogUserIp::class,
         TrackReferer::class,

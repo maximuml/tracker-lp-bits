@@ -24,7 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class SearchController extends LegacyController
+class SearchController extends BasePageController
 {
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,

@@ -29,7 +29,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class ForumController extends LegacyController
+class ForumController extends BasePageController
 {
     public function __construct(private readonly ForumRepositoryInterface $forumRepository,
         private readonly ForumService $service,

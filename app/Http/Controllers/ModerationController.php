@@ -26,7 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class ModerationController extends LegacyController
+class ModerationController extends BasePageController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker, private readonly OfferRepositoryInterface $offerRepository, private readonly CommentRepository $commentRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserRepositoryInterface $userRepository,
         private readonly CurrentUser $currentUser,

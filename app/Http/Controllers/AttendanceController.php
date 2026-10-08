@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class AttendanceController extends LegacyController
+class AttendanceController extends BasePageController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,

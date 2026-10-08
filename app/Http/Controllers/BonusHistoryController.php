@@ -32,7 +32,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-class BonusHistoryController extends LegacyController
+class BonusHistoryController extends BasePageController
 {
     private BonusCalculationRepository $bonusCalculationRepository;
 

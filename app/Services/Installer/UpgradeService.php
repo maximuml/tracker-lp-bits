@@ -47,7 +47,7 @@ final class UpgradeService
         private readonly AttendanceRepository $attendance,
         private readonly TokenRepository $tokens,
         private readonly ToolRepository $tools,
-        private readonly LegacySchemaChecks $schema,
+        private readonly UpgradeSchemaChecks $schema,
     ) {}
 
     /**

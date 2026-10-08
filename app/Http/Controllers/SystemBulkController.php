@@ -49,7 +49,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class SystemBulkController extends LegacyController
+class SystemBulkController extends BasePageController
 {
     private UserModerationRepositoryInterface $userModerationRepository;
 

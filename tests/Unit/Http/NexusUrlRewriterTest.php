@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Http;
 
-use App\Http\LegacyUrlRewriter;
+use App\Http\NexusUrlRewriter;
 use Illuminate\Http\Request;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::PURE_UNIT)]
-class LegacyUrlRewriterTest extends TestCase
+class NexusUrlRewriterTest extends TestCase
 {
     public function test_health_subpaths_are_preserved_for_laravel_routing(): void
     {
@@ -17,7 +17,7 @@ class LegacyUrlRewriterTest extends TestCase
             'SCRIPT_FILENAME' => public_path('index.php'),
         ]);
 
-        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
 
         $this->assertSame('/health/diag', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/health.php', $rewritten->server->get('SCRIPT_NAME'));
@@ -30,7 +30,7 @@ class LegacyUrlRewriterTest extends TestCase
             'SCRIPT_FILENAME' => public_path('index.php'),
         ]);
 
-        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
 
         $this->assertSame('/metrics', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/metrics.php', $rewritten->server->get('SCRIPT_NAME'));
@@ -43,7 +43,7 @@ class LegacyUrlRewriterTest extends TestCase
             'SCRIPT_FILENAME' => public_path('index.php'),
         ]);
 
-        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
 
         $this->assertSame('/recover/reset', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/recover.php', $rewritten->server->get('SCRIPT_NAME'));
@@ -56,7 +56,7 @@ class LegacyUrlRewriterTest extends TestCase
             'SCRIPT_FILENAME' => public_path('index.php'),
         ]);
 
-        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
 
         $this->assertSame('/recover?id=1&secret=abc', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/recover.php', $rewritten->server->get('SCRIPT_NAME'));
@@ -69,7 +69,7 @@ class LegacyUrlRewriterTest extends TestCase
             'SCRIPT_FILENAME' => public_path('index.php'),
         ]);
 
-        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
 
         $this->assertSame('/details/5', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/details.php', $rewritten->server->get('SCRIPT_NAME'));
@@ -82,7 +82,7 @@ class LegacyUrlRewriterTest extends TestCase
             'SCRIPT_FILENAME' => public_path('index.php'),
         ]);
 
-        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
 
         $this->assertSame('/web/torrents?seeded=1', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/index.php', $rewritten->server->get('SCRIPT_NAME'));
@@ -96,7 +96,7 @@ class LegacyUrlRewriterTest extends TestCase
             'SCRIPT_FILENAME' => public_path('index.php'),
         ]);
 
-        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
 
         $this->assertNull($rewritten->server->get('LEGACY_PAGE_SCRIPT'));
     }
@@ -110,7 +110,7 @@ class LegacyUrlRewriterTest extends TestCase
             'SCRIPT_FILENAME' => public_path('index.php'),
         ]);
 
-        $rewritten = (new LegacyUrlRewriter)->rewrite($request);
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
 
         $this->assertSame('/auth/passkey', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/auth.php', $rewritten->server->get('SCRIPT_NAME'));

@@ -28,7 +28,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class InviteController extends LegacyController
+class InviteController extends BasePageController
 {
     public function __construct(private readonly UserRepositoryInterface $userRepository,
         private readonly UserModerationRepositoryInterface $userModerationRepository,

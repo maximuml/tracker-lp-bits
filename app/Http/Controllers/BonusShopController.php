@@ -23,7 +23,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Js;
 use Illuminate\View\View;
 
-class BonusShopController extends LegacyController
+class BonusShopController extends BasePageController
 {
     public function __construct(private readonly UserDetailRepository $userDetailRepository, private readonly ExamRepositoryInterface $examRepository,
         private readonly CurrentUser $currentUser,

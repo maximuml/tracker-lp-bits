@@ -11,7 +11,7 @@ use App\Support\NotificationFeed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class NotificationController extends LegacyController
+class NotificationController extends BasePageController
 {
     public function __construct(
         private readonly NotificationFeed $feed,

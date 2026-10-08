@@ -27,7 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class InfoController extends LegacyController
+class InfoController extends BasePageController
 {
     public function __construct(private readonly UsercpLookupRepositoryInterface $usercpLookupRepository, private readonly PermissionChecker $permissionChecker,
         private readonly BitbucketService $bitbucketService,

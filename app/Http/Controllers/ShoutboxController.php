@@ -28,7 +28,7 @@ use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class ShoutboxController extends LegacyController
+class ShoutboxController extends BasePageController
 {
     public function __construct(
         private readonly ShoutboxRepositoryInterface $repository,

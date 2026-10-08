@@ -155,7 +155,7 @@ final class OfferListBuilder
             ])->render());
         } else {
             $catid = is_string($catq = $request->query('category', '')) ? $catq : '';
-            $sortUrl = static fn (string $column, string $type): string => '?category='.$catid.'&sort='.$column.'&type='.$type;
+            $sortUrl = static fn (string $column, string $type): string => '/web/offers?category='.$catid.'&sort='.$column.'&type='.$type;
 
             $showTimeout = $globalData['offervotetimeoutMain'] > 0 && $globalData['offeruptimeoutMain'] > 0;
             $canManage = Permission::can(PermissionEnum::OFFER_MANAGE);
@@ -261,7 +261,7 @@ final class OfferListBuilder
                     }
                     $comment = new OfferCommentCell(
                         count: $comms,
-                        href: '?id='.$offerId.'&off_details=1#startcomments',
+                        href: '/web/offers?id='.$offerId.'&off_details=1#startcomments',
                         hasNew: $hasnewcom,
                         title: $title,
                         tooltipId: $tooltipId,
@@ -278,7 +278,7 @@ final class OfferListBuilder
                 $against = (int) ($arr['against'] ?? 0);
                 $voteResults = ($yeah === 0 && $against === 0)
                     ? null
-                    : new OfferVoteResults($yeah, $against, '?id='.$offerId.'&offer_vote=1');
+                    : new OfferVoteResults($yeah, $against, '/web/offers?id='.$offerId.'&offer_vote=1');
 
                 $addtime = SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? 'now'), false, true));
                 $dispname = (string) ($arr['name'] ?? '');
@@ -302,7 +302,7 @@ final class OfferListBuilder
                 $catIconData = Category::iconData((int) ($arr['cat_id'] ?? 0));
                 $rows[] = new OfferRow(
                     id: $offerId,
-                    categoryIcon: new CategoryIcon($catIconData['iconClass'], $catIconData['name'], '?category='.(int) ($arr['cat_id'] ?? 0)),
+                    categoryIcon: new CategoryIcon($catIconData['iconClass'], $catIconData['name'], '/web/offers?category='.(int) ($arr['cat_id'] ?? 0)),
                     displayName: $dispname,
                     fullName: (string) ($arr['name'] ?? ''),
                     isNew: ! YesNo::isNo($curUser['appendnew'] ?? null) && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer,

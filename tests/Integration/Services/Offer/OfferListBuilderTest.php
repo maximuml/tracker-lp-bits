@@ -262,6 +262,29 @@ final class OfferListBuilderTest extends TestCase
         $this->assertSame(str_repeat('x', 68).'..', $deniedRow->displayName); // 70-char truncation
     }
 
+    public function test_emitted_links_are_canonical_web_offers_urls(): void
+    {
+        $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
+            $this->row(['id' => 5, 'comments' => 2, 'yeah' => 1, 'against' => 1, 'cat_id' => 3]),
+        ], 1));
+        $this->commentRepo->shouldReceive('getLastComments')->once()->with([5])->andReturn([
+            5 => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'hi'],
+        ]);
+
+        $s = $this->builder()->build($this->curUser(), 7, $this->request(['category' => '4']), $this->globalData());
+
+        $table = $s->table;
+        $this->assertNotNull($table);
+        foreach ([$table->sortCatUrl, $table->sortNameUrl, $table->sortVResUrl, $table->sortCommentsUrl, $table->sortAddedUrl] as $url) {
+            $this->assertStringStartsWith('/web/offers?', $url);
+        }
+        $row = $table->rows[0];
+        $this->assertStringStartsWith('/web/offers?category=3', (string) $row->categoryIcon->href);
+        $this->assertStringStartsWith('/web/offers?id=5&off_details=1', (string) $row->comment->href);
+        $this->assertNotNull($row->voteResults);
+        $this->assertStringStartsWith('/web/offers?id=5&offer_vote=1', (string) $row->voteResults->href);
+    }
+
     public function test_last_comments_cached_and_uncached_paths(): void
     {
         $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([

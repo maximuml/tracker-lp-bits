@@ -803,6 +803,7 @@ jobs:
             --git-diff-lines \
             --git-diff-base="${{ steps.changed.outputs.diff_base }}" \
             --map-source-class-to-test \
+            --ignore-msi-with-no-mutations \
             --test-framework-extra-args="--testsuite=Unit,Integration"
 
       - name: Run Infection (changed lines only, services + auth)
@@ -818,6 +819,7 @@ jobs:
             --git-diff-lines \
             --git-diff-base="${{ steps.changed.outputs.diff_base }}" \
             --map-source-class-to-test \
+            --ignore-msi-with-no-mutations \
             --test-framework-extra-args="--testsuite=Unit,Integration"
 
       - name: Upload Infection logs

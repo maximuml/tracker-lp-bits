@@ -52,12 +52,9 @@ final class UpgradeSchemaChecks
      */
     public function columnInfo(string $table, string $column): ?array
     {
-        foreach (Schema::getColumns($table) as $col) {
-            if ($col['name'] === $column) {
-                return $col;
-            }
-        }
-
-        return null;
+        return array_find(
+            Schema::getColumns($table),
+            static fn (array $col): bool => $col['name'] === $column,
+        );
     }
 }

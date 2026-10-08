@@ -28,6 +28,7 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\InviteController;
+use App\Http\Controllers\LegacyRedirectController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MetricsController;
@@ -161,7 +162,7 @@ Route::get('/userdetails', [UserDetailController::class, 'show'])
 Route::get('/usercp', [UsercpController::class, 'legacy'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('usercp.legacy');
-Route::post('/usercp', [UsercpController::class, 'legacyAction'])
+Route::post('/usercp', [LegacyRedirectController::class, 'post'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy', 'reject.get.mutations', 'legacy.shim.count']);
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], function () {

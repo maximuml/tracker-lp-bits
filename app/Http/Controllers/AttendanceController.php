@@ -39,15 +39,6 @@ class AttendanceController extends LegacyController
         return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);
     }
 
-    public function attendancePost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/user/attendance'.$suffix, 308);
-    }
-
     public function attendanceSubmit(AttendanceRequest $request, AttendanceRepository $repository): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get();

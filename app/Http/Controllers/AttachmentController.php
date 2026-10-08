@@ -37,15 +37,6 @@ class AttachmentController extends LegacyController
         return $this->renderAttachment($request, $currentUser, $Attach);
     }
 
-    public function attachmentStore(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/attachments/upload'.$suffix, 308);
-    }
-
     public function attachmentUpload(AttachmentUploadRequest $request, AttachmentMutationService $attachmentMutationService): Response
     {
         $currentUser = $this->currentUser->get() ?? [];

@@ -128,36 +128,6 @@ class UsercpController extends LegacyController
         return response()->noContent();
     }
 
-    public function legacyAction(Request $request): View|Response|RedirectResponse
-    {
-        $user = Auth::user();
-        if (! $user instanceof User) {
-            return redirect('/usercp');
-        }
-
-        $action = (string) $request->input('action');
-        $type = (string) $request->input('type');
-
-        $qs = $request->getQueryString();
-        $suffix = ($qs !== null && $qs !== '') ? '?'.$qs : '';
-        $redirect = match (true) {
-            $action === 'personal' && $type === 'save' => redirect()->to('/web/usercp/personal'.$suffix, 308),
-            $action === 'forum' && $type === 'save' => redirect()->to('/web/usercp/forum'.$suffix, 308),
-            $action === 'tracker' && $type === 'save' => redirect()->to('/web/usercp/tracker'.$suffix, 308),
-            $action === 'security' && $type === 'confirm' => redirect()->to('/web/usercp/security/confirm'.$suffix, 308),
-            default => null,
-        };
-        if ($redirect !== null) {
-            return $redirect;
-        }
-
-        if ($type === 'save' && $action === 'security') {
-            return redirect()->to('/web/usercp/security'.$suffix, 308);
-        }
-
-        return redirect('/usercp');
-    }
-
     public function savePersonal(UpdatePersonalSettingsRequest $request): RedirectResponse
     {
         $user = Auth::user();

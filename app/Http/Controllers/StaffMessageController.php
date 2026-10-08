@@ -55,27 +55,9 @@ class StaffMessageController extends LegacyController
         ]);
     }
 
-    public function staffmessPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/staffmess/submit'.$suffix, 308);
-    }
-
     public function staffmessSubmit(StaffmessSubmitRequest $request): View|RedirectResponse|Response
     {
         return $this->staffmess($request);
-    }
-
-    public function takeStaffmess(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/staffmess/send'.$suffix, 308);
     }
 
     public function sendStaffMessage(SendStaffMessageRequest $request): Response|RedirectResponse
@@ -130,27 +112,9 @@ class StaffMessageController extends LegacyController
 
     }
 
-    public function contactstaffPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/contactstaff/submit'.$suffix, 308);
-    }
-
     public function contactstaffSubmit(ContactstaffSubmitRequest $request): View|RedirectResponse|Response
     {
         return $this->contactstaff($request);
-    }
-
-    public function takecontact(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/contactstaff/send'.$suffix, 308);
     }
 
     public function sendContactStaff(SendContactStaffRequest $request): View|RedirectResponse|Response

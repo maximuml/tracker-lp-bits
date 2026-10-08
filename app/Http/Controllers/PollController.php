@@ -96,15 +96,6 @@ class PollController extends LegacyController
         ]);
     }
 
-    public function makepollPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/polls/create'.$suffix, 308);
-    }
-
     public function makepollSubmit(MakePollRequest $request): Response|RedirectResponse|View
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
@@ -135,15 +126,6 @@ class PollController extends LegacyController
         }
 
         return redirect('/');
-    }
-
-    public function polloverviewPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/polls/overview'.$suffix, 308);
     }
 
     public function polloverviewSubmit(PolloverviewRequest $request): View|RedirectResponse|Response

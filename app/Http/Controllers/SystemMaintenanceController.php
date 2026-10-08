@@ -27,15 +27,6 @@ class SystemMaintenanceController extends LegacyController
         private readonly CleanupServiceInterface $cleanupService,
     ) {}
 
-    public function docleanup(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/system/cleanup'.$suffix, 308);
-    }
-
     public function cleanup(CleanupRequest $request): Response
     {
 
@@ -45,15 +36,6 @@ class SystemMaintenanceController extends LegacyController
             ['Content-Type' => 'text/html; charset=utf-8']
         );
 
-    }
-
-    public function mailtestAction(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/system/mail-test'.$suffix, 308);
     }
 
     public function mailtestSubmit(MailTestRequest $request): View|RedirectResponse|Response

@@ -69,15 +69,6 @@ class AdminToolsController extends LegacyController
         ]);
     }
 
-    public function userBanLogPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/admin/user-ban-log'.$suffix, 308);
-    }
-
     public function userBanLogSubmit(UserBanLogRequest $request): View|RedirectResponse|Response
     {
         return $this->userBanLog($request);
@@ -96,15 +87,6 @@ class AdminToolsController extends LegacyController
             'done' => $done,
             'error' => $error,
         ]);
-    }
-
-    public function clearCachePost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/system/clear-cache'.$suffix, 308);
     }
 
     public function clearCacheSubmit(ClearCacheRequest $request): View|RedirectResponse|Response
@@ -186,15 +168,6 @@ class AdminToolsController extends LegacyController
         }
 
         return $this->renderLocationList($request, $success, $error, $rangeStartIp, $rangeEndIp);
-    }
-
-    public function locationPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/system/location'.$suffix, 308);
     }
 
     public function locationSubmit(LocationPostRequest $request): View|RedirectResponse|Response
@@ -350,15 +323,6 @@ class AdminToolsController extends LegacyController
             'actionUrl' => $actionUrl,
         ]);
 
-    }
-
-    public function testipPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/system/test-ip'.$suffix, 308);
     }
 
     public function testIpSubmit(TestIpRequest $request): View|RedirectResponse|Response

@@ -157,15 +157,6 @@ JS;
 
     }
 
-    public function freeleechPost(Request $request): RedirectResponse
-    {
-        // Renamed endpoint — 308 replays the body + query string unchanged.
-        $qs = $request->getQueryString();
-        $suffix = $qs !== null && $qs !== '' ? '?'.$qs : '';
-
-        return redirect()->to('/web/bonus/freeleech'.$suffix, 308);
-    }
-
     public function freeleechSubmit(FreeleechRequest $request): View|RedirectResponse|Response
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;

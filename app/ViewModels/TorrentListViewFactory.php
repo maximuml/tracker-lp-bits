@@ -179,7 +179,7 @@ final class TorrentListViewFactory
             $secondIcon = null;
             if (isset($row['category'])) {
                 $catData = Category::iconData($row['category']);
-                $categoryIcon = new CategoryIcon($catData['iconClass'], $catData['name'], '?cat='.$row['category']);
+                $categoryIcon = new CategoryIcon($catData['iconClass'], $catData['name'], '/web/torrents?cat='.$row['category']);
                 if ($hasSecondIcon) {
                     $siData = Category::secondIconData($row);
                     $secondIcon = new CategoryIcon($siData['iconClass'], $siData['name']);
@@ -382,7 +382,7 @@ final class TorrentListViewFactory
             $type = ((string) $sort === (string) $i) ? ($desc ? 'asc' : 'desc') : ($i == 1 ? 'asc' : 'desc');
 
             // Raw '&' here — the template escapes it to '&amp;' via {{ }}.
-            return '?'.$oldlink.'sort='.$i.'&type='.$type;
+            return '/web/torrents?'.$oldlink.'sort='.$i.'&type='.$type;
         };
         $sortedClass = static function (int $i) use ($sort): string {
             return ((string) $sort === (string) $i) ? ' nxm-th--sorted' : '';

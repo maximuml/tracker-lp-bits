@@ -71,7 +71,7 @@ final class TorrentSearchPanelFactory
                     'name' => (string) $item->name,
                     'checked' => $checked,
                     'checkboxName' => "cat{$item->id}",
-                    'href' => '?cat='.$item->id,
+                    'href' => '/web/torrents?cat='.$item->id,
                     'iconClass' => (string) $item->class_name,
                     'iconStyle' => $iconStyle,
                 ];

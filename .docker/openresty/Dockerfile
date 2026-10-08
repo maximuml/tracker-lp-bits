@@ -13,6 +13,10 @@ RUN apk add --no-cache 'expat>=2.8.5' 'libexpat>=2.8.5'
 # build (png_read_end use-after-free); pull the patched one.
 RUN apk add --no-cache 'libpng>=1.6.59'
 
+# CVE-2026-85091: zlib 1.3.1.x heap overflow in gz_vacate; upgrade to
+# the patched build until the pinned digest moves past it.
+RUN apk upgrade --no-cache zlib
+
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY .docker/openresty/render-config.sh /usr/local/bin/render-config.sh

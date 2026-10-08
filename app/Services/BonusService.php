@@ -11,6 +11,7 @@ use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Lock;
 use App\Support\Log;
@@ -44,9 +45,8 @@ final class BonusService
 
     /**
      * @param  array<int, array<string, mixed>>  $allBonus
-     * @param  array<string, mixed>  $curUser
      */
-    public function handleExchangeActionPublic(Request $request, array $allBonus, array $curUser, string $lockText): ?RedirectResponse
+    public function handleExchangeActionPublic(Request $request, array $allBonus, CurrentUser $curUser, string $lockText): ?RedirectResponse
     {
         $action = htmlspecialchars((string) $request->query('action', ''));
         if ($action !== 'exchange') {
@@ -62,9 +62,8 @@ final class BonusService
 
     /**
      * @param  array<int, array<string, mixed>>  $allBonus
-     * @param  array<string, mixed>  $curUser
      */
-    public function handleExchange(Request $request, array $allBonus, array $curUser, string $lockText): ?RedirectResponse
+    public function handleExchange(Request $request, array $allBonus, CurrentUser $curUser, string $lockText): ?RedirectResponse
     {
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         $bonusgiftBonus = SiteConfig::current()->bonus->bonusGift() ? 'yes' : 'no';
@@ -83,17 +82,17 @@ final class BonusService
             || $request->post('option') === null
             || ! isset($allBonus[(int) $request->post('option', 0)])
         ) {
-            Log::writeWithContext('User '.($curUser['username'] ?? '').','.($curUser['ip'] ?? '').' is trying to cheat at bonus system', 'mod');
+            Log::writeWithContext('User '.$curUser->username().','.((string) $curUser->value('ip', '')).' is trying to cheat at bonus system', 'mod');
             PageResponses::abort(__('mybonus.text_error'), __('mybonus.text_cheat_alert'), true, false);
         }
 
         $option = (int) $request->post('option', 0);
         $bonusarray = $allBonus[$option];
         $points = (float) $bonusarray['points'];
-        $userid = (int) ($curUser['id'] ?? 0);
+        $userid = $curUser->id();
         $art = (string) $bonusarray['art'];
 
-        if (($curUser['seedbonus'] ?? 0) < $points) {
+        if ($curUser->seedbonus() < $points) {
             return null;
         }
 
@@ -158,15 +157,16 @@ final class BonusService
     }
 
     /**
-     * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $bonusarray
      */
-    private function exchangeTraffic(array $curUser, array $bonusarray, float $points, float $ratiolimitBonus, int $dlamountlimitBonus): RedirectResponse
+    private function exchangeTraffic(CurrentUser $curUser, array $bonusarray, float $points, float $ratiolimitBonus, int $dlamountlimitBonus): RedirectResponse
     {
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
-        if (($curUser['uploaded'] ?? 0) > $dlamountlimitBonus * 1073741824) {
-            $ratio = ($curUser['downloaded'] ?? 0) > 0
-                ? ($curUser['uploaded'] ?? 0) / ($curUser['downloaded'] ?? 1)
+        $uploaded = (float) $curUser->value('uploaded', 0);
+        $downloaded = (float) $curUser->value('downloaded', 0);
+        if ($uploaded > $dlamountlimitBonus * 1073741824) {
+            $ratio = $downloaded > 0
+                ? $uploaded / $downloaded
                 : PHP_INT_MAX;
         } else {
             $ratio = 0;
@@ -174,85 +174,71 @@ final class BonusService
         if ($ratiolimitBonus > 0 && $ratio > $ratiolimitBonus) {
             PageResponses::abort(__('mybonus.text_error'), __('mybonus.text_cheat_alert'), true, false);
         }
-        $up = (int) ($curUser['uploaded'] ?? 0) + (int) $bonusarray['menge'];
-        Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange uploaded from %s to %s', $curUser['id'] ?? 0, $points, $curUser['uploaded'] ?? 0, $up), 'info', false);
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::EXCHANGE_UPLOAD->value, $points.' Points for uploaded.', ['uploaded' => $up]);
+        $up = (int) $uploaded + (int) $bonusarray['menge'];
+        Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange uploaded from %s to %s', $curUser->id(), $points, $uploaded, $up), 'info', false);
+        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_UPLOAD->value, $points.' Points for uploaded.', ['uploaded' => $up]);
 
         return $this->redirect($baseUrl, 'upload');
     }
 
     /**
-     * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $bonusarray
      */
-    private function exchangeTrafficDownloaded(array $curUser, array $bonusarray, float $points, string $baseUrl): RedirectResponse
+    private function exchangeTrafficDownloaded(CurrentUser $curUser, array $bonusarray, float $points, string $baseUrl): RedirectResponse
     {
-        $down = (int) ($curUser['downloaded'] ?? 0) + (int) $bonusarray['menge'];
-        Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange downloaded from %s to %s', $curUser['id'] ?? 0, $points, $curUser['downloaded'] ?? 0, $down), 'info', false);
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::EXCHANGE_DOWNLOAD->value, $points.' Points for downloaded.', ['downloaded' => $down]);
+        $down = (int) $curUser->value('downloaded', 0) + (int) $bonusarray['menge'];
+        Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange downloaded from %s to %s', $curUser->id(), $points, $curUser->value('downloaded', 0), $down), 'info', false);
+        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_DOWNLOAD->value, $points.' Points for downloaded.', ['downloaded' => $down]);
 
         return $this->redirect($baseUrl, 'download');
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function exchangeClass(array $curUser, float $points, string $baseUrl): RedirectResponse
+    private function exchangeClass(CurrentUser $curUser, float $points, string $baseUrl): RedirectResponse
     {
         if (UserDisplay::currentClass() >= UC_VIP) {
             PageResponses::abort(__('mybonus.std_no_permission'), __('mybonus.std_class_above_vip'), false);
         }
         $vipUntil = date('Y-m-d H:i:s', (strtotime(date('Y-m-d H:i:s')) + 28 * 86400));
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::BUY_VIP->value, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => true, 'vip_until' => $vipUntil]);
+        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::BUY_VIP->value, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => true, 'vip_until' => $vipUntil]);
 
         return $this->redirect($baseUrl, 'vip');
     }
 
     /**
-     * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $bonusarray
      */
-    private function exchangeInvite(array $curUser, array $bonusarray, float $points, string $baseUrl, int $buyinviteClass): RedirectResponse
+    private function exchangeInvite(CurrentUser $curUser, array $bonusarray, float $points, string $baseUrl, int $buyinviteClass): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
             PageResponses::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
         }
-        $inv = (int) ($curUser['invites'] ?? 0) + (int) $bonusarray['menge'];
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::EXCHANGE_INVITE->value, $points.' Points for invites.', ['invites' => $inv]);
+        $inv = (int) $curUser->value('invites', 0) + (int) $bonusarray['menge'];
+        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_INVITE->value, $points.' Points for invites.', ['invites' => $inv]);
 
         return $this->redirect($baseUrl, 'invite');
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function exchangeTmpInvite(array $curUser, float $points, string $baseUrl, int $buyinviteClass): RedirectResponse
+    private function exchangeTmpInvite(CurrentUser $curUser, float $points, string $baseUrl, int $buyinviteClass): RedirectResponse
     {
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
             PageResponses::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
         }
-        $this->bonusRep->consumeToBuyTemporaryInvite((int) $curUser['id']);
+        $this->bonusRep->consumeToBuyTemporaryInvite($curUser->id());
 
         return $this->redirect($baseUrl, 'tmp_invite');
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function exchangeTitle(Request $request, array $curUser, float $points, string $baseUrl): RedirectResponse
+    private function exchangeTitle(Request $request, CurrentUser $curUser, float $points, string $baseUrl): RedirectResponse
     {
         $title = (string) $request->post('title', '');
         $words = ['fuck', 'shit', 'pussy', 'cunt', 'nigger', 'Staff Leader', 'SysOp', 'Administrator', 'Moderator', 'Uploader', 'Retiree', 'VIP', 'Nexus Master', 'Ultimate User', 'Extreme User', 'Veteran User', 'Insane User', 'Crazy User', 'Elite User', 'Power User', 'User', 'Peasant', 'Champion'];
         $title = str_replace($words, __('mybonus.text_wasted_karma'), $title);
-        $this->bonusRep->consumeUserBonus((int) $curUser['id'], $points, BusinessType::CUSTOM_TITLE->value, $points.' Points for custom title. Old title is '.htmlspecialchars(trim((string) ($curUser['title'] ?? '')))." and new title is {$title}.", ['title' => $title]);
+        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::CUSTOM_TITLE->value, $points.' Points for custom title. Old title is '.htmlspecialchars(trim((string) $curUser->value('title', '')))." and new title is {$title}.", ['title' => $title]);
 
         return $this->redirect($baseUrl, 'title');
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function exchangeCharity(Request $request, array $curUser, float $points, string $baseUrl): ?RedirectResponse
+    private function exchangeCharity(Request $request, CurrentUser $curUser, float $points, string $baseUrl): ?RedirectResponse
     {
         $points = (int) $request->post('bonuscharity', 0);
         if ($points < 1000 || $points > 50000) {
@@ -262,14 +248,14 @@ final class BonusService
         if ($ratiocharity < 0.1 || $ratiocharity > 0.8) {
             PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_ratio_not_allowed'), false);
         }
-        if (($curUser['seedbonus'] ?? 0) < $points) {
+        if ($curUser->seedbonus() < $points) {
             return null;
         }
         $charityReceiverCount = $this->bonusCalculationRepository->getCharityReceiverCount($ratiocharity);
         if (! $charityReceiverCount) {
             PageResponses::abort(__('mybonus.std_sorry'), __('mybonus.std_no_users_need_charity'), false);
         }
-        $senderId = (int) $curUser['id'];
+        $senderId = $curUser->id();
         $charityPerUser = $points / $charityReceiverCount;
         DB::transaction(function () use ($senderId, $points, $ratiocharity, $charityPerUser) {
             $this->bonusRep->consumeUserBonusAndIncrementCharity($senderId, (float) $points, BusinessType::GIFT_TO_LOW_SHARE_RATIO->value, $points.' Points as charity to users with ratio below '.htmlspecialchars(trim((string) $ratiocharity)).'.', (float) $points);
@@ -280,10 +266,9 @@ final class BonusService
     }
 
     /**
-     * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $bonusarray
      */
-    private function exchangeGift(Request $request, array $curUser, array $bonusarray, float $points, string $baseUrl, float $taxpercentageBonus, float $basictaxBonus): ?RedirectResponse
+    private function exchangeGift(Request $request, CurrentUser $curUser, array $bonusarray, float $points, string $baseUrl, float $taxpercentageBonus, float $basictaxBonus): ?RedirectResponse
     {
         $points = (float) $request->post('bonusgift', 0);
         $message = (string) $request->post('message', '');
@@ -297,7 +282,7 @@ final class BonusService
         if ($points < (float) $bonusarray['points']) {
             PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed'), false);
         }
-        if (($curUser['seedbonus'] ?? 0) < $points) {
+        if ($curUser->seedbonus() < $points) {
             return null;
         }
         $aftertaxpoint = $points;
@@ -307,13 +292,13 @@ final class BonusService
         if ($basictaxBonus) {
             $aftertaxpoint -= $basictaxBonus;
         }
-        if ((int) $curUser['id'] === $useridgift) {
+        if ($curUser->id() === $useridgift) {
             PageResponses::abort(__('mybonus.text_huh'), view('my.sections._abort-karma-self')->render(), false);
         }
         $points2 = number_format($points, 1);
         $points2receiver = number_format($aftertaxpoint, 1);
-        $senderId = (int) $curUser['id'];
-        $senderUsername = (string) ($curUser['username'] ?? '');
+        $senderId = $curUser->id();
+        $senderUsername = $curUser->username();
         DB::transaction(function () use ($senderId, $useridgift, $points, $aftertaxpoint, $points2, $points2receiver, $usernamegift, $userseedbonus, $senderUsername) {
             $this->bonusRep->consumeUserBonus($senderId, $points, BusinessType::GIFT_TO_SOMEONE->value, $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)));
             $this->bonusRep->incrementUserSeedbonus($useridgift, (float) $aftertaxpoint);
@@ -322,9 +307,9 @@ final class BonusService
 
         $locale = Locale::userLocale($useridgift);
         $subject = Locale::trans('bonus.msg_someone_loves_you', [], $locale);
-        $msg = Locale::trans('bonus.msg_you_have_been_given', [], $locale).$points2.Locale::trans('bonus.msg_after_tax', [], $locale).$points2receiver.Locale::trans('bonus.msg_karma_points_by', [], $locale).($curUser['username'] ?? '');
+        $msg = Locale::trans('bonus.msg_you_have_been_given', [], $locale).$points2.Locale::trans('bonus.msg_after_tax', [], $locale).$points2receiver.Locale::trans('bonus.msg_karma_points_by', [], $locale).$curUser->username();
         if ($message) {
-            $msg .= "\n".Locale::trans('bonus.msg_personal_message_from', [], $locale).($curUser['username'] ?? '').Locale::trans('bonus.msg_colon', [], $locale).$message;
+            $msg .= "\n".Locale::trans('bonus.msg_personal_message_from', [], $locale).$curUser->username().Locale::trans('bonus.msg_colon', [], $locale).$message;
         }
         $this->messageRepository->add([
             'sender' => null,

@@ -48,8 +48,8 @@ final class BonusPageService
      */
     public function build(Request $request): BonusPageViewModel
     {
-        $curUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($curUser['id'] ?? 0);
+        $curUser = $this->currentUser;
+        $userId = $curUser->id();
 
         $bonusTweak = SiteConfig::current()->tweak->bonus();
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
@@ -73,7 +73,7 @@ final class BonusPageService
 
         $msg = $this->resolveDoMessage($do, $curUser, $lockText);
 
-        $bonus = number_format((float) ($curUser['seedbonus'] ?? 0), 1);
+        $bonus = number_format($curUser->seedbonus(), 1);
 
         $shop = null;
         $info = null;
@@ -83,7 +83,7 @@ final class BonusPageService
         }
 
         return new BonusPageViewModel(
-            curUser: $curUser,
+            curUser: $this->currentUser->get() ?? [],
             userId: $userId,
             action: $action,
             do: $do,
@@ -189,10 +189,7 @@ final class BonusPageService
         ];
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function resolveDoMessage(string $do, array $curUser, string $lockText): string
+    private function resolveDoMessage(string $do, CurrentUser $curUser, string $lockText): string
     {
         return match ($do) {
             'upload' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_upload'), 'b' => __('mybonus.text_uploaded_amount'), 'post' => '!'])->render(),
@@ -205,7 +202,7 @@ final class BonusPageService
                 'post' => __('mybonus.text_success_vip_two'),
             ])->render(),
             'vipfalse' => view('my.sections._b-msg', ['pre' => '', 'b' => __('mybonus.text_error_bang'), 'post' => __('mybonus.text_no_permission')])->render(),
-            'title' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_custom_title'), 'b' => (string) ($curUser['title'] ?? ''), 'post' => '!'])->render(),
+            'title' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_custom_title'), 'b' => (string) $curUser->value('title', ''), 'post' => '!'])->render(),
             'transfer' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_gift'), 'b' => __('mybonus.text_karma'), 'post' => __('mybonus.text_karma_well')])->render(),
             'charity' => __('mybonus.text_success_charity'),
             'cancel_hr' => __('mybonus.text_success_cancel_hr'),
@@ -219,9 +216,8 @@ final class BonusPageService
 
     /**
      * @param  array<int, array<string, mixed>>  $allBonus
-     * @param  array<string, mixed>  $curUser
      */
-    private function buildShop(array $allBonus, array $curUser, string $bonus, string $msg, string $lockText): BonusShopViewModel
+    private function buildShop(array $allBonus, CurrentUser $curUser, string $bonus, string $msg, string $lockText): BonusShopViewModel
     {
         $bonusgiftBonus = SiteConfig::current()->bonus->bonusGift() ? 'yes' : 'no';
         $ratiolimitBonus = SiteConfig::current()->bonus->ratioLimit();
@@ -245,7 +241,7 @@ final class BonusPageService
                 default => SafeHtml::fromUntrustedHtml(number_format((float) $bonusarray['points'])),
             };
 
-            $affordable = ($curUser['seedbonus'] ?? 0) >= $bonusarray['points'];
+            $affordable = $curUser->seedbonus() >= (float) $bonusarray['points'];
             $trade = $affordable
                 ? $this->resolveTradeButton($art, $curUser, $ratiolimitBonus, $dlamountlimitBonus)
                 : $this->tradeButton('mybonus.text_more_points_needed', true);
@@ -275,10 +271,7 @@ final class BonusPageService
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function resolveTradeButton(string $art, array $curUser, float $ratiolimitBonus, int $dlamountlimitBonus): BonusTradeButton
+    private function resolveTradeButton(string $art, CurrentUser $curUser, float $ratiolimitBonus, int $dlamountlimitBonus): BonusTradeButton
     {
         if ($art === 'gift_1') {
             return $this->tradeButton('mybonus.submit_karma_gift', false);
@@ -306,9 +299,11 @@ final class BonusPageService
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'traffic') {
-            if (($curUser['downloaded'] ?? 0) > 0) {
-                if (($curUser['uploaded'] ?? 0) > $dlamountlimitBonus * 1073741824) {
-                    $ratio = ($curUser['uploaded'] ?? 0) / ($curUser['downloaded'] ?? 1);
+            $downloaded = (float) $curUser->value('downloaded', 0);
+            if ($downloaded > 0) {
+                $uploaded = (float) $curUser->value('uploaded', 0);
+                if ($uploaded > $dlamountlimitBonus * 1073741824) {
+                    $ratio = $uploaded / $downloaded;
                 } else {
                     $ratio = 0;
                 }
@@ -322,14 +317,14 @@ final class BonusPageService
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'change_username_card') {
-            if ($this->bonusCalculationRepository->hasChangeUsernameCard((int) ($curUser['id'] ?? 0))) {
+            if ($this->bonusCalculationRepository->hasChangeUsernameCard($curUser->id())) {
                 return $this->tradeButton('mybonus.text_change_username_card_already_has', true);
             }
 
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'rainbow_id') {
-            if ($this->bonusCalculationRepository->hasRainbowIdForever((int) ($curUser['id'] ?? 0))) {
+            if ($this->bonusCalculationRepository->hasRainbowIdForever($curUser->id())) {
                 return $this->tradeButton('mybonus.text_rainbow_id_already_valid_forever', true);
             }
 
@@ -354,17 +349,14 @@ final class BonusPageService
         return new BonusTradeButton(html_entity_decode($label, ENT_QUOTES | ENT_HTML5, 'UTF-8'), $disabled);
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function buildInfo(array $curUser): BonusInfoViewModel
+    private function buildInfo(CurrentUser $curUser): BonusInfoViewModel
     {
         $perseedingBonus = SiteConfig::current()->bonus->perSeeding();
         $maxseedingBonus = SiteConfig::current()->bonus->maxSeeding();
         $bzeroBonus = SiteConfig::current()->bonus->bZero();
 
-        $seedBonusResult = Bonus::calculateForUser((int) ($curUser['id'] ?? 0), null);
-        $bonusTableResult = Bonus::buildBonusTableForUser($curUser, $seedBonusResult, ['table_style' => 'width: 50%']);
+        $seedBonusResult = Bonus::calculateForUser($curUser->id(), null);
+        $bonusTableResult = Bonus::buildBonusTableForUser($curUser->get() ?? [], $seedBonusResult, ['table_style' => 'width: 50%']);
 
         $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzeroBonus + $perseedingBonus * $maxseedingBonus);
         $loadpic = $percent <= 30 ? 'loadbarred' : ($percent <= 60 ? 'loadbaryellow' : 'loadbargreen');
@@ -385,7 +377,7 @@ final class BonusPageService
             aFactor: (string) round((float) $seedBonusResult['A'], 1),
             percentLabel: (string) $percent,
             loadbarClass: $loadpic,
-            userId: (int) ($curUser['id'] ?? 0),
+            userId: $curUser->id(),
             officialAdditionFactor: $bonusTableResult['has_official_addition'] ? (string) $bonusTableResult['official_addition_factor'] : null,
             haremAdditionFactor: $bonusTableResult['has_harem_addition'] ? (string) $bonusTableResult['harem_addition_factor'] : null,
             summaryTable: SafeHtml::fromTrustedHtml((string) $bonusTableResult['table']),

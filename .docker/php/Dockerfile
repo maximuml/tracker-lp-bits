@@ -31,8 +31,9 @@ RUN docker-php-ext-install -j$(nproc) \
     intl \
     ftp
 
-# 检查 pecl.php.net 可用性
-RUN curl -Is https://pecl.php.net | head -n 1 | grep "200" \
+# 检查 pecl.php.net 可用性 — retry through transient outages
+RUN curl -Is --retry 5 --retry-delay 10 --retry-all-errors --max-time 15 \
+    https://pecl.php.net | head -n 1 | grep "200" \
     || (echo "❌ pecl.php.net unreachable, aborting build." && exit 1)
 
 

@@ -31,8 +31,9 @@ RUN docker-php-ext-install -j$(nproc) \
     intl \
     ftp
 
-# 检查 pecl.php.net 可用性
-RUN curl -Is https://pecl.php.net | head -n 1 | grep "200" \
+# 检查 pecl.php.net 可用性 — retry through transient outages
+RUN curl -Is --retry 5 --retry-delay 10 --retry-all-errors --max-time 15 \
+    https://pecl.php.net | head -n 1 | grep "200" \
     || (echo "❌ pecl.php.net unreachable, aborting build." && exit 1)
 
 
@@ -68,8 +69,9 @@ RUN apk add --no-cache \
 # Upgrade past the pinned base image: curl/libcurl 8.21.0-r0 has
 # CVE-2026-82209/-80229/-80230/-80255/-13608/-18924/-19931,
 # nghttp2-libs 1.69.0-r0 has CVE-2026-58055 (fixed in 1.70.0-r0),
-# pcre2 10.48-r0 has CVE-2026-103111 (fixed in 10.49-r0).
-RUN apk upgrade --no-cache curl libcurl nghttp2-libs pcre2
+# pcre2 10.48-r0 has CVE-2026-103111 (fixed in 10.49-r0),
+# zlib 1.3.1.x has CVE-2026-85091 (fixed in 1.3.2-r1+).
+RUN apk upgrade --no-cache curl libcurl nghttp2-libs pcre2 zlib
 
 # 配置 www.conf
 RUN sed -i \

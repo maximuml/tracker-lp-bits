@@ -29,7 +29,7 @@ class TorrentEditRequest extends FormRequest
             'anonymous' => 'sometimes|integer|in:0,1',
             'visible' => 'sometimes|integer|in:0,1',
             'price' => 'sometimes|integer|min:0',
-            'sel_spstate' => 'sometimes|integer|in:2,3,4,5,6,7',
+            'sel_spstate' => 'sometimes|integer|in:1,2,3,4,5,6,7',
             'promotion_time_type' => 'sometimes|integer|in:0,1,2',
             'promotionuntil' => 'sometimes|nullable|string|max:30',
             'pos_state' => ['sometimes', Rule::enum(TorrentPosState::class)],

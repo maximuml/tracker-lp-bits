@@ -57,6 +57,23 @@ final class HttpMetricsCollectorTest extends TestCase
         $this->assertContains('nexus_legacy_ajax_requests_total{action="clearShoutBox"} 4', $lines);
     }
 
+    public function test_collect_emits_legacy_shim_counters(): void
+    {
+        $redis = Redis::connection();
+        $redis->set('metrics:legacy_shim:rules:301', 7);
+        $redis->set('metrics:legacy_shim:details/{id}:301', 3);
+        $redis->set('metrics:legacy_shim:takemessage:308', 12);
+        $redis->sadd('metrics:legacy_shim_keys', 'rules:301', 'details/{id}:301', 'takemessage:308');
+
+        $lines = (new HttpMetricsCollector(new PrometheusFormatter))->collect();
+
+        $this->assertContains('# HELP nexus_legacy_shim_hits_total Hits on legacy-URI redirect shims by route URI and status', $lines);
+        $this->assertContains('# TYPE nexus_legacy_shim_hits_total counter', $lines);
+        $this->assertContains('nexus_legacy_shim_hits_total{uri="rules",status="301"} 7', $lines);
+        $this->assertContains('nexus_legacy_shim_hits_total{uri="details/{id}",status="301"} 3', $lines);
+        $this->assertContains('nexus_legacy_shim_hits_total{uri="takemessage",status="308"} 12', $lines);
+    }
+
     public function test_collect_emits_statuses_recorded_outside_fixed_list(): void
     {
         $redis = Redis::connection();

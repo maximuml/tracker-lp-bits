@@ -8,6 +8,7 @@ use App\Http\Middleware\AuditStaffActions;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckSiteStatus;
 use App\Http\Middleware\CheckUserStatus;
+use App\Http\Middleware\CountLegacyShim;
 use App\Http\Middleware\CronToken;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\Filament;
@@ -128,6 +129,7 @@ class Kernel extends HttpKernel
         'checkUserStatus' => CheckUserStatus::class,
         'cron.token' => CronToken::class,
         'reject.get.mutations' => RejectGetMutations::class,
+        'legacy.shim.count' => CountLegacyShim::class,
         'metrics.access' => MetricsAccess::class,
         'passkey.v2' => PasskeyV2Enabled::class,
     ];

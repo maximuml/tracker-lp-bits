@@ -23,7 +23,7 @@ final class HttpMetricsCollector implements MetricsCollector
      */
     public function collect(): array
     {
-        return array_merge($this->requests(), $this->latency(), $this->legacyAjax());
+        return array_merge($this->requests(), $this->latency(), $this->legacyAjax(), $this->legacyShims());
     }
 
     /**
@@ -96,6 +96,37 @@ final class HttpMetricsCollector implements MetricsCollector
                 if ($count !== null) {
                     $lines[] = $this->fmt->line('nexus_legacy_ajax_requests_total', (float) $count, ['action' => (string) $action]);
                 }
+            }
+        } catch (\Throwable) {
+            // Redis unavailable — skip
+        }
+
+        return $lines;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function legacyShims(): array
+    {
+        $lines = $this->fmt->head('nexus_legacy_shim_hits_total', 'Hits on legacy-URI redirect shims by route URI and status', 'counter');
+
+        try {
+            $redis = Redis::connection();
+            $keys = (array) $redis->smembers('metrics:legacy_shim_keys');
+            sort($keys);
+            foreach ($keys as $key) {
+                $count = $redis->get("metrics:legacy_shim:{$key}");
+                if ($count === null) {
+                    continue;
+                }
+                $sep = strrpos((string) $key, ':');
+                if ($sep === false) {
+                    continue;
+                }
+                $uri = substr((string) $key, 0, $sep);
+                $status = substr((string) $key, $sep + 1);
+                $lines[] = $this->fmt->line('nexus_legacy_shim_hits_total', (float) $count, ['uri' => $uri, 'status' => $status]);
             }
         } catch (\Throwable) {
             // Redis unavailable — skip

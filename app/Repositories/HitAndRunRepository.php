@@ -7,7 +7,7 @@ namespace App\Repositories;
 use App\Auth\Permission;
 use App\Enums\HitAndRunMode;
 use App\Enums\HitAndRunStatus;
-use App\Enums\ModelEventEnum;
+use App\Enums\ModelEvent;
 use App\Models\HitAndRun;
 use App\Models\SearchBox;
 use App\Models\User;
@@ -89,7 +89,7 @@ class HitAndRunRepository extends BaseRepository
     {
         $model = HitAndRun::query()->findOrFail($id);
         $result = $model->delete();
-        HitAndRun::clearCache($model, ModelEventEnum::HIT_AND_RUN_DELETED);
+        HitAndRun::clearCache($model, ModelEvent::HitAndRunDeleted);
 
         return $result ?? true;
     }
@@ -112,7 +112,7 @@ class HitAndRunRepository extends BaseRepository
                 if (! $record instanceof HitAndRun) {
                     continue;
                 }
-                HitAndRun::clearCache($record, ModelEventEnum::HIT_AND_RUN_DELETED);
+                HitAndRun::clearCache($record, ModelEvent::HitAndRunDeleted);
             }
         }
 

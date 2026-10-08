@@ -18,7 +18,7 @@ namespace App\Models;
 
 use App\Enums\HitAndRunMode;
 use App\Enums\HitAndRunStatus;
-use App\Enums\ModelEventEnum;
+use App\Enums\ModelEvent;
 use App\Enums\UserClass as UserClassEnum;
 use App\Events\HitAndRunCreated;
 use App\Events\HitAndRunDeleted;
@@ -79,7 +79,7 @@ class HitAndRun extends NexusModel
             self::clearCache($model);
         });
         static::deleted(function ($model) {
-            self::clearCache($model, ModelEventEnum::HIT_AND_RUN_DELETED);
+            self::clearCache($model, ModelEvent::HitAndRunDeleted);
         });
     }
 
@@ -88,16 +88,16 @@ class HitAndRun extends NexusModel
         return sprintf('hit_and_run:user:%d:torrent:%d', $userId, $torrentId);
     }
 
-    public static function clearCache(HitAndRun $hitAndRun, string $event = ModelEventEnum::HIT_AND_RUN_UPDATED): void
+    public static function clearCache(HitAndRun $hitAndRun, ModelEvent $event = ModelEvent::HitAndRunUpdated): void
     {
         Cache::forgetWithLocales(self::getCacheKey($hitAndRun->uid, $hitAndRun->torrent_id));
         match ($event) {
-            ModelEventEnum::HIT_AND_RUN_CREATED => event(new HitAndRunCreated($hitAndRun)),
-            ModelEventEnum::HIT_AND_RUN_UPDATED => event(new HitAndRunUpdated($hitAndRun)),
-            ModelEventEnum::HIT_AND_RUN_DELETED => event(new HitAndRunDeleted($hitAndRun->toArray())),
+            ModelEvent::HitAndRunCreated => event(new HitAndRunCreated($hitAndRun)),
+            ModelEvent::HitAndRunUpdated => event(new HitAndRunUpdated($hitAndRun)),
+            ModelEvent::HitAndRunDeleted => event(new HitAndRunDeleted($hitAndRun->toArray())),
             default => null,
         };
-        Logger::writeWithContext((string) sprintf('userId: %s, torrentId: %s hit and run cache cleared, and trigger event: %s', $hitAndRun->uid, $hitAndRun->torrent_id, $event), (string) 'info', (bool) false);
+        Logger::writeWithContext((string) sprintf('userId: %s, torrentId: %s hit and run cache cleared, and trigger event: %s', $hitAndRun->uid, $hitAndRun->torrent_id, $event->value), (string) 'info', (bool) false);
     }
 
     /** @return  Attribute<mixed, mixed> */

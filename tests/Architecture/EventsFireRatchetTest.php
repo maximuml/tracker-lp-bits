@@ -10,8 +10,8 @@ use Tests\Attributes\TestCategory;
 /**
  * W2-10: Ratchet on Events::fire() calls.
  *
- * Events::fire() is a legacy wrapper that dispatches through
- * ModelEventEnum → event class → Laravel event(). The goal is
+ * Events::fire() was a legacy wrapper that dispatched through
+ * ModelEventEnum → event class → Laravel event(). It is gone; The goal is
  * to replace all Events::fire() calls with direct event() calls,
  * but this requires updating each call site to construct the
  * event class directly.

@@ -8,7 +8,6 @@ use App\Jobs\AttendanceJob;
 use App\Jobs\BuyTorrent;
 use App\Jobs\CheckQueueFailedJobs;
 use App\Jobs\CleanupJob;
-use App\Jobs\FireEvent;
 use App\Jobs\GenerateCoverThumbnail;
 use App\Jobs\GenerateTemporaryInvite;
 use App\Jobs\HrCheckJob;
@@ -33,12 +32,11 @@ use Tests\TestCase;
 final class QueueProfilesTest extends TestCase
 {
     /**
-     * Tracker-critical jobs: BuyTorrent, FireEvent, UpdateTorrentSeedersEtc, GenerateCoverThumbnail.
+     * Tracker-critical jobs: BuyTorrent, UpdateTorrentSeedersEtc, GenerateCoverThumbnail.
      */
     public function test_tracker_critical_jobs_assigned_to_correct_queue(): void
     {
         $this->assertSame('tracker-critical', (new BuyTorrent(1, 1))->queue);
-        $this->assertSame('tracker-critical', (new FireEvent('test', '1'))->queue);
         $this->assertSame('tracker-critical', (new UpdateTorrentSeedersEtc(1, 10, '1', 'key'))->queue);
         $this->assertSame('tracker-critical', (new GenerateCoverThumbnail('http://example.com/img.jpg', '/tmp/out.jpg'))->queue);
     }
@@ -141,7 +139,6 @@ final class QueueProfilesTest extends TestCase
             new BuyTorrent(1, 1),
             new CheckQueueFailedJobs,
             new CleanupJob,
-            new FireEvent('test', '1'),
             new GenerateCoverThumbnail('http://example.com/img.jpg', '/tmp/out.jpg'),
             new GenerateTemporaryInvite('key', 7, 1),
             new HrCheckJob,

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Enums\ModelEventEnum;
+use App\Enums\ModelEvent;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserCleanupRepository;
 use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
-use App\Support\Events;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\ModelEventPublisher;
 
 class RemoveUserWarning
 {
@@ -43,7 +43,7 @@ class RemoveUserWarning
             Logger::writeWithContext((string) sprintf('update user %s => %s', $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
             $user->save();
             Cache::clearUser($user->id, '');
-            Events::publishModel(ModelEventEnum::USER_UPDATED, $user->id, '');
+            ModelEventPublisher::publish(ModelEvent::UserUpdated, $user->id, '');
             $subject = Locale::trans('cleanup.msg_warning_removed', [], $locale);
             $msg = Locale::trans('cleanup.msg_your_warning_removed', [], $locale);
             $messageRepository->add([

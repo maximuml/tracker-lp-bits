@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Enums\ModelEvent;
 use App\Events\AgentAllowCreated;
 use App\Events\AgentAllowDeleted;
 use App\Events\AgentAllowUpdated;
@@ -25,16 +26,13 @@ use App\Events\UserDeleted;
 use App\Events\UserDisabled;
 use App\Events\UserEnabled;
 use App\Events\UserUpdated;
-use App\Support\Env;
-use App\Support\Logger;
-use App\Support\RedisGuard;
+use App\Support\ModelEventPublisher;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Redis;
 
 /**
  * W2-10: Publish model-change events to Redis pub/sub.
  *
- * Replaces the manual Events::publishModel() call that was embedded
+ * Replaces the manual ModelEventPublisher::publish() call that was embedded
  * in Events::fire(). Now that events are dispatched via Laravel's
  * event() helper, this listener handles the Redis publish side-effect.
  */
@@ -46,27 +44,27 @@ final class PublishModelEventToRedis
      * @var array<class-string, string>
      */
     private const EVENT_NAMES = [
-        TorrentCreated::class => 'torrent_created',
-        TorrentUpdated::class => 'torrent_updated',
-        TorrentDeleted::class => 'torrent_deleted',
-        UserCreated::class => 'user_created',
-        UserUpdated::class => 'user_updated',
-        UserDeleted::class => 'user_deleted',
-        UserEnabled::class => 'user_enabled',
-        UserDisabled::class => 'user_disabled',
-        NewsCreated::class => 'news_created',
-        HitAndRunCreated::class => 'hit_and_run_created',
-        HitAndRunUpdated::class => 'hit_and_run_updated',
-        HitAndRunDeleted::class => 'hit_and_run_deleted',
-        MessageCreated::class => 'message_created',
-        StaffMessageCreated::class => 'staff_message_created',
-        SnatchedUpdated::class => 'snatched_updated',
-        AgentAllowCreated::class => 'agent_allow_created',
-        AgentAllowUpdated::class => 'agent_allow_updated',
-        AgentAllowDeleted::class => 'agent_allow_deleted',
-        AgentDenyCreated::class => 'agent_deny_created',
-        AgentDenyUpdated::class => 'agent_deny_updated',
-        AgentDenyDeleted::class => 'agent_deny_deleted',
+        TorrentCreated::class => ModelEvent::TorrentCreated->value,
+        TorrentUpdated::class => ModelEvent::TorrentUpdated->value,
+        TorrentDeleted::class => ModelEvent::TorrentDeleted->value,
+        UserCreated::class => ModelEvent::UserCreated->value,
+        UserUpdated::class => ModelEvent::UserUpdated->value,
+        UserDeleted::class => ModelEvent::UserDeleted->value,
+        UserEnabled::class => ModelEvent::UserEnabled->value,
+        UserDisabled::class => ModelEvent::UserDisabled->value,
+        NewsCreated::class => ModelEvent::NewsCreated->value,
+        HitAndRunCreated::class => ModelEvent::HitAndRunCreated->value,
+        HitAndRunUpdated::class => ModelEvent::HitAndRunUpdated->value,
+        HitAndRunDeleted::class => ModelEvent::HitAndRunDeleted->value,
+        MessageCreated::class => ModelEvent::MessageCreated->value,
+        StaffMessageCreated::class => ModelEvent::StaffMessageCreated->value,
+        SnatchedUpdated::class => ModelEvent::SnatchedUpdated->value,
+        AgentAllowCreated::class => ModelEvent::AgentAllowCreated->value,
+        AgentAllowUpdated::class => ModelEvent::AgentAllowUpdated->value,
+        AgentAllowDeleted::class => ModelEvent::AgentAllowDeleted->value,
+        AgentDenyCreated::class => ModelEvent::AgentDenyCreated->value,
+        AgentDenyUpdated::class => ModelEvent::AgentDenyUpdated->value,
+        AgentDenyDeleted::class => ModelEvent::AgentDenyDeleted->value,
     ];
 
     public function handle(object $event): void
@@ -86,21 +84,15 @@ final class PublishModelEventToRedis
         } elseif (isset($event->data) && is_array($event->data)) {
             $id = (int) ($event->data['id'] ?? 0);
             $json = json_encode($event->data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if ($json === false) {
+                return;
+            }
         } else {
             return;
         }
 
-        $channel = Env::get('CHANNEL_NAME_MODEL_EVENT', null);
-
-        if (! empty($channel)) {
-            // Best-effort fan-out: a dead Redis costs ~5-10s of connect
-            // stalls per event — the breaker keeps callers fast instead.
-            RedisGuard::attempt(static fn () => Redis::connection()->client()->publish(
-                $channel,
-                json_encode(['event' => $name, 'id' => $id, 'json' => $json], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            ));
-        } else {
-            Logger::writeWithContext("event: $name, id: $id, channel: ".(is_scalar($channel) ? (string) $channel : '').', channel is empty!', 'error');
-        }
+        // Best-effort fan-out: a dead Redis costs ~5-10s of connect
+        // stalls per event — the breaker keeps callers fast instead.
+        ModelEventPublisher::send($name, $id, $json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 }

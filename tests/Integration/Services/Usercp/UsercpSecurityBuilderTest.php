@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -26,6 +27,7 @@ use Tests\TestCase;
 final class UsercpSecurityBuilderTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     /** @var UserPasskeyRepository&MockInterface */
@@ -81,7 +83,7 @@ final class UsercpSecurityBuilderTest extends TestCase
             'two_step_code' => '123456',
         ]);
 
-        $s = $this->builder()->build(['id' => 1, 'privacy' => 1, 'email' => 'old@x.com'], 'save');
+        $s = $this->builder()->build($this->curUser(['id' => 1, 'privacy' => 1, 'email' => 'old@x.com']), 'save');
 
         $this->assertTrue($s->isConfirm);
         $this->assertSame('1', $s->confirmHidden['resetpasskey']);
@@ -99,7 +101,7 @@ final class UsercpSecurityBuilderTest extends TestCase
         $this->emptyPasskeys();
         $this->passkeyRepository->shouldReceive('getAaguids')->andReturn([]);
 
-        $s = $this->builder()->build(['id' => 1, 'privacy' => 0, 'email' => 'a@b.c', 'two_step_secret' => 'EX'], '');
+        $s = $this->builder()->build($this->curUser(['id' => 1, 'privacy' => 0, 'email' => 'a@b.c', 'two_step_secret' => 'EX']), '');
 
         $this->assertFalse($s->isConfirm);
         $this->assertSame([], $s->confirmHidden);
@@ -114,7 +116,7 @@ final class UsercpSecurityBuilderTest extends TestCase
         $this->bindRequest();
         $this->emptyPasskeys();
 
-        $base = $this->builder()->build(['id' => 1], '')->savedMessage;
+        $base = $this->builder()->build($this->curUser(['id' => 1]), '')->savedMessage;
         $this->assertNotEmpty($base);
 
         $sentences = [
@@ -125,7 +127,7 @@ final class UsercpSecurityBuilderTest extends TestCase
         ];
         foreach ($sentences as $flag => $sentence) {
             $this->bindRequest([$flag => '1']);
-            $msg = $this->builder()->build(['id' => 1], '')->savedMessage;
+            $msg = $this->builder()->build($this->curUser(['id' => 1]), '')->savedMessage;
             $this->assertSame($base.' '.$sentence, $msg);
         }
     }
@@ -135,7 +137,7 @@ final class UsercpSecurityBuilderTest extends TestCase
         $this->bindRequest(['passkey' => '1']);
         $this->emptyPasskeys();
 
-        $s = $this->builder()->build(['id' => 1], '');
+        $s = $this->builder()->build($this->curUser(['id' => 1]), '');
 
         $this->assertSame(
             ['mail' => false, 'passkey' => true, 'password' => false, 'privacy' => false],
@@ -157,7 +159,7 @@ final class UsercpSecurityBuilderTest extends TestCase
             '00112233-4455-6677-8899-aabbccddeeff' => ['name' => 'Bitwarden', 'icon_dark' => 'ico.png'],
         ]);
 
-        $s = $this->builder()->build(['id' => 1, 'privacy' => 1], '');
+        $s = $this->builder()->build($this->curUser(['id' => 1, 'privacy' => 1]), '');
 
         $this->assertCount(1, $s->passkeys);
         $item = $s->passkeys[0];
@@ -182,7 +184,7 @@ final class UsercpSecurityBuilderTest extends TestCase
         $this->passkeyRepository->shouldReceive('getList')->andReturn(collect([$pk]));
         $this->passkeyRepository->shouldReceive('getAaguids')->andReturn([]);
 
-        $s = $this->builder()->build(['id' => 1, 'privacy' => 1], '');
+        $s = $this->builder()->build($this->curUser(['id' => 1, 'privacy' => 1]), '');
 
         $item = $s->passkeys[0];
         $this->assertSame(UserPasskeyRepository::DEFAULT_ICON, $item->iconUrl);
@@ -195,9 +197,9 @@ final class UsercpSecurityBuilderTest extends TestCase
         $this->bindRequest();
         $this->emptyPasskeys();
 
-        $this->assertTrue($this->builder()->build(['id' => 1, 'privacy' => 1], '')->showEmailChange);
+        $this->assertTrue($this->builder()->build($this->curUser(['id' => 1, 'privacy' => 1]), '')->showEmailChange);
 
         $this->seedTestSettings(['smtptype' => 'none']);
-        $this->assertFalse($this->builder()->build(['id' => 1, 'privacy' => 1], '')->showEmailChange);
+        $this->assertFalse($this->builder()->build($this->curUser(['id' => 1, 'privacy' => 1]), '')->showEmailChange);
     }
 }

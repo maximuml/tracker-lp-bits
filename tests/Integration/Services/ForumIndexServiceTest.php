@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 /**
@@ -34,6 +35,7 @@ use Tests\TestCase;
 final class ForumIndexServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     private ForumIndexService $service;
 
@@ -195,7 +197,7 @@ final class ForumIndexServiceTest extends TestCase
 
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn(null);
 
-        $result = $this->service->getLastReadPostId(1, ['id' => 1]);
+        $result = $this->service->getLastReadPostId(1, $this->curUser(['id' => 1]));
 
         $this->assertSame(0, $result);
     }
@@ -207,7 +209,7 @@ final class ForumIndexServiceTest extends TestCase
 
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn(null);
 
-        $result = $this->service->getLastReadPostId(1, ['id' => 1, 'last_catchup' => 50]);
+        $result = $this->service->getLastReadPostId(1, $this->curUser(['id' => 1, 'last_catchup' => 50]));
 
         $this->assertSame(50, $result);
     }
@@ -219,7 +221,7 @@ final class ForumIndexServiceTest extends TestCase
 
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn([1 => 100]);
 
-        $result = $this->service->getLastReadPostId(1, ['id' => 1, 'last_catchup' => 50]);
+        $result = $this->service->getLastReadPostId(1, $this->curUser(['id' => 1, 'last_catchup' => 50]));
 
         $this->assertSame(100, $result);
     }
@@ -290,7 +292,7 @@ final class ForumIndexServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(50);
         $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(10);
 
-        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $result = $this->service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
 
         $this->assertNotNull($result->stats);
         $this->assertSame(100, $result->stats->posts);
@@ -315,7 +317,7 @@ final class ForumIndexServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(0);
         $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(0);
 
-        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $result = $this->service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
 
         $this->assertNotNull($result->stats);
         $this->assertSame(0, $result->stats->activeUsers);
@@ -336,10 +338,40 @@ final class ForumIndexServiceTest extends TestCase
         $repo->shouldReceive('getOverforumsList')->andReturn([]);
         $repo->shouldReceive('getForumsList')->andReturn([]);
 
-        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $result = $this->service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
 
         $this->assertSame([], $result->sections);
         $this->assertFalse($result->canManageForums);
+    }
+
+    public function test_build_forums_index_stamps_forum_access_for_logged_in_user(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+
+        $repo->shouldReceive('updateUserForumAccess')->once()->with(1, Mockery::pattern('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/'))->andReturn(true);
+        $repo->shouldReceive('getOverforumsList')->andReturn([]);
+        $repo->shouldReceive('getForumsList')->andReturn([]);
+
+        $result = $this->service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
+
+        $this->assertSame([], $result->sections);
+    }
+
+    public function test_build_forums_index_skips_forum_access_for_guest(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+
+        $repo->shouldReceive('updateUserForumAccess')->never();
+        $repo->shouldReceive('getOverforumsList')->andReturn([]);
+        $repo->shouldReceive('getForumsList')->andReturn([]);
+
+        $result = $this->service->buildForumsIndex($this->curUser([]), 0);
+
+        $this->assertSame([], $result->sections);
     }
 
     public function test_build_forums_index_renders_orphan_forums_in_their_own_group(): void
@@ -359,7 +391,7 @@ final class ForumIndexServiceTest extends TestCase
             7 => ['id' => 7, 'name' => 'Orphan Forum', 'description' => 'no matching overforum', 'forid' => 999, 'minclassread' => 0, 'topiccount' => 3, 'postcount' => 9],
         ]);
 
-        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $result = $this->service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
 
         $sectionByForumId = [];
         foreach ($result->sections as $i => $section) {
@@ -386,7 +418,7 @@ final class ForumIndexServiceTest extends TestCase
             7 => ['id' => 7, 'name' => 'Staff Orphan Forum', 'description' => '', 'forid' => 999, 'minclassread' => 10, 'topiccount' => 0, 'postcount' => 0],
         ]);
 
-        $result = $this->service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $result = $this->service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
 
         $names = [];
         foreach ($result->sections as $section) {
@@ -472,7 +504,7 @@ final class ForumIndexServiceTest extends TestCase
         $this->postRepo->shouldReceive('getTodayPostsCount')->andReturn(10);
         $this->readStateRepo->shouldReceive('getLastReadPosts')->with(1)->andReturn([2 => 3]);
 
-        $result = $service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $result = $service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
 
         $today = date('Y-m-d');
         foreach ([
@@ -547,7 +579,7 @@ final class ForumIndexServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('getLastReadPosts')->with(0)->once()->andReturn([7 => 0]);
         $this->readStateRepo->shouldReceive('getLastReadPosts')->with(5)->andReturn(null);
 
-        $this->assertSame(0, $service->getLastReadPostId(2, ['username' => 'noid']));
+        $this->assertSame(0, $service->getLastReadPostId(2, $this->curUser(['username' => 'noid'])));
         $this->assertContains('user_0_last_read_post_list', $gets);
         $this->assertContains(['user_0_last_read_post_list', 'no record', 900], $puts);
 
@@ -560,7 +592,7 @@ final class ForumIndexServiceTest extends TestCase
             $this->readStateRepo,
             $this->postRepo,
         );
-        $this->assertSame(0, $service2->getLastReadPostId(7, ['username' => 'noid']));
+        $this->assertSame(0, $service2->getLastReadPostId(7, $this->curUser(['username' => 'noid'])));
         $this->assertContains(['user_0_last_read_post_list', [7 => 0], 900], $puts);
 
         $service3 = new ForumIndexService(
@@ -572,7 +604,7 @@ final class ForumIndexServiceTest extends TestCase
             $this->readStateRepo,
             $this->postRepo,
         );
-        $this->assertSame(0, $service3->getLastReadPostId(2, ['id' => 5]));
+        $this->assertSame(0, $service3->getLastReadPostId(2, $this->curUser(['id' => 5])));
         $this->assertContains(['user_5_last_read_post_list', 'no record', 900], $puts);
     }
 
@@ -624,7 +656,7 @@ final class ForumIndexServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTotalTopicsCount')->never();
         $this->postRepo->shouldReceive('getTodayPostsCount')->never();
 
-        $result = $service->buildForumsIndex(['id' => 1, 'username' => 'test'], 1);
+        $result = $service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
 
         $this->assertSame(2, $result->stats->activeUsers);
         $this->assertSame(50, $result->stats->posts);

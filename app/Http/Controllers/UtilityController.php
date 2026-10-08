@@ -11,12 +11,12 @@ use App\Http\Requests\PreviewRequest;
 use App\Models\Setting;
 use App\Repositories\UsercpSecurityCommand;
 use App\Services\SecureTokenService;
+use App\Support\AjaxRedirects;
 use App\Support\Api;
 use App\Support\Cache\NexusCache;
 use App\Support\Captcha;
 use App\Support\CurrentUser;
 use App\Support\HeaderBag;
-use App\Support\LegacyAjaxRedirects;
 use App\Support\Logger;
 use App\Support\RedisGuard;
 use Illuminate\Http\JsonResponse;
@@ -26,7 +26,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\View\View;
 
-class UtilityController extends LegacyController
+class UtilityController extends BasePageController
 {
     public function __construct(
         private readonly UsercpSecurityCommand $usercpSecurityCommand,
@@ -51,7 +51,7 @@ class UtilityController extends LegacyController
         // Count shim hits per action so the /ajax route can be dropped
         // once this family goes quiet (exposed via /metrics; unmapped
         // actions collapse to __invalid to bound label cardinality).
-        $label = LegacyAjaxRedirects::uriFor($action) !== null ? $action : '__invalid';
+        $label = AjaxRedirects::uriFor($action) !== null ? $action : '__invalid';
         RedisGuard::attempt(static function () use ($label) {
             $redis = Redis::connection();
             $redis->incr("metrics:legacy_ajax:{$label}");
@@ -69,7 +69,7 @@ class UtilityController extends LegacyController
         // replay method + body, so legacy {action, params} POSTs land
         // there byte-identically and the target FormRequest flattens
         // the envelope.
-        $redirectUri = LegacyAjaxRedirects::uriFor($action);
+        $redirectUri = AjaxRedirects::uriFor($action);
         if ($redirectUri !== null) {
             return redirect()->to($redirectUri, 308);
         }

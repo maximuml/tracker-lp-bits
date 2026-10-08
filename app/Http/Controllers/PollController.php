@@ -25,7 +25,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class PollController extends LegacyController
+class PollController extends BasePageController
 {
     private PollRepository $pollRepository;
 

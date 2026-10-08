@@ -10,7 +10,7 @@ use App\Http\Requests\StoreMessageRequest;
 /**
  * Legacy-URI POST dispatcher registry: route URI → 308-forward rules for
  * the endpoints that were split into dedicated /web/* REST routes. Sibling
- * of LegacyAjaxRedirects — same idea, for the page-level dispatchers.
+ * of AjaxRedirects — same idea, for the page-level dispatchers.
  *
  * Entry shape:
  * - 'target' => fixed URI every POST forwards to ('{input:name}' segments
@@ -23,7 +23,7 @@ use App\Http\Requests\StoreMessageRequest;
  * - 'default' => non-308 fallback when nothing matched (302),
  * - 'abort' => non-308 fallback rendered as an abort page with this text.
  */
-final class LegacyPostRedirects
+final class PostRedirects
 {
     /** @var array<string, array<string, mixed>> */
     private const MAP = [

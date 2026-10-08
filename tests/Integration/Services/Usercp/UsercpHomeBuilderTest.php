@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Services\Usercp\UsercpHomeBuilder;
 use App\Support\Cache\NexusCache;
+use App\Support\CurrentUser;
 use App\Support\Settings;
 use App\ViewModels\Usercp\UsercpHomeSection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -85,10 +86,8 @@ final class UsercpHomeBuilderTest extends TestCase
     /**
      * Calls build() while suppressing legacy error handlers left by
      * inner helpers (postRowWithContext / view fragments).
-     *
-     * @param  array<string, mixed>  $curUser
      */
-    private function callBuild(array $curUser): UsercpHomeSection
+    private function callBuild(CurrentUser $curUser): UsercpHomeSection
     {
         set_error_handler(static fn (int $severity): bool => true, E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
 
@@ -109,11 +108,11 @@ final class UsercpHomeBuilderTest extends TestCase
         );
     }
 
-    /** @param  array<string, mixed>  $overrides
-     * @return array<string, mixed> */
-    private function curUser(array $overrides = []): array
+    /** @param  array<string, mixed>  $overrides */
+    private function curUser(array $overrides = []): CurrentUser
     {
-        return array_merge([
+        $user = new CurrentUser;
+        $user->set(array_merge([
             'id' => 5,
             'username' => 'u',
             'email' => 'u@x.c',
@@ -123,12 +122,14 @@ final class UsercpHomeBuilderTest extends TestCase
             'seedbonus' => '10.0',
             'added' => now()->subDays(30)->toDateTimeString(),
             'ip' => '127.0.0.1',
-        ], $overrides);
+        ], $overrides));
+
+        return $user;
     }
 
     private function userInfo(): User
     {
-        return (new User)->newFromBuilder($this->curUser());
+        return (new User)->newFromBuilder($this->curUser()->get() ?? []);
     }
 
     public function test_forum_posts_path_computes_day_posts_and_percentage(): void

@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class StaffPageController extends LegacyController
+class StaffPageController extends BasePageController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker,
         private readonly CurrentUser $currentUser,

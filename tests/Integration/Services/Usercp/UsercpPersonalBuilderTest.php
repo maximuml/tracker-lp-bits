@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -24,6 +25,7 @@ use Tests\TestCase;
 final class UsercpPersonalBuilderTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     protected function setUp(): void
@@ -44,7 +46,7 @@ final class UsercpPersonalBuilderTest extends TestCase
     /** @param  array<string, mixed>  $overrides */
     private function section(array $overrides = []): UsercpPersonalSection
     {
-        return $this->builder()->build(array_merge([
+        return $this->builder()->build($this->curUser(array_merge([
             'parked' => 'yes',
             'acceptpms' => 1,
             'deletepms' => 'yes',
@@ -56,7 +58,7 @@ final class UsercpPersonalBuilderTest extends TestCase
             'country' => 0,
             'avatar' => 'http://x/av.png',
             'info' => 'bio text',
-        ], $overrides));
+        ], $overrides)));
     }
 
     public function test_yes_no_toggles_and_enums(): void
@@ -128,7 +130,7 @@ final class UsercpPersonalBuilderTest extends TestCase
         $lookup->shouldReceive('getCountryOptions')->once()->andReturn([(object) ['id' => 9, 'name' => 'Mocked']]);
         $lookup->shouldReceive('getBitbucketOptions')->once()->andReturn([(object) ['name' => 'bb']]);
 
-        $s = (new UsercpPersonalBuilder($lookup))->build([]);
+        $s = (new UsercpPersonalBuilder($lookup))->build($this->curUser([]));
 
         $this->assertSame('Mocked', $s->countryOptions['9']);
         $this->assertSame('bb', $s->bitbucketOptions['http://test.com/bitbucket/bb']);

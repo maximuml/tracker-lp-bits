@@ -25,7 +25,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class StaffMessageController extends LegacyController
+class StaffMessageController extends BasePageController
 {
     public function __construct(private readonly StaffMessageRepository $staffMessageRepository, private readonly UserRepositoryInterface $userRepository,
         private readonly CurrentUser $currentUser,

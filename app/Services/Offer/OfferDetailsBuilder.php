@@ -12,6 +12,7 @@ use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserTimeType;
 use App\Support\Cache\NexusCache;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
@@ -34,10 +35,7 @@ final class OfferDetailsBuilder
         private readonly NexusCache $cache,
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    public function build(array $curUser, int $userId, Request $request): OfferDetailsViewModel
+    public function build(CurrentUser $curUser, int $userId, Request $request): OfferDetailsViewModel
     {
         $id = (int) $request->query('id', 0);
         if (! $id) {
@@ -51,7 +49,7 @@ final class OfferDetailsBuilder
         $num = $offer->toArray();
 
         $timeFormat = Time::format((string) ($num['added'] ?? ''), true, false);
-        $offertime = ($curUser['timetype'] ?? 1) !== UserTimeType::TIMEALIVE->value
+        $offertime = ($curUser->value('timetype', 1)) !== UserTimeType::TIMEALIVE->value
             ? __('offers.text_at').$timeFormat
             : __('offers.text_blank').$timeFormat;
 

@@ -29,7 +29,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
-class SettingsController extends LegacyController
+class SettingsController extends BasePageController
 {
     private TagRepositoryInterface $tagRepository;
 

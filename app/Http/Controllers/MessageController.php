@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
 
-class MessageController extends LegacyController
+class MessageController extends BasePageController
 {
     private MessageRepository $repository;
 

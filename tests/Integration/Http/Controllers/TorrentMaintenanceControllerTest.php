@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
-use App\Http\Controllers\LegacyRedirectController;
+use App\Http\Controllers\CompatRedirectController;
 use App\Http\Controllers\TorrentMaintenanceController;
 use App\Http\Requests\FlushTorrentRequest;
 use App\Http\Requests\ReseedTorrentRequest;
@@ -76,7 +76,7 @@ final class TorrentMaintenanceControllerTest extends TestCase
 
     public function test_take_flush_legacy_uri_redirects_to_rest_endpoint(): void
     {
-        $controller = app(LegacyRedirectController::class);
+        $controller = app(CompatRedirectController::class);
         $request = Request::create('/takeflush', 'POST', ['id' => 2]);
 
         $response = $controller->post($request);
@@ -88,7 +88,7 @@ final class TorrentMaintenanceControllerTest extends TestCase
 
     public function test_take_reseed_legacy_uri_redirects_to_rest_endpoint(): void
     {
-        $controller = app(LegacyRedirectController::class);
+        $controller = app(CompatRedirectController::class);
         $request = Request::create('/takereseed', 'POST', ['reseedid' => 10]);
 
         $response = $controller->post($request);

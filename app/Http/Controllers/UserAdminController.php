@@ -35,7 +35,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class UserAdminController extends LegacyController
+class UserAdminController extends BasePageController
 {
     private UserRepositoryInterface $userRepository;
 

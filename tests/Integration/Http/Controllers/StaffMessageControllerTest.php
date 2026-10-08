@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Enums\UserClass;
-use App\Http\Controllers\LegacyRedirectController;
+use App\Http\Controllers\CompatRedirectController;
 use App\Http\Controllers\StaffMessageController;
 use App\Http\Requests\SendContactStaffRequest;
 use App\Http\Requests\SendStaffMessageRequest;
@@ -56,7 +56,7 @@ final class StaffMessageControllerTest extends TestCase
 
     public function test_take_staffmess_redirects_post_to_rest_endpoint(): void
     {
-        $controller = app(LegacyRedirectController::class);
+        $controller = app(CompatRedirectController::class);
         $request = Request::create('/takestaffmess', 'POST');
         app()->instance('request', $request);
 
@@ -111,7 +111,7 @@ final class StaffMessageControllerTest extends TestCase
 
     public function test_takecontact_redirects_post_to_rest_endpoint(): void
     {
-        $controller = app(LegacyRedirectController::class);
+        $controller = app(CompatRedirectController::class);
         $request = Request::create('/takecontact', 'POST');
         app()->instance('request', $request);
 

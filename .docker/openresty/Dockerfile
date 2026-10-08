@@ -17,6 +17,10 @@ RUN apk add --no-cache 'libpng>=1.6.59'
 # the patched build until the pinned digest moves past it.
 RUN apk upgrade --no-cache zlib
 
+# CVE-2026-4775: libtiff OOB heap write in putcontig8bitYCbCr44tile;
+# upgrade to 4.7.2 until the pinned digest moves past it.
+RUN apk upgrade --no-cache tiff
+
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY .docker/openresty/render-config.sh /usr/local/bin/render-config.sh

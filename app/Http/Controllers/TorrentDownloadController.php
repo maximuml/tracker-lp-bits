@@ -31,7 +31,7 @@ use Illuminate\View\View;
 use Rhilip\Bencode\TorrentFile;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
-class TorrentDownloadController extends LegacyController
+class TorrentDownloadController extends BasePageController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,

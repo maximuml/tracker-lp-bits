@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class RssController extends LegacyController
+class RssController extends BasePageController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,

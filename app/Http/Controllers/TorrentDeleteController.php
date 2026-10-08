@@ -22,7 +22,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class TorrentDeleteController extends LegacyController
+class TorrentDeleteController extends BasePageController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository,
         private readonly CurrentUser $currentUser,

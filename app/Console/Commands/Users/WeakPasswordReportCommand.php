@@ -21,7 +21,7 @@ use Symfony\Component\Console\Helper\Table;
  *   2. Announce a migration window for any remaining md5 users.
  *   3. After the window, disable md5 verification and require a password reset.
  */
-final class LegacyPasswordReportCommand extends Command
+final class WeakPasswordReportCommand extends Command
 {
     /** @var string */
     protected $signature = 'users:legacy-password-report

@@ -10,10 +10,10 @@ use App\Enums\UserGender;
 use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\RequestValues;
 use App\Support\Strings;
 use App\Support\Url;
-use App\Support\YesNo;
 use App\ViewModels\Usercp\UsercpPersonalSection;
 
 /**
@@ -25,10 +25,7 @@ final class UsercpPersonalBuilder
         private readonly UsercpLookupRepositoryInterface $usercpLookupRepository
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    public function build(array $curUser): UsercpPersonalSection
+    public function build(CurrentUser $curUser): UsercpPersonalSection
     {
         $countryOptions = ['0' => '---- '.__('usercp.select_none_selected').' ----'];
         foreach ($this->usercpLookupRepository->getCountryOptions() as $ct) {
@@ -47,34 +44,34 @@ final class UsercpPersonalBuilder
             $bitbucketOptions[$baseUrl.'/bitbucket/'.(string) $sor->name] = (string) $sor->name;
         }
 
-        $notifs = (string) ($curUser['notifs'] ?? '');
+        $notifs = (string) $curUser->value('notifs', '');
         $notifCheckboxes = [];
         foreach (User::$notificationOptions as $option) {
             $notifCheckboxes[] = [
                 'name' => 'notifs['.$option.']',
-                'checked' => is_null($curUser['notifs'] ?? null) || str_contains($notifs, "[{$option}]"),
+                'checked' => is_null($curUser->value('notifs', null)) || str_contains($notifs, "[{$option}]"),
                 'label' => (string) __('usercp.checkbox_pm_on_'.$option),
             ];
         }
 
         return new UsercpPersonalSection(
             formId: 'form'.Strings::randomCode(6),
-            parked: YesNo::isYes($curUser['parked'] ?? null),
-            acceptpms: UserAcceptPms::tryFrom((int) ($curUser['acceptpms'] ?? 0))?->stringValue() ?? 'yes',
-            deletepms: YesNo::isYes($curUser['deletepms'] ?? null),
-            savepms: YesNo::isYes($curUser['savepms'] ?? null),
-            commentpm: YesNo::isYes($curUser['commentpm'] ?? null),
+            parked: $curUser->yes('parked'),
+            acceptpms: UserAcceptPms::tryFrom((int) $curUser->value('acceptpms', 0))?->stringValue() ?? 'yes',
+            deletepms: $curUser->yes('deletepms'),
+            savepms: $curUser->yes('savepms'),
+            commentpm: $curUser->yes('commentpm'),
             notifCheckboxes: $notifCheckboxes,
-            gender: UserGender::tryFrom((int) ($curUser['gender'] ?? 2))?->stringValue() ?? 'N/A',
-            trackerUrlId: (string) ($curUser['tracker_url_id'] ?? ''),
+            gender: UserGender::tryFrom((int) $curUser->value('gender', 2))?->stringValue() ?? 'N/A',
+            trackerUrlId: (string) $curUser->value('tracker_url_id', ''),
             trackerUrlOptions: $trackerUrlOptions,
-            country: (string) ($curUser['country'] ?? ''),
+            country: (string) $curUser->value('country', ''),
             countryOptions: $countryOptions,
-            avatar: (string) ($curUser['avatar'] ?? ''),
+            avatar: (string) $curUser->value('avatar', ''),
             defaultAvatarUrl: $defaultAvatarUrl,
             bitbucketOptions: $bitbucketOptions,
             enableBitbucket: SiteConfig::current()->main->enableBitbucket(),
-            info: (string) ($curUser['info'] ?? ''),
+            info: (string) $curUser->value('info', ''),
         );
     }
 }

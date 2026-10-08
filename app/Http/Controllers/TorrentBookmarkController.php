@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class TorrentBookmarkController extends LegacyController
+class TorrentBookmarkController extends BasePageController
 {
     public function __construct(
         private readonly TorrentBookmarkService $bookmarkService,

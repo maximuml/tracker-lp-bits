@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Support\LegacyPostRedirects;
 use App\Support\PageResponses;
+use App\Support\PostRedirects;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,12 +14,12 @@ use Illuminate\Http\Response;
 /**
  * Permanent-redirect action for renamed legacy GET URIs.
  *
- * Registered via `Route::get(..., [LegacyRedirectController::class, 'get'])
+ * Registered via `Route::get(..., [CompatRedirectController::class, 'get'])
  * ->defaults('redirect_to', '/web/<page>')`. Keeping this a controller (not a
  * route closure) makes the shim safe for `route:cache` — nested closure
  * factories cannot be serialized and 500'd every redirect in cached envs.
  */
-final class LegacyRedirectController
+final class CompatRedirectController
 {
     public function __construct(private readonly Container $container) {}
 
@@ -47,14 +47,14 @@ final class LegacyRedirectController
     /**
      * 308-forwarding action for legacy POST URIs whose actions were split
      * into dedicated /web/* endpoints. The per-route map lives in
-     * LegacyPostRedirects — the dispatchers this replaced did the same
+     * PostRedirects — the dispatchers this replaced did the same
      * 308-replay inline inside each controller.
      */
     public function post(Request $request): RedirectResponse|Response
     {
         $route = $request->route();
         $routeUri = is_object($route) ? $route->uri() : trim($request->path(), '/');
-        $entry = LegacyPostRedirects::entry($routeUri);
+        $entry = PostRedirects::entry($routeUri);
         if ($entry === null) {
             abort(404);
         }

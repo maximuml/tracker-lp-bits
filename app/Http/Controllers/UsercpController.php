@@ -25,7 +25,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-class UsercpController extends LegacyController
+class UsercpController extends BasePageController
 {
     private UsercpRepositoryInterface $repository;
 

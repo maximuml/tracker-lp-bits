@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers\Fixtures;
 
-use App\Http\Controllers\LegacyController;
+use App\Http\Controllers\BasePageController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class TestLegacyController extends LegacyController
+class TestBasePageController extends BasePageController
 {
     /** @param  array<string, mixed>  $data */
     public function page(Request $request, string $page, bool $auth = true, array $data = []): View|RedirectResponse

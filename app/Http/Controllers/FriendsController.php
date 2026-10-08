@@ -22,7 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class FriendsController extends LegacyController
+class FriendsController extends BasePageController
 {
     public function __construct(
         private readonly FriendsRepository $friendsRepository,

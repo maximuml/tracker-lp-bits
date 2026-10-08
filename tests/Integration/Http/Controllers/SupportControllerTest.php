@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
-use App\Http\Controllers\LegacyRedirectController;
+use App\Http\Controllers\CompatRedirectController;
 use App\Http\Controllers\SupportController;
 use App\Http\Requests\ComplainNewRequest;
 use App\Http\Requests\ComplainReplyRequest;
@@ -167,7 +167,7 @@ final class SupportControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(LegacyRedirectController::class);
+        $controller = app(CompatRedirectController::class);
         $request = Request::create('/complains', 'POST', [
             'action' => 'unknown',
         ]);
@@ -288,7 +288,7 @@ final class SupportControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(LegacyRedirectController::class);
+        $controller = app(CompatRedirectController::class);
         $request = Request::create('/complains', 'POST', ['action' => 'new']);
         app()->instance('request', $request);
 
@@ -303,7 +303,7 @@ final class SupportControllerTest extends TestCase
     {
         $this->mockCurrentUser(null);
 
-        $controller = app(LegacyRedirectController::class);
+        $controller = app(CompatRedirectController::class);
 
         foreach (['reply' => 'reply', 'answered' => 'answered', 'unanswered' => 'unanswered'] as $action => $verb) {
             $request = Request::create('/complains', 'POST', ['action' => $action]);

@@ -44,7 +44,7 @@ final class UsersearchPageService
      */
     public function build(Request $request): UsersearchPageViewModel
     {
-        $curUser = (array) ($this->currentUser->get() ?? []);
+        $curUser = $this->currentUser;
         $requestUri = (string) RequestValues::serverValue('REQUEST_URI');
         $hasModcomment = Schema::hasColumn('users', 'modcomment');
 
@@ -187,10 +187,8 @@ final class UsersearchPageService
 
     /**
      * Build the results table view model.
-     *
-     * @param  array<string, mixed>  $curUser
      */
-    private function buildResults(array $curUser, bool $hasModcomment, string $requestUri): UsersearchResultsViewModel
+    private function buildResults(CurrentUser $curUser, bool $hasModcomment, string $requestUri): UsersearchResultsViewModel
     {
         $searchResult = $this->userSearchRepository->administrativeSearch((array) request()->query(), $hasModcomment, 30);
         $count = (int) $searchResult['count'];
@@ -202,7 +200,7 @@ final class UsersearchPageService
         $userIds = array_map(fn ($row) => (int) ($row['id'] ?? 0), $res);
         $ips = array_map(fn ($row) => (string) ($row['ip'] ?? ''), $res);
         UserDisplay::preload($userIds);
-        $extraStats = $this->userListingRepository->getSearchExtraStats($userIds, $ips, (int) ($curUser['class'] ?? 0));
+        $extraStats = $this->userListingRepository->getSearchExtraStats($userIds, $ips, (int) $curUser->value('class', 0));
         $peerTotals = $extraStats['peers'];
         $postCounts = $extraStats['posts'];
         $commentCounts = $extraStats['comments'];

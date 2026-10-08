@@ -25,7 +25,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class SupportController extends LegacyController
+class SupportController extends BasePageController
 {
     public function __construct(
         private readonly ComplainRepositoryInterface $complainRepository,

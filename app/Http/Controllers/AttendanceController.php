@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class AttendanceController extends LegacyController
+class AttendanceController extends BasePageController
 {
     public function __construct(
         private readonly CurrentUser $currentUser,
@@ -36,7 +36,7 @@ class AttendanceController extends LegacyController
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
         $attendance = $repository->getAttendance($uid);
 
-        return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);
+        return $this->renderAttendance($request, $repository, $this->currentUser, $uid, $attendance, $captchaEnabled);
     }
 
     public function attendanceSubmit(AttendanceRequest $request, AttendanceRepository $repository): View|RedirectResponse|Response
@@ -63,14 +63,13 @@ class AttendanceController extends LegacyController
             PageResponses::abort(__('attendance.sorry'), __('attendance.already_attended'));
         }
 
-        return $this->renderAttendance($request, $repository, $curUser, $uid, $attendance, $captchaEnabled);
+        return $this->renderAttendance($request, $repository, $this->currentUser, $uid, $attendance, $captchaEnabled);
     }
 
-    /** @param array<string, mixed> $curUser */
     private function renderAttendance(
         Request $request,
         AttendanceRepository $repository,
-        array $curUser,
+        CurrentUser $curUser,
         int $uid,
         ?Attendance $attendance,
         bool $captchaEnabled

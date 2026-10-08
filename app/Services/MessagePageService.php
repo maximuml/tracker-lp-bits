@@ -62,8 +62,8 @@ class MessagePageService
      */
     public function build(Request $request): MessagePageViewModel
     {
-        $curUser = (array) ($this->currentUser->get() ?? []);
-        $userId = $this->currentUser->id();
+        $curUser = $this->currentUser;
+        $userId = $curUser->id();
 
         $action = (string) $request->input('action', '');
         if ($action === '') {
@@ -71,7 +71,7 @@ class MessagePageService
         }
 
         $data = [
-            'curUser' => $curUser,
+            'curUser' => $curUser->get() ?? [],
             'userId' => $userId,
             'action' => $action,
             'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost'),
@@ -114,10 +114,9 @@ class MessagePageService
     /**
      * Build the mailbox listing section.
      *
-     * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    private function buildViewMailbox(array $curUser, int $userId, Request $request): array
+    private function buildViewMailbox(CurrentUser $curUser, int $userId, Request $request): array
     {
         $mailbox = (int) ($request->input('box', 0) ?: self::PM_INBOX);
         if ($mailbox === 0) {
@@ -276,10 +275,9 @@ class MessagePageService
     /**
      * Build the single message view section.
      *
-     * @param  array<string, mixed>  $curUser
      * @return array<string, mixed>
      */
-    private function buildViewMessage(array $curUser, int $userId, Request $request): array
+    private function buildViewMessage(CurrentUser $curUser, int $userId, Request $request): array
     {
         $pmId = (int) $request->input('id', 0);
         if ($pmId <= 0) {

@@ -44,16 +44,14 @@ final class ForumIndexService
 
     /**
      * Build the default forums index (overforums + forums list + stats).
-     *
-     * @param  array<string, mixed>  $curUser
      */
-    public function buildForumsIndex(array $curUser, int $userId): ForumIndexViewModel
+    public function buildForumsIndex(CurrentUser $curUser, int $userId): ForumIndexViewModel
     {
         $Cache = $this->cache;
         $todayDate = date('Y-m-d');
 
-        if ($curUser) {
-            $this->forumRepository->updateUserForumAccess((int) ($curUser['id'] ?? 0), date('Y-m-d H:i:s'));
+        if ($curUser->isLoggedIn()) {
+            $this->forumRepository->updateUserForumAccess($curUser->id(), date('Y-m-d H:i:s'));
         }
 
         $SITENAME = SiteConfig::current()->basic->siteName();
@@ -136,11 +134,10 @@ final class ForumIndexService
      * Build one forum row (name, counts, last post, moderators).
      *
      * @param  array<string, mixed>  $forums_arr
-     * @param  array<string, mixed>  $curUser
      * @param  array<string, mixed>  $prefetched  mget'ed forum_* cache rows
      * @param  array<string, mixed>  $postRows  mget'ed post_*_content rows
      */
-    private function forumRow(array $forums_arr, array $curUser, string $todayDate, array $prefetched, array $postRows): ForumRow
+    private function forumRow(array $forums_arr, CurrentUser $curUser, string $todayDate, array $prefetched, array $postRows): ForumRow
     {
         $Cache = $this->cache;
         $forumid = (int) $forums_arr['id'];
@@ -269,26 +266,24 @@ final class ForumIndexService
         return $forums[$forumid] ?? null;
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    public function getLastReadPostId(int $topicid, array $curUser): int
+    public function getLastReadPostId(int $topicid, CurrentUser $curUser): int
     {
         $Cache = $this->cache;
         $ret = $this->lastReadPostList;
-        if (! $ret && ! $ret = $Cache->get('user_'.($curUser['id'] ?? 0).'_last_read_post_list')) {
-            $ret = $this->readStateRepository->getLastReadPosts((int) ($curUser['id'] ?? 0));
+        if (! $ret && ! $ret = $Cache->get('user_'.$curUser->id().'_last_read_post_list')) {
+            $ret = $this->readStateRepository->getLastReadPosts($curUser->id());
             if ($ret !== null) {
-                $Cache->put('user_'.($curUser['id'] ?? 0).'_last_read_post_list', $ret, 900);
+                $Cache->put('user_'.$curUser->id().'_last_read_post_list', $ret, 900);
             } else {
-                $Cache->put('user_'.($curUser['id'] ?? 0).'_last_read_post_list', 'no record', 900);
+                $Cache->put('user_'.$curUser->id().'_last_read_post_list', 'no record', 900);
             }
         }
         $this->lastReadPostList = $ret;
-        if (is_array($ret) && (isset($ret[$topicid])) && (int) ($curUser['last_catchup'] ?? 0) < (int) $ret[$topicid]) {
+        $lastCatchup = (int) $curUser->value('last_catchup', 0);
+        if (is_array($ret) && (isset($ret[$topicid])) && $lastCatchup < (int) $ret[$topicid]) {
             return (int) $ret[$topicid];
-        } elseif ((int) ($curUser['last_catchup'] ?? 0)) {
-            return (int) $curUser['last_catchup'];
+        } elseif ($lastCatchup) {
+            return $lastCatchup;
         }
 
         return 0;

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
  * index detection used to decide whether a pre-Laravel database still
  * needs each conditional migration.
  */
-final class LegacySchemaChecks
+final class UpgradeSchemaChecks
 {
     /**
      * The unique (torrent, peer_id, userid) index the 2023_04_01 migration
@@ -52,12 +52,9 @@ final class LegacySchemaChecks
      */
     public function columnInfo(string $table, string $column): ?array
     {
-        foreach (Schema::getColumns($table) as $col) {
-            if ($col['name'] === $column) {
-                return $col;
-            }
-        }
-
-        return null;
+        return array_find(
+            Schema::getColumns($table),
+            static fn (array $col): bool => $col['name'] === $column,
+        );
     }
 }

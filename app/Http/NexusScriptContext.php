@@ -10,10 +10,10 @@ use App\Auth\AuthContext;
 /**
  * Load per-script legacy language files and run the parked() guard.
  *
- * Extracted from LegacyRequestMiddleware so the middleware can focus
+ * Extracted from NexusRequestMiddleware so the middleware can focus
  * on request bootstrap orchestration.
  */
-final class LegacyScriptContext
+final class NexusScriptContext
 {
     public function __construct(
         private readonly AccessGate $accessGate,

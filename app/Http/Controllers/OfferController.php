@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class OfferController extends LegacyController
+class OfferController extends BasePageController
 {
     private OfferRepositoryInterface $repository;
 

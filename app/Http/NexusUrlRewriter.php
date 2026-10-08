@@ -11,10 +11,10 @@ use Illuminate\Http\Request;
  *
  * This replaces the manual `public/index.php` pre-processing: it rewrites
  * legacy query parameters to Laravel paths and sets the legacy
- * SCRIPT_NAME/PATH_INFO server values. Extracted from LegacyRequestMiddleware
+ * SCRIPT_NAME/PATH_INFO server values. Extracted from NexusRequestMiddleware
  * so the middleware can focus on bootstrap context.
  */
-final class LegacyUrlRewriter
+final class NexusUrlRewriter
 {
     /** Paths that are routed directly by Laravel/Filament/Livewire and must not be rewritten to legacy /script.php. */
     private const LARAVEL_ONLY_PREFIXES = ['api', 'livewire', 'filament', 'nexusphp', 'horizon', 'web'];

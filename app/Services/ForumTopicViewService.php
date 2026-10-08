@@ -14,6 +14,7 @@ use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
+use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Html;
@@ -24,7 +25,6 @@ use App\Support\RequestValues;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
-use App\Support\YesNo;
 use App\ViewModels\Forum\PostViewModel;
 use App\ViewModels\Forum\ViewTopicViewModel;
 use Illuminate\Http\Request;
@@ -46,10 +46,8 @@ final class ForumTopicViewService
 
     /**
      * Build the view-topic section.
-     *
-     * @param  array<string, mixed>  $curUser
      */
-    public function buildViewTopic(array $curUser, int $userId, Request $request, int $postsperpage): ViewTopicViewModel
+    public function buildViewTopic(CurrentUser $curUser, int $userId, Request $request, int $postsperpage): ViewTopicViewModel
     {
         $highlight = trim((string) ($request->query('highlight') ?? ''));
         $topicid = (int) ($request->query('topicid') ?? 0);
@@ -82,7 +80,7 @@ final class ForumTopicViewService
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
             PageResponses::abort(__('forums.std_error'), __('forums.std_unpermitted_viewing_topic'));
         }
-        $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && YesNo::isYes($curUser['forumpost'] ?? null);
+        $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && $curUser->yes('forumpost');
 
         $this->topicRepository->incrementTopicViews($topicid);
 
@@ -109,7 +107,7 @@ final class ForumTopicViewService
             $page = 0;
         } elseif ($page > $pages - 1) {
             $page = $pages - 1;
-        } elseif (($curUser['clicktopic'] ?? 1) == UserClickTopic::FIRSTPAGE->value) {
+        } elseif ($curUser->value('clicktopic', 1) == UserClickTopic::FIRSTPAGE->value) {
             $page = 0;
         } else {
             $page = $pages - 1;
@@ -157,7 +155,7 @@ final class ForumTopicViewService
         $renderedFmt = [];
         if ($this->cache !== null && $allPosts !== []) {
             $fmtKeys = array_map(static fn ($p) => 'fmt_post_'.md5((string) ($p['body'] ?? '')), $allPosts);
-            if (YesNo::isYes($curUser['signatures'] ?? null)) {
+            if ($curUser->yes('signatures')) {
                 foreach ($allPosts as $p) {
                     $sig = (string) (optional($userInfoArr->get((int) ($p['userid'] ?? 0)))->signature ?? '');
                     if ($sig !== '') {
@@ -191,16 +189,16 @@ final class ForumTopicViewService
 
             $forumposts = $postCounts[$posterid] ?? 0;
 
-            $signature = YesNo::isYes($curUser['signatures'] ?? null) ? (string) ($arr2['signature'] ?? '') : '';
-            $avatar = YesNo::isYes($curUser['avatars'] ?? null) ? (string) ($arr2['avatar'] ?? '') : '';
+            $signature = $curUser->yes('signatures') ? (string) ($arr2['signature'] ?? '') : '';
+            $avatar = $curUser->yes('avatars') ? (string) ($arr2['avatar'] ?? '') : '';
             if ($avatar === '') {
                 $avatar = 'pic/default_avatar.png';
             }
 
             $isLast = $pn === $pc;
             if ($isLast && $postid > $lpr) {
-                $this->readStateRepository->markPostRead($userId, $topicid, $postid, (int) ($curUser['last_catchup'] ?? 0));
-                $this->cache?->forget('user_'.($curUser['id'] ?? 0).'_last_read_post_list');
+                $this->readStateRepository->markPostRead($userId, $topicid, $postid, (int) $curUser->value('last_catchup', 0));
+                $this->cache?->forget('user_'.$curUser->id().'_last_read_post_list');
             }
 
             $canViewProtected = $pn + $offset <= 1 || Forum::canViewPost($userId, $arr);
@@ -252,7 +250,7 @@ final class ForumTopicViewService
                 posterName: (string) ($arr2['username'] ?? ''),
                 canQuote: $maypost && $canViewProtected,
                 canDelete: $isMod,
-                canEdit: ($curUser['id'] == $posterid && ! $locked) || $isMod,
+                canEdit: ($curUser->id() == $posterid && ! $locked) || $isMod,
             );
         }
 

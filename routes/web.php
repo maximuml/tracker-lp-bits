@@ -20,6 +20,7 @@ use App\Http\Controllers\AuthenticateController;
 use App\Http\Controllers\BitbucketUploadController;
 use App\Http\Controllers\BonusHistoryController;
 use App\Http\Controllers\BonusShopController;
+use App\Http\Controllers\CompatRedirectController;
 use App\Http\Controllers\CspReportController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\ForumController;
@@ -28,7 +29,6 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\InviteController;
-use App\Http\Controllers\LegacyRedirectController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MetricsController;
@@ -162,7 +162,7 @@ Route::get('/userdetails', [UserDetailController::class, 'show'])
 Route::get('/usercp', [UsercpController::class, 'legacy'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy'])
     ->name('usercp.legacy');
-Route::post('/usercp', [LegacyRedirectController::class, 'post'])
+Route::post('/usercp', [CompatRedirectController::class, 'post'])
     ->middleware(['auth.nexus:nexus-web', 'throttle:legacy', 'reject.get.mutations', 'legacy.shim.count']);
 
 Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throttle:legacy']], function () {

@@ -13,7 +13,7 @@ namespace App\Support;
  * still dispatch through AjaxService until their group migrates
  * (all groups migrated — the map is exhaustive).
  */
-final class LegacyAjaxRedirects
+final class AjaxRedirects
 {
     /** @var array<string, string> */
     private const MAP = [

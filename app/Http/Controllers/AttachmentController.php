@@ -21,7 +21,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class AttachmentController extends LegacyController
+class AttachmentController extends BasePageController
 {
     public function __construct(
         private readonly AttachmentRepositoryInterface $attachmentRepository,

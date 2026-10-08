@@ -7,7 +7,7 @@ use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
- * /health/* routing through LegacyRequestMiddleware and the diag gate.
+ * /health/* routing through NexusRequestMiddleware and the diag gate.
  *
  * /health/live and /health/ready must stay reachable for unauthenticated
  * probes; /health/diag requires a sysop-class session.

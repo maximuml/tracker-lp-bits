@@ -10,6 +10,7 @@ use App\ViewModels\Usercp\UsercpTrackerSection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -23,6 +24,7 @@ use Tests\TestCase;
 final class UsercpTrackerBuilderTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     protected function setUp(): void
@@ -47,7 +49,7 @@ final class UsercpTrackerBuilderTest extends TestCase
     /** @param  array<string, mixed>  $overrides */
     private function section(array $overrides = []): UsercpTrackerSection
     {
-        return $this->builder()->build(array_merge([
+        return $this->builder()->build($this->curUser(array_merge([
             'notifs' => '',
             'stylesheet' => 1,
             'pmnum' => 20,
@@ -68,7 +70,7 @@ final class UsercpTrackerBuilderTest extends TestCase
             'showlastcom' => 'yes',
             'fontsize' => 2,
             'theme' => 'light',
-        ], $overrides));
+        ], $overrides)));
     }
 
     public function test_notifs_markers_drive_flags_and_special_state(): void

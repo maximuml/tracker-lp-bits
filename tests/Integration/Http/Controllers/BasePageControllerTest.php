@@ -13,11 +13,11 @@ use Illuminate\View\View as ViewInstance;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
-use Tests\Integration\Http\Controllers\Fixtures\TestLegacyController;
+use Tests\Integration\Http\Controllers\Fixtures\TestBasePageController;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
-final class LegacyControllerTest extends TestCase
+final class BasePageControllerTest extends TestCase
 {
     protected function tearDown(): void
     {
@@ -26,9 +26,9 @@ final class LegacyControllerTest extends TestCase
         parent::tearDown();
     }
 
-    private function controller(): TestLegacyController
+    private function controller(): TestBasePageController
     {
-        return new TestLegacyController;
+        return new TestBasePageController;
     }
 
     private function fakeView(string $content = 'html'): ViewInstance

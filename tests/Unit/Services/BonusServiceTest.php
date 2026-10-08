@@ -9,6 +9,7 @@ use App\Repositories\BonusRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\SettingRepository;
 use App\Services\BonusService;
+use App\Support\CurrentUser;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,6 +48,17 @@ final class BonusServiceTest extends TestCase
         return new BonusService($repo, $calcRepo, $this->app->make(MessageRepository::class));
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function curUser(array $data): CurrentUser
+    {
+        $user = new CurrentUser;
+        $user->set($data);
+
+        return $user;
+    }
+
     public function test_handle_exchange_stays_public(): void
     {
         $this->assertTrue(
@@ -61,7 +73,7 @@ final class BonusServiceTest extends TestCase
         $result = $this->service()->handleExchangeActionPublic(
             $request,
             [],
-            ['id' => 1, 'username' => 'test', 'seedbonus' => 1000],
+            $this->curUser(['id' => 1, 'username' => 'test', 'seedbonus' => 1000]),
             'locked',
         );
 
@@ -75,7 +87,7 @@ final class BonusServiceTest extends TestCase
         $result = $this->service()->handleExchangeActionPublic(
             $request,
             [],
-            ['id' => 1, 'username' => 'test', 'seedbonus' => 1000],
+            $this->curUser(['id' => 1, 'username' => 'test', 'seedbonus' => 1000]),
             'locked',
         );
 
@@ -89,7 +101,7 @@ final class BonusServiceTest extends TestCase
         $result = $this->service()->handleExchangeActionPublic(
             $request,
             [],
-            ['id' => 1, 'username' => 'test', 'seedbonus' => 1000],
+            $this->curUser(['id' => 1, 'username' => 'test', 'seedbonus' => 1000]),
             'locked',
         );
 
@@ -111,7 +123,7 @@ final class BonusServiceTest extends TestCase
         $result = $this->service()->handleExchangeActionPublic(
             $request,
             $allBonus,
-            ['id' => 1, 'username' => 'test', 'seedbonus' => 100, 'ip' => '1.2.3.4'],
+            $this->curUser(['id' => 1, 'username' => 'test', 'seedbonus' => 100, 'ip' => '1.2.3.4']),
             'locked',
         );
 
@@ -134,7 +146,7 @@ final class BonusServiceTest extends TestCase
         $result = $this->service()->handleExchangeActionPublic(
             $request,
             $allBonus,
-            ['id' => 1, 'username' => 'test', 'seedbonus' => 500, 'ip' => '1.2.3.4'],
+            $this->curUser(['id' => 1, 'username' => 'test', 'seedbonus' => 500, 'ip' => '1.2.3.4']),
             'locked',
         );
 

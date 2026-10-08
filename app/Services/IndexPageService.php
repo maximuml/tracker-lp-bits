@@ -59,7 +59,7 @@ final class IndexPageService
 
     public function build(): IndexPageViewModel
     {
-        $curUser = (array) ($this->currentUser->get() ?? []);
+        $curUser = $this->currentUser;
 
         $canNewsManage = Permission::can(PermissionEnum::NEWS_MANAGE);
         $canPollManage = Permission::can(PermissionEnum::POLL_MANAGE);
@@ -71,7 +71,7 @@ final class IndexPageService
         $forumPosts = $this->buildForumPosts($curUser);
         $latestTorrents = $this->buildLatestTorrents();
         $topUploaders = $this->buildTopUploaders();
-        $polls = $this->indexPollsSectionFactory->build($curUser, $canPollManage, $canLog);
+        $polls = $this->indexPollsSectionFactory->build($curUser->get() ?? [], $canPollManage, $canLog);
         $stats = $this->buildStats();
         $disclaimer = $this->buildDisclaimer();
         $browserNote = $this->buildBrowserNote();
@@ -81,12 +81,12 @@ final class IndexPageService
         }
 
         // Reset unread news count
-        if (! empty($curUser['id'])) {
-            $this->cache->forget('user_'.(int) $curUser['id'].'_unread_news_count');
+        if ($curUser->isLoggedIn()) {
+            $this->cache->forget('user_'.$curUser->id().'_unread_news_count');
         }
 
         return new IndexPageViewModel(
-            curUser: $curUser,
+            curUser: $curUser->get() ?? [],
             canNewsManage: $canNewsManage,
             canPollManage: $canPollManage,
             canSbManage: $canSbManage,
@@ -124,10 +124,7 @@ final class IndexPageService
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function buildShoutbox(bool $canManage, array $curUser): IndexShoutboxSection
+    private function buildShoutbox(bool $canManage, CurrentUser $curUser): IndexShoutboxSection
     {
         $show = SiteConfig::current()->main->showShoutbox();
 
@@ -135,7 +132,7 @@ final class IndexPageService
             return new IndexShoutboxSection;
         }
 
-        $csrf = Shoutbox::csrfToken((int) ($curUser['id'] ?? 0));
+        $csrf = Shoutbox::csrfToken($curUser->id());
         AssetAppender::js("var SHOUT_CSRF = '".addslashes($csrf)."';", 'footer', false);
 
         return new IndexShoutboxSection(
@@ -152,16 +149,13 @@ final class IndexPageService
             submitLabel: __('index.sumbit_shout'),
             clearButtonLabel: __('index.submit_clear'),
             showHideTitle: __('index.title_show_or_hide'),
-            refreshSeconds: (int) ($curUser['sbrefresh'] ?? 120),
+            refreshSeconds: (int) $curUser->value('sbrefresh', 120),
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    private function buildForumPosts(array $curUser): IndexForumPostsSection
+    private function buildForumPosts(CurrentUser $curUser): IndexForumPostsSection
     {
-        $show = SiteConfig::current()->main->showLastXForumPosts() && ! empty($curUser);
+        $show = SiteConfig::current()->main->showLastXForumPosts() && $curUser->isLoggedIn();
 
         if (! $show) {
             return new IndexForumPostsSection;
@@ -396,10 +390,7 @@ final class IndexPageService
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $curUser
-     */
-    public function appendAssets(array $curUser): void
+    public function appendAssets(CurrentUser $curUser): void
     {
         AssetAppender::css('styles/shoutbox.css', 'header', true);
         $shoutLang = json_encode([

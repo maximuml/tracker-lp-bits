@@ -54,7 +54,7 @@ class MyController extends Controller
         $actionRedirect = $this->bonusService->handleExchangeActionPublic(
             $request,
             $data['allBonus'],
-            $data['curUser'],
+            $this->currentUser,
             $data['lockText']
         );
         if ($actionRedirect instanceof RedirectResponse) {
@@ -75,7 +75,7 @@ class MyController extends Controller
         $response = $this->bonusService->handleExchange(
             $request,
             $data['allBonus'],
-            $data['curUser'],
+            $this->currentUser,
             $data['lockText']
         );
 

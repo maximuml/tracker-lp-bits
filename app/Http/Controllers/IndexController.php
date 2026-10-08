@@ -36,7 +36,7 @@ class IndexController extends Controller
         $this->indexRepository->touchLastHome((int) $this->currentUser->id());
 
         $data = $this->indexPageService->build()->toArray();
-        $this->indexPageService->appendAssets($data['curUser']);
+        $this->indexPageService->appendAssets($this->currentUser);
 
         return view('index.index', $data);
     }
@@ -57,7 +57,7 @@ class IndexController extends Controller
         }
 
         $data = $this->indexPageService->build()->toArray();
-        $this->indexPageService->appendAssets($data['curUser']);
+        $this->indexPageService->appendAssets($this->currentUser);
 
         return view('index.index', $data);
     }

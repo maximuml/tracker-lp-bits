@@ -26,7 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class TorrentAjaxController extends LegacyController
+class TorrentAjaxController extends BasePageController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker, private readonly UserRepositoryInterface $userRepository,
         protected CurrentUser $currentUser,

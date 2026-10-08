@@ -29,7 +29,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
 
-class TorrentRssController extends LegacyController
+class TorrentRssController extends BasePageController
 {
     private TorrentRepositoryInterface $torrentRepository;
 

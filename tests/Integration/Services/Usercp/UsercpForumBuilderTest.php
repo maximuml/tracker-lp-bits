@@ -7,6 +7,7 @@ namespace Tests\Integration\Services\Usercp;
 use App\Services\Usercp\UsercpForumBuilder;
 use App\ViewModels\Usercp\UsercpForumSection;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -18,6 +19,7 @@ use Tests\TestCase;
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class UsercpForumBuilderTest extends TestCase
 {
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private function builder(): UsercpForumBuilder
@@ -28,7 +30,7 @@ final class UsercpForumBuilderTest extends TestCase
     /** @param  array<string, mixed>  $overrides */
     private function section(array $overrides = []): UsercpForumSection
     {
-        return $this->builder()->build(array_merge([
+        return $this->builder()->build($this->curUser(array_merge([
             'topicsperpage' => 25,
             'postsperpage' => 10,
             'avatars' => 'yes',
@@ -36,7 +38,7 @@ final class UsercpForumBuilderTest extends TestCase
             'showlastpost' => 'yes',
             'clicktopic' => 0,
             'signature' => 'sig text',
-        ], $overrides));
+        ], $overrides)));
     }
 
     public function test_maps_yes_no_fields_and_per_page_values(): void
@@ -79,7 +81,7 @@ final class UsercpForumBuilderTest extends TestCase
     {
         $this->seedTestSettings(['enabletooltip_tweak' => 'no']);
 
-        $s = $this->builder()->build([]);
+        $s = $this->builder()->build($this->curUser([]));
 
         $this->assertSame(0, $s->topicsPerPage);
         $this->assertSame(0, $s->postsPerPage);

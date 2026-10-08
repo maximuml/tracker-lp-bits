@@ -26,7 +26,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-class LogController extends LegacyController
+class LogController extends BasePageController
 {
     private LogRepository $logRepository;
 

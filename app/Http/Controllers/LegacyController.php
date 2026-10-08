@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Support\CurrentUser;
-use App\Support\HeaderBag;
 use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +16,7 @@ abstract class LegacyController extends Controller
     /**
      * @param  array<string, mixed>  $data
      */
-    protected function legacyPage(Request $request, string $page, bool $auth = true, array $data = []): View|RedirectResponse
+    protected function renderPage(Request $request, string $page, bool $auth = true, array $data = []): View|RedirectResponse
     {
         if ($auth && CurrentUser::instance()->get() === null) {
             $qs = $request->getQueryString();
@@ -26,91 +25,19 @@ abstract class LegacyController extends Controller
         }
 
         /** @var view-string $viewName */
-        $viewName = $this->legacyViewName($page);
+        $viewName = $this->viewName($page);
         $view = view()->make($viewName, $data);
 
         /** @var View $view */
         return $view;
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    protected function legacyPageWithRedirect(Request $request, string $page, bool $auth = true, array $data = []): Response|RedirectResponse
-    {
-        if ($auth && CurrentUser::instance()->get() === null) {
-            $qs = $request->getQueryString();
-
-            return redirect('/'.$page.($qs ? '?'.$qs : ''));
-        }
-
-        /** @var view-string $viewName */
-        $viewName = $this->legacyViewName($page);
-        $content = view()->make($viewName, $data)->render();
-
-        // T-11: Read from the per-request HeaderBag instead of SAPI
-        // globals (headers_list/http_response_code/header_remove) that
-        // leak state across Octane worker requests.
-        $headerBag = HeaderBag::instance();
-        $status = $headerBag->getStatusCode();
-
-        // Check for a Location header (redirect)
-        $location = $headerBag->first('Location');
-        if ($location !== null) {
-            $headerBag->remove('Location');
-            $statusCode = $status !== null && $status >= 300 && $status < 400 ? $status : 302;
-
-            return redirect($location, $statusCode);
-        }
-
-        return response($content);
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    protected function legacyPageRaw(Request $request, string $page, bool $auth = true, array $data = []): Response|RedirectResponse
-    {
-        if ($auth && CurrentUser::instance()->get() === null) {
-            $qs = $request->getQueryString();
-
-            return redirect('/'.$page.($qs ? '?'.$qs : ''));
-        }
-
-        /** @var view-string $viewName */
-        $viewName = $this->legacyViewName($page);
-        $content = view()->make($viewName, $data)->render();
-
-        // T-11: Read from the per-request HeaderBag instead of SAPI
-        // globals (headers_list/http_response_code/header_remove) that
-        // leak state across Octane worker requests.
-        $headerBag = HeaderBag::instance();
-        $status = $headerBag->getStatusCode();
-
-        // Check for a Location header (redirect)
-        $location = $headerBag->first('Location');
-        if ($location !== null) {
-            $headerBag->remove('Location');
-            $statusCode = $status !== null && $status >= 300 && $status < 400 ? $status : 302;
-
-            return redirect($location, $statusCode);
-        }
-
-        // Collect remaining headers for the response
-        $responseHeaders = $headerBag->toResponseHeaders();
-        $headerBag->flush();
-
-        $responseStatus = $status !== null && $status >= 100 ? $status : 200;
-
-        return response($content, $responseStatus, $responseHeaders);
-    }
-
-    protected function legacyAbortResponse(string $heading, string $text, bool $htmlstrip = true): Response
+    protected function abortResponse(string $heading, string $text, bool $htmlstrip = true): Response
     {
         return response(PageResponses::captureAbort($heading, $text, $htmlstrip));
     }
 
-    private function legacyViewName(string $page): string
+    private function viewName(string $page): string
     {
         return $page.'.index';
     }

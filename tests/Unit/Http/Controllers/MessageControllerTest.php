@@ -60,7 +60,7 @@ final class MessageControllerTest extends TestCase
         $controller = new MessageController($repository, $legacyService, $pageService, new CurrentUser, Mockery::mock(UserRepositoryInterface::class));
         $request = Request::create('/messages', 'GET');
 
-        // The controller calls legacyPage which may fail on view rendering,
+        // The controller calls renderPage which may fail on view rendering,
         // but the service delegation should still occur.
         try {
             $controller->messages($request);

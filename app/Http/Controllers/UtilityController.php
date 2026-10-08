@@ -130,14 +130,14 @@ class UtilityController extends LegacyController
 
     private function renderPreview(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'preview', true, [
+        return $this->renderPage($request, 'preview', true, [
             'body' => (string) $request->post('body', ''),
         ]);
     }
 
     public function moresmilies(Request $request): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'moresmilies', true, [
+        return $this->renderPage($request, 'moresmilies', true, [
             'form' => (string) $request->query('form', ''),
             'text' => (string) $request->query('text', ''),
         ]);
@@ -146,7 +146,7 @@ class UtilityController extends LegacyController
     public function smilies(Request $request): View|RedirectResponse
     {
 
-        return $this->legacyPage($request, 'smilies', true);
+        return $this->renderPage($request, 'smilies', true);
     }
 
     public function confirmemail(Request $request): Response|RedirectResponse
@@ -205,7 +205,7 @@ class UtilityController extends LegacyController
             default => '',
         };
 
-        return $this->legacyPage($request, 'ok', false, [
+        return $this->renderPage($request, 'ok', false, [
             'type' => $type,
             'email' => $email,
             'title' => $title,

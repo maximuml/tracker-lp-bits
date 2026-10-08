@@ -49,18 +49,18 @@ class BonusHistoryController extends LegacyController
         $uid = (int) (request()->input('uid') ?? $this->currentUser->id());
 
         if (! Validators::isId($uid)) {
-            return $this->legacyAbortResponse('Error', 'Invalid uid.');
+            return $this->abortResponse('Error', 'Invalid uid.');
         }
 
         $user = $this->userRepository->findById((int) $uid, User::$commonFields);
         if (! $user) {
-            return $this->legacyAbortResponse('Error', "Invalid uid: {$uid}");
+            return $this->abortResponse('Error', "Invalid uid: {$uid}");
         }
 
         if ($uid != ($this->currentUser->id())) {
             $allowed = Permission::can(PermissionEnum::VIEW_USER_HISTORY, $user);
             if (! $allowed) {
-                return $this->legacyAbortResponse('Error', 'Permission denied.');
+                return $this->abortResponse('Error', 'Permission denied.');
             }
         }
 
@@ -68,13 +68,13 @@ class BonusHistoryController extends LegacyController
         $category = request()->input('category') ?? $defaultCategory;
         $categoryOptions = BonusLogs::listCategoryOptions();
         if (! isset($categoryOptions[$category])) {
-            return $this->legacyAbortResponse('Error', "Invalid category: {$category}");
+            return $this->abortResponse('Error', "Invalid category: {$category}");
         }
 
         $businessType = (int) (request()->input('business_type') ?? 0);
         $businessTypeOptions = BonusLogs::listBusinessTypeOptions($defaultCategory);
         if ($businessType && ! isset($businessTypeOptions[$businessType])) {
-            return $this->legacyAbortResponse('Error', "Invalid business_type: {$businessType}");
+            return $this->abortResponse('Error', "Invalid business_type: {$businessType}");
         }
 
         $title = Locale::trans('bonus-log.title_for_user', [], null);
@@ -133,7 +133,7 @@ document.getElementById("reset").addEventListener('click', function () {
 JS;
         AssetAppender::js($resetJs, 'footer', false);
 
-        return $this->legacyPage($request, 'bonus-log', true, [
+        return $this->renderPage($request, 'bonus-log', true, [
             'title' => $title,
             'uid' => $uid,
             'username' => $user->username,
@@ -165,7 +165,7 @@ JS;
     {
         $uploaderClass = defined('UC_UPLOADER') ? \constant('UC_UPLOADER') : PHP_INT_MAX;
         if (UserDisplay::currentClass() < $uploaderClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $year = (int) (request()->query('year') ?? 0);
@@ -259,7 +259,7 @@ JS;
             $monthOptionList[] = ['value' => $i, 'selected' => $i == $month];
         }
 
-        return $this->legacyPage($request, 'uploaders', true, [
+        return $this->renderPage($request, 'uploaders', true, [
             'year' => $year,
             'month' => $month,
             'order' => $order,

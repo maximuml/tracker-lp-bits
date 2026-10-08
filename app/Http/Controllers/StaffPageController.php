@@ -31,7 +31,7 @@ class StaffPageController extends LegacyController
         $currentUserId = (int) ($this->currentUser->id());
 
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $secs = 900;
@@ -107,7 +107,7 @@ class StaffPageController extends LegacyController
             ->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'stafffor'))
             ->all();
 
-        return $this->legacyPage($request, 'staff', true, [
+        return $this->renderPage($request, 'staff', true, [
             'supportRows' => $supportRows,
             'pickerRows' => $pickerRows,
             'forumModRows' => $forumModRows,
@@ -122,7 +122,7 @@ class StaffPageController extends LegacyController
     {
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
         if (UserDisplay::currentClass() < $moderatorClass) {
-            return $this->legacyAbortResponse('Error', 'Access denied!!!');
+            return $this->abortResponse('Error', 'Access denied!!!');
         }
 
         $sysopPanels = [];
@@ -142,7 +142,7 @@ class StaffPageController extends LegacyController
             $modPanels = $this->staffDirectoryRepository->listModPanels();
         }
 
-        return $this->legacyPage($request, 'staffpanel', true, [
+        return $this->renderPage($request, 'staffpanel', true, [
             'sysopPanels' => $sysopPanels,
             'adminPanels' => $adminPanels,
             'modPanels' => $modPanels,

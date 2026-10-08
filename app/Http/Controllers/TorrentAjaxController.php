@@ -102,7 +102,7 @@ class TorrentAjaxController extends LegacyController
         $data['canViewConfidential'] = Permission::can(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
         unset($data['snatchedRows']);
 
-        return $this->legacyPage($request, 'viewsnatches', true, $data);
+        return $this->renderPage($request, 'viewsnatches', true, $data);
     }
 
     /**

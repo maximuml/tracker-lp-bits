@@ -196,7 +196,7 @@ final class RssControllerTest extends TestCase
 
     /**
      * Set up the legacy environment: bind NexusCache to null so that
-     * legacyAbortResponse() and Html::stdhead() can render without Redis.
+     * abortResponse() and Html::stdhead() can render without Redis.
      */
     private function setupLegacyEnvironment(): void
     {

@@ -266,7 +266,7 @@ final class ModerationControllerTest extends TestCase
     }
 
     /**
-     * Set up minimal language strings so legacyAbortResponse's stdhead()
+     * Set up minimal language strings so abortResponse's stdhead()
      * can render for guest users (no authenticated user block).
      */
     private function setupMinimalLang(): void {}

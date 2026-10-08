@@ -59,7 +59,7 @@ class ForumController extends LegacyController
 
         $data = $this->pageService->build($request)->toArray();
 
-        return $this->legacyPage($request, 'forum', true, $data);
+        return $this->renderPage($request, 'forum', true, $data);
     }
 
     public function legacyAction(Request $request): Response|RedirectResponse
@@ -179,7 +179,7 @@ class ForumController extends LegacyController
         }
         unset($row);
 
-        return $this->legacyPage($request, 'latestcomments', true, [
+        return $this->renderPage($request, 'latestcomments', true, [
             'rows' => $rows,
             'count' => $count,
             'pagertop' => $pagertop,

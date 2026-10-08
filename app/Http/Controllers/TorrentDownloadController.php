@@ -187,7 +187,7 @@ class TorrentDownloadController extends LegacyController
 
         $tdattr = ($showrationotice && $showclientnotice) ? 'width="50%"' : 'colspan="2" width="100%"';
 
-        return $this->legacyPage($request, 'downloadnotice', true, [
+        return $this->renderPage($request, 'downloadnotice', true, [
             'torrentid' => $torrentid,
             'type' => $type,
             'title' => $title,

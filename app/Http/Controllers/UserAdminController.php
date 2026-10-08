@@ -58,7 +58,7 @@ class UserAdminController extends LegacyController
     public function users(Request $request): View|RedirectResponse|Response
     {
         if (! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) ($this->currentUser->get()['id'] ?? 0))) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $search = trim((string) (request()->query('search') ?? ''));
@@ -67,7 +67,7 @@ class UserAdminController extends LegacyController
         $letter = trim((string) (request()->query('letter') ?? ''));
 
         if (strlen($letter) > 1) {
-            return $this->legacyAbortResponse('Error', 'Invalid letter.');
+            return $this->abortResponse('Error', 'Invalid letter.');
         }
 
         if (! User::isValidUserClass($class)) {
@@ -134,7 +134,7 @@ class UserAdminController extends LegacyController
             $letterItems[] = ['label' => $L, 'href' => $href];
         }
 
-        return $this->legacyPage($request, 'users', true, [
+        return $this->renderPage($request, 'users', true, [
             'search' => $search,
             'class' => $class,
             'country' => $country,
@@ -154,7 +154,7 @@ class UserAdminController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied, Administrator Only.');
+            return $this->abortResponse('Error', 'Permission denied, Administrator Only.');
         }
 
         $curUser = $this->currentUser->get() ?? [];
@@ -176,7 +176,7 @@ class UserAdminController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied, Administrator Only.');
+            return $this->abortResponse('Error', 'Permission denied, Administrator Only.');
         }
 
         $curUser = $this->currentUser->get() ?? [];
@@ -190,20 +190,20 @@ class UserAdminController extends LegacyController
         $newpasswordagain = trim((string) request()->post('newpasswordagain'));
 
         if ($username === '' || $newpassword === '' || $newpasswordagain === '') {
-            return $this->legacyAbortResponse('Error', "Don't leave any fields blank.");
+            return $this->abortResponse('Error', "Don't leave any fields blank.");
         }
 
         if ($newpassword !== $newpasswordagain) {
-            return $this->legacyAbortResponse('Error', "The passwords didn't match! Must've typoed. Try again.");
+            return $this->abortResponse('Error', "The passwords didn't match! Must've typoed. Try again.");
         }
 
         if (strlen($newpassword) < 6) {
-            return $this->legacyAbortResponse('Error', 'Sorry, password is too short (min is 6 chars)');
+            return $this->abortResponse('Error', 'Sorry, password is too short (min is 6 chars)');
         }
 
         $user = $this->userRepository->findByUsername($username);
         if (! $user) {
-            return $this->legacyAbortResponse('Error', "Sorry, that username doesn't exist.");
+            return $this->abortResponse('Error', "Sorry, that username doesn't exist.");
         }
         $arr = $user->toArray();
 
@@ -212,14 +212,14 @@ class UserAdminController extends LegacyController
             Log::writeWithContext($log);
             Logger::writeWithContext($log, 'alert', false);
 
-            return $this->legacyAbortResponse('Error', "Sorry, you don't have enough permission to reset this user's password.");
+            return $this->abortResponse('Error', "Sorry, you don't have enough permission to reset this user's password.");
         }
 
         $userRep = $this->userRepository;
         try {
             $userRep->resetPassword((int) ($arr['id'] ?? 0), $newpassword, $newpasswordagain);
         } catch (\Exception $e) {
-            return $this->legacyAbortResponse('Error', $e->getMessage());
+            return $this->abortResponse('Error', $e->getMessage());
         }
 
         Log::writeWithContext("Password Reset For {$username} by {$currentUsername}");
@@ -231,7 +231,7 @@ class UserAdminController extends LegacyController
 
     private function resetPage(Request $request, bool $success, string $message): View|RedirectResponse
     {
-        return $this->legacyPage($request, 'reset', true, [
+        return $this->renderPage($request, 'reset', true, [
             'success' => $success,
             'message' => SafeHtml::fromTrustedHtml($message),
         ]);
@@ -271,18 +271,18 @@ class UserAdminController extends LegacyController
         AssetAppender::css('#ban-info td {border: none}', 'header', false);
 
         if ($unit <= 0) {
-            return $this->legacyPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
         if (($this->currentUser->enabled())) {
-            return $this->legacyPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
         $latestBanLog = $this->userModerationRepository->latestBanLogForUser($currentUserId);
         if (! $latestBanLog) {
             $viewData['latestBanLog'] = null;
 
-            return $this->legacyPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
         $latestBanLogCreatedAt = $latestBanLog->created_at;
@@ -300,7 +300,7 @@ class UserAdminController extends LegacyController
         $viewData['isUserBonusEnough'] = $isUserBonusEnough;
         $viewData['insufficientMessage'] = $insufficientMessage;
 
-        return $this->legacyPage($request, 'self-enable', true, $viewData);
+        return $this->renderPage($request, 'self-enable', true, $viewData);
 
     }
 
@@ -347,18 +347,18 @@ class UserAdminController extends LegacyController
         AssetAppender::css('#ban-info td {border: none}', 'header', false);
 
         if ($unit <= 0) {
-            return $this->legacyPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
         if (($this->currentUser->enabled())) {
-            return $this->legacyPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
         $latestBanLog = $this->userModerationRepository->latestBanLogForUser($currentUserId);
         if (! $latestBanLog) {
             $viewData['latestBanLog'] = null;
 
-            return $this->legacyPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
         $latestBanLogCreatedAt = $latestBanLog->created_at;
@@ -379,7 +379,7 @@ class UserAdminController extends LegacyController
                 $viewData['insufficientMessage'] = $insufficientMessage;
                 $viewData['showError'] = true;
 
-                return $this->legacyPage($request, 'self-enable', true, $viewData);
+                return $this->renderPage($request, 'self-enable', true, $viewData);
             }
 
             $userRep = $this->userRepository;
@@ -398,7 +398,7 @@ class UserAdminController extends LegacyController
         $viewData['isUserBonusEnough'] = $isUserBonusEnough;
         $viewData['insufficientMessage'] = $insufficientMessage;
 
-        return $this->legacyPage($request, 'self-enable', true, $viewData);
+        return $this->renderPage($request, 'self-enable', true, $viewData);
     }
 
     public function unco(Request $request): View|RedirectResponse|Response
@@ -410,7 +410,7 @@ class UserAdminController extends LegacyController
         }
 
         if (UserDisplay::currentClass() < UC_MODERATOR) {
-            return $this->legacyAbortResponse('Sorry', 'Access denied.');
+            return $this->abortResponse('Sorry', 'Access denied.');
         }
 
         $status = $request->query('status');
@@ -424,13 +424,13 @@ class UserAdminController extends LegacyController
 
         if (empty($rows)) {
             if ($status) {
-                return $this->legacyAbortResponse('Updated!', 'The user account has been updated.');
+                return $this->abortResponse('Updated!', 'The user account has been updated.');
             }
 
-            return $this->legacyAbortResponse('Ups!', 'Nothing Found...');
+            return $this->abortResponse('Ups!', 'Nothing Found...');
         }
 
-        return $this->legacyPage($request, 'unco', true, [
+        return $this->renderPage($request, 'unco', true, [
             'status' => $status,
             'rows' => $rows,
         ]);
@@ -454,10 +454,10 @@ class UserAdminController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Access denied.');
+            return $this->abortResponse('Error', 'Access denied.');
         }
 
-        return $this->legacyPage($request, 'adduser', true);
+        return $this->renderPage($request, 'adduser', true);
     }
 
     public function adduserPost(Request $request): RedirectResponse
@@ -473,7 +473,7 @@ class UserAdminController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Access denied.');
+            return $this->abortResponse('Error', 'Access denied.');
         }
 
         $userRep = $this->userRepository;
@@ -485,7 +485,7 @@ class UserAdminController extends LegacyController
                 'password_confirmation' => request()->post('password2'),
             ]);
         } catch (\Exception $e) {
-            return $this->legacyAbortResponse('ERROR', $e->getMessage());
+            return $this->abortResponse('ERROR', $e->getMessage());
         }
 
         return redirect('/userdetails?id='.(int) $newUser->id);

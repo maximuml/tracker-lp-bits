@@ -78,12 +78,12 @@ class FaqController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         $faqData = $this->infoRepository->faqManageData();
 
-        return $this->legacyPage($request, 'faqmanage', true, $faqData);
+        return $this->renderPage($request, 'faqmanage', true, $faqData);
     }
 
     public function faqManagePost(Request $request): RedirectResponse
@@ -104,7 +104,7 @@ class FaqController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
+            return $this->abortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
         }
 
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
@@ -112,14 +112,14 @@ class FaqController extends LegacyController
         $action = (string) (request()->query('action') ?? '');
 
         if ($action === 'delete') {
-            return $this->legacyAbortResponse('Error', 'Permission denied.');
+            return $this->abortResponse('Error', 'Permission denied.');
         }
 
         if ($action === 'edit') {
             $id = (int) (request()->query('id') ?? 0);
             $arr = $this->infoRepository->getFaqById($id);
             if ($arr === null) {
-                return $this->legacyAbortResponse('Error', 'Invalid id');
+                return $this->abortResponse('Error', 'Invalid id');
             }
             $arr['question'] = htmlspecialchars((string) $arr['question']);
             $arr['answer'] = htmlspecialchars((string) $arr['answer']);
@@ -131,7 +131,7 @@ class FaqController extends LegacyController
                 $arr['lang_name'] = $this->infoRepository->getLanguageName((int) $arr['lang_id']);
             }
 
-            return $this->legacyPage($request, 'faqactions', true, [
+            return $this->renderPage($request, 'faqactions', true, [
                 'mode' => 'edit',
                 'arr' => $arr,
                 'categories' => $categories,
@@ -142,7 +142,7 @@ class FaqController extends LegacyController
             $inId = (int) (request()->query('inid') ?? 0);
             $langId = (int) (request()->query('langid') ?? 0);
 
-            return $this->legacyPage($request, 'faqactions', true, [
+            return $this->renderPage($request, 'faqactions', true, [
                 'mode' => 'additem',
                 'inid' => $inId,
                 'langid' => $langId,
@@ -153,7 +153,7 @@ class FaqController extends LegacyController
             $languages = Locale::languageList('rule_lang', null);
             $defLang = SiteConfig::current()->main->defaultLang();
 
-            return $this->legacyPage($request, 'faqactions', true, [
+            return $this->renderPage($request, 'faqactions', true, [
                 'mode' => 'addsection',
                 'languages' => $languages,
                 'deflang' => $defLang,
@@ -176,7 +176,7 @@ class FaqController extends LegacyController
     {
         $administratorClass = defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0;
         if (UserDisplay::currentClass() < $administratorClass) {
-            return $this->legacyAbortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
+            return $this->abortResponse('Error', 'Only Administrators and above can modify the FAQ, sorry.');
         }
 
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
@@ -219,7 +219,7 @@ class FaqController extends LegacyController
                 return redirect($redirectBase.'/web/faqmanage');
             }
 
-            return $this->legacyPage($request, 'faqactions', true, [
+            return $this->renderPage($request, 'faqactions', true, [
                 'mode' => 'confirm_delete',
                 'id' => $id,
             ]);

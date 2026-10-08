@@ -123,7 +123,7 @@ class AttendanceController extends LegacyController
         AssetAppender::js($this->calendarScript($data), 'footer', false);
         $data['bonusLines'] = $this->bonusLines();
 
-        return $this->legacyPage($request, 'attendance', true, $data);
+        return $this->renderPage($request, 'attendance', true, $data);
     }
 
     /**

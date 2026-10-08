@@ -115,11 +115,11 @@ RUN apk add --no-cache \
     gmp \
     oniguruma
 
-# Base snapshot ships nghttp2-libs 1.69.0 (CVE-2026-58055) and
-# pcre2 10.48 (CVE-2026-103111); the alpine 3.24 repo carries fixed
-# versions, so upgrade explicitly until the official php image
-# is rebuilt against them.
-RUN apk upgrade --no-cache nghttp2-libs pcre2
+# Base snapshot ships nghttp2-libs 1.69.0 (CVE-2026-58055),
+# pcre2 10.48 (CVE-2026-103111) and zlib 1.3.1.x (CVE-2026-85091);
+# the alpine 3.24 repo carries fixed versions, so upgrade explicitly
+# until the official php image is rebuilt against them.
+RUN apk upgrade --no-cache nghttp2-libs pcre2 zlib
 
 # Configure PHP-FPM: log PHP errors to storage/logs/php_errors.log, tune for production
 RUN sed -i \

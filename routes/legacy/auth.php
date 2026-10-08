@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\BitbucketUploadController;
-use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\CompatRedirectController;
+use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\OfferController;

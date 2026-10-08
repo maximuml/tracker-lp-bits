@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Contracts\Repositories\SiteLogRepositoryInterface;
 use App\Enums\UserClass;
 use App\Enums\UserTimeType;
 use App\Models\Topic;
@@ -416,6 +417,68 @@ final class ForumListingServiceTest extends TestCase
             fn () => $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1']), Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10),
             (string) __('forums.std_forum_not_found'),
         );
+    }
+
+    public function test_build_view_forum_with_nonexistent_forum_writes_mod_log(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest(['forumid' => 999]);
+
+        $repo->shouldReceive('getForumsList')->andReturn([]);
+
+        $logRepo = Mockery::mock(SiteLogRepositoryInterface::class);
+        $logRepo->shouldReceive('create')->once()->with(
+            "User test,127.0.0.1 is trying to visit forum that doesn't exist",
+            'mod',
+            1,
+        );
+        $this->app->instance(SiteLogRepositoryInterface::class, $logRepo);
+
+        $this->assertAbortContains(
+            fn () => $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1']), Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10),
+            (string) __('forums.std_forum_not_found'),
+        );
+    }
+
+    public function test_build_view_forum_sets_jump_anchor_when_last_read_differs_from_catchup(): void
+    {
+        $user = User::factory()->create();
+        $topic = Topic::factory()->create();
+        DB::table('readposts')->insert(['userid' => $user->id, 'topicid' => $topic->id, 'lastpostread' => 50]);
+
+        $vm = $this->viewForumVm(
+            curUser: ['id' => $user->id, 'last_catchup' => 10],
+            topicAttrs: ['id' => $topic->id, 'lastpost' => 100],
+            postRows: ['post_100_content' => ['id' => 100, 'userid' => 5, 'added' => '2024-06-01 00:00:00', 'body' => 'lp body']],
+        );
+
+        $this->assertSame('unread', $vm->topics[0]->state);
+        $this->assertSame(50, $vm->topics[0]->jumpToPostId);
+    }
+
+    public function test_build_view_forum_no_jump_anchor_when_last_read_equals_catchup(): void
+    {
+        $user = User::factory()->create();
+        $topic = Topic::factory()->create();
+        DB::table('readposts')->insert(['userid' => $user->id, 'topicid' => $topic->id, 'lastpostread' => 50]);
+
+        $vm = $this->viewForumVm(
+            curUser: ['id' => $user->id, 'last_catchup' => 50],
+            topicAttrs: ['id' => $topic->id, 'lastpost' => 100],
+            postRows: ['post_100_content' => ['id' => 100, 'userid' => 5, 'added' => '2024-06-01 00:00:00', 'body' => 'lp body']],
+        );
+
+        $this->assertSame('unread', $vm->topics[0]->state);
+        $this->assertNull($vm->topics[0]->jumpToPostId);
+    }
+
+    public function test_build_view_forum_denies_post_when_forumpost_pref_no(): void
+    {
+        $vm = $this->viewForumVm(['forumpost' => 'no']);
+
+        $this->assertFalse($vm->mayPost);
     }
 
     public function test_build_view_forum_with_valid_forum_no_topics(): void

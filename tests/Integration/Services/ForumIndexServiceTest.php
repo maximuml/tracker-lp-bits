@@ -344,6 +344,36 @@ final class ForumIndexServiceTest extends TestCase
         $this->assertFalse($result->canManageForums);
     }
 
+    public function test_build_forums_index_stamps_forum_access_for_logged_in_user(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+
+        $repo->shouldReceive('updateUserForumAccess')->once()->with(1, Mockery::pattern('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/'))->andReturn(true);
+        $repo->shouldReceive('getOverforumsList')->andReturn([]);
+        $repo->shouldReceive('getForumsList')->andReturn([]);
+
+        $result = $this->service->buildForumsIndex($this->curUser(['id' => 1, 'username' => 'test']), 1);
+
+        $this->assertSame([], $result->sections);
+    }
+
+    public function test_build_forums_index_skips_forum_access_for_guest(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+
+        $repo->shouldReceive('updateUserForumAccess')->never();
+        $repo->shouldReceive('getOverforumsList')->andReturn([]);
+        $repo->shouldReceive('getForumsList')->andReturn([]);
+
+        $result = $this->service->buildForumsIndex($this->curUser([]), 0);
+
+        $this->assertSame([], $result->sections);
+    }
+
     public function test_build_forums_index_renders_orphan_forums_in_their_own_group(): void
     {
         $repo = $this->mockForumRepo();

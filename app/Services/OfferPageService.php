@@ -13,8 +13,8 @@ use App\Services\Offer\OfferListBuilder;
 use App\Services\Offer\OfferVoteListBuilder;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Input;
 use App\Support\PageResponses;
+use App\Support\RequestValues;
 use App\ViewModels\OfferPageViewModel;
 use Illuminate\Http\Request;
 
@@ -45,7 +45,7 @@ final class OfferPageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'),
+            'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost'),
             'contentWidth' => '737',
             'browsecatmode' => SiteConfig::current()->main->browseCat(1),
             'enableoffer' => SiteConfig::current()->main->showOffer(true) ? 'yes' : 'no',

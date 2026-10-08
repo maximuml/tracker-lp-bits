@@ -16,9 +16,9 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\PageResponses;
 use App\Support\Pagination;
+use App\Support\RequestValues;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -108,7 +108,7 @@ final class OfferListBuilder
 
         $search = (string) ($request->query('search', '') ?? '');
 
-        $self = Input::serverValue('PHP_SELF');
+        $self = RequestValues::serverValue('PHP_SELF');
         $offerResult = $this->offerRepository->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, 0, 0);
         $count = (int) $offerResult['count'];
 

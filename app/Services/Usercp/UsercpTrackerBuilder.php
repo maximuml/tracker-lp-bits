@@ -13,8 +13,8 @@ use App\Repositories\StyleRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\Locale;
+use App\Support\RequestValues;
 use App\Support\Strings;
 use App\Support\YesNo;
 use App\ViewModels\Search\SearchCategoryTableFactory;
@@ -59,7 +59,7 @@ final class UsercpTrackerBuilder
             $stylesheetOptions[$id] = (string) ($row['name'] ?? $id);
         }
 
-        $currentFolder = Locale::folderFromCookie((string) Input::cookieValue('c_lang_folder', ''), false);
+        $currentFolder = Locale::folderFromCookie((string) RequestValues::cookieValue('c_lang_folder', ''), false);
         $siteLanguages = [];
         $currentLangId = 0;
         foreach (Locale::languageList('site_lang', true) as $row) {

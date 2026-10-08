@@ -18,9 +18,9 @@ use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\PageResponses;
 use App\Support\Ratio;
+use App\Support\RequestValues;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -277,7 +277,7 @@ final class ForumTopicViewService
             mayPost: $maypost,
             isMod: $isMod,
             authorid: $authorid,
-            requestUri: (string) Input::serverValue('REQUEST_URI'),
+            requestUri: (string) RequestValues::serverValue('REQUEST_URI'),
             page: $page,
             pages: $pages,
             posts: $posts,

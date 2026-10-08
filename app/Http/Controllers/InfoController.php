@@ -16,9 +16,9 @@ use App\Services\PermissionChecker;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\PageResponses;
 use App\Support\Pagination;
+use App\Support\RequestValues;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -55,7 +55,7 @@ class InfoController extends LegacyController
 
         $action = htmlspecialchars((string) request()->query('action'));
         $perpage = 15;
-        $phpSelf = Input::serverValue('PHP_SELF');
+        $phpSelf = RequestValues::serverValue('PHP_SELF');
         $subject = UserDisplay::username($userid);
 
         $data = [

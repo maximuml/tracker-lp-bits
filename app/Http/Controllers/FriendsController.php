@@ -12,8 +12,8 @@ use App\Repositories\FriendsRepository;
 use App\Support\Avatar;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\Locale;
+use App\Support\RequestValues;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
@@ -240,7 +240,7 @@ class FriendsController extends LegacyController
     private function purgeNeighborsCache(): void
     {
         $currentUser = (array) ($this->currentUser->get() ?? []);
-        $cachefile = 'cache/'.Locale::folderFromCookie(Input::cookieValue('c_lang_folder', ''), false).'/neighbors/'.($this->currentUser->id()).'.html';
+        $cachefile = 'cache/'.Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), false).'/neighbors/'.($this->currentUser->id()).'.html';
         if (file_exists($cachefile)) {
             unlink($cachefile);
         }

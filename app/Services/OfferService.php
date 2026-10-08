@@ -13,7 +13,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
 use App\Support\CurrentUser;
-use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\PageResponses;
@@ -113,7 +112,7 @@ final class OfferService
             $this->abort(__('offers.std_error'), __('offers.std_must_select_category'));
         }
 
-        $descrmain = (string) Input::unescape($request->input('body') ?? $request->input('descr'));
+        $descrmain = (string) ($request->input('body') ?? $request->input('descr'));
         if (! $descrmain) {
             $this->abort(__('offers.std_error'), __('offers.std_must_enter_description'));
         }
@@ -121,7 +120,6 @@ final class OfferService
         $pic = '';
         $picture = (string) $request->input('picture');
         if ($picture !== '') {
-            $picture = (string) Input::unescape($picture);
             if (! preg_match('/^https?:\/\/[^\s\'"<>]+\.(jpg|gif|png)$/i', $picture)) {
                 $this->abort(__('offers.std_error'), __('offers.std_wrong_image_format'));
             }
@@ -233,14 +231,13 @@ final class OfferService
         $pic = '';
         $picture = (string) $request->input('picture');
         if ($picture !== '') {
-            $picture = (string) Input::unescape($picture);
             if (! preg_match('/^https?:\/\/[^\s\'"<>]+\.(jpg|gif|png)$/i', $picture)) {
                 $this->abort(__('offers.std_error'), __('offers.std_wrong_image_format'));
             }
             $pic = '[img]'.$picture."[/img]\n";
         }
 
-        $descr = $pic.(string) Input::unescape($request->input('body'));
+        $descr = $pic.(string) $request->input('body');
         if ($name === '') {
             $this->abort(__('offers.std_error'), __('offers.std_must_enter_name'));
         }

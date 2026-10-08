@@ -14,8 +14,8 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\RedisGuard;
+use App\Support\RequestValues;
 use App\Support\Url;
 use App\ViewModels\TorrentListViewFactory;
 use Illuminate\Contracts\View\View as ViewContract;
@@ -180,7 +180,7 @@ class SearchController extends LegacyController
         $siteName = SiteConfig::current()->basic->siteName();
         $siteEmail = SiteConfig::current()->main->siteEmail();
         $slogan = SiteConfig::current()->main->slogan();
-        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         $dateFounded = SiteConfig::current()->tweak->dateFounded();
         $projectName = PROJECTNAME;
 

@@ -109,7 +109,7 @@ final class Locale
     public static function idFromCookie(string $lang = ''): int
     {
         if ($lang === '') {
-            $lang = self::folderFromCookie(Input::cookieValue('c_lang_folder'));
+            $lang = self::folderFromCookie(RequestValues::cookieValue('c_lang_folder'));
         }
 
         return self::idFromFolder($lang);
@@ -171,7 +171,7 @@ final class Locale
     public static function trans(string $key, array $replace = [], ?string $locale = null): string
     {
         if ($locale === null) {
-            $locale = self::folderFromCookie(Input::cookieValue('c_lang_folder', ''), (bool) true);
+            $locale = self::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) true);
         }
 
         return trans($key, $replace, $locale);

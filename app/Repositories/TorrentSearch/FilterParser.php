@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Repositories\TorrentSearch;
 
 use App\Auth\Permission;
-use App\Support\Input;
 use App\Support\Log;
 use App\Support\Promotion;
+use App\Support\RequestValues;
 
 /**
  * Parse search query parameters and user notification preferences into
@@ -106,7 +106,7 @@ final class FilterParser
 
         if (! in_array($inclbookmarked, [0, 1, 2])) {
             $inclbookmarked = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking inclbookmarked field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
+            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking inclbookmarked field in'.RequestValues::serverValue('SCRIPT_NAME', ''), 'mod');
         }
         if ($inclbookmarked == 0) {  // all(bookmarked,not)
             $addparam .= 'inclbookmarked=0&';
@@ -134,7 +134,7 @@ final class FilterParser
 
         if (! in_array($include_dead, [0, 1, 2])) {
             $include_dead = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking incldead field in'.Input::serverValue('SCRIPT_NAME', ''), 'mod');
+            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking incldead field in'.RequestValues::serverValue('SCRIPT_NAME', ''), 'mod');
         }
         if ($include_dead == 0) {  // all(active,dead)
             $addparam .= 'incldead=0&';
@@ -161,7 +161,7 @@ final class FilterParser
 
         if (! in_array($special_state, [0, 1, 2, 3, 4, 5, 6, 7])) {
             $special_state = 0;
-            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking spstate field in '.Input::serverValue('SCRIPT_NAME', ''), 'mod');
+            Log::writeWithContext('User '.$CURUSER['username'].','.$CURUSER['ip'].' is hacking spstate field in '.RequestValues::serverValue('SCRIPT_NAME', ''), 'mod');
         }
         $globalSpecialState = Promotion::globalSpecialState();
         // Pass globalSpecialState to MeiliSearch so it can apply the same

@@ -14,10 +14,10 @@ use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Pagination;
+use App\Support\RequestValues;
 use App\Support\UserDisplay;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -56,7 +56,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             ->count();
 
         $perPage = 25;
-        $scriptName = Input::serverValue('SCRIPT_NAME');
+        $scriptName = RequestValues::serverValue('SCRIPT_NAME');
         $href = $scriptName !== '' ? $scriptName.'?id='.$torrentId.'&' : '?id='.$torrentId.'&';
         $pager = Pagination::pager($perPage, $count, $href);
 

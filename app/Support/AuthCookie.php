@@ -263,7 +263,7 @@ final class AuthCookie
             }
         }
 
-        $candidates[] = Input::serverValue('APP_KEY', '');
+        $candidates[] = RequestValues::serverValue('APP_KEY', '');
         $envKey = getenv('APP_KEY');
         if ($envKey !== false && $envKey !== '') {
             $candidates[] = $envKey;
@@ -284,7 +284,7 @@ final class AuthCookie
                 try {
                     $dotenv = Dotenv::createImmutable(dirname(__DIR__, 2));
                     $dotenv->safeLoad();
-                    $key = Input::serverValue('APP_KEY', '');
+                    $key = RequestValues::serverValue('APP_KEY', '');
                 } catch (\Throwable $e) {
                     // ignore .env parse errors
                 }

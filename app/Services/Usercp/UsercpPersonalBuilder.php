@@ -10,7 +10,7 @@ use App\Enums\UserGender;
 use App\Models\TrackerUrl;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
-use App\Support\Input;
+use App\Support\RequestValues;
 use App\Support\Strings;
 use App\Support\Url;
 use App\Support\YesNo;
@@ -40,7 +40,7 @@ final class UsercpPersonalBuilder
             $trackerUrlOptions[(string) $item->id] = (string) $item->url;
         }
 
-        $baseUrl = Url::absolute(SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'));
+        $baseUrl = Url::absolute(SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost'));
         $defaultAvatarUrl = $baseUrl.'/pic/default_avatar.png';
         $bitbucketOptions = [];
         foreach ($this->usercpLookupRepository->getBitbucketOptions() as $sor) {

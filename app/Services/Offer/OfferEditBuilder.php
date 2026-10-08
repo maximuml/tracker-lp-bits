@@ -8,7 +8,6 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Support\Category;
-use App\Support\Input;
 use App\Support\PageResponses;
 use App\ViewModels\Offer\OfferCategoryOption;
 use Illuminate\Http\Request;
@@ -39,7 +38,7 @@ final class OfferEditBuilder
             PageResponses::abort(__('offers.std_error'), __('offers.std_cannot_edit_others_offer'));
         }
 
-        $body = htmlspecialchars(Input::unescape((string) ($num['descr'] ?? '')));
+        $body = htmlspecialchars((string) ($num['descr'] ?? ''));
         $id2 = (int) ($num['category'] ?? 0);
 
         $catOptions = [];

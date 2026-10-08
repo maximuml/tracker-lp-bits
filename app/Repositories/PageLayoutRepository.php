@@ -9,10 +9,10 @@ use App\Models\Invite;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Input;
 use App\Support\Menu;
 use App\Support\PageState;
 use App\Support\RequestContext;
+use App\Support\RequestValues;
 use App\Support\UserUpdateBatch;
 use Illuminate\Support\Facades\DB;
 
@@ -151,7 +151,7 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         }
 
         $this->userUpdateBatch->add('last_access', date('Y-m-d H:i:s'));
-        $this->userUpdateBatch->add('ip', $this->currentUser->value('ip', Input::serverValue('REMOTE_ADDR', '')));
+        $this->userUpdateBatch->add('ip', $this->currentUser->value('ip', RequestValues::serverValue('REMOTE_ADDR', '')));
 
         $this->ipLogRepository->saveToCache((int) $this->currentUser->id());
 

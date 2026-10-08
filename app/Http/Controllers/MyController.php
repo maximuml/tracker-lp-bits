@@ -17,10 +17,10 @@ use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Input;
 use App\Support\Locale;
 use App\Support\PageResponses;
 use App\Support\Pagination;
+use App\Support\RequestValues;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -184,7 +184,7 @@ JS;
             'headerFilters' => $headerFilters,
             'queryString' => $queryString,
             'q' => $q,
-            'requestUri' => Input::serverValue('REQUEST_URI'),
+            'requestUri' => RequestValues::serverValue('REQUEST_URI'),
             'rescount' => $rescount,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,

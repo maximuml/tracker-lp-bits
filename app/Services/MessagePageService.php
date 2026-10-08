@@ -11,9 +11,9 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\PageResponses;
 use App\Support\Pagination;
+use App\Support\RequestValues;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use App\ViewModels\Message\MessageBoxOption;
@@ -74,7 +74,7 @@ class MessagePageService
             'curUser' => $curUser,
             'userId' => $userId,
             'action' => $action,
-            'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost'),
+            'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost'),
             'contentWidth' => '737',
         ];
 

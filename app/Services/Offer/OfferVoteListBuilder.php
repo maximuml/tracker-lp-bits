@@ -7,8 +7,8 @@ namespace App\Services\Offer;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\Enums\OfferVote;
-use App\Support\Input;
 use App\Support\Pagination;
+use App\Support\RequestValues;
 use App\Support\UserDisplay;
 use Illuminate\Http\Request;
 
@@ -32,7 +32,7 @@ final class OfferVoteListBuilder
         $offerName = (string) $this->offerRepository->getOfferName($offerId);
 
         $perpage = 25;
-        $self = Input::serverValue('PHP_SELF');
+        $self = RequestValues::serverValue('PHP_SELF');
         [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $self.'?id='.$offerId.'&offer_vote=1&');
         $voteRows = $this->offerVoteRepository->getVoteRows($offerId, (int) $offset, (int) $perpage);
 

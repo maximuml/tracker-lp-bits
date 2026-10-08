@@ -7,10 +7,10 @@ namespace App\Auth;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
-use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\RequestContext;
+use App\Support\RequestValues;
 
 /**
  * Context bundle for the access-gate checks.
@@ -58,7 +58,7 @@ final class AuthContext
         if (\function_exists('nexus')) {
             $script = RequestContext::instance()->getScript();
         } else {
-            $scriptFile = Input::serverValue('SCRIPT_FILENAME', '');
+            $scriptFile = RequestValues::serverValue('SCRIPT_FILENAME', '');
             $script = basename($scriptFile);
             if (str_contains($script, '.')) {
                 $script = strstr($script, '.', true) ?: '';
@@ -69,7 +69,7 @@ final class AuthContext
             user: CurrentUser::instance()->get(),
             cache: NexusCache::instance(),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
-            requestUri: Input::serverValue('REQUEST_URI'),
+            requestUri: RequestValues::serverValue('REQUEST_URI'),
             requestBody: request()->post(),
             queryParams: request()->query(),
             request: array_merge(request()->post(), request()->query()),
@@ -82,7 +82,7 @@ final class AuthContext
                 'maxusers' => SiteConfig::current()->main->maxUsers(0),
                 'maxip' => SiteConfig::current()->security->maxIp(0),
             ],
-            langFolder: Input::cookieValue('c_lang_folder'),
+            langFolder: RequestValues::cookieValue('c_lang_folder'),
             moderatorClass: defined('UC_MODERATOR') ? (int) \constant('UC_MODERATOR') : 0,
             script: $script,
         );

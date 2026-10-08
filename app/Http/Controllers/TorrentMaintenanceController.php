@@ -17,9 +17,9 @@ use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
-use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Path;
+use App\Support\RequestValues;
 use App\Support\Time;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -183,7 +183,7 @@ class TorrentMaintenanceController extends LegacyController
 
         $snatchedRows = $this->torrentAjaxRepository->listFinishedSnatchersForReseed($reseedid);
 
-        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         foreach ($snatchedRows as $snatchRow) {
             $locale = Locale::userLocale((int) $snatchRow['userid']);
             $rsSubject = Locale::trans('torrent.msg_reseed_request', [], $locale);

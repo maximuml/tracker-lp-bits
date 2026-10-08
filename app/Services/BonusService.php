@@ -11,12 +11,12 @@ use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\Input;
 use App\Support\Locale;
 use App\Support\Lock;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\PageResponses;
+use App\Support\RequestValues;
 use App\Support\Url;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -66,7 +66,7 @@ final class BonusService
      */
     public function handleExchange(Request $request, array $allBonus, array $curUser, string $lockText): ?RedirectResponse
     {
-        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         $bonusgiftBonus = SiteConfig::current()->bonus->bonusGift() ? 'yes' : 'no';
         $ratiolimitBonus = SiteConfig::current()->bonus->ratioLimit();
         $dlamountlimitBonus = SiteConfig::current()->bonus->dlAmountLimit();
@@ -163,7 +163,7 @@ final class BonusService
      */
     private function exchangeTraffic(array $curUser, array $bonusarray, float $points, float $ratiolimitBonus, int $dlamountlimitBonus): RedirectResponse
     {
-        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: Input::serverValue('HTTP_HOST', 'localhost');
+        $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         if (($curUser['uploaded'] ?? 0) > $dlamountlimitBonus * 1073741824) {
             $ratio = ($curUser['downloaded'] ?? 0) > 0
                 ? ($curUser['uploaded'] ?? 0) / ($curUser['downloaded'] ?? 1)

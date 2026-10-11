@@ -265,10 +265,21 @@ class AuthenticateController extends Controller
             RedisGuard::attempt(static fn () => Cache::put(Token::challengeKey($username), $challenge, 300), false);
             $user = $this->userRepository->findByUsername($username, ['secret', 'passhash_algo']);
 
+            if ($user !== null) {
+                $secret = (string) $user->secret;
+                $algo = (string) $user->passhash_algo;
+            } else {
+                // Deterministic pseudo-secret so repeated probes can't
+                // distinguish real users from non-existent ones.
+                $digest = hash_hmac('sha256', (string) $username, (string) config('app.key'));
+                $secret = substr($digest, 0, 40);
+                $algo = hexdec($digest[40]) % 2 === 0 ? 'sha256' : 'argon2id';
+            }
+
             return $this->success([
                 'challenge' => $challenge,
-                'secret' => $user->secret ?? Token::randomHex((int) 20),
-                'passhash_algo' => $user->passhash_algo ?? 'sha256',
+                'secret' => $secret,
+                'passhash_algo' => $algo,
             ]);
         } catch (\Exception $exception) {
             $msg = $exception->getMessage();

@@ -189,7 +189,7 @@ class AnnounceService
         $user = $this->passkeyUserLookup->find($passkey);
 
         if (! $user) {
-            RedisGuard::attempt(static fn () => Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]));
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->set(PasskeyUserLookup::invalidKey($passkey), TIMENOW, ['ex' => 24 * 3600]));
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.Url::schemeAndHost(true));
         }
 

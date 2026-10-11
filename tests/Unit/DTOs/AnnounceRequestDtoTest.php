@@ -52,7 +52,7 @@ final class AnnounceRequestDtoTest extends TestCase
             'numwant' => '100',
             'compact' => '1',
             'ipv4' => '1.2.3.4',
-            'ipv6' => '2001:db8::1',
+            'ipv6' => '2001:4860:4860::8888',
         ], $overrides);
     }
 
@@ -182,21 +182,61 @@ final class AnnounceRequestDtoTest extends TestCase
     public function test_param_ipv4_used_when_resolver_returns_ipv6(): void
     {
         $factory = $this->makeFactory('2001:db8::1');
-        $dto = $factory->build($this->standardParams(['ipv4' => '203.0.113.5', 'ipv6' => null]));
+        $dto = $factory->build($this->standardParams(['ipv4' => '8.8.8.8', 'ipv6' => null]));
 
         $this->assertSame('2001:db8::1', $dto->ip);
         $this->assertSame('2001:db8::1', $dto->ipv6);
-        $this->assertSame('203.0.113.5', $dto->ipv4);
+        $this->assertSame('8.8.8.8', $dto->ipv4);
     }
 
     public function test_param_ipv6_used_when_resolver_returns_ipv4(): void
     {
         $factory = $this->makeFactory('10.0.0.1');
-        $dto = $factory->build($this->standardParams(['ipv4' => null, 'ipv6' => '2001:db8::99']));
+        $dto = $factory->build($this->standardParams(['ipv4' => null, 'ipv6' => '2001:4860:4860::8888']));
 
         $this->assertSame('10.0.0.1', $dto->ip);
         $this->assertSame('10.0.0.1', $dto->ipv4);
-        $this->assertSame('2001:db8::99', $dto->ipv6);
+        $this->assertSame('2001:4860:4860::8888', $dto->ipv6);
+    }
+
+    public function test_private_param_ipv4_is_ignored(): void
+    {
+        $factory = $this->makeFactory('2001:db8::1');
+        $dto = $factory->build($this->standardParams(['ipv4' => '10.0.0.5', 'ipv6' => null]));
+
+        $this->assertNull($dto->ipv4);
+    }
+
+    public function test_reserved_param_ipv4_is_ignored(): void
+    {
+        $factory = $this->makeFactory('2001:db8::1');
+        $dto = $factory->build($this->standardParams(['ipv4' => '240.0.0.1', 'ipv6' => null]));
+
+        $this->assertNull($dto->ipv4);
+    }
+
+    public function test_loopback_param_ipv4_is_ignored(): void
+    {
+        $factory = $this->makeFactory('2001:db8::1');
+        $dto = $factory->build($this->standardParams(['ipv4' => '127.0.0.1', 'ipv6' => null]));
+
+        $this->assertNull($dto->ipv4);
+    }
+
+    public function test_loopback_param_ipv6_is_ignored(): void
+    {
+        $factory = $this->makeFactory('10.0.0.1');
+        $dto = $factory->build($this->standardParams(['ipv4' => null, 'ipv6' => '::1']));
+
+        $this->assertNull($dto->ipv6);
+    }
+
+    public function test_private_param_ipv6_is_ignored(): void
+    {
+        $factory = $this->makeFactory('10.0.0.1');
+        $dto = $factory->build($this->standardParams(['ipv4' => null, 'ipv6' => 'fc00::1']));
+
+        $this->assertNull($dto->ipv6);
     }
 
     public function test_invalid_param_ipv4_is_ignored(): void

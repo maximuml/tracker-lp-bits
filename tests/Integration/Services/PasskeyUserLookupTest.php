@@ -95,10 +95,10 @@ final class PasskeyUserLookupTest extends TestCase
         /** @var User $user */
         $user = User::factory()->create(['passkey' => self::passkey()]);
         $redis = Redis::connection()->client();
-        $redis->set("passkey_invalid:{$user->passkey}", time(), ['ex' => 3600]);
+        $redis->set(PasskeyUserLookup::invalidKey($user->passkey), time(), ['ex' => 3600]);
 
         $this->assertSame($user->id, $this->lookup->find($user->passkey)['id']);
-        $this->assertSame(0, $redis->exists("passkey_invalid:{$user->passkey}"));
+        $this->assertSame(0, $redis->exists(PasskeyUserLookup::invalidKey($user->passkey)));
     }
 
     public function test_find_falls_back_to_db_when_redis_is_down(): void

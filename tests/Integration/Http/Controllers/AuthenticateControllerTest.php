@@ -263,7 +263,39 @@ final class AuthenticateControllerTest extends TestCase
         $result = $controller->challenge($request);
 
         $this->assertMatchesRegularExpression('/^[0-9a-f]{40}$/', $result['data']['secret']);
-        $this->assertSame('sha256', $result['data']['passhash_algo']);
+        $this->assertContains($result['data']['passhash_algo'], ['sha256', 'argon2id']);
+    }
+
+    public function test_challenge_unknown_user_fallback_is_deterministic(): void
+    {
+        /** @var AuthenticateRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(AuthenticateRepository::class);
+
+        /** @var UserRepository&Mockery\MockInterface $userRepository */
+        $userRepository = Mockery::mock(UserRepository::class);
+        $userRepository->shouldReceive('findByUsername')
+            ->twice()
+            ->with('no_such_user_xyz', ['secret', 'passhash_algo'])
+            ->andReturn(null);
+
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
+
+        $first = $controller->challenge($this->challengeRequest('no_such_user_xyz'));
+        $second = $controller->challenge($this->challengeRequest('no_such_user_xyz'));
+
+        $this->assertSame($first['data']['secret'], $second['data']['secret']);
+        $this->assertSame($first['data']['passhash_algo'], $second['data']['passhash_algo']);
+        $this->assertNotSame($first['data']['challenge'], $second['data']['challenge']);
+    }
+
+    private function challengeRequest(string $username): ChallengeRequest
+    {
+        $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => $username]);
+        $request->setContainer(app());
+        $request->setRedirector(app('redirect'));
+        $request->validateResolved();
+
+        return $request;
     }
 
     public function test_challenge_validates_username_required(): void

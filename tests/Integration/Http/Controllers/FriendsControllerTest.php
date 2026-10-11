@@ -107,6 +107,43 @@ final class FriendsControllerTest extends TestCase
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
     }
 
+    public function test_friends_add_rejects_foreign_owner_id(): void
+    {
+        $userId = $this->mockCurrentUserWithDefaults();
+
+        $controller = app(FriendsController::class);
+        $request = FriendAddRequest::create('/web/friends/add', 'POST', [
+            'id' => $userId + 100,
+            'targetid' => 5,
+            'type' => 'friend',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->friendAdd($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+    }
+
+    public function test_friends_delete_rejects_foreign_owner_id(): void
+    {
+        $userId = $this->mockCurrentUserWithDefaults();
+
+        $controller = app(FriendsController::class);
+        $request = FriendDeleteRequest::create('/web/friends/delete', 'POST', [
+            'id' => $userId + 100,
+            'targetid' => 5,
+            'type' => 'friend',
+            'sure' => 1,
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->friendDelete($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+    }
+
     public function test_friends_add_rejects_invalid_targetid(): void
     {
         $userId = $this->mockCurrentUserWithDefaults();

@@ -83,10 +83,12 @@ final class AnnounceRequestFactory
             $ipv6 = $ip;
         }
 
-        if ($ipv4 === null && ! empty($params['ipv4']) && Network::isIpv4($params['ipv4'])) {
+        // Client-supplied IP is only honoured when it is a publicly routable
+        // address — private/reserved values must never reach the peer list.
+        if ($ipv4 === null && ! empty($params['ipv4']) && $this->isPublicIp($params['ipv4'], true)) {
             $ipv4 = $params['ipv4'];
         }
-        if ($ipv6 === null && ! empty($params['ipv6']) && Network::isIpv6($params['ipv6'])) {
+        if ($ipv6 === null && ! empty($params['ipv6']) && $this->isPublicIp($params['ipv6'], false)) {
             $ipv6 = $params['ipv6'];
         }
 
@@ -106,5 +108,13 @@ final class AnnounceRequestFactory
             ip: $ip,
             userAgent: (string) $userAgent,
         );
+    }
+
+    private function isPublicIp(string $ip, bool $v4): bool
+    {
+        $flags = FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+        $flags |= $v4 ? FILTER_FLAG_IPV4 : FILTER_FLAG_IPV6;
+
+        return filter_var($ip, FILTER_VALIDATE_IP, $flags) !== false;
     }
 }

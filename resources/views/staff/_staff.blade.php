@@ -11,7 +11,7 @@
         <td class="nx-embedded text-center"><b>{{ __('staff.text_language')}}</b></td>
         <td class="nx-embedded"><b>{{ __('staff.text_support_for')}}</b></td>
     </tr>
-    <tr><td class="nx-embedded" colspan=6><hr color="#4040c0"></td></tr>
+    <tr><td class="nx-embedded" colspan=6><hr class="border-nxm-accent"></td></tr>
     @foreach ($supportRows as $row)
     <tr>
 @include('staff._cells')
@@ -33,7 +33,7 @@
         <td class="nx-embedded text-center"><b>{{ __('staff.text_contact')}}</b></td>
         <td class="nx-embedded"><b>{{ __('staff.text_responsible_for')}}</b></td>
     </tr>
-    <tr><td class="nx-embedded" colspan=5><hr color="#4040c0"></td></tr>
+    <tr><td class="nx-embedded" colspan=5><hr class="border-nxm-accent"></td></tr>
     @foreach ($pickerRows as $row)
     <tr>
 @include('staff._cells')
@@ -55,7 +55,7 @@
         <td class="nx-embedded text-center"><b>{{ __('staff.text_contact')}}</b></td>
         <td class="nx-embedded"><b>{{ __('staff.text_forums')}}</b></td>
     </tr>
-    <tr><td class="nx-embedded" colspan=5><hr color="#4040c0"></td></tr>
+    <tr><td class="nx-embedded" colspan=5><hr class="border-nxm-accent"></td></tr>
     @foreach ($forumModRows as $row)
     <tr>
 @include('staff._cells')
@@ -81,7 +81,7 @@
                 <td class="nx-embedded text-center"><b>{{ __('staff.text_contact')}}</b></td>
                 <td class="nx-embedded"><b>{{ __('staff.text_duties')}}</b></td>
             </tr>
-            <tr height=15><td class="nx-embedded" colspan=5><hr color="#4040c0"></td></tr>
+            <tr height=15><td class="nx-embedded" colspan=5><hr class="border-nxm-accent"></td></tr>
         @else
             <tr>
 @include('staff._cells')
@@ -104,7 +104,7 @@
         <td class="nx-embedded text-center"><b>{{ __('staff.text_contact')}}</b></td>
         <td class="nx-embedded"><b>{{ __('staff.text_reason')}}</b></td>
     </tr>
-    <tr><td class="nx-embedded" colspan=5><hr color="#4040c0"></td></tr>
+    <tr><td class="nx-embedded" colspan=5><hr class="border-nxm-accent"></td></tr>
     @foreach ($vipRows as $row)
     <tr>
 @include('staff._cells')

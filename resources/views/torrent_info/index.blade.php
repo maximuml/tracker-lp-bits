@@ -7,8 +7,8 @@
 
 /* list styles */
 ul ul { margin-left: 15px; }
-ul, li { padding: 0px; margin: 0px; list-style-type: none; color: #000; font-weight: normal;}
-ul a, li a { color: #009; text-decoration: none; font-weight: normal; }
+ul, li { padding: 0px; margin: 0px; list-style-type: none; color: var(--nxm-text); font-weight: normal;}
+ul a, li a { color: var(--nxm-accent-text); text-decoration: none; font-weight: normal; }
 li { display: inline; } /* fix for IE blank line bug */
 ul > li { display: list-item; }
 

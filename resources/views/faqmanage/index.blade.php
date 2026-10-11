@@ -20,7 +20,7 @@
             @for ($n = 1; $n <= count($temp['items']); $n++)
                 <option value="{{ $n }}"@if ($n == ($tempItem['order'] ?? 0)) selected="selected"@endif>{{ $n }}</option>
             @endfor
-            </select></td><td>{{ $tempItem['question'] ?? '' }}</td><td class="text-center"></td><td class="text-center w-[60px]">@if (($tempItem['flag'] ?? '') == "0")<span class="text-nxm-danger">Hidden</span>@elseif (($tempItem['flag'] ?? '') == "2")<span class="text-[#0000ff]"><img src="pic/updated.png" alt="Updated" width="46" height="11" class="align-bottom"></span>@elseif (($tempItem['flag'] ?? '') == "3")<span class="text-nxm-success"><img src="pic/new.png" alt="New" width="27" height="11" class="align-bottom"></span>@else Normal @endif</td><td class="text-center w-[60px]"><a href="/web/faqactions?action=edit&id={{ (int) $id2 }}">Edit</a> <a href="/web/faqactions?action=delete&id={{ (int) $id2 }}">Delete</a></td></tr>
+            </select></td><td>{{ $tempItem['question'] ?? '' }}</td><td class="text-center"></td><td class="text-center w-[60px]">@if (($tempItem['flag'] ?? '') == "0")<span class="text-nxm-danger">Hidden</span>@elseif (($tempItem['flag'] ?? '') == "2")<span class="text-nxm-accent-text"><img src="pic/updated.png" alt="Updated" width="46" height="11" class="align-bottom"></span>@elseif (($tempItem['flag'] ?? '') == "3")<span class="text-nxm-success"><img src="pic/new.png" alt="New" width="27" height="11" class="align-bottom"></span>@else Normal @endif</td><td class="text-center w-[60px]"><a href="/web/faqactions?action=edit&id={{ (int) $id2 }}">Edit</a> <a href="/web/faqactions?action=delete&id={{ (int) $id2 }}">Delete</a></td></tr>
         @endforeach
     @endif
 <tr><td colspan="6" class="text-center"><a href="/web/faqactions?action=additem&inid={{ (int) $id }}&langid={{ (int) $lang }}">Add new item</a></td></tr>
@@ -34,7 +34,7 @@
 <tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">Item Title</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Status</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Actions</th></tr>
     @foreach ($faqOrphaned as $lang => $temp2)
         @foreach ($temp2 as $id => $temp)
-<tr><td>{{ $temp['question'] ?? '' }}</td><td class="text-center w-[60px]">@if (($temp['flag'] ?? '') == "0")<span class="text-nxm-danger">Hidden</span>@elseif (($temp['flag'] ?? '') == "2")<span class="text-[#0000ff]">Updated</span>@elseif (($temp['flag'] ?? '') == "3")<span class="text-nxm-success">New</span>@else Normal @endif</td><td class="text-center w-[60px]"><a href="/web/faqactions?action=edit&id={{ (int) $id }}">edit</a> <a href="/web/faqactions?action=delete&id={{ (int) $id }}">delete</a></td></tr>
+<tr><td>{{ $temp['question'] ?? '' }}</td><td class="text-center w-[60px]">@if (($temp['flag'] ?? '') == "0")<span class="text-nxm-danger">Hidden</span>@elseif (($temp['flag'] ?? '') == "2")<span class="text-nxm-accent-text">Updated</span>@elseif (($temp['flag'] ?? '') == "3")<span class="text-nxm-success">New</span>@else Normal @endif</td><td class="text-center w-[60px]"><a href="/web/faqactions?action=edit&id={{ (int) $id }}">edit</a> <a href="/web/faqactions?action=delete&id={{ (int) $id }}">delete</a></td></tr>
         @endforeach
     @endforeach
 </x-data-table>

@@ -39,6 +39,18 @@ final class FormLabelsTest extends TestCase
             ->assertDontSee('Default&lt;br /&gt;categories', false);
     }
 
+    public function test_tracker_selects_have_accessible_names(): void
+    {
+        $user = User::factory()->create(['class' => 1]);
+
+        $response = $this->withNexusCookie($user)->get('/usercp?action=tracker');
+
+        $response->assertOk()
+            ->assertSee('<label for="usercp-incldead"><b>'.e(__('usercp.text_show_dead_active')).'</b></label>', false)
+            ->assertSee('id="usercp-incldead"', false)
+            ->assertSee('aria-label="'.e(__('usercp.row_stylesheet')).'"', false);
+    }
+
     public function test_bonus_shop_controls_have_accessible_labels(): void
     {
         DB::table('settings')->updateOrInsert(

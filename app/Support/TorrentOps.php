@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\Enums\TorrentPromotion;
-use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\Config\SiteConfig;
@@ -37,7 +37,6 @@ final class TorrentOps
      *
      * @param  array<string, mixed>  $torrent
      * @param  array<string, mixed>  $queries
-     * @param  array<string, mixed>  $user
      * @param  array<string, mixed>  $peer
      * @param  array<string, mixed>  $snatch
      * @param  array<string, mixed>  $promotionInfo
@@ -46,18 +45,14 @@ final class TorrentOps
     public static function dataTraffic(
         array $torrent,
         array $queries,
-        array $user,
+        AnnounceUser $user,
         $peer,
         $snatch,
         $promotionInfo,
     ): array {
-        if (! isset($user['__is_donor'])) {
-            throw new \InvalidArgumentException("user no '__is_donor' field");
-        }
-
         $log = sprintf(
             'torrent: %s, owner: %s, user: %s, peerUploaded: %s, peerDownloaded: %s, queriesUploaded: %s, queriesDownloaded: %s',
-            $torrent['id'], $torrent['owner'], $user['id'], $peer['uploaded'] ?? '', $peer['downloaded'] ?? '', $queries['uploaded'], $queries['downloaded'],
+            $torrent['id'], $torrent['owner'], $user->id, $peer['uploaded'] ?? '', $peer['downloaded'] ?? '', $queries['uploaded'], $queries['downloaded'],
         );
 
         if (! empty($peer)) {
@@ -91,7 +86,7 @@ final class TorrentOps
 
             $uploaderRatio = SiteConfig::current()->torrent->uploaderdouble();
             $log .= ", uploaderRatio: $uploaderRatio";
-            if ($torrent['owner'] == $user['id'] && $uploaderRatio != 1) {
+            if ($torrent['owner'] == $user->id && $uploaderRatio != 1) {
                 $upRatio = max($uploaderRatio, $promotion->upMultiplier());
                 $log .= ", [IS_UPLOADER] && uploaderRatio != 1, upRatio: $upRatio";
             } else {
@@ -99,7 +94,7 @@ final class TorrentOps
                 $log .= ", [IS_NOT_UPLOADER] || uploaderRatio == 1, upRatio: $upRatio";
             }
 
-            if ($user['class'] == UserClassEnum::VIP->value) {
+            if ($user->isVip()) {
                 $downRatio = 0;
                 $log .= ", [IS_VIP], downRatio: $downRatio";
             } else {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\Repositories\AnnounceTorrentRepository;
 use App\Repositories\AnnounceUserRepository;
 use App\Repositories\PeerRepository;
@@ -22,7 +23,6 @@ final class TrafficAccountant
     /**
      * @param  array<string, mixed>  $params
      * @param  array<string, mixed>  $torrent
-     * @param  array<string, mixed>  $user
      * @param  array<string, mixed>|null  $self
      * @param  array<string, mixed>|false  $snatchInfo
      */
@@ -30,7 +30,7 @@ final class TrafficAccountant
         ?array $self,
         array $params,
         array $torrent,
-        array $user,
+        AnnounceUser $user,
         array|false $snatchInfo,
         string $ip,
         int $seeder,

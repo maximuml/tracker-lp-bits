@@ -14,16 +14,9 @@ use App\Support\UserDisplay;
  * and replaces the raw `array $user` (legacy CURUSER shape) that used to flow
  * through AnnounceService, CheaterDetector, HitAndRunHandler, PeerLimitGuard,
  * PeerLifecycle, TrafficAccountant and TorrentOps::dataTraffic.
- *
- * `toLegacyArray()` returns the underlying row — including the `__is_donor`
- * field TorrentOps::dataTraffic still validates — so call sites on the array
- * boundary keep working until they migrate.
  */
 final readonly class AnnounceUser
 {
-    /**
-     * @param  array<string, mixed>  $row
-     */
     private function __construct(
         public int $id,
         public string $username,
@@ -38,7 +31,6 @@ final readonly class AnnounceUser
         public ?float $seedbonus,
         public ?int $trackerUrlId,
         public bool $isDonor,
-        private array $row,
     ) {}
 
     /**
@@ -60,24 +52,12 @@ final readonly class AnnounceUser
             seedbonus: isset($row['seedbonus']) ? (float) $row['seedbonus'] : null,
             trackerUrlId: isset($row['tracker_url_id']) ? (int) $row['tracker_url_id'] : null,
             isDonor: isset($row['donor']) && UserDisplay::isDonor($row),
-            row: $row,
         );
     }
 
     public static function guest(): self
     {
         return self::fromRow([]);
-    }
-
-    /**
-     * Raw row for array-boundary call sites (carries `__is_donor`, which
-     * TorrentOps::dataTraffic requires).
-     *
-     * @return array<string, mixed>
-     */
-    public function toLegacyArray(): array
-    {
-        return $this->row + ['__is_donor' => $this->isDonor];
     }
 
     public function isVip(): bool

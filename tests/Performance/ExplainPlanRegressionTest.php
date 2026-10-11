@@ -16,7 +16,6 @@ use App\Repositories\ToptenRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentListingRepository;
 use App\Repositories\UserSearchRepository;
-use App\DTOs\Announce\AnnounceUser;
 use App\Services\Announce\PeerLifecycle;
 use App\Services\Cleanup\Tasks\PeerCleanupTask;
 use App\Services\TorrentStatsService;

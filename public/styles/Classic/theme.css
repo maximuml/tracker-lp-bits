@@ -1,3 +1,6 @@
+/* Classic pack — legacy-variant palette only. On modern pages the
+ * Classic token layer IS css/modern.css :root (no pack link is emitted).
+ * Layer ownership: see the header block in css/modern.css. */
 body
 {
 	margin-top: 0px;

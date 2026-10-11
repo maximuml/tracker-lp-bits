@@ -1,10 +1,21 @@
 /* Modern chrome for Variant-A pages (ADR 0014).
    Loaded after nexus.css; provides the semantic layout shell and a
-   neutral design layer that does not depend on the legacy theme CSS. */
+   neutral design layer that does not depend on the legacy theme CSS.
+
+   Layer ownership (UI system):
+   - styles/<pack>/theme.css — pack palette only (--nxm-* overrides)
+   - css/modern.css (this file) — token core + chrome + page components;
+     its :root IS the Classic pack's token layer (Classic ships no pack css)
+   - styles/<pack>/theme.css (pack link, after this file) — pack overrides
+   - css/nxt.css — compiled Tailwind utilities; its :where(:root) fallback
+     is the token source for legacy-variant pages that skip modern.css
+   - styles/nexus.css — legacy utility classes pending retirement */
 
 /* Design tokens (ADR 0019). Two colour schemes share one semantic set:
    :root carries light values; dark overrides apply via
-   html[data-theme="dark"] or, for auto/unset, prefers-color-scheme. */
+   html[data-theme="dark"] or, for auto/unset, prefers-color-scheme.
+   Scheme-independent tokens (defined through other vars, e.g.
+   accent-text = accent) live only in :root — var() resolves per-scheme. */
 :root {
     /* semantic */
     --nxm-bg: #f4f5f7;
@@ -16,6 +27,8 @@
     --nxm-border: #d8dce3;
     --nxm-accent: #1f6fd0;
     --nxm-accent-hover: #1758a8;
+    --nxm-accent-text: var(--nxm-accent);
+    --nxm-accent-text-hover: var(--nxm-accent-hover);
     --nxm-on-accent: #ffffff;
     --nxm-success: #1e7a1e;
     --nxm-danger: #c0392b;
@@ -77,6 +90,11 @@
     --nxm-content-width: 1200px;
     --nxm-shadow: 0 1px 3px rgba(20, 25, 33, 0.12);
     --nxm-font-size: 14px;
+
+    /* control + state primitives — the single recipe every interactive
+       element shares (fields, buttons, tabs, links). */
+    --nxm-focus-outline: 2px solid var(--nxm-accent);
+    --nxm-disabled-opacity: 0.55;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1358,6 +1376,8 @@ button.btn {
 }
 .btn:hover,
 input[type="submit"]:hover { background: var(--nxm-accent-hover); }
+input[type="submit"]:disabled { background: var(--nxm-accent); opacity: var(--nxm-disabled-opacity); cursor: default; }
+button:disabled, .nx-btn:disabled, .nx-btn[disabled] { opacity: var(--nxm-disabled-opacity); cursor: default; }
 
 input[type="reset"] {
     background: transparent;
@@ -1378,11 +1398,18 @@ input[type="file"], textarea, select {
     font: inherit;
 }
 input[type="file"] { border-style: dashed; background: transparent; }
+:is(input, textarea, select):disabled {
+    opacity: var(--nxm-disabled-opacity);
+    cursor: default;
+}
 :is(input, textarea, select):focus-visible {
-    outline: 2px solid var(--nxm-accent);
+    outline: var(--nxm-focus-outline);
     outline-offset: 1px;
     border-color: var(--nxm-accent);
 }
+/* After :focus-visible so an invalid field keeps the danger border while
+   focused (equal specificity, this rule wins). */
+:is(input, textarea, select)[aria-invalid="true"] { border-color: var(--nxm-danger); }
 textarea { resize: vertical; }
 
 /* ---------- Footer ---------- */
@@ -1407,7 +1434,7 @@ textarea { resize: vertical; }
 /* ---------- Accessibility ---------- */
 
 :focus-visible {
-    outline: 2px solid var(--nxm-accent);
+    outline: var(--nxm-focus-outline);
     outline-offset: 2px;
 }
 
@@ -1555,7 +1582,7 @@ select.nx-field__input {
     font: inherit;
 }
 .nx-field__input[aria-invalid="true"] { border-color: var(--nxm-danger); }
-.nx-field__input:focus-visible { outline: 2px solid var(--nxm-accent); outline-offset: 1px; }
+.nx-field__input:focus-visible { outline: var(--nxm-focus-outline); outline-offset: 1px; }
 .nx-field__error { margin: 0.25rem 0 0; color: var(--nxm-danger); font-size: 0.85rem; }
 .nx-field__help { margin: 0.25rem 0 0; color: var(--nxm-text-dim); font-size: 0.85rem; }
 
@@ -1574,8 +1601,8 @@ select.nx-field__input {
 .nx-btn:hover { background: var(--nxm-surface); }
 .nx-btn--primary { border-color: var(--nxm-accent); background: var(--nxm-accent); color: var(--nxm-on-accent); }
 .nx-btn--primary:hover { background: var(--nxm-accent-hover); }
-.nx-btn--danger { border-color: var(--nxm-danger); background: var(--nxm-danger); color: var(--nxm-on-accent); }
-.nx-btn:focus-visible { outline: 2px solid var(--nxm-accent); outline-offset: 2px; }
+.nx-btn--danger { border-color: var(--nxm-danger); background: var(--nxm-danger); color: var(--nxm-on-danger); }
+.nx-btn:focus-visible { outline: var(--nxm-focus-outline); outline-offset: 2px; }
 
 /* Shared footer preview image (was an inline style — CSP-blocked). */
 #nexus-preview { position: absolute; }
@@ -2107,7 +2134,7 @@ a.nx-mail:hover { color: var(--nxm-text); }
     border: 1px solid var(--nxm-border, rgba(127,127,127,.4)); border-radius: 6px;
     background: var(--nxm-surface, #fff); color: var(--nxm-text, #1d2733); font-size: 0.92rem;
 }
-.nx-faq__search-input:focus { outline: 2px solid var(--nxm-accent, #1f6fd0); outline-offset: 1px; }
+.nx-faq__search-input:focus { outline: var(--nxm-focus-outline); outline-offset: 1px; }
 .nx-faq__search-count { font-size: 0.82rem; color: var(--nxm-dim, #6b7280); }
 .nx-faq__item { border-bottom: 1px solid var(--nxm-border, rgba(127,127,127,.25)); }
 .nx-faq__item:first-of-type { border-top: 1px solid var(--nxm-border, rgba(127,127,127,.25)); }

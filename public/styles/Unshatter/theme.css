@@ -2,12 +2,11 @@
  * Unshatter — Linkin Park "From Zero" era palette: black + white + yellow.
  * Sharp square geometry, yellow accent, jagged "shatter" divider accents.
  *
- * This stylesheet ships inside the Unshatter pack and is loaded before
- * css/modern.css, so every --nxm-* override below is pinned behind a
- * `:root`-qualified selector: html[data-theme="X"]:root has higher
- * specificity than the plain html[data-theme="X"] rules in modern.css,
- * which keeps the pack's palette authoritative. Light and dark variants
- * are both defined; "auto" follows prefers-color-scheme between them.
+ * This stylesheet ships inside the Unshatter pack and is loaded AFTER
+ * css/modern.css (the pack link in head-assets), so its --nxm-* overrides
+ * win the cascade. Palette only — component rules live in css/modern.css.
+ * Layer ownership: see the header block in css/modern.css. Light and dark
+ * variants are both defined; "auto" follows prefers-color-scheme.
  */
 
 /* ---------- Dark variant (default / auto prefers-color-scheme dark) ---------- */

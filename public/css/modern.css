@@ -1935,7 +1935,8 @@ ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
 
 /* BBCode toolbar: ghost buttons in logical groups (bbcode-editor component). */
 .bbcode-toolbar { gap: 0.6rem; align-items: center; }
-.bbcode-group { display: flex; gap: 2px; align-items: center; }
+.bbcode-group { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; min-width: 0; max-width: 100%; }
+.bbcode-group select { min-width: 0; max-width: 100%; }
 .bbcode-toolbar input[type="button"] {
     background: var(--nxm-surface-alt);
     color: var(--nxm-text);

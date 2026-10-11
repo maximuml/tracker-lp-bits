@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
 use App\Models\Peer;
@@ -14,8 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 final class PeerLifecycle
 {
-    /** @var array<string, mixed> */
-    private array $user;
+    private AnnounceUser $user;
 
     private string $dt;
 
@@ -57,9 +57,8 @@ final class PeerLifecycle
 
     /**
      * @param  array<string, mixed>  $torrent
-     * @param  array<string, mixed>  $user
      */
-    public function __construct(AnnounceRequestDto $dto, array $torrent, array $user, string $dt, TorrentStatsService $torrentStats)
+    public function __construct(AnnounceRequestDto $dto, array $torrent, AnnounceUser $user, string $dt, TorrentStatsService $torrentStats)
     {
         $this->limitGuard = new PeerLimitGuard($dto, $torrent);
         $this->torrentStats = $torrentStats;
@@ -75,7 +74,7 @@ final class PeerLifecycle
         $this->seeder = $dto->isSeeder() ? 1 : 0;
         $this->left = $dto->left;
         $this->event = $dto->event;
-        $this->userId = (int) ($user['id'] ?? 0);
+        $this->userId = $user->id;
         $this->torrentId = (int) ($torrent['id'] ?? 0);
     }
 
@@ -168,7 +167,7 @@ final class PeerLifecycle
             throw TrackerException::failure('You cannot seed the same torrent from more than 3 locations.');
         }
 
-        $this->limitGuard->enforceForNewPeer($this->user, $this->userId);
+        $this->limitGuard->enforceForNewPeer($this->user);
 
         $peerInsert = [
             'torrent' => $this->torrentId,

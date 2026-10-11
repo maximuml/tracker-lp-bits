@@ -99,7 +99,7 @@ class AnnounceService
             return $repDict;
         }
 
-        $peerLifecycle = new PeerLifecycle($dto, $torrent, $ctx->user->toLegacyArray(), $ctx->dt, $this->repos->torrentStats);
+        $peerLifecycle = new PeerLifecycle($dto, $torrent, $ctx->user, $ctx->dt, $this->repos->torrentStats);
         $self = $peerLifecycle->findSelf();
         $ctx = $ctx->withSelf($self);
 
@@ -287,7 +287,7 @@ class AnnounceService
 
         $result = $peerLifecycle->process($traffic->upthis, $traffic->downthis, $traffic->snatchTimeColumn, $traffic->snatchTimeIncrement, $traffic->leechTimeNoSeederIncrement);
 
-        $snatchInfo = $this->hitAndRunHandler->handle($ctx->dto->left, $ctx->dto->event, $ctx->user->toLegacyArray(), $torrent, $ctx->userId(), $ctx->torrentId(), $ctx->isDonor, $ctx->dt, $result->snatchInfo)
+        $snatchInfo = $this->hitAndRunHandler->handle($ctx->dto->left, $ctx->dto->event, $ctx->user, $torrent, $ctx->torrentId(), $ctx->dt, $result->snatchInfo)
             ?? $result->snatchInfo;
 
         $this->applyUserUpdate($ctx, $result);

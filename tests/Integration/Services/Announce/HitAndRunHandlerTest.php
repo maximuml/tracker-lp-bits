@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services\Announce;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\Enums\TorrentHr;
 use App\Enums\UserClass;
 use App\Models\Snatch;
@@ -43,14 +44,17 @@ final class HitAndRunHandlerTest extends TestCase
      */
     private function handle(array $user = [], array $torrent = [], int $left = 100, ?string $event = null, bool $isDonor = false): ?array
     {
+        $row = $user + ['class' => UserClass::USER->value];
+        if ($isDonor) {
+            $row['donor'] = 'yes';
+        }
+
         return $this->handler->handle(
             $left,
             $event,
-            $user + ['class' => UserClass::USER->value],
+            AnnounceUser::fromRow($row),
             $torrent + ['mode' => 'b', 'hr' => TorrentHr::NO->value, 'size' => 1000],
-            999999,
             888888,
-            $isDonor,
             '2026-01-01 00:00:00',
             false,
         );
@@ -84,11 +88,12 @@ final class HitAndRunHandlerTest extends TestCase
         return $this->handler->handle(
             $left,
             $event,
-            ['class' => $class],
+            AnnounceUser::fromRow([
+                'id' => (int) $user->id,
+                'class' => $class,
+            ] + ($isDonor ? ['donor' => 'yes'] : [])),
             $torrentRow + ['mode' => 'b', 'hr' => TorrentHr::NO->value, 'size' => (int) $torrent->size],
-            (int) $user->id,
             (int) $torrent->id,
-            $isDonor,
             '2026-01-01 00:00:00',
             false,
         );

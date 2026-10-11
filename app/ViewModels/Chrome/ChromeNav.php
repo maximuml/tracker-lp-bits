@@ -22,6 +22,9 @@ final class ChromeNav
     public static function items(PageLayoutContext $context, ChromeRepositories $chrome): array
     {
         $script = $context->script !== '' ? $context->script : basename((string) $context->scriptFileName, '.php');
+        if ($script === 'index' && preg_match('#^/web/([a-zA-Z0-9_-]+)#', request()->getPathInfo(), $m) === 1) {
+            $script = $m[1];
+        }
         $user = $context->user;
         $userId = (int) ($user['id'] ?? 0);
 
@@ -30,11 +33,12 @@ final class ChromeNav
             preg_match('/forums/i', $script) => 'forums',
             preg_match('/latestcomments/i', $script) => 'latestcomments',
             preg_match('/torrents/i', $script) => 'torrents',
+            preg_match('/^details$/i', $script) => 'torrents',
             preg_match('/offers|offcomment/i', $script) => 'offers',
             preg_match('/upload/i', $script) => 'upload',
             preg_match('/usercp/i', $script) => 'usercp',
             preg_match('/topten/i', $script) => 'topten',
-            preg_match('/log/i', $script) => 'log',
+            preg_match('/^log$/i', $script) => 'log',
             preg_match('/rules/i', $script) => 'rules',
             preg_match('/faq/i', $script) => 'faq',
             preg_match('/contactstaff/i', $script) => 'contactstaff',

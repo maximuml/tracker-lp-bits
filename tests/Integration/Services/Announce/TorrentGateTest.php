@@ -305,6 +305,28 @@ final class TorrentGateTest extends TestCase
         }
     }
 
+    public function test_check_paid_skips_leecher_without_seedbonus_row(): void
+    {
+        Bus::fake();
+        $this->setSetting('torrent.paid_torrent_enabled', 'yes');
+
+        $buyer = $this->makeUser(['class' => 1, 'seedbonus' => 100]);
+        $owner = $this->makeUser();
+        $torrent = $this->makeTorrent($owner, ['price' => 50]);
+        $ctx = $this->makeCtx($this->makeDto((string) $torrent->info_hash), $buyer);
+        $ctx = $ctx->withTorrent($this->torrentRow($torrent));
+
+        // Seedbonus column absent/null in the user row — must still skip
+        // the purchase path even though the torrent itself is paid.
+        $row = $buyer->getAttributes();
+        unset($row['seedbonus']);
+        $ctx = $ctx->withUser(AnnounceUser::fromRow($row));
+
+        $this->gate->checkPaid($ctx);
+        $this->addToAssertionCount(1);
+        Bus::assertNotDispatched(BuyTorrent::class);
+    }
+
     public function test_check_paid_warns_and_dispatches_when_status_unknown(): void
     {
         Bus::fake();

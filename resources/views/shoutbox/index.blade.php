@@ -3,7 +3,7 @@
 <base href="{{ url('/') }}/" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc(\App\Support\Style::cssUriWithContext().'theme.css') }}" type="text/css">
-<link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('styles/nexus.css') }}" type="text/css">
+<link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/nxt.css') }}" type="text/css">
 <script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $shoutCsrf }}';</script><script src="{{ \App\Support\AssetAppender::versionedSrc('js/shoutbox.js') }}" type="text/javascript"></script><link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('styles/shoutbox.css') }}" type="text/css"><link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/modern.css') }}" type="text/css">
 {{ \App\Support\Style::addiCodeWithContext() }}
 <script type="text/javascript" nonce="{{ $cspNonce ?? '' }}">

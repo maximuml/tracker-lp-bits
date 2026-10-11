@@ -12,5 +12,5 @@
 <div class="nx-fhead"><b>{{ __('offers.row_description')}}<span class="text-nxm-danger">*</span></b></div><div class="nx-fcell">
 <livewire:bbcode-editor form="compose" text="body" :content="$edit_offer['bodyContent'] ?? ''" />
 </div>
-<div class="nx-ffull nx-toolbox text-center"><input id="qr" type="submit" value="{{ __('offers.submit_edit_offer')}}" class="btn" /></div>
+<div class="nx-ffull nx-toolbox text-center"><input id="qr" type="submit" value="{{ __('offers.submit_edit_offer')}}" class="nx-btn nx-btn--primary" /></div>
 </div></form><br />

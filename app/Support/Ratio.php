@@ -118,7 +118,7 @@ final class Ratio
 
     /**
      * CSS utility class (`nx-ratio-1`..`nx-ratio-10`, declared in
-     * `public/styles/nexus.css`) matching the {@see color()} bucket —
+     * `resources/css/nxt.css`) matching the {@see color()} bucket —
      * the CSP-safe way to colour a ratio; returns '' when healthy.
      */
     public static function colorClass(mixed $ratio): string

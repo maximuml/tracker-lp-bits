@@ -199,7 +199,7 @@ class TechnicalInformation
             return '';
         }
 
-        // .nti-* styles live in public/styles/nexus.css — an inline <style>
+        // .nti-* styles live in public/css/nxt.css — an inline <style>
         // block here is blocked by CSP style-src (no nonce available).
         return view('torrent._technical_info', ['vm' => $this->detailsViewModel()])->render();
     }

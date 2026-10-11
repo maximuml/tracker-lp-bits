@@ -104,7 +104,7 @@
             <div class="nx-fhead">{{ __('complains.text_new_email') ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" autocomplete="email" /></div>
             <div class="nx-fhead">{{ __('complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('complains.text_new_body_placeholder') ?? '' }}"></textarea></div>
             {{ $captchaHtml }}
-            <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') ?? 'Submit' }}" class="btn" /></div>
+            <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') ?? 'Submit' }}" class="nx-btn nx-btn--primary" /></div>
         </div>
     </form>
 </section>

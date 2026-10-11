@@ -376,21 +376,6 @@ a.altlink_green:hover
 	padding-top: 1px;
 	border-bottom: #ccc 1px outset
 }
-.btn
-{
-	border-right: #ccc 1px outset;
-	padding-right: 2px;
-	border-top: #ccc 1px outset;
-	padding-left: 2px;
-	font-weight: bold;
-	background: url(./btnbg.gif) repeat-x left top;
-	padding-bottom: 1px;
-	border-left: #ccc 1px outset;
-	cursor: pointer;
-	color: #666;
-	padding-top: 1px;
-	border-bottom: #ccc 1px outset
-}
 .small
 {
 }

@@ -12,7 +12,7 @@
 <div class="nx-fgrid">
     <div class="nx-fhead">User name</div><div class="nx-fcell"><input type="text" name="username" size="40"></div>
     <div class="nx-fhead">Donated</div><div class="nx-fcell"><input type="text" name="donated" size="5"></div>
-    <div class="nx-ffull text-center"><input type="submit" value="Okay" class="btn"></div>
+    <div class="nx-ffull text-center"><input type="submit" value="Okay" class="nx-btn nx-btn--primary"></div>
 </div>
 </form>
 @endsection

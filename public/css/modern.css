@@ -1,5 +1,5 @@
 /* Modern chrome for Variant-A pages (ADR 0014).
-   Loaded after nexus.css; provides the semantic layout shell and a
+   Loaded after the sprite/pack styles; provides the semantic layout shell and a
    neutral design layer that does not depend on the legacy theme CSS.
 
    Layer ownership (UI system):
@@ -9,7 +9,7 @@
    - styles/<pack>/theme.css (pack link, after this file) — pack overrides
    - css/nxt.css — compiled Tailwind utilities; its :where(:root) fallback
      is the token source for legacy-variant pages that skip modern.css
-   - styles/nexus.css — legacy utility classes pending retirement */
+*/
 
 /* Design tokens (ADR 0019). Two colour schemes share one semantic set:
    :root carries light values; dark overrides apply via
@@ -95,6 +95,9 @@
        element shares (fields, buttons, tabs, links). */
     --nxm-focus-outline: 2px solid var(--nxm-accent);
     --nxm-disabled-opacity: 0.55;
+    /* link text on a saturated alert/badge surface — white in every
+       scheme (on-accent is dark in the dark scheme, unreadable there). */
+    --nxm-alert-link: #ffffff;
 
     /* row highlights (own/neutral vs positive) — same in every scheme so
        highlighted rows keep their meaning; packs may override. */
@@ -108,6 +111,8 @@
         --nxm-bg: #151a20;
         --nxm-surface: #1d232c;
         --nxm-surface-alt: #262e39;
+        --nxm-highlight: #4e4438;
+        --nxm-highlight-ok: #1b5e20;
         --nxm-text: #dbe2ec;
         --nxm-text-dim: #93a2b4;
         --nxm-muted: #93a2b4;
@@ -173,6 +178,8 @@ html[data-theme="dark"] {
     --nxm-bg: #151a20;
     --nxm-surface: #1d232c;
     --nxm-surface-alt: #262e39;
+    --nxm-highlight: #4e4438;
+    --nxm-highlight-ok: #1b5e20;
     --nxm-text: #dbe2ec;
     --nxm-text-dim: #93a2b4;
     --nxm-muted: #93a2b4;
@@ -1256,7 +1263,7 @@ html[data-theme="dark"] .nxm-footer .nx-pagination__link--current :is(a:link, a:
 html[data-theme="dark"] .nxm-main :is(.colhead, .nx-colhead) :is(a:link, a:visited),
 html[data-theme="dark"] .nxm-footer :is(.colhead, .nx-colhead) :is(a:link, a:visited) { color: var(--nxm-text-dim); }
 /* Alert banners keep white links on their coloured backgrounds. */
-html[data-theme="dark"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
+html[data-theme="dark"] .nxm-alert :is(a:link, a:visited) { color: var(--nxm-alert-link); }
 /* Footer links sit inside muted text — accent vs dim text is only ~1:1,
    so underline is the distinguishing affordance (WCAG link-in-text-block). */
 html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { text-decoration: underline; }
@@ -1274,7 +1281,7 @@ html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { text-decoration: un
     html[data-theme="auto"] .nxm-main :is(.colhead, .nx-colhead) :is(a:link, a:visited),
     html[data-theme="auto"] .nxm-footer :is(.colhead, .nx-colhead) :is(a:link, a:visited) { color: var(--nxm-text-dim); }
     html:not([data-theme]) .nxm-alert :is(a:link, a:visited),
-    html[data-theme="auto"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
+    html[data-theme="auto"] .nxm-alert :is(a:link, a:visited) { color: var(--nxm-alert-link); }
     html:not([data-theme]) .nxm-footer :is(a:link, a:visited),
     html[data-theme="auto"] .nxm-footer :is(a:link, a:visited) { text-decoration: underline; }
 }
@@ -1300,7 +1307,7 @@ html[data-theme="dark"] a.altlink_green:link, html[data-theme="dark"] a.altlink_
 .classic { color: var(--nxm-success); }
 .recommended { color: var(--nxm-accent-text, var(--nxm-accent)); }
 
-/* Latest-torrents cards (nexus.css) follow the active scheme too. */
+/* Latest-torrents cards follow the active scheme too. */
 .lt-grid .lt-seed { color: var(--nxm-success); }
 .lt-grid .lt-leech { color: var(--nxm-danger); }
 .lt-grid .lt-cover .lt-cover-fallback { color: var(--nxm-text); }
@@ -1367,10 +1374,8 @@ table[data-nx="data"] tr:last-child td { border-bottom: none; }
 a { color: var(--nxm-accent-text, var(--nxm-accent)); }
 a:hover { color: var(--nxm-accent-text-hover, var(--nxm-accent-hover)); }
 
-.btn,
 input[type="submit"],
-input[type="button"],
-button.btn {
+input[type="button"] {
     background: var(--nxm-accent);
     color: var(--nxm-on-accent);
     border: none;
@@ -1379,11 +1384,10 @@ button.btn {
     cursor: pointer;
     font: inherit;
 }
-.btn:hover,
 input[type="submit"]:hover { background: var(--nxm-accent-hover); }
 input[type="submit"]:disabled { background: var(--nxm-accent); opacity: var(--nxm-disabled-opacity); cursor: default; }
 button:disabled, .nx-btn:disabled, .nx-btn[disabled],
-input[type="button"]:disabled, input[type="reset"]:disabled, .btn:disabled {
+input[type="button"]:disabled, input[type="reset"]:disabled {
     opacity: var(--nxm-disabled-opacity);
     cursor: default;
 }
@@ -1574,8 +1578,8 @@ div.niceTitle {
 .nx-auth__actions { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; }
 
 /* Form components (components/form-field, components/button). Tokenised
-   here so they follow the active colour scheme; nexus.css still carries
-   the light-only originals for hosts that do not load modern.css. */
+   here so they follow the active colour scheme; nxt.css carries
+   the legacy-variant originals for hosts that do not load modern.css. */
 .nx-field { margin-bottom: 0.75rem; }
 .nx-field__label { display: block; margin-bottom: 0.25rem; font-weight: 600; }
 .nx-field__required { color: var(--nxm-danger); }
@@ -1991,13 +1995,6 @@ ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
     background: transparent;
 }
 .bbcode-toolbar select.med { font-size: 11px; padding: 0.2rem 0.3rem; }
-.bbcode-actions input[type="button"].btn {
-    background: var(--nxm-surface-alt);
-    color: var(--nxm-text);
-    border: 1px solid var(--nxm-border);
-    font-weight: 500;
-}
-.bbcode-actions input[type="button"].btn:hover { border-color: var(--nxm-text-dim); }
 
 /* Submit row at the end of the upload form — pinned to the viewport bottom
    while the form scrolls so the primary action stays reachable. */

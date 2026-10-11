@@ -172,8 +172,8 @@ function shoutboxEdit(id) {
 
     var html = '<span class="shoutbox-editing">' +
         '<input type="text" id="shout-edit-text-' + id + '" value="' + shoutboxEscapeHtml(text) + '" />' +
-        '<button type="button" class="btn" data-shout-save="' + id + '">Save</button>' +
-        '<button type="button" class="btn" data-shout-cancel="' + id + '">Cancel</button>' +
+        '<button type="button" class="nx-btn nx-btn--primary" data-shout-save="' + id + '">Save</button>' +
+        '<button type="button" class="nx-btn nx-btn--primary" data-shout-cancel="' + id + '">Cancel</button>' +
         '</span>';
     row.innerHTML = html;
     var input = document.getElementById('shout-edit-text-' + id);

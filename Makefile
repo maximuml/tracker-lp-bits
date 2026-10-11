@@ -1,4 +1,4 @@
-.PHONY: help up down build test test-unit test-integration test-feature test-architecture test-lint migrate-test css css-watch
+.PHONY: help up down build test test-unit test-integration test-feature test-architecture test-lint migrate-test css css-watch test-theme-readiness
 
 # Default: show available commands
 help: ## Show this help
@@ -63,3 +63,7 @@ css: ## Build public/css/nxt.css via standalone Tailwind CLI (no Node)
 
 css-watch: ## Rebuild nxt.css on every Blade/PHP change
 	./scripts/build-css.sh --watch
+
+test-theme-readiness: ## Pre-acceptance gate: CSS build fresh+wired, then browser sweep of all theme combos (no DB reset)
+	./scripts/check-theme-readiness.sh
+	cd tests/browser && npx playwright test specs/theme-readiness.spec.ts

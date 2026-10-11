@@ -453,6 +453,11 @@ jobs:
         working-directory: tests/browser
         run: npx playwright install --with-deps chromium
 
+      - name: Build Tailwind CSS layer
+        # public/ is bind-mounted into the php/openresty containers, so a
+        # host-side build lands where nginx serves it from.
+        run: bash scripts/build-css.sh && test -s public/css/nxt.css
+
       - name: Run browser smoke suite
         working-directory: tests/browser
         env:

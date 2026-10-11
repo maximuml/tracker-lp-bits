@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Performance;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\DTOs\AnnounceRequestDto;
 use App\Models\Message;
 use App\Models\Topic;
@@ -269,7 +270,7 @@ final class ExplainPlanRegressionTest extends TestCase
         $lifecycle = new PeerLifecycle(
             $dto,
             ['id' => $torrent->id],
-            ['id' => $user->id],
+            AnnounceUser::fromRow(['id' => $user->id]),
             date('Y-m-d H:i:s'),
             app(TorrentStatsService::class),
         );

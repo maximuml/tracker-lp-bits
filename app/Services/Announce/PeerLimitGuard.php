@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\DTOs\AnnounceRequestDto;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
@@ -28,17 +29,14 @@ final class PeerLimitGuard
         private readonly array $torrent,
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $user
-     */
-    public function enforceForNewPeer(array $user, int $userId): void
+    public function enforceForNewPeer(AnnounceUser $user): void
     {
-        if ((int) $user['class'] >= (int) UserClassEnum::VIP->value) {
+        if ($user->classAtLeast((int) UserClassEnum::VIP->value)) {
             return;
         }
 
-        $ratio = ($user['downloaded'] > 0) ? ($user['uploaded'] / $user['downloaded']) : 1;
-        $gigs = $user['downloaded'] / (1024 * 1024 * 1024);
+        $ratio = ($user->downloaded > 0) ? ($user->uploaded / $user->downloaded) : 1;
+        $gigs = $user->downloaded / (1024 * 1024 * 1024);
 
         if ($gigs <= 10) {
             return;
@@ -76,7 +74,7 @@ final class PeerLimitGuard
 
             if ($max > 0) {
                 $leechingCount = Peer::query()
-                    ->where('userid', $userId)
+                    ->where('userid', $user->id)
                     ->where('seeder', 0)
                     ->count();
 

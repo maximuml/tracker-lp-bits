@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Services\Announce;
 
 use App\DTOs\Announce\AnnounceContext;
+use App\DTOs\Announce\AnnounceUser;
 use App\DTOs\AnnounceRequestDto;
 use App\Services\Announce\ResponseBuilder;
 use App\Services\Announce\TrafficResult;
@@ -113,7 +114,8 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto1),
-        )->withUser(['id' => 100, 'enabled' => true, 'parked' => false, 'downloadpos' => true]);
+            user: AnnounceUser::guest(),
+        )->withUser(AnnounceUser::fromRow(['id' => 100, 'enabled' => true, 'parked' => false, 'downloadpos' => true]));
 
         // Request 2: fresh context with user 200.
         $dto2 = $this->makeDto();
@@ -130,7 +132,8 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto2),
-        )->withUser(['id' => 200, 'enabled' => true, 'parked' => false, 'downloadpos' => true]);
+            user: AnnounceUser::guest(),
+        )->withUser(AnnounceUser::fromRow(['id' => 200, 'enabled' => true, 'parked' => false, 'downloadpos' => true]));
 
         // Context 1 must still have user 100.
         $this->assertSame(100, $ctx1->userId());
@@ -153,6 +156,7 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto1),
+            user: AnnounceUser::guest(),
         )->withTorrent(['id' => 500]);
 
         $dto2 = $this->makeDto();
@@ -169,6 +173,7 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto2),
+            user: AnnounceUser::guest(),
         );
 
         $this->assertSame(500, $ctx1->torrentId());
@@ -191,6 +196,7 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto1),
+            user: AnnounceUser::guest(),
         )->withTraffic(new TrafficResult(
             uploadedIncrementForUser: 1000,
             downloadedIncrementForUser: 500,
@@ -215,6 +221,7 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto2),
+            user: AnnounceUser::guest(),
         );
 
         $this->assertSame(1000, $ctx1->uploadedIncrementForUser);
@@ -237,6 +244,7 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto1),
+            user: AnnounceUser::guest(),
         )->withUserUpdate(['last_announce_at' => '2026-01-01 10:00:00']);
 
         $dto2 = $this->makeDto();
@@ -253,6 +261,7 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto2),
+            user: AnnounceUser::guest(),
         );
 
         $this->assertSame(['last_announce_at' => '2026-01-01 10:00:00'], $ctx1->userUpdate);
@@ -280,14 +289,15 @@ final class AnnounceStateIsolationTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto),
+            user: AnnounceUser::guest(),
         );
 
-        $ctx1 = $base->withUser(['id' => 1]);
-        $ctx2 = $base->withUser(['id' => 2]);
+        $ctx1 = $base->withUser(AnnounceUser::fromRow(['id' => 1]));
+        $ctx2 = $base->withUser(AnnounceUser::fromRow(['id' => 2]));
 
         $this->assertSame(1, $ctx1->userId());
         $this->assertSame(2, $ctx2->userId());
-        $this->assertSame([], $base->user);
+        $this->assertInstanceOf(AnnounceUser::class, $base->user);
     }
 
     /**

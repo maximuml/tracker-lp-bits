@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
 use App\Repositories\LogRepository;
@@ -23,36 +24,31 @@ final class CheaterDetector
 
     /**
      * @param  array<string, mixed>  $self
-     * @param  array<string, mixed>  $user
      */
     public function checkSpeed(
         int $upthis,
         ?array $self,
-        array $user,
-        int $userId,
-        bool $isDonor,
+        AnnounceUser $user,
     ): void {
         if ($self === null || $self['announcetime'] <= 0) {
             return;
         }
 
-        if ((int) $user['class'] >= (int) UserClassEnum::VIP->value || $isDonor) {
+        if ($user->classAtLeast((int) UserClassEnum::VIP->value) || $user->isDonor) {
             return;
         }
     }
 
     /**
      * @param  array<string, mixed>|null  $self
-     * @param  array<string, mixed>  $user
      * @param  array<string, mixed>  $torrent
      */
     public function checkCheating(
         int $upthis,
         int $downthis,
         ?array $self,
-        array $user,
+        AnnounceUser $user,
         array $torrent,
-        int $userId,
         int $torrentId,
         string $dt,
     ): void {
@@ -66,16 +62,15 @@ final class CheaterDetector
         }
 
         $nodetectSecurity = (int) SiteConfig::current()->security->noDetect(0);
-        if ((int) $user['class'] >= $nodetectSecurity) {
+        if ($user->classAtLeast($nodetectSecurity)) {
             return;
         }
 
-        $this->doCheaterCheck($upthis, $downthis, (int) $torrent['seeders'], (int) $torrent['leechers'], $cheaterdetSecurity, $self, $user, $userId, $torrentId, $dt);
+        $this->doCheaterCheck($upthis, $downthis, (int) $torrent['seeders'], (int) $torrent['leechers'], $cheaterdetSecurity, $self, $user, $torrentId, $dt);
     }
 
     /**
      * @param  array<string, mixed>  $self
-     * @param  array<string, mixed>  $user
      */
     private function doCheaterCheck(
         int $uploaded,
@@ -84,8 +79,7 @@ final class CheaterDetector
         int $leechers,
         int $cheaterdetSecurity,
         array $self,
-        array $user,
-        int $userId,
+        AnnounceUser $user,
         int $torrentId,
         string $time,
     ): void {
@@ -94,11 +88,11 @@ final class CheaterDetector
         $mayBeCheaterSpeed = $mustBeCheaterSpeed / 2;
 
         if ($uploaded > 1073741824 && $upspeed > ($mustBeCheaterSpeed / $cheaterdetSecurity)) {
-            DB::transaction(function () use ($time, $uploaded, $downloaded, $seeders, $leechers, $upspeed, $self, $user, $userId, $torrentId) {
+            DB::transaction(function () use ($time, $uploaded, $downloaded, $seeders, $leechers, $upspeed, $self, $user, $torrentId) {
                 $comment = 'User account was automatically disabled by system';
                 $this->logRepository->insertCheater([
                     'added' => $time,
-                    'userid' => $userId,
+                    'userid' => $user->id,
                     'torrentid' => $torrentId,
                     'uploaded' => $uploaded,
                     'downloaded' => $downloaded,
@@ -107,10 +101,10 @@ final class CheaterDetector
                     'leechers' => $leechers,
                     'comment' => $comment,
                 ]);
-                $this->userAccountRepository->updateById($userId, ['enabled' => false]);
+                $this->userAccountRepository->updateById($user->id, ['enabled' => false]);
                 $this->userCleanupRepository->insertBanLogs([[
-                    'uid' => $userId,
-                    'username' => $user['username'],
+                    'uid' => $user->id,
+                    'username' => $user->username,
                     'reason' => "$comment(Upload speed:".Format::size($upspeed).'/s)',
                 ]]);
             });
@@ -119,19 +113,19 @@ final class CheaterDetector
         }
 
         if ($uploaded > 1073741824 && $upspeed > ($mayBeCheaterSpeed / $cheaterdetSecurity)) {
-            $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'Abnormally high uploading rate', $self, $userId, $torrentId);
+            $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'Abnormally high uploading rate', $self, $user->id, $torrentId);
 
             return;
         }
 
         if ($cheaterdetSecurity > 1 && $uploaded > 1073741824 && $upspeed > 1048576 && $leechers < (2 * $cheaterdetSecurity)) {
-            $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'User is uploading fast when there is few leechers', $self, $userId, $torrentId);
+            $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'User is uploading fast when there is few leechers', $self, $user->id, $torrentId);
 
             return;
         }
 
         if ($cheaterdetSecurity > 1 && $uploaded > 10485760 && $upspeed > 102400 && $leechers == 0) {
-            $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'User is uploading when there is no leecher', $self, $userId, $torrentId);
+            $this->insertOrUpdateCheater($time, $uploaded, $downloaded, $seeders, $leechers, 'User is uploading when there is no leecher', $self, $user->id, $torrentId);
         }
     }
 

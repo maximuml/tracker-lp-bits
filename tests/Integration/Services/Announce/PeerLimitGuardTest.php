@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services\Announce;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\DTOs\AnnounceRequestDto;
 use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
@@ -61,15 +62,14 @@ final class PeerLimitGuardTest extends TestCase
         );
     }
 
-    /** @return array<string, mixed> */
-    private function makeUser(int $class = 1, int $uploaded = 0, int $downloaded = 0): array
+    private function makeUser(int $class = 1, int $uploaded = 0, int $downloaded = 0, int $id = 1): AnnounceUser
     {
-        return [
-            'id' => 1,
+        return AnnounceUser::fromRow([
+            'id' => $id,
             'class' => $class,
             'uploaded' => $uploaded,
             'downloaded' => $downloaded,
-        ];
+        ]);
     }
 
     /** @return array<string, mixed> */
@@ -96,7 +96,7 @@ final class PeerLimitGuardTest extends TestCase
     {
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent());
 
-        $guard->enforceForNewPeer($this->makeUser(1, 0, 5 * 1024 ** 3), 1);
+        $guard->enforceForNewPeer($this->makeUser(1, 0, 5 * 1024 ** 3));
         $this->addToAssertionCount(1);
     }
 
@@ -106,7 +106,7 @@ final class PeerLimitGuardTest extends TestCase
         $this->setSetting('main.maxdlsystem', 'no');
 
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent());
-        $guard->enforceForNewPeer($this->makeUser(1, 0, 100 * 1024 ** 3), 1);
+        $guard->enforceForNewPeer($this->makeUser(1, 0, 100 * 1024 ** 3));
         $this->addToAssertionCount(1);
     }
 
@@ -120,7 +120,7 @@ final class PeerLimitGuardTest extends TestCase
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW));
 
         $this->expectException(TrackerWarningException::class);
-        $guard->enforceForNewPeer($this->makeUser(1, $uploaded, $downloaded), 1);
+        $guard->enforceForNewPeer($this->makeUser(1, $uploaded, $downloaded));
     }
 
     /** @return array<string, array{0:int,1:int}> */
@@ -143,7 +143,7 @@ final class PeerLimitGuardTest extends TestCase
 
         // Torrent added 30h ago → elapsed exceeds even the 24h window.
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW - 30 * 3600));
-        $guard->enforceForNewPeer($this->makeUser(1, 0, 20 * 1024 ** 3), 1);
+        $guard->enforceForNewPeer($this->makeUser(1, 0, 20 * 1024 ** 3));
         $this->addToAssertionCount(1);
     }
 
@@ -154,7 +154,7 @@ final class PeerLimitGuardTest extends TestCase
 
         // ratio >= 0.8 → wait = 0, no warn even for a fresh torrent.
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW));
-        $guard->enforceForNewPeer($this->makeUser(1, 20 * 1024 ** 3, 20 * 1024 ** 3), 1);
+        $guard->enforceForNewPeer($this->makeUser(1, 20 * 1024 ** 3, 20 * 1024 ** 3));
         $this->addToAssertionCount(1);
     }
 
@@ -167,7 +167,7 @@ final class PeerLimitGuardTest extends TestCase
 
         $inside = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW - ($hours * 3600 - 60)));
         try {
-            $inside->enforceForNewPeer($user, 1);
+            $inside->enforceForNewPeer($user);
             $this->fail("expected warning 60s before the {$hours}h window ends");
         } catch (TrackerWarningException $e) {
             $this->assertSame(60, $e->getResponse()['interval']);
@@ -176,7 +176,7 @@ final class PeerLimitGuardTest extends TestCase
         }
 
         $after = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW - $hours * 3600));
-        $after->enforceForNewPeer($user, 1);
+        $after->enforceForNewPeer($user);
     }
 
     /** @return array<string, array{0:int,1:int}> */
@@ -198,7 +198,7 @@ final class PeerLimitGuardTest extends TestCase
         $this->setSetting('main.maxdlsystem', 'no');
 
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW));
-        $guard->enforceForNewPeer($this->makeUser(1, 16 * 1024 ** 3, 20 * 1024 ** 3), 1);
+        $guard->enforceForNewPeer($this->makeUser(1, 16 * 1024 ** 3, 20 * 1024 ** 3));
         $this->addToAssertionCount(1);
     }
 
@@ -208,10 +208,10 @@ final class PeerLimitGuardTest extends TestCase
         $this->setSetting('main.maxdlsystem', 'no');
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent(TIMENOW));
 
-        $guard->enforceForNewPeer($this->makeUser(1, 0, 10 * 1024 ** 3), 1);
+        $guard->enforceForNewPeer($this->makeUser(1, 0, 10 * 1024 ** 3));
 
         $this->expectException(TrackerWarningException::class);
-        $guard->enforceForNewPeer($this->makeUser((int) UserClassEnum::VIP->value - 1, 0, 10 * 1024 ** 3 + 1), 1);
+        $guard->enforceForNewPeer($this->makeUser((int) UserClassEnum::VIP->value - 1, 0, 10 * 1024 ** 3 + 1));
     }
 
     public function test_slot_limit_allows_one_below_max(): void
@@ -227,12 +227,12 @@ final class PeerLimitGuardTest extends TestCase
 
         // ratio 0.6 → max 2; one leech in use → allowed.
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent());
-        $guard->enforceForNewPeer($this->makeUser(1, 12 * 1024 ** 3, 20 * 1024 ** 3), $user->id);
+        $guard->enforceForNewPeer($this->makeUser(1, 12 * 1024 ** 3, 20 * 1024 ** 3, (int) $user->id));
 
         // ratio 0.4 → max 1; same single leech → limit reached.
         $this->expectException(TrackerException::class);
         $this->expectExceptionMessage('You may at most download 1 torrents');
-        $guard->enforceForNewPeer($this->makeUser(1, 8 * 1024 ** 3, 20 * 1024 ** 3), $user->id);
+        $guard->enforceForNewPeer($this->makeUser(1, 8 * 1024 ** 3, 20 * 1024 ** 3, (int) $user->id));
     }
 
     private function insertLeechingPeer(int $torrentId, User $user, int $i): void
@@ -288,7 +288,7 @@ final class PeerLimitGuardTest extends TestCase
 
         $this->expectException(TrackerException::class);
         $this->expectExceptionMessage('slot limit');
-        $guard->enforceForNewPeer($this->makeUser(1, $uploaded, $downloaded), $user->id);
+        $guard->enforceForNewPeer($this->makeUser(1, $uploaded, $downloaded, (int) $user->id));
     }
 
     /** @return array<string, array{0:int,1:int,2:int}> */
@@ -313,7 +313,7 @@ final class PeerLimitGuardTest extends TestCase
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent());
 
         // ratio < 0.5 → max 1 leech, but no existing leeching peers.
-        $guard->enforceForNewPeer($this->makeUser(1, 0, 20 * 1024 ** 3), $user->id);
+        $guard->enforceForNewPeer($this->makeUser(1, 0, 20 * 1024 ** 3, (int) $user->id));
         $this->addToAssertionCount(1);
     }
 
@@ -326,7 +326,7 @@ final class PeerLimitGuardTest extends TestCase
         $user = User::factory()->create(['class' => 1]);
         // ratio 1.0 → max = 0 → no cap regardless of peer count.
         $guard = new PeerLimitGuard($this->makeDto(), $this->makeTorrent());
-        $guard->enforceForNewPeer($this->makeUser(1, 25 * 1024 ** 3, 20 * 1024 ** 3), $user->id);
+        $guard->enforceForNewPeer($this->makeUser(1, 25 * 1024 ** 3, 20 * 1024 ** 3));
         $this->addToAssertionCount(1);
     }
 

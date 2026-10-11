@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services\Announce;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
@@ -113,9 +114,9 @@ final class PeerLifecycleTest extends TestCase
     }
 
     /** @return array<string, mixed> */
-    private function userRow(User $user): array
+    private function userRow(User $user): AnnounceUser
     {
-        return $user->getAttributes();
+        return AnnounceUser::fromRow($user->getAttributes());
     }
 
     private function dt(): string

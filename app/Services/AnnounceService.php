@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTOs\Announce\AnnounceContext;
-use App\Enums\UserClass as UserClassEnum;
+use App\DTOs\Announce\AnnounceUser;
 use App\Exceptions\ClientNotAllowedException;
 use App\Exceptions\TrackerException;
 use App\Models\Peer;
@@ -27,7 +27,6 @@ use App\Support\Logger;
 use App\Support\RedisGuard;
 use App\Support\Tracker;
 use App\Support\Url;
-use App\Support\UserDisplay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -69,6 +68,7 @@ class AnnounceService
             announceWait: MIN_ANNOUNCE_WAIT_SECOND,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto),
+            user: AnnounceUser::guest(),
         );
 
         $this->blockBrowser($ctx);
@@ -114,15 +114,15 @@ class AnnounceService
             $ctx->self,
             $ctx->params,
             $torrent,
-            $ctx->user,
+            $ctx->user->toLegacyArray(),
             $ctx->snatchInfo,
             $ctx->ip,
             $ctx->seeder,
         );
         $ctx = $ctx->withTraffic($traffic);
 
-        $this->cheaterDetector->checkSpeed($traffic->upthis, $ctx->self, $ctx->user, $ctx->userId(), $ctx->isDonor);
-        $this->cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $ctx->self, $ctx->user, $torrent, $ctx->userId(), $ctx->torrentId(), $ctx->dt);
+        $this->cheaterDetector->checkSpeed($traffic->upthis, $ctx->self, $ctx->user);
+        $this->cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $ctx->self, $ctx->user, $torrent, $ctx->torrentId(), $ctx->dt);
 
         $response = DB::transaction(function () use ($ctx, $peerLifecycle, $traffic): array {
             return $this->process($ctx, $peerLifecycle, $traffic);
@@ -195,20 +195,21 @@ class AnnounceService
 
         $this->currentUser->set($user);
 
-        if (! $user['enabled']) {
+        $announceUser = AnnounceUser::fromRow($user);
+
+        if (! $announceUser->enabled) {
             throw TrackerException::failure('Your account is disabled!');
         }
-        if ($user['parked']) {
+        if ($announceUser->parked) {
             throw TrackerException::failure('Your account is parked! (Read the FAQ)');
         }
-        if (! $user['downloadpos']) {
+        if (! $announceUser->downloadpos) {
             throw TrackerException::failure('Your downloading privileges have been disabled! (Read the rules)');
         }
 
-        $isDonor = UserDisplay::isDonor($user);
-        $user['__is_donor'] = $isDonor;
+        $isDonor = $announceUser->isDonor;
 
-        $ctx = $ctx->withUser($user)->withIsDonor($isDonor);
+        $ctx = $ctx->withUser($announceUser)->withIsDonor($isDonor);
 
         $this->checkTrackerUrl($ctx);
 
@@ -217,7 +218,7 @@ class AnnounceService
 
     private function checkTrackerUrl(AnnounceContext $ctx): void
     {
-        $trackerUrl = Tracker::schemaAndHost((int) $ctx->user['tracker_url_id'], true);
+        $trackerUrl = Tracker::schemaAndHost((int) $ctx->user->trackerUrlId, true);
         $trackerUrl = is_array($trackerUrl) ? implode('', $trackerUrl) : $trackerUrl;
         $currentUrl = Url::schemeAndHost();
 
@@ -240,7 +241,7 @@ class AnnounceService
         }
 
         if ($clicheckRes) {
-            if (! $ctx->user['showclienterror']) {
+            if (! $ctx->user->showclienterror) {
                 $this->trafficAccountant->markClientError($ctx->userId());
                 RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
             }
@@ -248,7 +249,7 @@ class AnnounceService
         }
 
         $userUpdate = $ctx->userUpdate;
-        if ($ctx->user['showclienterror']) {
+        if ($ctx->user->showclienterror) {
             $userUpdate['showclienterror'] = false;
             RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
         }
@@ -286,7 +287,7 @@ class AnnounceService
 
         $result = $peerLifecycle->process($traffic->upthis, $traffic->downthis, $traffic->snatchTimeColumn, $traffic->snatchTimeIncrement, $traffic->leechTimeNoSeederIncrement);
 
-        $snatchInfo = $this->hitAndRunHandler->handle($ctx->dto->left, $ctx->dto->event, $ctx->user, $torrent, $ctx->userId(), $ctx->torrentId(), $ctx->isDonor, $ctx->dt, $result->snatchInfo)
+        $snatchInfo = $this->hitAndRunHandler->handle($ctx->dto->left, $ctx->dto->event, $ctx->user, $torrent, $ctx->torrentId(), $ctx->dt, $result->snatchInfo)
             ?? $result->snatchInfo;
 
         $this->applyUserUpdate($ctx, $result);
@@ -312,7 +313,7 @@ class AnnounceService
     {
         $userUpdate = $ctx->userUpdate;
 
-        if ($ctx->clientFamilyId != 0 && $ctx->clientFamilyId != (int) $ctx->user['clientselect']) {
+        if ($ctx->clientFamilyId != 0 && $ctx->clientFamilyId != $ctx->user->clientselect) {
             $userUpdate['clientselect'] = $ctx->clientFamilyId;
         }
 
@@ -325,7 +326,7 @@ class AnnounceService
             $userUpdate['downloaded'] = DB::raw(DB::getQueryGrammar()->wrap('downloaded').' + '.(int) $ctx->downloadedIncrementForUser); // @phpstan-ignore argument.type
         }
 
-        if ((int) $ctx->user['class'] === (int) UserClassEnum::VIP->value) {
+        if ($ctx->user->isVip()) {
             unset($userUpdate['downloaded']);
         }
 

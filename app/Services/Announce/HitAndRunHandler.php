@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Announce;
 
+use App\DTOs\Announce\AnnounceUser;
 use App\Enums\HitAndRunMode;
 use App\Enums\TorrentHr;
 use App\Enums\UserClass as UserClassEnum;
@@ -25,7 +26,6 @@ final class HitAndRunHandler
     ) {}
 
     /**
-     * @param  array<string, mixed>  $user
      * @param  array<string, mixed>  $torrent
      * @param  array<string, mixed>|false  $snatchInfo
      * @return array<string, mixed>|null
@@ -33,21 +33,21 @@ final class HitAndRunHandler
     public function handle(
         int $left,
         ?string $event,
-        array $user,
+        AnnounceUser $user,
         array $torrent,
-        int $userId,
         int $torrentId,
-        bool $isDonor,
         string $dt,
         array|false $snatchInfo,
     ): ?array {
         if (($left <= 0 && $event !== 'completed')
-            || (int) $user['class'] >= (int) UserClassEnum::VIP->value
-            || $isDonor
+            || $user->classAtLeast((int) UserClassEnum::VIP->value)
+            || $user->isDonor
             || empty($torrent['mode'])
         ) {
             return null;
         }
+
+        $userId = $user->id;
 
         $snatchInfo = $this->torrentStats->getSnatchInfo($torrentId, $userId);
         if (! $snatchInfo) {

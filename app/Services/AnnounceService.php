@@ -114,7 +114,7 @@ class AnnounceService
             $ctx->self,
             $ctx->params,
             $torrent,
-            $ctx->user->toLegacyArray(),
+            $ctx->user,
             $ctx->snatchInfo,
             $ctx->ip,
             $ctx->seeder,

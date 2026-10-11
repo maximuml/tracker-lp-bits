@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\DTOs\Announce;
 
 use App\DTOs\Announce\AnnounceContext;
+use App\DTOs\Announce\AnnounceUser;
 use App\DTOs\AnnounceRequestDto;
 use App\Services\Announce\ResponseBuilder;
 use App\Services\Announce\TrafficResult;
@@ -21,10 +22,10 @@ class AnnounceContextTest extends TestCase
     {
         $ctx = $this->makeContext();
 
-        $newCtx = $ctx->withUser(['id' => 42, 'enabled' => true, 'parked' => false, 'downloadpos' => true]);
+        $newCtx = $ctx->withUser(AnnounceUser::fromRow(['id' => 42, 'enabled' => true, 'parked' => false, 'downloadpos' => true]));
 
         $this->assertNotSame($ctx, $newCtx);
-        $this->assertSame([], $ctx->user);
+        $this->assertInstanceOf(AnnounceUser::class, $ctx->user);
         $this->assertSame(42, $newCtx->userId());
         $this->assertSame($ctx->dto, $newCtx->dto);
     }
@@ -43,7 +44,7 @@ class AnnounceContextTest extends TestCase
 
     public function test_with_self_and_snatch_info_preserve_other_fields(): void
     {
-        $ctx = $this->makeContext()->withUser(['id' => 5]);
+        $ctx = $this->makeContext()->withUser(AnnounceUser::fromRow(['id' => 5]));
         $self = ['id' => 1, 'seeder' => 0];
         $snatchInfo = ['id' => 10, 'uploaded' => 500];
 
@@ -79,7 +80,7 @@ class AnnounceContextTest extends TestCase
         $dto = $this->makeDto();
         $builder = new ResponseBuilder($dto);
         $ctx = $this->makeContext()
-            ->withUser(['id' => 7])
+            ->withUser(AnnounceUser::fromRow(['id' => 7]))
             ->withTorrent(['id' => 3]);
 
         $newCtx = $ctx->withResponseBuilder($builder);
@@ -91,7 +92,7 @@ class AnnounceContextTest extends TestCase
 
     public function test_is_seeder_returns_true_when_seeder_is_one(): void
     {
-        $ctx = $this->makeContext()->withUser(['id' => 1]);
+        $ctx = $this->makeContext()->withUser(AnnounceUser::fromRow(['id' => 1]));
 
         $this->assertFalse($ctx->isSeeder());
 
@@ -109,6 +110,7 @@ class AnnounceContextTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto),
+            user: AnnounceUser::guest(),
         );
 
         $this->assertTrue($seederCtx->isSeeder());
@@ -141,6 +143,7 @@ class AnnounceContextTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto),
+            user: AnnounceUser::guest(),
         );
     }
 

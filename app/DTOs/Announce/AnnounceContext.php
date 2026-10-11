@@ -23,7 +23,7 @@ final readonly class AnnounceContext
 {
     /**
      * @param  array<string, mixed>  $params  Raw announce query params.
-     * @param  array<string, mixed>  $user  Authenticated user row.
+     * @param  AnnounceUser  $user  Authenticated tracker user (guest instance before auth).
      * @param  array<string, mixed>|null  $torrent  Torrent row or null if not found.
      * @param  array<string, mixed>|null  $self  Existing peer row for this user+torrent.
      * @param  array<string, mixed>|false  $snatchInfo  Snatch row or false if none.
@@ -43,7 +43,7 @@ final readonly class AnnounceContext
         public int $announceWait,
         public int $autocleanIntervalOne,
         public ResponseBuilder $responseBuilder,
-        public array $user = [],
+        public AnnounceUser $user,
         public ?array $torrent = null,
         public ?array $self = null,
         public array|false $snatchInfo = false,
@@ -56,7 +56,7 @@ final readonly class AnnounceContext
 
     public function userId(): int
     {
-        return (int) ($this->user['id'] ?? 0);
+        return $this->user->id;
     }
 
     public function torrentId(): int
@@ -79,8 +79,7 @@ final readonly class AnnounceContext
         return $this->seeder === 1;
     }
 
-    /** @param  array<string, mixed>  $user */
-    public function withUser(array $user): self
+    public function withUser(AnnounceUser $user): self
     {
         return new self(
             dto: $this->dto,

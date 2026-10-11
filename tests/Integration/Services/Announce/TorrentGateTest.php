@@ -6,6 +6,7 @@ namespace Tests\Integration\Services\Announce;
 
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\DTOs\Announce\AnnounceContext;
+use App\DTOs\Announce\AnnounceUser;
 use App\DTOs\AnnounceRequestDto;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\UserClass as UserClassEnum;
@@ -122,7 +123,7 @@ final class TorrentGateTest extends TestCase
             announceWait: 300,
             autocleanIntervalOne: 900,
             responseBuilder: new ResponseBuilder($dto),
-            user: $user->getAttributes(),
+            user: AnnounceUser::fromRow($user->getAttributes()),
         );
     }
 

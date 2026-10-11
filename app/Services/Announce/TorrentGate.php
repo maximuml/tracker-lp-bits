@@ -87,7 +87,7 @@ final class TorrentGate
     public function checkPaid(AnnounceContext $ctx): void
     {
         if ($ctx->seeder === 1
-            || ! isset($ctx->user['seedbonus'])
+            || $ctx->user->seedbonus === null
             || ! isset($ctx->torrent['price'])
             || (int) $ctx->torrent['price'] <= 0
             || (int) $ctx->torrent['owner'] == $ctx->userId()

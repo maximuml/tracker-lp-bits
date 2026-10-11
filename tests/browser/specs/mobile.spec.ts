@@ -23,6 +23,28 @@ const LEGACY_PAGES = [
   '/userdetails.php?id=1',
 ];
 
+test.describe('320px BBCode toolbar', () => {
+  test.use({
+    viewport: { width: 320, height: 800 },
+    storageState: AUTH_STATE,
+  });
+
+  test('toolbar controls wrap inside the editor', async ({ page }) => {
+    await page.goto('/sendmessage?receiver=1', { waitUntil: 'networkidle' });
+    await expect(page.locator('.bbcode-editor').first()).toBeVisible();
+    const outside = await page.locator('.bbcode-editor').first().evaluate((root) => {
+      const box = root.getBoundingClientRect();
+      return [...root.querySelectorAll('input, select, button, textarea, label')]
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && (r.left < box.left - 1 || r.right > box.right + 1);
+        })
+        .map((el) => `${el.tagName.toLowerCase()}[name=${el.getAttribute('name') ?? ''}]`);
+    });
+    expect(outside, `controls clipped by the editor: ${outside.join(', ')}`).toEqual([]);
+  });
+});
+
 test.describe('mobile viewport', () => {
   test.use({
     viewport: { width: 390, height: 844 },

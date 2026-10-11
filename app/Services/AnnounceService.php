@@ -121,8 +121,8 @@ class AnnounceService
         );
         $ctx = $ctx->withTraffic($traffic);
 
-        $this->cheaterDetector->checkSpeed($traffic->upthis, $ctx->self, $ctx->user->toLegacyArray(), $ctx->userId(), $ctx->isDonor);
-        $this->cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $ctx->self, $ctx->user->toLegacyArray(), $torrent, $ctx->userId(), $ctx->torrentId(), $ctx->dt);
+        $this->cheaterDetector->checkSpeed($traffic->upthis, $ctx->self, $ctx->user);
+        $this->cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $ctx->self, $ctx->user, $torrent, $ctx->torrentId(), $ctx->dt);
 
         $response = DB::transaction(function () use ($ctx, $peerLifecycle, $traffic): array {
             return $this->process($ctx, $peerLifecycle, $traffic);

@@ -109,7 +109,7 @@ final class TorrentSearchPanelFactory
                         'name' => (string) $item->name,
                         'checked' => $checked,
                         'checkboxName' => "{$torrentField}{$item->id}",
-                        'href' => "?{$torrentField}={$item->id}",
+                        'href' => "/web/torrents?{$torrentField}={$item->id}",
                         'iconClass' => '',
                         'iconStyle' => '',
                     ];

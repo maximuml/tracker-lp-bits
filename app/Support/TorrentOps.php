@@ -6,7 +6,6 @@ namespace App\Support;
 
 use App\DTOs\Announce\AnnounceUser;
 use App\Enums\TorrentPromotion;
-use App\Enums\UserClass as UserClassEnum;
 use App\Models\Torrent;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\Config\SiteConfig;

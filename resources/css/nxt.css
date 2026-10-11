@@ -84,6 +84,18 @@
     --nxm-highlight-ok: #00a527;
 }
 
+/* Dark variants mirror modern.css so legacy-variant pages match themed ones. */
+@media (prefers-color-scheme: dark) {
+    :where(html:not([data-theme])), :where(html[data-theme="auto"]) {
+        --nxm-highlight: #4e4438;
+        --nxm-highlight-ok: #1b5e20;
+    }
+}
+:where(html[data-theme="dark"]) {
+    --nxm-highlight: #4e4438;
+    --nxm-highlight-ok: #1b5e20;
+}
+
 /* The same interactive-state recipe modern.css applies — unlayered so it
    survives on legacy-variant pages that do not load modern.css. */
 :focus-visible { outline: var(--nxm-focus-outline); outline-offset: 2px; }

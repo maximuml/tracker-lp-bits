@@ -95,6 +95,9 @@
        element shares (fields, buttons, tabs, links). */
     --nxm-focus-outline: 2px solid var(--nxm-accent);
     --nxm-disabled-opacity: 0.55;
+    /* link text on a saturated alert/badge surface — white in every
+       scheme (on-accent is dark in the dark scheme, unreadable there). */
+    --nxm-alert-link: #ffffff;
 
     /* row highlights (own/neutral vs positive) — same in every scheme so
        highlighted rows keep their meaning; packs may override. */
@@ -108,6 +111,8 @@
         --nxm-bg: #151a20;
         --nxm-surface: #1d232c;
         --nxm-surface-alt: #262e39;
+        --nxm-highlight: #4e4438;
+        --nxm-highlight-ok: #1b5e20;
         --nxm-text: #dbe2ec;
         --nxm-text-dim: #93a2b4;
         --nxm-muted: #93a2b4;
@@ -173,6 +178,8 @@ html[data-theme="dark"] {
     --nxm-bg: #151a20;
     --nxm-surface: #1d232c;
     --nxm-surface-alt: #262e39;
+    --nxm-highlight: #4e4438;
+    --nxm-highlight-ok: #1b5e20;
     --nxm-text: #dbe2ec;
     --nxm-text-dim: #93a2b4;
     --nxm-muted: #93a2b4;
@@ -1256,7 +1263,7 @@ html[data-theme="dark"] .nxm-footer .nx-pagination__link--current :is(a:link, a:
 html[data-theme="dark"] .nxm-main :is(.colhead, .nx-colhead) :is(a:link, a:visited),
 html[data-theme="dark"] .nxm-footer :is(.colhead, .nx-colhead) :is(a:link, a:visited) { color: var(--nxm-text-dim); }
 /* Alert banners keep white links on their coloured backgrounds. */
-html[data-theme="dark"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
+html[data-theme="dark"] .nxm-alert :is(a:link, a:visited) { color: var(--nxm-alert-link); }
 /* Footer links sit inside muted text — accent vs dim text is only ~1:1,
    so underline is the distinguishing affordance (WCAG link-in-text-block). */
 html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { text-decoration: underline; }
@@ -1274,7 +1281,7 @@ html[data-theme="dark"] .nxm-footer :is(a:link, a:visited) { text-decoration: un
     html[data-theme="auto"] .nxm-main :is(.colhead, .nx-colhead) :is(a:link, a:visited),
     html[data-theme="auto"] .nxm-footer :is(.colhead, .nx-colhead) :is(a:link, a:visited) { color: var(--nxm-text-dim); }
     html:not([data-theme]) .nxm-alert :is(a:link, a:visited),
-    html[data-theme="auto"] .nxm-alert :is(a:link, a:visited) { color: #fff; }
+    html[data-theme="auto"] .nxm-alert :is(a:link, a:visited) { color: var(--nxm-alert-link); }
     html:not([data-theme]) .nxm-footer :is(a:link, a:visited),
     html[data-theme="auto"] .nxm-footer :is(a:link, a:visited) { text-decoration: underline; }
 }

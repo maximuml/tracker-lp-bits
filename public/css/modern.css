@@ -1485,6 +1485,10 @@ table.nx-torrents tbody td { background: var(--nxm-surface); }
 .nxm-empty__body { margin: 0; color: var(--nxm-muted, #666); }
 @media (max-width: 720px) {
   .nxm-filters { flex-direction: column; }
+  .nxm-field { min-width: 0; }
+  .nxm-field select { max-width: 100%; }
+  .nxm-range { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; white-space: normal; }
+  .nxm-range input { flex: 1 1 8rem; min-width: 0; max-width: 100%; box-sizing: border-box; }
   .nxm-searchline input[type="text"] { width: 100%; flex: 1 1 100%; }
 }
 

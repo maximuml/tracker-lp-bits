@@ -114,3 +114,29 @@ test.describe('mobile viewport', () => {
     await ctx.close();
   });
 });
+
+test.describe('320px search filters', () => {
+  test.use({
+    viewport: { width: 320, height: 800 },
+    storageState: AUTH_STATE,
+  });
+
+  test('expanded search filters stay inside the panel', async ({ page }) => {
+    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    const toggle = page.locator('[aria-controls="ksearchboxmain"]');
+    if ((await toggle.getAttribute('aria-expanded')) !== 'true') {
+      await toggle.click();
+    }
+    await expect(page.locator('#ksearchboxmain')).toBeVisible();
+    const outside = await page.locator('#ksearchboxmain').first().evaluate((root) => {
+      const box = root.getBoundingClientRect();
+      return [...root.querySelectorAll('input, select, button, textarea, label')]
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && (r.left < box.left - 1 || r.right > box.right + 1);
+        })
+        .map((el) => `${el.tagName.toLowerCase()}[name=${el.getAttribute('name') ?? ''}]`);
+    });
+    expect(outside, `controls clipped by the search panel: ${outside.join(', ')}`).toEqual([]);
+  });
+});

@@ -15,6 +15,7 @@ use App\Repositories\ToptenRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentListingRepository;
 use App\Repositories\UserSearchRepository;
+use App\DTOs\Announce\AnnounceUser;
 use App\Services\Announce\PeerLifecycle;
 use App\Services\Cleanup\Tasks\PeerCleanupTask;
 use App\Services\TorrentStatsService;
@@ -269,7 +270,7 @@ final class ExplainPlanRegressionTest extends TestCase
         $lifecycle = new PeerLifecycle(
             $dto,
             ['id' => $torrent->id],
-            ['id' => $user->id],
+            AnnounceUser::fromRow(['id' => $user->id]),
             date('Y-m-d H:i:s'),
             app(TorrentStatsService::class),
         );

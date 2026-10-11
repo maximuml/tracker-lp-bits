@@ -203,3 +203,30 @@ test.describe('compose form', () => {
     await expect(submit).toBeFocused();
   });
 });
+
+test.describe('Filament dashboard', () => {
+  test.use({ storageState: AUTH_STATE });
+
+  test('Latest Torrents widget has no color contrast violations', async ({
+    page,
+  }) => {
+    await page.goto('/nexusphp', { waitUntil: 'networkidle' });
+
+    const widget = page
+      .locator('.fi-wi-table')
+      .filter({ hasText: 'Torrent latest' });
+    await expect(widget).toBeVisible();
+    await expect(
+      widget.locator('a[href^="/web/details/"]'),
+    ).not.toHaveCount(0);
+    await widget.evaluate((element) =>
+      element.setAttribute('data-testid', 'latest-torrents-contrast'),
+    );
+
+    const results = await new AxeBuilder({ page })
+      .include('[data-testid="latest-torrents-contrast"]')
+      .withRules(['color-contrast'])
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
+});

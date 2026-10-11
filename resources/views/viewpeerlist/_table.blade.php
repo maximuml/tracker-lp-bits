@@ -22,7 +22,7 @@
         </thead>
     </x-slot:head>
     @foreach ($table->rows as $row)
-        <tr @if ($row->highlighted) class="bg-[#BBAF9B]" @endif>
+        <tr @if ($row->highlighted) class="bg-nxm-highlight" @endif>
             <td class="w-[1%]">
                 @if ($row->anonymous)
                     <i>{{ __('viewpeerlist.text_anonymous') }}</i>

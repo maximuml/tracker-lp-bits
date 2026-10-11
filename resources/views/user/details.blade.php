@@ -90,7 +90,7 @@
 <tr><td colspan="2" class="p-[10pt]">{{ \App\Support\Format::formatComment($user['info'], false) }}</td></tr>
 @endif
 @else
-<tr><td colspan="2" class="p-[10pt]"><span class="text-[#0000ff]">{{ __('userdetails.text_public_access_denied') ?? '' }}{{ $user['username'] }}{{ __('userdetails.text_user_wants_privacy') ?? '' }}</span></td></tr>
+<tr><td colspan="2" class="p-[10pt]"><span class="text-nxm-accent-text">{{ __('userdetails.text_public_access_denied') ?? '' }}{{ $user['username'] }}{{ __('userdetails.text_user_wants_privacy') ?? '' }}</span></td></tr>
 @endif
 @if (! $isOwner)
 <tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="/web/sendmessage?receiver={{ $user['id'] }}"><img class="f_pm" src="pic/trans.gif" alt="PM" title="{{ __('userdetails.title_send_pm') ?? '' }}" /></a>@endif<a href="/web/report?user={{ $user['id'] }}"><img class="f_report" src="pic/trans.gif" alt="Report" title="{{ __('userdetails.title_report_user') ?? '' }}" /></a></td></tr>

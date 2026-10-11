@@ -95,6 +95,11 @@
        element shares (fields, buttons, tabs, links). */
     --nxm-focus-outline: 2px solid var(--nxm-accent);
     --nxm-disabled-opacity: 0.55;
+
+    /* row highlights (own/neutral vs positive) — same in every scheme so
+       highlighted rows keep their meaning; packs may override. */
+    --nxm-highlight: #bbaf9b;
+    --nxm-highlight-ok: #00a527;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1377,7 +1382,11 @@ button.btn {
 .btn:hover,
 input[type="submit"]:hover { background: var(--nxm-accent-hover); }
 input[type="submit"]:disabled { background: var(--nxm-accent); opacity: var(--nxm-disabled-opacity); cursor: default; }
-button:disabled, .nx-btn:disabled, .nx-btn[disabled] { opacity: var(--nxm-disabled-opacity); cursor: default; }
+button:disabled, .nx-btn:disabled, .nx-btn[disabled],
+input[type="button"]:disabled, input[type="reset"]:disabled, .btn:disabled {
+    opacity: var(--nxm-disabled-opacity);
+    cursor: default;
+}
 
 input[type="reset"] {
     background: transparent;
@@ -1843,7 +1852,7 @@ input.nx-postbtn {
 .nx-postbtn:focus-visible { color: var(--nxm-text); border-color: var(--nxm-text-dim); text-decoration: none; }
 .nx-postbtn--danger:hover,
 .nx-postbtn--danger:focus-visible { color: var(--nxm-bad); border-color: var(--nxm-bad); }
-.nx-postbtn:disabled { opacity: 0.55; cursor: default; }
+.nx-postbtn:disabled { opacity: var(--nxm-disabled-opacity); cursor: default; }
 .nx-det-actions { display: inline-flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
 .nx-cmt-tools { display: inline-flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
 .nx-cmt-tools--right { justify-content: flex-end; float: right; }

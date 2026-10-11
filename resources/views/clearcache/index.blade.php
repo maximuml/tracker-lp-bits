@@ -16,7 +16,7 @@
 <div class="nx-fgrid">
     <div class="nx-fhead">Cache name</div><div class="nx-fcell"><input type="text" name="cachename" size="40"></div>
     <div class="nx-fhead">Multi languages</div><div class="nx-fcell"><input type="checkbox" name="multilang" value="yes">Yes</div>
-    <div class="nx-ffull text-center"><input type="submit" value="Okay" class="btn"></div>
+    <div class="nx-ffull text-center"><input type="submit" value="Okay" class="nx-btn nx-btn--primary"></div>
 </div>
 </form>
 @endsection

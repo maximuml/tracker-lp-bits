@@ -154,7 +154,7 @@
 @endif
 <tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.row_auto_warning') ?? '' }}<br /><i>({{ __('userdetails.text_low_ratio') ?? '' }})</i></td>
 @if ($leechwarn)
-<td class="align-top px-2.5 py-1.5"><span class="text-nxm-danger">{{ __('userdetails.text_leech_warned') ?? '' }}</span> {{ __('userdetails.text_until') ?? '' }}{{ $user['leechwarnuntil'] }}<br />({{ $leechwarnUntilPretty }}{{ __('userdetails.text_to_go') ?? '' }})&nbsp;<input id="remove-leech-warn" type="button" class="btn" value="Remove" data-uid="{{ $user['id'] }}" /></td></tr>
+<td class="align-top px-2.5 py-1.5"><span class="text-nxm-danger">{{ __('userdetails.text_leech_warned') ?? '' }}</span> {{ __('userdetails.text_until') ?? '' }}{{ $user['leechwarnuntil'] }}<br />({{ $leechwarnUntilPretty }}{{ __('userdetails.text_to_go') ?? '' }})&nbsp;<input id="remove-leech-warn" type="button" class="nx-btn nx-btn--primary" value="Remove" data-uid="{{ $user['id'] }}" /></td></tr>
 @else
 <td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_not_warned') ?? '' }}</td></tr>
 @endif
@@ -167,7 +167,7 @@
 <x-settings-row :label="__('userdetails.row_change_email')"><input type="text" size="80" name="email" value="{{ $user['email'] }}" /></x-settings-row>
 @endif
 <x-settings-row :label="__('userdetails.row_passkey')"><input name="resetkey" value="yes" type="checkbox" />{{ __('userdetails.checkbox_reset_passkey') ?? '' }}</x-settings-row>
-<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="btn" value="{{ __('userdetails.submit_okay') ?? '' }}" /></td></tr>
+<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') ?? '' }}" /></td></tr>
 </x-data-table>
 </form>
 </x-frame>

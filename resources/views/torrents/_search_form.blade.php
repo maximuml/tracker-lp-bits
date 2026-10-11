@@ -7,7 +7,7 @@
 			<div class="nxm-catrow">
 				@foreach ($cells as $cell)
 					@if ($cell['selectAll'])
-					<span class="nxm-catcell"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="btn medium" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
+					<span class="nxm-catcell"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="nx-btn nx-btn--primary" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
 					@else
 					<span class="nxm-catcell"><input type="checkbox" id="{{ $cell['checkboxName'] }}" name="{{ $cell['checkboxName'] }}" value="1" aria-label="{{ $cell['name'] !== '' ? $cell['name'] : '#'.$cell['id'] }}"@if ($cell['checked']) checked @endif /><a href="{{ $cell['href'] }}" aria-label="{{ $cell['name'] !== '' ? $cell['name'] : '#'.$cell['id'] }}"><img src="pic/cattrans.gif" class="{{ $cell['iconClass'] }}" alt="" aria-hidden="true" title="{{ $cell['name'] }}"@if ($cell['iconStyle'] !== '')@endif /></a></span>
 					@endif
@@ -22,7 +22,7 @@
 			<div class="nxm-catrow">
 				@foreach ($cells as $cell)
 					@if ($cell['selectAll'])
-					<span class="nxm-catcell"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="btn medium" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
+					<span class="nxm-catcell"><input name="{{ $cell['checkPrefix'] }}_check" value="{{ $panelVm->selectAllLabel }}" class="nx-btn nx-btn--primary" type="button" data-setchecked="{{ $cell['checkPrefix'] }}" data-setchecked-ctrl="{{ $cell['checkPrefix'] }}_check" data-checkall="{{ $panelVm->selectAllLabel }}" data-uncheckall="{{ $panelVm->unselectAllLabel }}"></span>
 					@else
 					<span class="nxm-catcell"><label><input type="checkbox" id="{{ $cell['checkboxName'] }}" name="{{ $cell['checkboxName'] }}" value="1"@if ($cell['checked']) checked @endif /><a href="{{ $cell['href'] }}">{{ $cell['name'] }}</a></label></span>
 					@endif
@@ -123,6 +123,6 @@
 			@endforeach
 		</div>
 		@endif
-		<div class="nxm-searchpanel__submit"><input type="submit" class="btn" value="{{ __('torrents.submit_go')}}" /></div>
+		<div class="nxm-searchpanel__submit"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('torrents.submit_go')}}" /></div>
 	</livewire:search-panel-toggle>
 </form>

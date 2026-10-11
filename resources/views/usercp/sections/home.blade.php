@@ -26,7 +26,7 @@
 		</span>
 	</x-settings-row-small>
 	@if ($home->passkeyLogin !== null)
-	<x-settings-row-small layout="grid" :label="__('usercp.row_passkey_login_url')"><form method="POST" action="{{ $home->passkeyLogin->action }}"><input type="hidden" name="passkey" value="{{ $home->passkeyLogin->passkey }}"><input type="hidden" name="timestamp" value="{{ $home->passkeyLogin->timestamp }}"><input type="hidden" name="signature" value="{{ $home->passkeyLogin->signature }}"><button type="submit" class="btn">Login</button></form></x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_passkey_login_url')"><form method="POST" action="{{ $home->passkeyLogin->action }}"><input type="hidden" name="passkey" value="{{ $home->passkeyLogin->passkey }}"><input type="hidden" name="timestamp" value="{{ $home->passkeyLogin->timestamp }}"><input type="hidden" name="signature" value="{{ $home->passkeyLogin->signature }}"><button type="submit" class="nx-btn nx-btn--primary">Login</button></form></x-settings-row-small>
 	@endif
 	</div>
 </div>

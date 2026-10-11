@@ -14,7 +14,7 @@
 <div class="p-[5px]">{{ __('shoutbox.text_to')}}</div><div class="p-[5px]"><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></div></div>
 <div class="flex items-start">
 <div class="p-[5px]">{{ __('shoutbox.text_search')}}</div><div class="p-[5px]"><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></div>
-<div class="p-[5px]"><input type="submit" class="btn" value="{{ __('shoutbox.text_filter')}}" /></div></div>
+<div class="p-[5px]"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('shoutbox.text_filter')}}" /></div></div>
 </form>
 </section>
 

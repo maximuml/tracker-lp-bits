@@ -22,7 +22,7 @@
 @foreach ($list->categories as $cat)
 <option value="{{ $cat->id }}">{{ $cat->name }}</option>
 @endforeach
-</select>&nbsp;&nbsp;<input type="submit" class="btn" value="{{ __('offers.submit_search') }}" /></form></div>
+</select>&nbsp;&nbsp;<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('offers.submit_search') }}" /></form></div>
 </div>
 </section>
 <br /><br />

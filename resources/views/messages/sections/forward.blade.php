@@ -15,6 +15,6 @@
 <div class="nx-fhead"><nobr>{{ __('messages.row_message') }}</nobr></div>
 <div class="nx-fcell"><textarea name="body" rows="8"></textarea><br />{{ $forward['body'] ?? '' }}</div>
 <div class="nx-ffull text-center"><input class=checkbox type="checkbox" name="save" value="yes"{{ \App\Support\YesNo::isYes($curUser['savepms'] ?? null) ? ' checked' : '' }}>{{ __('messages.checkbox_save_message') }}&nbsp;
-<input type="submit" class="btn" value={{ __('messages.submit_forward') }}></div>
+<input type="submit" class="nx-btn nx-btn--primary" value={{ __('messages.submit_forward') }}></div>
 </div>
 </form>

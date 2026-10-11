@@ -19,7 +19,7 @@
             @endif
             <div class="nx-fhead"><label for="body">{{ __('functions.row_body') }}</label></div>
             <div class="nx-fcell"><livewire:bbcode-editor form="compose" text="body" :content="$vm->body" :invalid="isset($errors) && $errors->has('body')" :described-by="isset($errors) && $errors->has('body') ? 'compose-body-error' : ''" />@if (isset($errors) && $errors->has('body'))<p class="nx-field__error" id="compose-body-error">{{ $errors->first('body') }}</p>@endif</div>
-            <div class="nx-ffull text-center"><input id="qr" type="submit" class="btn" value="{{ __('functions.submit_submit') }}" /></div>
+            <div class="nx-ffull text-center"><input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('functions.submit_submit') }}" /></div>
         </div>
     </x-frame>
 </form>

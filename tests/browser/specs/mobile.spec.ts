@@ -42,6 +42,10 @@ test.describe('mobile viewport', () => {
   test('burger toggles collapsed nav+userbar', async ({ page }) => {
     await page.goto('/index.php', { waitUntil: 'networkidle' });
 
+    await expect(page.locator('summary.nxm-usermenu__toggle')).toHaveAccessibleName(
+      'Account menu',
+    );
+
     const burger = page.locator('.nxm-burger');
     const panel = page.locator('#nxm-collapse');
     await expect(burger).toBeVisible();

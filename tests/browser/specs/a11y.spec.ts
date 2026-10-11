@@ -230,3 +230,20 @@ test.describe('Filament dashboard', () => {
     expect(results.violations).toEqual([]);
   });
 });
+
+test.describe('tracker settings form', () => {
+  test.use({ storageState: AUTH_STATE });
+
+  test('tracker controls have accessible names', async ({ page }) => {
+    await page.goto('/usercp.php?action=tracker', { waitUntil: 'networkidle' });
+
+    const results = await new AxeBuilder({ page })
+      .include('form')
+      .withRules(['label', 'select-name'])
+      .analyze();
+    const violationCounts = results.violations.map(
+      ({ id, nodes }) => `${id}: ${nodes.length}`,
+    );
+    expect(violationCounts).toEqual([]);
+  });
+});

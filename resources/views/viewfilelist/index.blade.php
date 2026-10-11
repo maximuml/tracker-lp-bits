@@ -1,5 +1,5 @@
 @isset($CURUSER)
-{{-- .fileicon rules live in styles/nexus.css: this fragment is AJAX-injected
+{{-- .fileicon rules live in css/nxt.css: this fragment is AJAX-injected
      into an already-loaded page, so an inline <style> here always carries a
      nonce for the wrong request and CSP refuses it. --}}
 <x-data-table class="nx-main" :caption="__('viewfilelist.col_path')" :caption-hidden="true">

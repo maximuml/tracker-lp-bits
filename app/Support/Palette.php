@@ -93,7 +93,7 @@ final class Palette
      * remaining wait (in hours) onto a continuous red ramp
      * `dechex(floor(127 * remaining / 48 + 128) * 65536)`; we quantize
      * the same ramp into ten `nx-wait-1`..`nx-wait-10` classes
-     * (declared in `public/styles/nexus.css`) — 1 = nearly over,
+     * (declared in `resources/css/nxt.css`) — 1 = nearly over,
      * 10 = longest wait.
      */
     public static function waitRampClass(int $remainingHours): string

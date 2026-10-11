@@ -1,5 +1,5 @@
 /* Modern chrome for Variant-A pages (ADR 0014).
-   Loaded after nexus.css; provides the semantic layout shell and a
+   Loaded after the sprite/pack styles; provides the semantic layout shell and a
    neutral design layer that does not depend on the legacy theme CSS.
 
    Layer ownership (UI system):
@@ -9,7 +9,7 @@
    - styles/<pack>/theme.css (pack link, after this file) — pack overrides
    - css/nxt.css — compiled Tailwind utilities; its :where(:root) fallback
      is the token source for legacy-variant pages that skip modern.css
-   - styles/nexus.css — legacy utility classes pending retirement */
+*/
 
 /* Design tokens (ADR 0019). Two colour schemes share one semantic set:
    :root carries light values; dark overrides apply via
@@ -1307,7 +1307,7 @@ html[data-theme="dark"] a.altlink_green:link, html[data-theme="dark"] a.altlink_
 .classic { color: var(--nxm-success); }
 .recommended { color: var(--nxm-accent-text, var(--nxm-accent)); }
 
-/* Latest-torrents cards (nexus.css) follow the active scheme too. */
+/* Latest-torrents cards follow the active scheme too. */
 .lt-grid .lt-seed { color: var(--nxm-success); }
 .lt-grid .lt-leech { color: var(--nxm-danger); }
 .lt-grid .lt-cover .lt-cover-fallback { color: var(--nxm-text); }
@@ -1578,8 +1578,8 @@ div.niceTitle {
 .nx-auth__actions { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; }
 
 /* Form components (components/form-field, components/button). Tokenised
-   here so they follow the active colour scheme; nexus.css still carries
-   the light-only originals for hosts that do not load modern.css. */
+   here so they follow the active colour scheme; nxt.css carries
+   the legacy-variant originals for hosts that do not load modern.css. */
 .nx-field { margin-bottom: 0.75rem; }
 .nx-field__label { display: block; margin-bottom: 0.25rem; font-weight: 600; }
 .nx-field__required { color: var(--nxm-danger); }

@@ -105,7 +105,7 @@ final class ChromeHead
             $packThemeUrl = $cssUri === 'styles/Classic/' ? null : $cssUri.'theme.css'.$cssUpdateDate;
 
             return [
-                array_merge(['styles/sprites.css', $picFolder.'/forumsprites.css'.$cssUpdateDate, 'styles/nexus.css'], $iconStyles),
+                array_merge(['styles/sprites.css', $picFolder.'/forumsprites.css'.$cssUpdateDate], $iconStyles),
                 [],
                 SafeHtml::fromTrustedHtml(''),
                 $picFolder,
@@ -117,7 +117,6 @@ final class ChromeHead
             'styles/sprites.css'.$cssUpdateDate,
             $picFolder.'/forumsprites.css'.$cssUpdateDate,
             $cssUri.'theme.css'.$cssUpdateDate,
-            'styles/nexus.css'.$cssUpdateDate,
         ], $iconStyles);
 
         // Tailwind utilities layer (converted components are shared between

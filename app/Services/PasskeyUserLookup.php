@@ -25,11 +25,29 @@ final class PasskeyUserLookup
     private const CACHE_TTL = 3600;
 
     /**
+     * Cache-key suffix for the invalid-passkey marker. Hashed so a
+     * caller-controlled passkey cannot mint arbitrary Redis keys.
+     */
+    public static function invalidKey(string $passkey): string
+    {
+        return 'passkey_invalid:'.hash('sha256', $passkey);
+    }
+
+    /**
+     * Passkey-keyed cache entry. Hashed so passkeys never appear in
+     * Redis key names (keyspace is visible to monitoring/CLI access).
+     */
+    public static function userCacheKey(string $passkey, string $suffix): string
+    {
+        return 'user_passkey_'.hash('sha256', $passkey).'_'.$suffix;
+    }
+
+    /**
      * @return array<string, mixed> empty array when the passkey is unknown
      */
     public function find(string $passkey): array
     {
-        $cacheKey = "user_passkey_{$passkey}_content";
+        $cacheKey = self::userCacheKey($passkey, 'content');
         $cached = RedisGuard::attempt(static fn () => Cache::get($cacheKey));
 
         if (is_array($cached) && $cached !== []) {
@@ -40,7 +58,7 @@ final class PasskeyUserLookup
         if ($user !== []) {
             RedisGuard::attempt(static function () use ($cacheKey, $user, $passkey) {
                 Cache::put($cacheKey, $user, self::CACHE_TTL);
-                Redis::connection()->client()->del("passkey_invalid:{$passkey}");
+                Redis::connection()->client()->del(self::invalidKey($passkey));
             });
         }
 

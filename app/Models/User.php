@@ -39,6 +39,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $id
  * @property string|null $username
  * @property string|null $passhash
+ * @property string $passhash_algo
  * @property string|null $secret
  * @property string|null $auth_key
  * @property int|null $auth_version

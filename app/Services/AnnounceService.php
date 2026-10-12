@@ -189,7 +189,7 @@ class AnnounceService
         $user = $this->passkeyUserLookup->find($passkey);
 
         if (! $user) {
-            RedisGuard::attempt(static fn () => Redis::connection()->client()->set("passkey_invalid:{$passkey}", TIMENOW, ['ex' => 24 * 3600]));
+            RedisGuard::attempt(static fn () => Redis::connection()->client()->set(PasskeyUserLookup::invalidKey($passkey), TIMENOW, ['ex' => 24 * 3600]));
             throw TrackerException::failure('Invalid passkey! Re-download the .torrent from '.Url::schemeAndHost(true));
         }
 
@@ -243,7 +243,7 @@ class AnnounceService
         if ($clicheckRes) {
             if (! $ctx->user->showclienterror) {
                 $this->trafficAccountant->markClientError($ctx->userId());
-                RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
+                RedisGuard::attempt(static fn () => AppCache::forgetWithLocales(PasskeyUserLookup::userCacheKey($ctx->params['passkey'], 'content')));
             }
             throw TrackerException::failure($clicheckRes);
         }
@@ -251,7 +251,7 @@ class AnnounceService
         $userUpdate = $ctx->userUpdate;
         if ($ctx->user->showclienterror) {
             $userUpdate['showclienterror'] = false;
-            RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
+            RedisGuard::attempt(static fn () => AppCache::forgetWithLocales(PasskeyUserLookup::userCacheKey($ctx->params['passkey'], 'content')));
         }
 
         return $ctx->withUserUpdate($userUpdate);

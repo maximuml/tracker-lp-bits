@@ -6,6 +6,7 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\TorrentRssController;
 use App\Repositories\TorrentRepository;
+use App\Services\PasskeyUserLookup;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -96,6 +97,48 @@ final class TorrentRssControllerTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame(400, $response->getStatusCode());
         $this->assertStringContainsString('invalid passkey', (string) $response->getContent());
+    }
+
+    public function test_torrentrss_serves_primed_response_cache(): void
+    {
+        $this->bindTorrentRepository();
+        $this->mockCurrentUser(null);
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class));
+
+        $passkey = md5('rss-feed-test');
+        $cacheKey = 'nexus_rss:'.hash('sha256', $passkey).':'.hash('xxh128', http_build_query([]));
+        Cache::put($cacheKey, '<rss><channel><title>SENTINEL_FEED</title></channel></rss>', 600);
+
+        $controller = app(TorrentRssController::class);
+        $request = Request::create('/torrentrss', 'GET', ['passkey' => $passkey]);
+        app()->instance('request', $request);
+
+        $response = $controller->torrentrss($request);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringContainsString('SENTINEL_FEED', (string) $response->getContent());
+        $this->assertStringContainsString('text/xml', (string) $response->headers->get('Content-Type'));
+    }
+
+    public function test_torrentrss_caches_user_row_for_one_hour(): void
+    {
+        $this->bindTorrentRepository();
+        $this->mockCurrentUser(null);
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class));
+
+        $passkey = md5('rss-ttl-test');
+
+        $controller = app(TorrentRssController::class);
+        $request = Request::create('/torrentrss', 'GET', ['passkey' => $passkey]);
+        app()->instance('request', $request);
+
+        Cache::spy();
+        $response = $controller->torrentrss($request);
+
+        $this->assertSame(400, $response->getStatusCode());
+        Cache::shouldHaveReceived('remember')
+            ->once()
+            ->with(PasskeyUserLookup::userCacheKey($passkey, 'rss'), 3600, Mockery::type(\Closure::class));
     }
 
     /**

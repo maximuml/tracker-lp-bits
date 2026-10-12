@@ -7,6 +7,7 @@ namespace App\Services\Announce;
 use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
+use App\Services\PasskeyUserLookup;
 use App\Support\RedisGuard;
 use Illuminate\Support\Facades\Redis;
 
@@ -43,7 +44,7 @@ final class RateLimiter
         $infoHashBinary = $dto->infoHash->toBinary();
         $infoHashFingerprint = $dto->infoHash->fingerprint();
 
-        if (RedisGuard::attempt(static fn () => $redis->get("passkey_invalid:{$passkey}"))) {
+        if (RedisGuard::attempt(static fn () => $redis->get(PasskeyUserLookup::invalidKey($passkey)))) {
             $this->warn($dto, 'Passkey invalid');
         }
 

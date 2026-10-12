@@ -8,6 +8,7 @@ use App\DTOs\AnnounceRequestDto;
 use App\Exceptions\TrackerException;
 use App\Exceptions\TrackerWarningException;
 use App\Services\Announce\RateLimiter;
+use App\Services\PasskeyUserLookup;
 use App\Support\RedisGuard;
 use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
@@ -107,7 +108,7 @@ final class RateLimiterTest extends TestCase
     {
         $this->hashByte = "\xA2";
         $passkey = bin2hex(random_bytes(16));
-        Redis::connection()->client()->set("passkey_invalid:{$passkey}", time(), ['ex' => 60]);
+        Redis::connection()->client()->set(PasskeyUserLookup::invalidKey($passkey), time(), ['ex' => 60]);
 
         $this->expectException(TrackerWarningException::class);
         $this->limiter->check($this->dto($passkey));
@@ -117,7 +118,7 @@ final class RateLimiterTest extends TestCase
     {
         $this->hashByte = "\xA3";
         $passkey = bin2hex(random_bytes(16));
-        Redis::connection()->client()->set("passkey_invalid:{$passkey}", time(), ['ex' => 60]);
+        Redis::connection()->client()->set(PasskeyUserLookup::invalidKey($passkey), time(), ['ex' => 60]);
 
         $this->expectException(TrackerException::class);
         $this->limiter->check($this->dto($passkey, 'stopped'));

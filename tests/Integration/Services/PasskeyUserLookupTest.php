@@ -43,6 +43,18 @@ final class PasskeyUserLookupTest extends TestCase
         return md5((string) mt_getrandmax().microtime(true).random_bytes(8));
     }
 
+    public function test_cache_keys_hash_the_raw_passkey(): void
+    {
+        $passkey = md5('lookup-key-test');
+        $digest = hash('sha256', $passkey);
+
+        $this->assertSame('passkey_invalid:'.$digest, PasskeyUserLookup::invalidKey($passkey));
+        $this->assertSame('user_passkey_'.$digest.'_content', PasskeyUserLookup::userCacheKey($passkey, 'content'));
+        $this->assertSame('user_passkey_'.$digest.'_rss', PasskeyUserLookup::userCacheKey($passkey, 'rss'));
+        $this->assertStringNotContainsString($passkey, PasskeyUserLookup::invalidKey($passkey));
+        $this->assertStringNotContainsString($passkey, PasskeyUserLookup::userCacheKey($passkey, 'content'));
+    }
+
     public function test_find_returns_user_for_known_passkey(): void
     {
         /** @var User $user */
@@ -51,7 +63,7 @@ final class PasskeyUserLookupTest extends TestCase
         $found = $this->lookup->find($user->passkey);
 
         $this->assertSame($user->id, $found['id']);
-        $this->assertSame($user->id, Cache::get("user_passkey_{$user->passkey}_content")['id']);
+        $this->assertSame($user->id, Cache::get(PasskeyUserLookup::userCacheKey($user->passkey, 'content'))['id']);
     }
 
     public function test_find_returns_empty_array_for_unknown_passkey(): void
@@ -75,7 +87,7 @@ final class PasskeyUserLookupTest extends TestCase
     {
         /** @var User $user */
         $user = User::factory()->create(['passkey' => self::passkey()]);
-        Cache::put("user_passkey_{$user->passkey}_content", [], 3600);
+        Cache::put(PasskeyUserLookup::userCacheKey($user->passkey, 'content'), [], 3600);
 
         $this->assertSame($user->id, $this->lookup->find($user->passkey)['id']);
     }
@@ -83,7 +95,7 @@ final class PasskeyUserLookupTest extends TestCase
     public function test_find_uses_cache_when_populated(): void
     {
         $passkey = self::passkey();
-        Cache::put("user_passkey_{$passkey}_content", ['id' => 424242, 'passkey' => $passkey], 3600);
+        Cache::put(PasskeyUserLookup::userCacheKey($passkey, 'content'), ['id' => 424242, 'passkey' => $passkey], 3600);
 
         $found = $this->lookup->find($passkey);
 
@@ -95,10 +107,10 @@ final class PasskeyUserLookupTest extends TestCase
         /** @var User $user */
         $user = User::factory()->create(['passkey' => self::passkey()]);
         $redis = Redis::connection()->client();
-        $redis->set("passkey_invalid:{$user->passkey}", time(), ['ex' => 3600]);
+        $redis->set(PasskeyUserLookup::invalidKey($user->passkey), time(), ['ex' => 3600]);
 
         $this->assertSame($user->id, $this->lookup->find($user->passkey)['id']);
-        $this->assertSame(0, $redis->exists("passkey_invalid:{$user->passkey}"));
+        $this->assertSame(0, $redis->exists(PasskeyUserLookup::invalidKey($user->passkey)));
     }
 
     public function test_find_falls_back_to_db_when_redis_is_down(): void

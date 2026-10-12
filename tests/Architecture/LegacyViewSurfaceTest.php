@@ -51,6 +51,7 @@ use Tests\Attributes\TestCategory;
  *   grep -rn 'fromTrustedHtml' resources/views --include='*.blade.php' | wc -l
  *   grep -rnE 'fromTrustedHtml\(\$lang(_\w+)?\[' resources/views --include='*.blade.php' | wc -l
  *   grep -rniE '(href|src|content|title|alt|value|data-[a-z-]+)="?@safeHtml' resources/views --include='*.blade.php' | wc -l
+ *   grep -rPn 'class="[^"]*(?<![\w-])(rowhead|colhead|colfollow|rowfollow|embedded)(?![\w-])' resources/views --include='*.blade.php' | wc -l
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class LegacyViewSurfaceTest extends TestCase
@@ -105,6 +106,9 @@ final class LegacyViewSurfaceTest extends TestCase
      * 'unsafe-inline' for style-src.
      */
     private const BASELINE_INLINE_STYLE_ATTR = 0;
+
+    /** Baseline: bare legacy NexusPHP class names in view class attributes. */
+    private const BASELINE_LEGACY_CLASSES = 0;
 
     /**
      * View subdirectories exempt from the style-attribute ratchet.
@@ -302,6 +306,24 @@ final class LegacyViewSurfaceTest extends TestCase
                .'attributes there. Use semantic classes in modern.css or nonce\'d <style> '
                .'blocks instead.',
                 self::BASELINE_INLINE_STYLE_ATTR,
+                $count,
+            ),
+        );
+    }
+
+    public function test_bare_legacy_class_count_does_not_exceed_baseline(): void
+    {
+        $count = $this->countPatternInViews(
+            '/class="[^"]*(?<![\w-])(rowhead|colhead|colfollow|rowfollow|embedded)(?![\w-])/',
+        );
+
+        $this->assertLessThanOrEqual(
+            self::BASELINE_LEGACY_CLASSES,
+            $count,
+            sprintf(
+                'Bare legacy NexusPHP class count increased from baseline %d to %d. '
+               .'Use namespaced nx- classes instead.',
+                self::BASELINE_LEGACY_CLASSES,
                 $count,
             ),
         );

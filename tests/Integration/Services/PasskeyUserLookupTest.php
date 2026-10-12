@@ -45,7 +45,7 @@ final class PasskeyUserLookupTest extends TestCase
 
     public function test_cache_keys_hash_the_raw_passkey(): void
     {
-        $passkey = '0123456789abcdef0123456789abcdef';
+        $passkey = md5('lookup-key-test');
         $digest = hash('sha256', $passkey);
 
         $this->assertSame('passkey_invalid:'.$digest, PasskeyUserLookup::invalidKey($passkey));

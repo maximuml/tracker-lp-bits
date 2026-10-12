@@ -105,7 +105,7 @@ final class TorrentRssControllerTest extends TestCase
         $this->mockCurrentUser(null);
         app()->instance(NexusCache::class, Mockery::mock(NexusCache::class));
 
-        $passkey = 'feed0123456789abcdef0123456789abcd';
+        $passkey = md5('rss-feed-test');
         $cacheKey = 'nexus_rss:'.hash('sha256', $passkey).':'.hash('xxh128', http_build_query([]));
         Cache::put($cacheKey, '<rss><channel><title>SENTINEL_FEED</title></channel></rss>', 600);
 
@@ -126,7 +126,7 @@ final class TorrentRssControllerTest extends TestCase
         $this->mockCurrentUser(null);
         app()->instance(NexusCache::class, Mockery::mock(NexusCache::class));
 
-        $passkey = 'ttl0123456789abcdef0123456789abcde';
+        $passkey = md5('rss-ttl-test');
 
         $controller = app(TorrentRssController::class);
         $request = Request::create('/torrentrss', 'GET', ['passkey' => $passkey]);

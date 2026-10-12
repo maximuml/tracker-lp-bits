@@ -12,7 +12,7 @@ namespace App\ViewModels;
  * `selectAll` cells carry the checkbox-group prefix for the legacy
  * SetChecked JS hook (data-setchecked / data-checkall / data-uncheckall).
  *
- * @phpstan-type PanelCell array{selectAll: true, checkPrefix: string}|array{selectAll: false, checkPrefix: string, id: int, name: string, checked: bool, checkboxName: string, href: string, iconClass: string, iconStyle: string}
+ * @phpstan-type PanelCell array{selectAll: true, checkPrefix: string}|array{selectAll: false, checkPrefix: string, id: int, name: string, checked: bool, checkboxName: string}
  * @phpstan-type TaxonomySection array{label: string, rows: list<list<PanelCell>>}
  */
 final class TorrentSearchPanelViewModel
@@ -21,7 +21,7 @@ final class TorrentSearchPanelViewModel
      * @param  list<list<PanelCell>>  $categoryRows
      * @param  list<TaxonomySection>  $taxonomySections
      * @param  list<string>  $hotSearches
-     * @param  array<string, string>  $searchModes
+     * @param  array<int|string, string>  $searchModes
      * @param  array<int, string>  $promotionOptions
      */
     public function __construct(
@@ -29,10 +29,10 @@ final class TorrentSearchPanelViewModel
         public readonly array $taxonomySections,
         public readonly array $hotSearches,
         public readonly string $categoryLabel,
-        public readonly int $catPadding,
         public readonly array $searchModes,
         public readonly array $promotionOptions,
-        public readonly string $selectAllLabel,
-        public readonly string $unselectAllLabel,
+        public readonly int $advancedFilterCount,
+        public readonly ?string $sortValue,
+        public readonly ?string $sortType,
     ) {}
 }

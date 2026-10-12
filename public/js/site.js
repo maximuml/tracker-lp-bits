@@ -572,6 +572,9 @@ document.addEventListener('click', function (e) {
     var setChecked = target.closest('input[data-setchecked]');
     if (setChecked && typeof SetChecked === 'function') {
         SetChecked(setChecked.getAttribute('data-setchecked'), setChecked.getAttribute('data-setchecked-ctrl'), setChecked.getAttribute('data-checkall'), setChecked.getAttribute('data-uncheckall'), -1, 10);
+        if (setChecked.hasAttribute('data-autosubmit') && setChecked.form) {
+            setChecked.form.requestSubmit();
+        }
         return;
     }
 
@@ -632,8 +635,21 @@ document.addEventListener('click', function (e) {
 
 document.addEventListener('submit', function (e) {
     var form = e.target;
+    if (form && form.matches && form.matches('.nxm-searchpanel') && (!e.submitter || e.submitter.id !== 'apply-filters')) {
+        var taxonomyInputs = form.querySelectorAll('.nxm-taxonomy-chip__input');
+        for (var i = 0; i < taxonomyInputs.length; i++) {
+            taxonomyInputs[i].checked = taxonomyInputs[i].defaultChecked;
+        }
+    }
     if (form && form.matches && (form.id === 'compose' || form.id === 'reply') && typeof postvalid === 'function') {
         if (!postvalid(form)) { e.preventDefault(); }
+    }
+});
+
+document.addEventListener('change', function (e) {
+    var input = e.target;
+    if (input && input.matches && input.matches('input[data-autosubmit]') && input.form) {
+        input.form.requestSubmit();
     }
 });
 

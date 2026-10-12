@@ -5,13 +5,12 @@ import { AUTH_STATE } from '../fixtures/auth';
 test.use({ storageState: AUTH_STATE });
 
 async function expandSearchPanel(page: Page): Promise<void> {
-  const toggle = page.locator('[aria-controls="ksearchboxmain"]');
-  await expect(toggle).toBeVisible();
-  if ((await toggle.getAttribute('aria-expanded')) !== 'true') {
-    await toggle.click();
+  const details = page.locator('#ksearchboxmain');
+  const summary = details.locator('summary');
+  if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+    await summary.click();
   }
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.locator('#ksearchboxmain')).toBeVisible();
+  await expect.poll(() => details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
 }
 
 function nameSortLink(page: Page) {
@@ -74,91 +73,131 @@ test.describe('catalog navigation', () => {
     expect(new URL(page.url()).pathname).toBe('/web/torrents');
   });
 
-  test('category cells navigate to the catalog with their category filter', async ({
+  test('category chips auto-submit and preserve active filters and sorting', async ({
     page,
   }) => {
-    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
-    await expandSearchPanel(page);
-
-    const categoryLink = page
-      .locator('#ksearchboxmain fieldset')
-      .first()
-      .locator('a[href]')
-      .first();
-    await expect(categoryLink).toBeVisible();
-    const resolvedHref = await categoryLink.evaluate(
-      (anchor: HTMLAnchorElement) => anchor.href,
+    await page.goto(
+      '/web/torrents?incldead=0&medium1=1&sort=4&type=desc',
+      { waitUntil: 'networkidle' },
     );
-    const categoryId = new URL(resolvedHref).searchParams.get('cat');
-    expect(categoryId).not.toBeNull();
+    await expandSearchPanel(page);
+    const mediaInputs = await page
+      .locator('#ksearchboxmain .nxm-taxonomy-chip__input[name^="medium"]')
+      .all();
+    let pendingTaxonomy: (typeof mediaInputs)[number] | undefined;
+    for (const input of mediaInputs) {
+      if ((await input.getAttribute('name')) !== 'medium1' && !(await input.isChecked())) {
+        pendingTaxonomy = input;
+        break;
+      }
+    }
+    expect(pendingTaxonomy).toBeDefined();
+    const pendingName = await pendingTaxonomy!.getAttribute('name');
+    await pendingTaxonomy!.locator('xpath=..').click();
+    await expect(pendingTaxonomy!).toBeChecked();
+
+    const category = page.locator('.nxm-category input[data-autosubmit]').first();
+    const field = await category.getAttribute('name');
+    expect(field).toMatch(/^cat\d+$/);
 
     await Promise.all([
       page.waitForURL(
         (url) =>
           url.pathname === '/web/torrents' &&
-          url.searchParams.has('cat'),
+          url.searchParams.get(field!) === '1' &&
+          url.searchParams.get('incldead') === '0' &&
+          url.searchParams.get('medium1') === '1' &&
+          !url.searchParams.has(pendingName!) &&
+          url.searchParams.get('sort') === '4' &&
+          url.searchParams.get('type') === 'desc',
       ),
-      categoryLink.click(),
+      category.locator('xpath=..').click(),
     ]);
 
     const url = new URL(page.url());
     expect(url.pathname).toBe('/web/torrents');
-    expect(url.searchParams.get('cat')).toBe(categoryId);
+    expect(url.searchParams.get(field!)).toBe('1');
+    expect(url.searchParams.get('medium1')).toBe('1');
+    expect(url.searchParams.has(pendingName!)).toBe(false);
+    expect(url.searchParams.get('sort')).toBe('4');
   });
 
-  test('taxonomy cells navigate to the catalog and check their filter', async ({
+  test('taxonomy chips wait for Apply to submit their filter', async ({
     page,
   }) => {
-    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    await page.goto('/web/torrents?sort=4&type=desc', { waitUntil: 'networkidle' });
     await expandSearchPanel(page);
 
-    const taxonomyLink = page
-      .locator('#ksearchboxmain fieldset label a[href]')
-      .first();
-    await expect(taxonomyLink).toBeVisible();
-    const resolvedHref = await taxonomyLink.evaluate(
-      (anchor: HTMLAnchorElement) => anchor.href,
-    );
-    const params = [...new URL(resolvedHref).searchParams.entries()];
-    expect(params).toHaveLength(1);
-    const [field, id] = params[0];
+    const inputs = await page.locator('#ksearchboxmain .nxm-taxonomy-chip__input[name^="medium"]').all();
+    const taxonomy = inputs[0];
+    const field = await taxonomy.getAttribute('name');
+    expect(field).toMatch(/^medium\d+$/);
+    if (await taxonomy.isChecked()) {
+      await taxonomy.locator('xpath=..').click();
+    }
+    const initialUrl = page.url();
+    await taxonomy.locator('xpath=..').click();
+    await expect(taxonomy).toBeChecked();
+    expect(page.url()).toBe(initialUrl);
 
     await Promise.all([
       page.waitForURL(
         (url) =>
           url.pathname === '/web/torrents' &&
-          url.searchParams.get(field) === id,
+          url.searchParams.get(field!) === '1' &&
+          url.searchParams.get('sort') === '4' &&
+          url.searchParams.get('type') === 'desc',
       ),
-      taxonomyLink.click(),
+      page.getByRole('button', { name: 'Apply' }).click(),
     ]);
 
     const url = new URL(page.url());
     expect(url.pathname).toBe('/web/torrents');
-    expect(url.searchParams.get(field)).toBe(id);
-    await expect(page.locator(`#${field}${id}`)).toBeChecked();
+    expect(url.searchParams.get(field!)).toBe('1');
+    await expect(page.locator(`#${field}`)).toBeChecked();
+    await expect(page.locator('.nxm-empty')).toBeVisible();
+  });
+
+  test('keyboard activation works for category and taxonomy chips', async ({
+    page,
+  }) => {
+    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    const category = page.locator('.nxm-category input[data-autosubmit]').first();
+    const categoryName = await category.getAttribute('name');
+    await category.focus();
+    await page.keyboard.press('Space');
+    await page.waitForURL((url) => url.searchParams.get(categoryName!) === '1');
+
+    await expandSearchPanel(page);
+    const taxonomy = page.locator('#ksearchboxmain .nxm-taxonomy-chip__input[name^="medium"]').first();
+    const taxonomyName = await taxonomy.getAttribute('name');
+    await taxonomy.focus();
+    if (await taxonomy.isChecked()) {
+      await page.keyboard.press('Space');
+    }
+    await page.keyboard.press('Space');
+    await expect(taxonomy).toBeChecked();
+    await page.getByRole('button', { name: 'Apply' }).focus();
+    await page.keyboard.press('Enter');
+    await page.waitForURL((url) => url.searchParams.get(taxonomyName!) === '1');
   });
 
   test('name sort preserves the current category filter', async ({ page }) => {
     await page.goto('/web/torrents', { waitUntil: 'networkidle' });
-    await expandSearchPanel(page);
-
-    const categoryHref = await page
-      .locator('#ksearchboxmain fieldset')
+    const categoryName = await page
+      .locator('.nxm-category input[data-autosubmit]')
       .first()
-      .locator('a[href]')
-      .first()
-      .evaluate((anchor: HTMLAnchorElement) => anchor.href);
-    const categoryId = new URL(categoryHref).searchParams.get('cat');
-    expect(categoryId).not.toBeNull();
+      .getAttribute('name');
+    expect(categoryName).toMatch(/^cat\d+$/);
 
-    await page.goto(`/web/torrents?cat=${encodeURIComponent(categoryId!)}`, {
+    await page.goto(`/web/torrents?${encodeURIComponent(categoryName!)}=1`, {
       waitUntil: 'networkidle',
     });
     await Promise.all([
       page.waitForURL(
         (url) =>
           url.pathname === '/web/torrents' &&
-          url.searchParams.get('cat') === categoryId &&
+          url.searchParams.get(categoryName!) === '1' &&
           url.searchParams.get('sort') === '1',
       ),
       nameSortLink(page).click(),
@@ -166,7 +205,7 @@ test.describe('catalog navigation', () => {
 
     const url = new URL(page.url());
     expect(url.pathname).toBe('/web/torrents');
-    expect(url.searchParams.get('cat')).toBe(categoryId);
+    expect(url.searchParams.get(categoryName!)).toBe('1');
     expect(url.searchParams.get('sort')).toBe('1');
   });
 

@@ -15,10 +15,10 @@ final class TorrentSearchPanelFactoryTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_category_and_taxonomy_links_use_catalog_urls(): void
+    public function test_category_and_taxonomy_cells_preserve_checkbox_names(): void
     {
         $mode = (int) DB::table('searchbox')->insertGetId([
-            'name' => 'taxonomy-hrefs',
+            'name' => 'taxonomy-chips',
             'showsubcat' => 1,
             'showmedium' => 1,
             'catsperrow' => 7,
@@ -48,7 +48,7 @@ final class TorrentSearchPanelFactoryTest extends TestCase
                 }
 
                 $categoryCellCount++;
-                $this->assertStringStartsWith('/web/torrents?', $cell['href']);
+                $this->assertStringStartsWith('cat', $cell['checkboxName']);
             }
         }
         $this->assertGreaterThan(0, $categoryCellCount);
@@ -62,10 +62,45 @@ final class TorrentSearchPanelFactoryTest extends TestCase
                     }
 
                     $taxonomyCellCount++;
-                    $this->assertStringStartsWith('/web/torrents?', $cell['href']);
+                    $this->assertStringStartsWith('medium', $cell['checkboxName']);
                 }
             }
         }
         $this->assertGreaterThan(0, $taxonomyCellCount);
+    }
+
+    public function test_advanced_filter_count_includes_taxonomy_status_and_ranges_only(): void
+    {
+        $mode = (int) DB::table('searchbox')->insertGetId([
+            'name' => 'advanced-count',
+            'showsubcat' => 1,
+            'showmedium' => 1,
+            'catsperrow' => 7,
+        ]);
+        $mediaId = (int) DB::table('media')->insertGetId([
+            'mode' => $mode,
+            'name' => 'Count Media',
+            'sort_index' => 1,
+        ]);
+
+        $factory = $this->app->make(TorrentSearchPanelFactory::class);
+        $defaults = $factory->create($mode, '', null, []);
+        $this->assertSame(0, $defaults->advancedFilterCount);
+
+        $viewModel = $factory->create(
+            $mode,
+            "medium{$mediaId}=1&incldead=2&size_begin=1&search=ignored&cat1=1",
+            null,
+            [],
+            [
+                "medium{$mediaId}" => '1',
+                'incldead' => '2',
+                'size_begin' => '1',
+                'search' => 'ignored',
+                'cat1' => '1',
+            ],
+        );
+
+        $this->assertSame(3, $viewModel->advancedFilterCount);
     }
 }

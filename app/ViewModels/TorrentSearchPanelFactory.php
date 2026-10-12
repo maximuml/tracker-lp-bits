@@ -9,8 +9,6 @@ use App\Models\Category;
 use App\Models\SearchBox;
 use App\Support\Locale;
 use App\Support\Logger;
-use App\Support\Path;
-use App\Support\RequestValues;
 
 /**
  * Builds TorrentSearchPanelViewModel — the data half of
@@ -28,13 +26,21 @@ final class TorrentSearchPanelFactory
 
     /**
      * @param  list<string>  $hotSearches
+     * @param  array<string, mixed>  $filterInput
      */
-    public function create(int $mode, string $checkedValues, ?string $userNotifs, array $hotSearches): TorrentSearchPanelViewModel
-    {
+    public function create(
+        int $mode,
+        string $checkedValues,
+        ?string $userNotifs,
+        array $hotSearches,
+        array $filterInput = [],
+        bool $showApprovalStatusFilter = false,
+    ): TorrentSearchPanelViewModel {
         $searchBox = $this->searchBoxes->findForCategoryTable($mode);
-        $lang = Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder'));
 
         parse_str($checkedValues, $checkedValuesArr);
+        /** @var array<string, mixed> $filterInput */
+        $filterInput = $filterInput !== [] ? $filterInput : $checkedValuesArr;
 
         $categoryRows = [];
         $categories = $this->searchBoxes->getCategoriesForTable($searchBox, true);
@@ -53,17 +59,6 @@ final class TorrentSearchPanelFactory
                         || (isset($checkedValuesArr['cat']) && $checkedValuesArr['cat'] == $item->id)
                     : ($userNotifs !== null && $userNotifs !== '' && str_contains($userNotifs, "[cat{$item->id}]"));
 
-                $iconStyle = '';
-                if ($item->icon) {
-                    $iconFolder = trim($item->icon->folder, '/');
-                    $langAndFile = ($item->icon->multilang ? "$lang/" : '').$item->image;
-                    $iconStyle = 'background-image: url('.(
-                        file_exists(Path::resolve("pic/category/$iconFolder/$langAndFile", public_path()))
-                            ? "pic/category/$iconFolder/$langAndFile"
-                            : "pic/category/{$searchBox->name}/$iconFolder/$langAndFile"
-                    ).')';
-                }
-
                 $cells[] = [
                     'selectAll' => false,
                     'checkPrefix' => 'cat',
@@ -71,15 +66,13 @@ final class TorrentSearchPanelFactory
                     'name' => (string) $item->name,
                     'checked' => $checked,
                     'checkboxName' => "cat{$item->id}",
-                    'href' => '/web/torrents?cat='.$item->id,
-                    'iconClass' => (string) $item->class_name,
-                    'iconStyle' => $iconStyle,
                 ];
             }
             $categoryRows[] = $cells;
         }
 
         $taxonomySections = [];
+        $advancedFilterCount = 0;
         foreach ($this->withTaxonomies($searchBox) as $torrentField => $tableName) {
             $taxonomyCollection = $this->searchBoxes->getTaxonomyRows($tableName, $mode);
             $selectAll = new \stdClass;
@@ -109,10 +102,10 @@ final class TorrentSearchPanelFactory
                         'name' => (string) $item->name,
                         'checked' => $checked,
                         'checkboxName' => "{$torrentField}{$item->id}",
-                        'href' => "/web/torrents?{$torrentField}={$item->id}",
-                        'iconClass' => '',
-                        'iconStyle' => '',
                     ];
+                    if ($checked) {
+                        $advancedFilterCount++;
+                    }
                 }
                 $rows[] = $cells;
             }
@@ -124,12 +117,22 @@ final class TorrentSearchPanelFactory
             $searchModes[(string) $modeValue] = (string) $modeLabel;
         }
 
+        $advancedFilterCount += $this->countAdvancedFilters($filterInput, $showApprovalStatusFilter);
+        $sortValue = $filterInput['sort'] ?? null;
+        $sortType = $filterInput['type'] ?? null;
+        $sortValue = is_scalar($sortValue) ? (string) $sortValue : null;
+        $sortType = is_scalar($sortType) ? (string) $sortType : null;
+        if (! in_array($sortValue, ['1', '2', '3', '4', '5', '6', '7', '8', '9'], true)
+            || ! in_array($sortType, ['asc', 'desc'], true)) {
+            $sortValue = null;
+            $sortType = null;
+        }
+
         return new TorrentSearchPanelViewModel(
             categoryRows: $categoryRows,
             taxonomySections: $taxonomySections,
             hotSearches: $hotSearches,
             categoryLabel: (string) Locale::trans('label.search_box.category', [], null),
-            catPadding: (int) $searchBox->catpadding,
             searchModes: $searchModes,
             promotionOptions: [
                 1 => (string) (__('functions.text_normal')),
@@ -140,9 +143,69 @@ final class TorrentSearchPanelFactory
                 6 => (string) (__('functions.text_half_down_two_up')),
                 7 => (string) (__('functions.text_thirty_percent_down')),
             ],
-            selectAllLabel: (string) Locale::trans('nexus.select_all', [], null),
-            unselectAllLabel: (string) Locale::trans('nexus.unselect_all', [], null),
+            advancedFilterCount: $advancedFilterCount,
+            sortValue: $sortValue,
+            sortType: $sortType,
         );
+    }
+
+    /**
+     * @param  array<string, mixed>  $filterInput
+     */
+    private function countAdvancedFilters(array $filterInput, bool $showApprovalStatusFilter): int
+    {
+        $count = 0;
+        foreach ([
+            'incldead' => ['default' => 1, 'allowed' => [0, 1, 2]],
+            'spstate' => ['default' => 0, 'allowed' => [0, 1, 2, 3, 4, 5, 6, 7]],
+            'inclbookmarked' => ['default' => 0, 'allowed' => [0, 1, 2]],
+        ] as $field => $settings) {
+            if (! array_key_exists($field, $filterInput)) {
+                continue;
+            }
+            $rawValue = $filterInput[$field];
+            $value = is_scalar($rawValue) && is_numeric($rawValue) ? (int) $rawValue : 0;
+            if (! in_array($value, $settings['allowed'], true)) {
+                $value = 0;
+            }
+            if ($value !== $settings['default']) {
+                $count++;
+            }
+        }
+
+        if (array_key_exists('search_mode', $filterInput)) {
+            $rawSearchMode = $filterInput['search_mode'];
+            $searchMode = is_scalar($rawSearchMode) ? (string) $rawSearchMode : '';
+            if (! in_array($searchMode, ['0', '2'], true)) {
+                $searchMode = '0';
+            }
+            if ($searchMode !== (string) SearchBox::getDefaultSearchMode()) {
+                $count++;
+            }
+        }
+
+        $approvalStatus = $filterInput['approval_status'] ?? null;
+        if ($showApprovalStatusFilter && is_scalar($approvalStatus) && $approvalStatus !== '' && is_numeric($approvalStatus)) {
+            $count++;
+        }
+
+        foreach ([
+            ['size_begin', 'size_end'],
+            ['seeders_begin', 'seeders_end'],
+            ['leechers_begin', 'leechers_end'],
+            ['times_completed_begin', 'times_completed_end'],
+            ['added_begin', 'added_end'],
+        ] as $range) {
+            foreach ($range as $field) {
+                $value = $filterInput[$field] ?? null;
+                if (is_scalar($value) && trim((string) $value) !== '') {
+                    $count++;
+                    break;
+                }
+            }
+        }
+
+        return $count;
     }
 
     /**

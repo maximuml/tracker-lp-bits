@@ -75,16 +75,22 @@ final class TorrentListViewModelsTest extends TestCase
 
         $this->assertSame(42, $row->id);
         $this->assertSame('free_bg', $row->rowClass);
-        $this->assertSame('Movies', $row->categoryIcon->name);
+        $categoryIcon = $row->categoryIcon;
+        $this->assertNotNull($categoryIcon);
+        $this->assertSame('Movies', $categoryIcon->name);
         $this->assertSame(2, $row->stickyCount);
         $this->assertTrue($row->isNew);
         $this->assertFalse($row->isBanned);
         $this->assertTrue($row->badges->paid);
-        $this->assertSame('pro_free', $row->badges->promotion->iconClass);
+        $promotion = $row->badges->promotion;
+        $this->assertNotNull($promotion);
+        $this->assertSame('pro_free', $promotion->iconClass);
         $this->assertTrue($row->badges->hitAndRun);
         $this->assertTrue($row->badges->approval === null);
         $this->assertFalse($row->badges->isEmpty());
-        $this->assertSame(75.0, $row->progress->percent);
+        $progress = $row->progress;
+        $this->assertNotNull($progress);
+        $this->assertSame(75.0, $progress->percent);
         $this->assertSame('5h', $row->waitText);
         $this->assertSame('nx-wait-10', $row->waitClass);
         $this->assertSame('4.00', $row->size['value']);
@@ -117,27 +123,27 @@ final class TorrentListViewModelsTest extends TestCase
     {
         $vm = new TorrentSearchPanelViewModel(
             categoryRows: [[
-                ['selectAll' => false, 'checkPrefix' => 'cat', 'id' => 1, 'name' => 'Movies', 'checked' => true, 'checkboxName' => 'cat1', 'href' => '?cat=1', 'iconClass' => 'movies', 'iconStyle' => ''],
+                ['selectAll' => false, 'checkPrefix' => 'cat', 'id' => 1, 'name' => 'Movies', 'checked' => true, 'checkboxName' => 'cat1'],
                 ['selectAll' => true, 'checkPrefix' => 'cat'],
             ]],
             taxonomySections: [['label' => 'Source', 'rows' => [[['selectAll' => true, 'checkPrefix' => 'source']]]]],
             hotSearches: ['bluray', 'dvdr'],
             categoryLabel: 'Category',
-            catPadding: 7,
-            searchModes: ['0' => 'And', '2' => 'Exact'],
+            searchModes: [0 => 'And', 2 => 'Exact'],
             promotionOptions: [1 => 'Normal', 2 => 'Free'],
-            selectAllLabel: 'Select all',
-            unselectAllLabel: 'Unselect all',
+            advancedFilterCount: 2,
+            sortValue: '4',
+            sortType: 'desc',
         );
 
         $this->assertCount(2, $vm->categoryRows[0]);
         $this->assertSame('Source', $vm->taxonomySections[0]['label']);
         $this->assertSame(['bluray', 'dvdr'], $vm->hotSearches);
         $this->assertSame('Category', $vm->categoryLabel);
-        $this->assertSame(7, $vm->catPadding);
-        $this->assertSame('Exact', $vm->searchModes['2']);
+        $this->assertSame('Exact', $vm->searchModes[2]);
         $this->assertSame('Free', $vm->promotionOptions[2]);
-        $this->assertSame('Select all', $vm->selectAllLabel);
-        $this->assertSame('Unselect all', $vm->unselectAllLabel);
+        $this->assertSame(2, $vm->advancedFilterCount);
+        $this->assertSame('4', $vm->sortValue);
+        $this->assertSame('desc', $vm->sortType);
     }
 }

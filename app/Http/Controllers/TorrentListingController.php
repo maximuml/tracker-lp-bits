@@ -57,6 +57,8 @@ class TorrentListingController extends Controller
             (string) ($request->getQueryString() ?? ''),
             isset($data['CURUSER']['notifs']) ? (string) $data['CURUSER']['notifs'] : null,
             $data['hotSearches'] ?? [],
+            $request->query->all(),
+            (bool) ($data['showApprovalStatusFilter'] ?? false),
         );
 
         return view('torrents.index', $data);

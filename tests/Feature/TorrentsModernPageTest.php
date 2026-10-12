@@ -22,6 +22,7 @@ final class TorrentsModernPageTest extends TestCase
 
     public function test_torrents_renders_modern_chrome_and_search_panel(): void
     {
+        /** @var User $user */
         $user = User::factory()->create();
 
         $response = $this->withNexusCookie($user)->get('/web/torrents');
@@ -32,16 +33,60 @@ final class TorrentsModernPageTest extends TestCase
         $this->assertStringContainsString('data-chrome="modern"', $html);
         $this->assertStringContainsString('<main id="main-content"', $html);
         $this->assertStringContainsString('nxm-searchpanel', $html);
-        $this->assertStringContainsString('nxm-searchpanel__toggle', $html);
-        // Search panel is built from fieldset/legend groups, not the
-        // legacy generated <table> from SearchBox::buildCategoryTable.
+        $this->assertStringContainsString('<details class="nxm-filters" id="ksearchboxmain"', $html);
         $this->assertStringContainsString('<fieldset', $html);
         $this->assertStringContainsString('<legend', $html);
+        $searchPosition = strpos($html, 'id="searchinput"');
+        $categoryPosition = strpos($html, 'nxm-category');
+        $this->assertIsInt($searchPosition);
+        $this->assertIsInt($categoryPosition);
+        $this->assertLessThan($categoryPosition, $searchPosition);
+    }
+
+    public function test_advanced_filters_open_the_details_and_update_the_badge(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        $closed = $this->withNexusCookie($user)->get('/web/torrents');
+        $closed->assertOk();
+        $this->assertDoesNotMatchRegularExpression('/<details[^>]*id="ksearchboxmain"[^>]*\bopen(?:\s|>)/', (string) $closed->getContent());
+
+        $filtered = $this->withNexusCookie($user)->get('/web/torrents?medium1=1&incldead=2');
+        $filtered->assertOk();
+        $html = (string) $filtered->getContent();
+        $this->assertMatchesRegularExpression('/<details[^>]*id="ksearchboxmain"[^>]*\bopen(?:\s|>)/', $html);
+        $this->assertStringContainsString('class="nxm-filters__count" aria-hidden="true">2</span>', $html);
+    }
+
+    public function test_valid_sort_parameters_are_hidden_and_filter_chips_have_no_links(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        $response = $this->withNexusCookie($user)->get('/web/torrents?sort=4&type=desc');
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('type="hidden" name="sort" value="4"', $html);
+        $this->assertStringContainsString('type="hidden" name="type" value="desc"', $html);
+
+        $this->assertSame(1, preg_match('/<details[^>]*id="ksearchboxmain".*?<\/details>/s', $html, $filters));
+        $filterHtml = $filters[0] ?? '';
+        preg_match_all('/<fieldset\b[^>]*>.*?<\/fieldset>/si', $filterHtml, $fieldsets);
+        foreach ($fieldsets[0] as $fieldset) {
+            $this->assertDoesNotMatchRegularExpression('/<a\s+href=/i', $fieldset);
+        }
+        preg_match_all('/<label class="nx-chip"[^>]*>.*?<\/label>/si', $html, $chips);
+        foreach ($chips[0] as $chip) {
+            $this->assertDoesNotMatchRegularExpression('/<a\b/i', $chip);
+        }
     }
 
     public function test_torrents_table_renders_prepared_rows(): void
     {
+        /** @var User $user */
         $user = User::factory()->create();
+        /** @var Torrent $torrent */
         $torrent = Torrent::factory()->create([
             'name' => 'Structural Marker Torrent',
             'category' => 1,
@@ -74,6 +119,7 @@ final class TorrentsModernPageTest extends TestCase
 
     public function test_torrents_empty_state_has_status_role(): void
     {
+        /** @var User $user */
         $user = User::factory()->create();
 
         // A search string that matches nothing forces the empty branch.

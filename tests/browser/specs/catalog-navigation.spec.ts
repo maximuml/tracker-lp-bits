@@ -113,6 +113,52 @@ test.describe('catalog navigation', () => {
     }
   });
 
+  test('filter summary spans its panel and count badge stays compact', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/web/torrents?medium9=1', { waitUntil: 'networkidle' });
+    const details = page.locator('#ksearchboxmain');
+    await expandSearchPanel(page);
+    await expect(details.locator('.nxm-filters__count')).toBeVisible();
+
+    for (const pack of ['Classic', 'Unshatter'] as const) {
+      await useUnshatterStylesheet(page, pack === 'Unshatter');
+      for (const scheme of ['light', 'dark'] as const) {
+        await page.evaluate((theme) => {
+          document.documentElement.setAttribute('data-theme', theme);
+        }, scheme);
+        const metrics = await details.evaluate((element) => {
+          const summary = element.querySelector('summary')!;
+          const badge = element.querySelector('.nxm-filters__count')!;
+          const summaryStyle = getComputedStyle(summary);
+          const badgeStyle = getComputedStyle(badge);
+          const summaryRect = summary.getBoundingClientRect();
+          const badgeRect = badge.getBoundingClientRect();
+
+          return {
+            summaryWidth: summaryRect.width,
+            detailsInnerWidth: element.clientWidth,
+            summaryCssWidth: summaryStyle.width,
+            summaryDisplay: summaryStyle.display,
+            summaryPadding: summaryStyle.padding,
+            summaryBackground: summaryStyle.backgroundColor,
+            summaryMarginBottom: summaryStyle.marginBottom,
+            badgeHeight: badgeRect.height,
+            badgeLineHeight: badgeStyle.lineHeight,
+            badgePadding: badgeStyle.padding,
+          };
+        });
+        const context = `${pack}/${scheme}: ${JSON.stringify(metrics)}`;
+        expect(
+          Math.abs(metrics.summaryWidth - metrics.detailsInnerWidth),
+          context,
+        ).toBeLessThanOrEqual(4);
+        expect(metrics.badgeHeight, context).toBeLessThanOrEqual(22);
+      }
+    }
+  });
+
   test('category chips auto-submit and preserve taxonomy picks, filters, and sorting', async ({
     page,
   }) => {

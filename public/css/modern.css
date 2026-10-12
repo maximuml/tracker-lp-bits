@@ -1504,8 +1504,9 @@ textarea { resize: vertical; }
 .nxm-filters > summary:focus-visible { outline: var(--nxm-focus-outline); outline-offset: 2px; }
 .nxm-filters__count {
     display: inline-flex; align-items: center; justify-content: center;
-    min-width: 1.35rem; min-height: 1.35rem; border-radius: 999px;
-    background: var(--nxm-accent); color: var(--nxm-on-accent); font-size: 0.8rem;
+    box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 4px;
+    border-radius: 999px; background: var(--nxm-accent); color: var(--nxm-on-accent);
+    font-size: 12px; line-height: 1;
 }
 .nxm-filters__content { padding: 0.75rem; border-top: 1px solid var(--nxm-border); }
 .nxm-filters__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; }

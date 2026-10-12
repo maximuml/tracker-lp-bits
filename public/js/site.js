@@ -572,6 +572,9 @@ document.addEventListener('click', function (e) {
     var setChecked = target.closest('input[data-setchecked]');
     if (setChecked && typeof SetChecked === 'function') {
         SetChecked(setChecked.getAttribute('data-setchecked'), setChecked.getAttribute('data-setchecked-ctrl'), setChecked.getAttribute('data-checkall'), setChecked.getAttribute('data-uncheckall'), -1, 10);
+        if (setChecked.hasAttribute('data-autosubmit') && setChecked.form) {
+            setChecked.form.requestSubmit();
+        }
         return;
     }
 
@@ -634,6 +637,13 @@ document.addEventListener('submit', function (e) {
     var form = e.target;
     if (form && form.matches && (form.id === 'compose' || form.id === 'reply') && typeof postvalid === 'function') {
         if (!postvalid(form)) { e.preventDefault(); }
+    }
+});
+
+document.addEventListener('change', function (e) {
+    var input = e.target;
+    if (input && input.matches && input.matches('input[data-autosubmit]') && input.form) {
+        input.form.requestSubmit();
     }
 });
 

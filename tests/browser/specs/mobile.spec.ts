@@ -149,12 +149,12 @@ test.describe('320px search filters', () => {
 
   test('expanded search filters stay inside the panel', async ({ page }) => {
     await page.goto('/web/torrents', { waitUntil: 'networkidle' });
-    const toggle = page.locator('[aria-controls="ksearchboxmain"]');
-    if ((await toggle.getAttribute('aria-expanded')) !== 'true') {
-      await toggle.click();
+    const details = page.locator('#ksearchboxmain');
+    if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+      await details.locator('summary').click();
     }
-    await expect(page.locator('#ksearchboxmain')).toBeVisible();
-    const outside = await page.locator('#ksearchboxmain').first().evaluate((root) => {
+    await expect.poll(() => details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+    const outside = await details.evaluate((root) => {
       const box = root.getBoundingClientRect();
       return [...root.querySelectorAll('input, select, button, textarea, label')]
         .filter((el) => {

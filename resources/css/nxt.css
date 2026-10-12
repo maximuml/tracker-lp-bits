@@ -233,7 +233,7 @@ img.hitandrun {
     margin-left: 0.5em;
 }
 
-details:not(.nxm-more):not(.nxm-usermenu) > summary {
+details:not(.nxm-more):not(.nxm-usermenu):not(.nxm-filters) > summary {
     width: fit-content;
     line-height: 28px;
     color: var(--nxm-accent-text, var(--nxm-accent, #4d6c99));
@@ -1066,7 +1066,7 @@ img.border {border:1px solid var(--nxm-border,#000)}
 
 table.torrents .colhead, table.torrents td.rowfollow {text-align:center}
 
-details[open] summary {
+details[open]:not(.nxm-filters) summary {
     margin-bottom: 10px;
 }
 

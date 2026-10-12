@@ -86,30 +86,25 @@ test.describe('a11y violations do not grow', () => {
 test.describe('expanded search panel', () => {
   test.use({ storageState: AUTH_STATE });
 
-  test('expanded /torrents.php filters pass axe and expose keyboard path', async ({
+  test('native search filters open by keyboard and pass axe', async ({
     page,
   }) => {
     await page.goto('/torrents.php', { waitUntil: 'networkidle' });
 
-    const toggle = page.locator('[aria-controls="ksearchboxmain"]');
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    await expect(toggle).toHaveAttribute('aria-controls', 'ksearchboxmain');
+    const details = page.locator('#ksearchboxmain');
+    const summary = details.locator('summary');
+    await expect.poll(() => details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
 
-    // Keyboard: focus the toggle, activate with Enter.
-    await toggle.focus();
+    await summary.focus();
     await page.keyboard.press('Enter');
-    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    const body = page.locator('#ksearchboxmain');
-    await expect(body).toBeVisible();
+    await expect.poll(() => details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
 
-    // Keyboard order: Tab from the toggle reaches a control inside the
-    // panel (first category checkbox or select-all button).
     await page.keyboard.press('Tab');
     const focused = await page.evaluate(() => {
       const el = document.activeElement;
       return el ? el.closest('#ksearchboxmain') !== null : false;
     });
-    expect(focused, 'Tab from toggle should land inside the panel').toBe(true);
+    expect(focused, 'Tab from summary should land inside the panel').toBe(true);
 
     const results = await new AxeBuilder({ page })
       .include('#ksearchboxmain')

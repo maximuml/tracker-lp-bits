@@ -5,13 +5,22 @@ import { AUTH_STATE } from '../fixtures/auth';
 test.use({ storageState: AUTH_STATE });
 
 async function expandSearchPanel(page: Page): Promise<void> {
-  const toggle = page.locator('[aria-controls="ksearchboxmain"]');
-  await expect(toggle).toBeVisible();
-  if ((await toggle.getAttribute('aria-expanded')) !== 'true') {
-    await toggle.click();
+  const details = page.locator('#ksearchboxmain');
+  const summary = details.locator('summary');
+  if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+    await summary.click();
   }
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.locator('#ksearchboxmain')).toBeVisible();
+  await expect.poll(() => details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+}
+
+async function useUnshatterStylesheet(page: Page, enabled: boolean): Promise<void> {
+  const selector = 'link[rel="stylesheet"][href*="styles/Unshatter"]';
+  const unshatter = page.locator(selector);
+  if (enabled && (await unshatter.count()) === 0) {
+    await page.addStyleTag({ url: '/styles/Unshatter/theme.css' });
+  } else if (!enabled) {
+    await unshatter.evaluateAll((links) => links.forEach((link) => link.remove()));
+  }
 }
 
 function nameSortLink(page: Page) {
@@ -74,91 +83,241 @@ test.describe('catalog navigation', () => {
     expect(new URL(page.url()).pathname).toBe('/web/torrents');
   });
 
-  test('category cells navigate to the catalog with their category filter', async ({
+  test('category and taxonomy chips stay compact in both theme packs', async ({
     page,
   }) => {
     await page.goto('/web/torrents', { waitUntil: 'networkidle' });
-    await expandSearchPanel(page);
+    const details = page.locator('#ksearchboxmain');
 
-    const categoryLink = page
-      .locator('#ksearchboxmain fieldset')
-      .first()
-      .locator('a[href]')
-      .first();
-    await expect(categoryLink).toBeVisible();
-    const resolvedHref = await categoryLink.evaluate(
-      (anchor: HTMLAnchorElement) => anchor.href,
-    );
-    const categoryId = new URL(resolvedHref).searchParams.get('cat');
-    expect(categoryId).not.toBeNull();
+    for (const pack of ['Classic', 'Unshatter'] as const) {
+      await useUnshatterStylesheet(page, pack === 'Unshatter');
+      for (const width of [1280, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+          await details.locator('summary').click();
+        }
 
-    await Promise.all([
-      page.waitForURL(
-        (url) =>
-          url.pathname === '/web/torrents' &&
-          url.searchParams.has('cat'),
-      ),
-      categoryLink.click(),
-    ]);
-
-    const url = new URL(page.url());
-    expect(url.pathname).toBe('/web/torrents');
-    expect(url.searchParams.get('cat')).toBe(categoryId);
+        const heights = await page.locator('.nx-chip').evaluateAll((chips) =>
+          chips.map((chip) => ({
+            label: chip.textContent?.trim() ?? '',
+            height: chip.getBoundingClientRect().height,
+          })),
+        );
+        expect(heights.length, `${pack} at ${width}px should render chips`).toBeGreaterThan(0);
+        const outOfRange = heights.filter(({ height }) => height < 30 || height > 36);
+        expect(
+          outOfRange,
+          `${pack} at ${width}px chip heights: ${JSON.stringify(outOfRange)}`,
+        ).toEqual([]);
+      }
+    }
   });
 
-  test('taxonomy cells navigate to the catalog and check their filter', async ({
+  test('filter summary spans its panel and count badge stays compact', async ({
     page,
   }) => {
-    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/web/torrents?medium9=1', { waitUntil: 'networkidle' });
+    const details = page.locator('#ksearchboxmain');
     await expandSearchPanel(page);
+    await expect(details.locator('.nxm-filters__count')).toBeVisible();
 
-    const taxonomyLink = page
-      .locator('#ksearchboxmain fieldset label a[href]')
-      .first();
-    await expect(taxonomyLink).toBeVisible();
-    const resolvedHref = await taxonomyLink.evaluate(
-      (anchor: HTMLAnchorElement) => anchor.href,
+    for (const pack of ['Classic', 'Unshatter'] as const) {
+      await useUnshatterStylesheet(page, pack === 'Unshatter');
+      for (const scheme of ['light', 'dark'] as const) {
+        await page.evaluate((theme) => {
+          document.documentElement.setAttribute('data-theme', theme);
+        }, scheme);
+        const metrics = await details.evaluate((element) => {
+          const summary = element.querySelector('summary')!;
+          const badge = element.querySelector('.nxm-filters__count')!;
+          const summaryStyle = getComputedStyle(summary);
+          const badgeStyle = getComputedStyle(badge);
+          const summaryRect = summary.getBoundingClientRect();
+          const badgeRect = badge.getBoundingClientRect();
+
+          return {
+            summaryWidth: summaryRect.width,
+            detailsInnerWidth: element.clientWidth,
+            summaryCssWidth: summaryStyle.width,
+            summaryDisplay: summaryStyle.display,
+            summaryPadding: summaryStyle.padding,
+            summaryBackground: summaryStyle.backgroundColor,
+            summaryMarginBottom: summaryStyle.marginBottom,
+            badgeHeight: badgeRect.height,
+            badgeLineHeight: badgeStyle.lineHeight,
+            badgePadding: badgeStyle.padding,
+          };
+        });
+        const context = `${pack}/${scheme}: ${JSON.stringify(metrics)}`;
+        expect(
+          Math.abs(metrics.summaryWidth - metrics.detailsInnerWidth),
+          context,
+        ).toBeLessThanOrEqual(4);
+        expect(metrics.badgeHeight, context).toBeLessThanOrEqual(22);
+      }
+    }
+  });
+
+  test('category chips auto-submit and preserve taxonomy picks, filters, and sorting', async ({
+    page,
+  }) => {
+    await page.goto(
+      '/web/torrents?incldead=0&medium1=1&sort=4&type=desc',
+      { waitUntil: 'networkidle' },
     );
-    const params = [...new URL(resolvedHref).searchParams.entries()];
-    expect(params).toHaveLength(1);
-    const [field, id] = params[0];
+    await expandSearchPanel(page);
+    const mediaInputs = await page
+      .locator('#ksearchboxmain .nxm-taxonomy-chip__input[name^="medium"]')
+      .all();
+    let pendingTaxonomy: (typeof mediaInputs)[number] | undefined;
+    for (const input of mediaInputs) {
+      if ((await input.getAttribute('name')) !== 'medium1' && !(await input.isChecked())) {
+        pendingTaxonomy = input;
+        break;
+      }
+    }
+    expect(pendingTaxonomy).toBeDefined();
+    const pendingName = await pendingTaxonomy!.getAttribute('name');
+    await pendingTaxonomy!.locator('xpath=..').click();
+    await expect(pendingTaxonomy!).toBeChecked();
+
+    const category = page.locator('.nxm-category input[data-autosubmit]').first();
+    const field = await category.getAttribute('name');
+    expect(field).toMatch(/^cat\d+$/);
 
     await Promise.all([
       page.waitForURL(
         (url) =>
           url.pathname === '/web/torrents' &&
-          url.searchParams.get(field) === id,
+          url.searchParams.get(field!) === '1' &&
+          url.searchParams.get('incldead') === '0' &&
+          url.searchParams.get('medium1') === '1' &&
+          url.searchParams.get(pendingName!) === '1' &&
+          url.searchParams.get('sort') === '4' &&
+          url.searchParams.get('type') === 'desc',
       ),
-      taxonomyLink.click(),
+      category.locator('xpath=..').click(),
     ]);
 
     const url = new URL(page.url());
     expect(url.pathname).toBe('/web/torrents');
-    expect(url.searchParams.get(field)).toBe(id);
-    await expect(page.locator(`#${field}${id}`)).toBeChecked();
+    expect(url.searchParams.get(field!)).toBe('1');
+    expect(url.searchParams.get('medium1')).toBe('1');
+    expect(url.searchParams.get(pendingName!)).toBe('1');
+    expect(url.searchParams.get('sort')).toBe('4');
+  });
+
+  test('taxonomy chips wait for Apply to submit their filter', async ({
+    page,
+  }) => {
+    await page.goto('/web/torrents?sort=4&type=desc', { waitUntil: 'networkidle' });
+    await expandSearchPanel(page);
+
+    const inputs = await page.locator('#ksearchboxmain .nxm-taxonomy-chip__input[name^="medium"]').all();
+    const taxonomy = inputs[0];
+    const field = await taxonomy.getAttribute('name');
+    expect(field).toMatch(/^medium\d+$/);
+    if (await taxonomy.isChecked()) {
+      await taxonomy.locator('xpath=..').click();
+    }
+    const initialUrl = page.url();
+    await taxonomy.locator('xpath=..').click();
+    await expect(taxonomy).toBeChecked();
+    expect(page.url()).toBe(initialUrl);
+
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          url.pathname === '/web/torrents' &&
+          url.searchParams.get(field!) === '1' &&
+          url.searchParams.get('sort') === '4' &&
+          url.searchParams.get('type') === 'desc',
+      ),
+      page.getByRole('button', { name: 'Apply' }).click(),
+    ]);
+
+    const url = new URL(page.url());
+    expect(url.pathname).toBe('/web/torrents');
+    expect(url.searchParams.get(field!)).toBe('1');
+    await expect(page.locator(`#${field}`)).toBeChecked();
+    await expect(page.locator('.nxm-empty')).toBeVisible();
+  });
+
+  test('Search submission carries pending taxonomy picks and range values', async ({
+    page,
+  }) => {
+    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    await expandSearchPanel(page);
+
+    const taxonomy = page
+      .locator('#ksearchboxmain .nxm-taxonomy-chip__input[name^="medium"]')
+      .first();
+    const field = await taxonomy.getAttribute('name');
+    expect(field).toMatch(/^medium\d+$/);
+    if (!(await taxonomy.isChecked())) {
+      await taxonomy.locator('xpath=..').click();
+    }
+    const initialUrl = page.url();
+    await expect(taxonomy).toBeChecked();
+    expect(page.url()).toBe(initialUrl);
+
+    const range = page.locator('input[name="size_begin"]');
+    await range.fill('1');
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          url.pathname === '/web/torrents' &&
+          url.searchParams.get(field!) === '1' &&
+          url.searchParams.get('size_begin') === '1',
+      ),
+      range.press('Enter'),
+    ]);
+    const url = new URL(page.url());
+    expect(url.searchParams.get(field!)).toBe('1');
+    expect(url.searchParams.get('size_begin')).toBe('1');
+  });
+
+  test('keyboard activation works for category and taxonomy chips', async ({
+    page,
+  }) => {
+    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    const category = page.locator('.nxm-category input[data-autosubmit]').first();
+    const categoryName = await category.getAttribute('name');
+    await category.focus();
+    await page.keyboard.press('Space');
+    await page.waitForURL((url) => url.searchParams.get(categoryName!) === '1');
+
+    await expandSearchPanel(page);
+    const taxonomy = page.locator('#ksearchboxmain .nxm-taxonomy-chip__input[name^="medium"]').first();
+    const taxonomyName = await taxonomy.getAttribute('name');
+    await taxonomy.focus();
+    if (await taxonomy.isChecked()) {
+      await page.keyboard.press('Space');
+    }
+    await page.keyboard.press('Space');
+    await expect(taxonomy).toBeChecked();
+    await page.getByRole('button', { name: 'Apply' }).focus();
+    await page.keyboard.press('Enter');
+    await page.waitForURL((url) => url.searchParams.get(taxonomyName!) === '1');
   });
 
   test('name sort preserves the current category filter', async ({ page }) => {
     await page.goto('/web/torrents', { waitUntil: 'networkidle' });
-    await expandSearchPanel(page);
-
-    const categoryHref = await page
-      .locator('#ksearchboxmain fieldset')
+    const categoryName = await page
+      .locator('.nxm-category input[data-autosubmit]')
       .first()
-      .locator('a[href]')
-      .first()
-      .evaluate((anchor: HTMLAnchorElement) => anchor.href);
-    const categoryId = new URL(categoryHref).searchParams.get('cat');
-    expect(categoryId).not.toBeNull();
+      .getAttribute('name');
+    expect(categoryName).toMatch(/^cat\d+$/);
 
-    await page.goto(`/web/torrents?cat=${encodeURIComponent(categoryId!)}`, {
+    await page.goto(`/web/torrents?${encodeURIComponent(categoryName!)}=1`, {
       waitUntil: 'networkidle',
     });
     await Promise.all([
       page.waitForURL(
         (url) =>
           url.pathname === '/web/torrents' &&
-          url.searchParams.get('cat') === categoryId &&
+          url.searchParams.get(categoryName!) === '1' &&
           url.searchParams.get('sort') === '1',
       ),
       nameSortLink(page).click(),
@@ -166,7 +325,7 @@ test.describe('catalog navigation', () => {
 
     const url = new URL(page.url());
     expect(url.pathname).toBe('/web/torrents');
-    expect(url.searchParams.get('cat')).toBe(categoryId);
+    expect(url.searchParams.get(categoryName!)).toBe('1');
     expect(url.searchParams.get('sort')).toBe('1');
   });
 

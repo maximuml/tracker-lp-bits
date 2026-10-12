@@ -18,6 +18,11 @@ const SCHEMES = ['light', 'dark'] as const;
 const SCREENSHOT_DIR = process.env.UI_STATES_SCREENSHOT_DIR;
 const SCREENSHOT_PHASE = process.env.UI_STATES_SCREENSHOT_PHASE;
 
+async function gotoPage(page: Page, url: string): Promise<void> {
+  await page.goto(url, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+}
+
 function trackerForm(page: Page) {
   return page.locator('form[action="/web/usercp/tracker"]');
 }
@@ -26,7 +31,7 @@ async function saveTrackerSettings(
   page: Page,
   values: { stylesheet?: string },
 ): Promise<void> {
-  await page.goto('/usercp?action=tracker', { waitUntil: 'networkidle' });
+  await gotoPage(page, '/usercp?action=tracker');
   const form = trackerForm(page);
   await expect(form).toBeVisible();
   if (values.stylesheet !== undefined) {
@@ -40,13 +45,14 @@ async function saveTrackerSettings(
   await form.locator('input[type=submit]').click();
   expect((await saved).status(), 'tracker settings save').toBeLessThan(400);
   await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1500);
 }
 
 async function forEachPackScheme(
   page: Page,
   check: (pack: (typeof STYLESHEETS)[number], scheme: (typeof SCHEMES)[number]) => Promise<void>,
 ): Promise<void> {
-  await page.goto('/usercp?action=tracker', { waitUntil: 'networkidle' });
+  await gotoPage(page, '/usercp?action=tracker');
   const originalStylesheet = await trackerForm(page)
     .locator('select[name="stylesheet"]')
     .inputValue();
@@ -102,9 +108,10 @@ async function captureHeaderFocus(
     }
   });
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+  await gotoPage(page, '/web/torrents');
   await page.evaluate((theme) => localStorage.setItem('nxm-theme', theme), scheme);
   await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
   await setScheme(page, scheme);
   await focusWithTab(page, '.nxm-nav__list > li > a');
   await page.screenshot({
@@ -209,7 +216,7 @@ test('every keyboard-focusable control shows a focus indicator', async ({ page }
     await captureHeaderFocus(page, pack, scheme);
     await page.setViewportSize({ width: 1280, height: 900 });
     for (const path of ['/web/torrents', '/web/upload', '/usercp?action=tracker']) {
-      await page.goto(path, { waitUntil: 'networkidle' });
+      await gotoPage(page, path);
       await setScheme(page, scheme);
       focusFailures.push({
         label: `${pack.name}/${scheme} ${path}`,
@@ -218,7 +225,7 @@ test('every keyboard-focusable control shows a focus indicator', async ({ page }
     }
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    await gotoPage(page, '/web/torrents');
     await setScheme(page, scheme);
     focusFailures.push({
       label: `${pack.name}/${scheme} /web/torrents (mobile)`,
@@ -236,12 +243,16 @@ test('disabled and invalid states use the shared tokens', async ({ page }) => {
   test.setTimeout(180_000);
   await forEachPackScheme(page, async (pack, scheme) => {
     for (const path of ['/web/upload', '/web/torrents']) {
-      await page.goto(path, { waitUntil: 'networkidle' });
+      await gotoPage(page, path);
       await setScheme(page, scheme);
       if (path === '/web/torrents') {
-        const toggle = page.locator('[aria-controls="ksearchboxmain"]');
-        await toggle.click();
-        await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+        const details = page.locator('#ksearchboxmain');
+        if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+          await page.locator('#ksearchboxmain > summary').click();
+        }
+        await expect
+          .poll(() => details.evaluate((element) => (element as HTMLDetailsElement).open))
+          .toBe(true);
       }
       const state = await page.evaluate((currentPath) => {
         const main = document.querySelector('main');
@@ -336,7 +347,7 @@ test('disabled and invalid states use the shared tokens', async ({ page }) => {
 test('highlighted rows keep text contrast', async ({ page }) => {
   test.setTimeout(180_000);
   await forEachPackScheme(page, async (pack, scheme) => {
-    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    await gotoPage(page, '/web/torrents');
     await setScheme(page, scheme);
     const rows = page.locator('table[data-nx="data"] tbody tr').filter({
       has: page.locator('td'),

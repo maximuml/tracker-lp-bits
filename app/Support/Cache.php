@@ -9,6 +9,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Events\UserUpdated;
 use App\Models\Setting;
 use App\Repositories\StaffMessageRepository;
+use App\Services\PasskeyUserLookup;
 use App\Support\Cache\NexusCache;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache as CacheFacade;
@@ -137,8 +138,8 @@ final class Cache
         self::forgetWithLocales("direct_permissions:$uid");
 
         if ($passkey) {
-            self::forgetWithLocales('user_passkey_'.$passkey.'_content');
-            self::forgetWithLocales('user_passkey_'.$passkey.'_rss');
+            self::forgetWithLocales(PasskeyUserLookup::userCacheKey($passkey, 'content'));
+            self::forgetWithLocales(PasskeyUserLookup::userCacheKey($passkey, 'rss'));
         }
 
         $userInfo = app(UserRepositoryInterface::class)->findForCacheClear($uid);

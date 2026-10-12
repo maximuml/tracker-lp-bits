@@ -51,7 +51,7 @@ final class PasskeyUserLookupTest extends TestCase
         $found = $this->lookup->find($user->passkey);
 
         $this->assertSame($user->id, $found['id']);
-        $this->assertSame($user->id, Cache::get("user_passkey_{$user->passkey}_content")['id']);
+        $this->assertSame($user->id, Cache::get(PasskeyUserLookup::userCacheKey($user->passkey, 'content'))['id']);
     }
 
     public function test_find_returns_empty_array_for_unknown_passkey(): void
@@ -75,7 +75,7 @@ final class PasskeyUserLookupTest extends TestCase
     {
         /** @var User $user */
         $user = User::factory()->create(['passkey' => self::passkey()]);
-        Cache::put("user_passkey_{$user->passkey}_content", [], 3600);
+        Cache::put(PasskeyUserLookup::userCacheKey($user->passkey, 'content'), [], 3600);
 
         $this->assertSame($user->id, $this->lookup->find($user->passkey)['id']);
     }
@@ -83,7 +83,7 @@ final class PasskeyUserLookupTest extends TestCase
     public function test_find_uses_cache_when_populated(): void
     {
         $passkey = self::passkey();
-        Cache::put("user_passkey_{$passkey}_content", ['id' => 424242, 'passkey' => $passkey], 3600);
+        Cache::put(PasskeyUserLookup::userCacheKey($passkey, 'content'), ['id' => 424242, 'passkey' => $passkey], 3600);
 
         $found = $this->lookup->find($passkey);
 

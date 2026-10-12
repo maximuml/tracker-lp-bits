@@ -243,7 +243,7 @@ class AnnounceService
         if ($clicheckRes) {
             if (! $ctx->user->showclienterror) {
                 $this->trafficAccountant->markClientError($ctx->userId());
-                RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
+                RedisGuard::attempt(static fn () => AppCache::forgetWithLocales(PasskeyUserLookup::userCacheKey($ctx->params['passkey'], 'content')));
             }
             throw TrackerException::failure($clicheckRes);
         }
@@ -251,7 +251,7 @@ class AnnounceService
         $userUpdate = $ctx->userUpdate;
         if ($ctx->user->showclienterror) {
             $userUpdate['showclienterror'] = false;
-            RedisGuard::attempt(static fn () => AppCache::forgetWithLocales("user_passkey_{$ctx->params['passkey']}_content"));
+            RedisGuard::attempt(static fn () => AppCache::forgetWithLocales(PasskeyUserLookup::userCacheKey($ctx->params['passkey'], 'content')));
         }
 
         return $ctx->withUserUpdate($userUpdate);

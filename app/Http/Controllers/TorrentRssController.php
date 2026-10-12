@@ -11,6 +11,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Models\SearchBox;
+use App\Services\PasskeyUserLookup;
 use App\Services\PermissionChecker;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
@@ -68,7 +69,7 @@ class TorrentRssController extends BasePageController
             }
         }
 
-        $cacheKey = 'nexus_rss:'.$passkey.':'.hash('xxh128', http_build_query($filteredQuery));
+        $cacheKey = 'nexus_rss:'.hash('sha256', $passkey).':'.hash('xxh128', http_build_query($filteredQuery));
         $cacheData = RedisGuard::attempt(static fn () => Cache::get($cacheKey));
         if ($cacheData && config('app.env') !== 'local') {
             Log::writeWithContext('rss get from cache');
@@ -91,7 +92,7 @@ class TorrentRssController extends BasePageController
         $dllink = false;
         $inclbookmarked = 0;
         /** @var array<string, mixed> $rssUser */
-        $rssUser = (array) RedisGuard::remember('user_passkey_'.$passkey.'_rss', 3600, function () use ($passkey) {
+        $rssUser = (array) RedisGuard::remember(PasskeyUserLookup::userCacheKey($passkey, 'rss'), 3600, function () use ($passkey) {
             return $this->userRepository->findByPasskey($passkey, ['id', 'enabled', 'parked', 'passkey'])?->toArray() ?? [];
         });
 

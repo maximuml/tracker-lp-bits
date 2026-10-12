@@ -52,7 +52,7 @@ final class TorrentsModernPageTest extends TestCase
         $closed->assertOk();
         $this->assertDoesNotMatchRegularExpression('/<details[^>]*id="ksearchboxmain"[^>]*\bopen(?:\s|>)/', (string) $closed->getContent());
 
-        $filtered = $this->withNexusCookie($user)->get('/web/torrents?medium1=1&incldead=2');
+        $filtered = $this->withNexusCookie($user)->get('/web/torrents?incldead=2&spstate=1');
         $filtered->assertOk();
         $html = (string) $filtered->getContent();
         $this->assertMatchesRegularExpression('/<details[^>]*id="ksearchboxmain"[^>]*\bopen(?:\s|>)/', $html);

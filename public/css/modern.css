@@ -382,6 +382,12 @@ a.nxm-logo:link, a.nxm-logo:visited {
     outline: none;
 }
 
+.nxm-nav__list > li > a:focus-visible,
+.nxm-more > summary:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+}
+
 .nxm-nav__list > li > a.nxm-nav__link--active,
 .nxm-nav__list > li > a[aria-current="page"] {
     color: var(--nxm-header-text);
@@ -436,6 +442,11 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-nav__sub a:focus-visible {
     background: var(--nxm-surface-alt);
     outline: none;
+}
+
+.nxm-nav__sub a:focus-visible {
+    outline: var(--nxm-focus-outline);
+    outline-offset: -2px;
 }
 
 .nxm-nav__sub a.nxm-nav__link--active,
@@ -507,6 +518,10 @@ a.nxm-logo:link, a.nxm-logo:visited {
     background: rgba(255, 255, 255, 0.1);
     outline: none;
 }
+.nxm-iconbtn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+}
 
 .nxm-usermenu { position: relative; }
 .nxm-usermenu > summary {
@@ -525,6 +540,10 @@ a.nxm-logo:link, a.nxm-logo:visited {
 .nxm-usermenu > summary:focus-visible {
     background: rgba(255, 255, 255, 0.1);
     outline: none;
+}
+.nxm-usermenu > summary:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
 }
 .nxm-usermenu[open] > summary { background: rgba(255, 255, 255, 0.1); }
 
@@ -704,7 +723,11 @@ a.nxm-logo:link, a.nxm-logo:visited {
     border-radius: 999px;
     color: var(--nxm-userbar-dim);
 }
-.nxm-search:focus-within { border-color: var(--nxm-nav-active); }
+.nxm-search:focus-within {
+    border-color: var(--nxm-nav-active);
+    outline: 2px solid var(--nxm-userbar-text);
+    outline-offset: 1px;
+}
 .nxm-search__icon { flex: none; }
 
 .nxm-search input[type="text"] {
@@ -757,6 +780,10 @@ a.nxm-logo:link, a.nxm-logo:visited {
     color: var(--nxm-userbar-text);
     background: rgba(255, 255, 255, 0.1);
     outline: none;
+}
+.nxm-search__go:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
 }
 
 .nxm-theme-ic { display: none; }
@@ -823,6 +850,10 @@ a.nxm-logo:link, a.nxm-logo:visited {
     .nxm-burger:focus-visible {
         background: rgba(255, 255, 255, 0.12);
         outline: none;
+    }
+    .nxm-burger:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: -2px;
     }
     .nxm-collapse--ready:not(.nxm-open) {
         display: none;
@@ -1079,6 +1110,10 @@ dialog.nx-modal--loading .nx-modal__spinner {
     background: rgba(255, 255, 255, 0.1);
     color: var(--nxm-userbar-text);
     text-decoration: none;
+}
+.nxm-donate:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
 }
 
 .nxm-ok { color: var(--nxm-userbar-ok); }

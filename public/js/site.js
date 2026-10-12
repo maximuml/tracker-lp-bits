@@ -635,12 +635,6 @@ document.addEventListener('click', function (e) {
 
 document.addEventListener('submit', function (e) {
     var form = e.target;
-    if (form && form.matches && form.matches('.nxm-searchpanel') && (!e.submitter || e.submitter.id !== 'apply-filters')) {
-        var taxonomyInputs = form.querySelectorAll('.nxm-taxonomy-chip__input');
-        for (var i = 0; i < taxonomyInputs.length; i++) {
-            taxonomyInputs[i].checked = taxonomyInputs[i].defaultChecked;
-        }
-    }
     if (form && form.matches && (form.id === 'compose' || form.id === 'reply') && typeof postvalid === 'function') {
         if (!postvalid(form)) { e.preventDefault(); }
     }

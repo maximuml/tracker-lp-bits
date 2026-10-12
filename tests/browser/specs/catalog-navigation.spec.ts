@@ -13,6 +13,16 @@ async function expandSearchPanel(page: Page): Promise<void> {
   await expect.poll(() => details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
 }
 
+async function useUnshatterStylesheet(page: Page, enabled: boolean): Promise<void> {
+  const selector = 'link[rel="stylesheet"][href*="styles/Unshatter"]';
+  const unshatter = page.locator(selector);
+  if (enabled && (await unshatter.count()) === 0) {
+    await page.addStyleTag({ url: '/styles/Unshatter/theme.css' });
+  } else if (!enabled) {
+    await unshatter.evaluateAll((links) => links.forEach((link) => link.remove()));
+  }
+}
+
 function nameSortLink(page: Page) {
   return page
     .getByRole('columnheader')
@@ -73,7 +83,37 @@ test.describe('catalog navigation', () => {
     expect(new URL(page.url()).pathname).toBe('/web/torrents');
   });
 
-  test('category chips auto-submit and preserve active filters and sorting', async ({
+  test('category and taxonomy chips stay compact in both theme packs', async ({
+    page,
+  }) => {
+    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    const details = page.locator('#ksearchboxmain');
+
+    for (const pack of ['Classic', 'Unshatter'] as const) {
+      await useUnshatterStylesheet(page, pack === 'Unshatter');
+      for (const width of [1280, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+          await details.locator('summary').click();
+        }
+
+        const heights = await page.locator('.nx-chip').evaluateAll((chips) =>
+          chips.map((chip) => ({
+            label: chip.textContent?.trim() ?? '',
+            height: chip.getBoundingClientRect().height,
+          })),
+        );
+        expect(heights.length, `${pack} at ${width}px should render chips`).toBeGreaterThan(0);
+        const outOfRange = heights.filter(({ height }) => height < 30 || height > 36);
+        expect(
+          outOfRange,
+          `${pack} at ${width}px chip heights: ${JSON.stringify(outOfRange)}`,
+        ).toEqual([]);
+      }
+    }
+  });
+
+  test('category chips auto-submit and preserve taxonomy picks, filters, and sorting', async ({
     page,
   }) => {
     await page.goto(
@@ -107,7 +147,7 @@ test.describe('catalog navigation', () => {
           url.searchParams.get(field!) === '1' &&
           url.searchParams.get('incldead') === '0' &&
           url.searchParams.get('medium1') === '1' &&
-          !url.searchParams.has(pendingName!) &&
+          url.searchParams.get(pendingName!) === '1' &&
           url.searchParams.get('sort') === '4' &&
           url.searchParams.get('type') === 'desc',
       ),
@@ -118,7 +158,7 @@ test.describe('catalog navigation', () => {
     expect(url.pathname).toBe('/web/torrents');
     expect(url.searchParams.get(field!)).toBe('1');
     expect(url.searchParams.get('medium1')).toBe('1');
-    expect(url.searchParams.has(pendingName!)).toBe(false);
+    expect(url.searchParams.get(pendingName!)).toBe('1');
     expect(url.searchParams.get('sort')).toBe('4');
   });
 
@@ -156,6 +196,40 @@ test.describe('catalog navigation', () => {
     expect(url.searchParams.get(field!)).toBe('1');
     await expect(page.locator(`#${field}`)).toBeChecked();
     await expect(page.locator('.nxm-empty')).toBeVisible();
+  });
+
+  test('Search submission carries pending taxonomy picks and range values', async ({
+    page,
+  }) => {
+    await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    await expandSearchPanel(page);
+
+    const taxonomy = page
+      .locator('#ksearchboxmain .nxm-taxonomy-chip__input[name^="medium"]')
+      .first();
+    const field = await taxonomy.getAttribute('name');
+    expect(field).toMatch(/^medium\d+$/);
+    if (!(await taxonomy.isChecked())) {
+      await taxonomy.locator('xpath=..').click();
+    }
+    const initialUrl = page.url();
+    await expect(taxonomy).toBeChecked();
+    expect(page.url()).toBe(initialUrl);
+
+    const range = page.locator('input[name="size_begin"]');
+    await range.fill('1');
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          url.pathname === '/web/torrents' &&
+          url.searchParams.get(field!) === '1' &&
+          url.searchParams.get('size_begin') === '1',
+      ),
+      range.press('Enter'),
+    ]);
+    const url = new URL(page.url());
+    expect(url.searchParams.get(field!)).toBe('1');
+    expect(url.searchParams.get('size_begin')).toBe('1');
   });
 
   test('keyboard activation works for category and taxonomy chips', async ({

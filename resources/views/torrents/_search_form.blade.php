@@ -118,7 +118,7 @@
 							@endif
 							<div class="nxm-field">
 								<label for="f-search-mode">{{ __('torrents.label_search_mode') }}</label>
-								<select id="f-search-mode" name="search_mode" aria-label="{{ __('torrents.label_search_mode') }}">
+								<select id="f-search-mode" name="search_mode">
 									@foreach ($panelVm->searchModes as $mKey => $mLabel)
 									<option value="{{ $mKey }}"@if ((string) ($filterInput['search_mode'] ?? \App\Models\SearchBox::getDefaultSearchMode()) === (string) $mKey) selected="selected"@endif>{{ $mLabel }}</option>
 									@endforeach
@@ -155,7 +155,7 @@
 			</div>
 			<div class="nxm-filters__footer">
 				<a href="/web/torrents">{{ __('torrents.reset_filters') }}</a>
-				<button id="apply-filters" type="submit" class="nx-btn nx-btn--primary">{{ __('torrents.apply_filters') }}</button>
+				<button type="submit" class="nx-btn nx-btn--primary">{{ __('torrents.apply_filters') }}</button>
 			</div>
 		</div>
 	</details>

@@ -880,10 +880,6 @@ a.nxm-logo:link, a.nxm-logo:visited {
     }
 }
 
-@media (max-width: 599px) {
-    .nxm-header__actions .nxm-donate { display: none; }
-}
-
 @media (max-width: 480px) {
     .nxm-header__actions { gap: 0.25rem; }
 }
@@ -1472,9 +1468,9 @@ textarea { resize: vertical; }
 .nxm-chiprow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 6px; }
 .nx-chip {
     position: relative; display: inline-flex; align-items: center; gap: 0.35rem;
-    min-height: 32px; padding: 0.25rem 0.65rem; border: 1px solid var(--nxm-border);
+    box-sizing: border-box; min-height: 32px; padding: 4px 12px; border: 1px solid var(--nxm-border);
     border-radius: 999px; background: var(--nxm-surface); color: var(--nxm-text);
-    cursor: pointer; line-height: 1.2;
+    cursor: pointer; font-size: 13px; line-height: 18px;
 }
 .nx-chip__input {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -1495,9 +1491,16 @@ textarea { resize: vertical; }
     border-radius: var(--nxm-radius); background: var(--nxm-surface);
 }
 .nxm-filters > summary {
-    display: flex; align-items: center; gap: 0.5rem; padding: 0.65rem 0.8rem;
-    font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 0.5rem; width: 100%; box-sizing: border-box;
+    padding: 0.65rem 0.8rem; border-radius: inherit; background: var(--nxm-surface-alt);
+    color: var(--nxm-text); font-weight: 600; cursor: pointer; list-style: none;
 }
+.nxm-filters > summary::-webkit-details-marker { display: none; }
+.nxm-filters > summary::after {
+    content: "▾"; margin-left: auto; font-size: 0.9em; transition: transform 0.15s ease;
+}
+.nxm-filters[open] > summary::after { transform: rotate(180deg); }
+.nxm-filters > summary:hover { background: color-mix(in srgb, var(--nxm-accent) 8%, var(--nxm-surface)); }
 .nxm-filters > summary:focus-visible { outline: var(--nxm-focus-outline); outline-offset: 2px; }
 .nxm-filters__count {
     display: inline-flex; align-items: center; justify-content: center;
@@ -1572,6 +1575,7 @@ table.nx-torrents tbody td { background: var(--nxm-surface); }
   .nxm-filters__grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 600px) {
+  .nxm-header__actions .nxm-donate { display: none; }
   .nxm-searchline { grid-template-columns: minmax(0, 1fr) auto; }
   .nxm-searchline label, .nxm-searchline input[type="text"] { grid-column: 1 / -1; }
   .nxm-searchline select { grid-column: 1; }

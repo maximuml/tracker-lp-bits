@@ -43,6 +43,18 @@ final class PasskeyUserLookupTest extends TestCase
         return md5((string) mt_getrandmax().microtime(true).random_bytes(8));
     }
 
+    public function test_cache_keys_hash_the_raw_passkey(): void
+    {
+        $passkey = '0123456789abcdef0123456789abcdef';
+        $digest = hash('sha256', $passkey);
+
+        $this->assertSame('passkey_invalid:'.$digest, PasskeyUserLookup::invalidKey($passkey));
+        $this->assertSame('user_passkey_'.$digest.'_content', PasskeyUserLookup::userCacheKey($passkey, 'content'));
+        $this->assertSame('user_passkey_'.$digest.'_rss', PasskeyUserLookup::userCacheKey($passkey, 'rss'));
+        $this->assertStringNotContainsString($passkey, PasskeyUserLookup::invalidKey($passkey));
+        $this->assertStringNotContainsString($passkey, PasskeyUserLookup::userCacheKey($passkey, 'content'));
+    }
+
     public function test_find_returns_user_for_known_passkey(): void
     {
         /** @var User $user */

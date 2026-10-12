@@ -157,7 +157,7 @@ class FriendsController extends BasePageController
 
     private function handleAdd(Request $request, int $userid): RedirectResponse|Response
     {
-        if ($userid !== (int) $this->currentUser->id()) {
+        if ($userid !== $this->currentUser->id()) {
             return $this->abortResponse(__('friends.std_error'), ('Permission denied.'));
         }
 
@@ -186,7 +186,7 @@ class FriendsController extends BasePageController
 
     private function handleDelete(Request $request, int $userid): RedirectResponse|Response
     {
-        if ($userid !== (int) $this->currentUser->id()) {
+        if ($userid !== $this->currentUser->id()) {
             return $this->abortResponse(__('friends.std_error'), ('Permission denied.'));
         }
 

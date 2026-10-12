@@ -288,6 +288,57 @@ final class AuthenticateControllerTest extends TestCase
         $this->assertNotSame($first['data']['challenge'], $second['data']['challenge']);
     }
 
+    public function test_challenge_unknown_user_fallback_matches_hmac_formula(): void
+    {
+        // One username per algo parity so the digest-derived branch is pinned.
+        [$evenUser, $oddUser] = $this->usernamesCoveringBothAlgoParities();
+
+        /** @var AuthenticateRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(AuthenticateRepository::class);
+
+        /** @var UserRepository&Mockery\MockInterface $userRepository */
+        $userRepository = Mockery::mock(UserRepository::class);
+        $userRepository->shouldReceive('findByUsername')
+            ->twice()
+            ->with(Mockery::type('string'), ['secret', 'passhash_algo'])
+            ->andReturn(null);
+
+        $controller = new AuthenticateController($repository, $userRepository, $this->app);
+
+        foreach ([$evenUser, $oddUser] as $username) {
+            $result = $controller->challenge($this->challengeRequest($username));
+
+            $digest = hash_hmac('sha256', $username, (string) config('app.key'));
+            $this->assertSame(substr($digest, 0, 40), $result['data']['secret']);
+            $this->assertSame(
+                hexdec($digest[40]) % 2 === 0 ? 'sha256' : 'argon2id',
+                $result['data']['passhash_algo']
+            );
+        }
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function usernamesCoveringBothAlgoParities(): array
+    {
+        $even = null;
+        $odd = null;
+        $appKey = (string) config('app.key');
+        for ($i = 0; $i < 200 && ($even === null || $odd === null); $i++) {
+            $username = 'no_such_user_'.$i;
+            if (hexdec(hash_hmac('sha256', $username, $appKey)[40]) % 2 === 0) {
+                $even ??= $username;
+            } else {
+                $odd ??= $username;
+            }
+        }
+        $this->assertNotNull($even);
+        $this->assertNotNull($odd);
+
+        return [$even, $odd];
+    }
+
     private function challengeRequest(string $username): ChallengeRequest
     {
         $request = ChallengeRequest::create('/api/v1/challenge', 'POST', ['username' => $username]);

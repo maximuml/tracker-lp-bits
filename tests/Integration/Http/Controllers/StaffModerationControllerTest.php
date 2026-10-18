@@ -196,15 +196,18 @@ final class StaffModerationControllerTest extends TestCase
         $this->actingAs($user);
         $this->mockCurrentUserWithDefaults($user->id, UserClass::STAFFLEADER->value);
 
+        /** @var User $target */
+        $target = User::factory()->create(['class' => UserClass::USER->value]);
+
         /** @var ModtaskRepository&MockInterface $modtaskRepository */
         $modtaskRepository = Mockery::mock(ModtaskRepository::class);
-        $modtaskRepository->shouldReceive('confirmUser')->once()->with(1, 'confirmed');
+        $modtaskRepository->shouldReceive('confirmUser')->once()->with($target->id, 'confirmed');
         app()->instance(ModtaskRepository::class, $modtaskRepository);
 
         $controller = app(StaffModerationController::class);
         $request = ModtaskRequest::create('/web/staff/modtask', 'POST', [
             'action' => 'confirmuser',
-            'userid' => 1,
+            'userid' => $target->id,
             'confirm' => 'confirmed',
         ]);
         app()->instance('request', $request);
@@ -214,6 +217,69 @@ final class StaffModerationControllerTest extends TestCase
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/web/unco', $response->getTargetUrl());
         $this->assertStringContainsString('status=1', $response->getTargetUrl());
+    }
+
+    /**
+     * Regression: confirmuser must enforce the same class hierarchy as
+     * edituser — otherwise a moderator could demote an administrator or
+     * sysop to pending and lock them out of the site.
+     */
+    public function test_modtask_confirmuser_denies_target_with_higher_class(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::MODERATOR->value]);
+        $this->actingAs($user);
+        $this->mockCurrentUserWithDefaults($user->id, UserClass::MODERATOR->value);
+
+        /** @var User $target */
+        $target = User::factory()->create(['class' => UserClass::ADMINISTRATOR->value]);
+
+        /** @var ModtaskRepository&MockInterface $modtaskRepository */
+        $modtaskRepository = Mockery::mock(ModtaskRepository::class);
+        $modtaskRepository->shouldNotReceive('confirmUser');
+        app()->instance(ModtaskRepository::class, $modtaskRepository);
+
+        $controller = app(StaffModerationController::class);
+        $request = ModtaskRequest::create('/web/staff/modtask', 'POST', [
+            'action' => 'confirmuser',
+            'userid' => $target->id,
+            'confirm' => 'pending',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->modtaskSubmit($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+    }
+
+    public function test_modtask_confirmuser_denies_target_with_equal_class(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::MODERATOR->value]);
+        $this->actingAs($user);
+        $this->mockCurrentUserWithDefaults($user->id, UserClass::MODERATOR->value);
+
+        /** @var User $target */
+        $target = User::factory()->create(['class' => UserClass::MODERATOR->value]);
+
+        /** @var ModtaskRepository&MockInterface $modtaskRepository */
+        $modtaskRepository = Mockery::mock(ModtaskRepository::class);
+        $modtaskRepository->shouldNotReceive('confirmUser');
+        app()->instance(ModtaskRepository::class, $modtaskRepository);
+
+        $controller = app(StaffModerationController::class);
+        $request = ModtaskRequest::create('/web/staff/modtask', 'POST', [
+            'action' => 'confirmuser',
+            'userid' => $target->id,
+            'confirm' => 'pending',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->modtaskSubmit($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
     }
 
     /**

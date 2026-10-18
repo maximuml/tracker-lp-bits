@@ -9,6 +9,7 @@ use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Torrent\FileBadge;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -18,6 +19,7 @@ use Livewire\Component;
  */
 final class TorrentFileList extends Component
 {
+    #[Locked]
     public int $torrentId = 0;
 
     public bool $open = false;

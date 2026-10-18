@@ -57,7 +57,7 @@ final class SiteAccess
         $guestVisitValue = $setting[$valueKey];
 
         if ($guestVisitType === 'static_page') {
-            $pageFile = ROOT_PATH.'resources/static-pages/'.$guestVisitValue;
+            $pageFile = ROOT_PATH.'resources/static-pages/'.basename($guestVisitValue);
             if (! file_exists($pageFile) || ! is_readable($pageFile)) {
                 Logger::writeWithContext("pageFile: $pageFile is not exists or readable");
                 throw new HttpResponseException(new Response('', 500));

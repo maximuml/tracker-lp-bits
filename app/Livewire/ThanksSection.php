@@ -11,6 +11,7 @@ use App\Services\ThankService;
 use App\ViewModels\Torrent\ThanksSectionFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -22,6 +23,7 @@ use Livewire\Component;
  */
 final class ThanksSection extends Component
 {
+    #[Locked]
     public int $torrentId = 0;
 
     public string $status = '';

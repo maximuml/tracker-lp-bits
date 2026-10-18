@@ -420,7 +420,9 @@ final class Tag
      */
     public static function formatImg(string $src, bool $enableResizer, int $maxWidth, int $maxHeight, string $imgId = ''): string
     {
-        $src = Security::filterSrc($src);
+        // See BBCode::url() — tempCode placeholders (\x08…\x08) must not
+        // reach the src attribute.
+        $src = Security::filterSrc(str_replace("\x08", '', $src));
         if (empty($src)) {
             return '';
         }
@@ -435,7 +437,9 @@ final class Tag
      */
     public static function formatYoutube(string $src, int|string $width = '', int|string $height = ''): string
     {
-        $src = Security::filterSrc($src);
+        // See BBCode::url() — tempCode placeholders (\x08…\x08) must not
+        // reach the src attribute.
+        $src = Security::filterSrc(str_replace("\x08", '', $src));
         if (empty($src)) {
             return '';
         }

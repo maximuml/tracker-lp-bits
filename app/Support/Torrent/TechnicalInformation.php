@@ -206,7 +206,7 @@ class TechnicalInformation
 
     private function detailsViewModel(): TechnicalInfoViewModel
     {
-        $rawMediaInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), $this->mediaInfo);
+        $rawMediaInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), htmlspecialchars($this->mediaInfo));
         $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawMediaInfo, false));
 
         $general = $this->getGeneralInfo();

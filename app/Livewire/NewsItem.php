@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\PersistsKlappe;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -16,21 +17,32 @@ final class NewsItem extends Component
 {
     use PersistsKlappe;
 
+    #[Locked]
     public int $itemId = 0;
 
+    #[Locked]
     public string $added = '';
 
+    #[Locked]
     public string $title = '';
 
+    #[Locked]
     public string $body = '';
 
+    #[Locked]
     public string $editLabel = '';
 
+    #[Locked]
     public string $deleteLabel = '';
 
+    #[Locked]
     public string $showHideTitle = '';
 
+    #[Locked]
     public bool $leadingBreak = false;
+
+    #[Locked]
+    public bool $canManage = false;
 
     public bool $open = true;
 
@@ -44,6 +56,7 @@ final class NewsItem extends Component
         string $showHideTitle,
         bool $leadingBreak = false,
         bool $open = true,
+        bool $canManage = false,
     ): void {
         $this->itemId = $itemId;
         $this->added = $added;
@@ -53,6 +66,7 @@ final class NewsItem extends Component
         $this->deleteLabel = $deleteLabel;
         $this->showHideTitle = $showHideTitle;
         $this->leadingBreak = $leadingBreak;
+        $this->canManage = $canManage;
         $this->open = $this->klappeInitial('a'.$itemId, $open);
     }
 

@@ -41,6 +41,10 @@ class AdminToolsController extends BasePageController
             return redirect('/web/user-ban-log'.($qs ? '?'.$qs : ''));
         }
 
+        if (UserDisplay::currentClass() < (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0)) {
+            return $this->abortResponse('Error', 'Permission denied.');
+        }
+
         $qRaw = is_scalar($request->input('q', '')) ? (string) $request->input('q', '') : '';
         $q = htmlspecialchars($qRaw);
 

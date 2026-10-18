@@ -6,7 +6,10 @@ namespace App\Support\Config;
 
 final class SecurityConfig extends Config
 {
-    public function disableEmailChange(bool $default = false): bool
+    /**
+     * Whether users may change their email (security.changeemail, yes = allowed).
+     */
+    public function emailChangeAllowed(bool $default = false): bool
     {
         return $this->bool('changeemail', $default);
     }

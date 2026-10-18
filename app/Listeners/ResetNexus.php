@@ -57,22 +57,14 @@ class ResetNexus
         // code may mutate them under Octane.
         $this->app->make(RuntimeContext::class)->reset();
 
-        // T-10: Reset auth guard cached user to prevent cross-request user
-        // leakage under Octane. NexusWebGuard caches $this->user on the guard
-        // instance, which persists across worker requests unless explicitly
-        // cleared. We use a reflection-based approach because setUser(null)
-        // is not supported by all guard implementations (e.g. SessionGuard
-        // requires a non-null Authenticatable). Note: setAccessible() is
-        // omitted — it's a no-op since PHP 8.1 and deprecated in 8.5.
-        $guard = Auth::guard();
-        if (property_exists($guard, 'user')) {
-            try {
-                $ref = new \ReflectionProperty($guard, 'user');
-                $ref->setValue($guard, null);
-            } catch (\Throwable) {
-                // Guard may not have a $user property — skip silently
-            }
-        }
+        // T-10: Drop all resolved guard instances to prevent cross-request
+        // and cross-job user leakage under Octane and the queue worker.
+        // NexusWebGuard caches $this->user on the guard instance, which
+        // persists while AuthManager keeps the resolved guard. Resetting
+        // only the default 'web' guard is not enough — the app authenticates
+        // via 'nexus-web' (and 'nexus'/'passkey' on tracker routes), so
+        // forgetGuards() clears every resolved guard instance at once.
+        Auth::forgetGuards();
 
         // T-10: Reset Settings static cache so workers reload settings from DB
         // instead of serving stale values for the worker's lifetime. This is

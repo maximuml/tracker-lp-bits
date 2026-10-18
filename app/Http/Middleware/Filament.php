@@ -39,18 +39,36 @@ class Filament extends Authenticate
      * Exempt updates whose originating path is the panel login URL — the
      * snapshot checksum binds the component, so the path cannot be forged to
      * reach another component.
+     *
+     * A batched update may carry several components: every snapshot must
+     * originate from the login page, otherwise the whole request requires
+     * authentication. Livewire verifies each snapshot's checksum when the
+     * update is processed, so a batch of login-path snapshots can only
+     * contain genuinely rendered login components.
      */
     private function isGuestPageLivewireRequest(Request $request): bool
     {
-        $snapshot = json_decode((string) $request->input('components.0.snapshot', ''), true);
-        $path = is_array($snapshot) ? ($snapshot['memo']['path'] ?? null) : null;
+        $loginPath = parse_url(FilamentFacade::getLoginUrl() ?? '', PHP_URL_PATH);
 
-        if (! is_string($path) || $path === '') {
+        if (! is_string($loginPath) || trim($loginPath, '/') === '') {
             return false;
         }
 
-        $loginPath = parse_url(FilamentFacade::getLoginUrl() ?? '', PHP_URL_PATH);
+        $components = $request->input('components');
 
-        return is_string($loginPath) && trim($path, '/') === trim($loginPath, '/');
+        if (! is_array($components) || $components === []) {
+            return false;
+        }
+
+        foreach ($components as $component) {
+            $snapshot = json_decode((string) (is_array($component) ? ($component['snapshot'] ?? '') : ''), true);
+            $path = is_array($snapshot) ? ($snapshot['memo']['path'] ?? null) : null;
+
+            if (! is_string($path) || trim($path, '/') !== trim($loginPath, '/')) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

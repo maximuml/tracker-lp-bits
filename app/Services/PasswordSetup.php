@@ -55,16 +55,6 @@ class PasswordSetup
     }
 
     /**
-     * Hash a password for a confirmation resend flow.
-     *
-     * @return array{passhash: string, passhash_algo: string, secret: string}
-     */
-    public function forResend(string $password): array
-    {
-        return $this->hash($password);
-    }
-
-    /**
      * @return array{passhash: string, passhash_algo: string, secret: string}
      */
     private function hash(string $password): array

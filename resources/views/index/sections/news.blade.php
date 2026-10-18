@@ -10,7 +10,7 @@
 @else
 <div class="p-[10pt]"><div>
 @foreach($news->items as $newsItem)
-    <livewire:news-item :item-id="$newsItem->id" :added="$newsItem->added" :title="$newsItem->title" :body="$newsItem->body" :edit-label="$news->editLabel" :delete-label="$news->deleteLabel" :show-hide-title="$news->showHideTitle" :leading-break="! $loop->first" :open="$loop->first" :key="'news-item-'.$newsItem->id" />
+    <livewire:news-item :item-id="$newsItem->id" :added="$newsItem->added" :title="$newsItem->title" :body="$newsItem->body" :edit-label="$news->editLabel" :delete-label="$news->deleteLabel" :show-hide-title="$news->showHideTitle" :leading-break="! $loop->first" :open="$loop->first" :can-manage="$news->canManage" :key="'news-item-'.$newsItem->id" />
 @endforeach
 </div></div>
 @endif

@@ -15,6 +15,9 @@ use App\Support\Path;
 
 class AttachmentMutationService
 {
+    // GD allocates ~4-8 bytes/px when decoding; cap dimensions to bound memory.
+    private const MAX_IMAGE_PIXELS = 25_000_000;
+
     public function __construct(
         private readonly AttachmentRepository $attachmentRepository,
     ) {}
@@ -87,7 +90,7 @@ class AttachmentMutationService
 
         if ($filesize == 0 || $file['name'] == '') { // nothing received
             $warning = (string) __('attachment.text_nothing_received');
-        } elseif (! $count_left) { // user cannot upload more files
+        } elseif ($count_left <= 0) { // user cannot upload more files
             $warning = (string) __('attachment.text_file_number_limit_reached');
         } elseif ($filesize > $size_limit || $filesize >= 5242880) { // do not allow file bigger than 5 MB
             $warning = (string) __('attachment.text_file_size_too_big');
@@ -112,7 +115,7 @@ class AttachmentMutationService
                 }
                 $height = (int) $imagesize[1];
                 $width = (int) $imagesize[0];
-                if ($width <= 0 || $height <= 0) {
+                if ($width <= 0 || $height <= 0 || $width * $height > self::MAX_IMAGE_PIXELS) {
                     $warning = (string) __('attachment.text_invalid_image_file');
 
                     return compact('warning', 'script', 'count_left');
@@ -237,6 +240,7 @@ class AttachmentMutationService
                     'driver' => $storageDriver,
                 ]);
                 $count_left--;
+                $Attach->countsofar++; // keep the shared quota in sync for multi-file batches
                 $nonce = (string) request()->attributes->get('csp_nonce', '');
                 $callback = ! empty($callbackFunc) && preg_match('/^preview_custom_field_image_\d+$/', $callbackFunc)
                     ? (string) $callbackFunc

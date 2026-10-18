@@ -80,8 +80,7 @@ class ApiQueryBuilder
     public function allowIncludes(array $includes): self
     {
         $this->allowedIncludes = $includes;
-        $requestIncludesStr = (string) $this->request->input(self::PARAM_NAME_INCLUDES, '');
-        $this->requestIncludes = explode(',', $requestIncludesStr);
+        $this->requestIncludes = self::csvToList($this->request->input(self::PARAM_NAME_INCLUDES, ''));
 
         return $this;
     }
@@ -102,8 +101,7 @@ class ApiQueryBuilder
     public function allowSorts(array $sorts): self
     {
         $this->allowedSorts = $sorts;
-        $requestSortsStr = (string) $this->request->input(self::PARAM_NAME_SORTS, '');
-        foreach (explode(',', $requestSortsStr) as $sort) {
+        foreach (self::csvToList($this->request->input(self::PARAM_NAME_SORTS, '')) as $sort) {
             $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
             $field = ltrim($sort, '-');
             $this->requestSorts[$field] = $direction;
@@ -128,8 +126,9 @@ class ApiQueryBuilder
     public function allowIncludeFields(array $fields): self
     {
         $this->allowedIncludeFields = $fields;
-        $requestIncludeFieldsStr = (string) $this->request->input(sprintf('%s.%s', self::PARAM_NAME_INCLUDE_FIELDS, $this->resourceName), '');
-        $this->requestIncludeFields = explode(',', $requestIncludeFieldsStr);
+        $this->requestIncludeFields = self::csvToList(
+            $this->request->input(sprintf('%s.%s', self::PARAM_NAME_INCLUDE_FIELDS, $this->resourceName), '')
+        );
 
         return $this;
     }
@@ -148,14 +147,14 @@ class ApiQueryBuilder
 
     protected function applyIncludes(): void
     {
-        $includes = explode(',', $this->request->query(self::PARAM_NAME_INCLUDES, ''));
+        $includes = self::csvToList($this->request->query(self::PARAM_NAME_INCLUDES, ''));
         $valid = array_intersect($this->allowedIncludes, $includes);
         $this->query->with($valid);
     }
 
     protected function applyIncludeCounts(): void
     {
-        $includeCounts = explode(',', $this->request->query(self::PARAM_NAME_INCLUDE_COUNTS, ''));
+        $includeCounts = self::csvToList($this->request->query(self::PARAM_NAME_INCLUDE_COUNTS, ''));
         $valid = array_intersect($this->allowedIncludeCounts, $includeCounts);
         //        do_log(sprintf(
         //            "includeCounts: %s, allow: %s, valid: %s",
@@ -201,7 +200,7 @@ class ApiQueryBuilder
             'gte' => $this->query->where($field, '>=', $value),
             'lte' => $this->query->where($field, '<=', $value),
             'like' => $this->query->where($field, 'like', $value),
-            'in' => $this->query->whereIn($field, is_array($value) ? $value : explode(',', $value)),
+            'in' => $this->query->whereIn($field, self::csvToList($value)),
             default => null
         };
     }
@@ -244,7 +243,7 @@ class ApiQueryBuilder
             'gte' => $query->orWhere($field, '>=', $value),
             'lte' => $query->orWhere($field, '<=', $value),
             'like' => $query->orWhere($field, 'like', $value),
-            'in' => $query->orWhereIn($field, is_array($value) ? $value : explode(',', $value)),
+            'in' => $query->orWhereIn($field, self::csvToList($value)),
             default => null
         };
     }
@@ -265,7 +264,7 @@ class ApiQueryBuilder
 
     protected function applySorts(): void
     {
-        $sorts = explode(',', $this->request->query(self::PARAM_NAME_SORTS, ''));
+        $sorts = self::csvToList($this->request->query(self::PARAM_NAME_SORTS, ''));
         foreach ($sorts as $sort) {
             $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
             $field = ltrim($sort, '-');
@@ -302,5 +301,27 @@ class ApiQueryBuilder
         }
 
         return in_array($oneKey, $result);
+    }
+
+    /**
+     * Normalise a comma-separated or array-valued request parameter to a
+     * list of strings — ?x=a,b and ?x[]=a&x[]=b are both accepted.
+     *
+     * @return list<string>
+     */
+    private static function csvToList(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return explode(',', (string) $value);
+        }
+
+        $list = [];
+        foreach ($value as $item) {
+            if (is_scalar($item) || $item instanceof \Stringable) {
+                $list[] = (string) $item;
+            }
+        }
+
+        return $list;
     }
 }

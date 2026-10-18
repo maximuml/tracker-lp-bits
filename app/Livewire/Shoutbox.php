@@ -13,6 +13,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\Shoutbox as ShoutboxSupport;
 use App\Support\UserDisplay;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -31,26 +32,37 @@ final class Shoutbox extends Component
 
     public string $status = '';
 
+    #[Locked]
     public int $refresh = 120;
 
+    #[Locked]
     public int $limit = 70;
 
+    #[Locked]
     public string $cardTitle = '';
 
+    #[Locked]
     public string $autoRefreshLabel = '';
 
+    #[Locked]
     public string $refreshSeconds = '';
 
+    #[Locked]
     public string $secondsLabel = '';
 
+    #[Locked]
     public string $historyLabel = '';
 
+    #[Locked]
     public bool $canManage = false;
 
+    #[Locked]
     public string $clearConfirm = '';
 
+    #[Locked]
     public string $clearLabel = '';
 
+    #[Locked]
     public string $showHideTitle = '';
 
     public bool $open = true;

@@ -182,6 +182,38 @@ final class SafeHtmlTest extends TestCase
     }
 
     /**
+     * Regression: parse_url() returns null for schemes containing control
+     * characters, which used to fall through to the "relative URL — safe"
+     * branch. Browsers strip C0 controls before scheme parsing, so
+     * "java\tscript:" is javascript: to them. Entities are decoded too.
+     *
+     * @dataProvider schemeBypassVectors
+     */
+    #[DataProvider('schemeBypassVectors')]
+    public function test_sanitizer_strips_scheme_bypass_urls(string $input): void
+    {
+        $result = HtmlSanitizer::sanitize($input);
+        $this->assertStringNotContainsString('href', $result,
+            "href must be stripped for input: $input");
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function schemeBypassVectors(): array
+    {
+        return [
+            'tab in scheme' => ["<a href=\"java\tscript:alert(1)\">x</a>"],
+            'newline in scheme' => ["<a href=\"java\nscript:alert(1)\">x</a>"],
+            'carriage return in scheme' => ["<a href=\"java\rscript:alert(1)\">x</a>"],
+            'null byte in scheme' => ["<a href=\"java\x00script:alert(1)\">x</a>"],
+            'entity-encoded tab' => ['<a href="jav&#x09;ascript:alert(1)">x</a>'],
+            'entity-encoded colon' => ['<a href="javascript&#58;alert(1)">x</a>'],
+            'entity-encoded letter' => ['<a href="&#x6A;avascript:alert(1)">x</a>'],
+        ];
+    }
+
+    /**
      * Sanitizer strips unknown tags.
      */
     public function test_sanitizer_strips_unknown_tags(): void

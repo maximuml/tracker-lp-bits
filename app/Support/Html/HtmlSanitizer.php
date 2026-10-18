@@ -208,8 +208,13 @@ final class HtmlSanitizer
             return true; // allowed — same scheme as page
         }
 
-        // Parse scheme — any URL with a scheme must use an allowed one
-        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        // Parse scheme — any URL with a scheme must use an allowed one.
+        // Normalize first: browsers strip C0 controls/whitespace inside
+        // URLs (java\tscript:) and decode entities before URL parsing, so
+        // parse_url() must be given the same normalized form.
+        $normalized = html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $normalized = (string) preg_replace('/[\x00-\x20]/', '', $normalized);
+        $scheme = strtolower((string) parse_url($normalized, PHP_URL_SCHEME));
 
         if ($scheme !== '') {
             // Block dangerous schemes explicitly

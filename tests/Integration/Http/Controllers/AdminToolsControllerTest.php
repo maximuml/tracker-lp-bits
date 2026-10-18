@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\Http\Controllers\AdminToolsController;
+use App\Http\Requests\UserBanLogRequest;
 use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,6 +55,34 @@ final class AdminToolsControllerTest extends TestCase
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/web/user-ban-log?q=spam', $response->getTargetUrl());
+    }
+
+    public function test_user_ban_log_denies_regular_user(): void
+    {
+        $this->mockCurrentUser(['id' => 1, 'username' => 'u', 'class' => 1]);
+
+        $controller = app(AdminToolsController::class);
+        $request = Request::create('/user-ban-log', 'GET');
+        app()->instance('request', $request);
+
+        $response = $controller->userBanLog($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+    }
+
+    public function test_user_ban_log_submit_denies_regular_user(): void
+    {
+        $this->mockCurrentUser(['id' => 1, 'username' => 'u', 'class' => 1]);
+
+        $controller = app(AdminToolsController::class);
+        $request = UserBanLogRequest::create('/admin/user-ban-log', 'POST');
+        app()->instance('request', $request);
+
+        $response = $controller->userBanLogSubmit($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Permission denied', (string) $response->getContent());
     }
 
     public function test_clear_cache_denies_access_for_guest(): void

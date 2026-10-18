@@ -144,10 +144,10 @@ final class UsercpSecurityCommand
         }
 
         $config = SiteConfig::current();
-        $disableEmailChange = $config->security->disableEmailChange(false) ? 'yes' : 'no';
+        $emailChangeAllowed = $config->security->emailChangeAllowed(false);
         $smtpType = $config->smtp->type('none');
 
-        if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
+        if ($emailChangeAllowed && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
                 PageResponses::abort((string) (__('usercp.std_error')), (string) (__('usercp.std_wrong_email_address_format')));
             }
@@ -249,13 +249,13 @@ final class UsercpSecurityCommand
 
         $email = (string) ($dto->email ?? '');
         $config = SiteConfig::current();
-        $disableEmailChange = $config->security->disableEmailChange(false) ? 'yes' : 'no';
+        $emailChangeAllowed = $config->security->emailChangeAllowed(false);
         $smtpType = $config->smtp->type('none');
         $siteName = $config->basic->siteName();
         $siteEmail = $config->main->siteEmail();
         $baseUrl = Url::absolute($config->basic->baseUrl());
 
-        if ($disableEmailChange !== 'no' && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
+        if ($emailChangeAllowed && $smtpType !== 'none' && $email !== '' && $email !== $user->email) {
             if (! Validators::isEmail($email)) {
                 throw ValidationException::withMessages(['email' => [__('usercp.std_wrong_email_address_format')]]);
             }

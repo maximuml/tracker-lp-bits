@@ -100,9 +100,13 @@ class Kernel extends HttpKernel
             CheckSiteStatus::class,
         ],
         'filament' => [
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
             RedisDegradedMode::class,
             StartSession::class,
-            //            \Filament\Http\Middleware\Authenticate::class,
+            ShareErrorsFromSession::class,
+            VerifyCsrfToken::class,
+            SubstituteBindings::class,
             Filament::class,
         ],
     ];

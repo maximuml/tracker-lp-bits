@@ -247,6 +247,31 @@ final class ScrapeServiceTest extends TestCase
         $this->assertSame(5, $result2['files'][$binHash]['complete']);
     }
 
+    public function test_scrape_cache_key_is_order_independent(): void
+    {
+        $this->insertUser();
+        $hex1 = str_repeat('a', 40);
+        $hex2 = str_repeat('b', 40);
+        $this->insertTorrent($hex1, 3, 1, 7);
+        $this->insertTorrent($hex2, 8, 4, 15);
+
+        $first = $this->service->scrape($this->makeDto([
+            $this->infoHashFromHex($hex1),
+            $this->infoHashFromHex($hex2),
+        ]));
+        $this->assertCount(2, $first['files']);
+
+        // Mutate the row — a reordered hash set must hit the same cache entry.
+        DB::table('torrents')->where('info_hash', hex2bin($hex1))->update(['seeders' => 999]);
+
+        $second = $this->service->scrape($this->makeDto([
+            $this->infoHashFromHex($hex2),
+            $this->infoHashFromHex($hex1),
+        ]));
+
+        $this->assertSame(3, $second['files'][hex2bin($hex1)]['complete']);
+    }
+
     public function test_scrape_partial_match_returns_only_registered(): void
     {
         $this->insertUser();

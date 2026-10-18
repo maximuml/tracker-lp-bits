@@ -19,6 +19,11 @@ use Illuminate\Http\Request;
 final readonly class ScrapeRequestDto
 {
     /**
+     * Maximum unique info_hash values accepted in a single scrape request.
+     */
+    private const MAX_INFO_HASHES = 100;
+
+    /**
      * @param  list<InfoHash>  $infoHashes
      */
     public function __construct(
@@ -72,12 +77,15 @@ final readonly class ScrapeRequestDto
         $hashes = [];
         foreach (array_values(array_filter(array_map('urldecode', $matches[1]))) as $binary) {
             $infoHash = InfoHash::tryFromBinary($binary);
-            if ($infoHash !== null) {
-                $hashes[] = $infoHash;
+            if ($infoHash !== null && ! isset($hashes[$infoHash->toHex()])) {
+                $hashes[$infoHash->toHex()] = $infoHash;
+                if (count($hashes) >= self::MAX_INFO_HASHES) {
+                    break;
+                }
             }
         }
 
-        return $hashes;
+        return array_values($hashes);
     }
 
     private static function blockBrowser(string $userAgent): void

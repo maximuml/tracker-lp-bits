@@ -9,6 +9,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Support\CurrentUser;
 use App\ViewModels\Torrent\PeerTableFactory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -18,10 +19,13 @@ use Livewire\Component;
  */
 final class PeerList extends Component
 {
+    #[Locked]
     public int $torrentId = 0;
 
+    #[Locked]
     public int $seeders = 0;
 
+    #[Locked]
     public int $leechers = 0;
 
     public bool $open = false;

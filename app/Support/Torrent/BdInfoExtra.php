@@ -921,7 +921,7 @@ class BdInfoExtra
 
     private function detailsViewModel(): BdInfoViewModel
     {
-        $rawBdInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), $this->bdInfo);
+        $rawBdInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), htmlspecialchars($this->bdInfo));
         $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawBdInfo, false));
 
         $allDiscs = $this->getAllDiscs();
@@ -998,7 +998,7 @@ class BdInfoExtra
             foreach ($hiddenParts as $key => $value) {
                 $hiddenContent .= view('support._nti-hidden-line', [
                     'key' => $key,
-                    'value' => SafeHtml::fromTrustedHtml($value),
+                    'value' => $value,
                 ])->render();
             }
             $hiddenContent = (string) preg_replace('/[<br>]+$/', '', $hiddenContent);

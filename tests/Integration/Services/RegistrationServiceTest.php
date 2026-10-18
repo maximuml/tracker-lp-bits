@@ -325,7 +325,7 @@ final class RegistrationServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->service()->resendConfirmation(
-            ['email' => 'test@test.com', 'wantpassword' => 'pass', 'passagain' => 'pass'],
+            ['email' => 'test@test.com'],
             '1.2.3.4',
             'en',
             $this->emptyLang(),
@@ -344,7 +344,7 @@ final class RegistrationServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->serviceWithAuth($authService)->resendConfirmation(
-            ['email' => '', 'wantpassword' => '', 'passagain' => ''],
+            ['email' => ''],
             '1.2.3.4',
             'en',
             $this->emptyLang(),
@@ -364,7 +364,7 @@ final class RegistrationServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->serviceWithAuth($authService)->resendConfirmation(
-            ['email' => 'not-an-email', 'wantpassword' => 'password', 'passagain' => 'password'],
+            ['email' => 'not-an-email'],
             '1.2.3.4',
             'en',
             $this->emptyLang(),
@@ -384,7 +384,7 @@ final class RegistrationServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->serviceWithAuth($authService)->resendConfirmation(
-            ['email' => 'nonexistent@test.com', 'wantpassword' => 'password', 'passagain' => 'password'],
+            ['email' => 'nonexistent@test.com'],
             '1.2.3.4',
             'en',
             $this->emptyLang(),
@@ -409,12 +409,56 @@ final class RegistrationServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->serviceWithAuth($authService)->resendConfirmation(
-            ['email' => 'already@confirmed.com', 'wantpassword' => 'password', 'passagain' => 'password'],
+            ['email' => 'already@confirmed.com'],
             '1.2.3.4',
             'en',
             $this->emptyLang(),
             $this->emptyLang(),
         );
+    }
+
+    /**
+     * Regression: a guest resend request must not overwrite the pending
+     * user's credentials — otherwise anyone who knows a pending email
+     * could take over the account once the victim clicks the mailed
+     * confirmation link.
+     */
+    public function test_resend_confirmation_preserves_user_credentials(): void
+    {
+        $this->setEmailVerification();
+        $id = $this->insertUser([
+            'username' => 'pendinguser',
+            'email' => 'pending@test.com',
+            'status' => UserStatus::PENDING->value,
+            'passhash' => 'original_hash',
+            'secret' => 'original_secret',
+            'editsecret' => 'original_editsecret',
+            'auth_version' => 3,
+        ]);
+
+        /** @var WebAuthService&Mockery\MockInterface $authService */
+        $authService = Mockery::mock(WebAuthService::class);
+        $authService->shouldReceive('assertNotBanned')->with('1.2.3.4')->once();
+        $authService->shouldReceive('isCaptchaEnabled')->once()->andReturn(false);
+
+        $redirect = $this->serviceWithAuth($authService)->resendConfirmation(
+            ['email' => 'pending@test.com', 'wantpassword' => 'attacker_pass', 'passagain' => 'attacker_pass'],
+            '1.2.3.4',
+            'en',
+            $this->emptyLang(),
+            $this->emptyLang(),
+        );
+
+        $this->assertStringStartsWith('/web/ok', $redirect);
+
+        $row = (array) DB::table('users')->where('id', $id)->first();
+        $this->assertSame('original_hash', $row['passhash']);
+        $this->assertSame('original_secret', $row['secret']);
+        $this->assertSame('original_editsecret', $row['editsecret']);
+        $this->assertSame(3, (int) $row['auth_version']);
+
+        // A fresh confirmation token is still issued for the pending user.
+        $this->assertSame(1, DB::table('email_confirmation_tokens')->where('user_id', $id)->count());
     }
 
     private function setEmailVerification(): void

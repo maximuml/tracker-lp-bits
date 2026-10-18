@@ -17,7 +17,6 @@ use App\Support\Email;
 use App\Support\Mail;
 use App\Support\Url;
 use Illuminate\Support\Facades\Cache as CacheFacade;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Handles account confirmation and confirmation-resend flows.
@@ -32,7 +31,6 @@ class EmailConfirmation
 
     public function __construct(
         private readonly WebAuthService $authService,
-        private readonly PasswordSetup $passwordSetup,
         private readonly SecureTokenService $tokenService,
         private readonly UserAccountRepository $userAccountRepository,
     ) {}
@@ -98,10 +96,8 @@ class EmailConfirmation
         $this->verifyCaptcha($data, $ip);
 
         $email = Email::sanitizeForDisplay(trim((string) ($data['email'] ?? '')));
-        $password = trim((string) ($data['wantpassword'] ?? ''));
-        $passAgain = trim((string) ($data['passagain'] ?? ''));
 
-        if ($email === '' || $password === '' || $passAgain === '') {
+        if ($email === '') {
             throw new AuthenticationException(__('confirm_resend.std_fields_blank'));
         }
 
@@ -122,27 +118,12 @@ class EmailConfirmation
             throw new AuthenticationException(__('confirm_resend.std_user_already_confirm'));
         }
 
-        $this->passwordSetup->validate($password, $passAgain, (string) $user->username, 'confirm_resend');
-
         // W1-05: Rate-limit resend requests (max 5 per hour per IP)
         $this->assertResendRateLimit($ip);
 
-        $passwordData = $this->passwordSetup->forResend($password);
-
-        $affected = $this->userAccountRepository->updateById((int) $user->id, [
-            'passhash' => $passwordData['passhash'],
-            'passhash_algo' => $passwordData['passhash_algo'],
-            'secret' => $passwordData['secret'],
-            'editsecret' => $passwordData['secret'],
-            'auth_version' => DB::raw('auth_version + 1'),
-        ]);
-
-        if (! $affected) {
-            throw new AuthenticationException(__('confirm_resend.std_database_error'));
-        }
-
-        Cache::clearUser($user->id, '');
-
+        // This endpoint must not touch user credentials: a guest POST
+        // proves no mailbox ownership, so writing passhash here allowed
+        // pre-auth takeover of any pending account.
         // W1-05: Revoke old confirmation tokens and generate a new secure one
         $this->revokeConfirmationTokens($user->id);
         $confirmToken = $this->generateConfirmationToken((int) $user->id, $ip);

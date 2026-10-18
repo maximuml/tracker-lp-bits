@@ -15,6 +15,7 @@ use App\Support\Smilies;
 use App\ViewModels\Comment\CommentTableFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
@@ -31,12 +32,15 @@ final class CommentSection extends Component
 {
     private const PER_PAGE = 10;
 
+    #[Locked]
     public int $parentId = 0;
 
+    #[Locked]
     public string $type = 'torrent';
 
     public int $page = -1;
 
+    #[Locked]
     public bool $enabled = true;
 
     public string $text = '';

@@ -107,6 +107,27 @@ final class OctaneCrossRequestIsolationTest extends TestCase
         $this->assertNull(Auth::guard()->user());
     }
 
+    public function test_nexus_web_guard_user_does_not_leak_between_requests(): void
+    {
+        $userA = User::factory()->create([
+            'username' => 'nexusguardA_iso',
+            'status' => 1,
+            'enabled' => true,
+        ]);
+
+        // Request A: the real auth guard caches user A (GuardHelpers::setUser
+        // is what NexusWebGuard::user() ends with once authentication passes)
+        Auth::guard('nexus-web')->setUser($userA);
+        $this->assertSame($userA->id, Auth::guard('nexus-web')->user()->id);
+
+        // Simulate end of request A → ResetNexus
+        $this->dispatchResetNexus();
+
+        // Request B: nexus-web resolves a fresh instance — no c_secure_pass
+        // cookie on the new request, so user() must be null, not user A
+        $this->assertNull(Auth::guard('nexus-web')->user());
+    }
+
     public function test_settings_static_cache_does_not_leak_between_requests(): void
     {
         // Prime the settings cache
@@ -252,14 +273,6 @@ final class OctaneCrossRequestIsolationTest extends TestCase
         app(CurrentUser::class)->reset();
         NexusContext::reset();
         Settings::resetCache();
-        $guard = Auth::guard();
-        if (property_exists($guard, 'user')) {
-            try {
-                $ref = new \ReflectionProperty($guard, 'user');
-                $ref->setValue($guard, null);
-            } catch (\Throwable) {
-                // Ignore
-            }
-        }
+        Auth::forgetGuards();
     }
 }

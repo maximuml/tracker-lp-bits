@@ -71,6 +71,20 @@ class StaffModerationController extends BasePageController
             if (! in_array($confirm, ['pending', 'confirmed'], true)) {
                 return $this->abortResponse('Error', 'Invalid confirmation status.');
             }
+
+            // Same hierarchy rule as edituser below: the operator must
+            // outrank the target, otherwise a moderator could demote an
+            // administrator to pending and lock them out.
+            $target = $this->userDetailRepository->getUser($userId);
+            if ($target === null || (int) ($target['class'] ?? 0) >= (int) UserDisplay::currentClass()) {
+                Log::writeWithContext(
+                    'User '.($this->currentUser->username())." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
+                    'mod'
+                );
+
+                return $this->abortResponse('Error', 'Permission denied. For security reason, we logged this action');
+            }
+
             $this->modtaskRepository->confirmUser($userId, $confirm);
 
             return redirect(Url::absolute($baseUrl).'/web/unco?status=1');

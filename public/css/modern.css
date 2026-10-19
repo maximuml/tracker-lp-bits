@@ -1603,6 +1603,14 @@ table.nx-torrents th.nxm-th--sorted :is(a:link, a:visited) { color: var(--nxm-te
 .nx-progress { width: 44px; height: 8px; margin-left: .35rem; vertical-align: middle; accent-color: var(--nxm-muted); }
 .nx-progress--seeding { accent-color: var(--nxm-success); }
 .nx-progress--leeching { accent-color: var(--nxm-accent); }
+.nxm-applied { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; min-width: 0; margin: 0.75rem 0 1rem; }
+.nxm-applied__title { margin: 0; color: var(--nxm-muted); font-size: 0.8rem; font-weight: 600; }
+.nxm-applied__list { display: flex; flex: 1 1 auto; flex-wrap: wrap; gap: 0.5rem; min-width: 0; margin: 0; padding: 0; list-style: none; }
+.nxm-applied__list li { max-width: 100%; }
+.nxm-applied__chip { display: inline-flex; align-items: center; gap: 0.375rem; max-width: 100%; min-height: 2rem; padding: 0.25rem 0.65rem; border: 1px solid color-mix(in srgb, var(--nxm-accent) 38%, var(--nxm-border)); border-radius: 999px; background: color-mix(in srgb, var(--nxm-accent) 9%, var(--nxm-surface)); color: var(--nxm-text); line-height: 1.25; text-decoration: none; overflow-wrap: anywhere; }
+.nxm-applied__chip span { flex: 0 0 auto; color: var(--nxm-muted); }
+.nxm-applied__chip:hover { background: var(--nxm-surface-alt); }
+.nxm-applied__chip:focus-visible { outline: var(--nxm-focus-outline); outline-offset: 2px; }
 .nxm-empty { margin: 24px auto; max-width: 560px; text-align: center; padding: 20px; border: 1px solid var(--nxm-border, #d8dbe0); border-radius: 6px; background: var(--nxm-surface, #f6f7f9); }
 .nxm-empty__title { font-weight: 600; margin: 0 0 6px; }
 .nxm-empty__body { margin: 0; color: var(--nxm-muted, #666); }

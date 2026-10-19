@@ -14,6 +14,7 @@ namespace App\ViewModels;
  *
  * @phpstan-type PanelCell array{selectAll: true, checkPrefix: string}|array{selectAll: false, checkPrefix: string, id: int, name: string, checked: bool, checkboxName: string}
  * @phpstan-type TaxonomySection array{label: string, rows: list<list<PanelCell>>}
+ * @phpstan-type AppliedFilter array{label: string, removeUrl: string}
  */
 final class TorrentSearchPanelViewModel
 {
@@ -23,6 +24,7 @@ final class TorrentSearchPanelViewModel
      * @param  list<string>  $hotSearches
      * @param  array<int|string, string>  $searchModes
      * @param  array<int, string>  $promotionOptions
+     * @param  list<AppliedFilter>  $appliedFilters
      */
     public function __construct(
         public readonly array $categoryRows,
@@ -34,5 +36,7 @@ final class TorrentSearchPanelViewModel
         public readonly int $advancedFilterCount,
         public readonly ?string $sortValue,
         public readonly ?string $sortType,
+        public readonly array $appliedFilters = [],
+        public readonly string $resetUrl = '/web/torrents',
     ) {}
 }

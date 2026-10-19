@@ -311,6 +311,66 @@ test.describe('catalog navigation', () => {
     await expect(page.locator('.nxm-empty')).toBeVisible();
   });
 
+  test('applied-filter chips remove filters, support Enter, and reset all', async ({
+    page,
+  }) => {
+    const query = '/web/torrents?incldead=2&spstate=1&sort=4&type=desc';
+    await page.goto(query, { waitUntil: 'networkidle' });
+    const chips = page.locator('.nxm-applied__chip');
+    await expect(chips).toHaveCount(2);
+    await Promise.all([
+      page.waitForURL((url) =>
+        url.pathname === '/web/torrents' &&
+        !url.searchParams.has('incldead') &&
+        url.searchParams.get('spstate') === '1' &&
+        url.searchParams.get('sort') === '4' &&
+        url.searchParams.get('type') === 'desc',
+      ),
+      chips.first().click(),
+    ]);
+    await expect(page.locator('.nxm-applied__chip')).toHaveCount(1);
+
+    await page.waitForTimeout(1500);
+    await page.goto(query, { waitUntil: 'networkidle' });
+    const keyboardChip = page.locator('.nxm-applied__chip').first();
+    await keyboardChip.focus();
+    await Promise.all([
+      page.waitForURL((url) => url.pathname === '/web/torrents' && !url.searchParams.has('incldead')),
+      page.keyboard.press('Enter'),
+    ]);
+    await expect(page.locator('.nxm-applied__chip')).toHaveCount(1);
+
+    await page.waitForTimeout(1500);
+    await page.goto(query, { waitUntil: 'networkidle' });
+    await Promise.all([
+      page.waitForURL((url) => url.pathname === '/web/torrents' && url.search === ''),
+      page.getByRole('link', { name: 'Reset all' }).click(),
+    ]);
+    await expect(page.locator('.nxm-applied')).toHaveCount(0);
+  });
+
+  test('applied-filter row passes axe in both theme packs and wraps on mobile', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/web/torrents?incldead=2&size_begin=1&size_end=10', { waitUntil: 'networkidle' });
+    for (const pack of ['Classic', 'Unshatter'] as const) {
+      await useUnshatterStylesheet(page, pack === 'Unshatter');
+      for (const theme of ['light', 'dark'] as const) {
+        await page.evaluate((value) => {
+          document.documentElement.dataset.theme = value;
+        }, theme);
+        const axe = await new AxeBuilder({ page }).include('.nxm-applied').analyze();
+        expect(axe.violations, `${pack}/${theme}`).toEqual([]);
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    );
+    expect(overflow).toBe(false);
+  });
+
   test('Search submission carries pending taxonomy picks and range values', async ({
     page,
   }) => {

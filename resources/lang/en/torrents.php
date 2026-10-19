@@ -74,4 +74,8 @@ return [
     'range_to' => 'to',
     'label_search_area' => 'Search area',
     'label_search_mode' => 'Search mode',
+    'applied_filters' => 'Applied filters',
+    'applied_search' => 'Search: “:term”',
+    'remove_filter' => 'Remove filter: :filter',
+    'reset_all' => 'Reset all',
 ];

@@ -197,6 +197,11 @@ final class TorrentSearchPanelFactory
         ];
     }
 
+    private function appliedFilterLabel(string $fieldLabel, string $value): string
+    {
+        return rtrim($fieldLabel, "?: \t\n\r\0\x0B").': '.$value;
+    }
+
     private function isChecked(mixed $value): bool
     {
         return is_scalar($value) && (string) $value === '1';
@@ -245,7 +250,11 @@ final class TorrentSearchPanelFactory
                 $value = 0;
             }
             if ($value !== $settings['default']) {
-                $filters[] = $this->appliedFilter($settings['label'].': '.$settings['options'][$value], $query, [$field]);
+                $filters[] = $this->appliedFilter(
+                    $this->appliedFilterLabel((string) $settings['label'], (string) $settings['options'][$value]),
+                    $query,
+                    [$field],
+                );
             }
         }
 
@@ -256,7 +265,11 @@ final class TorrentSearchPanelFactory
             $statuses = Torrent::listApprovalStatus(true);
             $value = (int) $query['approval_status'];
             if (isset($statuses[$value])) {
-                $filters[] = $this->appliedFilter(__('torrents.text_approval_status').' '.$statuses[$value], $query, ['approval_status']);
+                $filters[] = $this->appliedFilter(
+                    $this->appliedFilterLabel((string) __('torrents.text_approval_status'), (string) $statuses[$value]),
+                    $query,
+                    ['approval_status'],
+                );
             }
         }
 
@@ -267,7 +280,11 @@ final class TorrentSearchPanelFactory
                 $value = '0';
             }
             if ($value !== (string) SearchBox::getDefaultSearchMode() && isset($searchModes[$value])) {
-                $filters[] = $this->appliedFilter(__('torrents.label_search_mode').': '.$searchModes[$value], $query, ['search_mode']);
+                $filters[] = $this->appliedFilter(
+                    $this->appliedFilterLabel((string) __('torrents.label_search_mode'), $searchModes[$value]),
+                    $query,
+                    ['search_mode'],
+                );
             }
         }
     }
@@ -310,7 +327,7 @@ final class TorrentSearchPanelFactory
             }
             $range = $begin !== '' && $end !== '' ? $begin.' – '.$end
                 : ($begin !== '' ? '≥ '.$begin : '≤ '.$end);
-            $filters[] = $this->appliedFilter(rtrim((string) __($label), ': ').': '.$range, $query, [$beginKey, $endKey]);
+            $filters[] = $this->appliedFilter($this->appliedFilterLabel((string) __($label), $range), $query, [$beginKey, $endKey]);
         }
     }
 

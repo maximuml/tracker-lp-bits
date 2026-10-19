@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Integration\ViewModels;
 
+use App\Models\SearchBox;
+use App\Models\Torrent;
 use App\ViewModels\TorrentSearchPanelFactory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -146,9 +148,30 @@ final class TorrentSearchPanelFactoryTest extends TestCase
             ['label' => 'Search: “foo”', 'removeUrl' => $base],
             ['label' => 'Applied Category', 'removeUrl' => "/web/torrents?search=foo&search_area=1&notnewword=1&medium{$mediumId}=1&incldead=2&size_begin=1&size_end=10&sort=4&type=desc"],
             ['label' => 'Media: Applied Medium', 'removeUrl' => "/web/torrents?search=foo&search_area=1&notnewword=1&cat{$categoryId}=1&incldead=2&size_begin=1&size_end=10&sort=4&type=desc"],
-            ['label' => 'Show Dead/Active?: dead', 'removeUrl' => "/web/torrents?search=foo&search_area=1&notnewword=1&cat{$categoryId}=1&medium{$mediumId}=1&size_begin=1&size_end=10&sort=4&type=desc"],
+            ['label' => 'Show Dead/Active: dead', 'removeUrl' => "/web/torrents?search=foo&search_area=1&notnewword=1&cat{$categoryId}=1&medium{$mediumId}=1&size_begin=1&size_end=10&sort=4&type=desc"],
             ['label' => 'Size range(GB): 1 – 10', 'removeUrl' => "/web/torrents?search=foo&search_area=1&notnewword=1&cat{$categoryId}=1&medium{$mediumId}=1&incldead=2&sort=4&type=desc"],
         ], $filters);
+
+        $searchModes = SearchBox::listSearchModes();
+        $alternateSearchMode = (string) SearchBox::getDefaultSearchMode() === '0' ? 2 : 0;
+        $searchModeFilters = $factory->create($mode, '', null, [], ['search_mode' => (string) $alternateSearchMode]);
+        $this->assertSame('Search mode: '.$searchModes[$alternateSearchMode], $searchModeFilters->appliedFilters[0]['label']);
+
+        $approvalStatuses = Torrent::listApprovalStatus(true);
+        $approvalStatus = (int) array_key_first($approvalStatuses);
+        $approvalFilters = $factory->create(
+            $mode,
+            '',
+            null,
+            [],
+            ['approval_status' => (string) $approvalStatus],
+            true,
+        );
+        $this->assertSame(
+            'Approval status: '.(string) $approvalStatuses[$approvalStatus],
+            $approvalFilters->appliedFilters[0]['label'],
+        );
+
         $this->assertSame('/web/torrents', $viewModel->resetUrl);
 
         $fallbackOnly = $factory->create($mode, "cat{$categoryId}=1", "[cat{$categoryId}]", []);

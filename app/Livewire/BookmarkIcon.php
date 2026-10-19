@@ -10,6 +10,7 @@ use App\Support\Cache\NexusCache;
 use App\Support\TorrentBookmark;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -20,6 +21,7 @@ use Livewire\Component;
  */
 final class BookmarkIcon extends Component
 {
+    #[Locked]
     public int $torrentId = 0;
 
     public bool $bookmarked = false;

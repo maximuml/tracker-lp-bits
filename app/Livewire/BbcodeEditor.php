@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -16,8 +17,10 @@ use Livewire\Component;
  */
 final class BbcodeEditor extends Component
 {
+    #[Locked]
     public string $form = '';
 
+    #[Locked]
     public string $text = 'body';
 
     public string $body = '';
@@ -26,8 +29,10 @@ final class BbcodeEditor extends Component
 
     public bool $invalid = false;
 
+    #[Locked]
     public string $describedBy = '';
 
+    #[Locked]
     public string $label = '';
 
     public function mount(

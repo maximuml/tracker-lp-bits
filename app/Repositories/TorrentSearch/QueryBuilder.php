@@ -208,7 +208,7 @@ final class QueryBuilder
                     $this->pushWhere($wherea, $whereBindings, $likeSql, $likePatterns);
                 } else {
                     // only show normal torrents and anonymous torrents from himself
-                    $sql = "({$likeSql} AND torrents.anonymous = 0) OR ({$likeSql} AND torrents.anonymous = 1 AND users.id = ?)";
+                    $sql = "(({$likeSql} AND torrents.anonymous = 0) OR ({$likeSql} AND torrents.anonymous = 1 AND users.id = ?))";
                     $this->pushWhere($wherea, $whereBindings, $sql, array_merge($likePatterns, $likePatterns, [(int) $CURUSER['id']]));
                 }
             } else {

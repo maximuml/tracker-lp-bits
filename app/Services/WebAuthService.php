@@ -159,6 +159,12 @@ class WebAuthService
         }
 
         $user->makeVisible(['passhash', 'secret', 'auth_key']);
+
+        if (! $this->validatePassword($user, $password)) {
+            $this->recordFailedAttempt($ip);
+            throw new AuthenticationException('Username or password invalid.');
+        }
+
         $row = $user->toArray();
 
         if (($row['status'] ?? null) === UserStatus::PENDING->value) {
@@ -178,13 +184,6 @@ class WebAuthService
                 throw new AuthenticationException($code === '' ? 'Require two-step code.' : 'Invalid two-step code.');
             }
         }
-
-        if (! $this->validatePassword($user, $password)) {
-            $this->recordFailedAttempt($ip);
-            throw new AuthenticationException('Username or password invalid.');
-        }
-
-        $row = $user->toArray();
 
         // Generate auth_key for very old accounts that don't have one
         $update = [];

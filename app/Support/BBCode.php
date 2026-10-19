@@ -54,6 +54,11 @@ final class BBCode
         // htmlspecialchars() on the whole text before parsing BBCode,
         // so the URL arrives entity-encoded (e.g. &#x6a;avascript:).
         $decoded = html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // \x08-delimited tempCode placeholders must never survive into an
+        // attribute value: resolveTempCodes() substitutes them blindly,
+        // including inside href="…", and the stored markup would break
+        // out of the quotes. Stripping the byte defuses the placeholder.
+        $decoded = str_replace("\x08", '', $decoded);
 
         // Validate the URL scheme — only allow safe schemes or
         // relative URLs (no scheme). Reject javascript:, data:, etc.
@@ -271,6 +276,9 @@ final class BBCode
         if (! $title) {
             $title = $defaultTitle;
         }
+        // See url() — a tempCode placeholder smuggled into the title would
+        // resolve a foreign element inside <summary>.
+        $title = str_replace("\x08", '', $title);
         $contentClass = $defaultCollapsed ? '' : ' open';
 
         return trim(view('support._spoiler-details', [

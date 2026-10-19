@@ -35,8 +35,6 @@
         @csrf
         <input type="hidden" name="secret" value="{{ $secret }}" />
         <x-form-field :label="__('confirm_resend.row_registered_email')" name="email" type="email" :value="old('email')" autocomplete="email" />
-        <x-form-field :label="__('confirm_resend.row_new_password')" name="wantpassword" type="password" autocomplete="new-password" :help="__('confirm_resend.text_password_note')" />
-        <x-form-field :label="__('confirm_resend.row_enter_password_again')" name="passagain" type="password" autocomplete="new-password" />
 
         @if ($captchaEnabled && $captchaMarkup !== '')
             {{ $captchaMarkup }}

@@ -12,6 +12,7 @@ use App\Services\MagicRewardService;
 use App\ViewModels\Torrent\MagicSectionFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -25,6 +26,7 @@ use Livewire\Component;
  */
 final class MagicSection extends Component
 {
+    #[Locked]
     public int $torrentId = 0;
 
     public bool $showAll = false;

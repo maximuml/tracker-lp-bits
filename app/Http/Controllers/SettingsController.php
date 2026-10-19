@@ -298,6 +298,10 @@ class SettingsController extends BasePageController
                 $data['login_secret_deadline'] = $timestamp !== false ? date('Y-m-d H:i:s', $timestamp) : date('Y-m-d H:i:s');
                 $data['login_secret'] = bin2hex(random_bytes(16));
             }
+            $staticPage = $data['guest_visit_value_static_page'] ?? null;
+            if (is_string($staticPage) && $staticPage !== '' && ! in_array($staticPage, $this->getStaticPages(), true)) {
+                return $this->abortResponse('Error', 'Invalid static page: '.$staticPage);
+            }
         }
 
         // Special: authority validation

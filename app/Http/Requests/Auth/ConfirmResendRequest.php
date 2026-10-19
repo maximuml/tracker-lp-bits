@@ -20,8 +20,6 @@ class ConfirmResendRequest extends FormRequest
     {
         return [
             'email' => ['nullable', 'string'],
-            'wantpassword' => ['nullable', 'string'],
-            'passagain' => ['nullable', 'string'],
             'imagehash' => ['nullable', 'string'],
             'imagestring' => ['nullable', 'string'],
         ];

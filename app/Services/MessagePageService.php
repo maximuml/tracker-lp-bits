@@ -387,7 +387,7 @@ class MessagePageService
             $origName2 = $this->messageRepository->getUsername($orig) ?? '';
         }
 
-        $body = '-------- Original Message from '.htmlspecialchars($origName2).' --------<br />'.$this->renderMessageBody((string) ($message['msg'] ?? ''));
+        $body = '-------- Original Message from '.htmlspecialchars($origName2).' --------<br />'.$this->renderMessageBody((string) ($message['msg'] ?? ''), true);
 
         return [
             'pmId' => $pmId,

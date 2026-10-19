@@ -496,6 +496,35 @@ final class MessagePageServiceTest extends TestCase
         $this->assertStringContainsString('Forward this message', (string) $forward['body']);
     }
 
+    public function test_build_forward_escapes_html_in_original_message(): void
+    {
+        $userId = $this->createUser();
+        $senderId = $this->createUser();
+        $this->authenticatedUser(['id' => $userId]);
+        $this->seedSettings();
+
+        $msgId = $this->insertMessage([
+            'sender' => $senderId,
+            'receiver' => $userId,
+            'subject' => 'xss',
+            'msg' => 'hi<script>alert(1)</script>bye',
+            'location' => 1,
+            'unread' => 0,
+            'saved' => 0,
+        ]);
+
+        $request = Request::create('/messages.php', 'GET', [
+            'action' => 'forward',
+            'id' => $msgId,
+        ]);
+
+        $data = $this->callBuild($request);
+
+        $body = (string) $data['forward']['body'];
+        $this->assertStringNotContainsString('<script>', $body);
+        $this->assertStringContainsString('&lt;script&gt;', $body);
+    }
+
     public function test_build_forward_with_nonexistent_message_throws(): void
     {
         $userId = $this->createUser();

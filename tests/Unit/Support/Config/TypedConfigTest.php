@@ -131,18 +131,18 @@ final class TypedConfigTest extends TestCase
         $this->assertSame('ICP123', $config->icpLicense());
     }
 
-    public function test_security_config_disable_email_change(): void
+    public function test_security_config_email_change_allowed(): void
     {
         $config = new SecurityConfig(['changeemail' => 'yes']);
 
-        $this->assertTrue($config->disableEmailChange(false));
+        $this->assertTrue($config->emailChangeAllowed(false));
     }
 
-    public function test_security_config_disable_email_change_default(): void
+    public function test_security_config_email_change_allowed_default(): void
     {
         $config = new SecurityConfig([]);
 
-        $this->assertFalse($config->disableEmailChange(false));
+        $this->assertFalse($config->emailChangeAllowed(false));
     }
 
     public function test_tweak_config_enable_tooltip(): void

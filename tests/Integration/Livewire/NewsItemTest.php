@@ -21,6 +21,7 @@ final class NewsItemTest extends TestCase
         'editLabel' => 'Edit',
         'deleteLabel' => 'Delete',
         'showHideTitle' => 'Show/Hide',
+        'canManage' => true,
     ];
 
     #[Test]
@@ -32,6 +33,23 @@ final class NewsItemTest extends TestCase
             ->assertSee('class="plus"', false)
             ->assertSee('nx-hidden')
             ->assertSee('newsid=42');
+    }
+
+    #[Test]
+    public function manage_buttons_hidden_without_permission(): void
+    {
+        Livewire::test(NewsItem::class, [...$this->params, 'canManage' => false])
+            ->assertDontSee('newsid=42')
+            ->assertDontSee('/web/news?action=edit', false)
+            ->assertDontSee('/web/news/delete', false);
+    }
+
+    #[Test]
+    public function manage_buttons_visible_for_staff(): void
+    {
+        Livewire::test(NewsItem::class, $this->params)
+            ->assertSee('newsid=42')
+            ->assertSee('/web/news/delete', false);
     }
 
     #[Test]

@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use App\Livewire\Concerns\PersistsKlappe;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -17,8 +18,10 @@ final class DescrRow extends Component
 {
     use PersistsKlappe;
 
+    #[Locked]
     public string $descrRaw = '';
 
+    #[Locked]
     public string $showOrHideTitle = '';
 
     public bool $open = true;

@@ -20,15 +20,22 @@ final class FilamentLoginUpdateTest extends TestCase
     /**
      * @return array<string, mixed>
      */
-    private function livewirePayload(string $path): array
+    private function livewirePayload(string ...$paths): array
     {
-        $snapshot = json_encode([
-            'data' => [],
-            'memo' => ['id' => 'test', 'name' => 'TestComponent', 'path' => $path],
-            'checksum' => 'invalid-checksum-for-test',
-        ]);
+        $components = array_map(
+            fn (string $path): array => [
+                'snapshot' => json_encode([
+                    'data' => [],
+                    'memo' => ['id' => 'test', 'name' => 'TestComponent', 'path' => $path],
+                    'checksum' => 'invalid-checksum-for-test',
+                ]),
+                'updates' => [],
+                'calls' => [],
+            ],
+            $paths,
+        );
 
-        return ['components' => [['snapshot' => $snapshot, 'updates' => [], 'calls' => []]]];
+        return ['components' => $components];
     }
 
     public function test_guest_livewire_update_for_panel_login_page_is_not_auth_redirected(): void
@@ -47,5 +54,28 @@ final class FilamentLoginUpdateTest extends TestCase
         $response = $this->postJson('/livewire/update', $this->livewirePayload('nexusphp'));
 
         $response->assertUnauthorized();
+    }
+
+    /**
+     * Regression: the guest exemption previously inspected only
+     * components.0 — a batch could prepend a login-path snapshot and
+     * smuggle an authenticated-page component past the auth middleware.
+     */
+    public function test_guest_livewire_update_batch_with_authed_component_is_unauthenticated(): void
+    {
+        $response = $this->postJson('/livewire/update', $this->livewirePayload('nexusphp/login', 'nexusphp'));
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_guest_livewire_update_batch_of_only_login_components_is_not_auth_redirected(): void
+    {
+        $response = $this->postJson('/livewire/update', $this->livewirePayload('nexusphp/login', 'nexusphp/login'));
+
+        $this->assertNotSame(
+            302,
+            $response->getStatusCode(),
+            'Login-page-only Livewire batches must not bounce to the legacy login redirect.',
+        );
     }
 }

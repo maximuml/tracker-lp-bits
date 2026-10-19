@@ -93,6 +93,46 @@ final class SettingsControllerTest extends TestCase
         app()->instance(TagRepositoryInterface::class, $tagRepository);
     }
 
+    public function test_settings_submit_rejects_static_page_traversal(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+        $this->actingAs($user, 'nexus-web');
+        $this->mockCurrentUser(['id' => $user->id, 'username' => $user->username, 'class' => UserClass::SYSOP->value]);
+        $this->bindTagRepository();
+
+        $controller = app(SettingsController::class);
+        $request = SettingsSubmitRequest::create('/settings/submit', 'POST', [
+            'action' => 'savesettings_security',
+            'guest_visit_value_static_page' => '../../composer.json',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->settingsSubmit($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringContainsString('Invalid static page', (string) $response->getContent());
+    }
+
+    public function test_settings_submit_accepts_listed_static_page(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+        $this->actingAs($user, 'nexus-web');
+        $this->mockCurrentUser(['id' => $user->id, 'username' => $user->username, 'class' => UserClass::SYSOP->value]);
+        $this->bindTagRepository();
+
+        $controller = app(SettingsController::class);
+        $request = SettingsSubmitRequest::create('/settings/submit', 'POST', [
+            'action' => 'savesettings_security',
+            'guest_visit_value_static_page' => 'beian-aliyun.html',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->settingsSubmit($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringContainsString('/web/settings', $response->getTargetUrl());
+    }
+
     /**
      * Bind a partial mock of CurrentUser that returns the given user array.
      *

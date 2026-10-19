@@ -215,6 +215,21 @@ final class BitbucketServiceTest extends TestCase
         $this->service->uploadAvatar($file, ['id' => 1], false);
     }
 
+    public function test_upload_avatar_throws_for_oversized_image_dimensions(): void
+    {
+        // Minimal PNG with a forged IHDR — getimagesize() reads only the
+        // header, so a tiny file can declare dimensions that would make
+        // imagecreatefrom* exhaust memory.
+        $ihdr = pack('NN', 6000, 6000).chr(8).chr(2).chr(0).chr(0).chr(0);
+        $png = "\x89PNG\r\n\x1a\n".pack('N', strlen($ihdr)).'IHDR'.$ihdr.pack('N', crc32('IHDR'.$ihdr));
+        $file = UploadedFile::fake()->createWithContent('oversized_'.uniqid().'.png', $png);
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Image dimensions out of range.');
+
+        $this->service->uploadAvatar($file, ['id' => 1], false);
+    }
+
     // --- uploadAvatar: success cases ---
 
     public function test_upload_avatar_succeeds_for_valid_png(): void

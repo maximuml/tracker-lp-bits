@@ -25,6 +25,9 @@ final class BitbucketService
 
     private const SCALE_WIDTH = 150;
 
+    // GD allocates ~4-8 bytes/px when decoding; cap dimensions to bound memory.
+    private const MAX_IMAGE_PIXELS = 25_000_000;
+
     public function __construct(
         private readonly BitbucketRepository $bitbucketRepository,
         private readonly UserAccountRepository $userAccountRepository,
@@ -70,6 +73,9 @@ final class BitbucketService
 
         if ($typeName === null || $typeName !== strtolower($pp['extension'] ?? '')) {
             throw new LogicException('Invalid image format.');
+        }
+        if ($width <= 0 || $height <= 0 || $width * $height > self::MAX_IMAGE_PIXELS) {
+            throw new LogicException('Image dimensions out of range.');
         }
 
         $hscale = $height / self::SCALE_HEIGHT;

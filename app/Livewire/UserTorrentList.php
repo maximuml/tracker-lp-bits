@@ -13,6 +13,7 @@ use App\Support\Format;
 use App\Support\Strings;
 use App\ViewModels\Torrent\UserTorrentListVmFactory;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -22,14 +23,19 @@ use Livewire\Component;
  */
 final class UserTorrentList extends Component
 {
+    #[Locked]
     public int $userId = 0;
 
+    #[Locked]
     public string $type = '';
 
+    #[Locked]
     public string $label = '';
 
+    #[Locked]
     public string $title = '';
 
+    #[Locked]
     public string $linkText = '';
 
     public bool $open = false;

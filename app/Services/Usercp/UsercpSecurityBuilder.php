@@ -26,7 +26,7 @@ final class UsercpSecurityBuilder
 
     public function build(CurrentUser $curUser, string $type): UsercpSecuritySection
     {
-        $showEmailChange = SiteConfig::current()->security->disableEmailChange(true)
+        $showEmailChange = SiteConfig::current()->security->emailChangeAllowed(false)
             && SiteConfig::current()->smtp->type() !== 'none';
 
         // Two-step auth

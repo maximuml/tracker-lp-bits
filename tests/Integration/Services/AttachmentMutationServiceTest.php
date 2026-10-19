@@ -688,4 +688,89 @@ final class AttachmentMutationServiceTest extends TestCase
 
         $this->assertSame('Failure! Nothing received!', (string) ($result['warning']));
     }
+
+    // --- regression: a negative remaining quota must not pass the gate ---
+
+    public function test_process_upload_with_negative_count_left_returns_limit_warning(): void
+    {
+        $attach = $this->mockAttachService(['count_left' => -3]);
+        $file = $this->makeFile('content', 'txt');
+
+        $result = app(AttachmentMutationService::class)->processUpload(
+            $this->curUser(),
+            $attach,
+            'no',
+            '',
+            $file,
+        );
+
+        $this->assertSame('Failure! You cannot upload more files for the moment. Please wait some time.', (string) ($result['warning']));
+        $this->assertSame(0, DB::table('attachments')->count());
+    }
+
+    // --- regression: a multi-file batch must consume the shared quota ---
+
+    public function test_process_upload_consumes_quota_across_batch(): void
+    {
+        $this->configureLocalImageUpload();
+        $this->forgetSettings(['attachment.thumbwidth', 'attachment.thumbheight']);
+
+        /** @var AttachmentService&MockInterface $attach */
+        $attach = Mockery::mock(AttachmentService::class);
+        $attach->countlimit = 1;
+        $attach->countsofar = 0;
+        $attach->shouldReceive('get_count_left')->andReturnUsing(fn (): int => $attach->countlimit - $attach->countsofar);
+        $attach->shouldReceive('get_size_limit_byte')->andReturn(10485760);
+        $attach->shouldReceive('get_allowed_ext')->andReturn(['txt', 'pdf', 'zip', 'jpg', 'png', 'gif']);
+        $attach->shouldReceive('is_gif_ani')->andReturn(false);
+
+        $service = app(AttachmentMutationService::class);
+
+        $first = $service->processUpload($this->curUser(), $attach, 'no', '', $this->makeImageFile(400, 200));
+        $this->assertSame('', (string) ($first['warning']));
+
+        $second = $service->processUpload($this->curUser(), $attach, 'no', '', $this->makeImageFile(400, 200));
+
+        $this->assertSame('Failure! You cannot upload more files for the moment. Please wait some time.', (string) ($second['warning']));
+        $this->assertSame(1, DB::table('attachments')->count());
+    }
+
+    // --- regression: forged image dimensions are rejected before GD decode ---
+
+    /**
+     * Minimal PNG carrying a forged IHDR — getimagesize() reads only the
+     * header, so the file stays tiny while declaring huge dimensions.
+     *
+     * @return array<string, mixed>
+     */
+    private function makeOversizedPng(int $width, int $height): array
+    {
+        $ihdr = pack('NN', $width, $height).chr(8).chr(2).chr(0).chr(0).chr(0);
+        $png = "\x89PNG\r\n\x1a\n".pack('N', strlen($ihdr)).'IHDR'.$ihdr.pack('N', crc32('IHDR'.$ihdr));
+        $path = $this->tmpDir.'/bomb_'.uniqid().'.png';
+        file_put_contents($path, $png);
+
+        return [
+            'tmp_name' => $path,
+            'size' => strlen($png),
+            'type' => 'image/png',
+            'name' => 'bomb.png',
+        ];
+    }
+
+    public function test_process_upload_rejects_image_with_oversized_dimensions(): void
+    {
+        $attach = $this->mockAttachService();
+
+        $result = app(AttachmentMutationService::class)->processUpload(
+            $this->curUser(),
+            $attach,
+            'no',
+            '',
+            $this->makeOversizedPng(6000, 6000),
+        );
+
+        $this->assertSame('Failure! Invalid image file.', (string) ($result['warning']));
+        $this->assertSame(0, DB::table('attachments')->count());
+    }
 }

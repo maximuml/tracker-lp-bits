@@ -3,7 +3,7 @@
 <thead>
 <tr>
     @foreach ($listVm->columns as $col)
-    <th class="nx-colhead @if (($col['thClass'] ?? '') !== ''){{ $col['thClass'] }}@endif" scope="col">
+    <th class="nx-colhead @if (($col['thClass'] ?? '') !== ''){{ $col['thClass'] }}@endif" scope="col" @if (($col['ariaSort'] ?? null) !== null) aria-sort="{{ $col['ariaSort'] }}" @endif>
         @if ($col['sortUrl'])<a href="{{ $col['sortUrl'] }}">@endif
             @if ($col['iconClass'])<img class="{{ $col['iconClass'] }}" src="pic/trans.gif" alt="{{ (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '') ? '' : $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}" />@endif
             @if (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '')<span class="nxm-th__label">{{ ($col['shortLabel'] ?? '') !== '' ? $col['shortLabel'] : $col['label'] }}</span>@endif
@@ -42,7 +42,7 @@
     </td>
     @endif
     <td class="nx-rowfollow nowrap nxm-td-added"><time datetime="{{ str_replace(' ', 'T', (string) $row->added) }}">{{ $row->addedDate }} <br/>{{ $row->addedTime }}</time></td>
-    <td class="nx-rowfollow nowrap nxm-td-size">{{ $row->size['value'] }} <br/>{{ $row->size['unit'] }}</td>
+    <td class="nx-rowfollow nowrap nxm-td-size">{{ $row->size['value'] }} {{ $row->size['unit'] }}</td>
     <td class="nx-rowfollow nxm-td-seeders nx-center" data-label="{{ 'S' }}">
         @if ($row->seedersUrl)
             <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>

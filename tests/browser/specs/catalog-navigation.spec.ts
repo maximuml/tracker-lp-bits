@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { AUTH_STATE } from '../fixtures/auth';
 
 test.use({ storageState: AUTH_STATE });
@@ -157,6 +158,72 @@ test.describe('catalog navigation', () => {
         expect(metrics.badgeHeight, context).toBeLessThanOrEqual(22);
       }
     }
+  });
+
+  test('table frame, sorting, pager sizing, focus, and accessibility follow tokens', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/web/torrents?sort=4&type=desc', { waitUntil: 'networkidle' });
+    const table = page.locator('table.nx-torrents');
+
+    for (const pack of ['Classic', 'Unshatter'] as const) {
+      await useUnshatterStylesheet(page, pack === 'Unshatter');
+      for (const theme of ['light', 'dark'] as const) {
+        await page.evaluate((value) => {
+          document.documentElement.dataset.theme = value;
+        }, theme);
+        const frame = await table.evaluate((element) => ({
+          radius: parseFloat(getComputedStyle(element).borderTopLeftRadius),
+          radiusToken: parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue('--nxm-radius'),
+          ),
+          overflow: getComputedStyle(element).overflow,
+          firstHeader: getComputedStyle(element.querySelector('th')!).backgroundColor,
+        }));
+        expect(frame.radius).toBe(frame.radiusToken);
+        if (frame.radiusToken > 0) {
+          expect(frame.radius).toBeGreaterThan(0);
+        }
+        expect(frame.overflow).toBe('hidden');
+        expect(frame.firstHeader).not.toBe('rgba(0, 0, 0, 0)');
+        const sorted = page.locator('.nx-torrents th.nxm-th--sorted');
+        await expect(sorted).toHaveAttribute('aria-sort', 'descending');
+        const arrow = await sorted.evaluate((element) => getComputedStyle(element, '::after').content);
+        expect(arrow).toContain('▼');
+        const axe = await new AxeBuilder({ page }).include('.nx-torrents').analyze();
+        expect(axe.violations).toEqual([]);
+      }
+    }
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => {
+      document.documentElement.dataset.theme = 'light';
+    });
+    const mobile = await page.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth > window.innerWidth,
+      border: getComputedStyle(document.querySelector('table.nx-torrents')!).borderTopWidth,
+    }));
+    expect(mobile.overflow).toBe(false);
+    expect(mobile.border).toBe('0px');
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/web/log?action=dailylog', { waitUntil: 'networkidle' });
+    const pagerLinks = page.locator('nav[aria-label^="Pagination"] a');
+    await expect(pagerLinks.first()).toBeVisible();
+    await expect(page.locator('nav[aria-label="Pagination bottom"] a[rel="next"]')).toBeVisible();
+    for (const item of await pagerLinks.all()) {
+      const box = await item.boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(32);
+    }
+    await pagerLinks.first().focus();
+    const outline = await pagerLinks.first().evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { visible: element.matches(':focus-visible'), width: style.outlineWidth, style: style.outlineStyle };
+    });
+    expect(outline.visible).toBe(true);
+    expect(outline.style).not.toBe('none');
+    expect(parseFloat(outline.width)).toBeGreaterThan(0);
   });
 
   test('category chips auto-submit and preserve taxonomy picks, filters, and sorting', async ({

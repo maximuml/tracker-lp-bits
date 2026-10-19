@@ -1447,3 +1447,23 @@ document.addEventListener('DOMContentLoaded', function () {
     applyHash();
     window.addEventListener('hashchange', applyHash);
 })();
+
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.nx-tabs__link[aria-current="page"]').forEach(function (link) {
+            var list = link.closest('.nx-tabs__list');
+            if (!list || list.scrollWidth <= list.clientWidth) { return; }
+
+            var linkRect = link.getBoundingClientRect();
+            var listRect = list.getBoundingClientRect();
+            var visibleLeft = listRect.left + list.clientLeft;
+            var visibleRight = visibleLeft + list.clientWidth;
+
+            if (linkRect.left < visibleLeft) {
+                list.scrollLeft += linkRect.left - visibleLeft;
+            } else if (linkRect.right > visibleRight) {
+                list.scrollLeft += linkRect.right - visibleRight;
+            }
+        });
+    });
+})();

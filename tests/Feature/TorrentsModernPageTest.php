@@ -131,6 +131,28 @@ final class TorrentsModernPageTest extends TestCase
         $this->assertStringContainsString('role="status"', $html);
     }
 
+    public function test_applied_filter_row_renders_removal_and_reset_links_for_results_and_empty_states(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $filtered = $this->withNexusCookie($user)->get('/web/torrents?incldead=2&sort=4&type=desc');
+        $filtered->assertOk();
+        $html = (string) $filtered->getContent();
+        $this->assertStringContainsString('class="nxm-applied"', $html);
+        $this->assertStringContainsString('href="/web/torrents?sort=4&amp;type=desc"', $html);
+        $this->assertStringContainsString('href="/web/torrents">Reset all</a>', $html);
+
+        $plain = $this->withNexusCookie($user)->get('/web/torrents');
+        $plain->assertOk();
+        $this->assertStringNotContainsString('class="nxm-applied"', (string) $plain->getContent());
+
+        $empty = $this->withNexusCookie($user)->get('/web/torrents?search=empty-applied-filter-marker&incldead=2');
+        $empty->assertOk();
+        $emptyHtml = (string) $empty->getContent();
+        $this->assertStringContainsString('class="nxm-applied"', $emptyHtml);
+        $this->assertStringContainsString('class="nxm-empty"', $emptyHtml);
+    }
+
     public function test_sorted_column_exposes_direction_and_short_labels(): void
     {
         /** @var User $user */

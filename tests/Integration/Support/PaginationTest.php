@@ -47,13 +47,14 @@ final class PaginationTest extends TestCase
     public function test_render_first_page_prev_is_disabled(): void
     {
         $result = Pagination::render(10, 50, '/list.php?', 0, 5, self::LABELS);
-        $this->assertStringContainsString('<span class="inline-block border border-nxm-border px-2 py-0.5 text-nxm-text-dim">&lsaquo; Prev</span>', $result[0]);
+        $this->assertStringContainsString('<span class="inline-flex min-h-8 min-w-8 items-center justify-center rounded-md border border-transparent px-2.5 text-nxm-text-dim">&lsaquo; Prev</span>', $result[0]);
+        $this->assertDoesNotMatchRegularExpression('/<a\b[^>]*>&lsaquo; Prev<\/a>/', $result[0]->toHtml());
     }
 
     public function test_render_last_page_next_is_disabled(): void
     {
         $result = Pagination::render(10, 50, '/list.php?', 4, 5, self::LABELS);
-        $this->assertStringContainsString('<span class="inline-block border border-nxm-border px-2 py-0.5 text-nxm-text-dim">Next &rsaquo;</span>', $result[0]);
+        $this->assertStringContainsString('<span class="inline-flex min-h-8 min-w-8 items-center justify-center rounded-md border border-transparent px-2.5 text-nxm-text-dim">Next &rsaquo;</span>', $result[0]);
     }
 
     public function test_render_mid_page_has_both_links(): void

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\SitelogSecurityLevel;
 use App\Models\Category;
 use App\Models\Forum;
 use App\Models\Post;
@@ -9,6 +10,7 @@ use App\Models\Topic;
 use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Minimal browser-smoke fixture data (ADR 0016). The base seeders ship
@@ -38,6 +40,28 @@ class BrowserSmokeSeeder extends Seeder
                     'category' => $category->id,
                 ]),
             );
+        }
+
+        $logPrefix = 'Browser smoke pager fixture ';
+        $existingLogs = DB::table('sitelog')
+            ->where('txt', 'like', $logPrefix.'%')
+            ->pluck('txt')
+            ->all();
+        $logRows = [];
+        for ($index = 1; $index <= 51; $index++) {
+            $text = $logPrefix.$index;
+            if (in_array($text, $existingLogs, true)) {
+                continue;
+            }
+
+            $logRows[] = [
+                'added' => now()->subSeconds($index)->toDateTimeString(),
+                'txt' => $text,
+                'security_level' => SitelogSecurityLevel::NORMAL->value,
+            ];
+        }
+        if ($logRows !== []) {
+            DB::table('sitelog')->insert($logRows);
         }
 
         if (Topic::query()->count() > 0) {

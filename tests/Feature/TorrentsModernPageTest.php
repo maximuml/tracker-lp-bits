@@ -130,4 +130,33 @@ final class TorrentsModernPageTest extends TestCase
         $this->assertStringContainsString('nxm-empty', $html);
         $this->assertStringContainsString('role="status"', $html);
     }
+
+    public function test_sorted_column_exposes_direction_and_short_labels(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        Torrent::factory()->create([
+            'category' => 1,
+            'owner' => $user->id,
+            'visible' => 1,
+            'banned' => 0,
+            'medium' => 1,
+            'codec' => 1,
+            'standard' => 1,
+            'processing' => 1,
+            'audiocodec' => 1,
+        ]);
+
+        foreach (['asc' => 'ascending', 'desc' => 'descending'] as $type => $direction) {
+            $response = $this->withNexusCookie($user)->get('/web/torrents?sort=4&type='.$type.'&cat=1');
+            $response->assertOk();
+            $html = (string) $response->getContent();
+            $this->assertMatchesRegularExpression('/<th\b[^>]*class="[^"]*nxm-th--sorted[^"]*"[^>]*aria-sort="'.$direction.'"/', $html);
+            $this->assertSame(1, preg_match_all('/<th\b[^>]*\baria-sort=/i', $html));
+        }
+
+        foreach (['S', 'L', 'Sn'] as $label) {
+            $this->assertStringContainsString('nxm-th__label">'.$label.'</span>', $html);
+        }
+    }
 }

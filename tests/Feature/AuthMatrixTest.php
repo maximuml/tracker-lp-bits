@@ -143,8 +143,8 @@ final class AuthMatrixTest extends TestCase
 
         $this->assertSame(1, $user->tokens()->count());
 
-        // Guards memoize the resolved user per app instance (Octane clears
-        // them via FlushAuthenticationState; a test process must do it too).
+        // Guards memoize the resolved user per app instance; tests must
+        // clear them too.
         $this->app['auth']->forgetGuards();
 
         // Token A is dead, token B still works.

@@ -17,22 +17,21 @@ use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
- * Cross-request isolation test suite for Octane.
+ * Cross-request isolation test suite for long-lived workers.
  *
- * Simulates the Octane worker lifecycle: multiple sequential requests
- * served by the same PHP process, with ResetNexus running between each.
- * Verifies that per-request state (user, settings, locale, theme) does
- * not leak from one request to the next.
+ * Simulates a queue worker lifecycle between jobs and requests, with
+ * ResetNexus running between each. Verifies that per-request state (user,
+ * settings, locale, theme) does not leak.
  *
- * These tests run under PHPUnit (not a real RoadRunner worker), but they
- * simulate the critical isolation boundary by:
+ * These tests run under PHPUnit, but they simulate the critical isolation
+ * boundary by:
  * 1. Setting up state for "request A" (user A, settings A)
- * 2. Running ResetNexus (as Octane would between requests)
+ * 2. Running ResetNexus between jobs/requests
  * 3. Setting up state for "request B" (user B, settings B)
  * 4. Asserting that request B sees only its own state
  */
 #[TestCategory(TestCategory::HTTP_FEATURE)]
-final class OctaneCrossRequestIsolationTest extends TestCase
+final class ResetNexusIsolationTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -258,7 +257,7 @@ final class OctaneCrossRequestIsolationTest extends TestCase
     }
 
     /**
-     * Dispatch the ResetNexus listener as Octane would between requests.
+     * Dispatch the ResetNexus listener between jobs/requests.
      */
     private function dispatchResetNexus(): void
     {

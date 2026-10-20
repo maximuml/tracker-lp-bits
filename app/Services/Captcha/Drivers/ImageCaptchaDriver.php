@@ -158,7 +158,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         imagestring($im, 5, $textposh, $textposv, $characters, $textcolor);
 
         // T-11: Use HeaderBag instead of SAPI header() to avoid
-        // cross-request header leakage under Octane.
+        // cross-request header leakage.
         $this->headerBag->set('Content-Type', 'image/png');
         imagepng($im);
         imagedestroy($im);
@@ -176,7 +176,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     protected function renderFallback(): void
     {
         // T-11: Use HeaderBag instead of SAPI http_response_code() to
-        // avoid cross-request status code leakage under Octane.
+        // avoid cross-request status code leakage.
         $this->headerBag->setStatusCode(404);
     }
 }

@@ -296,7 +296,7 @@ class ShoutboxController extends BasePageController
                 // Drop pre-existing output buffers so frames flush in real
                 // time under php-fpm. CLI SAPI covers both PHPUnit
                 // (streamedContent() captures output in its own buffer —
-                // clearing it would break the capture) and Octane workers.
+                // clearing it would break the capture).
                 while (ob_get_level()) {
                     ob_end_clean();
                 }

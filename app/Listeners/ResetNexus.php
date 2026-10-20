@@ -30,7 +30,7 @@ class ResetNexus
     ) {}
 
     /**
-     * Clear per-request legacy state so a worker/Octane process does not leak
+     * Clear per-request legacy state so a worker process does not leak
      * values from one request/job into the next.
      *
      * @param  mixed  $event
@@ -51,14 +51,14 @@ class ResetNexus
         Category::resetState();
         Style::resetState();
         // T-11: Flush the per-request legacy header bag so headers/status
-        // set by one request do not leak into the next under Octane.
+        // set by one request do not leak into the next worker cycle.
         $this->headerBag->flush();
         // ADR 0017: restore entry-point legacy/tracker flags — per-request
-        // code may mutate them under Octane.
+        // code may mutate them between worker cycles.
         $this->app->make(RuntimeContext::class)->reset();
 
         // T-10: Drop all resolved guard instances to prevent cross-request
-        // and cross-job user leakage under Octane and the queue worker.
+        // and cross-job user leakage in long-lived workers.
         // NexusWebGuard caches $this->user on the guard instance, which
         // persists while AuthManager keeps the resolved guard. Resetting
         // only the default 'web' guard is not enough — the app authenticates

@@ -26,8 +26,8 @@ final class Category
     private static array $iconDataCache = [];
 
     /**
-     * Clear per-request memoized state so long-running workers (Octane,
-     * queue) re-read categories/icons instead of serving stale names
+     * Clear per-request memoized state so long-running workers re-read
+     * categories/icons instead of serving stale names
      * cached before an admin edit or delete.
      */
     public static function resetState(): void

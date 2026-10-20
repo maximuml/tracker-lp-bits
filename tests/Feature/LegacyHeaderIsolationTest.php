@@ -14,8 +14,7 @@ use Tests\TestCase;
  * Cross-request isolation tests for the legacy header bag.
  *
  * Verifies that headers and status codes set via HeaderBag
- * do not leak from one request to the next under Octane-style
- * sequential request handling.
+ * do not leak between sequential requests handled by one worker.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class LegacyHeaderIsolationTest extends TestCase
@@ -154,7 +153,7 @@ final class LegacyHeaderIsolationTest extends TestCase
     }
 
     /**
-     * Dispatch the ResetNexus listener as Octane would between requests.
+     * Dispatch the ResetNexus listener between requests/jobs.
      */
     private function dispatchResetNexus(): void
     {

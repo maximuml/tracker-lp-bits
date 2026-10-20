@@ -239,7 +239,7 @@ final class PageResponses
         }
 
         // T-11: Use HeaderBag instead of SAPI headers_sent() to avoid
-        // cross-request state leakage under Octane. If output has already
+        // cross-request state leakage. If output has already
         // been emitted (ob_get_level() > 0 with content), use a JS redirect.
         if (ob_get_level() > 0 && (string) ob_get_status()['name'] !== '') {
             $nonce = (string) request()->attributes->get('csp_nonce', '');

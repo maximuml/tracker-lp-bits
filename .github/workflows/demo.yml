@@ -204,8 +204,7 @@ jobs:
 
       - name: Restart PHP-FPM (graceful)
         run: |
-          ssh demo "cd $DEMO_WEB_ROOT && php artisan octane:reload 2>/dev/null || \
-            (sudo systemctl reload php8.5-fpm 2>/dev/null || \
+          ssh demo "cd $DEMO_WEB_ROOT && (sudo systemctl reload php8.5-fpm 2>/dev/null || \
              sudo service php8.5-fpm reload 2>/dev/null || \
              echo 'Could not reload PHP-FPM — caches will refresh on next request')"
 

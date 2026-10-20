@@ -16,8 +16,8 @@ use App\Services\Announce\TrafficResult;
  * the context returns a new instance via the `with*()` methods, following
  * the same pattern as ResponseBuilder::withTorrent().
  *
- * This eliminates cross-request state leakage under Octane/RoadRunner
- * because no mutable fields persist on the service between requests.
+ * This eliminates cross-request state leakage because no mutable fields
+ * persist on the service between requests.
  */
 final readonly class AnnounceContext
 {

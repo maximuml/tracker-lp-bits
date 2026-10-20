@@ -129,13 +129,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(UserUpdateBatch::class);
         // T-20: ActorContext is a per-request singleton — the instance is
         // resolved lazily from the authenticated user and must be flushed
-        // between requests under Octane. See ResetNexus listener.
+        // between requests. See ResetNexus listener.
         $this->app->singleton(ActorContext::class, static function (): ActorContext {
             return ActorContext::fromAuth();
         });
         // T-11: Per-request header bag for the legacy bridge — replaces
         // SAPI globals headers_list()/http_response_code()/header_remove()
-        // that leak state across Octane worker requests.
+        // that can persist across requests in a long-lived process.
         $this->app->singleton(HeaderBag::class);
         // Per-request page chrome renderer — carries the layout context
         // between stdhead()/stdfoot(); flushed by ResetNexus.
@@ -149,7 +149,7 @@ class AppServiceProvider extends ServiceProvider
         // Per-request context is managed by RequestContext's own static
         // boot/flush lifecycle (bootstrap/app.php + ResetNexus) — bind, not
         // singleton, so every injection resolves the CURRENT instance and a
-        // container-cached copy can never outlive an Octane request.
+        // container-cached copy can never outlive the current request.
         $this->app->bind(RequestContext::class, static fn (): RequestContext => RequestContext::instance());
 
         // W3-07: Repository contracts for the 10 most-used repositories.

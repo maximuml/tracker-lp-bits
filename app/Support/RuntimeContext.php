@@ -9,12 +9,13 @@ namespace App\Support;
  * entry-point constants (ADR 0017).
  *
  * `isLegacy()` is true when the request entered through the web front
- * controller (legacy FPM semantics), false for Octane worker boot, console
- * and test processes. `isTracker()` is true on the announce/scrape hot path.
+ * controller (legacy FPM semantics), false for console and test processes.
+ * `isTracker()` is true on the announce/scrape hot path.
  *
  * The constructor captures the entry-point defaults; `reset()` restores
  * them, so `ResetNexus` can flush per-request mutations (and tests can flip
- * the flag per test) without leaking state across Octane worker requests —
+ * the flag per test) without leaking state across requests in long-lived
+ * workers —
  * the exact hazard a process-global constant could not express.
  */
 final class RuntimeContext

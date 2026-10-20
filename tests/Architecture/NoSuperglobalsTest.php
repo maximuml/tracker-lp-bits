@@ -11,9 +11,9 @@ use Tests\Attributes\TestCategory;
  * W0-05: Ratchet on direct PHP superglobal access in app/.
  *
  * Direct access to $_SERVER, $_GET, $_POST, $_COOKIE, $_REQUEST, $_SESSION
- * in application code is an Octane-safety risk (superglobals persist across
- * requests under RoadRunner/FrankenPHP) and bypasses Laravel's Request
- * abstraction (TrustProxies, TrimStrings, etc.).
+ * in application code can leak state across requests in long-lived PHP
+ * workers and bypasses Laravel's Request abstraction (TrustProxies,
+ * TrimStrings, etc.).
  *
  * This test counts lines containing superglobal references in actual code
  * (not comments or docblocks) and fails if the count increases.

@@ -61,7 +61,7 @@ final class Style
     }
 
     /**
-     * Clear the per-process stylesheet row memo (Octane worker reset).
+     * Clear the per-process stylesheet row memo.
      */
     public static function resetState(): void
     {

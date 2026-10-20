@@ -28,7 +28,7 @@ final class UserDisplay
 
     /**
      * Clear the in-process caches. Called between tests and on each
-     * Octane/queue job reset so rows read under a rolled-back transaction
+     * queue job reset so rows read under a rolled-back transaction
      * or a previous request cannot leak stale data.
      */
     public static function resetState(): void

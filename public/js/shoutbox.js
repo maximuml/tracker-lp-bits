@@ -201,8 +201,17 @@ function shoutboxSaveEdit(id) {
 }
 
 function shoutboxDelete(id) {
-    if (!confirm(shoutboxT('confirmDelete', 'Delete this shout?'))) { return; }
-    shoutboxPost('shoutboxDelete', { id: id }, true);
+    var msg = shoutboxT('confirmDelete', 'Delete this shout?');
+    var lyr = (window.layer && typeof window.layer.confirm === 'function') ? window.layer
+        : (window.parent && window.parent.layer && typeof window.parent.layer.confirm === 'function') ? window.parent.layer
+        : null;
+    if (lyr) {
+        lyr.confirm(msg, {title: 'Info', btn: ['Yes', 'Cancel'], btnAlign: 'c'}, function () {
+            shoutboxPost('shoutboxDelete', { id: id }, true);
+        });
+    } else if (confirm(msg)) {
+        shoutboxPost('shoutboxDelete', { id: id }, true);
+    }
 }
 
 function shoutboxReact(id, emoji) {

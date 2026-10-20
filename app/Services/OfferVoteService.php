@@ -44,6 +44,22 @@ final class OfferVoteService
             return null;
         }
 
+        $offerid = $request->integer('id');
+        $this->castVote($offerid, $vote);
+
+        return response(
+            view('offers.vote-accepted', ['url' => "/web/offers?id={$offerid}&off_details=1"])->render()
+        );
+    }
+
+    /**
+     * Guards + mutation shared by the legacy POST handler and the
+     * OfferVote Livewire component. Throws HttpResponseException via
+     * abort() on every guard failure — callers needing inline errors
+     * must pre-check the same conditions or catch it.
+     */
+    public function castVote(int $offerid, string $vote): void
+    {
         if ($vote === 'against' && ! Permission::can(PermissionEnum::AGAINST_OFFER)) {
             $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
@@ -51,7 +67,6 @@ final class OfferVoteService
             $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
-        $offerid = $request->integer('id');
         $curuser = $this->curUser();
         $userid = (int) ($curuser['id'] ?? 0);
 
@@ -114,10 +129,6 @@ final class OfferVoteService
 
         $this->offerVoteRepository->recordVote($offerid, $userid, $vote);
         Bonus::updatePoints('+', $offervoteBonus, $userid);
-
-        return response(
-            view('offers.vote-accepted', ['url' => "/web/offers?id={$offerid}&off_details=1"])->render()
-        );
     }
 
     /**

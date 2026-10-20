@@ -3,7 +3,9 @@
 
     var clearBtn = document.getElementById('clear-shout-box');
     if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
+        clearBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             layer.confirm(clearBtn.getAttribute('data-confirm'), {title: 'Info', btn: ['Yes', 'Cancel'], btnAlign: 'c'}, function (layerIndex) {
                 nativePost('/web/shoutbox/clear', {}, function (response) {
                     layer.close(layerIndex);

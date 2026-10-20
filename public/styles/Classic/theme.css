@@ -287,7 +287,8 @@ table.head, .nx-head
 {
 	background: transparent;
 	height: 100px;
-	width: 920px;
+	width: 100%;
+	max-width: 920px;
 }
 table.main, .nx-main
 {

@@ -1456,7 +1456,9 @@ input[type="file"] { border-style: dashed; background: transparent; }
 /* After :focus-visible so an invalid field keeps the danger border while
    focused (equal specificity, this rule wins). */
 :is(input, textarea, select)[aria-invalid="true"] { border-color: var(--nxm-danger); }
-textarea { resize: vertical; }
+textarea { resize: vertical; max-width: 100%; box-sizing: border-box; }
+/* [code]/media-info blocks must scroll inside the column, not widen the page. */
+pre { max-width: 100%; overflow-x: auto; }
 
 /* ---------- Footer ---------- */
 

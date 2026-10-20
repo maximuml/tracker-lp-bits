@@ -18,7 +18,7 @@
     --nxm-surface: #ece9d8;
     --nxm-surface-alt: #f5f4ea;
     --nxm-text: #000000;
-    --nxm-text-dim: #6a6759;
+    --nxm-text-dim: #504d45;
     --nxm-border: #000000;
     --nxm-accent: #0055a4;
     --nxm-accent-hover: #003f7d;
@@ -46,7 +46,7 @@
     --classic-dropmenu-border: #a6c9d7;
     --classic-btn-bg-image: url(./btnbg.gif);
     --classic-btn-border: #cccccc;
-    --classic-btn-text: #666666;
+    --classic-btn-text: #545454;
     --classic-gobutton-bg: #476ba2;
     --classic-gobutton-text: #ffffff;
     --classic-info-bg: #cccccc;
@@ -54,15 +54,15 @@
     --classic-tooltip-bg: #ccffff;
     --classic-tooltip-border: #00ccff;
     --classic-tooltip-text: #000000;
-    --classic-attach-link: #0099cc;
-    --classic-altlink-red: #a83838;
-    --classic-altlink-green: #007800;
-    --classic-yellow: #997700;
+    --classic-attach-link: #005570;
+    --classic-altlink-red: #972727;
+    --classic-altlink-green: #005f00;
+    --classic-yellow: #665200;
 
     /* usercp stats + promotion flags */
     --classic-stat-indigo: #1900d1;
     --classic-stat-red: #8b0000;
-    --classic-stat-green: #008000;
+    --classic-stat-green: #005500;
     --classic-free: #f0cc00;
     --classic-twoup: #d2b8b8;
     --classic-twoupfree: #99cc66;
@@ -130,8 +130,8 @@ html[data-theme="dark"]:root {
     --classic-altlink-green: #7fbf87;
     --classic-yellow: #c9a227;
 
-    --classic-stat-indigo: #8f84f0;
-    --classic-stat-red: #e06060;
+    --classic-stat-indigo: #a89df7;
+    --classic-stat-red: #f08080;
     --classic-stat-green: #5cb860;
     --classic-free: #ffdd44;
     --classic-twoup: #b89898;
@@ -202,8 +202,8 @@ html[data-theme="dark"]:root {
         --classic-altlink-green: #7fbf87;
         --classic-yellow: #c9a227;
 
-        --classic-stat-indigo: #8f84f0;
-        --classic-stat-red: #e06060;
+        --classic-stat-indigo: #a89df7;
+        --classic-stat-red: #f08080;
         --classic-stat-green: #5cb860;
         --classic-free: #ffdd44;
         --classic-twoup: #b89898;

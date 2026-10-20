@@ -2022,8 +2022,23 @@ input.nx-postbtn {
 .nx-catgrid__row { display: flex; flex-wrap: wrap; gap: 2px 18px; }
 .nx-catgrid__cell { display: flex; align-items: center; gap: 4px; }
 /* usercp: two-step bind row (replaces inline <style> block) */
-.nx-tfa-row { display: flex; align-items: center; }
-.nx-tfa-row > div + div { padding-left: 20px; }
+.nx-setcards__form { display: contents; }
+.nx-tfa {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 1rem;
+    align-items: start;
+}
+.nx-tfa__qr { display: block; width: 100%; max-width: 18rem; height: auto; }
+.nx-tfa__steps { min-width: 0; margin: 0; padding-left: 1.5rem; }
+.nx-tfa__steps li + li { margin-top: 0.5rem; }
+.nx-tfa__steps input[type="text"] { box-sizing: border-box; max-width: 100%; }
+.nx-tfa__secret { overflow-wrap: anywhere; }
+.nx-savebar__hint { margin-left: 0.75rem; color: var(--nxm-text-dim); }
+@media (max-width: 640px) {
+    .nx-tfa { grid-template-columns: minmax(0, 1fr); }
+    .nx-tfa__qr { max-width: 14rem; }
+}
 /* mybonus: gift field rows (replaces embedded <table> in shop cells) */
 .nx-giftfields { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 4px; }
 .nx-giftfields > span { display: inline-flex; align-items: center; gap: 4px; }

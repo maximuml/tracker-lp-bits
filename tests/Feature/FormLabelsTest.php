@@ -28,27 +28,30 @@ final class FormLabelsTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_default_categories_label_renders_its_line_break(): void
+    public function test_tracker_uses_catalog_defaults_card_heading(): void
     {
+        /** @var User $user */
         $user = User::factory()->create(['class' => 1]);
 
         $response = $this->withNexusCookie($user)->get('/usercp?action=tracker');
 
         $response->assertOk()
-            ->assertSee('Default<br />categories', false)
-            ->assertDontSee('Default&lt;br /&gt;categories', false);
+            ->assertSee('Catalog defaults')
+            ->assertSee('id="ucp-sec-catalog"', false);
     }
 
     public function test_tracker_selects_have_accessible_names(): void
     {
+        /** @var User $user */
         $user = User::factory()->create(['class' => 1]);
 
         $response = $this->withNexusCookie($user)->get('/usercp?action=tracker');
 
         $response->assertOk()
-            ->assertSee('<label for="usercp-incldead"><b>'.e(__('usercp.text_show_dead_active')).'</b></label>', false)
+            ->assertSee('<label class="nx-setrow__label" for="usercp-stylesheet">'.e(__('usercp.row_stylesheet')).'</label>', false)
+            ->assertSee('<label for="usercp-incldead">'.e(__('usercp.text_show_dead_active')).'</label>', false)
             ->assertSee('id="usercp-incldead"', false)
-            ->assertSee('aria-label="'.e(__('usercp.row_stylesheet')).'"', false);
+            ->assertSee('id="usercp-stylesheet"', false);
     }
 
     public function test_bonus_shop_controls_have_accessible_labels(): void
@@ -63,6 +66,7 @@ final class FormLabelsTest extends TestCase
         );
         Settings::resetCache();
 
+        /** @var User $user */
         $user = User::factory()->create(['class' => 1]);
         $response = $this->withNexusCookie($user)->get('/web/mybonus');
 

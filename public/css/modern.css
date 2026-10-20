@@ -2236,6 +2236,134 @@ a.nx-mail:hover { color: var(--nxm-text); }
     .nx-ucards { grid-template-columns: 1fr; }
 }
 
+.nx-setcards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+}
+.nx-setcard { min-width: 0; }
+.nx-setcard--wide { grid-column: 1 / -1; }
+.nxm-main .nx-setcard__title {
+    margin: 0 0 0.65rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--nxm-text);
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-transform: none;
+}
+.nx-setcard__hint {
+    margin: 0 0 0.65rem;
+    color: var(--nxm-text-dim);
+}
+.nx-setcard__hint--warning {
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--nxm-warning-border);
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-warning-bg);
+    color: var(--nxm-text);
+}
+.nx-setrow {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 0.25rem 1rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--nxm-border);
+}
+.nx-setcard > .nx-setrow:first-of-type { padding-top: 0; border-top: 0; }
+.nxm-main .nx-setrow__label {
+    color: var(--nxm-text);
+    font-weight: 600;
+}
+.nx-setrow__control { min-width: 0; }
+.nx-setrow__control > label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0.2rem 0;
+    max-width: 100%;
+}
+.nx-setrow__control input[type="text"] {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+.nx-setrow__control select { max-width: 100%; }
+.nx-setrow__control input[type="checkbox"],
+.nx-setrow__control input[type="radio"] {
+    flex: 0 0 auto;
+    margin: 0.2rem 0 0;
+}
+.nx-setrow__hint {
+    margin: 0.25rem 0 0;
+    color: var(--nxm-text-dim);
+    font-size: 0.875em;
+}
+.nxm-main .nxm-chiprow {
+    gap: 0.35rem;
+    margin: 0;
+}
+.nxm-main .nxm-chiprow .nx-chip {
+    max-width: 100%;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+.nxm-main .nxm-chiprow .nx-chip__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+.nxm-main .nxm-chiprow .nx-chip:has(.nx-chip__input:focus-visible) {
+    outline: var(--nxm-focus-outline);
+    outline-offset: 2px;
+}
+.nx-setstatus {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem 0.8rem;
+}
+.nx-setstatus__item {
+    display: flex;
+    flex: 1 1 8rem;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    max-width: 16rem;
+}
+.nx-setstatus__item label { color: var(--nxm-text); }
+.nx-setrow__inline-control { flex-wrap: wrap; align-items: center !important; }
+.nx-setrow__inline-control select { flex: 0 0 auto; }
+.nx-savebar {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--nxm-border);
+    background: var(--nxm-surface);
+}
+@media (min-width: 900px) {
+    .nx-setcards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+    .nx-setrow { grid-template-columns: minmax(0, 1fr); }
+    .nx-setcards { padding-bottom: 4rem; }
+    .nx-savebar {
+        position: fixed;
+        right: 0;
+        left: 0;
+        padding: 0.6rem 1rem;
+    }
+}
+
 /* E5 — FAQ accordion + search */
 .nx-faq__search { display: flex; gap: 10px; align-items: center; margin: 0 0 10px; }
 .nx-faq__search-input {

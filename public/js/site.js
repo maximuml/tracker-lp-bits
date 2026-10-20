@@ -1467,3 +1467,23 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 })();
+
+(function () {
+    document.addEventListener('submit', function (e) {
+        if (e.defaultPrevented) { return; }
+        var form = e.target;
+        form.querySelectorAll('[data-submit-once]').forEach(function (button) {
+            button.disabled = true;
+        });
+        setTimeout(function () {
+            form.querySelectorAll('[data-submit-once]').forEach(function (button) {
+                button.disabled = true;
+            });
+        }, 0);
+    });
+    window.addEventListener('pageshow', function () {
+        document.querySelectorAll('[data-submit-once]').forEach(function (button) {
+            button.disabled = false;
+        });
+    });
+})();

@@ -30,7 +30,7 @@ async function saveStylesheet(page: Page, stylesheet: string): Promise<void> {
       response.url().includes('/web/usercp/tracker') &&
       response.request().method() === 'POST',
   );
-  await form.locator('input[type=submit]').click();
+  await form.locator('[type=submit]').click();
   expect((await saved).status(), 'tracker settings save').toBeLessThan(400);
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1500);

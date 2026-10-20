@@ -19,12 +19,27 @@
     --nxm-surface-alt: #f5f4ea;
     --nxm-text: #000000;
     --nxm-text-dim: #504d45;
+    --nxm-muted: #504d45;
     --nxm-border: #000000;
     --nxm-accent: #0055a4;
     --nxm-accent-hover: #003f7d;
     --nxm-accent-text: #004e98;
     --nxm-accent-text-hover: #003f7d;
     --nxm-on-accent: #ffffff;
+
+    --nxm-name-crazyuser: #005977;
+    --nxm-name-eliteuser: #005858;
+    --nxm-name-extremeuser: #7d4400;
+    --nxm-name-forummoderator: #0d5b62;
+    --nxm-name-moderator: #375283;
+    --nxm-name-nexusmaster: #1c5778;
+    --nxm-name-peasant: #485562;
+    --nxm-name-poweruser: #684e0f;
+    --nxm-name-retiree: #0d5b62;
+    --nxm-name-sysop: #804224;
+    --nxm-name-ultimateuser: #005a00;
+    --nxm-name-uploader: #a50f2d;
+    --nxm-name-vip: #006100;
 
     /* pack-specific */
     --classic-link: #000000;
@@ -55,8 +70,8 @@
     --classic-tooltip-border: #00ccff;
     --classic-tooltip-text: #000000;
     --classic-attach-link: #005570;
-    --classic-altlink-red: #972727;
-    --classic-altlink-green: #005f00;
+    --classic-altlink-red: #a83838;
+    --classic-altlink-green: #007800;
     --classic-yellow: #665200;
 
     /* usercp stats + promotion flags */
@@ -97,6 +112,12 @@ html[data-theme="dark"]:root {
     --nxm-accent-text: #7fb2e8;
     --nxm-accent-text-hover: #a5cdf0;
     --nxm-on-accent: #10151b;
+
+    --nxm-name-insaneuser: #e793e8;
+    --nxm-name-staffleader: #f59595;
+    --nxm-name-sysop: #e2a683;
+    --nxm-name-uploader: #f897ab;
+    --nxm-name-veteranuser: #b7abe8;
 
     --classic-link: var(--nxm-accent-text);
     --classic-link-hover: #ff7070;
@@ -169,6 +190,12 @@ html[data-theme="dark"]:root {
         --nxm-accent-text: #7fb2e8;
         --nxm-accent-text-hover: #a5cdf0;
         --nxm-on-accent: #10151b;
+
+        --nxm-name-insaneuser: #e793e8;
+        --nxm-name-staffleader: #f59595;
+        --nxm-name-sysop: #e2a683;
+        --nxm-name-uploader: #f897ab;
+        --nxm-name-veteranuser: #b7abe8;
 
         --classic-link: var(--nxm-accent-text);
         --classic-link-hover: #ff7070;
@@ -497,12 +524,12 @@ form
 a:link
 {
 	color: var(--classic-link);
-	text-decoration: none
+	text-decoration: underline
 }
 a:visited
 {
 	color: var(--classic-link);
-	text-decoration: none
+	text-decoration: underline
 }
 a:hover
 {

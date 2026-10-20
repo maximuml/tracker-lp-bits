@@ -176,7 +176,9 @@ final class BonusService
         }
         $up = (int) $uploaded + (int) $bonusarray['menge'];
         Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange uploaded from %s to %s', $curUser->id(), $points, $uploaded, $up), 'info', false);
-        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_UPLOAD->value, $points.' Points for uploaded.', ['uploaded' => $up]);
+        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_UPLOAD->value, $points.' Points for uploaded.', [
+            'uploaded' => DB::raw(DB::getQueryGrammar()->wrap('uploaded').' + '.(int) $bonusarray['menge']), // @phpstan-ignore argument.type
+        ]);
 
         return $this->redirect($baseUrl, 'upload');
     }
@@ -188,7 +190,9 @@ final class BonusService
     {
         $down = (int) $curUser->value('downloaded', 0) + (int) $bonusarray['menge'];
         Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange downloaded from %s to %s', $curUser->id(), $points, $curUser->value('downloaded', 0), $down), 'info', false);
-        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_DOWNLOAD->value, $points.' Points for downloaded.', ['downloaded' => $down]);
+        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_DOWNLOAD->value, $points.' Points for downloaded.', [
+            'downloaded' => DB::raw(DB::getQueryGrammar()->wrap('downloaded').' + '.(int) $bonusarray['menge']), // @phpstan-ignore argument.type
+        ]);
 
         return $this->redirect($baseUrl, 'download');
     }
@@ -212,8 +216,9 @@ final class BonusService
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
             PageResponses::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
         }
-        $inv = (int) $curUser->value('invites', 0) + (int) $bonusarray['menge'];
-        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_INVITE->value, $points.' Points for invites.', ['invites' => $inv]);
+        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_INVITE->value, $points.' Points for invites.', [
+            'invites' => DB::raw(DB::getQueryGrammar()->wrap('invites').' + '.(int) $bonusarray['menge']), // @phpstan-ignore argument.type
+        ]);
 
         return $this->redirect($baseUrl, 'invite');
     }
@@ -278,7 +283,6 @@ final class BonusService
             PageResponses::abort(__('mybonus.text_error'), view('my.sections._abort-receiver-not-exists')->render(), false);
         }
         $useridgift = (int) $arr['id'];
-        $userseedbonus = (float) $arr['seedbonus'];
         if ($points < (float) $bonusarray['points']) {
             PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed'), false);
         }
@@ -292,6 +296,9 @@ final class BonusService
         if ($basictaxBonus) {
             $aftertaxpoint -= $basictaxBonus;
         }
+        if ($aftertaxpoint <= 0) {
+            PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed'), false);
+        }
         if ($curUser->id() === $useridgift) {
             PageResponses::abort(__('mybonus.text_huh'), view('my.sections._abort-karma-self')->render(), false);
         }
@@ -299,10 +306,23 @@ final class BonusService
         $points2receiver = number_format($aftertaxpoint, 1);
         $senderId = $curUser->id();
         $senderUsername = $curUser->username();
-        DB::transaction(function () use ($senderId, $useridgift, $points, $aftertaxpoint, $points2, $points2receiver, $usernamegift, $userseedbonus, $senderUsername) {
+        DB::transaction(function () use ($senderId, $useridgift, $points, $aftertaxpoint, $points2, $points2receiver, $usernamegift, $senderUsername) {
+            // Lock sender and receiver in ascending-id order — the same
+            // canonical order MagicRewardService uses — so two opposing
+            // gifts cannot deadlock each other.
+            $locked = DB::table('users')
+                ->whereIn('id', [$senderId, $useridgift])
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->pluck('seedbonus', 'id');
+            $receiverBonus = $locked->get($useridgift);
+            if ($receiverBonus === null) {
+                throw new \RuntimeException('Gift receiver not found');
+            }
+            $receiverBonus = (float) $receiverBonus;
             $this->bonusRep->consumeUserBonus($senderId, $points, BusinessType::GIFT_TO_SOMEONE->value, $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)));
             $this->bonusRep->incrementUserSeedbonus($useridgift, (float) $aftertaxpoint);
-            $this->bonusRep->add($useridgift, $userseedbonus, $aftertaxpoint, $userseedbonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.$senderUsername, BusinessType::RECEIVE_GIFT->value);
+            $this->bonusRep->add($useridgift, $receiverBonus, $aftertaxpoint, $receiverBonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.$senderUsername, BusinessType::RECEIVE_GIFT->value);
         });
 
         $locale = Locale::userLocale($useridgift);

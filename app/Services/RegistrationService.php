@@ -20,6 +20,7 @@ use App\Support\Network;
 use App\Support\Token;
 use App\Support\Url;
 use App\Support\Validators;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Orchestrates the user registration flow.
@@ -172,31 +173,36 @@ class RegistrationService
             $userData['invited_by'] = (int) $invite->inviter;
         }
 
-        $user = $this->repositories->userAccount->createUser($userData);
-        $user->makeVisible(['secret']);
+        $confirmToken = '';
+        $user = DB::transaction(function () use ($userData, $isInvite, $invite, $email, $username, $ip, &$confirmToken) {
+            $user = $this->repositories->userAccount->createUser($userData);
+            $user->makeVisible(['secret']);
 
-        event(new UserCreated($user));
+            event(new UserCreated($user));
 
-        // T-24: Record user registered event in outbox
-        $this->outboxService->recordUserRegistered(
-            userId: (int) $user->id,
-            userData: [
-                'username' => $user->username,
-                'email' => $user->email,
-                'class' => $user->class,
-                'invited_by' => $isInvite && $invite !== null ? (int) $invite->inviter : null,
-            ],
-        );
+            // T-24: Record user registered event in outbox
+            $this->outboxService->recordUserRegistered(
+                userId: (int) $user->id,
+                userData: [
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'class' => $user->class,
+                    'invited_by' => $isInvite && $invite !== null ? (int) $invite->inviter : null,
+                ],
+            );
 
-        $this->sendWelcomeMessage($user);
-        $this->maybeAddTemporaryInvite((int) $user->id);
+            $this->sendWelcomeMessage($user);
+            $this->maybeAddTemporaryInvite((int) $user->id);
 
-        if ($isInvite && $invite !== null) {
-            $this->inviteValidator->consume($invite, (int) $user->id, $email, $username);
-        }
+            if ($isInvite && $invite !== null) {
+                $this->inviteValidator->consume($invite, (int) $user->id, $email, $username);
+            }
 
-        // W1-05: Generate a secure confirmation token (CSPRNG + SHA-256 digest)
-        $confirmToken = $this->emailConfirmation->generateConfirmationToken((int) $user->id, $ip);
+            // W1-05: Generate a secure confirmation token (CSPRNG + SHA-256 digest)
+            $confirmToken = $this->emailConfirmation->generateConfirmationToken((int) $user->id, $ip);
+
+            return $user;
+        });
 
         $redirect = $this->resolveSignupRedirect((int) $user->id, $confirmToken, $user, $verification, $email, $langFolder);
 

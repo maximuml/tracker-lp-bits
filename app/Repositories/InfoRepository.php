@@ -50,7 +50,7 @@ final class InfoRepository implements InfoRepositoryInterface
                 'contact' => (__('aboutnexus.text_contact')).PROJECTNAME,
             ],
             'notes' => [
-                'version' => SafeHtml::fromTrustedHtml(sprintf(__('aboutnexus.text_version_note'), $siteName, PROJECTNAME)),
+                'version' => SafeHtml::fromTrustedHtml(sprintf(__('aboutnexus.text_version_note'), e($siteName), e(PROJECTNAME))),
                 'nexus' => view('aboutnexus._nexus', ['projectName' => PROJECTNAME]),
                 'authorization' => view('aboutnexus._authorization', ['projectName' => PROJECTNAME]),
                 'translation' => view('aboutnexus._translation', ['projectName' => PROJECTNAME]),

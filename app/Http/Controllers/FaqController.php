@@ -11,6 +11,7 @@ use App\Http\Requests\FaqManageSubmitRequest;
 use App\Http\Requests\FaqPostRequest;
 use App\Support\Config\SiteConfig;
 use App\Support\Html;
+use App\Support\Html\HtmlSanitizer;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\RedisGuard;
@@ -40,22 +41,31 @@ class FaqController extends BasePageController
             $langId = $this->infoRepository->resolveRuleLangId(Locale::guestIdWithContext());
             $categories = $this->infoRepository->faqCategories($langId);
             foreach ($categories as &$category) {
-                foreach (($category['items'] ?? []) as &$item) {
-                    $item['answerCleaned'] = Html::cleanListChildren(strip_tags(
+                if (! isset($category['items']) || ! is_array($category['items'])) {
+                    continue;
+                }
+                foreach ($category['items'] as &$item) {
+                    $item['answerCleaned'] = Html::cleanListChildren(HtmlSanitizer::sanitize(
                         (string) ($item['answer'] ?? ''),
-                        '<a><b><i><u><s><br><p><div><span><ul><ol><li><img><span><pre><code><hr><table><tr><td><th><strong><em><h1><h2><h3><h4><h5><h6><blockquote>',
                     ));
                 }
+                unset($item);
             }
+            unset($category);
 
             return $categories;
         });
 
         foreach ($categories as &$category) {
-            foreach (($category['items'] ?? []) as &$item) {
+            if (! isset($category['items']) || ! is_array($category['items'])) {
+                continue;
+            }
+            foreach ($category['items'] as &$item) {
                 $item['answerHtml'] = SafeHtml::fromTrustedHtml((string) ($item['answerCleaned'] ?? ''));
             }
+            unset($item);
         }
+        unset($category);
 
         return response(view('faq.index', ['faqCategories' => $categories])->render());
     }

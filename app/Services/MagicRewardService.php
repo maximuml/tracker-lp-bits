@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Repositories\TorrentRepositoryInterface;
-use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\BusinessType;
 use App\Models\Setting;
 use App\Models\User;
@@ -13,6 +12,7 @@ use App\Repositories\BonusRepository;
 use App\Repositories\RewardRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Support\Bonus;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The magic-award pipeline shared by magic.php and the Livewire
@@ -26,7 +26,6 @@ final class MagicRewardService
         private readonly TorrentDetailRepository $torrentDetailRepository,
         private readonly RewardRepository $rewardRepository,
         private readonly TorrentRepositoryInterface $torrentRepository,
-        private readonly UserRepositoryInterface $userRepository,
         private readonly BonusRepository $bonusRepository,
     ) {}
 
@@ -43,9 +42,6 @@ final class MagicRewardService
         if (! in_array($value, Setting::getBonusRewardOptions())) {
             throw new \LogicException('Invalid value.');
         }
-        if ($value > (float) $user->seedbonus) {
-            throw new \LogicException('You do not have such bonus!');
-        }
 
         $torrentOwner = $this->torrentRepository->getOwnerId($torrentId);
         if (! $torrentOwner) {
@@ -55,28 +51,44 @@ final class MagicRewardService
             throw new \LogicException('You are giving magic to yourself.');
         }
 
-        if ($this->torrentDetailRepository->hasMagicRecord($torrentId, $userId)) {
-            throw new \LogicException('You already gave the magic value!');
-        }
+        DB::transaction(function () use ($userId, $torrentId, $value, $torrentOwner): void {
+            // Lock both balance rows in canonical id order — serializes
+            // concurrent gives from the same user and avoids ABBA
+            // deadlocks when two users reward each other's torrents.
+            $firstId = min($userId, (int) $torrentOwner);
+            $secondId = max($userId, (int) $torrentOwner);
+            $firstBonus = DB::table('users')->where('id', $firstId)->lockForUpdate()->value('seedbonus');
+            $secondBonus = DB::table('users')->where('id', $secondId)->lockForUpdate()->value('seedbonus');
+            $senderBonus = $firstId === $userId ? $firstBonus : $secondBonus;
+            $ownerBonus = $firstId === $userId ? $secondBonus : $firstBonus;
 
-        $todayStr = now()->startOfDay();
-        $todayCount = $this->rewardRepository->countSince($userId, $todayStr);
-        $timesLimit = Setting::getBonusRewardTimesLimit();
-        if ($timesLimit > 0 && $todayCount >= $timesLimit) {
-            throw new \LogicException('You already reach times limit!');
-        }
+            if ($senderBonus === null || $value > (float) $senderBonus) {
+                throw new \LogicException('You do not have such bonus!');
+            }
+            if ($ownerBonus === null) {
+                throw new \LogicException('Invalid torrent owner!');
+            }
 
-        $torrentOwnerInfo = $this->userRepository->findById((int) $torrentOwner, User::$commonFields);
-        if (! $torrentOwnerInfo) {
-            throw new \LogicException('Invalid torrent owner!');
-        }
+            if ($this->torrentDetailRepository->hasMagicRecord($torrentId, $userId)) {
+                throw new \LogicException('You already gave the magic value!');
+            }
 
-        $this->torrentDetailRepository->insertMagic($torrentId, $userId, $value);
+            $todayCount = $this->rewardRepository->countSince($userId, now()->startOfDay());
+            $timesLimit = Setting::getBonusRewardTimesLimit();
+            if ($timesLimit > 0 && $todayCount >= $timesLimit) {
+                throw new \LogicException('You already reach times limit!');
+            }
 
-        Bonus::updatePoints('-', (float) $value, $userId);
-        $this->bonusRepository->add($userId, (float) $user->seedbonus, $value, (float) $user->seedbonus - $value, '', BusinessType::REWARD_TORRENT->value);
+            $senderBonus = (float) $senderBonus;
+            $ownerBonus = (float) $ownerBonus;
 
-        Bonus::updatePoints('+', (float) $value, (int) $torrentOwner);
-        $this->bonusRepository->add((int) $torrentOwnerInfo['id'], (float) $torrentOwnerInfo['seedbonus'], $value, (float) $torrentOwnerInfo['seedbonus'] + $value, '', BusinessType::TORRENT_BE_REWARD->value);
+            $this->torrentDetailRepository->insertMagic($torrentId, $userId, $value);
+
+            Bonus::updatePoints('-', (float) $value, $userId);
+            $this->bonusRepository->add($userId, $senderBonus, $value, $senderBonus - $value, '', BusinessType::REWARD_TORRENT->value);
+
+            Bonus::updatePoints('+', (float) $value, (int) $torrentOwner);
+            $this->bonusRepository->add((int) $torrentOwner, $ownerBonus, $value, $ownerBonus + $value, '', BusinessType::TORRENT_BE_REWARD->value);
+        });
     }
 }

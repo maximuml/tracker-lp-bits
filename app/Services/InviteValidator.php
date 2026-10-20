@@ -41,7 +41,6 @@ class InviteValidator
         }
 
         if ((int) $invite->inviter !== $inviter) {
-            $this->inviteRepository->markInvalid((int) $invite->id);
             throw new AuthenticationException(Locale::trans('invite.invalid_inviter', [], $langFolder));
         }
 
@@ -50,12 +49,16 @@ class InviteValidator
 
     public function consume(Invite $invite, int $userId, string $email, string $username): void
     {
-        $this->inviteRepository->markConsumed((int) $invite->id, [
+        $consumed = $this->inviteRepository->markConsumed((int) $invite->id, [
             'valid' => InviteValid::NO->value,
             'invitee_register_uid' => $userId,
             'invitee_register_email' => $email,
             'invitee_register_username' => $username,
         ]);
+
+        if ($consumed === 0) {
+            throw new AuthenticationException(__('signup.std_uninvited'));
+        }
 
         // T-24: Record invite consumed event in outbox
         $this->outboxService->recordInviteConsumed(

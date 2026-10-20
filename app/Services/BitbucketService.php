@@ -8,6 +8,7 @@ use App\Enums\BitbucketPublic;
 use App\Repositories\BitbucketRepository;
 use App\Repositories\UserAccountRepository;
 use App\Support\Config\SiteConfig;
+use App\Support\ImageLimits;
 use App\Support\Path;
 use App\Support\Url;
 use Illuminate\Http\UploadedFile;
@@ -26,7 +27,7 @@ final class BitbucketService
     private const SCALE_WIDTH = 150;
 
     // GD allocates ~4-8 bytes/px when decoding; cap dimensions to bound memory.
-    private const MAX_IMAGE_PIXELS = 25_000_000;
+    private const MAX_IMAGE_PIXELS = ImageLimits::MAX_PIXELS;
 
     public function __construct(
         private readonly BitbucketRepository $bitbucketRepository,

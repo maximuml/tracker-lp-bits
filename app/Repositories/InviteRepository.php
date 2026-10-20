@@ -162,7 +162,7 @@ class InviteRepository
 
     public function decrementInvites(int $inviterId): int
     {
-        return User::query()->where('id', $inviterId)->decrement('invites');
+        return User::query()->where('id', $inviterId)->where('invites', '>', 0)->decrement('invites');
     }
 
     public function deleteExpiredCodes(string $invitedBefore, string $expiredBefore): int
@@ -191,7 +191,10 @@ class InviteRepository
      */
     public function markConsumed(int $id, array $fields): int
     {
-        return Invite::query()->where('id', $id)->update($fields);
+        return Invite::query()
+            ->where('id', $id)
+            ->where('valid', InviteValid::YES->value)
+            ->update($fields);
     }
 
     /**

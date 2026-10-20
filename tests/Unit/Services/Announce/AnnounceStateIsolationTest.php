@@ -16,11 +16,11 @@ use PHPUnit\Framework\TestCase;
 use Tests\Attributes\TestCategory;
 
 /**
- * W2-04: Octane/RoadRunner cross-request state isolation tests.
+ * W2-04: Cross-request state isolation tests.
  *
  * Verifies that ResponseBuilder and AnnounceContext — which are created
  * per-request — do not leak state between consecutive requests. This is
- * critical for Octane/RoadRunner where the PHP process persists across
+ * critical for long-lived PHP workers where the process persists across
  * requests and any mutable singleton or static cache could cause
  * cross-request contamination.
  *
@@ -53,7 +53,7 @@ final class AnnounceStateIsolationTest extends TestCase
     }
 
     /**
-     * Simulate two consecutive requests in the same PHP process (Octane).
+     * Simulate two consecutive requests in the same PHP process.
      * The first request's ResponseBuilder must not affect the second.
      */
     public function test_response_builder_does_not_leak_between_requests(): void
@@ -271,7 +271,7 @@ final class AnnounceStateIsolationTest extends TestCase
     /**
      * Repeated with* calls must not mutate the original context.
      * This simulates the same AnnounceService instance handling two
-     * requests in Octane — each request gets a fresh context.
+     * requests in one process — each request gets a fresh context.
      */
     public function test_repeated_with_calls_produce_independent_contexts(): void
     {
@@ -302,7 +302,7 @@ final class AnnounceStateIsolationTest extends TestCase
 
     /**
      * The DTO itself is readonly — once constructed, it cannot be mutated.
-     * This is the fundamental guarantee for Octane safety.
+     * This is a fundamental guarantee for request isolation.
      */
     public function test_dto_is_readonly_and_cannot_be_mutated(): void
     {

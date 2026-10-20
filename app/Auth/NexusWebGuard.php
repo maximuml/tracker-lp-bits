@@ -47,8 +47,8 @@ class NexusWebGuard implements StatefulGuard
      * Swap the bound request instance. Registered via
      * `$app->refresh('request', ...)` in AuthServiceProvider so the guard
      * follows request rebinding — without it a cached guard keeps reading
-     * cookies from the first request it ever saw (stale auth under Octane
-     * and in tests).
+     * cookies from the first request it ever saw (stale auth in tests and
+     * long-lived processes).
      */
     public function setRequest(Request $request): void
     {

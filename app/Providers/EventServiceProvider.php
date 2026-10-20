@@ -99,15 +99,6 @@ class EventServiceProvider extends ServiceProvider
         JobProcessing::class => [
             ResetNexus::class,
         ],
-        'Laravel\Octane\Events\RequestReceived' => [
-            ResetNexus::class,
-        ],
-        'Laravel\Octane\Events\TaskReceived' => [
-            ResetNexus::class,
-        ],
-        'Laravel\Octane\Events\TickReceived' => [
-            ResetNexus::class,
-        ],
         RouteMatched::class => [
             ResetQueryLog::class,
         ],

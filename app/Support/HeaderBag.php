@@ -8,8 +8,8 @@ namespace App\Support;
  * Per-request header bag for the legacy bridge.
  *
  * Replaces the PHP SAPI globals {@see headers_list()},
- * {@see http_response_code()}, and {@see header_remove()} that leak
- * state across Octane worker requests.
+ * {@see http_response_code()}, and {@see header_remove()} that can leak
+ * state across requests in long-lived processes.
  *
  * Legacy code that previously called `header('Location: ...')` or
  * `header('Content-Type: ...')` should now call
@@ -18,7 +18,7 @@ namespace App\Support;
  * request via {@see HeaderBag::flush()}.
  *
  * The bag is bound as a singleton in the container and reset by
- * {@see ResetNexus} between requests, so it is safe under Octane.
+ * {@see ResetNexus} between requests.
  */
 class HeaderBag
 {
@@ -157,7 +157,7 @@ class HeaderBag
     /**
      * Clear all headers and status code.
      *
-     * Called by {@see ResetNexus} between requests under Octane.
+     * Called by {@see ResetNexus} between requests.
      */
     public function flush(): void
     {

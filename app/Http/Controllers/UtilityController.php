@@ -98,7 +98,7 @@ class UtilityController extends BasePageController
         $content = $driver->imageBytes($imagehash);
 
         // T-11: Read from the per-request HeaderBag instead of SAPI
-        // globals that leak state across Octane worker requests.
+        // globals that can persist across requests in a long-lived process.
         $headerBag = $this->headerBag;
         $status = $headerBag->getStatusCode();
         $headers = $headerBag->toResponseHeaders();

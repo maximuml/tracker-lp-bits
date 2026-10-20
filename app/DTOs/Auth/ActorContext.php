@@ -21,8 +21,8 @@ use App\Support\CurrentUser;
  * into services that need the actor's identity, class, locale, or
  * permission checks.
  *
- * Under Octane/RoadRunner the container singleton is reset each request
- * via the `RequestResetter`, so this object never leaks between requests.
+ * The container singleton is reset each request via the `RequestResetter`,
+ * so this object never leaks between requests.
  */
 final readonly class ActorContext
 {

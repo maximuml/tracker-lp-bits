@@ -20,8 +20,8 @@ use Tests\TestCase;
  * W2-04: Repeated event idempotency tests.
  *
  * Verifies that repeated started, completed, and stopped events do not
- * double-count accounting. This is a critical invariant for Octane/RoadRunner
- * where a client may re-send an event due to network retries.
+ * double-count accounting. This is a critical invariant when a client
+ * re-sends an event due to network retries.
  *
  * @group w2-04
  */

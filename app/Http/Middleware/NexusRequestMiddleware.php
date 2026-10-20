@@ -33,8 +33,8 @@ use Symfony\Component\HttpFoundation\Response;
  * it rewrites legacy query parameters to Laravel paths, sets the legacy
  * SCRIPT_NAME/PATH_INFO server values, boots cache/Eloquent/settings/language,
  * loads per-page language files, runs the legacy parked() guard and schedules
- * the periodic autoclean task. Because it runs inside the Laravel middleware
- * pipeline it is Octane-compatible and runs once per worker request.
+ * the periodic autoclean task. It runs once per HTTP request inside the
+ * Laravel middleware pipeline.
  */
 final class NexusRequestMiddleware
 {
@@ -50,7 +50,7 @@ final class NexusRequestMiddleware
     {
         // ADR 0017: every request through the HTTP kernel is a legacy-context
         // request (public/index.php semantics); tracker endpoints are marked
-        // per request so the flag stays correct under Octane workers.
+        // per request so the flag stays correct.
         $runtime = $this->app->make(RuntimeContext::class);
         $runtime->markLegacy();
         $requestUri = (string) $request->server->get('REQUEST_URI', '');
@@ -65,7 +65,7 @@ final class NexusRequestMiddleware
         $this->bindRequest($request);
 
         // Reset the per-request CurrentUser cache so it re-reads from Auth
-        // on each request (Octane/test compatibility).
+        // on each request.
         $this->currentUser->reset();
 
         $rootpath = base_path().'/';
@@ -93,15 +93,9 @@ final class NexusRequestMiddleware
         ini_set('error_reporting', E_ALL);
         ini_set('display_errors', 0);
 
-        if (defined('RUNNING_IN_OCTANE') && RUNNING_IN_OCTANE) {
-            // ResetNexus listener already flushed state; just re-boot
-            // the instance with fresh request-scoped data.
-            RequestContext::boot();
-        } else {
-            RequestContext::flush();
-            AssetAppender::flush();
-            RequestContext::boot();
-        }
+        RequestContext::flush();
+        AssetAppender::flush();
+        RequestContext::boot();
 
         // NexusCache is registered as a singleton in
         // AppServiceProvider::register() — resolving it triggers the

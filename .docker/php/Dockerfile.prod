@@ -73,7 +73,7 @@ RUN composer install \
     --ignore-platform-req=ext-zip \
     --ignore-platform-req=ext-ftp
 
-# Generate optimized autoloader (no scripts — Octane is dev-only)
+# Generate optimized autoloader (no scripts)
 RUN composer dump-autoload \
     --no-dev \
     --optimize \

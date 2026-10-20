@@ -489,7 +489,7 @@ final class SearchBoxRepositoryTest extends TestCase
         Cache::clearCategory();
 
         // …and the per-request reset drops the in-worker memoization —
-        // Octane/queue workers must see the rename.
+        // long-lived workers must see the rename.
         Category::resetState();
         $this->assertSame('After', Category::row($cache, $catId)['name']);
     }

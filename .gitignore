@@ -44,8 +44,6 @@ attachments
 **/caddy
 frankenphp
 frankenphp-worker.php
-rr
-.rr.yaml
 /screenshots/
 perf-results/
 

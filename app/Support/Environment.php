@@ -13,7 +13,7 @@ final class Environment
 {
     public static function isConsole(): bool
     {
-        return (! defined('RUNNING_IN_OCTANE') || ! RUNNING_IN_OCTANE) && PHP_SAPI === 'cli';
+        return PHP_SAPI === 'cli';
     }
 
     public static function isFpm(): bool

@@ -33,14 +33,3 @@ defined('UC_MODERATOR') || define('UC_MODERATOR', 13);
 defined('UC_ADMINISTRATOR') || define('UC_ADMINISTRATOR', 14);
 defined('UC_SYSOP') || define('UC_SYSOP', 15);
 defined('UC_STAFFLEADER') || define('UC_STAFFLEADER', 16);
-
-if (! defined('RUNNING_IN_OCTANE')) {
-    $runningInOctane = false;
-    foreach (($_SERVER['argv'] ?? []) as $command) {
-        if (preg_match('/swoole|roadrunner/i', $command)) {
-            $runningInOctane = true;
-            break;
-        }
-    }
-    define('RUNNING_IN_OCTANE', $runningInOctane);
-}

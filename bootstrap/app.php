@@ -9,9 +9,7 @@ use Illuminate\Foundation\Application;
 
 defined('LARAVEL_START') || define('LARAVEL_START', microtime(true));
 defined('IN_NEXUS') || define('IN_NEXUS', false);
-if (! RUNNING_IN_OCTANE) {
-    RequestContext::boot();
-}
+RequestContext::boot();
 
 // Legacy pages define this in include/core.php, but Laravel-routed endpoints
 // (e.g. /announce) may need it before the legacy bootstrap is reached.
@@ -36,7 +34,7 @@ $app = new Application(
 // entry-point constants (ADR 0017). Bound here — before providers register —
 // so the instance is shared for the whole process; per-request mutations
 // happen in LegacyRequestMiddleware / TrackerThrottle and are flushed by
-// ResetNexus on Octane lifecycle events.
+// ResetNexus on queue-worker events.
 $app->instance(RuntimeContext::class, new RuntimeContext(
     defined('IN_NEXUS') && IN_NEXUS,
     defined('IN_TRACKER') && IN_TRACKER,

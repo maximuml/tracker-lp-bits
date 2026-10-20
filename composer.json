@@ -63,16 +63,13 @@
         "larastan/larastan": "^3.0",
         "laravel-lang/lang": "^15.10",
         "laravel-lang/publisher": "^16.0",
-        "laravel/octane": "^2.19",
         "laravel/pint": "^1.30",
         "laravel/tinker": "^3.0",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "orangehill/iseed": "^3.0",
         "phpstan/phpstan": "^2.2",
-        "phpunit/phpunit": "^13.3",
-        "spiral/roadrunner-cli": "^2.7",
-        "spiral/roadrunner-http": "^4.1"
+        "phpunit/phpunit": "^13.3"
     },
     "autoload-dev": {
         "psr-4": {

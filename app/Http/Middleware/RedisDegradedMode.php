@@ -46,8 +46,8 @@ final class RedisDegradedMode
         try {
             return $next($request);
         } finally {
-            // Restore so an Octane worker does not leak the degraded
-            // drivers into subsequent requests.
+            // Restore so the degraded drivers do not leak into subsequent
+            // requests in a long-lived process.
             if ($original !== null) {
                 config($original);
             }

@@ -10,7 +10,7 @@ PHP 8.4+, MySQL, Redis, MeiliSearch. Docker Compose stack for local development.
 - **Backend:** Laravel 13, PHP 8.4, Filament 5
 - **Database:** MySQL 9 (Docker), Redis 7
 - **Search:** MeiliSearch
-- **Queue:** Redis (default), Octane-compatible
+- **Queue:** Redis (default)
 - **Frontend:** Blade templates, legacy NexusPHP themes; Filament ships its
   own assets — there is no Node/Vite build step (removed in step 1.1)
 - **Tailwind layer:** converted Blade components use utility classes from
@@ -142,7 +142,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   of standard auth features. The legacy HMAC fallback should be removed once
   all cookies have rotated to the encrypted format (W1-04).
 
-### ADR 0002: NexusRequestMiddleware for URL rewriting (Accepted, Sprint 17; Octane-safe since T-11)
+### ADR 0002: NexusRequestMiddleware for URL rewriting (Accepted, Sprint 17; worker-safe since T-11)
 
 - **Context:** Legacy URLs (`/details.php?id=5`, `/torrents.php`, …) must
   keep working for bookmarks, search engines and announce URLs embedded in
@@ -151,8 +151,8 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
 - **Decision:** Global `NexusRequestMiddleware` detects the script name
   from `SCRIPT_FILENAME`/`SCRIPT_NAME`, rewrites `/foo.php?id=5` to `/foo?id=5`
   (or `/foo/5`), skips Laravel-only prefixes (`api/`, `livewire/`,
-  `filament/`, `horizon/`, `nexusphp/`, `web/`), boots the request context
-  (`NexusContext`) and treats Octane worker scripts as `index.php`.
+  `filament/`, `horizon/`, `nexusphp/`, `web/`) and boots the request
+  context (`NexusContext`).
 - **Consequences:** All legacy URLs work without web-server config; tested
   by `LegacySmokeTest` / `LegacyHeaderIsolationTest`; per-request reset via
   `CurrentUser::reset()`. Cost: ~0.1 ms regex per request and a 200+ line
@@ -180,7 +180,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
 - **Context:** `/announce` is the hottest path (every client every
   30–90 s). The original service kept mutable per-request state on
   properties (`$this->user`, `$this->torrent`, …), making it untestable in
-  isolation and prone to Octane cross-request contamination.
+  isolation and prone to cross-request contamination.
 - **Decision:** All state flows through an immutable readonly
   `AnnounceContext` DTO with `with*()` methods (`withUser()`,
   `withTorrent()`, `withTraffic()`, …). Each pipeline step
@@ -189,7 +189,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   with the context captured. Sub-components (`TrafficAccountant`,
   `CheaterDetector`, `HitAndRunHandler`, `RateLimiter`, `PeerLifecycle`)
   are stateless and constructor-injected.
-- **Consequences:** Octane-safe, each step independently testable, explicit
+- **Consequences:** Worker-safe, each step independently testable, explicit
   data flow, PHPStan level 8 clean. Cost: `AnnounceContext` is ~400 lines
   of `with*()` boilerplate, and the carried `ResponseBuilder` is still
   mutable (candidate for a future immutable refinement).
@@ -378,7 +378,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   (`LegacySmokeTest`, `LegacyHeaderIsolationTest`); splitting them moves
   half the contract into untestable web-server config. The measured cost
   is ~0.1 ms regex per request — not a hot-path concern next to
-  announce. Revisit only if Octane long-running mode or a dedicated
+  announce. Revisit only if long-running mode or a dedicated
   edge tier makes the middleware the bottleneck.
 - **Consequences:** `NexusRequestMiddleware` stays the single source of
   truth for URL rewriting; `LARAVEL_PATH_PREFIXES` (ADR 0011) is the
@@ -481,7 +481,7 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
 
 - **Context:** `IN_NEXUS` / `IN_TRACKER` are process-global PHP constants
   defined in `public/index.php` (web entry) and `bootstrap/app.php` /
-  `config/nexus_constants.php` (console/test defaults). Under Octane the
+  `config/nexus_constants.php` (console/test defaults). A long-lived
   worker defines them once at boot: `IN_NEXUS` can never be true for a
   web request and `IN_TRACKER` can never differ between announce and
   page requests — request-scoped semantics a constant cannot express.
@@ -497,23 +497,23 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   `NexusRequestMiddleware` calls `markLegacy()` and `markTracker()`
   (announce/scrape URI match, same regex as `public/index.php`);
   `TrackerThrottle` marks tracker again on its route group.
-  `ResetNexus::handle()` calls `reset()` on Octane lifecycle events,
+  `ResetNexus::handle()` calls `reset()` on queue-worker events,
   restoring entry defaults between worker requests. All `app/` reads
   migrated to the runtime (`grep IN_NEXUS app/` → 0); repositories take
   it via constructor injection per the `AppCallByNamespaceRatchetTest`
   baseline. `NEXUS_LEGACY_CONTEXT=1` → `TestCase::setUp()` calls
   `bootEntry(true)` — entry defaults so `reset()` keeps the flag when a
-  test fires `JobProcessing`/Octane events (a factory-created user
+  test fires `JobProcessing` events (a factory-created user
   dispatches the outbox job). The Integration files that carried dead
   `define('IN_NEXUS', true)` calls — never executed on CI because
   `bootstrap/app.php` defines the constant on the first `createApplication`
   — simply dropped them; they test the non-legacy paths. Only suites
   written for the legacy branch opt in (`TimeLegacyFormatTest`).
 - **Consequences:** Request-scoped legacy/tracker state is
-  Octane-safe; tests no longer need process isolation for the flag
+  worker-safe; tests no longer need process isolation for the flag
   (`TIMENOW` still forces `TimeLegacyFormatTest` into separate
-  processes). `markLegacy()` in global middleware also gives Octane
-  parity with FPM (`IN_NEXUS=true` for every web request). The constants
+  processes). `markLegacy()` in global middleware gives FPM semantics
+  (`IN_NEXUS=true` for every web request). The constants
   remain as deprecated aliases in the three entry/compat files for one
   release — they will be removed together with `dynamicConstantNames`
   in `phpstan.neon` once downstream reads are confirmed gone.
@@ -739,7 +739,7 @@ databases are used:
 
 | Database | Suite | CI job |
 |---|---|---|
-| `nexusphp_unit_testing` | Unit + Integration | `unit-tests`, `coverage`, `octane` |
+| `nexusphp_unit_testing` | Unit + Integration | `unit-tests`, `coverage` |
 | `nexusphp_feature_testing` | Feature (no OpenResty) | `coverage` |
 | `nexusphp_e2e_testing` | Feature + OpenResty (CriticalPathTest) | `smoke-test`, `browser-smoke`, `perf-budget` |
 
@@ -1011,10 +1011,10 @@ by final repository classes or static methods — see W2-01/W2-02).
   the prototype findings above document the integration cost
   (CSP + rewriter entries per prefix, JS bridges, Livewire hydration).
 
-### ADR 0030: RoadRunner as the single Octane server (Accepted, stage 7.9)
+### ADR 0030: RoadRunner as the single Octane server (Superseded by ADR 0033)
 
 - **Context:** The repo carried scaffolding for two Octane servers:
-  RoadRunner (`config/octane.php` default `OCTANE_SERVER=roadrunner`,
+  RoadRunner (the default `OCTANE_SERVER=roadrunner`,
   dev-deps `spiral/roadrunner-cli` + `spiral/roadrunner-http`, CI job
   `octane.yml` runs `rr get-binary` + `octane:start --server=roadrunner`)
   and FrankenPHP (a stray `frankenphp-worker.php` stub under `public/` —
@@ -1084,3 +1084,21 @@ by final repository classes or static methods — see W2-01/W2-02).
   ability layer. Any future narrowing (e.g. a dedicated `TOPIC_REPLY`
   ability) must split reply from moderate, not promote reply to
   `TOPIC_MANAGE`.
+
+### ADR 0033: Octane removed; PHP-FPM is the only web runtime (Accepted, step 6)
+
+- **Context:** Octane/RoadRunner was only a dev-dependency CI compatibility
+  job. Production runs PHP-FPM (`.docker/php/Dockerfile.prod`,
+  `pm.max_children=50`), and the k6 performance budget runs on FPM (announce
+  p95 ≈ 30 ms), with no measured need for persistent workers. Worker-safety
+  work (function-local static caches, raw `setcookie()` in AuthCookie/Locale)
+  had no production benefit.
+- **Decision:** Remove `laravel/octane`, `spiral/roadrunner-*`, the Octane
+  configuration file, `octane.yml`, `tracker-smoke.sh`,
+  the Octane runtime constant, the rewriter worker-script map, and Octane
+  event hooks.
+  Keep `ResetNexus` on `Looping`/`JobProcessing` for queue workers and retain
+  its isolation tests as `ResetNexusIsolationTest`.
+- **Consequences:** One web runtime and less CI. Reintroducing a persistent-
+  worker server requires a new ADR plus static-cache/cookie hardening and
+  smoke/isolation CI.

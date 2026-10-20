@@ -18,8 +18,10 @@ use Illuminate\View\View;
  * instead of service location inside the view model. The page title is read
  * from the already-rendered child's `title` section. The chrome variant is
  * read from the `chromeVariant` view data (`@extends('layouts.app', [...])`);
- * `legacy` pages render their chrome through `PageRenderer` and views that
- * already carry a `chrome` variable are left untouched.
+ * `legacy` is the default while the bulk of the site still renders legacy
+ * page bodies — modern pages opt in explicitly. Views that already carry
+ * a `chrome` variable (the procedural `PageRenderer` partials) are left
+ * untouched.
  */
 final class SiteChromeComposer
 {
@@ -35,7 +37,7 @@ final class SiteChromeComposer
         }
 
         $data = $view->getData();
-        $variant = (string) ($data['chromeVariant'] ?? 'modern');
+        $variant = (string) ($data['chromeVariant'] ?? 'legacy');
         $view->with('chromeVariant', $variant);
         $view->with('shell', (string) ($data['shell'] ?? match ($variant) {
             'legacy' => 'boxed',
@@ -43,12 +45,14 @@ final class SiteChromeComposer
             default => 'bare',
         }));
 
-        if ($variant === 'legacy') {
-            return;
-        }
-
         $title = trim($view->getFactory()->yieldContent('title'));
-        $view->with('chrome', SiteChromeViewModel::load($title, $this->layouts, $this->chromeRepositories, variant: $variant));
+        $view->with('chrome', SiteChromeViewModel::load(
+            $title,
+            $this->layouts,
+            $this->chromeRepositories,
+            variant: $variant,
+            msgalert: (bool) ($data['stdheadMsgalert'] ?? true),
+        ));
         $view->with('locale', str_replace('_', '-', App::getLocale()));
     }
 }

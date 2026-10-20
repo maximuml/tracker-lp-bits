@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app', ['chromeVariant' => 'modern'])
 
 @section('title', $pageTitle)
 

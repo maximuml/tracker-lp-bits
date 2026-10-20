@@ -1,5 +1,5 @@
 
-@extends('layouts.app')
+@extends('layouts.app', ['chromeVariant' => 'modern'])
 
 @section('title', $title ?? (__('usercp.head_control_panel')))
 

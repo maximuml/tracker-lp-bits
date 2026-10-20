@@ -14,6 +14,8 @@ use App\ViewModels\Chrome\ChromeNav;
 use App\ViewModels\Chrome\ChromeRepositories;
 use App\ViewModels\Chrome\ChromeSearch;
 use App\ViewModels\Chrome\ChromeUserBar;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
 
 /**
  * Data for the shared page chrome (`layouts.partials.*`, ADR 0018).
@@ -62,6 +64,7 @@ final class SiteChromeViewModel
         bool $skipUserData = false,
     ): self {
         $context ??= PageLayoutContext::fromSupportContext();
+        self::enforceSiteOnline($context, $variant);
         $user = $context->user;
         $cspNonce = (string) (request()->attributes->get('csp_nonce', ''));
 
@@ -90,5 +93,25 @@ final class SiteChromeViewModel
             head: ChromeHead::load($context, $title, $variant, $cspNonce, $chrome),
             footer: ChromeFooter::load($context, $variant, $cspNonce),
         );
+    }
+
+    /**
+     * Maintenance gate shared by every chrome path — the composited
+     * `layouts.app` render and the procedural `PageRenderer` aborts.
+     * `auth` is exempt so the login page stays reachable while the site
+     * is offline; staff get the offline banner via `offlineMsg` instead
+     * of a block.
+     */
+    private static function enforceSiteOnline(PageLayoutContext $context, string $variant): void
+    {
+        if ($variant === 'auth' || $context->siteOnline !== 'no') {
+            return;
+        }
+
+        if ($context->userClass() < $context->adminClass) {
+            throw new HttpResponseException(new Response((string) (__('functions.std_site_down_for_maintenance')), 503));
+        }
+
+        $context->offlineMsg = true;
     }
 }

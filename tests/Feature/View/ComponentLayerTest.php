@@ -197,8 +197,11 @@ final class ComponentLayerTest extends TestCase
         );
 
         $this->assertStringContainsString('<nav', $html);
+        $this->assertStringContainsString('class="nx-tabs"', $html);
         $this->assertStringContainsString('aria-label="Torrent sections"', $html);
-        $this->assertStringContainsString('aria-current="page"', $html);
+        $this->assertSame(1, substr_count($html, 'aria-current="page"'));
+        $this->assertSame(1, substr_count($html, 'class="nx-tabs__link nx-tabs__link--active"'));
+        $this->assertSame(1, substr_count($html, 'class="nx-tabs__link"'));
         $this->assertStringContainsString('Sec&lt;b&gt;', $html);
     }
 

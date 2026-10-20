@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Support\ImageLimits;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -55,6 +56,10 @@ class GenerateCoverThumbnail implements ShouldQueue
 
         $data = self::fetch($this->sourceUrl, $pinnedIp);
         if ($data === null || $data === '') {
+            return;
+        }
+
+        if (ImageLimits::sizeFromString($data) === null) {
             return;
         }
 

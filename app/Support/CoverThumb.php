@@ -114,12 +114,19 @@ final class CoverThumb
         string $publicUrl,
     ): string {
         $localPath = $rootPath.ltrim($url, '/');
-        if (! is_file($localPath)) {
+
+        $realRoot = realpath($rootPath);
+        $realLocal = realpath($localPath);
+        if ($realRoot === false || $realLocal === false || ! str_starts_with($realLocal, $realRoot.DIRECTORY_SEPARATOR)) {
             return $url;
         }
 
-        $data = @file_get_contents($localPath);
+        $data = @file_get_contents($realLocal);
         if ($data === false) {
+            return $url;
+        }
+
+        if (ImageLimits::sizeFromString($data) === null) {
             return $url;
         }
 

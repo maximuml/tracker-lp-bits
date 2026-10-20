@@ -10,7 +10,6 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
-use App\Services\ShoutboxService;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\NotificationFeed;
@@ -18,7 +17,6 @@ use App\Support\Shoutbox;
 use App\Support\SseEventId;
 use App\Support\SseWriter;
 use App\Support\UserDisplay;
-use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,7 +30,6 @@ class ShoutboxController extends BasePageController
 {
     public function __construct(
         private readonly ShoutboxRepositoryInterface $repository,
-        private readonly ShoutboxService $shoutboxService,
         private readonly ActorContext $actorContext,
         private readonly CurrentUser $currentUser,
         private readonly NotificationFeed $notificationFeed,
@@ -52,22 +49,6 @@ class ShoutboxController extends BasePageController
         $actor = $this->actorContext;
         $currentUser = $actor->toLegacyArray();
         $currentUserId = $actor->id;
-
-        $del = (int) $request->input('del', 0);
-        if ($del > 0 && Validators::isId($del) && $actor->can(PermissionEnum::SB_MANAGE)) {
-            $this->shoutboxService->deleteMessage($actor, $del);
-        }
-
-        if ($request->input('sent') === 'yes' && $request->filled('shbox_text') && $currentUserId > 0) {
-            $text = trim((string) $request->input('shbox_text'));
-            if (mb_strlen($text) > Shoutbox::MAX_MESSAGE_LENGTH) {
-                return response('Message too long', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
-            }
-
-            if (! $this->shoutboxService->postMessage($actor, $text)) {
-                return response('speaking too often', 429, ['Content-Type' => 'text/plain; charset=utf-8']);
-            }
-        }
 
         $isAjax = ! empty($request->input('ajax'));
         $where = 'shoutbox';

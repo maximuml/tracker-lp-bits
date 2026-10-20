@@ -10,13 +10,14 @@ use App\Support\Attachment\AttachmentService;
 use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
+use App\Support\ImageLimits;
 use App\Support\Logger;
 use App\Support\Path;
 
 class AttachmentMutationService
 {
     // GD allocates ~4-8 bytes/px when decoding; cap dimensions to bound memory.
-    private const MAX_IMAGE_PIXELS = 25_000_000;
+    private const MAX_IMAGE_PIXELS = ImageLimits::MAX_PIXELS;
 
     public function __construct(
         private readonly AttachmentRepository $attachmentRepository,

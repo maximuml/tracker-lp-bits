@@ -240,6 +240,7 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('faq/submit', [FaqController::class, 'faqSubmit']);
     Route::post('donate/submit', [InfoController::class, 'donateSubmit']);
     Route::post('torrents/bookmark', [TorrentBookmarkController::class, 'bookmarkSubmit']);
+    Route::post('bookmark', [TorrentBookmarkController::class, 'bookmarkSubmit'])->name('bookmark.legacy');
     Route::post('staff/modtask', [StaffModerationController::class, 'modtaskSubmit']);
     Route::post('staff/modrules', [StaffModerationController::class, 'modrulesSubmit']);
     Route::post('staffmess/submit', [StaffMessageController::class, 'staffmessSubmit']);
@@ -395,7 +396,6 @@ Route::group(['prefix' => 'web', 'middleware' => ['throttle:legacy']], function 
     Route::get('ok', [UtilityController::class, 'ok'])->name('ok.legacy');
     Route::get('complains', [SupportController::class, 'complains'])->name('complains.legacy');
     Route::get('shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['auth.nexus:nexus-web', 'throttle:shoutbox'])->name('shoutbox.legacy');
-    Route::get('bookmark', [TorrentBookmarkController::class, 'bookmark'])->name('bookmark.legacy');
     Route::get('viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
     Route::get('viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->middleware('auth.nexus:nexus-web')->name('viewpeerlist.legacy');
 });

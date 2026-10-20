@@ -2357,6 +2357,14 @@ a.nx-mail:hover { color: var(--nxm-text); }
     border-top: 1px solid var(--nxm-border);
     background: var(--nxm-surface);
 }
+.nx-usercp-avatar {
+    display: block;
+    width: auto;
+    max-width: 10rem;
+    max-height: 10rem;
+    margin-bottom: 0.5rem;
+    object-fit: contain;
+}
 @media (min-width: 900px) {
     .nx-setcards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

@@ -65,7 +65,7 @@ async function saveTrackerSettings(
   const saved = page.waitForResponse(
     (r) => r.url().includes('/web/usercp/tracker') && r.request().method() === 'POST',
   );
-  await form.locator('input[type=submit]').click();
+  await form.locator('[type=submit]').click();
   expect((await saved).status(), 'tracker settings save').toBeLessThan(400);
   await page.waitForLoadState('networkidle');
 }

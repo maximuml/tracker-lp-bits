@@ -96,6 +96,10 @@ final class ChromeHead
         }
 
         $cssUri = Style::cssUri($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
+        $baseStyles = array_merge([
+            'styles/sprites.css'.$cssUpdateDate,
+            $picFolder.'/forumsprites.css'.$cssUpdateDate,
+        ], $iconStyles);
 
         if ($variant !== 'legacy') {
             // Modern chrome only loads Classic's pack files historically;
@@ -105,7 +109,7 @@ final class ChromeHead
             $packThemeUrl = $cssUri === 'styles/Classic/' ? null : $cssUri.'theme.css'.$cssUpdateDate;
 
             return [
-                array_merge(['styles/sprites.css', $picFolder.'/forumsprites.css'.$cssUpdateDate], $iconStyles),
+                $baseStyles,
                 [],
                 SafeHtml::fromTrustedHtml(''),
                 $picFolder,
@@ -113,18 +117,13 @@ final class ChromeHead
             ];
         }
 
-        $headStyles = array_merge([
-            'styles/sprites.css'.$cssUpdateDate,
-            $picFolder.'/forumsprites.css'.$cssUpdateDate,
-            $cssUri.'theme.css'.$cssUpdateDate,
-        ], $iconStyles);
-
-        // Tailwind utilities layer (converted components are shared between
-        // chromes — without it they render unstyled on legacy pages). Last
-        // in the cascade; missing on clones that have not run `make css`.
-        if (file_exists(public_path('css/nxt.css'))) {
-            $headStyles[] = 'css/nxt.css';
-        }
+        // Legacy chrome shares the modern cascade order: theme.css rides in
+        // the packThemeUrl slot AFTER css/modern.css so the pack palette
+        // overrides the base instead of being stomped by it, and nxt.css
+        // loads once via head-assets.blade.php (Tailwind utilities layer
+        // stays last). Unlike modern pages, legacy markup still needs
+        // Classic's theme.css — the pack file carries table.colhead styles.
+        $packThemeUrl = $cssUri.'theme.css'.$cssUpdateDate;
 
         $addiCode = Style::addiCode($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
         if ($cspNonce !== '' && $addiCode !== '') {
@@ -132,11 +131,11 @@ final class ChromeHead
         }
 
         return [
-            $headStyles,
+            $baseStyles,
             [],
             SafeHtml::fromTrustedHtml($addiCode),
             $picFolder,
-            null,
+            $packThemeUrl,
         ];
     }
 }

@@ -73,7 +73,7 @@ final class UsercpSecurityBuilder
         } else {
             AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
 
-            $savedMessage = __('usercp.text_saved');
+            $savedMessage = __('usercp.text_settings_saved');
             if ($savedFlags['mail']) {
                 $savedMessage .= ' '.(__('usercp.std_confirmation_email_sent'));
             }

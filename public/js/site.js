@@ -1475,11 +1475,6 @@ document.addEventListener('DOMContentLoaded', function () {
         form.querySelectorAll('[data-submit-once]').forEach(function (button) {
             button.disabled = true;
         });
-        setTimeout(function () {
-            form.querySelectorAll('[data-submit-once]').forEach(function (button) {
-                button.disabled = true;
-            });
-        }, 0);
     });
     window.addEventListener('pageshow', function () {
         document.querySelectorAll('[data-submit-once]').forEach(function (button) {

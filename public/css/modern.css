@@ -2279,10 +2279,13 @@ a.nx-mail:hover { color: var(--nxm-text); }
 }
 .nx-setrow__control { min-width: 0; }
 .nx-setrow__control > label {
+    display: block;
+    margin: 0.2rem 0;
+}
+.nx-setrow__control > label:has(> input[type="checkbox"], > input[type="radio"]) {
     display: flex;
     align-items: flex-start;
     gap: 0.4rem;
-    margin: 0.2rem 0;
     max-width: 100%;
 }
 .nx-setrow__control input[type="text"] {
@@ -2340,8 +2343,12 @@ a.nx-mail:hover { color: var(--nxm-text); }
     max-width: 16rem;
 }
 .nx-setstatus__item label { color: var(--nxm-text); }
-.nx-setrow__inline-control { flex-wrap: wrap; align-items: center !important; }
-.nx-setrow__inline-control select { flex: 0 0 auto; }
+.nx-setrow__control > label.nx-setrow__inline-control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.nx-setrow__control > label.nx-setrow__inline-control select { flex: 0 0 auto; }
 .nx-savebar {
     position: sticky;
     bottom: 0;

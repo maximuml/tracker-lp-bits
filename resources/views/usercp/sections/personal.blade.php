@@ -48,18 +48,17 @@
                     </select>
                 </div>
             </div>
+            <div class="nx-setrow" role="group" aria-labelledby="ucp-g-acceptpms">
+                <div class="nx-setrow__label" id="ucp-g-acceptpms">@safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.text_accept_pms')))</div>
+                <div class="nx-setrow__control">
+                    <label><input type="radio" name="acceptpms" value="yes" @checked($personal->acceptpms === 'yes')>{{ __('usercp.radio_all_except_blocks') }}</label>
+                    <label><input type="radio" name="acceptpms" value="friends" @checked($personal->acceptpms === 'friends')>{{ __('usercp.radio_friends_only') }}</label>
+                    <label><input type="radio" name="acceptpms" value="no" @checked($personal->acceptpms === 'no')>{{ __('usercp.radio_staff_only') }}</label>
+                </div>
+            </div>
             <div class="nx-setrow" role="group" aria-labelledby="ucp-g-pms">
                 <div class="nx-setrow__label" id="ucp-g-pms">{{ __('usercp.row_pms') }}</div>
                 <div class="nx-setrow__control">
-                    <div>
-                        @safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.text_accept_pms')))
-                        &nbsp;
-                        <label><input type="radio" name="acceptpms" value="yes" @checked($personal->acceptpms === 'yes')>{{ __('usercp.radio_all_except_blocks') }}</label>
-                        &nbsp;
-                        <label><input type="radio" name="acceptpms" value="friends" @checked($personal->acceptpms === 'friends')>{{ __('usercp.radio_friends_only') }}</label>
-                        &nbsp;
-                        <label><input type="radio" name="acceptpms" value="no" @checked($personal->acceptpms === 'no')>{{ __('usercp.radio_staff_only') }}</label>
-                    </div>
                     <label><input type="checkbox" name="deletepms" @checked($personal->deletepms)> @safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.checkbox_delete_pms')))</label>
                     <label><input type="checkbox" name="savepms" @checked($personal->savepms)> @safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.checkbox_save_pms')))</label>
                     <label><input type="checkbox" name="commentpm" value="yes" @checked($personal->commentpm)> @safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.checkbox_pm_on_comments')))</label>

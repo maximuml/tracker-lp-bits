@@ -75,7 +75,7 @@ final class ChromeFooter
         return new self(
             yearFounded: substr($context->dateFounded, 0, 4) ?: '2007',
             icpLicense: $context->icpLicenseMain,
-            versionHtml: SafeHtml::fromPlainText(defined('VERSION') ? (string) \constant('VERSION') : ''),
+            versionHtml: SafeHtml::fromTrustedHtml(defined('VERSION') ? (string) \constant('VERSION') : ''),
             debugEnabled: $debugEnabled,
             debugQueries: array_values(array_map(
                 static fn (array $query): array => ['query' => (string) ($query['query'] ?? ''), 'time' => (string) ($query['time'] ?? '')],

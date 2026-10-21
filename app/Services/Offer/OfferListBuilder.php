@@ -8,13 +8,13 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserTimeType;
 use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
@@ -50,7 +50,7 @@ final class OfferListBuilder
     /**
      * @param  array<string, mixed>  $globalData
      */
-    public function build(CurrentUser $curUser, int $userId, Request $request, array $globalData): OfferListViewModel
+    public function build(ActorContext $actor, int $userId, Request $request, array $globalData): OfferListViewModel
     {
         // Validate sort
         $sort = '';
@@ -142,7 +142,7 @@ final class OfferListBuilder
         }
 
         // Build the table rows
-        $last_offer = strtotime((string) $curUser->value('last_offer', 'now'));
+        $last_offer = strtotime((string) $actor->value('last_offer', 'now'));
         $table = null;
         $emptyState = SafeHtml::fromPlainText('');
         if (! $num) {
@@ -160,7 +160,7 @@ final class OfferListBuilder
             $canManage = Permission::can(PermissionEnum::OFFER_MANAGE);
             $showAgainstCell = UserDisplay::currentClass() >= $globalData['againstofferClass'];
             $canAgainst = Permission::can(PermissionEnum::AGAINST_OFFER);
-            $showlastcom = (bool) ($curUser->value('showlastcom', true));
+            $showlastcom = (bool) ($actor->value('showlastcom', true));
 
             $lastcoms = [];
             $lastcomUserIds = [];
@@ -237,7 +237,7 @@ final class OfferListBuilder
                     $tooltipId = null;
                     if ($showlastcom) {
                         if (! empty($lastcom)) {
-                            if (($curUser->value('timetype', 1)) !== UserTimeType::TIMEALIVE->value) {
+                            if (($actor->value('timetype', 1)) !== UserTimeType::TIMEALIVE->value) {
                                 $lastcomtime = __('offers.text_at_time').($lastcom['added'] ?? '');
                             } else {
                                 $lastcomtime = __('offers.text_blank').Time::format((string) ($lastcom['added'] ?? 'now'), true, false, true);
@@ -304,7 +304,7 @@ final class OfferListBuilder
                     categoryIcon: new CategoryIcon($catIconData['iconClass'], $catIconData['name'], '/web/offers?category='.(int) ($arr['cat_id'] ?? 0)),
                     displayName: $dispname,
                     fullName: (string) ($arr['name'] ?? ''),
-                    isNew: ! $curUser->no('appendnew') && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer,
+                    isNew: ! $actor->no('appendnew') && strtotime((string) ($arr['added'] ?? 'now')) >= $last_offer,
                     allowed: $allowed,
                     voteResults: $voteResults,
                     comment: $comment,
@@ -332,7 +332,7 @@ final class OfferListBuilder
         }
 
         // Update last_offer timestamp
-        if ($curUser->isLoggedIn()) {
+        if ($actor->isAuthenticated()) {
             $this->usercpRepository->updateLastOffer($userId);
         }
 

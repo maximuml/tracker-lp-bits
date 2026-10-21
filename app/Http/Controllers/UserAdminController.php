@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\AddUserRequest;
@@ -18,7 +19,6 @@ use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\UserListingRepository;
 use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Log;
@@ -48,7 +48,7 @@ class UserAdminController extends BasePageController
         UserModerationRepositoryInterface $userModerationRepository,
         BonusRepository $bonusRepository,
         private readonly UserListingRepository $userListingRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {
         $this->userRepository = $userRepository;
         $this->userModerationRepository = $userModerationRepository;
@@ -57,7 +57,7 @@ class UserAdminController extends BasePageController
 
     public function users(Request $request): View|RedirectResponse|Response
     {
-        if (! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) ($this->currentUser->get()['id'] ?? 0))) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_LIST->value, false, (int) ($this->actor->toLegacyArray()['id'] ?? 0))) {
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
@@ -157,8 +157,8 @@ class UserAdminController extends BasePageController
             return $this->abortResponse('Error', 'Permission denied, Administrator Only.');
         }
 
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUsername = (string) ($this->currentUser->username());
+        $actor = $this->actor->toLegacyArray();
+        $currentUsername = (string) ($this->actor->username);
 
         return $this->resetPage($request, false, '');
     }
@@ -170,8 +170,8 @@ class UserAdminController extends BasePageController
             return $this->abortResponse('Error', 'Permission denied, Administrator Only.');
         }
 
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUsername = (string) ($this->currentUser->username());
+        $actor = $this->actor->toLegacyArray();
+        $currentUsername = (string) ($this->actor->username);
 
         $success = false;
         $message = '';
@@ -215,7 +215,7 @@ class UserAdminController extends BasePageController
 
         Log::writeWithContext("Password Reset For {$username} by {$currentUsername}");
         $success = true;
-        $message = "The password of account <b>{$username}</b> is reset, please inform user of this change.";
+        $message = sprintf('The password of account <b>%s</b> is reset, please inform user of this change.', e($username));
 
         return $this->resetPage($request, $success, $message);
     }
@@ -231,8 +231,8 @@ class UserAdminController extends BasePageController
 
     public function selfEnable(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $actor = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
 
         $title = Locale::trans('self-enable.title', [], null);
         $unit = Setting::getSelfEnableBonus();
@@ -240,8 +240,8 @@ class UserAdminController extends BasePageController
         $viewData = [
             'title' => $title,
             'unit' => $unit,
-            'enabled' => (bool) ($this->currentUser->enabled()),
-            'bonus' => (float) ($this->currentUser->seedbonus()),
+            'enabled' => (bool) ($this->actor->enabled()),
+            'bonus' => (float) ($this->actor->seedbonus()),
             'latestBanLog' => null,
             'elapsedDay' => 0,
             'total' => 0,
@@ -265,7 +265,7 @@ class UserAdminController extends BasePageController
             return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
-        if (($this->currentUser->enabled())) {
+        if (($this->actor->enabled())) {
             return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
@@ -281,8 +281,8 @@ class UserAdminController extends BasePageController
             ? (int) ceil((time() - $latestBanLogCreatedAt->getTimestamp()) / 86400)
             : 0;
         $total = $unit * $elapsedDay;
-        $isUserBonusEnough = (float) ($this->currentUser->seedbonus()) >= $total;
-        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $this->currentUser->seedbonus()], null);
+        $isUserBonusEnough = (float) ($this->actor->seedbonus()) >= $total;
+        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $this->actor->seedbonus()], null);
         $viewData['t']['deductTotal'] = Locale::trans('self-enable.deduct_bonus_total', ['days' => number_format($elapsedDay), 'total' => number_format($total)], null);
 
         $viewData['latestBanLog'] = $latestBanLog;
@@ -297,9 +297,9 @@ class UserAdminController extends BasePageController
 
     public function selfEnableSubmit(SelfEnableRequest $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
-        $currentUsername = (string) ($this->currentUser->username());
+        $actor = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
+        $currentUsername = (string) ($this->actor->username);
 
         $title = Locale::trans('self-enable.title', [], null);
         $unit = Setting::getSelfEnableBonus();
@@ -307,8 +307,8 @@ class UserAdminController extends BasePageController
         $viewData = [
             'title' => $title,
             'unit' => $unit,
-            'enabled' => (bool) ($this->currentUser->enabled()),
-            'bonus' => (float) ($this->currentUser->seedbonus()),
+            'enabled' => (bool) ($this->actor->enabled()),
+            'bonus' => (float) ($this->actor->seedbonus()),
             'latestBanLog' => null,
             'elapsedDay' => 0,
             'total' => 0,
@@ -332,7 +332,7 @@ class UserAdminController extends BasePageController
             return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
-        if (($this->currentUser->enabled())) {
+        if (($this->actor->enabled())) {
             return $this->renderPage($request, 'self-enable', true, $viewData);
         }
 
@@ -348,8 +348,8 @@ class UserAdminController extends BasePageController
             ? (int) ceil((time() - $latestBanLogCreatedAt->getTimestamp()) / 86400)
             : 0;
         $total = $unit * $elapsedDay;
-        $isUserBonusEnough = (float) ($this->currentUser->seedbonus()) >= $total;
-        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $this->currentUser->seedbonus()], null);
+        $isUserBonusEnough = (float) ($this->actor->seedbonus()) >= $total;
+        $insufficientMessage = Locale::trans('self-enable.bonus_not_enough', ['bonus' => $this->actor->seedbonus()], null);
         $viewData['t']['deductTotal'] = Locale::trans('self-enable.deduct_bonus_total', ['days' => number_format($elapsedDay), 'total' => number_format($total)], null);
 
         if ($request->post('submit')) {
@@ -385,7 +385,7 @@ class UserAdminController extends BasePageController
 
     public function unco(Request $request): View|RedirectResponse|Response
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/unco'.($qs ? '?'.$qs : ''));

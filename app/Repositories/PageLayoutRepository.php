@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\Invite;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Menu;
 use App\Support\PageState;
 use App\Support\RequestContext;
@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\DB;
 class PageLayoutRepository extends BaseRepository implements PageLayoutRepositoryInterface
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
         private readonly PageState $pageState,
         private readonly IpLogRepository $ipLogRepository,
         private readonly ?NexusCache $cache,
@@ -138,10 +137,9 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
      * Record per-request user access data and precompute the main menu so
      * the header view helper does not have to mutate state or touch Redis.
      */
-    public function prepareAccess(): void
+    public function prepareAccess(ActorContext $actor): void
     {
-        $user = $this->currentUser->get();
-        if ($user === null || empty($this->currentUser->id())) {
+        if ($actor->isGuest()) {
             return;
         }
 
@@ -151,15 +149,15 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
         }
 
         $this->userUpdateBatch->add('last_access', date('Y-m-d H:i:s'));
-        $this->userUpdateBatch->add('ip', $this->currentUser->value('ip', RequestValues::serverValue('REMOTE_ADDR', '')));
+        $this->userUpdateBatch->add('ip', $actor->value('ip', RequestValues::serverValue('REMOTE_ADDR', '')));
 
-        $this->ipLogRepository->saveToCache((int) $this->currentUser->id());
+        $this->ipLogRepository->saveToCache($actor->id);
 
         $menuResult = $this->menu->render(
             $script,
             SiteConfig::current()->main->showOffer() ? 'yes' : 'no',
             null,
-            $user,
+            $actor->toLegacyArray(),
             $this->cache,
             $this->pageState->langDir(),
         );
@@ -174,10 +172,9 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
     /**
      * Flush any pending user updates to the database at the end of the request.
      */
-    public function flushAccess(): void
+    public function flushAccess(ActorContext $actor): void
     {
-        $user = $this->currentUser->get();
-        if ($user === null || empty($this->currentUser->id())) {
+        if ($actor->isGuest()) {
             return;
         }
 
@@ -186,6 +183,6 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
             return;
         }
 
-        $this->updateUser((int) $this->currentUser->id(), $userUpdateSet);
+        $this->updateUser($actor->id, $userUpdateSet);
     }
 }

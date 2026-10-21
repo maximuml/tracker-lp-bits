@@ -6,12 +6,12 @@ namespace App\ViewModels\Comment;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\User;
 use App\Support\Avatar;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Time;
@@ -24,7 +24,7 @@ use App\Support\UserDisplay;
 final class CommentTableFactory
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly UserRepositoryInterface $userRepository,
         private readonly ?NexusCache $cache = null,
     ) {}
@@ -34,7 +34,7 @@ final class CommentTableFactory
      */
     public function build(array $rows, string $type, int|string $parentId): CommentTableViewModel
     {
-        $curUser = (array) ($this->currentUser->get() ?? []);
+        $curUser = $this->actor->isGuest() ? [] : $this->actor->toLegacyArray();
         $commanageClass = (int) SiteConfig::current()->authority->permission('commanage', 0);
         $contentWidth = \defined('CONTENT_WIDTH') ? (int) CONTENT_WIDTH : 100;
 
@@ -54,7 +54,7 @@ final class CommentTableFactory
         foreach ($rows as $row) {
             $userRow = $userInfoArr->get($row['user'], User::defaultUser())->toArray();
 
-            $avatar = ($this->currentUser->value('avatars', false)) ? \htmlspecialchars(trim((string) ($userRow['avatar'] ?? ''))) : '';
+            $avatar = ($this->actor->value('avatars', false)) ? \htmlspecialchars(trim((string) ($userRow['avatar'] ?? ''))) : '';
             $avatar = Avatar::forUser((int) $row['user'], $avatar);
 
             $viewRows[] = new CommentRow(
@@ -70,7 +70,7 @@ final class CommentTableFactory
                 online: ($userRow['last_access'] ?? '') > $dt,
                 pmTitle: self::plainTitle('functions.title_send_message_to').(string) ($userRow['username'] ?? ''),
                 canDelete: $canManage,
-                canEdit: (int) $row['user'] === (int) ($this->currentUser->id()) || UserDisplay::currentClass() >= $commanageClass,
+                canEdit: (int) $row['user'] === (int) ($this->actor->id) || UserDisplay::currentClass() >= $commanageClass,
             );
         }
 

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\FriendAddRequest;
 use App\Http\Requests\FriendDeleteRequest;
 use App\Repositories\FriendsRepository;
 use App\Support\Avatar;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\RequestValues;
@@ -26,13 +26,13 @@ class FriendsController extends BasePageController
 {
     public function __construct(
         private readonly FriendsRepository $friendsRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {}
 
     public function friends(Request $request): Response|RedirectResponse|View
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $userid = (int) ($request->input('id') ?? $this->currentUser->id());
+        $currentUser = (array) ($this->actor->toLegacyArray());
+        $userid = (int) ($request->input('id') ?? $this->actor->id);
         if ($userid <= 0 || ! Validators::isId($userid)) {
             return $this->abortResponse(__('friends.std_error'), (__('friends.std_invalid_id')).$userid.'.');
         }
@@ -79,7 +79,7 @@ class FriendsController extends BasePageController
                 ? UserClass::name((int) ($friend['class'] ?? 0), false, true, true)
                 : SafeHtml::fromPlainText($title);
             $avatar = '';
-            if ($this->currentUser->yes('avatars')) {
+            if ($this->actor->yes('avatars')) {
                 $avatar = htmlspecialchars((string) ($friend['avatar'] ?? ''), ENT_QUOTES, 'UTF-8');
             }
             $friend['avatarSrc'] = Avatar::forUser($friendId, $avatar);
@@ -150,14 +150,14 @@ class FriendsController extends BasePageController
 
     private function listOwnerId(Request $request): int
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $currentUser = (array) ($this->actor->toLegacyArray());
 
-        return (int) ($request->input('id') ?? $this->currentUser->id());
+        return (int) ($request->input('id') ?? $this->actor->id);
     }
 
     private function handleAdd(Request $request, int $userid): RedirectResponse|Response
     {
-        if ($userid !== $this->currentUser->id()) {
+        if ($userid !== $this->actor->id) {
             return $this->abortResponse(__('friends.std_error'), ('Permission denied.'));
         }
 
@@ -186,7 +186,7 @@ class FriendsController extends BasePageController
 
     private function handleDelete(Request $request, int $userid): RedirectResponse|Response
     {
-        if ($userid !== $this->currentUser->id()) {
+        if ($userid !== $this->actor->id) {
             return $this->abortResponse(__('friends.std_error'), ('Permission denied.'));
         }
 
@@ -247,8 +247,8 @@ class FriendsController extends BasePageController
 
     private function purgeNeighborsCache(): void
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $cachefile = 'cache/'.Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), false).'/neighbors/'.($this->currentUser->id()).'.html';
+        $currentUser = (array) ($this->actor->toLegacyArray());
+        $cachefile = 'cache/'.Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), false).'/neighbors/'.($this->actor->id).'.html';
         if (file_exists($cachefile)) {
             unlink($cachefile);
         }

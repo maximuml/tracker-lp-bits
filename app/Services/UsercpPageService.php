@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Usercp\UsercpForumBuilder;
@@ -11,7 +12,6 @@ use App\Services\Usercp\UsercpHomeBuilder;
 use App\Services\Usercp\UsercpPersonalBuilder;
 use App\Services\Usercp\UsercpSecurityBuilder;
 use App\Services\Usercp\UsercpTrackerBuilder;
-use App\Support\CurrentUser;
 use App\ViewModels\UsercpPageViewModel;
 
 /**
@@ -31,7 +31,7 @@ use App\ViewModels\UsercpPageViewModel;
 final class UsercpPageService
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly UsercpHomeBuilder $homeBuilder,
         private readonly UsercpPersonalBuilder $personalBuilder,
         private readonly UsercpTrackerBuilder $trackerBuilder,
@@ -44,12 +44,12 @@ final class UsercpPageService
      */
     public function build(string $action, string $type): UsercpPageViewModel
     {
-        $curUser = $this->currentUser;
-        $userInfo = (new User)->newFromBuilder($curUser->get() ?? []);
+        $actor = $this->actor;
+        $userInfo = (new User)->newFromBuilder($actor->toLegacyArray());
         $siteName = Setting::getSiteName();
 
         $data = [
-            'curUser' => $curUser->get() ?? [],
+            'curUser' => $actor->toLegacyArray(),
             'userInfo' => $userInfo,
             'siteName' => $siteName,
             'action' => $action,
@@ -59,19 +59,19 @@ final class UsercpPageService
 
         switch ($action) {
             case 'personal':
-                $data['personal'] = $this->personalBuilder->build($curUser);
+                $data['personal'] = $this->personalBuilder->build($actor);
                 break;
             case 'tracker':
-                $data['tracker'] = $this->trackerBuilder->build($curUser);
+                $data['tracker'] = $this->trackerBuilder->build($actor);
                 break;
             case 'forum':
-                $data['forum'] = $this->forumBuilder->build($curUser);
+                $data['forum'] = $this->forumBuilder->build($actor);
                 break;
             case 'security':
-                $data['security'] = $this->securityBuilder->build($curUser, $type);
+                $data['security'] = $this->securityBuilder->build($actor, $type);
                 break;
             default:
-                $data['home'] = $this->homeBuilder->build($curUser, $userInfo);
+                $data['home'] = $this->homeBuilder->build($actor, $userInfo);
                 break;
         }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Controllers\TorrentDetailsController;
 use App\Models\Torrent;
 use App\Models\User;
@@ -13,14 +14,18 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class TorrentDetailsControllerRenderTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function tearDown(): void
     {
         app(CurrentUser::class)->set(null);
+        app()->instance(ActorContext::class, $this->actor([]));
         parent::tearDown();
     }
 

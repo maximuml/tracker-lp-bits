@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\ReportType;
 use App\Http\Requests\ReportRequest;
@@ -14,7 +15,6 @@ use App\Repositories\CommentRepository;
 use App\Repositories\ModerationRepository;
 use App\Services\PermissionChecker;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Time;
@@ -29,7 +29,7 @@ use Illuminate\View\View;
 class ModerationController extends BasePageController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker, private readonly OfferRepositoryInterface $offerRepository, private readonly CommentRepository $commentRepository, private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserRepositoryInterface $userRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ?NexusCache $cache,
         private readonly ModerationRepository $moderationRepository,
     ) {}
@@ -41,8 +41,8 @@ class ModerationController extends BasePageController
 
     public function report(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $actor = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
         $staffmemClass = defined('UC_STAFFMEM') ? \constant('UC_STAFFMEM') : (defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0);
 
         $cache = $this->cache;
@@ -224,8 +224,8 @@ class ModerationController extends BasePageController
 
     public function reports(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $actor = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
 
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->abortResponse('Error', 'Permission denied.');

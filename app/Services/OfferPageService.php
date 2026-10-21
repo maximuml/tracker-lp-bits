@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Services\Offer\OfferAddBuilder;
 use App\Services\Offer\OfferDetailsBuilder;
@@ -12,7 +13,6 @@ use App\Services\Offer\OfferEditBuilder;
 use App\Services\Offer\OfferListBuilder;
 use App\Services\Offer\OfferVoteListBuilder;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\PageResponses;
 use App\Support\RequestValues;
 use App\ViewModels\OfferPageViewModel;
@@ -26,7 +26,7 @@ use Illuminate\Http\Request;
 final class OfferPageService
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly OfferAddBuilder $addBuilder,
         private readonly OfferDetailsBuilder $detailsBuilder,
         private readonly OfferEditBuilder $editBuilder,
@@ -36,13 +36,13 @@ final class OfferPageService
 
     public function build(Request $request): OfferPageViewModel
     {
-        $curUser = $this->currentUser;
-        $userId = $this->currentUser->id();
+        $actor = $this->actor;
+        $userId = $this->actor->id;
 
         $action = $this->resolveAction($request);
 
         $data = [
-            'curUser' => $curUser->get() ?? [],
+            'curUser' => $actor->toLegacyArray(),
             'userId' => $userId,
             'action' => $action,
             'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost'),
@@ -68,16 +68,16 @@ final class OfferPageService
                 $data['add_offer'] = $this->addBuilder->build($data['browsecatmode']);
                 break;
             case 'off_details':
-                $data['off_details'] = $this->detailsBuilder->build($curUser, $userId, $request);
+                $data['off_details'] = $this->detailsBuilder->build($actor, $userId, $request);
                 break;
             case 'edit_offer':
-                $data['edit_offer'] = $this->editBuilder->build($curUser, $userId, $request, $data['browsecatmode']);
+                $data['edit_offer'] = $this->editBuilder->build($actor, $userId, $request, $data['browsecatmode']);
                 break;
             case 'offer_vote':
                 $data['offer_vote'] = $this->voteListBuilder->build($request);
                 break;
             default:
-                $data['list'] = $this->listBuilder->build($curUser, $userId, $request, $data);
+                $data['list'] = $this->listBuilder->build($actor, $userId, $request, $data);
                 $data['action'] = 'list';
                 break;
         }

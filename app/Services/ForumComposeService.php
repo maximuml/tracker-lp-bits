@@ -6,11 +6,11 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
@@ -107,11 +107,11 @@ final class ForumComposeService
         return $this->buildComposeFrame($forumid, 'new');
     }
 
-    public function buildQuotePost(CurrentUser $curUser, Request $request): ?ForumComposeViewModel
+    public function buildQuotePost(ActorContext $actor, Request $request): ?ForumComposeViewModel
     {
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post');
-        if (! Forum::canViewPost($curUser->id(), $postid)) {
+        if (! Forum::canViewPost($actor->id, $postid)) {
             PageResponses::permissionDenied();
         }
 
@@ -126,7 +126,7 @@ final class ForumComposeService
         return $this->buildComposeFrame($topicid, 'reply');
     }
 
-    public function buildEditPost(CurrentUser $curUser, Request $request): ?ForumComposeViewModel
+    public function buildEditPost(ActorContext $actor, Request $request): ?ForumComposeViewModel
     {
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post');
@@ -138,7 +138,7 @@ final class ForumComposeService
 
         $locked = (bool) $post['locked'];
         $ismod = Forum::isModerator($postid, 'post');
-        if (($curUser->id() != $post['userid'] || $locked) && ! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod) {
+        if (($actor->id != $post['userid'] || $locked) && ! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod) {
             PageResponses::permissionDenied();
         }
 

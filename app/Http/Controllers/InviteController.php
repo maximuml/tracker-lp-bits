@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\InviteValid;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
@@ -16,7 +17,6 @@ use App\Models\Setting;
 use App\Repositories\InviteRepository;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
@@ -32,7 +32,7 @@ class InviteController extends BasePageController
 {
     public function __construct(private readonly UserRepositoryInterface $userRepository,
         private readonly UserModerationRepositoryInterface $userModerationRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly InviteRepository $inviteRepository,
     ) {}
 
@@ -43,8 +43,8 @@ class InviteController extends BasePageController
 
     public function invite(Request $request): View|RedirectResponse|Response
     {
-        $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUser = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
         $id = $request->input('id') !== null ? (int) $request->input('id') : $currentUserId;
 
         if (! Validators::isId($id) || ($currentUserId !== $id && ! Permission::can(PermissionEnum::VIEW_INVITE))) {
@@ -114,7 +114,7 @@ class InviteController extends BasePageController
                 ];
             }
 
-            $invitation_body = sprintf(__('invite.text_invitation_body'), $SITENAME).$this->currentUser->username();
+            $invitation_body = sprintf(__('invite.text_invitation_body'), $SITENAME).$this->actor->username;
             $showPreUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
             $_s = ((int) ($inv['invites'] ?? 0) !== 1) ? (__('invite.text_s')) : '';
 

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\AccessGate;
 use App\Auth\AuthContext;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\PreviewRequest;
 use App\Models\Setting;
 use App\Repositories\UsercpSecurityCommand;
@@ -15,7 +16,6 @@ use App\Support\AjaxRedirects;
 use App\Support\Api;
 use App\Support\Cache\NexusCache;
 use App\Support\Captcha;
-use App\Support\CurrentUser;
 use App\Support\HeaderBag;
 use App\Support\Logger;
 use App\Support\RedisGuard;
@@ -31,7 +31,7 @@ class UtilityController extends BasePageController
     public function __construct(
         private readonly UsercpSecurityCommand $usercpSecurityCommand,
         private readonly UserRepositoryInterface $userRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ?NexusCache $cache,
         private readonly HeaderBag $headerBag,
         private readonly SecureTokenService $secureTokenService,
@@ -74,8 +74,8 @@ class UtilityController extends BasePageController
             return redirect()->to($redirectUri, 308);
         }
 
-        $currentUser = $this->currentUser->get() ?? [];
-        Logger::writeWithContext((string) ('hacking attempt made by '.($this->currentUser->value('username', 'guest')).',uid '.($this->currentUser->id())), (string) 'error', (bool) false);
+        $currentUser = $this->actor->toLegacyArray();
+        Logger::writeWithContext((string) ('hacking attempt made by '.($this->actor->value('username', 'guest')).',uid '.($this->actor->id)), (string) 'error', (bool) false);
 
         return response()->json(Api::call(1, "Invalid action: {$action}", $request->only(['action', 'params'])));
     }
@@ -201,7 +201,7 @@ class UtilityController extends BasePageController
             'email' => $email,
             'title' => $title,
             'siteName' => Setting::getSiteName(),
-            'CURUSER' => $this->currentUser->get(),
+            'CURUSER' => $this->actor->toLegacyArray(),
         ]);
     }
 }

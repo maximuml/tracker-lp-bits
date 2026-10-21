@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\PageResponses;
 use App\ViewModels\ForumPageViewModel;
 use Illuminate\Http\Request;
@@ -29,7 +29,7 @@ final class ForumPageService
         private readonly ForumComposeService $composeService,
         private readonly ForumTopicViewService $topicViewService,
         private readonly ForumListingService $listingService,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {}
 
     /**
@@ -37,15 +37,15 @@ final class ForumPageService
      */
     public function build(Request $request): ForumPageViewModel
     {
-        $curUser = $this->currentUser;
-        $userId = $curUser->id();
+        $actor = $this->actor;
+        $userId = $actor->id;
 
         $mainConfig = SiteConfig::current()->main;
-        $postsperpage = (int) ($this->currentUser->value('postsperpage', 0));
+        $postsperpage = (int) ($this->actor->value('postsperpage', 0));
         if (! $postsperpage) {
             $postsperpage = $mainConfig->forumPostsPerPage(10);
         }
-        $topicsperpage = (int) ($this->currentUser->value('topicsperpage', 0));
+        $topicsperpage = (int) ($this->actor->value('topicsperpage', 0));
         if (! $topicsperpage) {
             $topicsperpage = $mainConfig->forumTopicsPerPage(20);
         }
@@ -73,7 +73,7 @@ final class ForumPageService
                 $action = 'newtopic';
                 break;
             case 'quotepost':
-                $compose = $this->composeService->buildQuotePost($curUser, $request);
+                $compose = $this->composeService->buildQuotePost($actor, $request);
                 $action = 'quotepost';
                 break;
             case 'reply':
@@ -81,19 +81,19 @@ final class ForumPageService
                 $action = 'reply';
                 break;
             case 'editpost':
-                $compose = $this->composeService->buildEditPost($curUser, $request);
+                $compose = $this->composeService->buildEditPost($actor, $request);
                 $action = 'editpost';
                 break;
             case 'viewtopic':
-                $viewtopic = $this->topicViewService->buildViewTopic($curUser, $userId, $request, $postsperpage);
+                $viewtopic = $this->topicViewService->buildViewTopic($actor, $userId, $request, $postsperpage);
                 $action = 'viewtopic';
                 break;
             case 'viewforum':
-                $viewforum = $this->listingService->buildViewForum($curUser, $request, $topicsperpage, $postsperpage);
+                $viewforum = $this->listingService->buildViewForum($actor, $request, $topicsperpage, $postsperpage);
                 $action = 'viewforum';
                 break;
             case 'viewunread':
-                $viewunread = $this->listingService->buildViewUnread($curUser);
+                $viewunread = $this->listingService->buildViewUnread($actor);
                 $action = 'viewunread';
                 break;
             case 'search':
@@ -104,13 +104,13 @@ final class ForumPageService
                 if ($action !== '') {
                     PageResponses::abort(__('forums.std_forum_error'), __('forums.std_unknown_action'));
                 }
-                $forums = $this->indexService->buildForumsIndex($curUser, $userId);
+                $forums = $this->indexService->buildForumsIndex($actor, $userId);
                 $action = 'forums';
                 break;
         }
 
         return new ForumPageViewModel(
-            curUser: $curUser->get() ?? [],
+            curUser: $actor->toLegacyArray(),
             userId: $userId,
             action: $action,
             sitename: $sitename,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Post;
 use App\Models\Topic;
@@ -15,7 +16,6 @@ use App\Repositories\MessageRepository;
 use App\Support\Bonus;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\PageResponses;
@@ -110,7 +110,7 @@ final class ForumService
 
     public function __construct(
         private readonly ForumDataRepositories $data,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly NexusCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
@@ -123,7 +123,7 @@ final class ForumService
      */
     private function user(): array
     {
-        return (array) ($this->currentUser->get() ?? []);
+        return $this->actor->toLegacyArray();
     }
 
     private function cacheDelete(string $key): void

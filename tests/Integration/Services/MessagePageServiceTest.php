@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -31,6 +32,7 @@ use Tests\TestCase;
 final class MessagePageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private int $initialObLevel;
@@ -50,10 +52,15 @@ final class MessagePageServiceTest extends TestCase
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         $this->mockCache();
-        $this->service = new MessagePageService(
+        $this->service = $this->buildService();
+    }
+
+    private function buildService(): MessagePageService
+    {
+        return new MessagePageService(
             $this->app->make(MessageRepository::class),
             $this->app->make(MailboxRepository::class),
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $this->app->make(NexusCache::class),
         );
     }
@@ -132,8 +139,8 @@ final class MessagePageServiceTest extends TestCase
     private function authenticatedUser(array $userData = []): void
     {
         $defaults = ['id' => 1, 'username' => 'testuser', 'class' => 1, 'pmnum' => 20];
-        $currentUser = $this->app->make(CurrentUser::class);
-        $currentUser->set(array_merge($defaults, $userData));
+        $this->app->instance(ActorContext::class, $this->actor(array_merge($defaults, $userData)));
+        $this->service = $this->buildService();
     }
 
     private function seedSettings(): void
@@ -442,7 +449,7 @@ final class MessagePageServiceTest extends TestCase
         $service = new MessagePageService(
             $this->app->make(MessageRepository::class),
             $this->app->make(MailboxRepository::class),
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $cache,
         );
 

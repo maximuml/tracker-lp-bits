@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Usercp;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserPrivacy;
 use App\Repositories\UserPasskeyRepository;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\TwoFactorAuthHelper;
 use App\ViewModels\Usercp\PasskeyItem;
@@ -24,23 +24,23 @@ final class UsercpSecurityBuilder
         private readonly UserPasskeyRepository $passkeyRepository
     ) {}
 
-    public function build(CurrentUser $curUser, string $type): UsercpSecuritySection
+    public function build(ActorContext $actor, string $type): UsercpSecuritySection
     {
         $showEmailChange = SiteConfig::current()->security->emailChangeAllowed(false)
             && SiteConfig::current()->smtp->type() !== 'none';
 
         // Two-step auth
-        $hasSecret = ! empty($curUser->value('two_step_secret'));
+        $hasSecret = ! empty($actor->value('two_step_secret'));
         $secret = '';
         $qrCodeUrl = '';
         if (! $hasSecret) {
             $secret = TwoFactorAuthHelper::createSecret();
             $siteConfig = SiteConfig::current();
-            $label = sprintf('%s(%s)', $siteConfig->basic->siteName(), $curUser->username());
+            $label = sprintf('%s(%s)', $siteConfig->basic->siteName(), $actor->username);
             $qrCodeUrl = TwoFactorAuthHelper::qrCodeUrl($label, $secret);
         }
 
-        $currentPrivacy = UserPrivacy::tryFrom((int) $curUser->value('privacy', 1)) ?? UserPrivacy::NORMAL;
+        $currentPrivacy = UserPrivacy::tryFrom((int) $actor->value('privacy', 1)) ?? UserPrivacy::NORMAL;
 
         // For the confirm step, capture the posted values to re-render as hidden fields
         $confirmHidden = [];
@@ -97,8 +97,8 @@ final class UsercpSecurityBuilder
             showEmailChange: $showEmailChange,
             twoStep: new TwoStepState($hasSecret, $secret, $qrCodeUrl),
             privacy: $currentPrivacy->stringValue(),
-            email: (string) $curUser->value('email', ''),
-            passkeys: $isConfirm ? [] : $this->buildPasskeyItems($curUser->id()),
+            email: (string) $actor->value('email', ''),
+            passkeys: $isConfirm ? [] : $this->buildPasskeyItems($actor->id),
             cspNonce: (string) request()->attributes->get('csp_nonce', ''),
             confirmHtml: SafeHtml::fromPlainText(''),
         );

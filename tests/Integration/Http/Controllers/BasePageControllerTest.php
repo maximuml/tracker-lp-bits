@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,12 +14,15 @@ use Illuminate\View\View as ViewInstance;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Integration\Http\Controllers\Fixtures\TestBasePageController;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class BasePageControllerTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function tearDown(): void
     {
         app(CurrentUser::class)->set(null);
@@ -76,6 +80,7 @@ final class BasePageControllerTest extends TestCase
     public function test_render_page_renders_view_for_authenticated_user(): void
     {
         app(CurrentUser::class)->set(['id' => 1]);
+        app()->instance(ActorContext::class, $this->actor(['id' => 1]));
         $view = $this->fakeView();
         View::shouldReceive('make')->once()->with('mypage.index', [])->andReturn($view);
 

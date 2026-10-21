@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Controllers\AttendanceController;
 use App\Models\Attendance;
 use App\Models\User;
 use App\Repositories\AttendanceRepository;
-use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Mockery;
@@ -63,7 +63,7 @@ final class AttendanceControllerTest extends TestCase
         $repository->shouldNotReceive('attend');
 
         Auth::shouldReceive('user')->andReturn(null);
-        app()->forgetInstance(CurrentUser::class);
+        app()->forgetInstance(ActorContext::class);
 
         $controller = app(AttendanceController::class);
         $request = Request::create('/api/v1/attendance', 'POST', []);
@@ -102,7 +102,7 @@ final class AttendanceControllerTest extends TestCase
     }
 
     /**
-     * Authenticate a user with the given ID via Auth facade and refresh CurrentUser.
+     * Authenticate a user with the given ID via Auth facade and refresh the actor context.
      */
     private function authenticateUser(int $userId): void
     {
@@ -111,6 +111,6 @@ final class AttendanceControllerTest extends TestCase
         $user->class = 1;
 
         Auth::shouldReceive('user')->andReturn($user);
-        app()->forgetInstance(CurrentUser::class);
+        app()->instance(ActorContext::class, ActorContext::fromAuth($user));
     }
 }

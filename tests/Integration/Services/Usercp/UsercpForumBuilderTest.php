@@ -30,7 +30,8 @@ final class UsercpForumBuilderTest extends TestCase
     /** @param  array<string, mixed>  $overrides */
     private function section(array $overrides = []): UsercpForumSection
     {
-        return $this->builder()->build($this->curUser(array_merge([
+        return $this->builder()->build($this->actor(array_merge([
+            'id' => 1,
             'topicsperpage' => 25,
             'postsperpage' => 10,
             'avatars' => 'yes',
@@ -81,7 +82,7 @@ final class UsercpForumBuilderTest extends TestCase
     {
         $this->seedTestSettings(['enabletooltip_tweak' => 'no']);
 
-        $s = $this->builder()->build($this->curUser([]));
+        $s = $this->builder()->build($this->actor([]));
 
         $this->assertSame(0, $s->topicsPerPage);
         $this->assertSame(0, $s->postsPerPage);

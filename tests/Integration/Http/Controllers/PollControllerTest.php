@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Controllers\PollController;
 use App\Http\Requests\PollStoreRequest;
 use App\Http\Requests\PollUpdateRequest;
@@ -15,12 +16,14 @@ use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class PollControllerTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     protected function tearDown(): void
     {
@@ -116,6 +119,7 @@ final class PollControllerTest extends TestCase
 
         $currentUser = ['id' => 999, 'username' => 'voter'];
         app(CurrentUser::class)->set($currentUser);
+        app()->instance(ActorContext::class, $this->actor($currentUser));
 
         $indexRepo = Mockery::mock(IndexRepository::class);
         $indexRepo->shouldReceive('hasVoted')->once()->with($poll->id, 999)->andReturn(false);
@@ -150,6 +154,7 @@ final class PollControllerTest extends TestCase
 
         $currentUser = ['id' => 998, 'username' => 'blank_voter'];
         app(CurrentUser::class)->set($currentUser);
+        app()->instance(ActorContext::class, $this->actor($currentUser));
 
         $indexRepo = Mockery::mock(IndexRepository::class);
         $indexRepo->shouldReceive('hasVoted')->once()->with($poll->id, 998)->andReturn(false);
@@ -178,6 +183,7 @@ final class PollControllerTest extends TestCase
     {
         $currentUser = ['id' => 997, 'username' => 'tester'];
         app(CurrentUser::class)->set($currentUser);
+        app()->instance(ActorContext::class, $this->actor($currentUser));
 
         $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
@@ -205,6 +211,7 @@ final class PollControllerTest extends TestCase
 
         $currentUser = ['id' => 996, 'username' => 'tester'];
         app(CurrentUser::class)->set($currentUser);
+        app()->instance(ActorContext::class, $this->actor($currentUser));
 
         $controller = app(PollController::class);
         $request = PollVoteRequest::create('/api/polls/vote', 'POST', [
@@ -230,6 +237,7 @@ final class PollControllerTest extends TestCase
 
         $currentUser = ['id' => 995, 'username' => 'tester'];
         app(CurrentUser::class)->set($currentUser);
+        app()->instance(ActorContext::class, $this->actor($currentUser));
 
         $indexRepo = Mockery::mock(IndexRepository::class);
         $indexRepo->shouldReceive('hasVoted')->once()->with($poll->id, 995)->andReturn(true);
@@ -260,6 +268,7 @@ final class PollControllerTest extends TestCase
 
         $currentUser = ['id' => 994, 'username' => 'tester'];
         app(CurrentUser::class)->set($currentUser);
+        app()->instance(ActorContext::class, $this->actor($currentUser));
 
         $indexRepo = Mockery::mock(IndexRepository::class);
         $indexRepo->shouldReceive('hasVoted')->once()->andReturn(false);

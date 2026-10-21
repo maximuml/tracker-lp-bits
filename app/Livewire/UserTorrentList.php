@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
-use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Services\PermissionChecker;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Strings;
 use App\ViewModels\Torrent\UserTorrentListVmFactory;
@@ -42,9 +41,7 @@ final class UserTorrentList extends Component
 
     private ?PermissionChecker $permissionChecker = null;
 
-    private ?UserRepositoryInterface $userRepository = null;
-
-    private ?CurrentUser $currentUser = null;
+    private ?ActorContext $actor = null;
 
     private ?TorrentAjaxRepositoryInterface $torrentAjaxRepository = null;
 
@@ -52,14 +49,12 @@ final class UserTorrentList extends Component
 
     public function boot(
         PermissionChecker $permissionChecker,
-        UserRepositoryInterface $userRepository,
-        CurrentUser $currentUser,
+        ActorContext $actor,
         TorrentAjaxRepositoryInterface $torrentAjaxRepository,
         UserTorrentListVmFactory $userTorrentListVmFactory,
     ): void {
         $this->permissionChecker = $permissionChecker;
-        $this->userRepository = $userRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
         $this->torrentAjaxRepository = $torrentAjaxRepository;
         $this->userTorrentListVmFactory = $userTorrentListVmFactory;
     }
@@ -82,10 +77,8 @@ final class UserTorrentList extends Component
     {
         $data = null;
         if ($this->open) {
-            $curUser = $this->currentUser()->get() ?? [];
-            $currentUser = $curUser !== []
-                ? $this->userRepository()->findById((int) ($curUser['id'] ?? 0))
-                : null;
+            $curUser = $this->actor()->toLegacyArray();
+            $currentUser = $this->actor()->user;
             $allowed = $currentUser !== null
                 && ($this->permissionChecker()->userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id)
                     || $currentUser->id === $this->userId);
@@ -115,14 +108,9 @@ final class UserTorrentList extends Component
         return $this->permissionChecker ?? throw new \LogicException('UserTorrentList used before boot()');
     }
 
-    private function userRepository(): UserRepositoryInterface
+    private function actor(): ActorContext
     {
-        return $this->userRepository ?? throw new \LogicException('UserTorrentList used before boot()');
-    }
-
-    private function currentUser(): CurrentUser
-    {
-        return $this->currentUser ?? throw new \LogicException('UserTorrentList used before boot()');
+        return $this->actor ?? throw new \LogicException('UserTorrentList used before boot()');
     }
 
     private function torrentAjaxRepository(): TorrentAjaxRepositoryInterface

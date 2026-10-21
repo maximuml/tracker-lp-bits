@@ -75,9 +75,11 @@ final class HtmlInPhpRatchetTest extends TestCase
      * Unverified raw output — byte-identical to {!! !!}; a usage needs
      * justification in the PR. Baseline captured 2026-10-21 after the
      * Tag.php attribute/text markers moved to escaped {{ }} and the
-     * text/empty-string sites moved to fromPlainText().
+     * text/empty-string sites moved to fromPlainText(); 244 after the
+     * VERSION powered-by constant reverted — it is deliberate markup
+     * (`<a href="aboutnexus.php">`), not plain text.
      */
-    private const BASELINE_TRUSTED_HTML = 253;
+    private const BASELINE_TRUSTED_HTML = 244;
 
     public function test_table_literal_count_does_not_exceed_baseline(): void
     {

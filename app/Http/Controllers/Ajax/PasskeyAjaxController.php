@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Ajax;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\Ajax\PasskeyCreateArgsRequest;
 use App\Http\Requests\Ajax\PasskeyCreateRequest;
 use App\Http\Requests\Ajax\PasskeyDeleteRequest;
@@ -11,32 +12,31 @@ use App\Http\Requests\Ajax\PasskeyGetArgsRequest;
 use App\Http\Requests\Ajax\PasskeyGetRequest;
 use App\Http\Requests\Ajax\PasskeyListRequest;
 use App\Repositories\UserPasskeyRepository;
-use App\Support\CurrentUser;
 use Illuminate\Http\JsonResponse;
 
 final class PasskeyAjaxController extends AjaxController
 {
     public function __construct(
         private readonly UserPasskeyRepository $userPasskeyRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {}
 
     public function createArgs(PasskeyCreateArgsRequest $request): JsonResponse
     {
         return $this->respond($request, function () {
-            $user = $this->currentUser->get() ?? [];
+            $user = $this->actor->toLegacyArray();
 
-            return $this->userPasskeyRepository->getCreateArgs($this->currentUser->id(), $this->currentUser->username());
+            return $this->userPasskeyRepository->getCreateArgs($this->actor->id, $this->actor->username);
         });
     }
 
     public function processCreate(PasskeyCreateRequest $request): JsonResponse
     {
         return $this->respond($request, function () use ($request) {
-            $user = $this->currentUser->get() ?? [];
+            $user = $this->actor->toLegacyArray();
 
             return $this->userPasskeyRepository->processCreate(
-                $this->currentUser->id(),
+                $this->actor->id,
                 $request->input('challengeId'),
                 $request->input('clientDataJSON'),
                 $request->input('attestationObject'),
@@ -47,18 +47,18 @@ final class PasskeyAjaxController extends AjaxController
     public function delete(PasskeyDeleteRequest $request): JsonResponse
     {
         return $this->respond($request, function () use ($request) {
-            $user = $this->currentUser->get() ?? [];
+            $user = $this->actor->toLegacyArray();
 
-            return $this->userPasskeyRepository->delete($this->currentUser->id(), $request->input('credentialId'));
+            return $this->userPasskeyRepository->delete($this->actor->id, $request->input('credentialId'));
         });
     }
 
     public function list(PasskeyListRequest $request): JsonResponse
     {
         return $this->respond($request, function () {
-            $user = $this->currentUser->get() ?? [];
+            $user = $this->actor->toLegacyArray();
 
-            return $this->userPasskeyRepository->getList($this->currentUser->id());
+            return $this->userPasskeyRepository->getList($this->actor->id);
         });
     }
 

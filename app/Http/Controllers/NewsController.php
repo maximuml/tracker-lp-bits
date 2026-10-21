@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Events\NewsCreated;
 use App\Http\Requests\NewsAddRequest;
@@ -18,7 +19,6 @@ use App\Repositories\IndexRepository;
 use App\Repositories\NewsRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Http\SafeReturnUrl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +28,7 @@ use Illuminate\View\View;
 class NewsController extends BasePageController
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ?NexusCache $cache,
         private readonly IndexRepository $indexRepository,
         private readonly NewsRepository $newsRepository,
@@ -135,8 +135,8 @@ class NewsController extends BasePageController
     {
         $data = $request->validated();
 
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $data['userid'] = (int) ($this->currentUser->id());
+        $currentUser = (array) ($this->actor->toLegacyArray());
+        $data['userid'] = (int) ($this->actor->id);
         $data['added'] = now()->toDateTimeString();
         $data['notify'] = ($data['notify'] ?? 'no') === 'yes';
 
@@ -232,9 +232,9 @@ class NewsController extends BasePageController
         }
         $notify = $request->input('notify') === 'yes';
 
-        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $currentUser = (array) ($this->actor->toLegacyArray());
         $newsId = $this->newsRepository->insertGetId([
-            'userid' => (int) ($this->currentUser->id()),
+            'userid' => (int) ($this->actor->id),
             'added' => $added,
             'body' => $body,
             'title' => $title,

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Contracts\Repositories\StyleRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass as UserClassEnum;
 use App\Http\Requests\SettingsSubmitRequest;
 use App\Models\Language;
@@ -16,7 +17,6 @@ use App\Models\User;
 use App\Repositories\IndexRepository;
 use App\Repositories\LanguageRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Log;
@@ -33,14 +33,14 @@ class SettingsController extends BasePageController
 {
     private TagRepositoryInterface $tagRepository;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     private IndexRepository $indexRepository;
 
-    public function __construct(private readonly SearchBoxRepositoryInterface $searchBoxRepository, private readonly StyleRepositoryInterface $styleRepository, private readonly LanguageRepository $languageRepository, TagRepositoryInterface $tagRepository, CurrentUser $currentUser, IndexRepository $indexRepository)
+    public function __construct(private readonly SearchBoxRepositoryInterface $searchBoxRepository, private readonly StyleRepositoryInterface $styleRepository, private readonly LanguageRepository $languageRepository, TagRepositoryInterface $tagRepository, ActorContext $actor, IndexRepository $indexRepository)
     {
         $this->tagRepository = $tagRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
         $this->indexRepository = $indexRepository;
     }
 
@@ -110,8 +110,7 @@ class SettingsController extends BasePageController
 
     public function settings(Request $request): View|RedirectResponse|Response
     {
-        $currentUser = $this->currentUser->get();
-        if ($currentUser === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/web/settings');
         }
 
@@ -127,7 +126,7 @@ class SettingsController extends BasePageController
 
         $data = [
             'action' => $action,
-            'currentUser' => (array) $currentUser,
+            'currentUser' => $this->actor->toLegacyArray(),
             'scriptName' => '/web/settings',
         ];
 
@@ -194,8 +193,7 @@ class SettingsController extends BasePageController
 
     public function settingsSubmit(SettingsSubmitRequest $request): RedirectResponse|Response
     {
-        $currentUser = $this->currentUser->get();
-        if ($currentUser === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/web/settings');
         }
 
@@ -215,8 +213,8 @@ class SettingsController extends BasePageController
     private function handleSave(Request $request): RedirectResponse|Response|null
     {
         $action = (string) ($request->post('action') ?? '');
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $username = (string) ($this->currentUser->value('username', 'unknown'));
+        $currentUser = $this->actor->toLegacyArray();
+        $username = (string) ($this->actor->value('username', 'unknown'));
         $actiontime = date('F j, Y, g:i a');
 
         $saveMap = [

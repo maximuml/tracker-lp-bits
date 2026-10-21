@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Repositories\PostRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserTimeType;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
@@ -47,14 +47,14 @@ final class ForumListingService
     /**
      * Build the view-forum section.
      */
-    public function buildViewForum(CurrentUser $curUser, Request $request, int $topicsperpage, int $postsperpage): TopicListViewModel
+    public function buildViewForum(ActorContext $actor, Request $request, int $topicsperpage, int $postsperpage): TopicListViewModel
     {
         $forumid = (int) (request()->query('forumid') ?? 0);
         PageResponses::assertId($forumid, true);
 
         $row = $this->index->getForumRow($forumid);
         if (! $row) {
-            Log::writeWithContext('User '.$curUser->username().','.((string) $curUser->value('ip', ''))." is trying to visit forum that doesn't exist", 'mod');
+            Log::writeWithContext('User '.$actor->username.','.((string) $actor->value('ip', ''))." is trying to visit forum that doesn't exist", 'mod');
             PageResponses::abort(__('forums.std_forum_error'), __('forums.std_forum_not_found'));
         }
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
@@ -82,7 +82,7 @@ final class ForumListingService
         $topicRows = $topicResult['rows'];
 
         $enabletooltipTweak = SiteConfig::current()->tweak->enableTooltip() ? 'yes' : 'no';
-        $tooltipsEnabled = $enabletooltipTweak === 'yes' && ! $curUser->no('showlastpost');
+        $tooltipsEnabled = $enabletooltipTweak === 'yes' && ! $actor->no('showlastpost');
 
         $topics = [];
         $tooltips = [];
@@ -190,7 +190,7 @@ final class ForumListingService
             $lpadded = (string) ($arr['added'] ?? '');
             $tooltipId = null;
             if ($tooltipsEnabled) {
-                if ($curUser->value('timetype', 1) != UserTimeType::TIMEALIVE->value) {
+                if ($actor->value('timetype', 1) != UserTimeType::TIMEALIVE->value) {
                     $lastposttime = __('forums.text_at_time').$lpadded;
                 } else {
                     $lastposttime = __('forums.text_blank').Time::format($lpadded, true, false, true);
@@ -206,14 +206,14 @@ final class ForumListingService
 
             $arr = $resolvePost((int) ($topicarr['firstpost'] ?? 0));
             $firstAdded = (string) ($arr['added'] ?? '');
-            $lastpostread = $this->index->getLastReadPostId($topicid, $curUser);
+            $lastpostread = $this->index->getLastReadPostId($topicid, $actor);
 
             $jumpToPostId = null;
             if ($lastpostread >= $lppostid) {
                 $state = $locked ? 'locked' : 'read';
             } else {
                 $state = $locked ? 'lockednew' : 'unread';
-                if ($lastpostread != (int) $curUser->value('last_catchup', 0)) {
+                if ($lastpostread != (int) $actor->value('last_catchup', 0)) {
                     $jumpToPostId = $lastpostread;
                 }
             }
@@ -239,7 +239,7 @@ final class ForumListingService
             $counter++;
         }
 
-        $maypost = UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && UserDisplay::currentClass() >= (int) ($row['minclasscreate'] ?? 0) && $curUser->yes('forumpost');
+        $maypost = UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && UserDisplay::currentClass() >= (int) ($row['minclasscreate'] ?? 0) && $actor->yes('forumpost');
 
         return new TopicListViewModel(
             siteName: SiteConfig::current()->basic->siteName(),
@@ -259,11 +259,11 @@ final class ForumListingService
     /**
      * Build the view-unread-posts section.
      */
-    public function buildViewUnread(CurrentUser $curUser): UnreadTopicsViewModel
+    public function buildViewUnread(ActorContext $actor): UnreadTopicsViewModel
     {
         $beforepostid = (int) (request()->query('beforepostid') ?? 0);
         $maxresults = 25;
-        $lastCatchup = (int) $curUser->value('last_catchup', 0);
+        $lastCatchup = (int) $actor->value('last_catchup', 0);
         $unreadTopics = $this->topicRepository->getUnreadTopics($lastCatchup, $beforepostid ?: null, 100);
 
         $topics = [];
@@ -276,7 +276,7 @@ final class ForumListingService
             $topiclastpost = (int) ($arr['lastpost'] ?? 0);
             $topicid = (int) ($arr['id'] ?? 0);
 
-            $lastpostread = $this->index->getLastReadPostId($topicid, $curUser);
+            $lastpostread = $this->index->getLastReadPostId($topicid, $actor);
 
             if ($lastpostread >= $topiclastpost) {
                 continue;

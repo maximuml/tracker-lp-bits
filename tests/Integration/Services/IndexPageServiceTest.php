@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\Category;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\IndexRepository;
 use App\Services\IndexPageService;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\ViewModels\Index\IndexBrowserNoteSection;
 use App\ViewModels\Index\IndexClassStatRow;
 use App\ViewModels\Index\IndexDisclaimerSection;
@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -45,11 +46,12 @@ use Tests\TestCase;
 final class IndexPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private IndexPageService $service;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     private NexusCache $cache;
 
@@ -64,7 +66,7 @@ final class IndexPageServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->currentUser = new CurrentUser;
+        $this->actor = $this->actor([]);
         $this->cache = new NexusCache;
 
         /** @var IndexRepository&MockInterface $repo */
@@ -72,7 +74,7 @@ final class IndexPageServiceTest extends TestCase
         $this->indexRepository = $repo;
 
         $this->service = new IndexPageService(
-            $this->currentUser,
+            $this->actor,
             $this->cache,
             $this->indexRepository,
             new IndexPollsSectionFactory($this->cache, $this->indexRepository),
@@ -94,11 +96,17 @@ final class IndexPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $userData */
     private function setCurrentUser(array $userData = []): void
     {
-        $this->currentUser->set(array_merge([
+        $this->actor = $this->actor(array_merge([
             'id' => 0,
             'username' => '',
             'class' => 1,
         ], $userData));
+        $this->service = new IndexPageService(
+            $this->actor,
+            $this->cache,
+            $this->indexRepository,
+            new IndexPollsSectionFactory($this->cache, $this->indexRepository),
+        );
     }
 
     private function mockCache(): void {}
@@ -185,7 +193,7 @@ final class IndexPageServiceTest extends TestCase
     public function test_can_instantiate_service(): void
     {
         $service = new IndexPageService(
-            $this->currentUser,
+            $this->actor,
             $this->cache,
             $this->indexRepository,
             new IndexPollsSectionFactory($this->cache, $this->indexRepository),

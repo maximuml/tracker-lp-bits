@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests\Integration\Services\Offer;
 
 use App\Contracts\Repositories\OfferRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\Offer;
 use App\Services\Offer\OfferAddBuilder;
 use App\Services\Offer\OfferEditBuilder;
-use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -46,9 +46,7 @@ final class OfferEditBuilderTest extends TestCase
         $offerRepo = Mockery::mock(OfferRepositoryInterface::class);
         $this->offerRepo = $offerRepo;
 
-        $currentUser = new CurrentUser;
-        $currentUser->set(['id' => 7, 'username' => 'u', 'class' => 0]);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor(['id' => 7, 'username' => 'u', 'class' => 0]));
 
         DB::table('categories')->insert([
             'mode' => 1, 'class_name' => 'test_cat', 'name' => 'ZZ Category', 'image' => 'x.gif', 'sort_index' => 0,
@@ -99,7 +97,7 @@ final class OfferEditBuilderTest extends TestCase
         $this->offerRepo->shouldReceive('findOffer')->with(5)->andReturn(null);
 
         $this->assertAbortContains(
-            fn () => $this->editBuilder()->build($this->curUser(['id' => 7]), 7, $this->request(), 1),
+            fn () => $this->editBuilder()->build($this->actor(['id' => 7]), 7, $this->request(), 1),
             (string) __('offers.text_nothing_found'),
         );
     }
@@ -109,7 +107,7 @@ final class OfferEditBuilderTest extends TestCase
         $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['userid' => 10]));
 
         $this->assertAbortContains(
-            fn () => $this->editBuilder()->build($this->curUser(['id' => 7]), 7, $this->request(), 1),
+            fn () => $this->editBuilder()->build($this->actor(['id' => 7]), 7, $this->request(), 1),
             (string) __('offers.std_cannot_edit_others_offer'),
         );
     }
@@ -118,7 +116,7 @@ final class OfferEditBuilderTest extends TestCase
     {
         $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['userid' => 7]));
 
-        $r = $this->editBuilder()->build($this->curUser(['id' => 7]), 7, $this->request(), 1);
+        $r = $this->editBuilder()->build($this->actor(['id' => 7]), 7, $this->request(), 1);
 
         $this->assertSame(5, $r['id']);
         $this->assertSame('&lt;b&gt;Offer&lt;/b&gt;', $r['title']);

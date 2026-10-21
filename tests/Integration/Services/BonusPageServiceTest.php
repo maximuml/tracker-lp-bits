@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Repositories\BonusCalculationRepository;
 use App\Services\BonusPageService;
-use App\Support\CurrentUser;
 use App\Support\Strings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -30,6 +31,7 @@ use Tests\TestCase;
 final class BonusPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private BonusPageService $service;
@@ -39,7 +41,7 @@ final class BonusPageServiceTest extends TestCase
     /** @var BonusCalculationRepository&MockInterface */
     private $bonusCalcRep;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     protected function setUp(): void
     {
@@ -55,10 +57,10 @@ final class BonusPageServiceTest extends TestCase
         $rep->shouldIgnoreMissing();
         $this->bonusCalcRep = $rep;
 
-        $this->currentUser = new CurrentUser;
-        $this->app->instance(CurrentUser::class, $this->currentUser);
+        $this->actor = $this->actor([]);
+        $this->app->instance(ActorContext::class, $this->actor);
 
-        $this->service = new BonusPageService($this->currentUser, $rep);
+        $this->service = new BonusPageService($this->actor, $rep);
     }
 
     protected function tearDown(): void
@@ -79,11 +81,12 @@ final class BonusPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $userData */
     private function setCurrentUser(array $userData = []): void
     {
-        $this->currentUser->set(array_merge([
+        $this->actor = $this->actor(array_merge([
             'id' => 1,
             'username' => 'testuser',
             'seedbonus' => 500.0,
         ], $userData));
+        $this->service = new BonusPageService($this->actor, $this->bonusCalcRep);
     }
 
     /** @param  array<string, mixed>  $query */
@@ -96,7 +99,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new BonusPageService($this->currentUser, $this->bonusCalcRep);
+        $service = new BonusPageService($this->actor, $this->bonusCalcRep);
 
         $this->assertInstanceOf(BonusPageService::class, $service);
     }

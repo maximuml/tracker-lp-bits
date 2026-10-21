@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
@@ -16,7 +17,6 @@ use App\Repositories\TopicRepository;
 use App\Services\ForumIndexService;
 use App\Services\ForumTopicViewService;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\PageState;
 use App\ViewModels\Forum\ViewTopicViewModel;
 use Carbon\Carbon;
@@ -68,7 +68,7 @@ final class ForumTopicViewServiceTest extends TestCase
         PageState::instance()->setLangDir('en');
 
         $indexService = new ForumIndexService(
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $this->app->make(ForumRepository::class),
             new OverforumRepository,
             $this->app->make(NexusCache::class),
@@ -146,7 +146,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $cacheInstance = $cache ?? $this->app->make(NexusCache::class);
 
         $indexService = new ForumIndexService(
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $forumRepo,
             new OverforumRepository,
             $cacheInstance,
@@ -177,9 +177,7 @@ final class ForumTopicViewServiceTest extends TestCase
         ];
         $merged = array_merge($defaults, $data);
 
-        $currentUser = $this->app->make(CurrentUser::class);
-        $currentUser->set($merged);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor($merged));
 
         $user = new User;
         $user->id = $merged['id'];
@@ -265,7 +263,7 @@ final class ForumTopicViewServiceTest extends TestCase
         // true) — removing the call lands on the topic-not-found abort, and
         // flipping stdhead renders the int-error partial instead.
         $this->assertAbortContains(
-            fn () => $this->service->buildViewTopic($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]),
+            fn () => $this->service->buildViewTopic($this->actor(['id' => 1, 'username' => 'test', 'class' => 10]),
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 0]),
                 10,
@@ -287,7 +285,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->topicRepo->shouldReceive('getTopic')->with(999)->andReturn(null);
 
         $this->assertAbortContains(
-            fn () => $this->service->buildViewTopic($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]),
+            fn () => $this->service->buildViewTopic($this->actor(['id' => 1, 'username' => 'test', 'class' => 10]),
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 999]),
                 10,
@@ -321,7 +319,7 @@ final class ForumTopicViewServiceTest extends TestCase
         ]);
 
         $this->assertAbortContains(
-            fn () => $this->service->buildViewTopic($this->curUser(['id' => 1, 'username' => 'test', 'class' => 0]),
+            fn () => $this->service->buildViewTopic($this->actor(['id' => 1, 'username' => 'test', 'class' => 0]),
                 1,
                 Request::create('/forums.php', 'GET', ['topicid' => 1]),
                 10,
@@ -361,7 +359,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
         $this->topicRepo->shouldReceive('getTopicById')->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser(['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->actor(['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
             'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
             'last_catchup' => 0]),
             999,
@@ -435,7 +433,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser(['id' => $userId, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->actor(['id' => $userId, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
             'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
             'last_catchup' => 0]),
             $userId,
@@ -484,7 +482,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
         $this->topicRepo->shouldReceive('getTopicById')->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser(['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->actor(['id' => 999, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes',
             'clicktopic' => 0, 'avatars' => 'yes', 'signatures' => 'yes',
             'last_catchup' => 0]),
             999,
@@ -578,7 +576,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('markPostRead')->andReturn(true);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser($curUser),
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->actor($curUser),
             (int) $curUser['id'],
             Request::create('/forums.php', 'GET', $query),
             10,
@@ -760,7 +758,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn([1 => 0]);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser($curUser),
+        $result = $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->actor($curUser),
             $userId,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,
@@ -854,7 +852,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn([1 => 0]);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->curUser($curUser),
+        $this->callWithSuppressedErrors(fn () => $this->service->buildViewTopic($this->actor($curUser),
             $userId,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,
@@ -873,7 +871,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->createDbUser($userId);
 
         $indexService = new ForumIndexService(
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $repo,
             new OverforumRepository,
             $this->app->make(NexusCache::class),
@@ -920,7 +918,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->readStateRepo->shouldReceive('getLastReadPosts')->andReturn(null);
         $this->topicRepo->shouldReceive('getTopicById')->with(1)->andReturn($topic);
 
-        $result = $this->callWithSuppressedErrors(fn () => $service->buildViewTopic($this->curUser($curUser),
+        $result = $this->callWithSuppressedErrors(fn () => $service->buildViewTopic($this->actor($curUser),
             $userId,
             Request::create('/forums.php', 'GET', ['topicid' => 1]),
             10,

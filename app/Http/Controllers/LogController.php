@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\ChronicleAddRequest;
 use App\Http\Requests\ChronicleDeleteRequest;
@@ -14,7 +15,6 @@ use App\Models\Setting;
 use App\Repositories\LogRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
@@ -30,14 +30,14 @@ class LogController extends BasePageController
 {
     private LogRepository $logRepository;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     private ?NexusCache $cache;
 
-    public function __construct(LogRepository $logRepository, CurrentUser $currentUser, ?NexusCache $cache)
+    public function __construct(LogRepository $logRepository, ActorContext $actor, ?NexusCache $cache)
     {
         $this->logRepository = $logRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
         $this->cache = $cache;
     }
 
@@ -47,8 +47,8 @@ class LogController extends BasePageController
             return $abort;
         }
 
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($this->currentUser->id());
+        $currentUser = (array) ($this->actor->toLegacyArray());
+        $userId = (int) ($this->actor->id);
 
         $action = (string) ($request->input('action', 'dailylog'));
         $allowed = ['dailylog', 'chronicle', 'news', 'poll'];
@@ -70,8 +70,8 @@ class LogController extends BasePageController
             return $abort;
         }
 
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($this->currentUser->id());
+        $currentUser = (array) ($this->actor->toLegacyArray());
+        $userId = (int) ($this->actor->id);
 
         $action = (string) ($request->input('action', 'dailylog'));
         $allowed = ['dailylog', 'chronicle', 'news', 'poll'];
@@ -224,8 +224,8 @@ class LogController extends BasePageController
 
         $txt = (string) ($request->input('txt') ?? '');
         if ($txt !== '') {
-            $currentUser = (array) ($this->currentUser->get() ?? []);
-            $this->logRepository->addChronicle((int) ($this->currentUser->id()), $txt);
+            $currentUser = (array) ($this->actor->toLegacyArray());
+            $this->logRepository->addChronicle((int) ($this->actor->id), $txt);
         }
 
         return redirect('/web/log?action=chronicle');

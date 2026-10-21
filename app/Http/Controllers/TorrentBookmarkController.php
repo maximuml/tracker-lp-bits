@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\BookmarkSubmitRequest;
 use App\Http\Requests\ThanksTorrentRequest;
 use App\Services\TorrentBookmarkService;
-use App\Support\CurrentUser;
 use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class TorrentBookmarkController extends BasePageController
 {
     public function __construct(
         private readonly TorrentBookmarkService $bookmarkService,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {}
 
     public function bookmark(Request $request): Response
@@ -31,8 +31,7 @@ class TorrentBookmarkController extends BasePageController
             'Content-Type' => 'text/xml; charset=utf-8',
         ];
 
-        $user = $this->currentUser->get();
-        if ($user === null) {
+        if ($this->actor->isGuest()) {
             return response('failed', 200, $headers);
         }
 
@@ -41,7 +40,7 @@ class TorrentBookmarkController extends BasePageController
             return response('failed', 200, $headers);
         }
 
-        $status = $this->bookmarkService->toggleBookmark((int) $this->currentUser->id(), $torrentId);
+        $status = $this->bookmarkService->toggleBookmark((int) $this->actor->id, $torrentId);
 
         return response($status, 200, $headers);
     }
@@ -53,11 +52,11 @@ class TorrentBookmarkController extends BasePageController
 
     public function thanksSubmit(ThanksTorrentRequest $request): Response|RedirectResponse|View
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/thanks'.($request->getQueryString() ? '?'.$request->getQueryString() : ''));
         }
 
-        $curUser = $this->currentUser->get();
+        $actor = $this->actor->toLegacyArray();
 
         if ($request->query('id') !== null) {
             PageResponses::abort('Party is over!', "This trick doesn't work anymore. You need to click the button!");
@@ -66,7 +65,7 @@ class TorrentBookmarkController extends BasePageController
         $torrentid = (int) $request->post('id');
 
         try {
-            $this->bookmarkService->thankTorrent($curUser, $torrentid);
+            $this->bookmarkService->thankTorrent($actor, $torrentid);
         } catch (\RuntimeException $e) {
             PageResponses::abort('Error', $e->getMessage());
         }

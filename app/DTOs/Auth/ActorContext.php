@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\DTOs\Auth;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Support\CurrentUser;
+use App\Support\YesNo;
 
 /**
  * Immutable per-request actor context.
@@ -21,13 +21,20 @@ use App\Support\CurrentUser;
  * into services that need the actor's identity, class, locale, or
  * permission checks.
  *
- * The container singleton is reset each request via the `RequestResetter`,
- * so this object never leaks between requests.
+ * The container singleton is a per-request snapshot: `CurrentUser::set()`/
+ * `reset()` drop it when the legacy user changes mid-request, `ResetNexus`
+ * flushes it on worker lifecycle events, and `FlushRouteController`
+ * re-resolves route-memoized controllers so their constructor-injected
+ * actor is built after legacy auth has run.
  */
 final readonly class ActorContext
 {
     /**
-     * @param  list<PermissionEnum>  $permissions  Cached permission enum values for this actor.
+     * @param  list<PermissionEnum>|null  $permissions  Explicitly granted
+     *                                                  permissions; `null` means "resolve lazily via Permission::can
+     *                                                  against the carried user model" (the fromAuth() path). An
+     *                                                  explicit list is authoritative — used by guest contexts and
+     *                                                  test fixtures so no permission storage is consulted.
      */
     public function __construct(
         public int $id,
@@ -37,8 +44,8 @@ final readonly class ActorContext
         public int $stylesheet,
         public int $page,
         public ?string $passkey,
-        /** @var list<PermissionEnum> */
-        public array $permissions,
+        /** @var list<PermissionEnum>|null */
+        public ?array $permissions,
         public ?User $user = null,
     ) {}
 
@@ -52,11 +59,11 @@ final readonly class ActorContext
     {
         if ($user === null) {
             $cached = CurrentUser::instance()->get();
-            if ($cached !== null) {
-                $userId = (int) (CurrentUser::instance()->id());
-                if ($userId > 0) {
-                    $user = self::userRepo()->findById($userId);
-                }
+            if ($cached !== null && (int) ($cached['id'] ?? 0) > 0) {
+                // CurrentUser already holds the freshly-resolved user row
+                // (SiteAccess cookie check or a mid-request set() override)
+                // — hydrate a model from it instead of re-querying.
+                $user = (new User)->newFromBuilder($cached);
             }
         }
 
@@ -81,14 +88,9 @@ final readonly class ActorContext
         $page = (int) ($user->page ?? 0);
         $passkey = $user->passkey;
 
-        // Pre-compute all permissions for this actor's class
-        $permissions = [];
-        foreach (PermissionEnum::cases() as $permission) {
-            if (Permission::can($permission, $user)) {
-                $permissions[] = $permission;
-            }
-        }
-
+        // Permissions resolve lazily in can() — eager evaluation over every
+        // PermissionEnum case would force a user-row + permission-list load on
+        // each fromAuth() resolution, including requests that check nothing.
         return new self(
             id: (int) $user->id,
             username: (string) $user->username,
@@ -97,7 +99,7 @@ final readonly class ActorContext
             stylesheet: $stylesheet,
             page: $page,
             passkey: $passkey,
-            permissions: $permissions,
+            permissions: null,
             user: $user,
         );
     }
@@ -107,6 +109,10 @@ final readonly class ActorContext
      */
     public function can(PermissionEnum $permission): bool
     {
+        if ($this->permissions === null) {
+            return $this->user instanceof User && Permission::can($permission, $this->user);
+        }
+
         return in_array($permission, $this->permissions, true);
     }
 
@@ -139,6 +145,38 @@ final readonly class ActorContext
     }
 
     /**
+     * Typed escape hatch for one-off legacy keys — mirrors
+     * CurrentUser::value() so callers don't need the raw array.
+     */
+    public function value(string $key, mixed $default = null): mixed
+    {
+        return $this->toLegacyArray()[$key] ?? $default;
+    }
+
+    /**
+     * Legacy enum('yes','no')/tinyint tolerant check — see YesNo.
+     */
+    public function yes(string $key): bool
+    {
+        return YesNo::isYes($this->value($key));
+    }
+
+    public function no(string $key): bool
+    {
+        return YesNo::isNo($this->value($key));
+    }
+
+    public function seedbonus(): float
+    {
+        return (float) $this->value('seedbonus', 0);
+    }
+
+    public function enabled(): bool
+    {
+        return YesNo::isYes($this->value('enabled', false));
+    }
+
+    /**
      * Return the legacy array representation for backward compatibility
      * with code that still expects `$currentUser['key']` access.
      *
@@ -159,10 +197,5 @@ final readonly class ActorContext
             'page' => $this->page,
             'passkey' => $this->passkey ?? '',
         ];
-    }
-
-    private static function userRepo(): UserRepositoryInterface
-    {
-        return app(UserRepositoryInterface::class);
     }
 }

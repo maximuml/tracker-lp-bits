@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\DeleteTorrentRequest;
 use App\Http\Requests\FastDeleteTorrentRequest;
@@ -14,7 +15,6 @@ use App\Repositories\MessageRepository;
 use App\Services\PermissionChecker;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\TorrentOps;
@@ -25,21 +25,20 @@ use Illuminate\View\View;
 class TorrentDeleteController extends BasePageController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     public function fastDeleteTorrent(FastDeleteTorrentRequest $request): Response|RedirectResponse
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/fastdelete'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUserId = (int) ($this->actor->id);
 
         $id = (int) $request->input('id');
         if ($id <= 0) {
@@ -77,7 +76,7 @@ class TorrentDeleteController extends BasePageController
         if ($anonymous == 1 && $currentUserId == $ownerId) {
             Log::writeWithContext("Torrent $id ({$name}) was deleted by its anonymous uploader", 'normal');
         } else {
-            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$this->currentUser->username()}", 'normal');
+            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$this->actor->username}", 'normal');
         }
 
         if ($currentUserId != $ownerId && $this->userRepository->existsById($ownerId)) {
@@ -86,7 +85,7 @@ class TorrentDeleteController extends BasePageController
             $subject = Locale::trans('torrent.msg_torrent_deleted', [], $locale);
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
                 .$name
-                .Locale::trans('torrent.msg_was_deleted_by', ['admin' => $this->currentUser->username()], $locale);
+                .Locale::trans('torrent.msg_was_deleted_by', ['admin' => $this->actor->username], $locale);
             $this->messageRepository->add([
                 'sender' => null,
                 'receiver' => $ownerId,
@@ -101,14 +100,13 @@ class TorrentDeleteController extends BasePageController
 
     public function deleteTorrent(DeleteTorrentRequest $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/delete'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUserId = (int) ($this->actor->id);
 
         if ($request->query('id') !== null) {
             return $this->abortResponse('Party is over!', "This trick doesn't work anymore. You need to click the button!");
@@ -171,7 +169,7 @@ class TorrentDeleteController extends BasePageController
         if ($anonymous == 1 && $currentUserId == $ownerId) {
             Log::writeWithContext("Torrent $id ({$name}) was deleted by its anonymous uploader ($reasonstr)", 'normal');
         } else {
-            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$this->currentUser->username()} ($reasonstr)", 'normal');
+            Log::writeWithContext("Torrent $id ({$name}) was deleted by {$this->actor->username} ($reasonstr)", 'normal');
         }
 
         $uploadtorrentBonus = (float) SiteConfig::current()->bonus->uploadTorrent();
@@ -184,7 +182,7 @@ class TorrentDeleteController extends BasePageController
             $msg = Locale::trans('torrent.msg_the_torrent_you_uploaded', [], $locale)
                 .$name
                 .Locale::trans('torrent.msg_was_deleted_by', [], $locale)
-                ."[url=/userdetails?id=$currentUserId]{$this->currentUser->username()}[/url]"
+                ."[url=/userdetails?id=$currentUserId]{$this->actor->username}[/url]"
                 .Locale::trans('torrent.msg_reason_is', [], $locale)
                 .$reasonstr;
             $this->messageRepository->add([

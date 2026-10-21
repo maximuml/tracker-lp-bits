@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\Torrent;
 use App\Repositories\TorrentSearch\SearchEngine;
 use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\SearchBox;
@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 class TorrentSearchRepository
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly TagRepository $tagRepository,
         private readonly SearchEngine $engine,
         private readonly TorrentListingRepository $listingRepository,
@@ -34,7 +34,7 @@ class TorrentSearchRepository
      */
     public function getListingData(array $query, string $script): array
     {
-        $CURUSER = $this->currentUser->get() ?? [];
+        $CURUSER = $this->actor->toLegacyArray();
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
         $torrentsperpage_main = SiteConfig::current()->main->torrentsPerPage();
         $catimgurl = '';
@@ -196,7 +196,7 @@ class TorrentSearchRepository
 
         if ($shouldUseMeili) {
             try {
-                $resultFromSearchRep = $this->engine->meiliAdapter->search($searchParams, $this->currentUser->id());
+                $resultFromSearchRep = $this->engine->meiliAdapter->search($searchParams, $this->actor->id);
                 $count = $resultFromSearchRep['total'];
             } catch (\Throwable $e) {
                 Logger::writeWithContext((string) ('MeiliSearch search failed, falling back to SQL: '.$e->getMessage()), (string) 'error', (bool) false);
@@ -209,8 +209,8 @@ class TorrentSearchRepository
         $maxPageSize = 100;
         if (! empty($searchParams['pageSize'])) {
             $torrentsperpage = (int) $searchParams['pageSize'];
-        } elseif ($this->currentUser->value('torrentsperpage')) {
-            $torrentsperpage = (int) $this->currentUser->value('torrentsperpage');
+        } elseif ($this->actor->value('torrentsperpage')) {
+            $torrentsperpage = (int) $this->actor->value('torrentsperpage');
         } elseif ($torrentsperpage_main) {
             $torrentsperpage = $torrentsperpage_main;
         } else {
@@ -220,7 +220,7 @@ class TorrentSearchRepository
 
         if ($count) {
             if ($searchstr !== null && (! isset($searchParams['notnewword']) || ! $searchParams['notnewword'])) {
-                SearchSuggest::add((string) $searchstr, $this->currentUser->id(), (bool) true);
+                SearchSuggest::add((string) $searchstr, $this->actor->id, (bool) true);
             }
             if ($pagerlink !== '') {
                 if (substr($addparam, -1) === ';') {

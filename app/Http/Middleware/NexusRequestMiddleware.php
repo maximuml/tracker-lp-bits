@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Http\NexusScriptContext;
 use App\Http\NexusUrlRewriter;
 use App\Support\AssetAppender;
@@ -75,7 +76,7 @@ final class NexusRequestMiddleware
 
         $this->scriptContext->boot($script, $rootpath);
 
-        $this->pageLayoutRepository->prepareAccess();
+        $this->pageLayoutRepository->prepareAccess($this->app->make(ActorContext::class));
 
         return $next($request);
     }
@@ -125,7 +126,7 @@ final class NexusRequestMiddleware
 
     public function terminate(Request $request, Response $response): void
     {
-        $this->pageLayoutRepository->flushAccess();
+        $this->pageLayoutRepository->flushAccess($this->app->make(ActorContext::class));
 
         if ($this->detectScript($request) === 'index') {
             Bootstrap::autoClean((bool) false);

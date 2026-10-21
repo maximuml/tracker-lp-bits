@@ -7,12 +7,12 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Exceptions\NexusException;
 use App\Http\Requests\DownloadNoticeRequest;
 use App\Models\User;
 use App\Repositories\IpLogRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Http;
 use App\Support\Logger;
@@ -34,7 +34,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 class TorrentDownloadController extends BasePageController
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly IpLogRepository $ipLogRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
         private readonly TorrentRepositoryInterface $torrentRepository,
@@ -141,8 +141,7 @@ class TorrentDownloadController extends BasePageController
 
     public function downloadnotice(Request $request): Response|RedirectResponse|View
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/downloadnotice'.($qs ? '?'.$qs : ''));
@@ -162,10 +161,10 @@ class TorrentDownloadController extends BasePageController
                 $forcecheck = false;
                 break;
             case 'ratio':
-                $leechwarnuntiltime = strtotime((string) ($this->currentUser->value('leechwarnuntil', '')));
+                $leechwarnuntiltime = strtotime((string) ($this->actor->value('leechwarnuntil', '')));
                 $note = '';
                 if ($leechwarnuntiltime && $timenow < $leechwarnuntiltime) {
-                    $kicktimeout = Time::format($this->currentUser->value('leechwarnuntil'), false, false, true);
+                    $kicktimeout = Time::format($this->actor->value('leechwarnuntil'), false, false, true);
                     $note = view('downloadnotice._note', ['type' => 'ratio', 'kicktimeout' => $kicktimeout])->render();
                 }
                 $title = __('downloadnotice.text_low_ratio_notice');
@@ -202,8 +201,7 @@ class TorrentDownloadController extends BasePageController
 
     public function downloadnoticeSubmit(DownloadNoticeRequest $request): Response|RedirectResponse
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/web/downloadnotice');
         }
 
@@ -214,7 +212,7 @@ class TorrentDownloadController extends BasePageController
             return response('error');
         }
 
-        $userId = (int) ($this->currentUser->id());
+        $userId = (int) ($this->actor->id);
         if ($hidenotice && $userId > 0) {
             $update = [];
             if ($type === 'firsttime') {

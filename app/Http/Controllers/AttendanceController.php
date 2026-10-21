@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\AttendanceRequest;
 use App\Models\Attendance;
 use App\Repositories\AttendanceRepository;
 use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\PageResponses;
@@ -22,31 +22,29 @@ use Illuminate\View\View;
 class AttendanceController extends BasePageController
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {}
 
     public function attendance(Request $request, AttendanceRepository $repository): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/web/attendance');
         }
 
-        $uid = (int) ($this->currentUser->id());
+        $uid = (int) ($this->actor->id);
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
         $attendance = $repository->getAttendance($uid);
 
-        return $this->renderAttendance($request, $repository, $this->currentUser, $uid, $attendance, $captchaEnabled);
+        return $this->renderAttendance($request, $repository, $this->actor, $uid, $attendance, $captchaEnabled);
     }
 
     public function attendanceSubmit(AttendanceRequest $request, AttendanceRepository $repository): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/web/attendance');
         }
 
-        $uid = (int) ($this->currentUser->id());
+        $uid = (int) ($this->actor->id);
         $captchaEnabled = SiteConfig::current()->captcha->attendanceEnabled((bool) config('captcha.attendance.enabled', true));
 
         if ($captchaEnabled && SiteConfig::current()->security->captchaRequired()) {
@@ -63,13 +61,13 @@ class AttendanceController extends BasePageController
             PageResponses::abort(__('attendance.sorry'), __('attendance.already_attended'));
         }
 
-        return $this->renderAttendance($request, $repository, $this->currentUser, $uid, $attendance, $captchaEnabled);
+        return $this->renderAttendance($request, $repository, $this->actor, $uid, $attendance, $captchaEnabled);
     }
 
     private function renderAttendance(
         Request $request,
         AttendanceRepository $repository,
-        CurrentUser $curUser,
+        ActorContext $actor,
         int $uid,
         ?Attendance $attendance,
         bool $captchaEnabled
@@ -98,7 +96,7 @@ class AttendanceController extends BasePageController
                 'totalDays' => $attendance->total_days,
                 'days' => $attendance->days,
                 'points' => $attendance->points,
-                'cards' => $this->currentUser->value('attendance_card', 0),
+                'cards' => $this->actor->value('attendance_card', 0),
             ])->render());
             $data['headerRight'] = SafeHtml::fromTrustedHtml(Locale::trans(
                 'attendance.ranking',
@@ -189,12 +187,11 @@ EOP;
      */
     public function attend(Request $request, AttendanceRepository $repository): array
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             return $this->fail([], 'Unauthenticated');
         }
 
-        $uid = (int) ($this->currentUser->id());
+        $uid = (int) ($this->actor->id);
         $attendance = $repository->attend($uid);
 
         return $this->success([

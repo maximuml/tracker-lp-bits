@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\AccessGate;
 use App\Auth\AuthContext;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Http\Requests\AmountUploadRequest;
@@ -25,7 +26,6 @@ use App\Repositories\UserListingRepository;
 use App\Services\PermissionChecker;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Environment;
 use App\Support\Format;
@@ -53,18 +53,18 @@ class SystemBulkController extends BasePageController
 {
     private UserModerationRepositoryInterface $userModerationRepository;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     private ?NexusCache $cache;
 
     public function __construct(private readonly ModerationRepository $moderationRepository, private readonly UserListingRepository $userListingRepository, private readonly PermissionChecker $permissionChecker, private readonly InviteRepository $inviteRepository, private readonly UserDetailRepository $userDetailRepository,
         UserModerationRepositoryInterface $userModerationRepository,
-        CurrentUser $currentUser,
+        ActorContext $actor,
         ?NexusCache $cache,
         private readonly AccessGate $accessGate,
     ) {
         $this->userModerationRepository = $userModerationRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
         $this->cache = $cache;
     }
 
@@ -83,8 +83,7 @@ class SystemBulkController extends BasePageController
             return $this->abortResponse('Error', 'Permission denied!');
         }
 
-        $curUser = $this->currentUser->get() ?? [];
-        $senderId = $request->post('sender') === 'system' ? null : (int) ($this->currentUser->id());
+        $senderId = $request->post('sender') === 'system' ? null : $this->actor->id;
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) $request->post('msg'));
         $amount = $request->post('amount');
@@ -128,14 +127,13 @@ class SystemBulkController extends BasePageController
 
     public function sendInvite(SendInviteRequest $request): Response|RedirectResponse
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/takeinvite.php'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUserId = (int) ($this->actor->id);
         $lockName = sprintf('takeinvite:%s', $currentUserId);
         $lock = new Lock($lockName, 10);
         if (! $lock->get()) {
@@ -235,7 +233,7 @@ class SystemBulkController extends BasePageController
             $inviteTimeout = (string) SiteConfig::current()->main->inviteTimeout();
 
             $message = nl2br(view('emails.invite', [
-                'senderUsername' => $this->currentUser->username(),
+                'senderUsername' => $this->actor->username,
                 'signupUrl' => $signupUrl,
                 'inviteTimeout' => $inviteTimeout,
                 'personalBody' => $body,
@@ -290,14 +288,13 @@ class SystemBulkController extends BasePageController
 
     public function systemUpdate(SystemUpdateRequest $request): Response|RedirectResponse
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/takeupdate.php'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUserId = (int) ($this->actor->id);
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->abortResponse('Error', 'Permission denied.');
         }
@@ -327,8 +324,7 @@ class SystemBulkController extends BasePageController
 
     public function incrementBulk(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/increment-bulk'.($qs ? '?'.$qs : ''));
@@ -357,7 +353,7 @@ class SystemBulkController extends BasePageController
             'returnto' => $returnto,
             'httpReferer' => RequestValues::serverValue('HTTP_REFERER'),
             'submitLabel' => Locale::trans('label.submit', [], null),
-            'CURUSER' => $curUser,
+            'CURUSER' => $this->actor->toLegacyArray(),
         ]);
     }
 
@@ -401,8 +397,8 @@ class SystemBulkController extends BasePageController
 
         $validTypeMap = (array) (__('incrementbulk.types'));
 
-        $currentUser = $this->currentUser->get() ?? [];
-        $senderId = $request->input('sender') === 'system' ? null : ((int) ($this->currentUser->id()));
+        $currentUser = $this->actor->toLegacyArray();
+        $senderId = $request->input('sender') === 'system' ? null : ((int) ($this->actor->id));
         $added = date('Y-m-d H:i:s');
         $msg = trim((string) $request->input('msg', ''));
         $amount = $request->input('amount');

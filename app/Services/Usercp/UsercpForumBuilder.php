@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Usercp;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClickTopic;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Strings;
 use App\ViewModels\Usercp\UsercpForumSection;
 
@@ -15,18 +15,18 @@ use App\ViewModels\Usercp\UsercpForumSection;
  */
 final class UsercpForumBuilder
 {
-    public function build(CurrentUser $curUser): UsercpForumSection
+    public function build(ActorContext $actor): UsercpForumSection
     {
         return new UsercpForumSection(
             formId: 'form'.Strings::randomCode(6),
             showTooltipSetting: SiteConfig::current()->tweak->enableTooltip(),
-            topicsPerPage: (int) $curUser->value('topicsperpage', 0),
-            postsPerPage: (int) $curUser->value('postsperpage', 0),
-            avatars: $curUser->yes('avatars'),
-            signatures: $curUser->yes('signatures'),
-            showLastPost: $curUser->yes('showlastpost'),
-            clicktopic: UserClickTopic::tryFrom((int) $curUser->value('clicktopic', 0))?->stringValue() ?? 'firstpage',
-            signature: (string) $curUser->value('signature', ''),
+            topicsPerPage: (int) $actor->value('topicsperpage', 0),
+            postsPerPage: (int) $actor->value('postsperpage', 0),
+            avatars: $actor->yes('avatars'),
+            signatures: $actor->yes('signatures'),
+            showLastPost: $actor->yes('showlastpost'),
+            clicktopic: UserClickTopic::tryFrom((int) $actor->value('clicktopic', 0))?->stringValue() ?? 'firstpage',
+            signature: (string) $actor->value('signature', ''),
         );
     }
 }

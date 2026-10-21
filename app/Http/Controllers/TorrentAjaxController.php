@@ -7,10 +7,10 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Services\PermissionChecker;
 use App\Support\Category;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Ratio;
@@ -29,7 +29,7 @@ use Illuminate\View\View;
 class TorrentAjaxController extends BasePageController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker, private readonly UserRepositoryInterface $userRepository,
-        protected CurrentUser $currentUser,
+        protected ActorContext $actor,
         protected TorrentAjaxRepositoryInterface $torrentAjaxRepository,
         protected PeerTableFactory $peerTableFactory,
         protected UserTorrentListVmFactory $userTorrentListVmFactory,
@@ -66,8 +66,8 @@ class TorrentAjaxController extends BasePageController
             return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
         }
 
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($this->currentUser->id())) : null;
+        $actor = $this->actor->toLegacyArray();
+        $currentUser = $this->actor->user;
 
         $headers = [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
@@ -78,7 +78,7 @@ class TorrentAjaxController extends BasePageController
         ];
 
         $data = $this->torrentAjaxRepository->peerList($torrentId, $currentUser);
-        $curUserArr = $curUser;
+        $curUserArr = $actor;
 
         $data['seederTable'] = $this->peerTableFactory->buildTable((string) (__('viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
         $data['leecherTable'] = $this->peerTableFactory->buildTable((string) (__('viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
@@ -94,10 +94,10 @@ class TorrentAjaxController extends BasePageController
         }
 
         $data = $this->torrentAjaxRepository->snatchList($torrentId);
-        $curUser = $this->currentUser->get() ?? [];
+        $actor = $this->actor->toLegacyArray();
         $data['rows'] = $this->decorateSnatchRows(
             $data['snatchedRows'] ?? collect(),
-            (int) ($this->currentUser->id())
+            (int) ($this->actor->id)
         );
         $data['canViewConfidential'] = Permission::can(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
         unset($data['snatchedRows']);
@@ -169,8 +169,8 @@ class TorrentAjaxController extends BasePageController
             return response('', 400, ['Content-Type' => 'text/html; charset=utf-8']);
         }
 
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($this->currentUser->id())) : null;
+        $actor = $this->actor->toLegacyArray();
+        $currentUser = $this->actor->user;
 
         if ($currentUser === null || (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_HISTORY->value, false, $currentUser->id) && $currentUser->id !== $targetUserId)) {
             return response('', 403, ['Content-Type' => 'text/html; charset=utf-8']);
@@ -189,7 +189,7 @@ class TorrentAjaxController extends BasePageController
         $data = $this->torrentAjaxRepository->userTorrentList($targetUserId, $type, $page, $currentUser);
 
         $data['userTorrentListVm'] = ($data['count'] > 0 && ! empty($data['rows']))
-            ? $this->userTorrentListVmFactory->build($data['rows'], $type, $targetUserId, $curUser, $data['seedTimeAndUploaded'], $data['torrentRep'])
+            ? $this->userTorrentListVmFactory->build($data['rows'], $type, $targetUserId, $actor, $data['seedTimeAndUploaded'], $data['torrentRep'])
             : null;
 
         $hasData = (bool) ($data['total_size'] || $data['count']);
@@ -229,7 +229,7 @@ class TorrentAjaxController extends BasePageController
             return response()->json(['torrents' => []]);
         }
 
-        $userId = (int) ($this->currentUser->get()['id'] ?? 0);
+        $userId = (int) ($this->actor->toLegacyArray()['id'] ?? 0);
         $user = $this->userRepository->findById($userId);
 
         if ($user === null) {

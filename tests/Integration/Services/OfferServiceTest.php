@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Repositories\MessageRepository;
 use App\Repositories\OfferCommentRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
 use App\Services\OfferModerationService;
 use App\Services\OfferService;
-use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -35,13 +36,14 @@ use Tests\TestCase;
 final class OfferServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private int $initialObLevel;
 
     private OfferService $service;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     protected function setUp(): void
     {
@@ -57,13 +59,18 @@ final class OfferServiceTest extends TestCase
         DB::table('comments')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->currentUser = new CurrentUser;
-        $this->service = new OfferService(
-            $this->currentUser,
+        $this->actor = $this->actor([]);
+        $this->service = $this->buildService();
+    }
+
+    private function buildService(): OfferService
+    {
+        return new OfferService(
+            $this->actor,
             new OfferRepository,
             new OfferVoteRepository,
             new OfferCommentRepository,
-            new OfferModerationService($this->currentUser, new OfferRepository, new OfferVoteRepository, new MessageRepository),
+            new OfferModerationService($this->actor, new OfferRepository, new OfferVoteRepository, new MessageRepository),
             new MessageRepository,
         );
     }
@@ -114,14 +121,16 @@ final class OfferServiceTest extends TestCase
 
     private function unauthenticatedUser(): void
     {
-        $this->currentUser->set([]);
+        $this->actor = $this->actor([]);
+        $this->service = $this->buildService();
     }
 
     /** @param array<string, mixed> $userData */
     private function authenticatedUser(array $userData = []): void
     {
         $defaults = ['id' => 1, 'username' => 'testuser', 'class' => 1];
-        $this->currentUser->set(array_merge($defaults, $userData));
+        $this->actor = $this->actor(array_merge($defaults, $userData));
+        $this->service = $this->buildService();
     }
 
     private function seedSettings(): void

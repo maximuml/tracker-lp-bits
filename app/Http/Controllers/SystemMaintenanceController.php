@@ -6,10 +6,10 @@ namespace App\Http\Controllers;
 
 use App\Contracts\CleanupServiceInterface;
 use App\Contracts\Repositories\MysqlStatsRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\CleanupRequest;
 use App\Http\Requests\MailTestRequest;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Email;
 use App\Support\Html\SafeHtml;
 use App\Support\Mail;
@@ -22,7 +22,7 @@ use Illuminate\View\View;
 class SystemMaintenanceController extends BasePageController
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly MysqlStatsRepositoryInterface $mysqlStatsRepository,
         private readonly CleanupServiceInterface $cleanupService,
     ) {}
@@ -45,7 +45,7 @@ class SystemMaintenanceController extends BasePageController
 
     public function mailtest(Request $request): View|RedirectResponse|Response
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/mailtest'.($qs ? '?'.$qs : ''));
@@ -99,7 +99,7 @@ class SystemMaintenanceController extends BasePageController
 
     public function mysqlStats(Request $request): View|RedirectResponse|Response
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/mysql_stats'.($qs ? '?'.$qs : ''));

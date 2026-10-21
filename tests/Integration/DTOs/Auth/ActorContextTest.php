@@ -19,7 +19,7 @@ use Tests\TestCase;
  * Unit tests for ActorContext.
  *
  * Verifies that the immutable DTO correctly wraps the authenticated
- * user, pre-computes permissions, and provides a guest fallback.
+ * user, resolves permissions, and provides a guest fallback.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ActorContextTest extends TestCase

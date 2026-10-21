@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\ContactstaffSubmitRequest;
 use App\Http\Requests\SendContactStaffRequest;
 use App\Http\Requests\SendStaffMessageRequest;
@@ -13,7 +14,6 @@ use App\Jobs\BulkUserMessageJob;
 use App\Models\User;
 use App\Repositories\StaffMessageRepository;
 use App\Support\Cache;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\RequestValues;
@@ -28,7 +28,7 @@ use Illuminate\View\View;
 class StaffMessageController extends BasePageController
 {
     public function __construct(private readonly StaffMessageRepository $staffMessageRepository, private readonly UserRepositoryInterface $userRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {}
 
     public function staffmess(Request $request): View|RedirectResponse|Response
@@ -38,7 +38,7 @@ class StaffMessageController extends BasePageController
             return $this->abortResponse('Sorry', 'Access denied.');
         }
 
-        $currentUser = $this->currentUser->get() ?? [];
+        $currentUser = $this->actor->toLegacyArray();
         $classes = array_chunk(User::$classes, 4, true);
         $returntoQuery = $request->query('returnto');
         $httpReferer = RequestValues::serverValue('HTTP_REFERER');
@@ -48,7 +48,7 @@ class StaffMessageController extends BasePageController
             'classes' => $classes,
             'body' => SafeHtml::fromPlainText((string) $request->query('body')),
             'receiver' => (int) ($request->query('receiver') ?? 0),
-            'username' => SafeHtml::fromPlainText((string) ($this->currentUser->username())),
+            'username' => SafeHtml::fromPlainText((string) ($this->actor->username)),
             'sent' => (int) ($request->query('sent') ?? 0),
             'showReturnto' => (bool) ($returntoQuery || $httpReferer),
             'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),
@@ -67,8 +67,8 @@ class StaffMessageController extends BasePageController
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
-        $currentUser = $this->currentUser->get() ?? [];
-        $senderId = $request->post('sender') === 'system' ? null : (int) ($this->currentUser->id());
+        $currentUser = $this->actor->toLegacyArray();
+        $senderId = $request->post('sender') === 'system' ? null : (int) ($this->actor->id);
         $subject = trim((string) $request->post('subject'));
         $msg = trim((string) $request->post('msg'));
 
@@ -119,7 +119,7 @@ class StaffMessageController extends BasePageController
 
     public function sendContactStaff(SendContactStaffRequest $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
+        $actor = $this->actor->toLegacyArray();
 
         $msg = trim((string) $request->post('body'));
         $subject = trim((string) $request->post('subject'));
@@ -131,12 +131,12 @@ class StaffMessageController extends BasePageController
             return $this->abortResponse(__('takecontact.std_error'), __('takecontact.std_please_define_subject'));
         }
 
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUserId = (int) ($this->actor->id);
         $moderatorClass = defined('UC_MODERATOR') ? \constant('UC_MODERATOR') : 0;
         $timeNow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
 
         if (UserDisplay::currentClass() < $moderatorClass) {
-            $last = $this->currentUser->value('last_staffmsg', null);
+            $last = $this->actor->value('last_staffmsg', null);
             if ($last !== null && strtotime((string) $last) > ($timeNow - 60)) {
                 $secs = 60 - ($timeNow - strtotime((string) $last));
 

@@ -6,18 +6,19 @@ namespace Tests\Integration\Services\Usercp;
 
 use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\Passkey;
 use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Services\Usercp\UsercpHomeBuilder;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\Settings;
 use App\ViewModels\Usercp\UsercpHomeSection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -32,6 +33,7 @@ use Tests\TestCase;
 final class UsercpHomeBuilderTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     /** @var UsercpLookupRepositoryInterface&MockInterface */
@@ -87,7 +89,7 @@ final class UsercpHomeBuilderTest extends TestCase
      * Calls build() while suppressing legacy error handlers left by
      * inner helpers (postRowWithContext / view fragments).
      */
-    private function callBuild(CurrentUser $curUser): UsercpHomeSection
+    private function callBuild(ActorContext $curUser): UsercpHomeSection
     {
         set_error_handler(static fn (int $severity): bool => true, E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
 
@@ -109,10 +111,9 @@ final class UsercpHomeBuilderTest extends TestCase
     }
 
     /** @param  array<string, mixed>  $overrides */
-    private function curUser(array $overrides = []): CurrentUser
+    private function curUser(array $overrides = []): ActorContext
     {
-        $user = new CurrentUser;
-        $user->set(array_merge([
+        return $this->actor(array_merge([
             'id' => 5,
             'username' => 'u',
             'email' => 'u@x.c',
@@ -123,13 +124,11 @@ final class UsercpHomeBuilderTest extends TestCase
             'added' => now()->subDays(30)->toDateTimeString(),
             'ip' => '127.0.0.1',
         ], $overrides));
-
-        return $user;
     }
 
     private function userInfo(): User
     {
-        return (new User)->newFromBuilder($this->curUser()->get() ?? []);
+        return (new User)->newFromBuilder($this->curUser()->toLegacyArray());
     }
 
     public function test_forum_posts_path_computes_day_posts_and_percentage(): void

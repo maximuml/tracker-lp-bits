@@ -20,7 +20,16 @@ use Tests\Attributes\TestCategory;
  * bridges to it while the migration is in progress).
  *
  * Baseline captured after the OfferVoteService/OfferVote migration: 247
- * lines. Lower it as more surfaces migrate; never raise it.
+ * lines; lowered to 69 after the Phase 4.1 batch migration of services,
+ * repositories, controllers and Livewire components, then 71 when
+ * `BasePageController::renderPage` reverted to `CurrentUser::instance()`
+ * (base-class auth gate — 37 children override `__construct` without
+ * calling parent, and service-location is ratcheted to zero in
+ * controllers), then 67 after the two pure-reader ViewModel factories
+ * moved to `ActorContext`. The remainder is the deliberate auth/legacy
+ * seam (Support/*, middleware, guards, `BasePageController`, and
+ * `set()`/`reset()` mutation sites). Lower it as more surfaces
+ * migrate; never raise it.
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class CurrentUserUsageRatchetTest extends TestCase
@@ -32,7 +41,7 @@ final class CurrentUserUsageRatchetTest extends TestCase
         'DTOs/Auth/ActorContext.php',
     ];
 
-    private const BASELINE = 247;
+    private const BASELINE = 67;
 
     public function test_current_user_references_do_not_exceed_baseline(): void
     {

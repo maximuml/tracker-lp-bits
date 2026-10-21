@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Services\PollVoteService;
-use App\Support\CurrentUser;
 use App\ViewModels\Index\IndexPollsSectionFactory;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -25,31 +25,30 @@ final class IndexPoll extends Component
 
     private ?PollVoteService $pollVoteService = null;
 
-    private ?CurrentUser $currentUser = null;
+    private ?ActorContext $actor = null;
 
     public function boot(
         IndexPollsSectionFactory $indexPollsSectionFactory,
         PollVoteService $pollVoteService,
-        CurrentUser $currentUser,
+        ActorContext $actor,
     ): void {
         $this->indexPollsSectionFactory = $indexPollsSectionFactory;
         $this->pollVoteService = $pollVoteService;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
     }
 
     public function vote(): void
     {
-        $user = $this->currentUser()->get();
-        if (! is_array($user) || $user === []) {
+        if ($this->actor()->isGuest()) {
             return;
         }
 
-        $this->pollVoteService()->vote($user, $this->choice);
+        $this->pollVoteService()->vote($this->actor()->toLegacyArray(), $this->choice);
     }
 
     public function render(): View
     {
-        $curUser = (array) ($this->currentUser()->get() ?? []);
+        $curUser = $this->actor()->toLegacyArray();
         $polls = $this->indexPollsSectionFactory()->build(
             $curUser,
             Permission::can(PermissionEnum::POLL_MANAGE),
@@ -69,8 +68,8 @@ final class IndexPoll extends Component
         return $this->pollVoteService ?? throw new \LogicException('IndexPoll used before boot()');
     }
 
-    private function currentUser(): CurrentUser
+    private function actor(): ActorContext
     {
-        return $this->currentUser ?? throw new \LogicException('IndexPoll used before boot()');
+        return $this->actor ?? throw new \LogicException('IndexPoll used before boot()');
     }
 }

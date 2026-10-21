@@ -49,7 +49,8 @@ final class UsercpTrackerBuilderTest extends TestCase
     /** @param  array<string, mixed>  $overrides */
     private function section(array $overrides = []): UsercpTrackerSection
     {
-        return $this->builder()->build($this->curUser(array_merge([
+        return $this->builder()->build($this->actor(array_merge([
+            'id' => 1,
             'notifs' => '',
             'stylesheet' => 1,
             'pmnum' => 20,

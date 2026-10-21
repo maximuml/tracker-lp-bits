@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\MagicRewardRequest;
 use App\Models\BonusLogs;
@@ -17,7 +18,6 @@ use App\Services\MagicRewardService;
 use App\Support\Api;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
@@ -38,15 +38,15 @@ class BonusHistoryController extends BasePageController
 
     public function __construct(private readonly TorrentRepositoryInterface $torrentRepository, private readonly UserListingRepository $userListingRepository, private readonly UserRepositoryInterface $userRepository,
         BonusCalculationRepository $bonusCalculationRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {
         $this->bonusCalculationRepository = $bonusCalculationRepository;
     }
 
     public function bonusLog(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
-        $uid = (int) ($request->input('uid') ?? $this->currentUser->id());
+        $actor = $this->actor->toLegacyArray();
+        $uid = (int) ($request->input('uid') ?? $this->actor->id);
 
         if (! Validators::isId($uid)) {
             return $this->abortResponse('Error', 'Invalid uid.');
@@ -57,7 +57,7 @@ class BonusHistoryController extends BasePageController
             return $this->abortResponse('Error', "Invalid uid: {$uid}");
         }
 
-        if ($uid != ($this->currentUser->id())) {
+        if ($uid != ($this->actor->id)) {
             $allowed = Permission::can(PermissionEnum::VIEW_USER_HISTORY, $user);
             if (! $allowed) {
                 return $this->abortResponse('Error', 'Permission denied.');
@@ -275,7 +275,7 @@ JS;
 
     public function magicSubmit(MagicRewardRequest $request, MagicRewardService $magicRewardService): JsonResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
+        $actor = $this->actor->toLegacyArray();
         $validated = $request->validated();
         $torrentId = (int) $validated['id'];
         $value = (int) abs((float) $validated['value']);

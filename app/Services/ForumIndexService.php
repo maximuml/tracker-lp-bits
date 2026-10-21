@@ -7,13 +7,13 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\OverforumRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\UserDisplay;
@@ -33,7 +33,7 @@ final class ForumIndexService
     private array|string|null $lastReadPostList = null;
 
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly OverforumRepository $overforumRepository,
         private readonly NexusCache $cache,
@@ -45,13 +45,13 @@ final class ForumIndexService
     /**
      * Build the default forums index (overforums + forums list + stats).
      */
-    public function buildForumsIndex(CurrentUser $curUser, int $userId): ForumIndexViewModel
+    public function buildForumsIndex(ActorContext $actor, int $userId): ForumIndexViewModel
     {
         $Cache = $this->cache;
         $todayDate = date('Y-m-d');
 
-        if ($curUser->isLoggedIn()) {
-            $this->forumRepository->updateUserForumAccess($curUser->id(), date('Y-m-d H:i:s'));
+        if ($actor->isAuthenticated()) {
+            $this->forumRepository->updateUserForumAccess($actor->id, date('Y-m-d H:i:s'));
         }
 
         $SITENAME = SiteConfig::current()->basic->siteName();
@@ -106,7 +106,7 @@ final class ForumIndexService
             $rows = [];
             foreach ($visibleForums as $f) {
                 if ((int) ($f['forid'] ?? 0) === $forid) {
-                    $rows[] = $this->forumRow($f, $curUser, $todayDate, $prefetched, $postRows);
+                    $rows[] = $this->forumRow($f, $actor, $todayDate, $prefetched, $postRows);
                 }
             }
             $sections[] = new OverforumGroup((string) ($a['name'] ?? ''), $rows);
@@ -115,7 +115,7 @@ final class ForumIndexService
         $orphans = [];
         foreach ($visibleForums as $f) {
             if (! in_array((int) ($f['forid'] ?? 0), $overforumIds, true)) {
-                $orphans[] = $this->forumRow($f, $curUser, $todayDate, $prefetched, $postRows);
+                $orphans[] = $this->forumRow($f, $actor, $todayDate, $prefetched, $postRows);
             }
         }
         if ($orphans !== []) {
@@ -137,7 +137,7 @@ final class ForumIndexService
      * @param  array<string, mixed>  $prefetched  mget'ed forum_* cache rows
      * @param  array<string, mixed>  $postRows  mget'ed post_*_content rows
      */
-    private function forumRow(array $forums_arr, CurrentUser $curUser, string $todayDate, array $prefetched, array $postRows): ForumRow
+    private function forumRow(array $forums_arr, ActorContext $actor, string $todayDate, array $prefetched, array $postRows): ForumRow
     {
         $Cache = $this->cache;
         $forumid = (int) $forums_arr['id'];
@@ -174,7 +174,7 @@ final class ForumIndexService
                 date: (string) ($post_arr['added'] ?? ''),
                 poster: UserDisplay::username((int) ($post_arr['userid'] ?? 0)),
             );
-            $hasUnread = $this->getLastReadPostId($lasttopicid, $curUser) < $lastpostid;
+            $hasUnread = $this->getLastReadPostId($lasttopicid, $actor) < $lastpostid;
         }
 
         $todayKey = 'forum_'.$forumid.'_post_'.$todayDate.'_count';
@@ -234,12 +234,12 @@ final class ForumIndexService
      */
     public function catchUp(): void
     {
-        $CURUSER = (array) ($this->currentUser->get() ?? []);
-        $Cache = $this->cache;
-
-        if (! $CURUSER) {
+        if ($this->actor->isGuest()) {
             return;
         }
+
+        $CURUSER = $this->actor->toLegacyArray();
+        $Cache = $this->cache;
         $this->readStateRepository->clearReadPosts((int) $CURUSER['id']);
         $Cache->forget('user_'.$CURUSER['id'].'_last_read_post_list');
         $lastpostid = $this->postRepository->getLastPostId();
@@ -266,20 +266,20 @@ final class ForumIndexService
         return $forums[$forumid] ?? null;
     }
 
-    public function getLastReadPostId(int $topicid, CurrentUser $curUser): int
+    public function getLastReadPostId(int $topicid, ActorContext $actor): int
     {
         $Cache = $this->cache;
         $ret = $this->lastReadPostList;
-        if (! $ret && ! $ret = $Cache->get('user_'.$curUser->id().'_last_read_post_list')) {
-            $ret = $this->readStateRepository->getLastReadPosts($curUser->id());
+        if (! $ret && ! $ret = $Cache->get('user_'.$actor->id.'_last_read_post_list')) {
+            $ret = $this->readStateRepository->getLastReadPosts($actor->id);
             if ($ret !== null) {
-                $Cache->put('user_'.$curUser->id().'_last_read_post_list', $ret, 900);
+                $Cache->put('user_'.$actor->id.'_last_read_post_list', $ret, 900);
             } else {
-                $Cache->put('user_'.$curUser->id().'_last_read_post_list', 'no record', 900);
+                $Cache->put('user_'.$actor->id.'_last_read_post_list', 'no record', 900);
             }
         }
         $this->lastReadPostList = $ret;
-        $lastCatchup = (int) $curUser->value('last_catchup', 0);
+        $lastCatchup = (int) $actor->value('last_catchup', 0);
         if (is_array($ret) && (isset($ret[$topicid])) && $lastCatchup < (int) $ret[$topicid]) {
             return (int) $ret[$topicid];
         } elseif ($lastCatchup) {

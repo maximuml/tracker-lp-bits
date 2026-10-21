@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\ComplainRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\ComplainNewRequest;
 use App\Http\Requests\ComplainReplyRequest;
@@ -14,7 +15,6 @@ use App\Http\Requests\ComplainToggleRequest;
 use App\Models\Setting;
 use App\Services\ComplainService;
 use App\Support\Captcha;
-use App\Support\CurrentUser;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Network;
@@ -30,14 +30,14 @@ class SupportController extends BasePageController
     public function __construct(
         private readonly ComplainRepositoryInterface $complainRepository,
         private readonly ComplainService $complainService,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     public function complains(Request $request): View|RedirectResponse|Response
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $uid = (int) ($this->currentUser->id());
+        $currentUser = (array) ($this->actor->toLegacyArray());
+        $uid = (int) ($this->actor->id);
         $isAdmin = Permission::can(PermissionEnum::STAFF_MEMBER);
 
         if ($uid > 0 && ! $isAdmin) {
@@ -97,9 +97,9 @@ class SupportController extends BasePageController
 
     private function complainsUid(): int
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $currentUser = (array) ($this->actor->toLegacyArray());
 
-        return (int) ($this->currentUser->id());
+        return (int) ($this->actor->id);
     }
 
     private function complainsGate(): ?Response

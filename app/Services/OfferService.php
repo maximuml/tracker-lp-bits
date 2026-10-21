@@ -8,11 +8,11 @@ use App\Auth\Permission;
 use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\MessageRepository;
 use App\Support\Cache;
-use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\PageResponses;
@@ -29,7 +29,7 @@ use LogicException;
 final class OfferService
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
         private readonly OfferCommentRepositoryInterface $offerCommentRepository,
@@ -84,7 +84,7 @@ final class OfferService
      */
     private function curUser(): array
     {
-        return (array) ($this->currentUser->get() ?? []);
+        return $this->actor->toLegacyArray();
     }
 
     private function abort(string $heading, string $text, bool $htmlstrip = true): void

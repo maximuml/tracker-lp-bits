@@ -6,6 +6,7 @@ namespace App\ViewModels;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\TagRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserAppendPromotion;
 use App\Enums\UserTimeType;
 use App\Models\Torrent;
@@ -14,7 +15,6 @@ use App\Services\TorrentStatsService;
 use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
@@ -45,7 +45,7 @@ final class TorrentListViewFactory
 
     public function __construct(
         private readonly ?NexusCache $cache,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly TorrentModerationRepository $moderationRep,
         private readonly TorrentStatsService $statsService,
         private readonly TagRepositoryInterface $tagRep,
@@ -61,7 +61,7 @@ final class TorrentListViewFactory
         if ($cache === null) {
             throw new \RuntimeException('Cache not initialized');
         }
-        $user = $this->currentUser->get() ?? [];
+        $user = $this->actor->isGuest() ? [] : $this->actor->toLegacyArray();
         $config = SiteConfig::current();
         $waitsystem = $config->main->waitSystem(false) ? 'yes' : 'no';
         $enableTooltip = $config->tweak->enableTooltip(false);
@@ -73,7 +73,7 @@ final class TorrentListViewFactory
         }
         UserDisplay::preload($ownerIdArr);
 
-        $seedingStatus = $this->torrentStatus->listLeechingSeedingStatus($this->currentUser->id(), $torrentIdArr);
+        $seedingStatus = $this->torrentStatus->listLeechingSeedingStatus($this->actor->id, $torrentIdArr);
         $tagResult = $this->statsService->getTorrentTagsGrouped($torrentIdArr);
 
         $showCover = false;
@@ -84,11 +84,11 @@ final class TorrentListViewFactory
             }
         }
 
-        $lastBrowse = min((int) $this->currentUser->value('last_browse'), TIMENOW);
+        $lastBrowse = min((int) $this->actor->value('last_browse'), TIMENOW);
         $wait = 0;
         if (UserDisplay::currentClass() < UC_VIP && $waitsystem === 'yes') {
-            $ratio = Ratio::forUserId($this->currentUser->id(), false);
-            $gigs = $this->currentUser->value('uploaded') / (1024 * 1024 * 1024);
+            $ratio = Ratio::forUserId($this->actor->id, false);
+            $gigs = $this->actor->value('uploaded') / (1024 * 1024 * 1024);
             if ($gigs > 10) {
                 if ($ratio < 0.4) {
                     $wait = 24;
@@ -102,21 +102,21 @@ final class TorrentListViewFactory
             }
         }
 
-        $showComments = (bool) ($this->currentUser->value('showcomnum', false));
+        $showComments = (bool) ($this->actor->value('showcomnum', false));
         // Columns are only rendered alongside rows; skip the header build
         // (and its lang lookups) for empty listings.
         $columns = $rows === []
             ? []
-            : $this->columns($wait > 0, $showComments, (string) ($this->currentUser->value('timetype', '')));
+            : $this->columns($wait > 0, $showComments, (string) ($this->actor->value('timetype', '')));
 
-        $caticonrow = Category::iconRowWithContext($this->currentUser->value('caticon'));
+        $caticonrow = Category::iconRowWithContext($this->actor->value('caticon'));
         $hasSecondIcon = is_array($caticonrow) && (bool) ($caticonrow['secondicon'] ?? false);
 
-        $posStates = $this->currentUser->value('appendsticky') ? Torrent::listPosStates() : [];
-        $appendNew = (bool) ($this->currentUser->value('appendnew', false));
-        $showLastCom = $enableTooltip && ($this->currentUser->value('showlastcom', false));
-        $timeAlive = ($this->currentUser->value('timetype', null)) == UserTimeType::TIMEALIVE->value;
-        $promotionNote = ($this->currentUser->value('appendpromotion', null)) == UserAppendPromotion::HIGHLIGHT->value;
+        $posStates = $this->actor->value('appendsticky') ? Torrent::listPosStates() : [];
+        $appendNew = (bool) ($this->actor->value('appendnew', false));
+        $showLastCom = $enableTooltip && ($this->actor->value('showlastcom', false));
+        $timeAlive = ($this->actor->value('timetype', null)) == UserTimeType::TIMEALIVE->value;
+        $promotionNote = ($this->actor->value('appendpromotion', null)) == UserAppendPromotion::HIGHLIGHT->value;
         $canViewAnonymous = Permission::canViewAnonymous();
 
         $lastcoms = [];
@@ -194,7 +194,7 @@ final class TorrentListViewFactory
 
             $stickyCount = 0;
             $stickyTitle = '';
-            if ($this->currentUser->value('appendsticky')) {
+            if ($this->actor->value('appendsticky')) {
                 $posState = $posStates[$row['pos_state']] ?? ['text' => '', 'icon_counts' => 0];
                 $stickyCount = (int) ($posState['icon_counts'] ?? 0);
                 $stickyTitle = (string) $posState['text'];
@@ -234,8 +234,8 @@ final class TorrentListViewFactory
                 )
                 : null;
 
-            $showDownload = (bool) ($this->currentUser->value('dlicon', false)) && (bool) ($this->currentUser->value('downloadpos', true));
-            $showBookmark = (bool) ($this->currentUser->value('bmicon', false));
+            $showDownload = (bool) ($this->actor->value('dlicon', false)) && (bool) ($this->actor->value('downloadpos', true));
+            $showBookmark = (bool) ($this->actor->value('bmicon', false));
 
             $waitText = null;
             $waitClass = null;
@@ -254,7 +254,7 @@ final class TorrentListViewFactory
             if ($showComments && $row['comments'] && $showLastCom) {
                 $lastcom = $lastcoms[$id] ?? null;
                 if ($lastcom) {
-                    $commentIsNew = $lastcom['user'] != $this->currentUser->id() && strtotime($lastcom['added']) >= $lastBrowse;
+                    $commentIsNew = $lastcom['user'] != $this->actor->id && strtotime($lastcom['added']) >= $lastBrowse;
                     $lastcomtime = $timeAlive
                         ? __('functions.text_blank').Time::format($lastcom['added'], true, false, true)
                         : __('functions.text_at_time').$lastcom['added'];
@@ -291,7 +291,7 @@ final class TorrentListViewFactory
 
             $uploaderAnonymous = $row['anonymous'] == 1;
             $uploaderShowOwner = $uploaderAnonymous
-                && ($canViewAnonymous || (isset($row['owner']) && $row['owner'] == $this->currentUser->id()));
+                && ($canViewAnonymous || (isset($row['owner']) && $row['owner'] == $this->actor->id));
             $uploaderName = isset($row['owner'])
                 ? UserDisplay::username($row['owner'])
                 : null;
@@ -350,7 +350,7 @@ final class TorrentListViewFactory
             rows: $outRows,
             showComments: $showComments,
             showPromotionNote: $promotionNote,
-            lastCommentTooltips: ($enableTooltip && (empty($user) || ($this->currentUser->value('showlastcom', false))))
+            lastCommentTooltips: ($enableTooltip && (empty($user) || ($this->actor->value('showlastcom', false))))
                 ? $lastcomTooltip
                 : [],
         );

@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Models\User;
+use App\DTOs\Auth\ActorContext;
 use App\Services\TorrentBookmarkService;
 use App\Support\Cache\NexusCache;
 use App\Support\TorrentBookmark;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -28,19 +27,21 @@ final class BookmarkIcon extends Component
 
     private ?TorrentBookmarkService $service = null;
 
-    public function boot(TorrentBookmarkService $service): void
+    private ?ActorContext $actor = null;
+
+    public function boot(TorrentBookmarkService $service, ActorContext $actor): void
     {
         $this->service = $service;
+        $this->actor = $actor;
     }
 
     public function mount(int $torrentId): void
     {
         $this->torrentId = $torrentId;
-        $user = Auth::guard('nexus-web')->user();
-        if ($user instanceof User) {
+        if ($this->actor()->id > 0) {
             $this->bookmarked = TorrentBookmark::isBookmarked(
                 NexusCache::instance(),
-                (int) $user->id,
+                $this->actor()->id,
                 $torrentId
             );
         }
@@ -48,12 +49,11 @@ final class BookmarkIcon extends Component
 
     public function toggle(): void
     {
-        $user = Auth::guard('nexus-web')->user();
-        if (! $user instanceof User) {
+        if ($this->actor()->id <= 0) {
             return;
         }
 
-        $status = $this->service()->toggleBookmark((int) $user->id, $this->torrentId);
+        $status = $this->service()->toggleBookmark($this->actor()->id, $this->torrentId);
         if ($status === 'added') {
             $this->bookmarked = true;
         } elseif ($status === 'deleted') {
@@ -69,5 +69,10 @@ final class BookmarkIcon extends Component
     private function service(): TorrentBookmarkService
     {
         return $this->service ?? throw new \LogicException('BookmarkIcon used before boot()');
+    }
+
+    private function actor(): ActorContext
+    {
+        return $this->actor ?? throw new \LogicException('BookmarkIcon used before boot()');
     }
 }

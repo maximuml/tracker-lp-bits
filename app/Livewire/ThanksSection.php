@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Contracts\Repositories\TorrentRepositoryInterface;
-use App\Models\User;
+use App\DTOs\Auth\ActorContext;
 use App\Repositories\TorrentDetailRepository;
 use App\Services\ThankService;
 use App\ViewModels\Torrent\ThanksSectionFactory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -36,16 +35,20 @@ final class ThanksSection extends Component
 
     private ?ThanksSectionFactory $factory = null;
 
+    private ?ActorContext $actor = null;
+
     public function boot(
         TorrentDetailRepository $detailRepository,
         ThankService $service,
         TorrentRepositoryInterface $torrents,
         ThanksSectionFactory $factory,
+        ActorContext $actor,
     ): void {
         $this->detailRepository = $detailRepository;
         $this->service = $service;
         $this->torrents = $torrents;
         $this->factory = $factory;
+        $this->actor = $actor;
     }
 
     public function mount(int $torrentId): void
@@ -55,8 +58,8 @@ final class ThanksSection extends Component
 
     public function thank(): void
     {
-        $user = Auth::guard('nexus-web')->user();
-        if (! $user instanceof User) {
+        $user = $this->actor()->user;
+        if ($user === null) {
             return;
         }
 
@@ -80,7 +83,7 @@ final class ThanksSection extends Component
 
     public function render(): View
     {
-        $userId = (int) (Auth::guard('nexus-web')->id() ?? 0);
+        $userId = $this->actor()->id;
         $thanksInfo = $this->detailRepository()->getThanksInfo($this->torrentId, $userId);
 
         return view('livewire.thanks-section', [
@@ -106,5 +109,10 @@ final class ThanksSection extends Component
     private function factory(): ThanksSectionFactory
     {
         return $this->factory ?? throw new \LogicException('ThanksSection used before boot()');
+    }
+
+    private function actor(): ActorContext
+    {
+        return $this->actor ?? throw new \LogicException('ThanksSection used before boot()');
     }
 }

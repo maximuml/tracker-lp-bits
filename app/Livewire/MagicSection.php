@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\Setting;
-use App\Models\User;
 use App\Repositories\TorrentDetailRepository;
 use App\Services\MagicRewardService;
 use App\ViewModels\Torrent\MagicSectionFactory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -41,16 +40,20 @@ final class MagicSection extends Component
 
     private ?MagicSectionFactory $factory = null;
 
+    private ?ActorContext $actor = null;
+
     public function boot(
         MagicRewardService $service,
         TorrentDetailRepository $detailRepository,
         TorrentRepositoryInterface $torrentRepository,
-        MagicSectionFactory $factory
+        MagicSectionFactory $factory,
+        ActorContext $actor,
     ): void {
         $this->service = $service;
         $this->detailRepository = $detailRepository;
         $this->torrentRepository = $torrentRepository;
         $this->factory = $factory;
+        $this->actor = $actor;
     }
 
     public function mount(int $torrentId): void
@@ -61,8 +64,8 @@ final class MagicSection extends Component
     public function give(int $value): void
     {
         $this->status = '';
-        $user = Auth::guard('nexus-web')->user();
-        if (! $user instanceof User) {
+        $user = $this->actor()->user;
+        if ($user === null) {
             return;
         }
 
@@ -80,8 +83,7 @@ final class MagicSection extends Component
 
     public function render(): View
     {
-        $user = Auth::guard('nexus-web')->user();
-        $currentUser = $user instanceof User ? $user->toLegacyArray() : [];
+        $currentUser = $this->actor()->isGuest() ? [] : $this->actor()->toLegacyArray();
         $ownerId = $this->torrentRepository()->getOwnerId($this->torrentId);
         $isOwner = $ownerId !== null && (int) $ownerId === (int) ($currentUser['id'] ?? 0);
         $magicInfo = $this->detailRepository()->getMagicInfo($this->torrentId, (int) ($currentUser['id'] ?? 0));
@@ -115,5 +117,10 @@ final class MagicSection extends Component
     private function factory(): MagicSectionFactory
     {
         return $this->factory ?? throw new \LogicException('MagicSection used before boot()');
+    }
+
+    private function actor(): ActorContext
+    {
+        return $this->actor ?? throw new \LogicException('MagicSection used before boot()');
     }
 }

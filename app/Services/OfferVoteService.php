@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Auth\Permission;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\MessageRepository;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\PageResponses;
@@ -31,7 +30,7 @@ use LogicException;
 final class OfferVoteService
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
         private readonly MessageRepository $messageRepository,
@@ -60,15 +59,14 @@ final class OfferVoteService
      */
     public function castVote(int $offerid, string $vote): void
     {
-        if ($vote === 'against' && ! Permission::can(PermissionEnum::AGAINST_OFFER)) {
+        if ($vote === 'against' && ! $this->actor->can(PermissionEnum::AGAINST_OFFER)) {
             $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
         if ($vote !== 'yeah' && $vote !== 'against') {
             $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
-        $curuser = $this->curUser();
-        $userid = (int) ($curuser['id'] ?? 0);
+        $userid = $this->actor->id;
 
         if ($this->offerRepository->getOfferOwner($offerid) === $userid) {
             $this->abort(__('offers.std_error'), __('offers.std_cannot_vote_youself'));
@@ -129,14 +127,6 @@ final class OfferVoteService
 
         $this->offerVoteRepository->recordVote($offerid, $userid, $vote);
         Bonus::updatePoints('+', $offervoteBonus, $userid);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function curUser(): array
-    {
-        return (array) ($this->currentUser->get() ?? []);
     }
 
     private function baseUrl(): string

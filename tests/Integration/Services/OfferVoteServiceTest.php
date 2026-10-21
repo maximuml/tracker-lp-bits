@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\OfferAllowed;
 use App\Enums\OfferVote;
+use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass;
 use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
 use App\Services\OfferVoteService;
-use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -41,8 +43,6 @@ final class OfferVoteServiceTest extends TestCase
 
     private OfferVoteService $service;
 
-    private CurrentUser $currentUser;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -55,9 +55,8 @@ final class OfferVoteServiceTest extends TestCase
         DB::table('messages')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->currentUser = new CurrentUser;
         $this->service = new OfferVoteService(
-            $this->currentUser,
+            $this->authenticatedActor(),
             new OfferRepository,
             new OfferVoteRepository,
             new MessageRepository,
@@ -112,8 +111,31 @@ final class OfferVoteServiceTest extends TestCase
     /** @param array<string, mixed> $userData */
     private function authenticatedUser(array $userData = []): void
     {
-        $defaults = ['id' => 1, 'username' => 'testuser', 'class' => 1, 'seedbonus' => 0.0];
-        $this->currentUser->set(array_merge($defaults, $userData));
+        $this->service = new OfferVoteService(
+            $this->authenticatedActor($userData),
+            new OfferRepository,
+            new OfferVoteRepository,
+            new MessageRepository,
+        );
+    }
+
+    /** @param array<string, mixed> $userData */
+    private function authenticatedActor(array $userData = []): ActorContext
+    {
+        $data = array_merge(['id' => 1, 'username' => 'testuser', 'class' => 1], $userData);
+
+        // Class-1 seeded users hold the against-offer permission; grant it
+        // unconditionally so the guard under test sees the same context.
+        return new ActorContext(
+            id: (int) $data['id'],
+            username: (string) $data['username'],
+            class: UserClass::tryFrom((int) $data['class']) ?? UserClass::PEASANT,
+            locale: 'en',
+            stylesheet: 0,
+            page: 0,
+            passkey: null,
+            permissions: [PermissionEnum::AGAINST_OFFER],
+        );
     }
 
     /**

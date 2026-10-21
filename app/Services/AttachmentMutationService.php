@@ -37,7 +37,7 @@ class AttachmentMutationService
         $allowed_exts = $Attach->get_allowed_ext();
 
         if ($file === null || ! isset($file['tmp_name'], $file['size'], $file['type'], $file['name'])) {
-            return ['warning' => (string) __('attachment.text_nothing_received'), 'script' => SafeHtml::fromTrustedHtml(''), 'count_left' => $count_left];
+            return ['warning' => (string) __('attachment.text_nothing_received'), 'script' => SafeHtml::fromPlainText(''), 'count_left' => $count_left];
         }
 
         $config = SiteConfig::current()->attachment;

@@ -61,10 +61,10 @@ class UserAdminController extends BasePageController
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
-        $search = trim((string) (request()->query('search') ?? ''));
-        $class = (string) (request()->query('class') ?? '-');
-        $country = (int) (request()->query('country') ?? 0);
-        $letter = trim((string) (request()->query('letter') ?? ''));
+        $search = trim((string) ($request->query('search') ?? ''));
+        $class = (string) ($request->query('class') ?? '-');
+        $country = (int) ($request->query('country') ?? 0);
+        $letter = trim((string) ($request->query('letter') ?? ''));
 
         if (strlen($letter) > 1) {
             return $this->abortResponse('Error', 'Invalid letter.');
@@ -176,9 +176,9 @@ class UserAdminController extends BasePageController
         $success = false;
         $message = '';
 
-        $username = trim((string) request()->post('username'));
-        $newpassword = trim((string) request()->post('newpassword'));
-        $newpasswordagain = trim((string) request()->post('newpasswordagain'));
+        $username = trim((string) $request->post('username'));
+        $newpassword = trim((string) $request->post('newpassword'));
+        $newpasswordagain = trim((string) $request->post('newpasswordagain'));
 
         if ($username === '' || $newpassword === '' || $newpasswordagain === '') {
             return $this->abortResponse('Error', "Don't leave any fields blank.");
@@ -443,10 +443,10 @@ class UserAdminController extends BasePageController
         $userRep = $this->userRepository;
         try {
             $newUser = $userRep->store([
-                'username' => request()->post('username'),
-                'email' => request()->post('email'),
-                'password' => request()->post('password'),
-                'password_confirmation' => request()->post('password2'),
+                'username' => $request->post('username'),
+                'email' => $request->post('email'),
+                'password' => $request->post('password'),
+                'password_confirmation' => $request->post('password2'),
             ]);
         } catch (\Exception $e) {
             return $this->abortResponse('ERROR', $e->getMessage());

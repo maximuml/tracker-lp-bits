@@ -5,12 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Reward;
-use App\Models\Torrent;
-use App\Models\User;
-use App\Support\Logger;
-use App\Support\QueryLog;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class RewardRepository extends BaseRepository
 {
@@ -34,51 +29,6 @@ class RewardRepository extends BaseRepository
         $query->orderBy($sortField, $sortType);
 
         return $query->paginate();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function store(int $torrentId, float $value, User $user)
-    {
-        if ($user->seedbonus < $value) {
-            throw new \LogicException('your bonus not enough.');
-        }
-        if ($user->reward_torrent_logs()->where('torrentid', $torrentId)->exists()) {
-            throw new \LogicException('you already reward this torrent.');
-        }
-        $torrent = Torrent::query()->findOrFail($torrentId, Torrent::$commentFields);
-        $torrent->checkIsNormal();
-        $torrentOwner = User::query()->findOrFail($torrent->owner);
-        if ($user->id == $torrentOwner->id) {
-            throw new \LogicException("you can't reward to yourself.");
-        }
-        $torrentOwner->checkIsNormal();
-
-        return DB::transaction(function () use ($torrentId, $value, $user, $torrentOwner) {
-            $model = $user->reward_torrent_logs()->create([
-                'torrentid' => $torrentId,
-                'value' => $value,
-            ]);
-            $affectedRows = User::query()
-                ->where('id', $user->id)
-                ->where('seedbonus', $user->seedbonus)
-                ->decrement('seedbonus', $value);
-            if ($affectedRows != 1) {
-                Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".QueryLog::last()), (string) 'error', (bool) false);
-                throw new \RuntimeException('decrement user bonus fail.');
-            }
-            $affectedRows = User::query()
-                ->where('id', $torrentOwner->id)
-                ->where('seedbonus', $torrentOwner->seedbonus)
-                ->increment('seedbonus', $value);
-            if ($affectedRows != 1) {
-                Logger::writeWithContext((string) ("affectedRows: {$affectedRows}, query: ".QueryLog::last()), (string) 'error', (bool) false);
-                throw new \RuntimeException('increment owner bonus fail.');
-            }
-
-            return $model;
-        });
     }
 
     /**

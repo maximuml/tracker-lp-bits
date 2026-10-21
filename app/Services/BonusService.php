@@ -37,7 +37,7 @@ final class BonusService
 
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository, private readonly MessageRepository $messageRepository)
+    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository, private readonly MessageRepository $messageRepository, private readonly BonusLedgerService $ledger)
     {
         $this->bonusRep = $bonusRep;
         $this->bonusCalculationRepository = $bonusCalculationRepository;
@@ -176,7 +176,7 @@ final class BonusService
         }
         $up = (int) $uploaded + (int) $bonusarray['menge'];
         Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange uploaded from %s to %s', $curUser->id(), $points, $uploaded, $up), 'info', false);
-        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_UPLOAD->value, $points.' Points for uploaded.', [
+        $this->ledger->debit($curUser->id(), $points, BusinessType::EXCHANGE_UPLOAD, $points.' Points for uploaded.', [
             'uploaded' => DB::raw(DB::getQueryGrammar()->wrap('uploaded').' + '.(int) $bonusarray['menge']), // @phpstan-ignore argument.type
         ]);
 
@@ -190,7 +190,7 @@ final class BonusService
     {
         $down = (int) $curUser->value('downloaded', 0) + (int) $bonusarray['menge'];
         Logger::writeWithContext(sprintf('user: %s going to use %s bonus to exchange downloaded from %s to %s', $curUser->id(), $points, $curUser->value('downloaded', 0), $down), 'info', false);
-        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_DOWNLOAD->value, $points.' Points for downloaded.', [
+        $this->ledger->debit($curUser->id(), $points, BusinessType::EXCHANGE_DOWNLOAD, $points.' Points for downloaded.', [
             'downloaded' => DB::raw(DB::getQueryGrammar()->wrap('downloaded').' + '.(int) $bonusarray['menge']), // @phpstan-ignore argument.type
         ]);
 
@@ -203,7 +203,7 @@ final class BonusService
             PageResponses::abort(__('mybonus.std_no_permission'), __('mybonus.std_class_above_vip'), false);
         }
         $vipUntil = date('Y-m-d H:i:s', (strtotime(date('Y-m-d H:i:s')) + 28 * 86400));
-        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::BUY_VIP->value, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => true, 'vip_until' => $vipUntil]);
+        $this->ledger->debit($curUser->id(), $points, BusinessType::BUY_VIP, $points.' Points for 1 month VIP Status.', ['class' => UC_VIP, 'vip_added' => true, 'vip_until' => $vipUntil]);
 
         return $this->redirect($baseUrl, 'vip');
     }
@@ -216,7 +216,7 @@ final class BonusService
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
             PageResponses::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
         }
-        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::EXCHANGE_INVITE->value, $points.' Points for invites.', [
+        $this->ledger->debit($curUser->id(), $points, BusinessType::EXCHANGE_INVITE, $points.' Points for invites.', [
             'invites' => DB::raw(DB::getQueryGrammar()->wrap('invites').' + '.(int) $bonusarray['menge']), // @phpstan-ignore argument.type
         ]);
 
@@ -238,7 +238,7 @@ final class BonusService
         $title = (string) $request->post('title', '');
         $words = ['fuck', 'shit', 'pussy', 'cunt', 'nigger', 'Staff Leader', 'SysOp', 'Administrator', 'Moderator', 'Uploader', 'Retiree', 'VIP', 'Nexus Master', 'Ultimate User', 'Extreme User', 'Veteran User', 'Insane User', 'Crazy User', 'Elite User', 'Power User', 'User', 'Peasant', 'Champion'];
         $title = str_replace($words, __('mybonus.text_wasted_karma'), $title);
-        $this->bonusRep->consumeUserBonus($curUser->id(), $points, BusinessType::CUSTOM_TITLE->value, $points.' Points for custom title. Old title is '.htmlspecialchars(trim((string) $curUser->value('title', '')))." and new title is {$title}.", ['title' => $title]);
+        $this->ledger->debit($curUser->id(), $points, BusinessType::CUSTOM_TITLE, $points.' Points for custom title. Old title is '.htmlspecialchars(trim((string) $curUser->value('title', '')))." and new title is {$title}.", ['title' => $title]);
 
         return $this->redirect($baseUrl, 'title');
     }
@@ -263,7 +263,9 @@ final class BonusService
         $senderId = $curUser->id();
         $charityPerUser = $points / $charityReceiverCount;
         DB::transaction(function () use ($senderId, $points, $ratiocharity, $charityPerUser) {
-            $this->bonusRep->consumeUserBonusAndIncrementCharity($senderId, (float) $points, BusinessType::GIFT_TO_LOW_SHARE_RATIO->value, $points.' Points as charity to users with ratio below '.htmlspecialchars(trim((string) $ratiocharity)).'.', (float) $points);
+            $this->ledger->debit($senderId, (float) $points, BusinessType::GIFT_TO_LOW_SHARE_RATIO, $points.' Points as charity to users with ratio below '.htmlspecialchars(trim((string) $ratiocharity)).'.', [
+                'charity' => DB::raw(DB::getQueryGrammar()->wrap('charity').' + '.(float) $points), // @phpstan-ignore argument.type
+            ]);
             $this->bonusRep->incrementSeedbonusForLowRatioReceivers($ratiocharity, (float) $charityPerUser);
         });
 
@@ -306,24 +308,16 @@ final class BonusService
         $points2receiver = number_format($aftertaxpoint, 1);
         $senderId = $curUser->id();
         $senderUsername = $curUser->username();
-        DB::transaction(function () use ($senderId, $useridgift, $points, $aftertaxpoint, $points2, $points2receiver, $usernamegift, $senderUsername) {
-            // Lock sender and receiver in ascending-id order — the same
-            // canonical order MagicRewardService uses — so two opposing
-            // gifts cannot deadlock each other.
-            $locked = DB::table('users')
-                ->whereIn('id', [$senderId, $useridgift])
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->pluck('seedbonus', 'id');
-            $receiverBonus = $locked->get($useridgift);
-            if ($receiverBonus === null) {
-                throw new \RuntimeException('Gift receiver not found');
-            }
-            $receiverBonus = (float) $receiverBonus;
-            $this->bonusRep->consumeUserBonus($senderId, $points, BusinessType::GIFT_TO_SOMEONE->value, $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)));
-            $this->bonusRep->incrementUserSeedbonus($useridgift, (float) $aftertaxpoint);
-            $this->bonusRep->add($useridgift, $receiverBonus, $aftertaxpoint, $receiverBonus + $aftertaxpoint, ' + '.$points2receiver.' Points (after tax) as a gift from '.$senderUsername, BusinessType::RECEIVE_GIFT->value);
-        });
+        $this->ledger->transfer(
+            $senderId,
+            $useridgift,
+            $points,
+            BusinessType::GIFT_TO_SOMEONE,
+            BusinessType::RECEIVE_GIFT,
+            $aftertaxpoint,
+            $points2.' Points as gift to '.htmlspecialchars(trim($usernamegift)),
+            ' + '.$points2receiver.' Points (after tax) as a gift from '.$senderUsername,
+        );
 
         $locale = Locale::userLocale($useridgift);
         $subject = Locale::trans('bonus.msg_someone_loves_you', [], $locale);

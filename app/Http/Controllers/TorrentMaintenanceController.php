@@ -149,7 +149,7 @@ class TorrentMaintenanceController extends BasePageController
             return $this->abortResponse(__('takereseed.std_error'), ('Permission denied.'));
         }
 
-        $reseedid = (int) (request()->query('reseedid') ?? request()->query('id') ?? 0);
+        $reseedid = (int) ($request->query('reseedid') ?? $request->query('id') ?? 0);
         $torrent = $this->torrentRepository->findById($reseedid);
         $row = $torrent instanceof Torrent ? $torrent->toArray() : null;
 

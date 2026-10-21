@@ -111,7 +111,7 @@ final class ChromeHead
             return [
                 $baseStyles,
                 [],
-                SafeHtml::fromTrustedHtml(''),
+                SafeHtml::fromPlainText(''),
                 $picFolder,
                 $packThemeUrl,
             ];

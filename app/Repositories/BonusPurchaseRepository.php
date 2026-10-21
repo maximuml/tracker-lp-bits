@@ -14,6 +14,7 @@ use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
 use App\Models\UserMeta;
+use App\Services\BonusLedgerService;
 use App\Services\OutboxService;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
@@ -36,6 +37,7 @@ class BonusPurchaseRepository extends BaseRepository
         private readonly UserRepository $userRepository,
         private readonly BonusConsumptionRepository $consumptionRepository,
         private readonly MessageRepository $messageRepository,
+        private readonly BonusLedgerService $ledger,
     ) {}
 
     /**
@@ -204,21 +206,8 @@ class BonusPurchaseRepository extends BaseRepository
             $increaseBonus = $requireBonus * (1 - $taxFactor);
             $owner = $torrent->user;
             if ($owner->id) {
-                $nowStr = now()->toDateTimeString();
-                $businessType = BusinessType::TORRENT_BE_DOWNLOADED->value;
-                $owner->increment('seedbonus', $increaseBonus);
                 $comment = Locale::trans('bonus.comment_torrent_be_downloaded', ['username' => $user->username, 'uid' => $user->id], $owner->locale);
-                $bonusLog = [
-                    'business_type' => $businessType,
-                    'uid' => $owner->id,
-                    'old_total_value' => (float) $owner->seedbonus,
-                    'value' => $increaseBonus,
-                    'new_total_value' => bcadd((string) ($owner->seedbonus ?? 0), (string) $increaseBonus),
-                    'comment' => sprintf('[%s] %s', BusinessType::TORRENT_BE_DOWNLOADED->label(), $comment),
-                    'created_at' => $nowStr,
-                    'updated_at' => $nowStr,
-                ];
-                BonusLogs::query()->insert($bonusLog);
+                $this->ledger->credit((int) $owner->id, $increaseBonus, BusinessType::TORRENT_BE_DOWNLOADED, $comment);
             }
             $buyTorrentSuccessMessage = [
                 'sender' => null,

@@ -98,7 +98,7 @@ final class Shoutbox
     public static function formatMessage(string $text, int $currentUserId, bool &$mentionsMe = false): SafeHtml
     {
         if ($text === '') {
-            return SafeHtml::fromTrustedHtml('');
+            return SafeHtml::fromPlainText('');
         }
 
         $html = (string) Comment::format($text, true, false, true, true, 600, true, false);
@@ -128,7 +128,7 @@ final class Shoutbox
         }
         $class = (int) $class;
         if (! isset($map[$class])) {
-            return SafeHtml::fromTrustedHtml('');
+            return SafeHtml::fromPlainText('');
         }
         [$label, $modifier] = $map[$class];
         $tooltip = '';

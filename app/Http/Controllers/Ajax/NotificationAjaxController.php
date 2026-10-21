@@ -25,7 +25,7 @@ final class NotificationAjaxController extends AjaxController
             'staff' => $request->integer('last_staff_id'),
         ];
 
-        return $this->respond(fn () => $this->notificationFeed->since(
+        return $this->respond($request, fn () => $this->notificationFeed->since(
             (int) Auth::id(),
             $cursors,
             $request->boolean('init'),

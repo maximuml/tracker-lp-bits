@@ -101,69 +101,6 @@ final class RewardRepositoryTest extends TestCase
         }
     }
 
-    public function test_store_throws_when_bonus_not_enough(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create(['seedbonus' => 50.0]);
-        /** @var User $owner */
-        $owner = User::factory()->create();
-        $torrent = $this->createTorrent($owner->id);
-
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('your bonus not enough.');
-
-        $this->repository->store($torrent->id, 100.0, $user);
-    }
-
-    public function test_store_throws_when_already_rewarded(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create(['seedbonus' => 500.0]);
-        /** @var User $owner */
-        $owner = User::factory()->create();
-        $torrent = $this->createTorrent($owner->id);
-
-        $this->createReward($torrent->id, $user->id, 100.0);
-
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('you already reward this torrent.');
-
-        $this->repository->store($torrent->id, 100.0, $user);
-    }
-
-    public function test_store_throws_when_rewarding_own_torrent(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create(['seedbonus' => 500.0]);
-        $torrent = $this->createTorrent($user->id);
-
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage("you can't reward to yourself.");
-
-        $this->repository->store($torrent->id, 100.0, $user);
-    }
-
-    public function test_store_succeeds_and_transfers_bonus(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create(['seedbonus' => 500.0]);
-        /** @var User $owner */
-        $owner = User::factory()->create(['seedbonus' => 0.0]);
-        $torrent = $this->createTorrent($owner->id);
-
-        $result = $this->repository->store($torrent->id, 100.0, $user);
-
-        $this->assertInstanceOf(Reward::class, $result);
-        $this->assertSame($torrent->id, (int) $result->torrentid);
-        $this->assertSame($user->id, (int) $result->userid);
-
-        $user->refresh();
-        $owner->refresh();
-
-        $this->assertSame(400.0, (float) $user->seedbonus);
-        $this->assertSame(100.0, (float) $owner->seedbonus);
-    }
-
     public function test_update_modifies_reward(): void
     {
         /** @var User $user */

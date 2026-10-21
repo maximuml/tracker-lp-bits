@@ -100,7 +100,7 @@ final class UsercpSecurityBuilder
             email: (string) $curUser->value('email', ''),
             passkeys: $isConfirm ? [] : $this->buildPasskeyItems($curUser->id()),
             cspNonce: (string) request()->attributes->get('csp_nonce', ''),
-            confirmHtml: SafeHtml::fromTrustedHtml(''),
+            confirmHtml: SafeHtml::fromPlainText(''),
         );
     }
 

@@ -95,7 +95,7 @@ class MyController extends Controller
         $userid = $viewerId;
         $pagerParams = [];
 
-        $requestedUserId = request()->query('userid');
+        $requestedUserId = $request->query('userid');
         if (! empty($requestedUserId)) {
             if (! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId) && (int) $requestedUserId != $viewerId) {
                 PageResponses::permissionDenied();
@@ -109,7 +109,7 @@ class MyController extends Controller
             PageResponses::abort('Error', 'User not exists.');
         }
 
-        $status = request()->query('status') ?? HitAndRunStatus::INSPECTING->value;
+        $status = $request->query('status') ?? HitAndRunStatus::INSPECTING->value;
         $status = is_array($status) ? HitAndRunStatus::INSPECTING->value : $status;
         $allStatus = HitAndRun::listStatus();
         $pagerParams['status'] = $status;
@@ -121,7 +121,7 @@ class MyController extends Controller
             $headerFilters[] = ['query' => http_build_query($filterParams), 'active' => $key == $status, 'text' => $value['text']];
         }
 
-        $q = htmlspecialchars((string) (request()->query('q') ?? ''));
+        $q = htmlspecialchars((string) ($request->query('q') ?? ''));
 
         $rescount = $this->hitAndRunRepository->countForUser($userid, $status);
         [$pagertop, $pagerbottom, $limit, $offset, $pageSize] = Pagination::pager(50, $rescount, sprintf('?%s&', $queryString));

@@ -98,9 +98,9 @@ class TorrentDetailRepository
             ->exists();
     }
 
-    public function insertMagic(int $torrentId, int $userId, int $value): void
+    public function insertMagic(int $torrentId, int $userId, int $value): int
     {
-        DB::table('magic')->insert([
+        return (int) DB::table('magic')->insertGetId([
             'torrentid' => $torrentId,
             'userid' => $userId,
             'value' => $value,

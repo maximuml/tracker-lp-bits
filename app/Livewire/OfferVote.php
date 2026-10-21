@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Auth\Permission;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Services\OfferVoteService;
-use App\Support\CurrentUser;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Livewire\Attributes\Locked;
@@ -43,18 +42,18 @@ final class OfferVote extends Component
 
     private ?OfferVoteRepositoryInterface $offerVoteRepository = null;
 
-    private ?CurrentUser $currentUser = null;
+    private ?ActorContext $actor = null;
 
     public function boot(
         OfferVoteService $offerVoteService,
         OfferRepositoryInterface $offerRepository,
         OfferVoteRepositoryInterface $offerVoteRepository,
-        CurrentUser $currentUser,
+        ActorContext $actor,
     ): void {
         $this->offerVoteService = $offerVoteService;
         $this->offerRepository = $offerRepository;
         $this->offerVoteRepository = $offerVoteRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
     }
 
     public function vote(string $vote): void
@@ -62,15 +61,14 @@ final class OfferVote extends Component
         if (! in_array($vote, ['yeah', 'against'], true)) {
             return;
         }
-        $user = $this->currentUser()->get();
-        if (! is_array($user) || $user === []) {
+        if (! $this->actor()->isAuthenticated()) {
             $this->error = __('offers.std_error');
 
             return;
         }
-        $uid = (int) ($user['id'] ?? 0);
+        $uid = $this->actor()->id;
 
-        if ($vote === 'against' && ! Permission::can(PermissionEnum::AGAINST_OFFER)) {
+        if ($vote === 'against' && ! $this->actor()->can(PermissionEnum::AGAINST_OFFER)) {
             $this->error = __('offers.std_smell_rat');
 
             return;
@@ -105,8 +103,7 @@ final class OfferVote extends Component
     {
         $alreadyVoted = $this->voted;
         if (! $alreadyVoted) {
-            $user = $this->currentUser()->get();
-            $uid = is_array($user) ? (int) ($user['id'] ?? 0) : 0;
+            $uid = $this->actor()->id;
             $alreadyVoted = $uid > 0 && $this->offerVoteRepository()->userVoted($this->offerId, $uid);
         }
 
@@ -128,8 +125,8 @@ final class OfferVote extends Component
         return $this->offerVoteRepository ?? throw new \LogicException('OfferVote used before boot()');
     }
 
-    private function currentUser(): CurrentUser
+    private function actor(): ActorContext
     {
-        return $this->currentUser ?? throw new \LogicException('OfferVote used before boot()');
+        return $this->actor ?? throw new \LogicException('OfferVote used before boot()');
     }
 }

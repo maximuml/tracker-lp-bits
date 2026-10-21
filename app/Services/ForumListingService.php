@@ -294,7 +294,7 @@ final class ForumListingService
 
             $topics[] = new UnreadTopicRow(
                 topicId: $topicid,
-                subject: SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($arr['subject'] ?? ''))),
+                subject: SafeHtml::fromPlainText((string) ($arr['subject'] ?? '')),
                 hlcolor: (int) ($arr['hlcolor'] ?? 0),
                 jumpToPostId: ($lastpostread > 0 && $lastpostread != $lastCatchup) ? $lastpostread : null,
                 forumId: $forumid,

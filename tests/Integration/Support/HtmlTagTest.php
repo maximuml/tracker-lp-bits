@@ -57,13 +57,10 @@ class HtmlTagTest extends TestCase
         );
     }
 
-    public function test_table_row_does_not_escape_class_attribute(): void
+    public function test_table_row_escapes_class_attribute(): void
     {
-        // Legacy quirk: `sprintf(' class="%s"', $class)` does NOT escape.
-        // Static call sites only pass alphanumeric class names so this
-        // never matters in practice, but pin the contract regardless.
         $this->assertSame(
-            '<tr><td class="a"b">cell</td></tr>'."\n",
+            '<tr><td class="a&quot;b">cell</td></tr>'."\n",
             Html::tableRow('a"b', 'cell'),
         );
     }
@@ -151,12 +148,10 @@ class HtmlTagTest extends TestCase
         $this->assertStringContainsString('<option value="7"></option>', $result);
     }
 
-    public function test_promotion_select_options_does_not_escape_labels_legacy_quirk(): void
+    public function test_promotion_select_options_escapes_labels(): void
     {
-        // Legacy quirk: lang strings are spliced raw. Pinned because
-        // some translations contain HTML entities (e.g. `&times;`).
         $result = Html::promotionSelectOptions(0, 0, ['normal' => '<b>bold</b>'] + self::promoLabels());
-        $this->assertStringContainsString('<option value="1"><b>bold</b></option>', $result);
+        $this->assertStringContainsString('<option value="1">&lt;b&gt;bold&lt;/b&gt;</option>', $result);
     }
 
     public function test_torrent_select_full_block_with_items(): void
@@ -204,14 +199,11 @@ class HtmlTagTest extends TestCase
         );
     }
 
-    public function test_torrent_select_does_not_escape_name_or_selname_legacy_quirk(): void
+    public function test_torrent_select_escapes_name_and_selname(): void
     {
-        // Legacy `$name` and `$selname` flow raw into `<b>` and
-        // `name="..."` — call sites pass plain lang strings, never
-        // user input. Pinned regardless.
         $result = Html::torrentSelect('<b>raw</b>', 'a"b', 'C', 0, []);
-        $this->assertStringContainsString('<b><b>raw</b></b>', $result);
-        $this->assertStringContainsString('name="a"b"', $result);
+        $this->assertStringContainsString('<b>&lt;b&gt;raw&lt;/b&gt;</b>', $result);
+        $this->assertStringContainsString('name="a&quot;b"', $result);
     }
 
     public function test_torrent_select_coerces_string_ids(): void
@@ -418,10 +410,10 @@ class HtmlTagTest extends TestCase
         );
     }
 
-    public function test_tooltip_container_does_not_escape_id_or_content(): void
+    public function test_tooltip_container_escapes_id_but_preserves_content(): void
     {
         $this->assertSame(
-            '<div class="nx-hidden"><div id="row & 1"><table><tr><td>raw</td></tr></table></div></div>',
+            '<div class="nx-hidden"><div id="row &amp; 1"><table><tr><td>raw</td></tr></table></div></div>',
             Html::tooltipContainer([
                 ['id' => 'row & 1', 'content' => '<table><tr><td>raw</td></tr></table>'],
             ]),

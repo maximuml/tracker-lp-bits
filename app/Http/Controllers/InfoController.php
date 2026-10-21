@@ -45,7 +45,7 @@ class InfoController extends BasePageController
             return redirect('/web/userhistory'.($qs ? '?'.$qs : ''));
         }
 
-        $userid = (int) request()->query('id');
+        $userid = (int) $request->query('id');
         PageResponses::assertId($userid, true);
 
         $viewerId = (int) ($this->currentUser->id());
@@ -53,7 +53,7 @@ class InfoController extends BasePageController
             PageResponses::permissionDenied();
         }
 
-        $action = htmlspecialchars((string) request()->query('action'));
+        $action = htmlspecialchars((string) $request->query('action'));
         $perpage = 15;
         $phpSelf = RequestValues::serverValue('PHP_SELF');
         $subject = UserDisplay::username($userid);

@@ -52,34 +52,38 @@ final class ControllerTest extends TestCase
 
     public function test_pagination_parameters_use_limit_and_page(): void
     {
-        app()->instance('request', Request::create('/x?limit=25&page=3', 'GET'));
+        $request = Request::create('/x?limit=25&page=3', 'GET');
+        app()->instance('request', $request);
 
-        $this->assertSame(['25', ['*'], 'page', '3'], $this->controller()->pagination());
+        $this->assertSame(['25', ['*'], 'page', '3'], $this->controller()->pagination($request));
     }
 
     public function test_pagination_parameters_support_data_table_format(): void
     {
-        app()->instance('request', Request::create('/x?__format=data-table&length=50&start=100', 'GET'));
+        $request = Request::create('/x?__format=data-table&length=50&start=100', 'GET');
+        app()->instance('request', $request);
 
-        $this->assertSame(['50', ['*'], 'page', 3], $this->controller()->pagination());
+        $this->assertSame(['50', ['*'], 'page', 3], $this->controller()->pagination($request));
     }
 
     public function test_has_extra_field_reads_request_csv(): void
     {
-        app()->instance('request', Request::create('/x?extra_fields=a,b', 'GET'));
+        $request = Request::create('/x?extra_fields=a,b', 'GET');
+        app()->instance('request', $request);
 
         $controller = $this->controller();
-        $this->assertTrue($controller->extraField('a'));
-        $this->assertTrue($controller->extraField('b'));
-        $this->assertFalse($controller->extraField('z'));
+        $this->assertTrue($controller->extraField($request, 'a'));
+        $this->assertTrue($controller->extraField($request, 'b'));
+        $this->assertFalse($controller->extraField($request, 'z'));
     }
 
     public function test_append_extra_settings_only_adds_requested_names(): void
     {
-        app()->instance('request', Request::create('/x?extra_settings=main.sitename', 'GET'));
+        $request = Request::create('/x?extra_settings=main.sitename', 'GET');
+        app()->instance('request', $request);
 
         $additional = ['existing' => 1];
-        $this->controller()->extraSettings($additional, ['main.sitename', 'nonexistent.setting']);
+        $this->controller()->extraSettings($request, $additional, ['main.sitename', 'nonexistent.setting']);
 
         $this->assertSame(1, $additional['existing']);
         $this->assertArrayHasKey('extra_settings', $additional);
@@ -89,10 +93,11 @@ final class ControllerTest extends TestCase
 
     public function test_append_extra_settings_leaves_additional_untouched_when_nothing_requested(): void
     {
-        app()->instance('request', Request::create('/x', 'GET'));
+        $request = Request::create('/x', 'GET');
+        app()->instance('request', $request);
 
         $additional = ['existing' => 1];
-        $this->controller()->extraSettings($additional, ['main.sitename']);
+        $this->controller()->extraSettings($request, $additional, ['main.sitename']);
 
         $this->assertSame(['existing' => 1], $additional);
     }

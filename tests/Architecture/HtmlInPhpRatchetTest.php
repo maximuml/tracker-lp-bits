@@ -51,6 +51,8 @@ final class HtmlInPhpRatchetTest extends TestCase
         // DOMDocument/tag reconstruction, never emitted markup.
         'Support/Html/Escape.php',
         'Support/Html/HtmlSanitizer.php',
+        // SafeHtml::fromTrustedHtml() definition site, not a usage.
+        'Support/Html/SafeHtml.php',
     ];
 
     /** Baseline: lines with a quoted '<table literal (layout markup in PHP). */
@@ -67,6 +69,15 @@ final class HtmlInPhpRatchetTest extends TestCase
 
     /** Baseline: HTML literal lines inside app/Repositories (target: 0). */
     private const BASELINE_REPO_HTML_LITERALS = 0;
+
+    /**
+     * Baseline: SafeHtml::fromTrustedHtml() call sites in app/.
+     * Unverified raw output — byte-identical to {!! !!}; a usage needs
+     * justification in the PR. Baseline captured 2026-10-21 after the
+     * Tag.php attribute/text markers moved to escaped {{ }} and the
+     * text/empty-string sites moved to fromPlainText().
+     */
+    private const BASELINE_TRUSTED_HTML = 253;
 
     public function test_table_literal_count_does_not_exceed_baseline(): void
     {
@@ -144,6 +155,21 @@ final class HtmlInPhpRatchetTest extends TestCase
             $this->failureMessage(
                 'HTML literal lines in app/Repositories',
                 self::BASELINE_REPO_HTML_LITERALS,
+                $offenders,
+            ),
+        );
+    }
+
+    public function test_trusted_html_call_sites_do_not_exceed_baseline(): void
+    {
+        $offenders = $this->matchingLines('/\bfromTrustedHtml\b/');
+
+        $this->assertLessThanOrEqual(
+            self::BASELINE_TRUSTED_HTML,
+            count($offenders),
+            $this->failureMessage(
+                'SafeHtml::fromTrustedHtml() call sites',
+                self::BASELINE_TRUSTED_HTML,
                 $offenders,
             ),
         );

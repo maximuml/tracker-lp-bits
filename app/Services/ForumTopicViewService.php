@@ -66,8 +66,8 @@ final class ForumTopicViewService
         $orgsubject = (string) ($arr['subject'] ?? '');
         $subject = SafeHtml::fromTrustedHtml(
             $highlight !== ''
-                ? Format::highlight(htmlspecialchars($highlight), $orgsubject)
-                : htmlspecialchars($orgsubject),
+                ? Format::highlight(e($highlight), e($orgsubject))
+                : e($orgsubject),
         );
         $sticky = ($arr['sticky'] ?? 0) == 1;
         $views = (int) ($arr['views'] ?? 0);

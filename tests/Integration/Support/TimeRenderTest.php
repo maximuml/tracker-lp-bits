@@ -136,12 +136,11 @@ class TimeRenderTest extends TestCase
         $this->assertSame('<span title="T">2hour&#12288;30min</span>', $result);
     }
 
-    public function test_format_elapsed_does_not_escape_title_attribute_legacy_quirk(): void
+    public function test_format_elapsed_escapes_title_attribute(): void
     {
-        // Legacy quirk preserved: the original concatenates `$time`
-        // raw into the `title="..."` attribute. We do the same.
-        // Existing call sites pass timestamps that never contain
-        // quotes, so this hasn't bitten anyone in years.
+        // The legacy code concatenated `$time` raw into `title="..."`;
+        // Phase 4.2 dropped that quirk — the attribute is now escaped
+        // (SafeHtml in an attribute context bypassed attr escaping).
         $result = Time::formatElapsedTime(
             '5min',
             'a"b',
@@ -151,6 +150,6 @@ class TimeRenderTest extends TestCase
             textSpace: ' ',
             textAgo: '',
         );
-        $this->assertSame('<span title="a"b">5min</span>', $result);
+        $this->assertSame('<span title="a&quot;b">5min</span>', $result);
     }
 }

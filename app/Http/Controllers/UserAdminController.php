@@ -215,7 +215,7 @@ class UserAdminController extends BasePageController
 
         Log::writeWithContext("Password Reset For {$username} by {$currentUsername}");
         $success = true;
-        $message = "The password of account <b>{$username}</b> is reset, please inform user of this change.";
+        $message = sprintf('The password of account <b>%s</b> is reset, please inform user of this change.', e($username));
 
         return $this->resetPage($request, $success, $message);
     }

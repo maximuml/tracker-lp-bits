@@ -77,7 +77,7 @@ final class HtmlInPhpRatchetTest extends TestCase
      * Tag.php attribute/text markers moved to escaped {{ }} and the
      * text/empty-string sites moved to fromPlainText().
      */
-    private const BASELINE_TRUSTED_HTML = 253;
+    private const BASELINE_TRUSTED_HTML = 243;
 
     public function test_table_literal_count_does_not_exceed_baseline(): void
     {

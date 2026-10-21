@@ -87,12 +87,12 @@ class SearchController extends BasePageController
         };
         $tag = function (string $name, string $description, string|ViewContract $syntax, string $example, string|ViewContract $remarks = ''): array {
             return [
-                'name' => SafeHtml::fromTrustedHtml($name),
-                'description' => SafeHtml::fromTrustedHtml($description),
-                'syntax' => $syntax instanceof ViewContract ? $syntax : SafeHtml::fromTrustedHtml($syntax),
-                'example' => SafeHtml::fromTrustedHtml($example),
+                'name' => SafeHtml::fromPlainText($name),
+                'description' => SafeHtml::fromPlainText($description),
+                'syntax' => $syntax instanceof ViewContract ? $syntax : SafeHtml::fromPlainText($syntax),
+                'example' => SafeHtml::fromPlainText($example),
                 'result' => Format::formatComment($example),
-                'remarks' => $remarks instanceof ViewContract ? $remarks : SafeHtml::fromTrustedHtml($remarks),
+                'remarks' => $remarks instanceof ViewContract ? $remarks : SafeHtml::fromPlainText($remarks),
             ];
         };
         $syntax = fn (string $key): string|ViewContract => $ph($t($key));

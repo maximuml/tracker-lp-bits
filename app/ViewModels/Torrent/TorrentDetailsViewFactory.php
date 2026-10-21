@@ -291,7 +291,7 @@ JS, \json_encode($approvalTitle)), 'footer', false);
 
         return new DenyBanner(
             message: SafeHtml::fromTrustedHtml(
-                (string) Locale::trans('torrent.approval.deny_comment_show', ['reason' => $denyLog->comment], null)
+                (string) Locale::trans('torrent.approval.deny_comment_show', ['reason' => e($denyLog->comment)], null)
             ),
         );
     }

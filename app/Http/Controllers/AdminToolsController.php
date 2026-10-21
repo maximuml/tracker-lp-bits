@@ -319,7 +319,7 @@ class AdminToolsController extends BasePageController
             'mode' => 'list',
             'success' => $success,
             'error' => $error,
-            'message' => SafeHtml::fromTrustedHtml($message),
+            'message' => SafeHtml::fromPlainText($message),
             'rangeStartIp' => $rangeStartIp,
             'rangeEndIp' => $rangeEndIp,
             'hasRangeFilter' => $hasRangeFilter,

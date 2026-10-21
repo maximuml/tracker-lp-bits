@@ -159,8 +159,8 @@ class UserDetailController extends Controller
             if ($canViewConfidential || $isOwner) {
                 $clientRows[] = [
                     'agent' => Strings::userAgentClient($arr['agent']),
-                    'ipv4' => $isOwner ? Strings::hidden($arr['ipv4']) : $arr['ipv4'],
-                    'ipv6' => $isOwner ? Strings::hidden($arr['ipv6']) : $arr['ipv6'],
+                    'ipv4' => $isOwner ? Strings::hidden(e($arr['ipv4'])) : $arr['ipv4'],
+                    'ipv6' => $isOwner ? Strings::hidden(e($arr['ipv6'])) : $arr['ipv6'],
                     'port' => $arr['port'],
                 ];
             } else {

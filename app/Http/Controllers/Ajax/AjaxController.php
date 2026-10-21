@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Support\Api;
 use App\Support\Logger;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Base class for the REST endpoints that replaced the /ajax action-string
@@ -18,7 +19,7 @@ use Illuminate\Http\JsonResponse;
 abstract class AjaxController extends Controller
 {
     /** @param callable(): mixed $callback */
-    protected function respond(callable $callback): JsonResponse
+    protected function respond(Request $request, callable $callback): JsonResponse
     {
         try {
             return response()->json(Api::successWithContext($callback()));
@@ -27,7 +28,7 @@ abstract class AjaxController extends Controller
 
             return response()->json(Api::failWithContext(
                 self::clientSafeMessage($exception),
-                request()->only(['action', 'params']),
+                $request->only(['action', 'params']),
             ));
         }
     }

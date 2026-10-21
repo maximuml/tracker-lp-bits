@@ -76,7 +76,7 @@ class SystemBulkController extends BasePageController
         }
 
         if ($request->isMethod('get')) {
-            if (request()->query('sent') == '1') {
+            if ($request->query('sent') == '1') {
                 return response(PageResponses::captureAbort('Success', 'Upload amount has been added successfully.', true, 'Add Upload'));
             }
 
@@ -84,10 +84,10 @@ class SystemBulkController extends BasePageController
         }
 
         $curUser = $this->currentUser->get() ?? [];
-        $senderId = request()->post('sender') === 'system' ? null : (int) ($this->currentUser->id());
+        $senderId = $request->post('sender') === 'system' ? null : (int) ($this->currentUser->id());
         $added = date('Y-m-d H:i:s');
-        $msg = trim((string) request()->post('msg'));
-        $amount = request()->post('amount');
+        $msg = trim((string) $request->post('msg'));
+        $amount = $request->post('amount');
 
         if ($msg === '' || $amount === null || $amount === '') {
             return $this->abortResponse('Error', 'Don\'t leave any fields blank.');
@@ -96,14 +96,14 @@ class SystemBulkController extends BasePageController
             return $this->abortResponse('Error', 'amount must be numeric');
         }
 
-        $classSet = (array) request()->post('clases');
+        $classSet = (array) $request->post('clases');
         foreach ($classSet as $class) {
             if (! Validators::isId($class) && $class != 0) {
                 return $this->abortResponse('Error', 'Invalid Class');
             }
         }
 
-        $subject = trim((string) request()->post('subject'));
+        $subject = trim((string) $request->post('subject'));
         $bytes = Format::bytesFromUnit($amount, 'G');
         $dryRun = (bool) $request->post('dry_run', false);
         $idempotencyKey = (string) $request->post('idempotency_key', Str::uuid()->toString());
@@ -155,9 +155,9 @@ class SystemBulkController extends BasePageController
                 return $this->abortResponse(__('takeinvite.std_error'), $exception->getMessage());
             }
 
-            $email = htmlspecialchars(trim((string) request()->post('email')));
+            $email = htmlspecialchars(trim((string) $request->post('email')));
             $email = Email::sanitizeForDisplay($email);
-            $preRegisterUsername = (string) request()->post('pre_register_username');
+            $preRegisterUsername = (string) $request->post('pre_register_username');
             $isPreRegisterEmailAndUsername = SiteConfig::current()->system->isInvitePreEmailAndUsername();
 
             if (strlen($preRegisterUsername) > 12) {
@@ -170,7 +170,7 @@ class SystemBulkController extends BasePageController
                 return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_invalid_email_address'));
             }
 
-            $body = trim(strip_tags((string) request()->post('body')));
+            $body = trim(strip_tags((string) $request->post('body')));
             if (! $body) {
                 return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_must_enter_personal_message'));
             }
@@ -203,7 +203,7 @@ class SystemBulkController extends BasePageController
                 return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_invitation_already_sent_to').htmlspecialchars($email).__('takeinvite.std_await_user_registeration'));
             }
 
-            $hashPost = (string) request()->post('hash');
+            $hashPost = (string) $request->post('hash');
             if ($hashPost === '') {
                 return $this->abortResponse(__('takeinvite.head_invitation_failed'), __('takeinvite.std_must_select_invite'));
             }
@@ -302,7 +302,7 @@ class SystemBulkController extends BasePageController
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
-        $delreport = (array) request()->post('delreport');
+        $delreport = (array) $request->post('delreport');
         if (empty($delreport)) {
 
             return $this->abortResponse('Error', __('functions.select_at_least_one_record'));
@@ -313,10 +313,10 @@ class SystemBulkController extends BasePageController
             return $this->abortResponse('Error', 'Invalid report ids.');
         }
 
-        if (request()->post('setdealt')) {
+        if ($request->post('setdealt')) {
             $this->moderationRepository->markReportsDealt($delreportIds, $currentUserId);
             $this->cache?->forget('staff_new_report_count', true);
-        } elseif (request()->post('delete')) {
+        } elseif ($request->post('delete')) {
             $this->moderationRepository->deleteReports($delreportIds);
             $this->cache?->forget('staff_new_report_count', true);
             $this->cache?->forget('staff_report_count', true);

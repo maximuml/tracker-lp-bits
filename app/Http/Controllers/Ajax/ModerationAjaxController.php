@@ -17,7 +17,7 @@ final class ModerationAjaxController extends AjaxController
 
     public function removeLeechWarn(RemoveLeechWarnRequest $request): JsonResponse
     {
-        return $this->respond(fn () => $this->userModeration->removeLeechWarn(
+        return $this->respond($request, fn () => $this->userModeration->removeLeechWarn(
             (int) Auth::id(),
             $request->integer('uid'),
         ));

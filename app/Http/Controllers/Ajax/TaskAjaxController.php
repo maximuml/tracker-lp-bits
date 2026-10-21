@@ -17,7 +17,7 @@ final class TaskAjaxController extends AjaxController
 
     public function claim(ClaimTaskRequest $request): JsonResponse
     {
-        return $this->respond(fn () => $this->examUsers->assignToUser(
+        return $this->respond($request, fn () => $this->examUsers->assignToUser(
             (int) Auth::id(),
             $request->integer('exam_id'),
         ));

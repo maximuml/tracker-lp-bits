@@ -10,6 +10,7 @@ use App\Support\Settings;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Str;
 
@@ -87,9 +88,8 @@ class Controller extends BaseController
     }
 
     /** @return  array<int|string, mixed> */
-    protected function getPaginationParameters(): array
+    protected function getPaginationParameters(Request $request): array
     {
-        $request = request();
         $format = $request->__format;
         if ($format == 'data-table') {
             $perPage = $request->length;
@@ -103,10 +103,10 @@ class Controller extends BaseController
     }
 
     /** @param  mixed  $field */
-    protected function hasExtraField($field): bool
+    protected function hasExtraField(Request $request, $field): bool
     {
         if ($this->extraFields === null) {
-            $extraFieldsStr = request()->input('extra_fields', '');
+            $extraFieldsStr = $request->input('extra_fields', '');
             $this->extraFields = explode(',', $extraFieldsStr);
         }
         Logger::writeWithContext((string) sprintf('field: %s, extraFields: %s', $field, json_encode($this->extraFields)), (string) 'info', (bool) false);
@@ -118,10 +118,10 @@ class Controller extends BaseController
      * @param  array<int|string, mixed>  $additional
      * @param  array<int|string, mixed>  $names
      */
-    protected function appendExtraSettings(array &$additional, array $names): void
+    protected function appendExtraSettings(Request $request, array &$additional, array $names): void
     {
         if ($this->extraSettingNames === null) {
-            $extraSettingStr = request()->input('extra_settings', '');
+            $extraSettingStr = $request->input('extra_settings', '');
             $this->extraSettingNames = explode(',', $extraSettingStr);
         }
         $results = [];

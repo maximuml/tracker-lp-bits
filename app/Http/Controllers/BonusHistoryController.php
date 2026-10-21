@@ -46,7 +46,7 @@ class BonusHistoryController extends BasePageController
     public function bonusLog(Request $request): View|RedirectResponse|Response
     {
         $curUser = $this->currentUser->get() ?? [];
-        $uid = (int) (request()->input('uid') ?? $this->currentUser->id());
+        $uid = (int) ($request->input('uid') ?? $this->currentUser->id());
 
         if (! Validators::isId($uid)) {
             return $this->abortResponse('Error', 'Invalid uid.');
@@ -65,13 +65,13 @@ class BonusHistoryController extends BasePageController
         }
 
         $defaultCategory = BonusLogs::CATEGORY_COMMON;
-        $category = request()->input('category') ?? $defaultCategory;
+        $category = $request->input('category') ?? $defaultCategory;
         $categoryOptions = BonusLogs::listCategoryOptions();
         if (! isset($categoryOptions[$category])) {
             return $this->abortResponse('Error', "Invalid category: {$category}");
         }
 
-        $businessType = (int) (request()->input('business_type') ?? 0);
+        $businessType = (int) ($request->input('business_type') ?? 0);
         $businessTypeOptions = BonusLogs::listBusinessTypeOptions($defaultCategory);
         if ($businessType && ! isset($businessTypeOptions[$businessType])) {
             return $this->abortResponse('Error', "Invalid business_type: {$businessType}");
@@ -90,7 +90,7 @@ class BonusHistoryController extends BasePageController
             $categoryOptionList[] = [
                 'value' => (string) $name,
                 'label' => $text,
-                'selected' => (request()->input('category') ?? '') == $name,
+                'selected' => ($request->input('category') ?? '') == $name,
             ];
         }
 
@@ -99,7 +99,7 @@ class BonusHistoryController extends BasePageController
             $businessTypeOptionList[] = [
                 'value' => (string) $name,
                 'label' => $text,
-                'selected' => (request()->input('business_type') ?? '') == $name,
+                'selected' => ($request->input('business_type') ?? '') == $name,
             ];
         }
 
@@ -150,7 +150,7 @@ JS;
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
-            'requestUri' => (string) request()->server->get('REQUEST_URI', ''),
+            'requestUri' => (string) $request->server->get('REQUEST_URI', ''),
             'columnBusinessTypeLabel' => Locale::trans('bonus-log.fields.business_type', [], null),
             'columnOldTotalLabel' => Locale::trans('bonus-log.fields.old_total_value', [], null),
             'columnValueLabel' => Locale::trans('bonus-log.fields.value', [], null),
@@ -168,15 +168,15 @@ JS;
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
-        $year = (int) (request()->query('year') ?? 0);
+        $year = (int) ($request->query('year') ?? 0);
         if (! $year || $year < 2000) {
             $year = (int) date('Y');
         }
-        $month = (int) (request()->query('month') ?? 0);
+        $month = (int) ($request->query('month') ?? 0);
         if (! $month || $month <= 0 || $month > 12) {
             $month = (int) date('m');
         }
-        $order = (string) (request()->query('order') ?? '');
+        $order = (string) ($request->query('order') ?? '');
         if (! in_array($order, ['username', 'torrent_size', 'torrent_count'])) {
             $order = 'username';
         }

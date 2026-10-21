@@ -16,6 +16,6 @@ final class OfferAjaxController extends AjaxController
 
     public function show(OfferShowRequest $request): JsonResponse
     {
-        return $this->respond(fn () => $this->offers->findOrFailById($request->integer('id'))->toArray());
+        return $this->respond($request, fn () => $this->offers->findOrFailById($request->integer('id'))->toArray());
     }
 }

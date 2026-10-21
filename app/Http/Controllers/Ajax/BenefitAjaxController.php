@@ -17,6 +17,6 @@ final class BenefitAjaxController extends AjaxController
 
     public function consume(ConsumeBenefitRequest $request): JsonResponse
     {
-        return $this->respond(fn () => $this->users->consumeBenefit((int) Auth::id(), $request->validated()));
+        return $this->respond($request, fn () => $this->users->consumeBenefit((int) Auth::id(), $request->validated()));
     }
 }

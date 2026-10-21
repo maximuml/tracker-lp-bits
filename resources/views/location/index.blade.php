@@ -9,7 +9,7 @@
 @endif
 
 @if (($mode ?? '') === 'edit' && ! empty($editRow))
-<form name='form1' method='get' action='{{ $actionUrl ?? '' }}'>
+<form name='form1' method='post' action='/web/system/location'>@csrf
 <input type='hidden' name='id' value='{{ (int) $editRow['id'] }}'>
 <input type='hidden' name='edited' value='1'>
 <div class="nx-fgrid nx-fgrid--flat nx-main w-[50%]">
@@ -29,7 +29,7 @@
 </form>
 @else
 <div class="flex items-start nx-row--spread">
-<form name='form1' method='get' action='{{ $actionUrl ?? '' }}' class="w-[48%]">
+<form name='form1' method='post' action='/web/system/location' class="w-[48%]">@csrf
 <div class="nx-fgrid nx-fgrid--flat nx-main">
 <div class="nx-ffull nx-colhead text-center">Add New Locations</div>
 <div class="nx-fhead">Name:</div><div class="nx-fcell"><input type='text' size=10 name='name'></div>

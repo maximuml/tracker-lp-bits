@@ -63,11 +63,11 @@ class StaffModerationController extends BasePageController
         $currentUserId = (int) ($this->currentUser->id());
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
 
-        $action = (string) request()->post('action');
+        $action = (string) $request->post('action');
 
         if ($action === 'confirmuser') {
-            $userId = (int) request()->post('userid');
-            $confirm = (string) request()->post('confirm');
+            $userId = (int) $request->post('userid');
+            $confirm = (string) $request->post('confirm');
             if (! in_array($confirm, ['pending', 'confirmed'], true)) {
                 return $this->abortResponse('Error', 'Invalid confirmation status.');
             }
@@ -94,27 +94,27 @@ class StaffModerationController extends BasePageController
             return $this->abortResponse('Error', 'Invalid action.');
         }
 
-        $userId = (int) request()->post('userid');
+        $userId = (int) $request->post('userid');
         $userInfo = $this->userDetailRepository->findOrFailById($userId);
 
         $class = $userInfo->class;
 
-        $warned = (string) (request()->post('warned') ?? '');
-        $warnLength = (int) (request()->post('warnlength') ?? 0);
-        $warnPm = (string) (request()->post('warnpm') ?? '');
-        $title = (string) (request()->post('title') ?? '');
-        $avatar = (string) (request()->post('avatar') ?? '');
-        $signature = (string) (request()->post('signature') ?? '');
-        $uploadpos = request()->post('uploadpos') === 'yes';
-        $downloadpos = request()->post('downloadpos') === 'yes';
-        $privacy = (string) (request()->post('privacy') ?? 'normal');
-        $forumpost = request()->post('forumpost') === 'yes';
-        $supportlang = (string) (request()->post('supportlang') ?? '');
-        $support = request()->post('support') === 'yes';
-        $supportfor = (string) (request()->post('supportfor') ?? '');
-        $moviepicker = request()->post('moviepicker') === 'yes';
-        $pickfor = (string) (request()->post('pickfor') ?? '');
-        $stafffor = (string) (request()->post('staffduties') ?? '');
+        $warned = (string) ($request->post('warned') ?? '');
+        $warnLength = (int) ($request->post('warnlength') ?? 0);
+        $warnPm = (string) ($request->post('warnpm') ?? '');
+        $title = (string) ($request->post('title') ?? '');
+        $avatar = (string) ($request->post('avatar') ?? '');
+        $signature = (string) ($request->post('signature') ?? '');
+        $uploadpos = $request->post('uploadpos') === 'yes';
+        $downloadpos = $request->post('downloadpos') === 'yes';
+        $privacy = (string) ($request->post('privacy') ?? 'normal');
+        $forumpost = $request->post('forumpost') === 'yes';
+        $supportlang = (string) ($request->post('supportlang') ?? '');
+        $support = $request->post('support') === 'yes';
+        $supportfor = (string) ($request->post('supportfor') ?? '');
+        $moviepicker = $request->post('moviepicker') === 'yes';
+        $pickfor = (string) ($request->post('pickfor') ?? '');
+        $stafffor = (string) ($request->post('staffduties') ?? '');
 
         if (! Validators::isId($userId) || ! SupportUser::isValidUserClass($class)) {
             return $this->abortResponse('Error', 'Bad user ID or class ID.');
@@ -158,8 +158,8 @@ class StaffModerationController extends BasePageController
 
         if (Permission::can(PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO, $this->userDetailRepository->findOrFailById($currentUserId))) {
             $locale = Locale::userLocale($userId);
-            $email = (string) (request()->post('email') ?? '');
-            $username = (string) (request()->post('username') ?? '');
+            $email = (string) ($request->post('email') ?? '');
+            $username = (string) ($request->post('username') ?? '');
 
             if ($arr['email'] !== $email) {
                 $updateset['email'] = $email;
@@ -202,13 +202,13 @@ class StaffModerationController extends BasePageController
         $staffleaderClass = defined('UC_STAFFLEADER') ? \constant('UC_STAFFLEADER') : 0;
         if (UserDisplay::currentClass() == $staffleaderClass) {
             $locale = Locale::userLocale($userId);
-            $donor = request()->post('donor') === 'yes';
-            $donoruntil = request()->post('donoruntil') ?: null;
-            $donated = (float) (request()->post('donated') ?? 0);
-            $donatedCny = (float) (request()->post('donated_cny') ?? 0);
+            $donor = $request->post('donor') === 'yes';
+            $donoruntil = $request->post('donoruntil') ?: null;
+            $donated = (float) ($request->post('donated') ?? 0);
+            $donatedCny = (float) ($request->post('donated_cny') ?? 0);
             $thisDonatedUsd = $donated - (float) $arr['donated'];
             $thisDonatedCny = $donatedCny - (float) $arr['donated_cny'];
-            $memo = htmlspecialchars((string) request()->post('donation_memo'));
+            $memo = htmlspecialchars((string) $request->post('donation_memo'));
 
             if ($donated != (float) $arr['donated'] || $donatedCny != (float) $arr['donated_cny']) {
                 $this->modtaskRepository->addFund($userId, $thisDonatedUsd, $thisDonatedCny, $memo);
@@ -297,7 +297,7 @@ class StaffModerationController extends BasePageController
             $updateset['privacy'] = UserPrivacy::fromStringSafe($privacy)->value;
         }
 
-        if (request()->post('resetkey') !== null && request()->post('resetkey') === 'yes') {
+        if ($request->post('resetkey') !== null && $request->post('resetkey') === 'yes') {
             $updateset['passkey'] = $this->passkeyGenerator->generate();
         }
 
@@ -361,7 +361,7 @@ class StaffModerationController extends BasePageController
             ]);
         }
 
-        $modcomment = trim((string) (request()->post('modcomment') ?? ''));
+        $modcomment = trim((string) ($request->post('modcomment') ?? ''));
         if ($modcomment !== '') {
             $userModifyLogs[] = date('Y-m-d').' - '.$modcomment.' (by '.$this->currentUser->username().')';
         }
@@ -383,7 +383,7 @@ class StaffModerationController extends BasePageController
 
         Cache::clearUser($userId, $arr['passhash']);
 
-        $returnto = (string) request()->post('returnto');
+        $returnto = (string) $request->post('returnto');
         $prefix = Url::absolute($baseUrl);
 
         return redirect($prefix.'/'.($returnto !== '' ? $returnto : '/userdetails?id='.$userId));
@@ -396,7 +396,7 @@ class StaffModerationController extends BasePageController
             return $this->abortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
         }
 
-        $act = (string) (request()->query('act') ?? 'list');
+        $act = (string) ($request->query('act') ?? 'list');
 
         if ($act === 'del') {
             return $this->abortResponse('Error', 'Permission denied.');
@@ -414,7 +414,7 @@ class StaffModerationController extends BasePageController
         }
 
         if ($act === 'edit') {
-            $id = (int) (request()->query('id') ?? 0);
+            $id = (int) ($request->query('id') ?? 0);
             $rule = $this->ruleRepository->findById($id) ?? [];
             $langs = Locale::languageList('site_lang', null);
 
@@ -462,12 +462,12 @@ class StaffModerationController extends BasePageController
             return $this->abortResponse('Error', 'Only Administrators and above can modify the Rules, sorry.');
         }
 
-        $act = (string) (request()->query('act') ?? 'list');
+        $act = (string) ($request->query('act') ?? 'list');
 
         if ($act === 'addsect') {
-            $title = (string) request()->post('title');
-            $text = (string) request()->post('text');
-            $language = (int) request()->post('language');
+            $title = (string) $request->post('title');
+            $text = (string) $request->post('text');
+            $language = (int) $request->post('language');
             $this->ruleRepository->insert([
                 'title' => $title,
                 'text' => $text,
@@ -479,10 +479,10 @@ class StaffModerationController extends BasePageController
         }
 
         if ($act === 'edited') {
-            $id = (int) (request()->post('id') ?? 0);
-            $title = (string) request()->post('title');
-            $text = (string) request()->post('text');
-            $language = (int) request()->post('language');
+            $id = (int) ($request->post('id') ?? 0);
+            $title = (string) $request->post('title');
+            $text = (string) $request->post('text');
+            $language = (int) $request->post('language');
             $this->ruleRepository->updateById($id, [
                 'title' => $title,
                 'text' => $text,
@@ -494,8 +494,8 @@ class StaffModerationController extends BasePageController
         }
 
         if ($act === 'del') {
-            $id = (int) (request()->post('id') ?? 0);
-            $sure = (int) (request()->post('sure') ?? 0);
+            $id = (int) ($request->post('id') ?? 0);
+            $sure = (int) ($request->post('sure') ?? 0);
             if (! $sure) {
                 return $this->abortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href="?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
             }

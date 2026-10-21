@@ -82,7 +82,7 @@ class TorrentController extends Controller
      *
      * @return array<string, mixed>
      */
-    public function show(int $id): array
+    public function show(Request $request, int $id): array
     {
         Logger::writeWithContext((string) 'controller torrent show entry', (string) 'info', (bool) false);
         /**
@@ -93,10 +93,10 @@ class TorrentController extends Controller
         Logger::writeWithContext((string) 'controller torrent show getDetail', (string) 'info', (bool) false);
         $resource = new TorrentResource($torrent);
         $additional = [];
-        if ($this->hasExtraField('bonus_reward_values')) {
+        if ($this->hasExtraField($request, 'bonus_reward_values')) {
             $additional['bonus_reward_values'] = Setting::getBonusRewardOptions();
         }
-        $this->appendExtraSettings($additional, []);
+        $this->appendExtraSettings($request, $additional, []);
         $resource->additional($additional);
         Logger::writeWithContext((string) 'controller torrent show prepare resource', (string) 'info', (bool) false);
 

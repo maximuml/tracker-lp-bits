@@ -41,7 +41,7 @@ class TorrentDeleteController extends BasePageController
 
         $currentUserId = (int) ($this->currentUser->id());
 
-        $id = (int) request()->input('id');
+        $id = (int) $request->input('id');
         if ($id <= 0) {
             return $this->abortResponse(__('fastdelete.std_delete_failed'), __('fastdelete.std_missing_form_data'));
         }
@@ -60,7 +60,7 @@ class TorrentDeleteController extends BasePageController
         $name = (string) ($row['name'] ?? '');
         $anonymous = (int) ($row['anonymous'] ?? 0);
 
-        $sure = request()->input('sure');
+        $sure = $request->input('sure');
         if (empty($sure)) {
             return $this->abortResponse(
                 __('fastdelete.std_delete_torrent'),
@@ -114,7 +114,7 @@ class TorrentDeleteController extends BasePageController
             return $this->abortResponse('Party is over!', "This trick doesn't work anymore. You need to click the button!");
         }
 
-        $id = request()->post('id');
+        $id = $request->post('id');
         if ($id === null) {
             return $this->abortResponse(__('delete.std_delete_failed'), __('delete.std_missing_form_date'));
         }
@@ -141,12 +141,12 @@ class TorrentDeleteController extends BasePageController
             return $this->abortResponse(__('delete.std_delete_failed'), __('delete.std_not_owner'));
         }
 
-        $rt = (int) request()->post('reasontype');
+        $rt = (int) $request->post('reasontype');
         if ($rt < 1 || $rt > 5) {
             return $this->abortResponse(__('delete.std_delete_failed'), (__('delete.std_invalid_reason')).$rt.'.');
         }
 
-        $reason = (array) request()->post('reason');
+        $reason = (array) $request->post('reason');
         if ($rt == 1) {
             $reasonstr = 'Dead: 0 seeders, 0 leechers = 0 peers total';
         } elseif ($rt == 2) {
@@ -197,7 +197,7 @@ class TorrentDeleteController extends BasePageController
         }
 
         return $this->renderPage($request, 'delete', true, [
-            'returnto' => (string) request()->post('returnto'),
+            'returnto' => (string) $request->post('returnto'),
             'message' => __('delete.text_torrent_deleted'),
         ]);
     }

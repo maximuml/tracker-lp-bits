@@ -23,7 +23,7 @@ final class ShoutboxAjaxController extends AjaxController
 
     public function clear(ShoutboxClearRequest $request): JsonResponse
     {
-        return $this->respond(function () {
+        return $this->respond($request, function () {
             if (! $this->shoutboxService->clearAll($this->actorContext)) {
                 throw new \RuntimeException('No permission');
             }
@@ -34,7 +34,7 @@ final class ShoutboxAjaxController extends AjaxController
 
     public function post(ShoutboxPostRequest $request): JsonResponse
     {
-        return $this->respond(function () use ($request) {
+        return $this->respond($request, function () use ($request) {
             $text = trim((string) $request->input('text', $request->input('content', '')));
             if ($text === '') {
                 throw new \InvalidArgumentException('Message cannot be empty');
@@ -52,7 +52,7 @@ final class ShoutboxAjaxController extends AjaxController
 
     public function edit(ShoutboxEditRequest $request): JsonResponse
     {
-        return $this->respond(function () use ($request) {
+        return $this->respond($request, function () use ($request) {
             $id = $request->integer('id');
             $text = trim((string) $request->input('text'));
             if ($text === '') {
@@ -71,7 +71,7 @@ final class ShoutboxAjaxController extends AjaxController
 
     public function delete(ShoutboxDeleteRequest $request): JsonResponse
     {
-        return $this->respond(function () use ($request) {
+        return $this->respond($request, function () use ($request) {
             if (! $this->shoutboxService->deleteMessage($this->actorContext, $request->integer('id'))) {
                 throw new \RuntimeException('No permission, delete window expired, or deleting too often');
             }
@@ -82,7 +82,7 @@ final class ShoutboxAjaxController extends AjaxController
 
     public function react(ShoutboxReactRequest $request): JsonResponse
     {
-        return $this->respond(function () use ($request) {
+        return $this->respond($request, function () use ($request) {
             $result = $this->shoutboxService->toggleReaction(
                 $this->actorContext,
                 $request->integer('id'),

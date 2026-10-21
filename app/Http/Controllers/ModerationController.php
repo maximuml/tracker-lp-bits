@@ -47,18 +47,18 @@ class ModerationController extends BasePageController
 
         $cache = $this->cache;
 
-        $reportofferid = (int) (request()->query('reportofferid') ?? 0);
-        $user = (int) (request()->query('user') ?? 0);
-        $commentid = (int) (request()->query('commentid') ?? 0);
-        $torrent = (int) (request()->query('torrent') ?? 0);
-        $forumpost = (int) (request()->query('forumpost') ?? 0);
+        $reportofferid = (int) ($request->query('reportofferid') ?? 0);
+        $user = (int) ($request->query('user') ?? 0);
+        $commentid = (int) ($request->query('commentid') ?? 0);
+        $torrent = (int) ($request->query('torrent') ?? 0);
+        $forumpost = (int) ($request->query('forumpost') ?? 0);
 
-        $takeuser = (int) (request()->post('takeuser') ?? 0);
-        $takecommentid = (int) (request()->post('takecommentid') ?? 0);
-        $taketorrent = (int) (request()->post('taketorrent') ?? 0);
-        $takeforumpost = (int) (request()->post('takeforumpost') ?? 0);
-        $takereportofferid = (int) (request()->post('takereportofferid') ?? 0);
-        $takereason = trim((string) request()->post('reason'));
+        $takeuser = (int) ($request->post('takeuser') ?? 0);
+        $takecommentid = (int) ($request->post('takecommentid') ?? 0);
+        $taketorrent = (int) ($request->post('taketorrent') ?? 0);
+        $takeforumpost = (int) ($request->post('takeforumpost') ?? 0);
+        $takereportofferid = (int) ($request->post('takereportofferid') ?? 0);
+        $takereason = trim((string) $request->post('reason'));
 
         $repo = $this->moderationRepository;
         $doTakeReport = function (int $reportid, string $type, string $reason) use ($currentUserId, $cache, $repo): Response {

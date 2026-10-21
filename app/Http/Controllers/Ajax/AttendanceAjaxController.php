@@ -17,7 +17,7 @@ final class AttendanceAjaxController extends AjaxController
 
     public function retroactive(AttendanceRetroactiveRequest $request): JsonResponse
     {
-        return $this->respond(fn () => $this->attendance->retroactive(
+        return $this->respond($request, fn () => $this->attendance->retroactive(
             (int) Auth::id(),
             $request->string('date')->toString(),
         ));

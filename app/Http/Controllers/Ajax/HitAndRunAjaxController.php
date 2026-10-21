@@ -17,7 +17,7 @@ final class HitAndRunAjaxController extends AjaxController
 
     public function remove(RemoveHitAndRunRequest $request): JsonResponse
     {
-        return $this->respond(fn () => $this->bonus->consumeToCancelHitAndRun(
+        return $this->respond($request, fn () => $this->bonus->consumeToCancelHitAndRun(
             (int) Auth::id(),
             $request->integer('id'),
         ));

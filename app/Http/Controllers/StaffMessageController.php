@@ -46,10 +46,10 @@ class StaffMessageController extends BasePageController
         return $this->renderPage($request, 'staffmess', true, [
             'stdheadMsgalert' => false,
             'classes' => $classes,
-            'body' => SafeHtml::fromPlainText((string) request()->query('body')),
-            'receiver' => (int) (request()->query('receiver') ?? 0),
+            'body' => SafeHtml::fromPlainText((string) $request->query('body')),
+            'receiver' => (int) ($request->query('receiver') ?? 0),
             'username' => SafeHtml::fromPlainText((string) ($this->currentUser->username())),
-            'sent' => (int) (request()->query('sent') ?? 0),
+            'sent' => (int) ($request->query('sent') ?? 0),
             'showReturnto' => (bool) ($returntoQuery || $httpReferer),
             'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),
         ]);
@@ -68,15 +68,15 @@ class StaffMessageController extends BasePageController
         }
 
         $currentUser = $this->currentUser->get() ?? [];
-        $senderId = request()->post('sender') === 'system' ? null : (int) ($this->currentUser->id());
-        $subject = trim((string) request()->post('subject'));
-        $msg = trim((string) request()->post('msg'));
+        $senderId = $request->post('sender') === 'system' ? null : (int) ($this->currentUser->id());
+        $subject = trim((string) $request->post('subject'));
+        $msg = trim((string) $request->post('msg'));
 
         if ($msg === '') {
             return $this->abortResponse('Error', "Don't leave any fields blank.");
         }
 
-        $selectedClasses = (array) request()->post('classes');
+        $selectedClasses = (array) $request->post('classes');
         if (empty($selectedClasses)) {
             return $this->abortResponse('Error', 'No valid filter');
         }
@@ -121,8 +121,8 @@ class StaffMessageController extends BasePageController
     {
         $curUser = $this->currentUser->get() ?? [];
 
-        $msg = trim((string) request()->post('body'));
-        $subject = trim((string) request()->post('subject'));
+        $msg = trim((string) $request->post('body'));
+        $subject = trim((string) $request->post('subject'));
 
         if ($msg === '') {
             return $this->abortResponse(__('takecontact.std_error'), __('takecontact.std_please_enter_something'));
@@ -152,7 +152,7 @@ class StaffMessageController extends BasePageController
         $this->userRepository->updateFields($currentUserId, ['last_staffmsg' => date('Y-m-d H:i:s')]);
         Cache::clearStaffMessage();
 
-        $returnto = (string) request()->post('returnto');
+        $returnto = (string) $request->post('returnto');
         if ($returnto !== '') {
             return redirect(SafeReturnUrl::filter($returnto));
         }

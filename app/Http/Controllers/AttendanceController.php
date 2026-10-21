@@ -51,8 +51,8 @@ class AttendanceController extends BasePageController
 
         if ($captchaEnabled && SiteConfig::current()->security->captchaRequired()) {
             Captcha::checkCode(
-                (string) (request()->post('imagehash') ?? ''),
-                (string) (request()->post('imagestring') ?? ''),
+                (string) ($request->post('imagehash') ?? ''),
+                (string) ($request->post('imagestring') ?? ''),
                 '/web/attendance',
                 false,
                 true

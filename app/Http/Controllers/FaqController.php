@@ -101,14 +101,14 @@ class FaqController extends BasePageController
 
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         $redirectBase = Url::absolute($baseUrl);
-        $action = (string) (request()->query('action') ?? '');
+        $action = (string) ($request->query('action') ?? '');
 
         if ($action === 'delete') {
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
         if ($action === 'edit') {
-            $id = (int) (request()->query('id') ?? 0);
+            $id = (int) ($request->query('id') ?? 0);
             $arr = $this->infoRepository->getFaqById($id);
             if ($arr === null) {
                 return $this->abortResponse('Error', 'Invalid id');
@@ -131,8 +131,8 @@ class FaqController extends BasePageController
         }
 
         if ($action === 'additem') {
-            $inId = (int) (request()->query('inid') ?? 0);
-            $langId = (int) (request()->query('langid') ?? 0);
+            $inId = (int) ($request->query('inid') ?? 0);
+            $langId = (int) ($request->query('langid') ?? 0);
 
             return $this->renderPage($request, 'faqactions', true, [
                 'mode' => 'additem',
@@ -164,30 +164,30 @@ class FaqController extends BasePageController
 
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
         $redirectBase = Url::absolute($baseUrl);
-        $action = (string) (request()->query('action') ?? '');
+        $action = (string) ($request->query('action') ?? '');
 
         if ($action === 'reorder' && $request->isMethod('post')) {
-            $this->infoRepository->reorderFaq((array) request()->post('order'));
+            $this->infoRepository->reorderFaq((array) $request->post('order'));
 
             return redirect($redirectBase.'/web/faqmanage');
         }
 
         if ($action === 'edititem' && $request->isMethod('post')) {
-            $this->infoRepository->updateFaq((int) request()->post('id'), [
-                'question' => (string) request()->post('question'),
-                'answer' => (string) request()->post('answer'),
-                'flag' => (int) request()->post('flag'),
-                'categ' => (int) request()->post('categ'),
+            $this->infoRepository->updateFaq((int) $request->post('id'), [
+                'question' => (string) $request->post('question'),
+                'answer' => (string) $request->post('answer'),
+                'flag' => (int) $request->post('flag'),
+                'categ' => (int) $request->post('categ'),
             ]);
 
             return redirect($redirectBase.'/web/faqmanage');
         }
 
         if ($action === 'editsect' && $request->isMethod('post')) {
-            $this->infoRepository->updateFaq((int) request()->post('id'), [
-                'question' => (string) request()->post('title'),
+            $this->infoRepository->updateFaq((int) $request->post('id'), [
+                'question' => (string) $request->post('title'),
                 'answer' => '',
-                'flag' => (int) request()->post('flag'),
+                'flag' => (int) $request->post('flag'),
                 'categ' => 0,
             ]);
 
@@ -195,8 +195,8 @@ class FaqController extends BasePageController
         }
 
         if ($action === 'delete') {
-            $id = (int) (request()->query('id') ?? 0);
-            if (request()->query('confirm') === 'yes') {
+            $id = (int) ($request->query('id') ?? 0);
+            if ($request->query('confirm') === 'yes') {
                 $this->infoRepository->deleteFaq($id);
 
                 return redirect($redirectBase.'/web/faqmanage');
@@ -209,16 +209,16 @@ class FaqController extends BasePageController
         }
 
         if ($action === 'addnewitem' && $request->isMethod('post')) {
-            $categ = (int) (request()->post('categ') ?? 0);
-            $langId = (int) (request()->post('langid') ?? 0);
+            $categ = (int) ($request->post('categ') ?? 0);
+            $langId = (int) ($request->post('langid') ?? 0);
             $max = $this->infoRepository->getFaqMaxOrderAndLinkId(FaqType::ITEM->stringValue(), $langId);
             $this->infoRepository->insertFaq([
                 'link_id' => $max['maxlinkid'] + 1,
                 'type' => FaqType::ITEM->value,
                 'lang_id' => $langId,
-                'question' => (string) request()->post('question'),
-                'answer' => (string) request()->post('answer'),
-                'flag' => (int) (request()->post('flag') ?? 0),
+                'question' => (string) $request->post('question'),
+                'answer' => (string) $request->post('answer'),
+                'flag' => (int) ($request->post('flag') ?? 0),
                 'categ' => $categ,
                 'order' => $max['maxorder'] + 1,
             ]);
@@ -227,15 +227,15 @@ class FaqController extends BasePageController
         }
 
         if ($action === 'addnewsect' && $request->isMethod('post')) {
-            $language = (int) (request()->post('language') ?? 0);
+            $language = (int) ($request->post('language') ?? 0);
             $max = $this->infoRepository->getFaqMaxOrderAndLinkId(FaqType::CATEG->stringValue(), $language);
             $this->infoRepository->insertFaq([
                 'link_id' => $max['maxlinkid'] + 1,
                 'type' => FaqType::CATEG->value,
                 'lang_id' => $language,
-                'question' => (string) request()->post('title'),
+                'question' => (string) $request->post('title'),
                 'answer' => '',
-                'flag' => (int) (request()->post('flag') ?? 0),
+                'flag' => (int) ($request->post('flag') ?? 0),
                 'categ' => 0,
                 'order' => $max['maxorder'] + 1,
             ]);

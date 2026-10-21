@@ -17,7 +17,7 @@ final class TorrentApprovalAjaxController extends AjaxController
 
     public function modal(ApprovalModalRequest $request): JsonResponse
     {
-        return $this->respond(fn () => $this->torrentModeration->buildApprovalModal(
+        return $this->respond($request, fn () => $this->torrentModeration->buildApprovalModal(
             (int) Auth::id(),
             $request->integer('torrent_id'),
         ));

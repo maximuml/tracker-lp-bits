@@ -132,25 +132,27 @@ class AdminToolsController extends BasePageController
         $editRow = [];
         $mode = 'list';
 
-        $rangeStartIp = (string) (request()->query('range_start_ip') ?? '');
-        $rangeEndIp = (string) (request()->query('range_end_ip') ?? '');
+        $rangeStartIp = (string) ($request->query('range_start_ip') ?? '');
+        $rangeEndIp = (string) ($request->query('range_end_ip') ?? '');
 
-        $sure = (string) (request()->query('sure') ?? '');
-        $delid = (int) (request()->query('delid') ?? 0);
+        $sure = (string) ($request->query('sure') ?? '');
+        $delid = (int) ($request->query('delid') ?? 0);
         if ($sure === 'yes' && $delid > 0) {
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
         if ($delid > 0) {
-            return $this->abortResponse('Confirm', 'Are you sure you would like to delete this Location?(<strong><a href="'.$actionUrl.'?delid='.$delid.'&sure=yes">Yes!</a></strong> / <strong><a href="'.$actionUrl.'">No</a></strong>)', false);
+            $confirm = 'Are you sure you would like to delete this Location?(<strong><form method="post" action="/web/system/location" style="display:inline">'.csrf_field().'<input type="hidden" name="delid" value="'.$delid.'"><input type="hidden" name="sure" value="yes"><button type="submit" class="nxm-linkbtn" style="font-weight:bold">Yes!</button></form></strong> / <strong><a href="'.$actionUrl.'">No</a></strong>)';
+
+            return $this->abortResponse('Confirm', $confirm, false);
         }
 
-        $edited = (string) (request()->query('edited') ?? '');
+        $edited = (string) ($request->query('edited') ?? '');
         if ($edited === '1') {
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
-        $editid = (int) (request()->query('editid') ?? 0);
+        $editid = (int) ($request->query('editid') ?? 0);
         if ($editid > 0) {
             $editRow = $this->locationService->findLocation($editid);
             if (empty($editRow)) {
@@ -166,7 +168,7 @@ class AdminToolsController extends BasePageController
             }
         }
 
-        $add = (string) (request()->query('add') ?? '');
+        $add = (string) ($request->query('add') ?? '');
         if ($add === 'true') {
             return $this->abortResponse('Error', 'Permission denied.');
         }
@@ -185,11 +187,11 @@ class AdminToolsController extends BasePageController
         $success = false;
         $error = '';
 
-        $rangeStartIp = (string) (request()->query('range_start_ip') ?? '');
-        $rangeEndIp = (string) (request()->query('range_end_ip') ?? '');
+        $rangeStartIp = (string) ($request->post('range_start_ip') ?? '');
+        $rangeEndIp = (string) ($request->post('range_end_ip') ?? '');
 
-        $sure = (string) (request()->query('sure') ?? '');
-        $delid = (int) (request()->query('delid') ?? 0);
+        $sure = (string) ($request->post('sure') ?? '');
+        $delid = (int) ($request->post('delid') ?? 0);
         if ($sure === 'yes' && $delid > 0) {
             if (Validators::isId($delid)) {
                 $this->locationService->deleteLocation($delid);
@@ -198,19 +200,19 @@ class AdminToolsController extends BasePageController
             return $this->abortResponse('Success', 'Location successfully removed, click <a class=altlink href="'.$actionUrl.'">here</a> to go back.', false);
         }
 
-        $edited = (string) (request()->query('edited') ?? '');
+        $edited = (string) ($request->post('edited') ?? '');
         if ($edited === '1') {
-            $id = (int) (request()->query('id') ?? 0);
-            $name = (string) request()->query('name');
-            $flagpic = (string) request()->query('flagpic');
-            $locationMain = (string) request()->query('location_main');
-            $locationSub = (string) request()->query('location_sub');
-            $startIp = (string) request()->query('start_ip');
-            $endIp = (string) request()->query('end_ip');
-            $theoryUpspeed = (string) request()->query('theory_upspeed');
-            $practicalUpspeed = (string) request()->query('practical_upspeed');
-            $theoryDownspeed = (string) request()->query('theory_downspeed');
-            $practicalDownspeed = (string) request()->query('practical_downspeed');
+            $id = (int) ($request->post('id') ?? 0);
+            $name = (string) $request->post('name');
+            $flagpic = (string) $request->post('flagpic');
+            $locationMain = (string) $request->post('location_main');
+            $locationSub = (string) $request->post('location_sub');
+            $startIp = (string) $request->post('start_ip');
+            $endIp = (string) $request->post('end_ip');
+            $theoryUpspeed = (string) $request->post('theory_upspeed');
+            $practicalUpspeed = (string) $request->post('practical_upspeed');
+            $theoryDownspeed = (string) $request->post('theory_downspeed');
+            $practicalDownspeed = (string) $request->post('practical_downspeed');
 
             if (! Network::isValidIpv4Format($startIp) || ! Network::isValidIpv4Format($endIp)) {
                 $error = 'Invalid IP Address Format !!!';
@@ -236,18 +238,18 @@ class AdminToolsController extends BasePageController
             return $this->renderLocationList($request, $success, $error, $rangeStartIp, $rangeEndIp);
         }
 
-        $add = (string) (request()->query('add') ?? '');
+        $add = (string) ($request->post('add') ?? '');
         if ($add === 'true') {
-            $name = (string) request()->query('name');
-            $flagpic = (string) request()->query('flagpic');
-            $locationMain = (string) request()->query('location_main');
-            $locationSub = (string) request()->query('location_sub');
-            $startIp = (string) request()->query('start_ip');
-            $endIp = (string) request()->query('end_ip');
-            $theoryUpspeed = (string) request()->query('theory_upspeed');
-            $practicalUpspeed = (string) request()->query('practical_upspeed');
-            $theoryDownspeed = (string) request()->query('theory_downspeed');
-            $practicalDownspeed = (string) request()->query('practical_downspeed');
+            $name = (string) $request->post('name');
+            $flagpic = (string) $request->post('flagpic');
+            $locationMain = (string) $request->post('location_main');
+            $locationSub = (string) $request->post('location_sub');
+            $startIp = (string) $request->post('start_ip');
+            $endIp = (string) $request->post('end_ip');
+            $theoryUpspeed = (string) $request->post('theory_upspeed');
+            $practicalUpspeed = (string) $request->post('practical_upspeed');
+            $theoryDownspeed = (string) $request->post('theory_downspeed');
+            $practicalDownspeed = (string) $request->post('practical_downspeed');
 
             if (! Network::isValidIpv4Format($startIp) || ! Network::isValidIpv4Format($endIp)) {
                 $error = 'Invalid IP Address Format !!!';
@@ -282,7 +284,7 @@ class AdminToolsController extends BasePageController
         $hasRangeFilter = false;
         $message = '';
 
-        $checkRange = (string) (request()->query('check_range') ?? '');
+        $checkRange = (string) ($request->input('check_range') ?? '');
         if ($checkRange === 'true') {
             if (! Network::isValidIpv4Format($rangeStartIp) || ! Network::isValidIpv4Format($rangeEndIp)) {
                 $error = 'Invalid IP Address Format !!!';
@@ -342,9 +344,9 @@ class AdminToolsController extends BasePageController
         }
 
         if ($request->isMethod('post')) {
-            $ip = (string) request()->post('ip');
+            $ip = (string) $request->post('ip');
         } else {
-            $ip = (string) (request()->query('ip') ?? '');
+            $ip = (string) ($request->query('ip') ?? '');
         }
 
         $hasResult = false;

@@ -123,7 +123,7 @@ JS;
             return $this->abortResponse('Error', 'Access denied.');
         }
 
-        $action = trim((string) (request()->post('action') ?? request()->query('action') ?? 'main'));
+        $action = trim((string) ($request->post('action') ?? $request->query('action') ?? 'main'));
         $action = htmlspecialchars($action);
 
         $stateMap = [
@@ -164,7 +164,7 @@ JS;
             return $this->abortResponse('Error', 'Access denied.');
         }
 
-        $action = trim((string) (request()->post('action') ?? request()->query('action') ?? 'main'));
+        $action = trim((string) ($request->post('action') ?? $request->query('action') ?? 'main'));
         $action = htmlspecialchars($action);
 
         $stateMap = [

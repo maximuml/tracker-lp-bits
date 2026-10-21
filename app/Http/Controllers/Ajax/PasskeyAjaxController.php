@@ -23,7 +23,7 @@ final class PasskeyAjaxController extends AjaxController
 
     public function createArgs(PasskeyCreateArgsRequest $request): JsonResponse
     {
-        return $this->respond(function () {
+        return $this->respond($request, function () {
             $user = $this->currentUser->get() ?? [];
 
             return $this->userPasskeyRepository->getCreateArgs($this->currentUser->id(), $this->currentUser->username());
@@ -32,7 +32,7 @@ final class PasskeyAjaxController extends AjaxController
 
     public function processCreate(PasskeyCreateRequest $request): JsonResponse
     {
-        return $this->respond(function () use ($request) {
+        return $this->respond($request, function () use ($request) {
             $user = $this->currentUser->get() ?? [];
 
             return $this->userPasskeyRepository->processCreate(
@@ -46,7 +46,7 @@ final class PasskeyAjaxController extends AjaxController
 
     public function delete(PasskeyDeleteRequest $request): JsonResponse
     {
-        return $this->respond(function () use ($request) {
+        return $this->respond($request, function () use ($request) {
             $user = $this->currentUser->get() ?? [];
 
             return $this->userPasskeyRepository->delete($this->currentUser->id(), $request->input('credentialId'));
@@ -55,7 +55,7 @@ final class PasskeyAjaxController extends AjaxController
 
     public function list(PasskeyListRequest $request): JsonResponse
     {
-        return $this->respond(function () {
+        return $this->respond($request, function () {
             $user = $this->currentUser->get() ?? [];
 
             return $this->userPasskeyRepository->getList($this->currentUser->id());
@@ -68,7 +68,7 @@ final class PasskeyAjaxController extends AjaxController
      */
     public function getArgs(PasskeyGetArgsRequest $request): JsonResponse
     {
-        return $this->respond(fn () => $this->userPasskeyRepository->getGetArgs());
+        return $this->respond($request, fn () => $this->userPasskeyRepository->getGetArgs());
     }
 
     /**
@@ -77,7 +77,7 @@ final class PasskeyAjaxController extends AjaxController
      */
     public function processGet(PasskeyGetRequest $request): JsonResponse
     {
-        return $this->respond(function () use ($request) {
+        return $this->respond($request, function () use ($request) {
             return $this->userPasskeyRepository->processGet(
                 $request->input('challengeId'),
                 $request->input('id'),

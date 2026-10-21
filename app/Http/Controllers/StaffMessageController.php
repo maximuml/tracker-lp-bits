@@ -46,9 +46,9 @@ class StaffMessageController extends BasePageController
         return $this->renderPage($request, 'staffmess', true, [
             'stdheadMsgalert' => false,
             'classes' => $classes,
-            'body' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) request()->query('body'))),
+            'body' => SafeHtml::fromPlainText((string) request()->query('body')),
             'receiver' => (int) (request()->query('receiver') ?? 0),
-            'username' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($this->currentUser->username()))),
+            'username' => SafeHtml::fromPlainText((string) ($this->currentUser->username())),
             'sent' => (int) (request()->query('sent') ?? 0),
             'showReturnto' => (bool) ($returntoQuery || $httpReferer),
             'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),

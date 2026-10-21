@@ -61,7 +61,7 @@ final class Comment
         int $imageMaxHeight = 0,
     ): SafeHtml {
         if ($text === '') {
-            return SafeHtml::fromTrustedHtml('');
+            return SafeHtml::fromPlainText('');
         }
 
         self::resetTempCode();

@@ -249,8 +249,8 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
                 'rows' => [],
                 'count' => 0,
                 'total_size' => 0,
-                'pagertop' => SafeHtml::fromTrustedHtml(''),
-                'pagerbottom' => SafeHtml::fromTrustedHtml(''),
+                'pagertop' => SafeHtml::fromPlainText(''),
+                'pagerbottom' => SafeHtml::fromPlainText(''),
                 'torrentlist' => '',
                 'seedTimeAndUploaded' => collect(),
             ];

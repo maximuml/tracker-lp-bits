@@ -77,7 +77,7 @@ class FriendsController extends BasePageController
             $title = (string) ($friend['title'] ?? '');
             $titleHtml = $title === ''
                 ? UserClass::name((int) ($friend['class'] ?? 0), false, true, true)
-                : SafeHtml::fromTrustedHtml(htmlspecialchars($title, ENT_QUOTES, 'UTF-8'));
+                : SafeHtml::fromPlainText($title);
             $avatar = '';
             if ($this->currentUser->yes('avatars')) {
                 $avatar = htmlspecialchars((string) ($friend['avatar'] ?? ''), ENT_QUOTES, 'UTF-8');

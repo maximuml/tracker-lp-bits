@@ -189,8 +189,8 @@ class InviteController extends BasePageController
         }
 
         $inviteRows = [];
-        $pagertop = SafeHtml::fromTrustedHtml('');
-        $pagerbottom = SafeHtml::fromTrustedHtml('');
+        $pagertop = SafeHtml::fromPlainText('');
+        $pagerbottom = SafeHtml::fromPlainText('');
         $haremAdditionFactor = SiteConfig::current()->bonus->haremAddition();
         $pendingCount = 0;
 
@@ -256,8 +256,8 @@ JS;
         $number = $this->inviteRepository->countInvites($id, $menuSelected);
         $pageSize = 50;
         $inviteRows = [];
-        $pagertop = SafeHtml::fromTrustedHtml('');
-        $pagerbottom = SafeHtml::fromTrustedHtml('');
+        $pagertop = SafeHtml::fromPlainText('');
+        $pagerbottom = SafeHtml::fromPlainText('');
 
         if ($number > 0) {
             [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");

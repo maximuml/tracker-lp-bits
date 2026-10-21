@@ -26,9 +26,8 @@ final class Tag
      */
     public static function tableRow(string $class, string ...$cells): string
     {
-        $classAttr = $class !== '' ? sprintf(' class="%s"', $class) : '';
         $row = trim(view('support.tag._tr', [
-            'classAttr' => SafeHtml::fromTrustedHtml($classAttr),
+            'class' => $class,
             'cells' => array_map(SafeHtml::fromTrustedHtml(...), $cells),
         ])->render());
 
@@ -45,10 +44,9 @@ final class Tag
     {
         $currentpage = 'var currentpage='.$page.';';
         $maxpage = 'var maxpage='.$pages.';';
-        $nonceAttr = $nonce !== '' ? ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"' : '';
 
         return "\n".ltrim(view('support.tag._key-shortcut', [
-            'nonceAttr' => SafeHtml::fromTrustedHtml($nonceAttr),
+            'nonce' => $nonce,
             'maxpage' => $maxpage,
             'currentpage' => $currentpage,
         ])->render(), "\n");
@@ -84,7 +82,7 @@ final class Tag
             $html .= trim(view('support.tag._option', [
                 'value' => $id,
                 'selected' => $selected === $id,
-                'label' => SafeHtml::fromTrustedHtml($label),
+                'label' => $label,
             ])->render());
         }
 
@@ -98,13 +96,10 @@ final class Tag
      * helper. The DB lookup that produces `$items` stays in the
      * proxy because `searchbox_item_list()` is DB-backed.
      *
-     * Legacy quirks preserved bit-for-bit:
-     *  - `$name` and `$selectName` are NOT escaped — call sites pass
-     *    plain lang strings, never user input.
-     *  - Item names ARE `htmlspecialchars`-escaped (PHP 8.1+ default
-     *    flags), matching the legacy emitter.
-     *  - The trailing `&nbsp;&nbsp;&nbsp;\n` after `</select>` is
-     *    intentional spacing in the source markup.
+     * Escaping contract: `$name`, `$selectName`, `$chooseOneLabel` and
+     * item names are all Blade-escaped; only the assembled `<option>`
+     * fragments are emitted raw. The trailing `&nbsp;&nbsp;&nbsp;\n`
+     * after `</select>` is intentional spacing in the source markup.
      *
      * @param  iterable<array{id?: mixed, name?: mixed}>  $items
      */
@@ -121,14 +116,14 @@ final class Tag
             $options[] = SafeHtml::fromTrustedHtml(trim(view('support.tag._option', [
                 'value' => $rowId,
                 'selected' => $rowId === $selectedId,
-                'label' => SafeHtml::fromTrustedHtml(htmlspecialchars((string) ($row['name'] ?? ''))),
+                'label' => (string) ($row['name'] ?? ''),
             ])->render()));
         }
 
         return ltrim(view('support.tag._torrent-select', [
-            'name' => SafeHtml::fromTrustedHtml($name),
-            'selectName' => SafeHtml::fromTrustedHtml($selectName),
-            'chooseOneLabel' => SafeHtml::fromTrustedHtml($chooseOneLabel),
+            'name' => $name,
+            'selectName' => $selectName,
+            'chooseOneLabel' => $chooseOneLabel,
             'options' => $options,
         ])->render(), "\n");
     }
@@ -144,7 +139,7 @@ final class Tag
      *  - `$head` is NEVER escaped — call sites pass lang strings and
      *    pre-built HTML markup (radio buttons, etc.).
      *  - A non-empty `$relation` is emitted as TWO attributes on the
-     *    `<tr>`: `relation="X" class="X"`. The value is used unescaped.
+     *    `<tr>`: `relation="X" class="X"` (both Blade-escaped).
      *  - The output has NO trailing newline.
      */
     public static function settingsRow(
@@ -157,12 +152,8 @@ final class Tag
             ? nl2br(htmlspecialchars($follow))
             : $follow;
 
-        $relationAttr = $relation !== ''
-            ? sprintf(' relation="%s" class="%s"', $relation, $relation)
-            : '';
-
         return trim(view('support.tag._settings-row', [
-            'relationAttr' => SafeHtml::fromTrustedHtml($relationAttr),
+            'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => SafeHtml::fromTrustedHtml($cell),
         ])->render());
@@ -192,10 +183,8 @@ final class Tag
     ): string {
         $cell = $escape ? htmlspecialchars($follow) : $follow;
 
-        $relationAttr = $relation !== '' ? ' relation = "'.$relation.'"' : '';
-
         return trim(view('support.tag._settings-row-small', [
-            'relationAttr' => SafeHtml::fromTrustedHtml($relationAttr),
+            'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => SafeHtml::fromTrustedHtml($cell),
         ])->render());
@@ -219,7 +208,7 @@ final class Tag
             : $follow;
 
         return trim(view('support.tag._settings-frow', [
-            'relation' => SafeHtml::fromTrustedHtml($relation),
+            'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => SafeHtml::fromTrustedHtml($cell),
         ])->render());
@@ -328,12 +317,11 @@ final class Tag
      *    silently swallowed empty arrays without emitting the outer
      *    wrapper; callers rely on that to keep the page noise-free
      *    when no tooltip targets exist.
-     *  - Neither `id` NOR `content` is escaped. Tooltip content is
-     *    pre-built HTML markup (a `<table>` with the post body / user
-     *    info, sometimes with `<img>` + `<a>` children) — escaping
-     *    would corrupt it. Pre-`<div>`-extracted IDs are trusted
-     *    integer-derived strings (`lastpost-12345` style). Same
-     *    contract as the legacy.
+     *  - `content` is NOT escaped. Tooltip content is pre-built HTML
+     *    markup (a `<table>` with the post body / user info, sometimes
+     *    with `<img>` + `<a>` children) — escaping would corrupt it.
+     *    IDs (`lastpost-12345` style) are Blade-escaped as attribute
+     *    values.
      *  - Outer wrapper is always `<div class="nx-hidden">` —
      *    visibility is toggled per-child by tipsy at hover time.
      *
@@ -345,7 +333,7 @@ final class Tag
         $children = [];
         foreach ($items as $item) {
             $children[] = SafeHtml::fromTrustedHtml(trim(view('support.tag._tooltip-child', [
-                'id' => SafeHtml::fromTrustedHtml((string) ($item['id'] ?? '')),
+                'id' => (string) ($item['id'] ?? ''),
                 'content' => SafeHtml::fromTrustedHtml((string) ($item['content'] ?? '')),
             ])->render()));
         }

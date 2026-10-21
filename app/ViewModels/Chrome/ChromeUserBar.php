@@ -89,7 +89,7 @@ final class ChromeUserBar
         }
 
         $hitAndRunEnabled = HitAndRun::getIsEnabled();
-        $hitAndRunStatsHtml = SafeHtml::fromTrustedHtml('');
+        $hitAndRunStatsHtml = SafeHtml::fromPlainText('');
         if ($hitAndRunEnabled) {
             $hitAndRunStatsHtml = SafeHtml::fromTrustedHtml(
                 (string) $chrome->hitAndRun->getStatusStats($userId)
@@ -146,8 +146,8 @@ final class ChromeUserBar
     private static function empty(): self
     {
         return new self(
-            usernameHtml: SafeHtml::fromTrustedHtml(''),
-            ratio: SafeHtml::fromTrustedHtml(''),
+            usernameHtml: SafeHtml::fromPlainText(''),
+            ratio: SafeHtml::fromPlainText(''),
             uploaded: '',
             downloaded: '',
             seedbonus: '',
@@ -168,7 +168,7 @@ final class ChromeUserBar
             connectable: null,
             maxSlots: 0,
             hitAndRunEnabled: false,
-            hitAndRunStatsHtml: SafeHtml::fromTrustedHtml(''),
+            hitAndRunStatsHtml: SafeHtml::fromPlainText(''),
             canStaffmem: false,
             cheaterCount: 0,
             reportCount: 0,

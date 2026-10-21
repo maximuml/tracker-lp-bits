@@ -144,7 +144,7 @@ final class OfferListBuilder
         // Build the table rows
         $last_offer = strtotime((string) $curUser->value('last_offer', 'now'));
         $table = null;
-        $emptyState = SafeHtml::fromTrustedHtml('');
+        $emptyState = SafeHtml::fromPlainText('');
         if (! $num) {
             $emptyState = SafeHtml::fromTrustedHtml(view('partials.std-message', [
                 'heading' => __('offers.text_nothing_found'),

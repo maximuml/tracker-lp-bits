@@ -145,8 +145,8 @@ class PollController extends BasePageController
 
             $count = $this->pollRepository->countAnswers($pollid);
             $answers = [];
-            $pagertop = SafeHtml::fromTrustedHtml('');
-            $pagerbottom = SafeHtml::fromTrustedHtml('');
+            $pagertop = SafeHtml::fromPlainText('');
+            $pagerbottom = SafeHtml::fromPlainText('');
 
             if ($count > 0) {
                 $perpage = 100;

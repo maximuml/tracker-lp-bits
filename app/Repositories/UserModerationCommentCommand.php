@@ -92,6 +92,11 @@ final class UserModerationCommentCommand
             'added' => Carbon::now(),
         ];
         DB::transaction(function () use ($uid, $sourceField, $old, $update, $message, $modCommentText) {
+            // Serialize against BonusLedgerService debits/credits on the
+            // same row — the CAS below still guards against a stale $old,
+            // and the lock makes concurrent adjustments wait rather than
+            // collide mid-transaction.
+            DB::table('users')->where('id', $uid)->lockForUpdate()->value('id');
             $affectedRows = User::query()
                 ->where('id', $uid)
                 ->where($sourceField, $old)

@@ -9,6 +9,7 @@ use App\Http\Requests\RewardRequest;
 use App\Http\Resources\RewardResource;
 use App\Models\User;
 use App\Repositories\RewardRepository;
+use App\Services\MagicRewardService;
 use App\Support\Locale;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,12 +17,15 @@ class RewardController extends Controller
 {
     private RewardRepository $repository;
 
+    private MagicRewardService $magicRewardService;
+
     /**
      * @return mixed
      */
-    public function __construct(RewardRepository $repository)
+    public function __construct(RewardRepository $repository, MagicRewardService $magicRewardService)
     {
         $this->repository = $repository;
+        $this->magicRewardService = $magicRewardService;
     }
 
     /**
@@ -49,8 +53,8 @@ class RewardController extends Controller
         if (! $user instanceof User) {
             throw new \RuntimeException('unauthenticated');
         }
-        $result = $this->repository->store($request->torrent_id, $request->value, $user);
-        $resource = new RewardResource($result);
+        $reward = $this->magicRewardService->give($user, (int) $request->torrent_id, (int) $request->value);
+        $resource = new RewardResource($reward);
 
         return $this->success($resource, __('details.text_reward_sent'));
     }

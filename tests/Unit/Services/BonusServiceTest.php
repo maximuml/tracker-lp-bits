@@ -8,6 +8,7 @@ use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\SettingRepository;
+use App\Services\BonusLedgerService;
 use App\Services\BonusService;
 use App\Support\CurrentUser;
 use App\Support\Settings;
@@ -45,7 +46,7 @@ final class BonusServiceTest extends TestCase
         $this->app->instance(SettingRepository::class, $settingsRepo);
         Settings::resetCache();
 
-        return new BonusService($repo, $calcRepo, $this->app->make(MessageRepository::class));
+        return new BonusService($repo, $calcRepo, $this->app->make(MessageRepository::class), $this->app->make(BonusLedgerService::class));
     }
 
     /**

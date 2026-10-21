@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Repositories\IndexRepository;
@@ -12,7 +13,6 @@ use App\Support\AssetAppender;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\CoverThumb;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
@@ -48,7 +48,7 @@ final class IndexPageService
     private readonly CoverThumb $coverThumb;
 
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly NexusCache $cache,
         private readonly IndexRepository $indexRepository,
         private readonly IndexPollsSectionFactory $indexPollsSectionFactory,
@@ -59,7 +59,7 @@ final class IndexPageService
 
     public function build(): IndexPageViewModel
     {
-        $curUser = $this->currentUser;
+        $actor = $this->actor;
 
         $canNewsManage = Permission::can(PermissionEnum::NEWS_MANAGE);
         $canPollManage = Permission::can(PermissionEnum::POLL_MANAGE);
@@ -67,11 +67,11 @@ final class IndexPageService
         $canLog = Permission::can(PermissionEnum::LOG);
 
         $news = $this->buildNews($canNewsManage);
-        $shoutbox = $this->buildShoutbox($canSbManage, $curUser);
-        $forumPosts = $this->buildForumPosts($curUser);
+        $shoutbox = $this->buildShoutbox($canSbManage, $actor);
+        $forumPosts = $this->buildForumPosts($actor);
         $latestTorrents = $this->buildLatestTorrents();
         $topUploaders = $this->buildTopUploaders();
-        $polls = $this->indexPollsSectionFactory->build($curUser->get() ?? [], $canPollManage, $canLog);
+        $polls = $this->indexPollsSectionFactory->build($actor->toLegacyArray(), $canPollManage, $canLog);
         $stats = $this->buildStats();
         $disclaimer = $this->buildDisclaimer();
         $browserNote = $this->buildBrowserNote();
@@ -81,12 +81,12 @@ final class IndexPageService
         }
 
         // Reset unread news count
-        if ($curUser->isLoggedIn()) {
-            $this->cache->forget('user_'.$curUser->id().'_unread_news_count');
+        if ($actor->isAuthenticated()) {
+            $this->cache->forget('user_'.$actor->id.'_unread_news_count');
         }
 
         return new IndexPageViewModel(
-            curUser: $curUser->get() ?? [],
+            curUser: $actor->toLegacyArray(),
             canNewsManage: $canNewsManage,
             canPollManage: $canPollManage,
             canSbManage: $canSbManage,
@@ -124,7 +124,7 @@ final class IndexPageService
         );
     }
 
-    private function buildShoutbox(bool $canManage, CurrentUser $curUser): IndexShoutboxSection
+    private function buildShoutbox(bool $canManage, ActorContext $actor): IndexShoutboxSection
     {
         $show = SiteConfig::current()->main->showShoutbox();
 
@@ -132,7 +132,7 @@ final class IndexPageService
             return new IndexShoutboxSection;
         }
 
-        $csrf = Shoutbox::csrfToken($curUser->id());
+        $csrf = Shoutbox::csrfToken($actor->id);
         AssetAppender::js("var SHOUT_CSRF = '".addslashes($csrf)."';", 'footer', false);
 
         return new IndexShoutboxSection(
@@ -149,13 +149,13 @@ final class IndexPageService
             submitLabel: __('index.sumbit_shout'),
             clearButtonLabel: __('index.submit_clear'),
             showHideTitle: __('index.title_show_or_hide'),
-            refreshSeconds: (int) $curUser->value('sbrefresh', 120),
+            refreshSeconds: (int) $actor->value('sbrefresh', 120),
         );
     }
 
-    private function buildForumPosts(CurrentUser $curUser): IndexForumPostsSection
+    private function buildForumPosts(ActorContext $actor): IndexForumPostsSection
     {
-        $show = SiteConfig::current()->main->showLastXForumPosts() && $curUser->isLoggedIn();
+        $show = SiteConfig::current()->main->showLastXForumPosts() && $actor->isAuthenticated();
 
         if (! $show) {
             return new IndexForumPostsSection;
@@ -390,7 +390,7 @@ final class IndexPageService
         );
     }
 
-    public function appendAssets(CurrentUser $curUser): void
+    public function appendAssets(ActorContext $actor): void
     {
         AssetAppender::css('styles/shoutbox.css', 'header', true);
         $shoutLang = json_encode([

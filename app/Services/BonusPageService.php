@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\BonusLogs;
 use App\Models\HitAndRun;
@@ -12,7 +13,6 @@ use App\Models\User;
 use App\Repositories\BonusCalculationRepository;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
@@ -39,7 +39,7 @@ use Illuminate\Http\Request;
 final class BonusPageService
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly BonusCalculationRepository $bonusCalculationRepository,
     ) {}
 
@@ -48,8 +48,8 @@ final class BonusPageService
      */
     public function build(Request $request): BonusPageViewModel
     {
-        $curUser = $this->currentUser;
-        $userId = $curUser->id();
+        $actor = $this->actor;
+        $userId = $actor->id;
 
         $bonusTweak = SiteConfig::current()->tweak->bonus();
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
@@ -71,19 +71,19 @@ final class BonusPageService
         $action = htmlspecialchars((string) $request->query('action', ''));
         $do = htmlspecialchars((string) $request->query('do', ''));
 
-        $msg = $this->resolveDoMessage($do, $curUser, $lockText);
+        $msg = $this->resolveDoMessage($do, $actor, $lockText);
 
-        $bonus = number_format($curUser->seedbonus(), 1);
+        $bonus = number_format($actor->seedbonus(), 1);
 
         $shop = null;
         $info = null;
         if (! $action) {
-            $shop = $this->buildShop($allBonus, $curUser, $bonus, $msg, $lockText);
-            $info = $this->buildInfo($curUser);
+            $shop = $this->buildShop($allBonus, $actor, $bonus, $msg, $lockText);
+            $info = $this->buildInfo($actor);
         }
 
         return new BonusPageViewModel(
-            curUser: $this->currentUser->get() ?? [],
+            curUser: $this->actor->toLegacyArray(),
             userId: $userId,
             action: $action,
             do: $do,
@@ -189,7 +189,7 @@ final class BonusPageService
         ];
     }
 
-    private function resolveDoMessage(string $do, CurrentUser $curUser, string $lockText): string
+    private function resolveDoMessage(string $do, ActorContext $actor, string $lockText): string
     {
         return match ($do) {
             'upload' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_upload'), 'b' => __('mybonus.text_uploaded_amount'), 'post' => '!'])->render(),
@@ -202,7 +202,7 @@ final class BonusPageService
                 'post' => __('mybonus.text_success_vip_two'),
             ])->render(),
             'vipfalse' => view('my.sections._b-msg', ['pre' => '', 'b' => __('mybonus.text_error_bang'), 'post' => __('mybonus.text_no_permission')])->render(),
-            'title' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_custom_title'), 'b' => (string) $curUser->value('title', ''), 'post' => '!'])->render(),
+            'title' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_custom_title'), 'b' => (string) $actor->value('title', ''), 'post' => '!'])->render(),
             'transfer' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_gift'), 'b' => __('mybonus.text_karma'), 'post' => __('mybonus.text_karma_well')])->render(),
             'charity' => __('mybonus.text_success_charity'),
             'cancel_hr' => __('mybonus.text_success_cancel_hr'),
@@ -217,7 +217,7 @@ final class BonusPageService
     /**
      * @param  array<int, array<string, mixed>>  $allBonus
      */
-    private function buildShop(array $allBonus, CurrentUser $curUser, string $bonus, string $msg, string $lockText): BonusShopViewModel
+    private function buildShop(array $allBonus, ActorContext $actor, string $bonus, string $msg, string $lockText): BonusShopViewModel
     {
         $bonusgiftBonus = SiteConfig::current()->bonus->bonusGift() ? 'yes' : 'no';
         $ratiolimitBonus = SiteConfig::current()->bonus->ratioLimit();
@@ -241,9 +241,9 @@ final class BonusPageService
                 default => SafeHtml::fromUntrustedHtml(number_format((float) $bonusarray['points'])),
             };
 
-            $affordable = $curUser->seedbonus() >= (float) $bonusarray['points'];
+            $affordable = $actor->seedbonus() >= (float) $bonusarray['points'];
             $trade = $affordable
-                ? $this->resolveTradeButton($art, $curUser, $ratiolimitBonus, $dlamountlimitBonus)
+                ? $this->resolveTradeButton($art, $actor, $ratiolimitBonus, $dlamountlimitBonus)
                 : $this->tradeButton('mybonus.text_more_points_needed', true);
 
             $items[] = new BonusShopItem(
@@ -271,7 +271,7 @@ final class BonusPageService
         );
     }
 
-    private function resolveTradeButton(string $art, CurrentUser $curUser, float $ratiolimitBonus, int $dlamountlimitBonus): BonusTradeButton
+    private function resolveTradeButton(string $art, ActorContext $actor, float $ratiolimitBonus, int $dlamountlimitBonus): BonusTradeButton
     {
         if ($art === 'gift_1') {
             return $this->tradeButton('mybonus.submit_karma_gift', false);
@@ -299,9 +299,9 @@ final class BonusPageService
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'traffic') {
-            $downloaded = (float) $curUser->value('downloaded', 0);
+            $downloaded = (float) $actor->value('downloaded', 0);
             if ($downloaded > 0) {
-                $uploaded = (float) $curUser->value('uploaded', 0);
+                $uploaded = (float) $actor->value('uploaded', 0);
                 if ($uploaded > $dlamountlimitBonus * 1073741824) {
                     $ratio = $uploaded / $downloaded;
                 } else {
@@ -317,14 +317,14 @@ final class BonusPageService
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'change_username_card') {
-            if ($this->bonusCalculationRepository->hasChangeUsernameCard($curUser->id())) {
+            if ($this->bonusCalculationRepository->hasChangeUsernameCard($actor->id)) {
                 return $this->tradeButton('mybonus.text_change_username_card_already_has', true);
             }
 
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'rainbow_id') {
-            if ($this->bonusCalculationRepository->hasRainbowIdForever($curUser->id())) {
+            if ($this->bonusCalculationRepository->hasRainbowIdForever($actor->id)) {
                 return $this->tradeButton('mybonus.text_rainbow_id_already_valid_forever', true);
             }
 
@@ -349,14 +349,14 @@ final class BonusPageService
         return new BonusTradeButton(html_entity_decode($label, ENT_QUOTES | ENT_HTML5, 'UTF-8'), $disabled);
     }
 
-    private function buildInfo(CurrentUser $curUser): BonusInfoViewModel
+    private function buildInfo(ActorContext $actor): BonusInfoViewModel
     {
         $perseedingBonus = SiteConfig::current()->bonus->perSeeding();
         $maxseedingBonus = SiteConfig::current()->bonus->maxSeeding();
         $bzeroBonus = SiteConfig::current()->bonus->bZero();
 
-        $seedBonusResult = Bonus::calculateForUser($curUser->id(), null);
-        $bonusTableResult = Bonus::buildBonusTableForUser($curUser->get() ?? [], $seedBonusResult, ['table_style' => 'width: 50%']);
+        $seedBonusResult = Bonus::calculateForUser($actor->id, null);
+        $bonusTableResult = Bonus::buildBonusTableForUser($actor->toLegacyArray(), $seedBonusResult, ['table_style' => 'width: 50%']);
 
         $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzeroBonus + $perseedingBonus * $maxseedingBonus);
         $loadpic = $percent <= 30 ? 'loadbarred' : ($percent <= 60 ? 'loadbaryellow' : 'loadbargreen');
@@ -377,7 +377,7 @@ final class BonusPageService
             aFactor: (string) round((float) $seedBonusResult['A'], 1),
             percentLabel: (string) $percent,
             loadbarClass: $loadpic,
-            userId: $curUser->id(),
+            userId: $actor->id,
             officialAdditionFactor: $bonusTableResult['has_official_addition'] ? (string) $bonusTableResult['official_addition_factor'] : null,
             haremAdditionFactor: $bonusTableResult['has_harem_addition'] ? (string) $bonusTableResult['harem_addition_factor'] : null,
             summaryTable: SafeHtml::fromTrustedHtml((string) $bonusTableResult['table']),

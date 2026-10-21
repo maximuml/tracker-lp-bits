@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\PostRepository;
@@ -11,7 +12,6 @@ use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumPageService;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\PageState;
 use App\Support\Settings;
 use App\ViewModels\Forum\ForumIndexViewModel;
@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 /**
@@ -33,6 +34,7 @@ use Tests\TestCase;
 final class ForumPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     private ForumPageService $service;
 
@@ -143,9 +145,7 @@ final class ForumPageServiceTest extends TestCase
         ];
         $merged = array_merge($defaults, $data);
 
-        $currentUser = new CurrentUser;
-        $currentUser->set($merged);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor($merged));
 
         $user = new User;
         $user->id = $merged['id'];

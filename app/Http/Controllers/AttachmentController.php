@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\AttachmentRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
 use App\Http\Requests\AttachmentUploadRequest;
@@ -12,7 +13,6 @@ use App\Services\AttachmentMutationService;
 use App\Support\Attachment\AttachmentService;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Style;
 use Illuminate\Http\RedirectResponse;
@@ -25,22 +25,22 @@ class AttachmentController extends BasePageController
 {
     public function __construct(
         private readonly AttachmentRepositoryInterface $attachmentRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ?NexusCache $cache,
     ) {}
 
     public function attachment(Request $request): Response
     {
-        $currentUser = $this->currentUser->get() ?? [];
-        $Attach = new AttachmentService((int) ($this->currentUser->id()));
+        $currentUser = $this->actor->toLegacyArray();
+        $Attach = new AttachmentService((int) ($this->actor->id));
 
         return $this->renderAttachment($request, $currentUser, $Attach);
     }
 
     public function attachmentUpload(AttachmentUploadRequest $request, AttachmentMutationService $attachmentMutationService): Response
     {
-        $currentUser = $this->currentUser->get() ?? [];
-        $Attach = new AttachmentService((int) ($this->currentUser->id()));
+        $currentUser = $this->actor->toLegacyArray();
+        $Attach = new AttachmentService((int) ($this->actor->id));
 
         $warning = '';
         $script = '';
@@ -111,8 +111,8 @@ class AttachmentController extends BasePageController
             'callback_func' => (string) $request->input('callback_func', ''),
             'warning' => $warning,
             'script' => SafeHtml::fromTrustedHtml($script),
-            'theme' => UserTheme::fromStringSafe(is_string($this->currentUser->value('theme', null)) ? $this->currentUser->value('theme') : null)->value,
-            'fontSize' => UserFontsize::fromMixed($this->currentUser->value('fontsize', null))->stringValue(),
+            'theme' => UserTheme::fromStringSafe(is_string($this->actor->value('theme', null)) ? $this->actor->value('theme') : null)->value,
+            'fontSize' => UserFontsize::fromMixed($this->actor->value('fontsize', null))->stringValue(),
         ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);

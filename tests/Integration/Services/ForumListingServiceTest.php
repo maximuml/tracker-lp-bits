@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\Contracts\Repositories\SiteLogRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
 use App\Enums\UserTimeType;
 use App\Models\Topic;
@@ -65,7 +66,7 @@ final class ForumListingServiceTest extends TestCase
         Settings::resetCache();
 
         $indexService = new ForumIndexService(
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $this->app->make(ForumRepository::class),
             new OverforumRepository,
             $this->app->make(NexusCache::class),
@@ -133,7 +134,7 @@ final class ForumListingServiceTest extends TestCase
         $cacheInstance = $cache ?? $this->app->make(NexusCache::class);
 
         $indexService = new ForumIndexService(
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $forumRepo,
             new OverforumRepository,
             $cacheInstance,
@@ -157,9 +158,8 @@ final class ForumListingServiceTest extends TestCase
         $defaults = ['id' => 1, 'username' => 'testuser', 'class' => 10];
         $merged = array_merge($defaults, $data);
 
-        $currentUser = $this->app->make(CurrentUser::class);
-        $currentUser->set($merged);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor($merged));
+        app(CurrentUser::class)->set($merged);
 
         // The legacy runtime flag is false in the test environment, so
         // UserDisplay::currentClass() uses auth()->user()->class — log in a
@@ -213,7 +213,7 @@ final class ForumListingServiceTest extends TestCase
                 $this->assertStringContainsString(e($needle), $html);
             }
         } catch (\Throwable $e) {
-            $this->fail('Expected HttpResponseException, got '.$e::class);
+            $this->fail('Expected HttpResponseException, got '.$e::class.': '.$e->getMessage());
         }
     }
 
@@ -241,7 +241,7 @@ final class ForumListingServiceTest extends TestCase
 
         $this->topicRepo->shouldReceive('getUnreadTopics')->andReturn(new Collection);
 
-        $vm = $this->service->buildViewUnread($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]));
+        $vm = $this->service->buildViewUnread($this->actor(['id' => 1, 'username' => 'test', 'class' => 10]));
 
         $this->assertSame('TestSite', $vm->siteName);
         $this->assertSame([], $vm->topics);
@@ -262,7 +262,7 @@ final class ForumListingServiceTest extends TestCase
             1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0],
         ]);
 
-        $vm = $this->service->buildViewUnread($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]));
+        $vm = $this->service->buildViewUnread($this->actor(['id' => 1, 'username' => 'test', 'class' => 10]));
 
         $this->assertCount(1, $vm->topics);
         $row = $vm->topics[0];
@@ -289,7 +289,7 @@ final class ForumListingServiceTest extends TestCase
             1 => ['id' => 1, 'name' => 'Staff Forum', 'forid' => 1, 'minclassread' => 90],
         ]);
 
-        $vm = $this->service->buildViewUnread($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]));
+        $vm = $this->service->buildViewUnread($this->actor(['id' => 1, 'username' => 'test', 'class' => 10]));
 
         $this->assertSame([], $vm->topics);
     }
@@ -312,7 +312,7 @@ final class ForumListingServiceTest extends TestCase
             1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0],
         ]);
 
-        $vm = $this->service->buildViewUnread($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]));
+        $vm = $this->service->buildViewUnread($this->actor(['id' => 1, 'username' => 'test', 'class' => 10]));
 
         $this->assertCount(25, $vm->topics);
         $this->assertSame(1026, $vm->moreBeforePostId);
@@ -398,7 +398,7 @@ final class ForumListingServiceTest extends TestCase
         // true) — removing the call lands on the forum-not-found abort, and
         // flipping stdhead renders the int-error partial instead.
         $this->assertAbortContains(
-            fn () => $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10]), Request::create('/forums.php', 'GET', ['forumid' => 0]), 20, 10),
+            fn () => $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10]), Request::create('/forums.php', 'GET', ['forumid' => 0]), 20, 10),
             'Invalid ID',
             'nx-box--500',
         );
@@ -414,7 +414,7 @@ final class ForumListingServiceTest extends TestCase
         $repo->shouldReceive('getForumsList')->andReturn([]);
 
         $this->assertAbortContains(
-            fn () => $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1']), Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10),
+            fn () => $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1']), Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10),
             (string) __('forums.std_forum_not_found'),
         );
     }
@@ -437,7 +437,7 @@ final class ForumListingServiceTest extends TestCase
         $this->app->instance(SiteLogRepositoryInterface::class, $logRepo);
 
         $this->assertAbortContains(
-            fn () => $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1']), Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10),
+            fn () => $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'ip' => '127.0.0.1']), Request::create('/forums.php', 'GET', ['forumid' => 999]), 20, 10),
             (string) __('forums.std_forum_not_found'),
         );
     }
@@ -493,7 +493,7 @@ final class ForumListingServiceTest extends TestCase
         ]);
         $this->topicRepo->shouldReceive('getTopicsByForum')->andReturn(['count' => 0, 'rows' => new Collection]);
 
-        $vm = $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),
+        $vm = $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,
             10,
@@ -528,7 +528,7 @@ final class ForumListingServiceTest extends TestCase
         Settings::saveBatch('tweak', ['enabletooltip' => 'no']);
         Settings::resetCache();
 
-        $vm = $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),
+        $vm = $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,
             10,
@@ -566,7 +566,7 @@ final class ForumListingServiceTest extends TestCase
         ]);
         $this->postRepo->shouldReceive('countTopicPostsBatch')->with([7])->andReturn([7 => 95]); // 10 pages at 10/page
 
-        $vm = $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),
+        $vm = $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,
             10,
@@ -591,7 +591,7 @@ final class ForumListingServiceTest extends TestCase
             ->with(1, 'abc', 'firstpost', 'asc', Mockery::type('int'), Mockery::type('int'))
             ->andReturn(['count' => 0, 'rows' => new Collection]);
 
-        $vm = $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),
+        $vm = $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,
             10,
@@ -634,7 +634,7 @@ final class ForumListingServiceTest extends TestCase
         ]);
         $this->postRepo->shouldReceive('countTopicPostsBatch')->with([7])->andReturn([7 => 3]);
 
-        $vm = $this->service->buildViewForum($this->curUser($curUser),
+        $vm = $this->service->buildViewForum($this->actor($curUser),
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,
             10,
@@ -778,7 +778,7 @@ final class ForumListingServiceTest extends TestCase
         ]);
         $this->postRepo->shouldReceive('countTopicPostsBatch')->with([7, 8, 9])->andReturn([7 => 3, 8 => 5]);
 
-        $vm = $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes', 'showlastpost' => 'yes']),
+        $vm = $this->callWithSuppressedErrors(fn () => $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes', 'showlastpost' => 'yes']),
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,
             10,
@@ -818,7 +818,7 @@ final class ForumListingServiceTest extends TestCase
         auth()->login($user);
 
         $indexService = new ForumIndexService(
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $repo,
             new OverforumRepository,
             $this->app->make(NexusCache::class),
@@ -862,7 +862,7 @@ final class ForumListingServiceTest extends TestCase
             ]),
         ]);
 
-        $vm = $this->callWithSuppressedErrors(fn () => $service->buildViewForum($this->curUser(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes', 'showlastpost' => 'yes']),
+        $vm = $this->callWithSuppressedErrors(fn () => $service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes', 'showlastpost' => 'yes']),
             Request::create('/forums.php', 'GET', ['forumid' => 1]),
             20,
             10,

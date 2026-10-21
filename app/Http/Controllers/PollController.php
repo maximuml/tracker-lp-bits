@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\MakePollRequest;
 use App\Http\Requests\PolloverviewRequest;
 use App\Http\Requests\PollStoreRequest;
@@ -14,7 +15,6 @@ use App\Models\Poll;
 use App\Repositories\IndexRepository;
 use App\Repositories\PollRepository;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Strings;
@@ -31,19 +31,19 @@ class PollController extends BasePageController
 
     private IndexRepository $indexRepository;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     private ?NexusCache $cache;
 
     public function __construct(
         PollRepository $pollRepository,
         IndexRepository $indexRepository,
-        CurrentUser $currentUser,
+        ActorContext $actor,
         ?NexusCache $cache,
     ) {
         $this->pollRepository = $pollRepository;
         $this->indexRepository = $indexRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
         $this->cache = $cache;
     }
 
@@ -283,8 +283,8 @@ class PollController extends BasePageController
      */
     public function vote(PollVoteRequest $request): array
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
-        $userId = (int) ($this->currentUser->id());
+        $currentUser = (array) ($this->actor->toLegacyArray());
+        $userId = (int) ($this->actor->id);
 
         $data = $request->validated();
 

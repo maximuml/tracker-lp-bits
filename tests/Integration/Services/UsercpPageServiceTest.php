@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Repositories\UsercpLookupRepository;
@@ -16,7 +17,6 @@ use App\Services\Usercp\UsercpSecurityBuilder;
 use App\Services\Usercp\UsercpTrackerBuilder;
 use App\Services\UsercpPageService;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\ViewModels\Search\SearchCategoryTableFactory;
 use App\ViewModels\Usercp\TwoStepState;
 use App\ViewModels\Usercp\UsercpHomeSection;
@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -42,11 +43,12 @@ use Tests\TestCase;
 final class UsercpPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private UsercpPageService $service;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     /** @var TokenRepository&MockInterface */
     private TokenRepository $tokenRepository;
@@ -66,7 +68,7 @@ final class UsercpPageServiceTest extends TestCase
 
         $this->userId = $this->createUser();
 
-        $this->currentUser = new CurrentUser;
+        $this->actor = $this->actor([]);
         $this->tokenRepository = Mockery::mock(TokenRepository::class);
         $this->passkeyRepository = Mockery::mock(UserPasskeyRepository::class);
 
@@ -78,7 +80,7 @@ final class UsercpPageServiceTest extends TestCase
         $lookup = app(UsercpLookupRepository::class);
 
         return new UsercpPageService(
-            $this->currentUser ?? new CurrentUser,
+            $this->actor ?? $this->actor([]),
             new UsercpHomeBuilder(
                 $lookup,
                 app(UsercpRepository::class),
@@ -135,7 +137,7 @@ final class UsercpPageServiceTest extends TestCase
     /** @param  array<string, mixed>  $overrides */
     private function setCurrentUser(array $overrides = []): void
     {
-        $this->currentUser->set(array_merge([
+        $this->actor = $this->actor(array_merge([
             'id' => $this->userId,
             'username' => 'testuser',
             'class' => 1,
@@ -151,6 +153,7 @@ final class UsercpPageServiceTest extends TestCase
             'stylesheet' => 1,
             'two_step_secret' => '',
         ], $overrides));
+        $this->service = $this->makeService();
     }
 
     private function mockTokenRepo(): void

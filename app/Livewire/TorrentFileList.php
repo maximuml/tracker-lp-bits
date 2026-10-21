@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
-use App\Support\CurrentUser;
+use App\DTOs\Auth\ActorContext;
 use App\Support\Format;
 use App\Support\Torrent\FileBadge;
 use Illuminate\Contracts\View\View;
@@ -26,12 +26,12 @@ final class TorrentFileList extends Component
 
     private ?TorrentAjaxRepositoryInterface $torrentAjaxRepository = null;
 
-    private ?CurrentUser $currentUser = null;
+    private ?ActorContext $actor = null;
 
-    public function boot(TorrentAjaxRepositoryInterface $torrentAjaxRepository, CurrentUser $currentUser): void
+    public function boot(TorrentAjaxRepositoryInterface $torrentAjaxRepository, ActorContext $actor): void
     {
         $this->torrentAjaxRepository = $torrentAjaxRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
     }
 
     public function mount(int $torrentId): void
@@ -61,7 +61,7 @@ final class TorrentFileList extends Component
                 ->all()
             : [];
 
-        return view('livewire.torrent-file-list', ['files' => $files, 'CURUSER' => $this->currentUser()->get()]);
+        return view('livewire.torrent-file-list', ['files' => $files, 'CURUSER' => $this->actor()->toLegacyArray()]);
     }
 
     private function torrentAjaxRepository(): TorrentAjaxRepositoryInterface
@@ -69,8 +69,8 @@ final class TorrentFileList extends Component
         return $this->torrentAjaxRepository ?? throw new \LogicException('TorrentFileList used before boot()');
     }
 
-    private function currentUser(): CurrentUser
+    private function actor(): ActorContext
     {
-        return $this->currentUser ?? throw new \LogicException('TorrentFileList used before boot()');
+        return $this->actor ?? throw new \LogicException('TorrentFileList used before boot()');
     }
 }

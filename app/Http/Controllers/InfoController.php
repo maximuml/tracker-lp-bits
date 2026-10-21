@@ -7,13 +7,13 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\BitbucketLogRequest;
 use App\Http\Requests\DonatedRequest;
 use App\Http\Requests\DonateSubmitRequest;
 use App\Services\BitbucketService;
 use App\Services\PermissionChecker;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
@@ -31,15 +31,14 @@ class InfoController extends BasePageController
 {
     public function __construct(private readonly UsercpLookupRepositoryInterface $usercpLookupRepository, private readonly PermissionChecker $permissionChecker,
         private readonly BitbucketService $bitbucketService,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly InfoRepositoryInterface $infoRepository,
         private readonly UserRepositoryInterface $userRepository,
     ) {}
 
     public function userhistory(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/userhistory'.($qs ? '?'.$qs : ''));
@@ -48,7 +47,7 @@ class InfoController extends BasePageController
         $userid = (int) $request->query('id');
         PageResponses::assertId($userid, true);
 
-        $viewerId = (int) ($this->currentUser->id());
+        $viewerId = (int) ($this->actor->id);
         if ($viewerId != $userid && ! $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_HISTORY->value, false, $viewerId)) {
             PageResponses::permissionDenied();
         }
@@ -70,7 +69,7 @@ class InfoController extends BasePageController
         ];
 
         if ($action === 'viewposts') {
-            $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($this->currentUser->classId()), $perpage, $phpSelf);
+            $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($this->actor->class->value), $perpage, $phpSelf);
             if (empty($result['posts'])) {
                 return $this->abortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_posts_found')));
             }
@@ -224,7 +223,7 @@ class InfoController extends BasePageController
 
     public function bitbucketlog(Request $request): Response|RedirectResponse|View
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $currentUser = (array) ($this->actor->toLegacyArray());
         $currentClass = (int) UserDisplay::currentClass();
 
         if ($currentClass < (defined('UC_ADMINISTRATOR') ? \constant('UC_ADMINISTRATOR') : 0)) {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\GetrssRequest;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Locale;
 use App\Support\PageResponses;
@@ -23,14 +23,13 @@ use Illuminate\View\View;
 class RssController extends BasePageController
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly SearchCategoryTableFactory $searchCategoryTableFactory,
     ) {}
 
     public function getrss(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/web/getrss');
         }
 
@@ -112,8 +111,7 @@ class RssController extends BasePageController
 
     private function handleGetrssPost(Request $request): Response|RedirectResponse
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/web/getrss');
         }
 
@@ -126,7 +124,7 @@ class RssController extends BasePageController
             return $this->getrssMessageResponse(__('getrss.std_error'), __('getrss.std_no_row'));
         }
 
-        $query = ['passkey' => $this->currentUser->passkey(), 'rows' => (int) $showrows];
+        $query = ['passkey' => $this->actor->passkey ?? '', 'rows' => (int) $showrows];
 
         $brcats = Category::listByModeWithContext($browsecatmode);
         foreach ($brcats as $cat) {

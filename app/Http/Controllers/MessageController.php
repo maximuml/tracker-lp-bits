@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\DTOs\Message\ListUnreadDto;
 use App\DTOs\Message\MessageListDto;
 use App\DTOs\Message\StoreMessageDto;
@@ -19,7 +20,6 @@ use App\Models\Message;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Services\MessageService;
-use App\Support\CurrentUser;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -42,7 +42,7 @@ class MessageController extends BasePageController
         MessageRepository $repository,
         MessageService $legacyService,
         MessagePageService $pageService,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly UserRepositoryInterface $userRepository,
     ) {
         $this->repository = $repository;
@@ -79,7 +79,7 @@ class MessageController extends BasePageController
 
     public function sendmessage(Request $request): Response|RedirectResponse|View
     {
-        $currentUser = (array) ($this->currentUser->get() ?? []);
+        $currentUser = (array) ($this->actor->toLegacyArray());
 
         $receiver = (int) $request->input('receiver', 0);
         if ($receiver <= 0) {
@@ -105,10 +105,10 @@ class MessageController extends BasePageController
                 return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
             }
             $msga = $msg->toArray();
-            if ((int) ($msga['receiver'] ?? 0) !== (int) ($this->currentUser->id())) {
+            if ((int) ($msga['receiver'] ?? 0) !== (int) ($this->actor->id)) {
                 return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
             }
-            $body .= ($msga['msg'] ?? '')."\n\n-------- [url=/userdetails?id=".$this->currentUser->id().']'.$this->currentUser->username().'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
+            $body .= ($msga['msg'] ?? '')."\n\n-------- [url=/userdetails?id=".$this->actor->id.']'.$this->actor->username.'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
             $subject = (string) ($msga['subject'] ?? '');
             if (preg_match('/^Re:\\s/', $subject)) {
                 $subject = preg_replace('/^Re:\\s(.*)$/', 'Re(2): \\1', $subject) ?? $subject;
@@ -142,8 +142,8 @@ class MessageController extends BasePageController
             'title' => $title,
             'frameTitle' => $frameTitle,
             'stdheadMsgalert' => false,
-            'deleteChecked' => $this->currentUser->yes('deletepms') ? ' checked' : '',
-            'saveChecked' => $this->currentUser->yes('savepms') ? ' checked' : '',
+            'deleteChecked' => $this->actor->yes('deletepms') ? ' checked' : '',
+            'saveChecked' => $this->actor->yes('savepms') ? ' checked' : '',
         ]);
     }
 

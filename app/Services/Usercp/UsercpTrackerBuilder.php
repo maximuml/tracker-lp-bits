@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Usercp;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserAppendPromotion;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
@@ -11,7 +12,6 @@ use App\Enums\UserTimeType;
 use App\Enums\UserTooltip;
 use App\Repositories\StyleRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
@@ -29,12 +29,12 @@ final class UsercpTrackerBuilder
         private readonly SearchCategoryTableFactory $searchCategoryTableFactory
     ) {}
 
-    public function build(CurrentUser $curUser): UsercpTrackerSection
+    public function build(ActorContext $actor): UsercpTrackerSection
     {
         $showTooltipSetting = SiteConfig::current()->tweak->enableTooltip();
         $browsecatmode = SiteConfig::current()->main->browseCat(1);
 
-        $notifs = (string) $curUser->value('notifs', '');
+        $notifs = (string) $actor->value('notifs', '');
         $specialState = 0;
         for ($i = 7; $i >= 0; $i--) {
             if (str_contains($notifs, "[spstate={$i}]")) {
@@ -45,7 +45,7 @@ final class UsercpTrackerBuilder
 
         $categoriesTable = $this->searchCategoryTableFactory->create($browsecatmode, 'yes', '/web/torrents?allsec=1&', '', 3, $notifs, ['section_name' => true]);
 
-        $currentTheme = UserTheme::fromStringSafe(is_string($curUser->value('theme', null)) ? $curUser->value('theme') : null)->value;
+        $currentTheme = UserTheme::fromStringSafe(is_string($actor->value('theme', null)) ? $actor->value('theme') : null)->value;
         $themeOptions = [];
         foreach (UserTheme::cases() as $theme) {
             $themeOptions[$theme->value] = (string) __('usercp.select_theme_'.$theme->value);
@@ -87,29 +87,29 @@ final class UsercpTrackerBuilder
             inclbookmarked: $inclbookmarked,
             promotionOptionsHtml: SafeHtml::fromTrustedHtml(Html::promotionSelection($specialState)),
             stylesheetOptions: $stylesheetOptions,
-            currentStylesheet: (int) $curUser->value('stylesheet', 0),
+            currentStylesheet: (int) $actor->value('stylesheet', 0),
             themeOptions: $themeOptions,
             currentTheme: $currentTheme,
-            fontsize: UserFontsize::tryFrom((int) $curUser->value('fontsize', 1))?->stringValue() ?? 'medium',
+            fontsize: UserFontsize::tryFrom((int) $actor->value('fontsize', 1))?->stringValue() ?? 'medium',
             langOptions: $siteLanguages,
             currentLangId: $currentLangId,
-            pmnum: (int) $curUser->value('pmnum', 0),
+            pmnum: (int) $actor->value('pmnum', 0),
             showShoutbox: SiteConfig::current()->main->showShoutbox(),
-            sbnum: (int) $curUser->value('sbnum', 0),
-            sbrefresh: (int) $curUser->value('sbrefresh', 0),
-            showdescription: $curUser->yes('showdescription'),
-            showcomment: $curUser->yes('showcomment'),
-            timetype: UserTimeType::tryFrom((int) $curUser->value('timetype', 1))?->stringValue() ?? 'timealive',
-            torrentsperpage: (int) $curUser->value('torrentsperpage', 0),
-            tooltip: UserTooltip::tryFrom((int) $curUser->value('tooltip', 2))?->stringValue() ?? 'off',
-            appendsticky: $curUser->yes('appendsticky'),
-            appendnew: $curUser->yes('appendnew'),
-            appendpromotion: UserAppendPromotion::tryFrom((int) $curUser->value('appendpromotion', 2))?->stringValue() ?? 'icon',
-            appendpicked: $curUser->yes('appendpicked'),
-            dlicon: $curUser->yes('dlicon'),
-            bmicon: $curUser->yes('bmicon'),
-            showcomnum: $curUser->yes('showcomnum'),
-            showlastcom: ! $curUser->no('showlastcom'),
+            sbnum: (int) $actor->value('sbnum', 0),
+            sbrefresh: (int) $actor->value('sbrefresh', 0),
+            showdescription: $actor->yes('showdescription'),
+            showcomment: $actor->yes('showcomment'),
+            timetype: UserTimeType::tryFrom((int) $actor->value('timetype', 1))?->stringValue() ?? 'timealive',
+            torrentsperpage: (int) $actor->value('torrentsperpage', 0),
+            tooltip: UserTooltip::tryFrom((int) $actor->value('tooltip', 2))?->stringValue() ?? 'off',
+            appendsticky: $actor->yes('appendsticky'),
+            appendnew: $actor->yes('appendnew'),
+            appendpromotion: UserAppendPromotion::tryFrom((int) $actor->value('appendpromotion', 2))?->stringValue() ?? 'icon',
+            appendpicked: $actor->yes('appendpicked'),
+            dlicon: $actor->yes('dlicon'),
+            bmicon: $actor->yes('bmicon'),
+            showcomnum: $actor->yes('showcomnum'),
+            showlastcom: ! $actor->no('showlastcom'),
             showTooltipSetting: $showTooltipSetting,
         );
     }

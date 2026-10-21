@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\OfferRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\AllowOfferRequest;
 use App\Http\Requests\DeleteOfferRequest;
 use App\Http\Requests\FinishOfferRequest;
@@ -15,7 +16,6 @@ use App\Services\OfferModerationService;
 use App\Services\OfferPageService;
 use App\Services\OfferService;
 use App\Services\OfferVoteService;
-use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -37,7 +37,7 @@ class OfferController extends BasePageController
         OfferPageService $pageService,
         OfferVoteService $offerVoteService,
         private readonly OfferModerationService $offerModerationService,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {
         $this->repository = $repository;
         $this->offerService = $offerService;
@@ -63,7 +63,7 @@ class OfferController extends BasePageController
 
     public function legacy(Request $request): View|RedirectResponse|Response
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/offers'.($qs ? '?'.$qs : ''));

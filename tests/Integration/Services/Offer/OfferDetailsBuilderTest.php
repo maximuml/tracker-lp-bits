@@ -7,10 +7,10 @@ namespace Tests\Integration\Services\Offer;
 use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\Offer;
 use App\Services\Offer\OfferDetailsBuilder;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\Time;
 use App\ViewModels\Offer\OfferDetailsViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -72,9 +72,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->cache->shouldIgnoreMissing();
         $this->cache->shouldReceive('get')->andReturn(false)->byDefault();
 
-        $currentUser = new CurrentUser;
-        $currentUser->set(['id' => 7, 'username' => 'u', 'class' => 0]);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor(['id' => 7, 'username' => 'u', 'class' => 0]));
 
         $this->seedTestSettings(['BASEURL' => 'http://test.com']);
     }
@@ -98,7 +96,7 @@ final class OfferDetailsBuilderTest extends TestCase
         set_error_handler(static fn (int $severity): bool => true, E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
 
         try {
-            return $this->builder()->build($this->curUser($curUser), 7, $request ?? $this->request());
+            return $this->builder()->build($this->actor($curUser), 7, $request ?? $this->request());
         } finally {
             restore_error_handler();
         }
@@ -166,7 +164,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->voteRepo->shouldReceive('getVoteCounts')->with(5)->andReturn(['yeah' => 4, 'against' => 2]);
         $this->commentRepo->shouldReceive('countComments')->with(5)->andReturn(0);
 
-        $s = $this->builder()->build($this->curUser(['id' => 7, 'timetype' => 1]), 7, $this->request());
+        $s = $this->builder()->build($this->actor(['id' => 7, 'timetype' => 1]), 7, $this->request());
 
         $this->assertTrue($s->isPending);
         $this->assertSame('nx-color-red', $s->status->cssClass);
@@ -188,7 +186,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
         $this->commentRepo->shouldReceive('countComments')->andReturn(0);
 
-        $s = $this->builder()->build($this->curUser(['id' => 7, 'timetype' => 0]), 7, $this->request());
+        $s = $this->builder()->build($this->actor(['id' => 7, 'timetype' => 0]), 7, $this->request());
 
         $this->assertSame(
             (string) __('offers.text_at').Time::format('2024-01-02 03:04:05', true, false),
@@ -202,7 +200,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
         $this->commentRepo->shouldReceive('countComments')->andReturn(0);
 
-        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request());
+        $s = $this->builder()->build($this->actor(['id' => 7]), 7, $this->request());
 
         $this->assertFalse($s->isPending);
         $this->assertSame((string) __('offers.text_allowed'), $s->status->label);
@@ -217,7 +215,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
         $this->commentRepo->shouldReceive('countComments')->andReturn(0);
 
-        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request());
+        $s = $this->builder()->build($this->actor(['id' => 7]), 7, $this->request());
 
         $this->assertSame((string) __('offers.text_voter_receives_pm_note'), $s->allowedNote);
         $this->assertFalse($s->showEditDelete);
@@ -229,7 +227,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
         $this->commentRepo->shouldReceive('countComments')->andReturn(0);
 
-        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request());
+        $s = $this->builder()->build($this->actor(['id' => 7]), 7, $this->request());
 
         $this->assertSame('nx-color-red', $s->status->cssClass);
         $this->assertSame((string) __('offers.text_denied'), $s->status->label);
@@ -260,7 +258,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->commentRepo->shouldReceive('countComments')->andReturn(0);
         $this->cache->shouldReceive('put')->never();
 
-        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request());
+        $s = $this->builder()->build($this->actor(['id' => 7]), 7, $this->request());
         $this->assertSame('', (string) $s->description);
     }
 
@@ -270,7 +268,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
         $this->commentRepo->shouldReceive('countComments')->with(5)->andReturn(30);
 
-        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request());
+        $s = $this->builder()->build($this->actor(['id' => 7]), 7, $this->request());
 
         $this->assertSame(30, $s->commentCount);
         $this->assertNotEmpty((string) $s->pagerTop);

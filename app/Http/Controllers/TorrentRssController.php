@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
@@ -15,7 +16,6 @@ use App\Services\PasskeyUserLookup;
 use App\Services\PermissionChecker;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Log;
@@ -39,7 +39,7 @@ class TorrentRssController extends BasePageController
     public function __construct(private readonly UserRepositoryInterface $userRepository, private readonly PermissionChecker $permissionChecker,
         TorrentRepositoryInterface $torrentRepository,
         TorrentDownloadRepositoryInterface $downloadRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly NexusCache $cache,
     ) {
         $this->torrentRepository = $torrentRepository;
@@ -49,8 +49,8 @@ class TorrentRssController extends BasePageController
     public function torrentrss(Request $request): Response
     {
         $cache = $this->cache;
-        $currentUser = $this->currentUser->get() ?? [];
-        $passkey = (string) ($request->input('passkey') ?? $this->currentUser->passkey());
+        $currentUser = $this->actor->toLegacyArray();
+        $passkey = (string) ($request->input('passkey') ?? $this->actor->passkey ?? '');
 
         if ($passkey === '') {
             return response('require passkey', 400, ['Content-Type' => 'text/plain; charset=utf-8']);

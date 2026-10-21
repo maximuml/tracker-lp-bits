@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\DTOs\Forum\StoreForumDto;
 use App\DTOs\Forum\UpdateForumDto;
 use App\Http\Requests\ForumDeletePostRequest;
@@ -18,7 +19,6 @@ use App\Repositories\CommentRepository;
 use App\Services\ForumPageService;
 use App\Services\ForumService;
 use App\Support\Avatar;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
@@ -34,7 +34,7 @@ class ForumController extends BasePageController
     public function __construct(private readonly ForumRepositoryInterface $forumRepository,
         private readonly ForumService $service,
         private readonly ForumPageService $pageService,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly CommentRepository $commentRepository,
     ) {}
 
@@ -48,7 +48,7 @@ class ForumController extends BasePageController
      */
     public function legacy(Request $request): View|Response|RedirectResponse
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/forums?'.$request->getQueryString());
         }
 
@@ -64,7 +64,7 @@ class ForumController extends BasePageController
 
     public function legacyAction(Request $request): Response|RedirectResponse
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/forums?'.$request->getQueryString());
         }
 
@@ -133,7 +133,7 @@ class ForumController extends BasePageController
 
     private function forumsGate(Request $request): ?RedirectResponse
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/forums'.($qs !== null && $qs !== '' ? '?'.$qs : ''));
@@ -157,7 +157,7 @@ class ForumController extends BasePageController
             $userDisplayMap[(int) $uid] = UserDisplay::username((int) $uid, false, true, true, false, false, true);
         }
 
-        $showAvatars = $this->currentUser->yes('avatars');
+        $showAvatars = $this->actor->yes('avatars');
         foreach ($rows as &$row) {
             $row = (array) $row;
             $commentId = (int) ($row['id'] ?? 0);

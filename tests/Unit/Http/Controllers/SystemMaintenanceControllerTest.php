@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Contracts\CleanupServiceInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Http\Controllers\SystemMaintenanceController;
 use App\Http\Requests\CleanupRequest;
 use App\Support\CurrentUser;
@@ -12,11 +13,14 @@ use Illuminate\Http\Request;
 use Mockery;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class SystemMaintenanceControllerTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function tearDown(): void
     {
         Mockery::close();
@@ -158,5 +162,11 @@ final class SystemMaintenanceControllerTest extends TestCase
         $real = new CurrentUser;
         $real->set($user);
         app()->instance(CurrentUser::class, $real);
+        app()->instance(
+            ActorContext::class,
+            $user === null
+                ? $this->actor([])
+                : $this->actor(array_merge(['id' => 1, 'username' => 'testuser'], $user)),
+        );
     }
 }

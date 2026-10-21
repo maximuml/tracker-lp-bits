@@ -7,9 +7,9 @@ namespace Tests\Integration\Services\Offer;
 use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Services\Offer\OfferListBuilder;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\Time;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -33,6 +34,7 @@ use Tests\TestCase;
 final class OfferListBuilderTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     /** @var OfferRepositoryInterface&MockInterface */
@@ -72,9 +74,7 @@ final class OfferListBuilderTest extends TestCase
         $this->cache->shouldReceive('get')->andReturn(false)->byDefault();
         $this->cache->shouldReceive('getMany')->andReturn([])->byDefault();
 
-        $currentUser = new CurrentUser;
-        $currentUser->set(['id' => 7, 'username' => 'u', 'class' => 0]);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->curUser(['id' => 7, 'username' => 'u', 'class' => 0]));
 
         $_SERVER['PHP_SELF'] = '/web/offers';
 
@@ -156,12 +156,9 @@ final class OfferListBuilderTest extends TestCase
     }
 
     /** @param  array<string, mixed>  $overrides */
-    private function curUser(array $overrides = []): CurrentUser
+    private function curUser(array $overrides = []): ActorContext
     {
-        $user = new CurrentUser;
-        $user->set(array_merge(['id' => 7, 'timetype' => 1, 'appendnew' => 'yes', 'last_offer' => '2000-01-01 00:00:00'], $overrides));
-
-        return $user;
+        return $this->actor(array_merge(['id' => 7, 'timetype' => 1, 'appendnew' => 'yes', 'last_offer' => '2000-01-01 00:00:00'], $overrides));
     }
 
     private function assertAbortContains(callable $fn, string $needle): void
@@ -180,7 +177,7 @@ final class OfferListBuilderTest extends TestCase
     public function test_invalid_sort_aborts(): void
     {
         $this->assertAbortContains(
-            fn () => $this->builder()->build($this->curUser(), 7, $this->request(['sort' => 'evil']), $this->globalData()),
+            fn () => $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(['sort' => 'evil']), $this->globalData()),
             (string) __('offers.std_smell_rat'),
         );
     }
@@ -192,7 +189,7 @@ final class OfferListBuilderTest extends TestCase
             ->with(0, 0, '', ' ORDER BY name asc', 'desc', Mockery::type('int'), Mockery::type('int'))
             ->andReturn($this->listResult([], 0));
 
-        $s = $this->builder()->build($this->curUser(), 7, $this->request(['sort' => 'name', 'type' => 'desc']), $this->globalData());
+        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(['sort' => 'name', 'type' => 'desc']), $this->globalData());
 
         $this->assertSame(0, $s->count);
         $this->assertNull($s->table);
@@ -207,7 +204,7 @@ final class OfferListBuilderTest extends TestCase
             ->with(0, 0, '', '', 'asc', Mockery::type('int'), Mockery::type('int'))
             ->andReturn($this->listResult([], 0));
 
-        $this->builder()->build($this->curUser(), 7, $this->request(['sort' => 'yeah', 'type' => 'asc']), $this->globalData());
+        $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(['sort' => 'yeah', 'type' => 'asc']), $this->globalData());
         $this->addToAssertionCount(1);
     }
 
@@ -219,7 +216,7 @@ final class OfferListBuilderTest extends TestCase
             ->andReturn($this->listResult([], 0));
 
         $s = $this->builder()->build(
-            $this->curUser(),
+            $this->curUser(['id' => 7]),
             7,
             $this->request(['category' => 3, 'offerorid' => 42, 'search' => 'needle']),
             $this->globalData(),
@@ -233,7 +230,7 @@ final class OfferListBuilderTest extends TestCase
         $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([], 0));
         $this->usercpRepo->shouldReceive('updateLastOffer')->with(7)->once();
 
-        $s = $this->builder()->build($this->curUser(), 7, $this->request(), $this->globalData());
+        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(), $this->globalData());
 
         $this->assertSame(0, $s->count);
         $this->assertNull($s->table);
@@ -248,7 +245,7 @@ final class OfferListBuilderTest extends TestCase
             $this->row(['id' => 2, 'allowed' => 2, 'name' => str_repeat('x', 80)]),
         ], 2));
 
-        $s = $this->builder()->build($this->curUser(), 7, $this->request(), $this->globalData());
+        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(), $this->globalData());
 
         $table = $s->table;
         $this->assertNotNull($table);
@@ -273,7 +270,7 @@ final class OfferListBuilderTest extends TestCase
             5 => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'hi'],
         ]);
 
-        $s = $this->builder()->build($this->curUser(), 7, $this->request(['category' => '4']), $this->globalData());
+        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(['category' => '4']), $this->globalData());
 
         $table = $s->table;
         $this->assertNotNull($table);
@@ -309,7 +306,7 @@ final class OfferListBuilderTest extends TestCase
         $this->cache->shouldReceive('put')->with('offer_2_last_comment_content', Mockery::type('array'), 1855)->once();
         $this->cache->shouldReceive('put')->with('offer_1_last_comment_content', Mockery::any(), Mockery::any())->never();
 
-        $s = $this->builder()->build($this->curUser(), 7, $this->request(), $this->globalData());
+        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(), $this->globalData());
 
         $table = $s->table;
         $this->assertNotNull($table);
@@ -338,7 +335,7 @@ final class OfferListBuilderTest extends TestCase
             'offer_1_last_comment_content' => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'cached comment'],
         ]);
 
-        $s = $this->builder()->build($this->curUser(['timetype' => 1]), 7, $this->request(), $this->globalData());
+        $s = $this->builder()->build($this->curUser(['id' => 7, 'timetype' => 1]), 7, $this->request(), $this->globalData());
 
         $this->assertNotNull($s->table);
         $tooltip = $s->table->tooltips[0] ?? null;
@@ -370,7 +367,7 @@ final class OfferListBuilderTest extends TestCase
             $puts[] = [$key, $ttl];
         });
 
-        $this->builder()->build($this->curUser(), 7, $this->request(), $this->globalData());
+        $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(), $this->globalData());
 
         $this->assertCount(1, $fmtTtCalls);
         $this->assertStringStartsWith('fmt_tt_', (string) $fmtTtCalls[0][0]);
@@ -389,7 +386,7 @@ final class OfferListBuilderTest extends TestCase
             'offer_1_last_comment_content' => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'x'],
         ]);
 
-        $s = $this->builder()->build($this->curUser(['showlastcom' => false]), 7, $this->request(), $this->globalData());
+        $s = $this->builder()->build($this->curUser(['id' => 7, 'showlastcom' => false]), 7, $this->request(), $this->globalData());
 
         $table = $s->table;
         $this->assertNotNull($table);
@@ -401,7 +398,7 @@ final class OfferListBuilderTest extends TestCase
     {
         $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([$this->row()]));
 
-        $s = $this->builder()->build($this->curUser(['appendnew' => 'no']), 7, $this->request(), $this->globalData());
+        $s = $this->builder()->build($this->curUser(['id' => 7, 'appendnew' => 'no']), 7, $this->request(), $this->globalData());
 
         $table = $s->table;
         $this->assertNotNull($table);
@@ -412,7 +409,7 @@ final class OfferListBuilderTest extends TestCase
     {
         $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([$this->row()]));
 
-        $s = $this->builder()->build($this->curUser(), 7, $this->request(), $this->globalData(['offervotetimeoutMain' => 3600]));
+        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(), $this->globalData(['offervotetimeoutMain' => 3600]));
 
         $table = $s->table;
         $this->assertNotNull($table);
@@ -428,7 +425,7 @@ final class OfferListBuilderTest extends TestCase
         ], 2));
 
         $s = $this->builder()->build(
-            $this->curUser(),
+            $this->curUser(['id' => 7]),
             7,
             $this->request(),
             $this->globalData(['offervotetimeoutMain' => 3600, 'offeruptimeoutMain' => 7200]),

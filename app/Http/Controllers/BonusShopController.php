@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\ExamRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\ExamType;
 use App\Http\Requests\FreeleechRequest;
 use App\Models\User;
 use App\Repositories\UserDetailRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
@@ -26,14 +26,14 @@ use Illuminate\View\View;
 class BonusShopController extends BasePageController
 {
     public function __construct(private readonly UserDetailRepository $userDetailRepository, private readonly ExamRepositoryInterface $examRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ?NexusCache $cache,
     ) {}
 
     public function task(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $actor = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
 
         $total = $this->examRepository->countEnabledTasks();
         $perPage = 20;

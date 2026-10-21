@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -51,6 +52,10 @@ class CurrentUser
     {
         $this->cached = $user;
         $this->initialized = true;
+        // ActorContext is an immutable snapshot of this state — any change
+        // must drop a previously resolved instance so late consumers
+        // re-resolve fromAuth() with the new user.
+        app()->forgetInstance(ActorContext::class);
     }
 
     /**
@@ -60,6 +65,7 @@ class CurrentUser
     {
         $this->cached = null;
         $this->initialized = false;
+        app()->forgetInstance(ActorContext::class);
     }
 
     public function isLoggedIn(): bool

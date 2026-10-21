@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\Topic;
 use App\Models\User;
 use App\Policies\PostPolicy;
@@ -17,13 +18,13 @@ use App\Services\ForumDataRepositories;
 use App\Services\ForumModerationService;
 use App\Services\ForumService;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -38,6 +39,7 @@ use Tests\TestCase;
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumServiceTest extends TestCase
 {
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private int $initialObLevel;
@@ -162,7 +164,7 @@ final class ForumServiceTest extends TestCase
     {
         return new ForumService(
             $this->app->make(ForumDataRepositories::class),
-            $this->app->make(CurrentUser::class),
+            $this->app->make(ActorContext::class),
             $this->app->make(NexusCache::class),
             $this->app->make(TopicPolicy::class),
             $this->app->make(PostPolicy::class),
@@ -173,9 +175,7 @@ final class ForumServiceTest extends TestCase
 
     private function unauthenticatedUser(): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set([]);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor([]));
     }
 
     /**
@@ -192,9 +192,7 @@ final class ForumServiceTest extends TestCase
         ];
         $data = array_merge($defaults, $userData);
 
-        $currentUser = new CurrentUser;
-        $currentUser->set($data);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor($data));
     }
 
     /**

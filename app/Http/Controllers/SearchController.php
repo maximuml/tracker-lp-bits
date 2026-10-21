@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Repositories\SearchPageRepository;
 use App\Repositories\TorrentListingRepository;
 use App\Services\UsersearchPageService;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\RedisGuard;
@@ -27,18 +26,16 @@ use Illuminate\View\View;
 class SearchController extends BasePageController
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
         private readonly UsersearchPageService $usersearchPageService,
         private readonly SearchPageRepository $searchPageRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly TorrentListViewFactory $torrentListFactory,
         private readonly TorrentListingRepository $torrentListingRepository,
     ) {}
 
     public function search(Request $request): View|RedirectResponse
     {
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUser = ! empty($curUser) ? $this->userRepository->findById((int) ($this->currentUser->id())) : null;
+        $currentUser = $this->actor->user;
         if ($currentUser === null) {
             $qs = $request->getQueryString();
 
@@ -64,7 +61,7 @@ class SearchController extends BasePageController
     public function tags(Request $request): View|RedirectResponse
     {
         $siteName = Setting::getSiteName();
-        $username = (string) (($this->currentUser->get() ?? [])['username'] ?? '');
+        $username = $this->actor->username;
 
         return $this->renderPage($request, 'tags', false, [
             'test' => (string) $request->post('test', ''),

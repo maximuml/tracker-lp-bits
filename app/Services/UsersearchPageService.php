@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Repositories\UserSearchRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Schema;
 final class UsersearchPageService
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly UserSearchRepositoryInterface $userSearchRepository,
         private readonly UserListingRepository $userListingRepository,
     ) {}
@@ -44,7 +44,7 @@ final class UsersearchPageService
      */
     public function build(Request $request): UsersearchPageViewModel
     {
-        $curUser = $this->currentUser;
+        $actor = $this->actor;
         $requestUri = (string) RequestValues::serverValue('REQUEST_URI');
         $hasModcomment = Schema::hasColumn('users', 'modcomment');
 
@@ -65,7 +65,7 @@ final class UsersearchPageService
         if (count(request()->query()) > 0 && empty(request()->query('h'))) {
             $hasResults = true;
             try {
-                $results = $this->buildResults($curUser, $hasModcomment, $requestUri);
+                $results = $this->buildResults($actor, $hasModcomment, $requestUri);
             } catch (\InvalidArgumentException $e) {
                 $resultsError = SafeHtml::fromTrustedHtml(view('partials.std-message', [
                     'heading' => 'Error',
@@ -188,7 +188,7 @@ final class UsersearchPageService
     /**
      * Build the results table view model.
      */
-    private function buildResults(CurrentUser $curUser, bool $hasModcomment, string $requestUri): UsersearchResultsViewModel
+    private function buildResults(ActorContext $actor, bool $hasModcomment, string $requestUri): UsersearchResultsViewModel
     {
         $searchResult = $this->userSearchRepository->administrativeSearch((array) request()->query(), $hasModcomment, 30);
         $count = (int) $searchResult['count'];
@@ -200,7 +200,7 @@ final class UsersearchPageService
         $userIds = array_map(fn ($row) => (int) ($row['id'] ?? 0), $res);
         $ips = array_map(fn ($row) => (string) ($row['ip'] ?? ''), $res);
         UserDisplay::preload($userIds);
-        $extraStats = $this->userListingRepository->getSearchExtraStats($userIds, $ips, (int) $curUser->value('class', 0));
+        $extraStats = $this->userListingRepository->getSearchExtraStats($userIds, $ips, (int) $actor->value('class', 0));
         $peerTotals = $extraStats['peers'];
         $postCounts = $extraStats['posts'];
         $commentCounts = $extraStats['comments'];

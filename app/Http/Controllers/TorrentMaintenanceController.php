@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClass as UserClassEnum;
 use App\Http\Requests\FlushTorrentRequest;
@@ -15,7 +16,6 @@ use App\Repositories\PeerRepository;
 use App\Repositories\TorrentAjaxRepository;
 use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Path;
@@ -32,7 +32,7 @@ use Rhilip\Bencode\Bencode;
 class TorrentMaintenanceController extends BasePageController
 {
     public function __construct(private readonly TorrentAjaxRepository $torrentAjaxRepository, private readonly PermissionChecker $permissionChecker, private readonly MessageRepository $messageRepository, private readonly PeerRepository $peerRepository, private readonly TorrentRepositoryInterface $torrentRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
     ) {}
 
     public function torrentInfo(Request $request): View|RedirectResponse|Response
@@ -47,8 +47,8 @@ class TorrentMaintenanceController extends BasePageController
             abort(404);
         }
 
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $actor = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
         if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_STRUCTURE->value, false, $currentUserId)) {
             abort(403);
         }
@@ -114,8 +114,8 @@ class TorrentMaintenanceController extends BasePageController
             return $this->abortResponse('Error', 'Invalid ID.');
         }
 
-        $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUser = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
         $currentClass = (int) UserDisplay::currentClass();
 
         if ($currentClass >= UserClassEnum::MODERATOR->value || $currentUserId === $id) {
@@ -137,14 +137,13 @@ class TorrentMaintenanceController extends BasePageController
 
     public function reseed(ReseedTorrentRequest $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/takereseed.php'.($qs ? '?'.$qs : ''));
         }
 
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUserId = (int) ($this->actor->id);
         if (! $this->permissionChecker->userCan(PermissionEnum::ASK_RESEED->value, false, $currentUserId)) {
             return $this->abortResponse(__('takereseed.std_error'), ('Permission denied.'));
         }
@@ -170,7 +169,7 @@ class TorrentMaintenanceController extends BasePageController
             $locale = Locale::userLocale((int) $snatchRow['userid']);
             $rsSubject = Locale::trans('torrent.msg_reseed_request', [], $locale);
             $pnMsg = Locale::trans('torrent.msg_reseed_user', [], $locale)
-                .$this->currentUser->username()
+                .$this->actor->username
                 .Locale::trans('torrent.msg_ask_reseed', [], $locale)
                 .'[url='.Url::absolute($baseUrl).'/web/details/'.$reseedid.']'.$snatchRow['torrent_name'].'[/url]'
                 .Locale::trans('torrent.msg_thank_you', [], $locale);

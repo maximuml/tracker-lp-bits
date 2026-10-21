@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Controllers\ForumController;
 use App\Models\Forum;
 use App\Models\User;
@@ -11,12 +12,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class ForumControllerTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     protected function setUp(): void
     {
@@ -45,6 +48,7 @@ final class ForumControllerTest extends TestCase
         $currentUser = new CurrentUser;
         $currentUser->set(['id' => $user->id]);
         app()->instance(CurrentUser::class, $currentUser);
+        app()->instance(ActorContext::class, ActorContext::fromAuth($user));
 
         $controller = app(ForumController::class);
 

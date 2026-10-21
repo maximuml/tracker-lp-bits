@@ -10,7 +10,6 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\NotificationFeed;
 use App\Support\Shoutbox;
@@ -31,7 +30,6 @@ class ShoutboxController extends BasePageController
     public function __construct(
         private readonly ShoutboxRepositoryInterface $repository,
         private readonly ActorContext $actorContext,
-        private readonly CurrentUser $currentUser,
         private readonly NotificationFeed $notificationFeed,
         private readonly SseWriter $sseWriter,
     ) {}
@@ -85,8 +83,8 @@ class ShoutboxController extends BasePageController
     {
         $result = $this->repository->history($request);
 
-        $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUser = $this->actorContext->toLegacyArray();
+        $currentUserId = (int) ($this->actorContext->id);
         $rows = (array) ($result['data'] ?? []);
         $shoutIds = array_map(fn ($r) => (int) ($r['id'] ?? 0), $rows);
         $userIds = array_filter(array_unique(array_map(fn ($r) => (int) ($r['userid'] ?? 0), $rows)));
@@ -173,8 +171,7 @@ class ShoutboxController extends BasePageController
 
     public function shoutboxSse(Request $request): SymfonyResponse
     {
-        $user = $this->currentUser->get();
-        if ($user === null) {
+        if ($this->actorContext->isGuest()) {
             return new SymfonyResponse('', 403);
         }
 
@@ -191,7 +188,7 @@ class ShoutboxController extends BasePageController
                 'staff' => (int) $request->input('last_staff_id', 0),
             ]
         );
-        $userId = (int) ($this->currentUser->id());
+        $userId = (int) ($this->actorContext->id);
 
         // Bounded stream lifetime: the client reconnects after the loop
         // ends and resumes via Last-Event-ID/cursor params.
@@ -310,7 +307,7 @@ class ShoutboxController extends BasePageController
      */
     private function runShoutLoop(string $type, int $lastId, int $maxLoops, int $interval, callable $owns): void
     {
-        $buildQuery = fn (string $type, int $lastId) => $this->repository->newAfterIdQuery($type, $lastId, $this->currentUser->get());
+        $buildQuery = fn (string $type, int $lastId) => $this->repository->newAfterIdQuery($type, $lastId, $this->actorContext->toLegacyArray());
         $query = $buildQuery($type, $lastId);
 
         for ($i = 0; $i < $maxLoops; $i++) {

@@ -15,12 +15,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class TorrentListingControllerTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     public function test_index_redirects_to_login_when_not_authenticated(): void
     {

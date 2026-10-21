@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\HitAndRunStatus;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\ExchangeBonusRequest;
@@ -16,7 +17,6 @@ use App\Services\BonusService;
 use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\PageResponses;
 use App\Support\Pagination;
@@ -32,18 +32,18 @@ class MyController extends Controller
 
     private BonusService $bonusService;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
-    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly HitAndRunRepository $hitAndRunRepository, private readonly UserRepositoryInterface $userRepository, BonusPageService $bonusPageService, BonusService $bonusService, CurrentUser $currentUser)
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly HitAndRunRepository $hitAndRunRepository, private readonly UserRepositoryInterface $userRepository, BonusPageService $bonusPageService, BonusService $bonusService, ActorContext $actor)
     {
         $this->bonusPageService = $bonusPageService;
         $this->bonusService = $bonusService;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
     }
 
     public function bonus(Request $request): View|Response|RedirectResponse
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/mybonus'.($qs ? '?'.$qs : ''));
@@ -54,7 +54,7 @@ class MyController extends Controller
         $actionRedirect = $this->bonusService->handleExchangeActionPublic(
             $request,
             $data['allBonus'],
-            $this->currentUser,
+            $this->actor,
             $data['lockText']
         );
         if ($actionRedirect instanceof RedirectResponse) {
@@ -66,7 +66,7 @@ class MyController extends Controller
 
     public function exchangeBonus(ExchangeBonusRequest $request): RedirectResponse
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/web/mybonus');
         }
 
@@ -75,7 +75,7 @@ class MyController extends Controller
         $response = $this->bonusService->handleExchange(
             $request,
             $data['allBonus'],
-            $this->currentUser,
+            $this->actor,
             $data['lockText']
         );
 
@@ -84,14 +84,14 @@ class MyController extends Controller
 
     public function hr(Request $request): View|RedirectResponse
     {
-        $curUser = $this->currentUser->get();
-        if ($curUser === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/myhr'.($qs ? '?'.$qs : ''));
         }
 
-        $viewerId = (int) ($this->currentUser->id());
+        $curUser = $this->actor->toLegacyArray();
+        $viewerId = $this->actor->id;
         $userid = $viewerId;
         $pagerParams = [];
 
@@ -135,7 +135,7 @@ class MyController extends Controller
         $cancelHrBonus = SiteConfig::current()->bonus->cancelHr();
 
         $hasActionRemove = collect($list)->contains(
-            fn ($row) => $row->uid == $this->currentUser->id() && in_array($row->status, HitAndRun::CAN_PARDON_STATUS)
+            fn ($row) => $row->uid == $this->actor->id && in_array($row->status, HitAndRun::CAN_PARDON_STATUS)
         );
         if ($hasActionRemove) {
             $msg = Locale::trans('hr.remove_confirm_msg', ['bonus' => $cancelHrBonus], null);

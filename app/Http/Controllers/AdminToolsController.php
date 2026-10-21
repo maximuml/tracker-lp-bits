@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Requests\ClearCacheRequest;
 use App\Http\Requests\LocationPostRequest;
 use App\Http\Requests\TestIpRequest;
@@ -12,7 +13,6 @@ use App\Repositories\ModerationRepository;
 use App\Repositories\UserModerationRepository;
 use App\Services\LocationService;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
 use App\Support\Network;
 use App\Support\Pagination;
@@ -29,13 +29,13 @@ class AdminToolsController extends BasePageController
     public function __construct(private readonly UserModerationRepository $userModerationRepository,
         private readonly ModerationRepository $moderationRepository,
         private readonly LocationService $locationService,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ?NexusCache $cache,
     ) {}
 
     public function userBanLog(Request $request): View|RedirectResponse|Response
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/user-ban-log'.($qs ? '?'.$qs : ''));

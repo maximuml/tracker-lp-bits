@@ -28,6 +28,7 @@ use App\Events\UserUpdated;
 use App\Listeners\AppendQueryCountHeader;
 use App\Listeners\ClearTorrentCache;
 use App\Listeners\DeductUserBonusWhenTorrentDeleted;
+use App\Listeners\FlushRouteController;
 use App\Listeners\PublishModelEventToRedis;
 use App\Listeners\RecordCacheMetrics;
 use App\Listeners\RecordModelEventToOutbox;
@@ -101,6 +102,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         RouteMatched::class => [
             ResetQueryLog::class,
+            FlushRouteController::class,
         ],
         RequestHandled::class => [
             AppendQueryCountHeader::class,

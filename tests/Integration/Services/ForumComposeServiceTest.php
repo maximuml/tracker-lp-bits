@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\Contracts\Repositories\ForumRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumComposeService;
-use App\Support\CurrentUser;
 use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -32,6 +33,7 @@ use Tests\TestCase;
 final class ForumComposeServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private int $initialObLevel;
@@ -120,9 +122,7 @@ final class ForumComposeServiceTest extends TestCase
     /** @param  array<string, mixed>  $data */
     private function setUser(array $data = []): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set(array_merge(['id' => 1, 'username' => 'testuser', 'class' => 1], $data));
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor(array_merge(['id' => 1, 'username' => 'testuser', 'class' => 1], $data)));
     }
 
     /** @param  array<string, mixed>  $query */

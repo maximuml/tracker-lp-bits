@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
 use App\Http\Controllers\SystemMaintenanceController;
 use App\Jobs\SendLegacyMail;
@@ -18,12 +19,14 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Queue;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class SystemMaintenanceControllerTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     protected function setUp(): void
     {
@@ -133,6 +136,7 @@ final class SystemMaintenanceControllerTest extends TestCase
         $user = User::factory()->admin()->create();
         $this->actingAs($user);
         app(CurrentUser::class)->set($user->toLegacyArray());
+        app()->instance(ActorContext::class, ActorContext::fromAuth($user));
     }
 
     /**
@@ -143,5 +147,11 @@ final class SystemMaintenanceControllerTest extends TestCase
         $real = new CurrentUser;
         $real->set($user);
         app()->instance(CurrentUser::class, $real);
+        $this->app->instance(
+            ActorContext::class,
+            $user === null
+                ? $this->actor([])
+                : $this->actor(array_merge(['id' => 1, 'username' => 'testuser'], $user)),
+        );
     }
 }

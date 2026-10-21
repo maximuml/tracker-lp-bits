@@ -18,6 +18,11 @@ abstract class BasePageController extends Controller
      */
     protected function renderPage(Request $request, string $page, bool $auth = true, array $data = []): View|RedirectResponse
     {
+        // Ambient-seam read: this base-class helper predates per-child
+        // DI and cannot take a typed ActorContext — 37 children override
+        // __construct without calling parent, and service-location is
+        // ratcheted to zero in controllers. The ambient user singleton
+        // stays the contract here like in SiteAccess / guards / middleware.
         if ($auth && CurrentUser::instance()->get() === null) {
             $qs = $request->getQueryString();
 

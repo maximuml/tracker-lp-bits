@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UtilityController;
@@ -19,11 +20,14 @@ use Mockery;
 use Mockery\MockInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class UtilityControllerTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function tearDown(): void
     {
         Mockery::close();
@@ -316,5 +320,11 @@ final class UtilityControllerTest extends TestCase
         $real = new CurrentUser;
         $real->set($user);
         app()->instance(CurrentUser::class, $real);
+        $this->app->instance(
+            ActorContext::class,
+            $user === null
+                ? $this->actor([])
+                : $this->actor(array_merge(['id' => 1, 'username' => 'testuser'], $user)),
+        );
     }
 }

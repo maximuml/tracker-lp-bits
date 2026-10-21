@@ -6,6 +6,7 @@ namespace Tests\Integration\Http\Controllers;
 
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
 use App\Http\Controllers\CompatRedirectController;
 use App\Http\Controllers\SystemBulkController;
@@ -32,12 +33,14 @@ use Illuminate\View\View;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class SystemBulkControllerTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     protected function setUp(): void
     {
@@ -612,6 +615,12 @@ final class SystemBulkControllerTest extends TestCase
         $real = new CurrentUser;
         $real->set($user);
         app()->instance(CurrentUser::class, $real);
+        $this->app->instance(
+            ActorContext::class,
+            $user === null
+                ? $this->actor([])
+                : $this->actor(array_merge(['id' => 1, 'username' => 'testuser'], $user)),
+        );
     }
 
     private function mockCurrentUserWithDefaults(int $userId, int $class): void

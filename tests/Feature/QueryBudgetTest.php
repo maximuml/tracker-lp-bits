@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\UserClass;
 use App\Models\Message;
 use App\Models\Torrent;
 use App\Models\User;
@@ -76,7 +77,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_index_page_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         $this->withNexusCookie($user);
 
         $this->assertQueryCountBelow(61, function (): void {
@@ -91,7 +92,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_torrents_listing_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         $this->withNexusCookie($user);
 
         $this->assertQueryCountBelow(45, function (): void {
@@ -104,7 +105,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_torrent_details_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         $torrent = Torrent::factory()->owner($user)->create();
         $this->withNexusCookie($user);
 
@@ -118,7 +119,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_announce_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         $torrent = Torrent::factory()->owner($user)->create();
 
         $infoHash = InfoHash::fromBinary($torrent->info_hash)->toBinary();
@@ -144,7 +145,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_scrape_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         $torrent = Torrent::factory()->owner($user)->create();
 
         $this->assertQueryCountBelow(5, function () use ($user, $torrent): void {
@@ -160,7 +161,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_usercp_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         $this->withNexusCookie($user);
 
         $this->assertQueryCountBelow(30, function (): void {
@@ -169,16 +170,18 @@ final class QueryBudgetTest extends TestCase
     }
 
     /**
-     * /forums.php index — actual ~39 with the seeded 5 forums after the
-     * unified-chrome queries (staffmessages/news/exam_users) joined the page.
-     * Known N+1: ~4-5 lastpost lookups per forum row → budget 42.
+     * /forums.php index — actual ~45-46 with the seeded 5 forums: unified
+     * chrome (staffmessages/news/exam_users) + permission-scoped staff box
+     * + per-forum lastpost N+1. Actor is pinned to a regular user — the
+     * factory rolls a staff class ~30% of the time which adds ~7 dashboard
+     * counts. → budget 48.
      */
     public function test_forums_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         $this->withNexusCookie($user);
 
-        $this->assertQueryCountBelow(42, function (): void {
+        $this->assertQueryCountBelow(48, function (): void {
             $this->get('/forums.php');
         });
     }
@@ -192,7 +195,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_messages_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         Message::factory()->count(5)->between($user, $user)->create();
         $this->withNexusCookie($user);
 
@@ -206,7 +209,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_rss_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         Torrent::factory()->owner($user)->create();
         $this->withNexusCookie($user);
 
@@ -249,7 +252,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_api_torrents_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         Torrent::factory()->owner($user)->create();
         Sanctum::actingAs($user, ['*']);
 
@@ -263,7 +266,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_api_messages_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         Message::factory()->between($user, $user)->create();
         Sanctum::actingAs($user, ['*']);
 
@@ -277,7 +280,7 @@ final class QueryBudgetTest extends TestCase
      */
     public function test_api_forums_query_budget(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
         Sanctum::actingAs($user, ['*']);
 
         $this->assertQueryCountBelow(4, function (): void {

@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\ToptenRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
-use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\RedisGuard;
 use Illuminate\Http\RedirectResponse;
@@ -17,13 +17,13 @@ use Illuminate\Http\Response;
 class ToptenController extends Controller
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ToptenRepositoryInterface $toptenRepository,
     ) {}
 
     public function legacy(Request $request): Response|RedirectResponse
     {
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/web/topten'.($qs ? '?'.$qs : ''));

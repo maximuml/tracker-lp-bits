@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserAcceptPms;
 use App\Enums\UserStatus;
@@ -19,7 +20,6 @@ use App\Support\AssetAppender;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\Country;
-use App\Support\CurrentUser;
 use App\Support\Env;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
@@ -43,19 +43,19 @@ class UserDetailController extends Controller
 
     private UserDetailRepository $userDetailRepository;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     public function __construct(
         private readonly PermissionChecker $permissionChecker,
         HitAndRunRepository $hitAndRunRepository,
         UserRepositoryInterface $userRepository,
         UserDetailRepository $userDetailRepository,
-        CurrentUser $currentUser,
+        ActorContext $actor,
     ) {
         $this->hitAndRunRepository = $hitAndRunRepository;
         $this->userRepository = $userRepository;
         $this->userDetailRepository = $userDetailRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
     }
 
     public function show(Request $request): View|RedirectResponse
@@ -63,14 +63,14 @@ class UserDetailController extends Controller
         $id = (int) $request->input('id', 0);
 
         if ($id <= 0) {
-            $currentUser = $this->currentUser->get();
-            $id = (int) ($this->currentUser->id());
+            $currentUser = $this->actor->toLegacyArray();
+            $id = (int) ($this->actor->id);
             if ($id <= 0) {
                 abort(404);
             }
         }
 
-        if ($this->currentUser->get() === null) {
+        if ($this->actor->isGuest()) {
             return redirect('/userdetails?'.$request->getQueryString());
         }
 
@@ -111,8 +111,8 @@ class UserDetailController extends Controller
      */
     private function buildDetailsViewData(int $id, array $user, ?User $userModel): array
     {
-        $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUser = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
         $isOwner = $currentUserId === $id;
 
         $canViewConfidential = Permission::can(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);

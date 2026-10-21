@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\RuleRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UsernameChangeType;
 use App\Enums\UserPrivacy;
@@ -16,7 +17,6 @@ use App\Repositories\ModtaskRepository;
 use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Log;
@@ -37,7 +37,7 @@ use Illuminate\View\View;
 class StaffModerationController extends BasePageController
 {
     public function __construct(private readonly RuleRepositoryInterface $ruleRepository, private readonly MessageRepository $messageRepository, private readonly UserDetailRepository $userDetailRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly ModtaskRepository $modtaskRepository,
         private readonly PasskeyGenerator $passkeyGenerator,
     ) {}
@@ -59,8 +59,8 @@ class StaffModerationController extends BasePageController
             return $deny;
         }
 
-        $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUser = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
         $baseUrl = SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost');
 
         $action = (string) $request->post('action');
@@ -78,7 +78,7 @@ class StaffModerationController extends BasePageController
             $target = $this->userDetailRepository->getUser($userId);
             if ($target === null || (int) ($target['class'] ?? 0) >= (int) UserDisplay::currentClass()) {
                 Log::writeWithContext(
-                    'User '.($this->currentUser->username())." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
+                    'User '.($this->actor->username)." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
                     'mod'
                 );
 
@@ -126,7 +126,7 @@ class StaffModerationController extends BasePageController
         $arr = $this->modtaskRepository->getUserArray($userId);
         if ($arr === null) {
             Log::writeWithContext(
-                'User '.($this->currentUser->username())." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
+                'User '.($this->actor->username)." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
                 'mod'
             );
 
@@ -163,11 +163,11 @@ class StaffModerationController extends BasePageController
 
             if ($arr['email'] !== $email) {
                 $updateset['email'] = $email;
-                $modifyLog = "Email changed from {$arr['email']} to {$email} by {$this->currentUser->username()}.";
+                $modifyLog = "Email changed from {$arr['email']} to {$email} by {$this->actor->username}.";
                 Log::writeWithContext($modifyLog, 'mod');
                 $userModifyLogs[] = $modifyLog;
                 $subject = Locale::trans('user.msg_email_change', [], $locale);
-                $msg = Locale::trans('user.msg_your_email_changed_from', [], $locale).$arr['email'].Locale::trans('user.msg_to_new', [], $locale).$email.Locale::trans('user.msg_by', [], $locale).$this->currentUser->username();
+                $msg = Locale::trans('user.msg_your_email_changed_from', [], $locale).$arr['email'].Locale::trans('user.msg_to_new', [], $locale).$email.Locale::trans('user.msg_by', [], $locale).$this->actor->username;
                 $this->messageRepository->add([
                     'sender' => null,
                     'receiver' => $userId,
@@ -179,9 +179,9 @@ class StaffModerationController extends BasePageController
 
             if ($arr['username'] !== $username) {
                 $updateset['username'] = $username;
-                $userModifyLogs[] = "Username changed from {$arr['username']} to {$username} by {$this->currentUser->username()}";
+                $userModifyLogs[] = "Username changed from {$arr['username']} to {$username} by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_username_change', [], $locale);
-                $msg = Locale::trans('user.msg_your_username_changed_from', [], $locale).$arr['username'].Locale::trans('user.msg_to_new', [], $locale).$username.Locale::trans('user.msg_by', [], $locale).$this->currentUser->username();
+                $msg = Locale::trans('user.msg_your_username_changed_from', [], $locale).$arr['username'].Locale::trans('user.msg_to_new', [], $locale).$username.Locale::trans('user.msg_by', [], $locale).$this->actor->username;
                 $this->messageRepository->add([
                     'sender' => null,
                     'receiver' => $userId,
@@ -191,7 +191,7 @@ class StaffModerationController extends BasePageController
                 ]);
                 $this->userDetailRepository->insertUsernameChangeLog([
                     'uid' => $arr['id'],
-                    'operator' => $this->currentUser->username(),
+                    'operator' => $this->actor->username,
                     'change_type' => UsernameChangeType::ADMIN->value,
                     'username_old' => $arr['username'],
                     'username_new' => $username,
@@ -222,7 +222,7 @@ class StaffModerationController extends BasePageController
             $nowStr = date('Y-m-d H:i:s');
             if (($donor !== (bool) $arr['donor']) && (($donor && $donoruntil && $donoruntil >= $nowStr) || (! $donor))) {
                 $subject = Locale::trans('user.msg_your_donor_status_changed', [], $locale);
-                $msg = Locale::trans('user.msg_donor_status_changed_by', [], $locale).$this->currentUser->username();
+                $msg = Locale::trans('user.msg_donor_status_changed_by', [], $locale).$this->actor->username;
                 $this->messageRepository->add([
                     'sender' => null,
                     'receiver' => $userId,
@@ -230,13 +230,13 @@ class StaffModerationController extends BasePageController
                     'msg' => $msg,
                     'added' => now(),
                 ]);
-                $userModifyLogs[] = "donor status changed by {$this->currentUser->username()}. Current donor status: ".($donor ? 'yes' : 'no');
+                $userModifyLogs[] = "donor status changed by {$this->actor->username}. Current donor status: ".($donor ? 'yes' : 'no');
             }
         }
 
         if ($curClass >= UserDisplay::currentClass()) {
             Log::writeWithContext(
-                'User '.($this->currentUser->username())." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
+                'User '.($this->actor->username)." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
                 'mod'
             );
 
@@ -249,9 +249,9 @@ class StaffModerationController extends BasePageController
 
             $locale = Locale::userLocale($userId);
             if ($warned === 'no') {
-                $userModifyLogs[] = "Warning removed by {$this->currentUser->username()}";
+                $userModifyLogs[] = "Warning removed by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_warn_removed', [], $locale);
-                $msg = Locale::trans('user.msg_your_warning_removed_by', [], $locale).$this->currentUser->username().'.';
+                $msg = Locale::trans('user.msg_your_warning_removed_by', [], $locale).$this->actor->username.'.';
             } else {
                 $subject = '';
                 $msg = '';
@@ -267,14 +267,14 @@ class StaffModerationController extends BasePageController
         } elseif ($warnLength > 0) {
             $locale = Locale::userLocale($userId);
             if ($warnLength == 255) {
-                $userModifyLogs[] = 'Warned by '.$this->currentUser->username().".\nReason: {$warnPm}.";
-                $msg = Locale::trans('user.msg_you_are_warned_by', [], $locale).$this->currentUser->username().'.'.($warnPm ? Locale::trans('user.msg_reason', [], $locale).$warnPm : '');
+                $userModifyLogs[] = 'Warned by '.$this->actor->username.".\nReason: {$warnPm}.";
+                $msg = Locale::trans('user.msg_you_are_warned_by', [], $locale).$this->actor->username.'.'.($warnPm ? Locale::trans('user.msg_reason', [], $locale).$warnPm : '');
                 $updateset['warneduntil'] = null;
             } else {
                 $warneduntil = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:s')) + $warnLength * 604800);
                 $dur = $warnLength.Locale::trans('user.msg_week', [], $locale).($warnLength > 1 ? Locale::trans('user.msg_s', [], $locale) : '');
-                $msg = Locale::trans('user.msg_you_are_warned_for', [], $locale).$dur.Locale::trans('user.msg_by', [], $locale).$this->currentUser->username().'.'.($warnPm ? Locale::trans('user.msg_reason', [], $locale).$warnPm : '');
-                $userModifyLogs[] = "Warned for {$dur} by ".$this->currentUser->username().".Reason: {$warnPm}";
+                $msg = Locale::trans('user.msg_you_are_warned_for', [], $locale).$dur.Locale::trans('user.msg_by', [], $locale).$this->actor->username.'.'.($warnPm ? Locale::trans('user.msg_reason', [], $locale).$warnPm : '');
+                $userModifyLogs[] = "Warned for {$dur} by ".$this->actor->username.".Reason: {$warnPm}";
                 $updateset['warneduntil'] = $warneduntil;
             }
 
@@ -304,13 +304,13 @@ class StaffModerationController extends BasePageController
         if ($forumpost !== $curForumpost) {
             $locale = Locale::userLocale($userId);
             if ($forumpost) {
-                $userModifyLogs[] = "Posting enabled by {$this->currentUser->username()}";
+                $userModifyLogs[] = "Posting enabled by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_posting_rights_restored', [], $locale);
-                $msg = Locale::trans('user.msg_your_posting_rights_restored', [], $locale).$this->currentUser->username().Locale::trans('user.msg_you_can_post', [], $locale);
+                $msg = Locale::trans('user.msg_your_posting_rights_restored', [], $locale).$this->actor->username.Locale::trans('user.msg_you_can_post', [], $locale);
             } else {
-                $userModifyLogs[] = "Posting disabled by {$this->currentUser->username()}";
+                $userModifyLogs[] = "Posting disabled by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_posting_rights_removed', [], $locale);
-                $msg = Locale::trans('user.msg_your_posting_rights_removed', [], $locale).$this->currentUser->username().Locale::trans('user.msg_probably_reason_two', [], $locale);
+                $msg = Locale::trans('user.msg_your_posting_rights_removed', [], $locale).$this->actor->username.Locale::trans('user.msg_probably_reason_two', [], $locale);
             }
             $this->messageRepository->add([
                 'sender' => null,
@@ -324,13 +324,13 @@ class StaffModerationController extends BasePageController
         if ($uploadpos !== $curUploadpos) {
             $locale = Locale::userLocale($userId);
             if ($uploadpos) {
-                $userModifyLogs[] = "Upload enabled by {$this->currentUser->username()}";
+                $userModifyLogs[] = "Upload enabled by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_upload_rights_restored', [], $locale);
-                $msg = Locale::trans('user.msg_your_upload_rights_restored', [], $locale).$this->currentUser->username().Locale::trans('user.msg_you_upload_can_upload', [], $locale);
+                $msg = Locale::trans('user.msg_your_upload_rights_restored', [], $locale).$this->actor->username.Locale::trans('user.msg_you_upload_can_upload', [], $locale);
             } else {
-                $userModifyLogs[] = "Upload disabled by {$this->currentUser->username()}";
+                $userModifyLogs[] = "Upload disabled by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_upload_rights_removed', [], $locale);
-                $msg = Locale::trans('user.msg_your_upload_rights_removed', [], $locale).$this->currentUser->username().Locale::trans('user.msg_probably_reason_two', [], $locale);
+                $msg = Locale::trans('user.msg_your_upload_rights_removed', [], $locale).$this->actor->username.Locale::trans('user.msg_probably_reason_two', [], $locale);
             }
             $this->messageRepository->add([
                 'sender' => null,
@@ -344,13 +344,13 @@ class StaffModerationController extends BasePageController
         if ($downloadpos !== $curDownloadpos) {
             $locale = Locale::userLocale($userId);
             if ($downloadpos) {
-                $userModifyLogs[] = "Download enabled by {$this->currentUser->username()}";
+                $userModifyLogs[] = "Download enabled by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_download_rights_restored', [], $locale);
-                $msg = Locale::trans('user.msg_your_download_rights_restored', [], $locale).$this->currentUser->username().Locale::trans('user.msg_you_can_download', [], $locale);
+                $msg = Locale::trans('user.msg_your_download_rights_restored', [], $locale).$this->actor->username.Locale::trans('user.msg_you_can_download', [], $locale);
             } else {
-                $userModifyLogs[] = "Download disabled by {$this->currentUser->username()}";
+                $userModifyLogs[] = "Download disabled by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_download_rights_removed', [], $locale);
-                $msg = Locale::trans('user.msg_your_download_rights_removed', [], $locale).$this->currentUser->username().Locale::trans('user.msg_probably_reason_three', [], $locale);
+                $msg = Locale::trans('user.msg_your_download_rights_removed', [], $locale).$this->actor->username.Locale::trans('user.msg_probably_reason_three', [], $locale);
             }
             $this->messageRepository->add([
                 'sender' => null,
@@ -363,7 +363,7 @@ class StaffModerationController extends BasePageController
 
         $modcomment = trim((string) ($request->post('modcomment') ?? ''));
         if ($modcomment !== '') {
-            $userModifyLogs[] = date('Y-m-d').' - '.$modcomment.' (by '.$this->currentUser->username().')';
+            $userModifyLogs[] = date('Y-m-d').' - '.$modcomment.' (by '.$this->actor->username.')';
         }
 
         $this->modtaskRepository->updateUser($userId, $updateset);
@@ -440,12 +440,12 @@ class StaffModerationController extends BasePageController
 
     private function modtaskPreamble(): ?Response
     {
-        $currentUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $currentUser = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
 
         if (! Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO, $this->userDetailRepository->findOrFailById($currentUserId))) {
             Log::writeWithContext(
-                'User '.($this->currentUser->username())." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
+                'User '.($this->actor->username)." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
                 'mod'
             );
 

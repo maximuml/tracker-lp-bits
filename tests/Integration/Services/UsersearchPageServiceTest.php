@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Services\UsersearchPageService;
-use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 /**
@@ -32,6 +33,7 @@ use Tests\TestCase;
 final class UsersearchPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     private int $initialObLevel;
 
@@ -103,9 +105,7 @@ final class UsersearchPageServiceTest extends TestCase
         ];
         $data = array_merge($defaults, $userData);
 
-        $currentUser = new CurrentUser;
-        $currentUser->set($data);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor($data));
 
         $user = new User;
         $user->id = $data['id'];
@@ -173,9 +173,7 @@ final class UsersearchPageServiceTest extends TestCase
 
     public function test_build_aborts_for_unauthenticated_user(): void
     {
-        $currentUser = new CurrentUser;
-        $currentUser->set([]);
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor([]));
         // Do not log in via Auth — auth()->check() returns false
         $this->mockUserListingRepo();
 

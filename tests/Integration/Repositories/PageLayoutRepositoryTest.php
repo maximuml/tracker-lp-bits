@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\ReportType;
 use App\Models\User;
 use App\Repositories\PageLayoutRepository;
-use App\Support\CurrentUser;
 use App\Support\UserUpdateBatch;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 /**
@@ -29,8 +30,16 @@ use Tests\TestCase;
 final class PageLayoutRepositoryTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
 
     private PageLayoutRepository $repository;
+
+    /** @param  array<string, mixed>  $data */
+    private function bindActor(array $data): void
+    {
+        $this->app->instance(ActorContext::class, $this->actor($data));
+        $this->repository = app(PageLayoutRepository::class);
+    }
 
     protected function setUp(): void
     {
@@ -55,7 +64,7 @@ final class PageLayoutRepositoryTest extends TestCase
 
     protected function tearDown(): void
     {
-        app(CurrentUser::class)->reset();
+        $this->bindActor([]);
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
         parent::tearDown();
     }
@@ -291,18 +300,18 @@ final class PageLayoutRepositoryTest extends TestCase
 
     public function test_prepare_access_returns_early_when_no_user(): void
     {
-        app(CurrentUser::class)->reset();
+        $this->bindActor([]);
 
-        $this->repository->prepareAccess();
+        $this->repository->prepareAccess(app(ActorContext::class));
 
         $this->expectNotToPerformAssertions();
     }
 
     public function test_flush_access_returns_early_when_no_user(): void
     {
-        app(CurrentUser::class)->reset();
+        $this->bindActor([]);
 
-        $this->repository->flushAccess();
+        $this->repository->flushAccess(app(ActorContext::class));
 
         $this->expectNotToPerformAssertions();
     }
@@ -311,11 +320,11 @@ final class PageLayoutRepositoryTest extends TestCase
     {
         /** @var User $user */
         $user = User::factory()->create();
-        app(CurrentUser::class)->set(['id' => $user->id]);
+        $this->bindActor(['id' => $user->id]);
 
         $originalAccess = DB::table('users')->where('id', $user->id)->value('last_access');
 
-        $this->repository->flushAccess();
+        $this->repository->flushAccess(app(ActorContext::class));
 
         // last_access should be unchanged since no updates were queued.
         $this->assertSame(
@@ -328,11 +337,11 @@ final class PageLayoutRepositoryTest extends TestCase
     {
         /** @var User $user */
         $user = User::factory()->create();
-        app(CurrentUser::class)->set(['id' => $user->id]);
+        $this->bindActor(['id' => $user->id]);
 
         app(UserUpdateBatch::class)->add('last_access', '2025-06-15 10:00:00');
 
-        $this->repository->flushAccess();
+        $this->repository->flushAccess(app(ActorContext::class));
 
         $this->assertSame(
             '2025-06-15 10:00:00',

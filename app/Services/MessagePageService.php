@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
@@ -41,19 +41,19 @@ class MessagePageService
 
     private MailboxRepository $mailboxRepository;
 
-    private CurrentUser $currentUser;
+    private ActorContext $actor;
 
     private ?NexusCache $cache;
 
     public function __construct(
         MessageRepository $messageRepository,
         MailboxRepository $mailboxRepository,
-        CurrentUser $currentUser,
+        ActorContext $actor,
         ?NexusCache $cache,
     ) {
         $this->messageRepository = $messageRepository;
         $this->mailboxRepository = $mailboxRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
         $this->cache = $cache;
     }
 
@@ -62,8 +62,8 @@ class MessagePageService
      */
     public function build(Request $request): MessagePageViewModel
     {
-        $curUser = $this->currentUser;
-        $userId = $curUser->id();
+        $actor = $this->actor;
+        $userId = $actor->id;
 
         $action = (string) $request->input('action', '');
         if ($action === '') {
@@ -71,7 +71,7 @@ class MessagePageService
         }
 
         $data = [
-            'curUser' => $curUser->get() ?? [],
+            'curUser' => $actor->toLegacyArray(),
             'userId' => $userId,
             'action' => $action,
             'baseUrl' => SiteConfig::current()->basic->baseUrl() ?: RequestValues::serverValue('HTTP_HOST', 'localhost'),
@@ -80,10 +80,10 @@ class MessagePageService
 
         switch ($action) {
             case 'viewmessage':
-                $viewmessage = $this->buildViewMessage($curUser, $userId, $request);
+                $viewmessage = $this->buildViewMessage($actor, $userId, $request);
                 $data['viewmessage'] = $viewmessage;
                 $listRequest = $request->duplicate(['box' => $viewmessage['mailbox']]);
-                $data['viewmailbox'] = $this->buildViewMailbox($curUser, $userId, $listRequest);
+                $data['viewmailbox'] = $this->buildViewMailbox($actor, $userId, $listRequest);
                 break;
             case 'forward':
                 $data['forward'] = $this->buildForward($userId, $request);
@@ -92,7 +92,7 @@ class MessagePageService
                 $data['editmailboxes'] = $this->buildEditMailboxes($userId);
                 break;
             default:
-                $data['viewmailbox'] = $this->buildViewMailbox($curUser, $userId, $request);
+                $data['viewmailbox'] = $this->buildViewMailbox($actor, $userId, $request);
                 $data['action'] = 'viewmailbox';
                 break;
         }
@@ -116,7 +116,7 @@ class MessagePageService
      *
      * @return array<string, mixed>
      */
-    private function buildViewMailbox(CurrentUser $curUser, int $userId, Request $request): array
+    private function buildViewMailbox(ActorContext $actor, int $userId, Request $request): array
     {
         $mailbox = (int) ($request->input('box', 0) ?: self::PM_INBOX);
         if ($mailbox === 0) {
@@ -152,7 +152,7 @@ class MessagePageService
             $unreadRaw === 'no' || $unreadRaw === '0' => false,
             default => null,
         };
-        $perpage = (int) ($this->currentUser->value('pmnum', 0)) ?: 20;
+        $perpage = (int) ($this->actor->value('pmnum', 0)) ?: 20;
 
         $countResult = $this->messageRepository->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, 0, 0);
         $count = $countResult['count'];
@@ -277,7 +277,7 @@ class MessagePageService
      *
      * @return array<string, mixed>
      */
-    private function buildViewMessage(CurrentUser $curUser, int $userId, Request $request): array
+    private function buildViewMessage(ActorContext $actor, int $userId, Request $request): array
     {
         $pmId = (int) $request->input('id', 0);
         if ($pmId <= 0) {

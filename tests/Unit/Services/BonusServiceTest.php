@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\SettingRepository;
 use App\Services\BonusLedgerService;
 use App\Services\BonusService;
-use App\Support\CurrentUser;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,8 @@ use Tests\TestCase;
 #[TestCategory(TestCategory::PURE_UNIT)]
 final class BonusServiceTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function tearDown(): void
     {
         Mockery::close();
@@ -52,12 +55,9 @@ final class BonusServiceTest extends TestCase
     /**
      * @param  array<string, mixed>  $data
      */
-    private function curUser(array $data): CurrentUser
+    private function curUser(array $data): ActorContext
     {
-        $user = new CurrentUser;
-        $user->set($data);
-
-        return $user;
+        return $this->actor($data);
     }
 
     public function test_handle_exchange_stays_public(): void

@@ -11,14 +11,16 @@ use App\Repositories\UserListingRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
 use App\Services\PermissionChecker;
-use App\Support\CurrentUser;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class UserAdminControllerTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function tearDown(): void
     {
         Mockery::close();
@@ -43,7 +45,7 @@ final class UserAdminControllerTest extends TestCase
             $userModerationRepository,
             $bonusRepository,
             Mockery::mock(UserListingRepository::class),
-            new CurrentUser,
+            $this->actor([]),
         );
 
         $this->assertInstanceOf(UserAdminController::class, $controller);

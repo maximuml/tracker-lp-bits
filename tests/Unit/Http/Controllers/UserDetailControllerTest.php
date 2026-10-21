@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Http\Controllers\UserDetailController;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\UserRepository;
@@ -13,11 +14,14 @@ use Illuminate\Http\Request;
 use Mockery;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class UserDetailControllerTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function tearDown(): void
     {
         Mockery::close();
@@ -106,5 +110,11 @@ final class UserDetailControllerTest extends TestCase
         $real = new CurrentUser;
         $real->set($user);
         app()->instance(CurrentUser::class, $real);
+        app()->instance(
+            ActorContext::class,
+            $user === null
+                ? $this->actor([])
+                : $this->actor(array_merge(['id' => 1, 'username' => 'testuser'], $user)),
+        );
     }
 }

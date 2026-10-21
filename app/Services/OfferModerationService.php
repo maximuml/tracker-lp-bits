@@ -7,10 +7,10 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\PageResponses;
@@ -29,7 +29,7 @@ use LogicException;
 final class OfferModerationService
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
         private readonly MessageRepository $messageRepository,
@@ -40,7 +40,7 @@ final class OfferModerationService
      */
     private function curUser(): array
     {
-        return (array) ($this->currentUser->get() ?? []);
+        return $this->actor->toLegacyArray();
     }
 
     private function baseUrl(): string

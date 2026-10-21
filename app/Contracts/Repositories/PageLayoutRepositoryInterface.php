@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Contracts\Repositories;
 
+use App\DTOs\Auth\ActorContext;
+
 interface PageLayoutRepositoryInterface
 {
     public function getInboxCount(int $userId): int;
@@ -44,10 +46,10 @@ interface PageLayoutRepositoryInterface
     /**
      * @return void
      */
-    public function prepareAccess();
+    public function prepareAccess(ActorContext $actor);
 
     /**
      * @return void
      */
-    public function flushAccess();
+    public function flushAccess(ActorContext $actor);
 }

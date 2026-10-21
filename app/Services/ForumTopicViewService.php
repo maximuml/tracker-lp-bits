@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Auth\Permission;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\PostRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserClickTopic;
 use App\Models\User;
@@ -14,7 +15,6 @@ use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Format;
 use App\Support\Forum;
 use App\Support\Html;
@@ -47,7 +47,7 @@ final class ForumTopicViewService
     /**
      * Build the view-topic section.
      */
-    public function buildViewTopic(CurrentUser $curUser, int $userId, Request $request, int $postsperpage): ViewTopicViewModel
+    public function buildViewTopic(ActorContext $actor, int $userId, Request $request, int $postsperpage): ViewTopicViewModel
     {
         $highlight = trim((string) ($request->query('highlight') ?? ''));
         $topicid = (int) ($request->query('topicid') ?? 0);
@@ -80,7 +80,7 @@ final class ForumTopicViewService
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
             PageResponses::abort(__('forums.std_error'), __('forums.std_unpermitted_viewing_topic'));
         }
-        $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && $curUser->yes('forumpost');
+        $maypost = ((UserDisplay::currentClass() >= (int) ($row['minclasswrite'] ?? 0) && ! $locked) || $isMod) && $actor->yes('forumpost');
 
         $this->topicRepository->incrementTopicViews($topicid);
 
@@ -107,7 +107,7 @@ final class ForumTopicViewService
             $page = 0;
         } elseif ($page > $pages - 1) {
             $page = $pages - 1;
-        } elseif ($curUser->value('clicktopic', 1) == UserClickTopic::FIRSTPAGE->value) {
+        } elseif ($actor->value('clicktopic', 1) == UserClickTopic::FIRSTPAGE->value) {
             $page = 0;
         } else {
             $page = $pages - 1;
@@ -150,12 +150,12 @@ final class ForumTopicViewService
                 $this->cache?->put('user_'.$posterId.'_post_count', $postCounts[$posterId] ?? 0, 3600);
             }
         }
-        $lpr = $this->index->getLastReadPostId($topicid, $curUser);
+        $lpr = $this->index->getLastReadPostId($topicid, $actor);
 
         $renderedFmt = [];
         if ($this->cache !== null && $allPosts !== []) {
             $fmtKeys = array_map(static fn ($p) => 'fmt_post_'.md5((string) ($p['body'] ?? '')), $allPosts);
-            if ($curUser->yes('signatures')) {
+            if ($actor->yes('signatures')) {
                 foreach ($allPosts as $p) {
                     $sig = (string) (optional($userInfoArr->get((int) ($p['userid'] ?? 0)))->signature ?? '');
                     if ($sig !== '') {
@@ -189,16 +189,16 @@ final class ForumTopicViewService
 
             $forumposts = $postCounts[$posterid] ?? 0;
 
-            $signature = $curUser->yes('signatures') ? (string) ($arr2['signature'] ?? '') : '';
-            $avatar = $curUser->yes('avatars') ? (string) ($arr2['avatar'] ?? '') : '';
+            $signature = $actor->yes('signatures') ? (string) ($arr2['signature'] ?? '') : '';
+            $avatar = $actor->yes('avatars') ? (string) ($arr2['avatar'] ?? '') : '';
             if ($avatar === '') {
                 $avatar = 'pic/default_avatar.png';
             }
 
             $isLast = $pn === $pc;
             if ($isLast && $postid > $lpr) {
-                $this->readStateRepository->markPostRead($userId, $topicid, $postid, (int) $curUser->value('last_catchup', 0));
-                $this->cache?->forget('user_'.$curUser->id().'_last_read_post_list');
+                $this->readStateRepository->markPostRead($userId, $topicid, $postid, (int) $actor->value('last_catchup', 0));
+                $this->cache?->forget('user_'.$actor->id.'_last_read_post_list');
             }
 
             $canViewProtected = $pn + $offset <= 1 || Forum::canViewPost($userId, $arr);
@@ -250,7 +250,7 @@ final class ForumTopicViewService
                 posterName: (string) ($arr2['username'] ?? ''),
                 canQuote: $maypost && $canViewProtected,
                 canDelete: $isMod,
-                canEdit: ($curUser->id() == $posterid && ! $locked) || $isMod,
+                canEdit: ($actor->id == $posterid && ! $locked) || $isMod,
             );
         }
 

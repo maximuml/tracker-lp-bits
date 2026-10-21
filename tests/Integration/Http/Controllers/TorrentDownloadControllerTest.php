@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Exceptions\NexusException;
 use App\Http\Controllers\TorrentDownloadController;
 use App\Http\Requests\DownloadNoticeRequest;
@@ -16,11 +17,14 @@ use Illuminate\Http\Response;
 use Mockery;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION, TestCategory::MUTATION)]
 final class TorrentDownloadControllerTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -174,6 +178,12 @@ final class TorrentDownloadControllerTest extends TestCase
         $real = new CurrentUser;
         $real->set($user);
         app()->instance(CurrentUser::class, $real);
+        $this->app->instance(
+            ActorContext::class,
+            $user === null
+                ? $this->actor([])
+                : $this->actor(array_merge(['id' => 1, 'username' => 'testuser'], $user)),
+        );
     }
 
     /**

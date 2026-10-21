@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\StaffDirectoryRepository;
 use App\Services\PermissionChecker;
 use App\Support\Country;
-use App\Support\CurrentUser;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -21,14 +21,14 @@ use Illuminate\View\View;
 class StaffPageController extends BasePageController
 {
     public function __construct(private readonly PermissionChecker $permissionChecker,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly StaffDirectoryRepository $staffDirectoryRepository,
     ) {}
 
     public function staff(Request $request): View|RedirectResponse|Response
     {
-        $curUser = $this->currentUser->get() ?? [];
-        $currentUserId = (int) ($this->currentUser->id());
+        $actor = $this->actor->toLegacyArray();
+        $currentUserId = (int) ($this->actor->id);
 
         if (! $this->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $currentUserId)) {
             return $this->abortResponse('Error', 'Permission denied.');

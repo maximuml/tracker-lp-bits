@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Repositories\OfferRepository;
 use App\Repositories\UsercpRepository;
 use App\Services\OfferPageService;
 use App\Support\Cache\NexusCache;
-use App\Support\CurrentUser;
 use App\ViewModels\Offer\OfferListViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\Concerns\SeedsLegacySettings;
 use Tests\TestCase;
 
@@ -36,6 +37,7 @@ use Tests\TestCase;
 final class OfferPageServiceTest extends TestCase
 {
     use DatabaseTransactions;
+    use MakesCurrentUser;
     use SeedsLegacySettings;
 
     private int $initialObLevel;
@@ -125,9 +127,7 @@ final class OfferPageServiceTest extends TestCase
             'class' => 1,
         ];
 
-        $currentUser = new CurrentUser;
-        $currentUser->set(array_merge($defaults, $userData));
-        $this->app->instance(CurrentUser::class, $currentUser);
+        $this->app->instance(ActorContext::class, $this->actor(array_merge($defaults, $userData)));
     }
 
     /** @param  array<string, mixed>  $values */

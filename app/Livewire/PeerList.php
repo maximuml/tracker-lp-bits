@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
-use App\Contracts\Repositories\UserRepositoryInterface;
-use App\Support\CurrentUser;
+use App\DTOs\Auth\ActorContext;
 use App\ViewModels\Torrent\PeerTableFactory;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
@@ -34,20 +33,16 @@ final class PeerList extends Component
 
     private ?PeerTableFactory $peerTableFactory = null;
 
-    private ?UserRepositoryInterface $userRepository = null;
-
-    private ?CurrentUser $currentUser = null;
+    private ?ActorContext $actor = null;
 
     public function boot(
         TorrentAjaxRepositoryInterface $torrentAjaxRepository,
         PeerTableFactory $peerTableFactory,
-        UserRepositoryInterface $userRepository,
-        CurrentUser $currentUser,
+        ActorContext $actor,
     ): void {
         $this->torrentAjaxRepository = $torrentAjaxRepository;
         $this->peerTableFactory = $peerTableFactory;
-        $this->userRepository = $userRepository;
-        $this->currentUser = $currentUser;
+        $this->actor = $actor;
     }
 
     public function mount(int $torrentId, int $seeders = 0, int $leechers = 0, bool $openOnLoad = false): void
@@ -72,10 +67,8 @@ final class PeerList extends Component
     {
         $data = ['seederTable' => null, 'leecherTable' => null];
         if ($this->open) {
-            $curUser = $this->currentUser()->get() ?? [];
-            $currentUser = $curUser !== []
-                ? $this->userRepository()->findById((int) ($curUser['id'] ?? 0))
-                : null;
+            $curUser = $this->actor()->toLegacyArray();
+            $currentUser = $this->actor()->user;
             $peerData = $this->torrentAjaxRepository()->peerList($this->torrentId, $currentUser);
             $data['seederTable'] = $this->peerTableFactory()->buildTable(
                 (string) __('viewpeerlist.text_seeders'), $peerData['seeders'], $peerData['torrent'],
@@ -102,13 +95,8 @@ final class PeerList extends Component
         return $this->peerTableFactory ?? throw new \LogicException('PeerList used before boot()');
     }
 
-    private function userRepository(): UserRepositoryInterface
+    private function actor(): ActorContext
     {
-        return $this->userRepository ?? throw new \LogicException('PeerList used before boot()');
-    }
-
-    private function currentUser(): CurrentUser
-    {
-        return $this->currentUser ?? throw new \LogicException('PeerList used before boot()');
+        return $this->actor ?? throw new \LogicException('PeerList used before boot()');
     }
 }

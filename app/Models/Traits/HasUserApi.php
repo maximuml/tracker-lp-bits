@@ -18,7 +18,13 @@ trait HasUserApi
      */
     public function toLegacyArray(): array
     {
-        return $this->makeVisible(['passkey', 'auth_key'])->toArray();
+        // Raw column values — legacy $CURUSER was the SELECT * row: no
+        // accessor/cast transforms (avatar default, datetime casts) so
+        // value('avatar')/value('added')/yes()/no() see faithful data.
+        return array_diff_key(
+            $this->getAttributes(),
+            array_flip(array_diff($this->getHidden(), ['passkey', 'auth_key'])),
+        );
     }
 
     /**

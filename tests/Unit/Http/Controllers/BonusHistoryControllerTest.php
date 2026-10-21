@@ -9,14 +9,16 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Http\Controllers\BonusHistoryController;
 use App\Repositories\BonusCalculationRepository;
 use App\Repositories\UserListingRepository;
-use App\Support\CurrentUser;
 use Mockery;
 use Tests\Attributes\TestCategory;
+use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::PURE_UNIT, TestCategory::MUTATION)]
 final class BonusHistoryControllerTest extends TestCase
 {
+    use MakesCurrentUser;
+
     protected function tearDown(): void
     {
         Mockery::close();
@@ -33,7 +35,7 @@ final class BonusHistoryControllerTest extends TestCase
             Mockery::mock(UserListingRepository::class),
             Mockery::mock(UserRepositoryInterface::class),
             $calculationRepository,
-            new CurrentUser,
+            $this->actor([]),
         );
 
         $this->assertInstanceOf(BonusHistoryController::class, $controller);

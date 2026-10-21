@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire;
 
 use App\Contracts\Repositories\OfferCommentRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\Comment;
-use App\Models\User;
 use App\Repositories\TorrentDetailRepository;
 use App\Services\CommentService;
 use App\Support\Html\SafeHtml;
@@ -14,7 +14,6 @@ use App\Support\Pagination;
 use App\Support\Smilies;
 use App\ViewModels\Comment\CommentTableFactory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -55,16 +54,20 @@ final class CommentSection extends Component
 
     private ?OfferCommentRepositoryInterface $offerRepository = null;
 
+    private ?ActorContext $actor = null;
+
     public function boot(
         CommentService $comments,
         CommentTableFactory $factory,
         TorrentDetailRepository $detailRepository,
         OfferCommentRepositoryInterface $offerRepository,
+        ActorContext $actor,
     ): void {
         $this->comments = $comments;
         $this->factory = $factory;
         $this->detailRepository = $detailRepository;
         $this->offerRepository = $offerRepository;
+        $this->actor = $actor;
     }
 
     public function mount(int $parentId, string $type = 'torrent', bool $enabled = true): void
@@ -77,8 +80,8 @@ final class CommentSection extends Component
 
     public function post(): void
     {
-        $user = Auth::guard('nexus-web')->user();
-        if (! $user instanceof User) {
+        $user = $this->actor()->user;
+        if ($user === null) {
             return;
         }
 
@@ -152,6 +155,11 @@ final class CommentSection extends Component
     private function factory(): CommentTableFactory
     {
         return $this->factory ?? throw new \LogicException('CommentSection used before boot()');
+    }
+
+    private function actor(): ActorContext
+    {
+        return $this->actor ?? throw new \LogicException('CommentSection used before boot()');
     }
 
     private function detailRepository(): TorrentDetailRepository

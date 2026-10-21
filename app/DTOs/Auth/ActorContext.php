@@ -30,7 +30,11 @@ use App\Support\YesNo;
 final readonly class ActorContext
 {
     /**
-     * @param  list<PermissionEnum>  $permissions  Cached permission enum values for this actor.
+     * @param  list<PermissionEnum>|null  $permissions  Explicitly granted
+     *                                                  permissions; `null` means "resolve lazily via Permission::can
+     *                                                  against the carried user model" (the fromAuth() path). An
+     *                                                  explicit list is authoritative — used by guest contexts and
+     *                                                  test fixtures so no permission storage is consulted.
      */
     public function __construct(
         public int $id,
@@ -40,8 +44,8 @@ final readonly class ActorContext
         public int $stylesheet,
         public int $page,
         public ?string $passkey,
-        /** @var list<PermissionEnum> */
-        public array $permissions,
+        /** @var list<PermissionEnum>|null */
+        public ?array $permissions,
         public ?User $user = null,
     ) {}
 
@@ -84,14 +88,9 @@ final readonly class ActorContext
         $page = (int) ($user->page ?? 0);
         $passkey = $user->passkey;
 
-        // Pre-compute all permissions for this actor's class
-        $permissions = [];
-        foreach (PermissionEnum::cases() as $permission) {
-            if (Permission::can($permission, $user)) {
-                $permissions[] = $permission;
-            }
-        }
-
+        // Permissions resolve lazily in can() — eager evaluation over every
+        // PermissionEnum case would force a user-row + permission-list load on
+        // each fromAuth() resolution, including requests that check nothing.
         return new self(
             id: (int) $user->id,
             username: (string) $user->username,
@@ -100,7 +99,7 @@ final readonly class ActorContext
             stylesheet: $stylesheet,
             page: $page,
             passkey: $passkey,
-            permissions: $permissions,
+            permissions: null,
             user: $user,
         );
     }
@@ -110,6 +109,10 @@ final readonly class ActorContext
      */
     public function can(PermissionEnum $permission): bool
     {
+        if ($this->permissions === null) {
+            return $this->user instanceof User && Permission::can($permission, $this->user);
+        }
+
         return in_array($permission, $this->permissions, true);
     }
 

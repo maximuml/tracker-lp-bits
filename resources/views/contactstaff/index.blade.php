@@ -1,4 +1,4 @@
-@extends('layouts.app', ['chromeVariant' => 'legacy'])
+@extends('layouts.app')
 
 @section('title', __('contactstaff.head_contact_staff'))
 

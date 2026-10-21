@@ -1139,12 +1139,12 @@ dialog.nx-modal--loading .nx-modal__spinner {
 }
 
 .nxm-alert__text { flex: 1 1 auto; min-width: 0; }
-.nxm-alert__text a { color: var(--nxm-accent-text, var(--nxm-accent, #0d5aa7)); }
+.nxm-alert__text a { color: color-mix(in srgb, var(--nxm-accent-text, var(--nxm-accent, #0d5aa7)) 72%, black); }
 
 a.nxm-alert__action:link,
 a.nxm-alert__action:visited {
     flex: none;
-    color: var(--nxm-accent-text, var(--nxm-accent, #0d5aa7));
+    color: color-mix(in srgb, var(--nxm-accent-text, var(--nxm-accent, #0d5aa7)) 72%, black);
     text-decoration: none;
     white-space: nowrap;
     padding: .45rem;
@@ -1456,7 +1456,9 @@ input[type="file"] { border-style: dashed; background: transparent; }
 /* After :focus-visible so an invalid field keeps the danger border while
    focused (equal specificity, this rule wins). */
 :is(input, textarea, select)[aria-invalid="true"] { border-color: var(--nxm-danger); }
-textarea { resize: vertical; }
+textarea { resize: vertical; max-width: 100%; box-sizing: border-box; }
+/* [code]/media-info blocks must scroll inside the column, not widen the page. */
+pre { max-width: 100%; overflow-x: auto; }
 
 /* ---------- Footer ---------- */
 

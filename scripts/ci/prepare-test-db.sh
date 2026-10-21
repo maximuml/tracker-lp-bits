@@ -20,8 +20,9 @@ php artisan migrate:fresh --seed --force
 # Seed rows the suites depend on: settings/users — config + auth,
 # categories/forums — FK targets and inner joins,
 # searchbox/searchbox_fields — browse mode,
-# agent_allowed_* — announce client check.
-SEED_TABLES="settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception"
+# agent_allowed_* — announce client check,
+# stylesheets — Style::cssUri resolves pack theme.css through them.
+SEED_TABLES="settings users categories forums searchbox searchbox_fields agent_allowed_family agent_allowed_exception stylesheets"
 
 for db in "$@"; do
     mysql -h 127.0.0.1 -u root -proot -e "

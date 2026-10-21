@@ -121,9 +121,14 @@ td.shoutrow .shout-class-badge--staffleader { background: #bf360c; }
 }
 
 .shout-actions a {
-    text-decoration: none;
+    color: var(--nxm-text);
+    text-decoration: underline;
     padding: .35rem;
     margin: -.35rem;
+}
+
+.shout-actions a.shout-action-del {
+    color: color-mix(in srgb, var(--nxm-danger, #c0392b) 72%, var(--nxm-text, #000));
 }
 
 .shout-reactions {

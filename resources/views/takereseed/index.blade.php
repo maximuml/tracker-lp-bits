@@ -1,4 +1,4 @@
-@extends('layouts.app', ['chromeVariant' => 'legacy'])
+@extends('layouts.app')
 
 @section('title', __('takereseed.head_reseed_request'))
 

@@ -1,4 +1,4 @@
-@extends('layouts.app', ['chromeVariant' => 'legacy', 'shell' => 'bare'])
+@extends('layouts.app', ['shell' => 'bare'])
 
 @section('title', __('mailtest.head_mail_test'))
 

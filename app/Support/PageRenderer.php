@@ -8,8 +8,6 @@ use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Support\Html\SafeHtml;
 use App\ViewModels\Chrome\ChromeRepositories;
 use App\ViewModels\SiteChromeViewModel;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Http\Response;
 
 /**
  * Request-scoped legacy page chrome renderer (replaces the static
@@ -68,14 +66,6 @@ final class PageRenderer
 
     private function renderHeader(PageLayoutContext $context, string $title, bool $msgalert, string $script, string $place): string
     {
-        if ($context->siteOnline == 'no') {
-            if ($context->userClass() < $context->adminClass) {
-                throw new HttpResponseException(new Response((string) (__('functions.std_site_down_for_maintenance')), 503));
-            } else {
-                $context->offlineMsg = true;
-            }
-        }
-
         $chrome = SiteChromeViewModel::load($title, $this->layoutRepository, $this->chromeRepositories, $context, 'legacy', $msgalert);
 
         return view('layouts.partials.head-assets', ['chrome' => $chrome])->render()

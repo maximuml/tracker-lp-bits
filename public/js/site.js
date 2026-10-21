@@ -563,7 +563,15 @@ document.addEventListener('click', function (e) {
 
     var confirmEl = target.closest('[data-confirm]');
     if (confirmEl) {
-        if (!window.confirm(confirmEl.getAttribute('data-confirm'))) {
+        if (confirmEl.__nxConfirmOk) {
+            delete confirmEl.__nxConfirmOk;
+        } else if (window.layer && typeof window.layer.confirm === 'function') {
+            e.preventDefault();
+            layer.confirm(confirmEl.getAttribute('data-confirm'), {title: 'Info', btn: ['Yes', 'Cancel'], btnAlign: 'c'}, function () {
+                confirmEl.__nxConfirmOk = true;
+                target.click();
+            });
+        } else if (!window.confirm(confirmEl.getAttribute('data-confirm'))) {
             e.preventDefault();
         }
         return;

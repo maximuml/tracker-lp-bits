@@ -111,7 +111,7 @@ table.main {
 
 .nx-embedded {padding:0}
 
-.nx-mainouter {width:1200px;margin-left:auto;margin-right:auto;border-collapse:separate;border-spacing:0}
+.nx-mainouter {width:1200px;max-width:100%;margin-left:auto;margin-right:auto;border-collapse:separate;border-spacing:0}
 
 .nx-fgrid {display:grid;grid-template-columns:max-content 1fr;border:1px solid var(--nxm-border,rgba(127,127,127,.35))}
 
@@ -366,6 +366,12 @@ table.head {
 #main-content {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+    }
+.nx-fgrid, .nx-fgrid--6 {
+        grid-template-columns: 1fr;
+    }
+.nx-fgrid .nx-fhead {
+        text-align: left;
     }
 }
 
@@ -976,7 +982,7 @@ button.nx-shoutbox-mentions {border:1px solid var(--nxm-danger-border,#c0392b);b
 
 .nx-fgrid--flat {border:none}
 
-.nx-fgrid--auto {width:max-content;margin-left:auto;margin-right:auto}
+.nx-fgrid--auto {width:max-content;max-width:100%;margin-left:auto;margin-right:auto}
 
 .nx-fgrid--auto .nx-ffull {text-align:center}
 

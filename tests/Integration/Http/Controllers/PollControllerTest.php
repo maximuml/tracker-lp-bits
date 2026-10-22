@@ -123,7 +123,7 @@ final class PollControllerTest extends TestCase
 
         $indexRepo = Mockery::mock(IndexRepository::class);
         $indexRepo->shouldReceive('hasVoted')->once()->with($poll->id, 999)->andReturn(false);
-        $indexRepo->shouldReceive('recordPollVote')->once()->with($poll->id, 999, 0);
+        $indexRepo->shouldReceive('recordPollVote')->once()->with($poll->id, 999, 0)->andReturn(true);
         app()->instance(IndexRepository::class, $indexRepo);
 
         $cache = Mockery::mock(NexusCache::class);
@@ -158,7 +158,7 @@ final class PollControllerTest extends TestCase
 
         $indexRepo = Mockery::mock(IndexRepository::class);
         $indexRepo->shouldReceive('hasVoted')->once()->with($poll->id, 998)->andReturn(false);
-        $indexRepo->shouldReceive('recordPollVote')->once()->with($poll->id, 998, 255);
+        $indexRepo->shouldReceive('recordPollVote')->once()->with($poll->id, 998, 255)->andReturn(true);
         app()->instance(IndexRepository::class, $indexRepo);
 
         $cache = Mockery::mock(NexusCache::class);
@@ -272,7 +272,7 @@ final class PollControllerTest extends TestCase
 
         $indexRepo = Mockery::mock(IndexRepository::class);
         $indexRepo->shouldReceive('hasVoted')->once()->andReturn(false);
-        $indexRepo->shouldReceive('recordPollVote')->once();
+        $indexRepo->shouldReceive('recordPollVote')->once()->andReturn(true);
         app()->instance(IndexRepository::class, $indexRepo);
 
         $cache = Mockery::mock(NexusCache::class);

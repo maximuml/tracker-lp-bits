@@ -274,6 +274,20 @@ final class IndexRepositoryTest extends TestCase
         $this->assertSame(0, $this->repository->getUserVote($pollId, $user->id));
     }
 
+    public function test_record_poll_vote_rejects_concurrent_duplicate(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $pollId = $this->createPoll();
+
+        $this->assertTrue($this->repository->recordPollVote($pollId, $user->id, 1));
+        // Second insert hits the (pollid, userid) unique key — the
+        // double-vote race loser gets false instead of a second row.
+        $this->assertFalse($this->repository->recordPollVote($pollId, $user->id, 2));
+        $this->assertSame(1, DB::table('pollanswers')->where('pollid', $pollId)->where('userid', $user->id)->count());
+        $this->assertSame(1, (int) DB::table('pollanswers')->where('pollid', $pollId)->where('userid', $user->id)->value('selection'));
+    }
+
     public function test_get_poll_results_returns_sorted_items(): void
     {
         /** @var User $user1 */

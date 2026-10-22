@@ -1,1 +1,1 @@
-<span style="color: red">{{ $text }}</span>
+<span class="text-nxm-danger">{{ $text }}</span>

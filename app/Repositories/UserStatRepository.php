@@ -8,6 +8,7 @@ use App\Enums\UserStatus;
 use App\Models\User;
 use App\Support\PasswordHasher;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
 
 /**
@@ -48,13 +49,30 @@ final class UserStatRepository
     }
 
     /**
-     * Seed-bonus totals upsert — SeedBonusJob.
+     * Seed-bonus snapshot upsert — SeedBonusJob. Writes only the columns
+     * the job recomputes from scratch; the accumulating totals go through
+     * {@see addSeedAccumulators()} so a credit landing between the job's
+     * read and its write is not overwritten.
      *
      * @param  array<int, array<string, mixed>>  $rows
      */
     public function upsertSeedBonus(array $rows): int
     {
-        return User::query()->upsert($rows, ['id'], ['seed_points', 'seed_points_per_hour', 'seed_bonus_per_hour', 'seedbonus', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
+        return User::query()->upsert($rows, ['id'], ['seed_points_per_hour', 'seed_bonus_per_hour', 'seeding_torrent_count', 'seeding_torrent_size', 'seed_points_updated_at']);
+    }
+
+    /**
+     * Atomically add the period's seed points and bonus to one user's
+     * accumulating totals — `UPDATE users SET col = col + delta`.
+     */
+    public function addSeedAccumulators(int $userId, float $seedPoints, float $seedbonus): void
+    {
+        User::query()
+            ->where('id', $userId)
+            ->update([
+                'seed_points' => DB::raw(DB::getQueryGrammar()->wrap('seed_points').' + '.(float) $seedPoints), // @phpstan-ignore argument.type
+                'seedbonus' => DB::raw(DB::getQueryGrammar()->wrap('seedbonus').' + '.(float) $seedbonus), // @phpstan-ignore argument.type
+            ]);
     }
 
     public function countAll(): int

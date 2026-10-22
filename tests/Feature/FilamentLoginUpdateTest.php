@@ -9,9 +9,10 @@ use Tests\TestCase;
 
 /**
  * The panel's Livewire update route runs the Filament auth middleware
- * globally. Guest-only pages (the login screen) must still be able to call
- * their components — the middleware exempts updates whose snapshot path is
- * the panel login URL — while updates for authenticated pages keep bouncing
+ * globally. Guest-reachable pages (the panel login screen, public pages)
+ * must still be able to call their components — the middleware exempts
+ * updates whose snapshot paths originate outside the panel or from its
+ * login URL — while updates for authenticated panel pages keep bouncing
  * guests to the legacy login.
  */
 #[TestCategory(TestCategory::HTTP_FEATURE)]
@@ -77,5 +78,30 @@ final class FilamentLoginUpdateTest extends TestCase
             $response->getStatusCode(),
             'Login-page-only Livewire batches must not bounce to the legacy login redirect.',
         );
+    }
+
+    /**
+     * The update route is global: public-page components (shoutbox, polls,
+     * thanks) arrive under the same URI. Snapshots originating outside the
+     * panel path must not require panel authentication — the checksummed
+     * path cannot be forged, and component-level guards still apply.
+     */
+    public function test_guest_livewire_update_for_public_page_is_not_auth_redirected(): void
+    {
+        $response = $this->postJson('/livewire/update', $this->livewirePayload('index.php'));
+
+        $this->assertNotSame(
+            302,
+            $response->getStatusCode(),
+            'Public-page Livewire update must not bounce to the legacy login redirect.',
+        );
+        $this->assertNotSame(401, $response->getStatusCode());
+    }
+
+    public function test_guest_livewire_update_batch_mixing_public_and_panel_is_unauthenticated(): void
+    {
+        $response = $this->postJson('/livewire/update', $this->livewirePayload('index.php', 'nexusphp'));
+
+        $response->assertUnauthorized();
     }
 }

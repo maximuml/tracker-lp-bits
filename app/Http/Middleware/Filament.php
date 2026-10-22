@@ -26,7 +26,7 @@ class Filament extends Authenticate
      */
     protected function authenticate($request, array $guards): void
     {
-        if ($this->isGuestPageLivewireRequest($request)) {
+        if ($this->isGuestReachableLivewireRequest($request)) {
             return;
         }
 
@@ -35,22 +35,26 @@ class Filament extends Authenticate
 
     /**
      * The panel's Livewire update route carries this middleware globally, so
-     * guest-only pages (the login screen) can never call their components.
-     * Exempt updates whose originating path is the panel login URL — the
-     * snapshot checksum binds the component, so the path cannot be forged to
-     * reach another component.
+     * every Livewire component update in the app — public pages included —
+     * arrives here. Panel authentication must therefore only be enforced for
+     * components that originate from panel pages: exempt updates whose
+     * snapshot paths are guest-reachable — the panel login URL or any path
+     * outside the panel prefix. The snapshot checksum binds each component's
+     * path, so it cannot be forged to reach another component.
      *
-     * A batched update may carry several components: every snapshot must
-     * originate from the login page, otherwise the whole request requires
-     * authentication. Livewire verifies each snapshot's checksum when the
-     * update is processed, so a batch of login-path snapshots can only
-     * contain genuinely rendered login components.
+     * A batched update may carry several components: every snapshot must be
+     * guest-reachable, otherwise the whole request requires authentication.
+     * Livewire verifies each snapshot's checksum when the update is
+     * processed, so a batch of exempt-path snapshots can only contain
+     * genuinely rendered guest-reachable components.
      */
-    private function isGuestPageLivewireRequest(Request $request): bool
+    private function isGuestReachableLivewireRequest(Request $request): bool
     {
+        $panelPath = trim((string) (FilamentFacade::getCurrentOrDefaultPanel()?->getPath() ?? ''), '/');
         $loginPath = parse_url(FilamentFacade::getLoginUrl() ?? '', PHP_URL_PATH);
+        $loginPath = is_string($loginPath) ? trim($loginPath, '/') : '';
 
-        if (! is_string($loginPath) || trim($loginPath, '/') === '') {
+        if ($panelPath === '' || $loginPath === '') {
             return false;
         }
 
@@ -64,7 +68,15 @@ class Filament extends Authenticate
             $snapshot = json_decode((string) (is_array($component) ? ($component['snapshot'] ?? '') : ''), true);
             $path = is_array($snapshot) ? ($snapshot['memo']['path'] ?? null) : null;
 
-            if (! is_string($path) || trim($path, '/') !== trim($loginPath, '/')) {
+            if (! is_string($path) || ($path = trim($path, '/')) === '') {
+                return false;
+            }
+
+            if ($path === $loginPath) {
+                continue;
+            }
+
+            if ($path === $panelPath || str_starts_with($path, $panelPath.'/')) {
                 return false;
             }
         }

@@ -41,7 +41,7 @@ return [
     'invalid_pieces' => 'Invalid file block',
     'missing_length_and_files' => 'Missing length and file',
     'filename_errors' => 'Error file name',
-    'uploaded_not_offered' => 'You can only upload torrent that pass the candidate. Please return to select the appropriate project in <b>your candidate</b> before uploading!',
+    'uploaded_not_offered' => 'You can only upload torrent that pass the candidate. Please return to select the appropriate project in your candidate before uploading!',
     'unauthorized_upload_freely' => 'You do not have the permission to upload freely!',
     'torrent_existed' => 'The torrent already exists!id: :id',
     'torrent_file_too_big' => 'The torrent file is too large! Maximum allowable',
@@ -57,7 +57,7 @@ Uploader::upload_by
 Introduction:
 :description
 
-View more detailed information and download it (you may need to log in), please click here: <b><a href=javascript:void(null) onclick=window.open(\':torrent_url\')>here</a></b>
+View more detailed information and download it (you may need to log in), please click here:
 :torrent_url
 
 :site_name Website',

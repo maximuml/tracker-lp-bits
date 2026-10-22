@@ -26,8 +26,8 @@ return [
 
     'result_pass_for_exam' => 'Passed!',
     'result_pass_for_task' => 'Completed!',
-    'result_not_pass_for_exam' => '<span style="color: red">Not Passed!</span>',
-    'result_not_pass_for_task' => '<span style="color: red">Not Completed!</span>',
+    'result_not_pass_for_exam' => 'Not Passed!',
+    'result_not_pass_for_task' => 'Not Completed!',
     'checkout_pass_message_subject_for_exam' => 'Exam passed!',
     'checkout_pass_message_content_for_exam' => 'Congratulation! You have pass the exam: :exam_name in time(:begin ~ :end)',
     'checkout_not_pass_message_subject_for_exam' => 'Exam not pass, and account is banned!',

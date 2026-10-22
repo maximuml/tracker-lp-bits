@@ -56,7 +56,9 @@ final class ExamProgressCalculator implements ExamProgressCalculatorInterface
             $index['current_value'] = $currentValue;
             $index['current_value_formatted'] = $currentValueFormatted;
             $index['passed'] = $currentValue >= $requireValueAtomic;
-            $index['index_result'] = $index['passed'] ? Locale::trans($exam->getPassResultTransKey('pass'), [], null) : Locale::trans($exam->getPassResultTransKey('not_pass'), [], null);
+            $index['index_result'] = $index['passed']
+                ? Locale::trans($exam->getPassResultTransKey('pass'), [], null)
+                : '<span style="color: red">'.Locale::trans($exam->getPassResultTransKey('not_pass'), [], null).'</span>';
             $result[] = $index;
         }
 

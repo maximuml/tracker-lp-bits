@@ -100,7 +100,7 @@ class AttendanceController extends BasePageController
             ])->render());
             $data['headerRight'] = SafeHtml::fromTrustedHtml(Locale::trans(
                 'attendance.ranking',
-                ['ranking' => $data['myRanking'], 'counts' => $data['todayCounts']],
+                ['ranking' => '<b>'.(int) $data['myRanking'].'</b>', 'counts' => '<b>'.(int) $data['todayCounts'].'</b>'],
                 null
             ));
         } else {

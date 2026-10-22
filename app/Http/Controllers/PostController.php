@@ -181,7 +181,7 @@ class PostController extends Controller
     {
         $user = Auth::user();
         if ($user instanceof User) {
-            $this->currentUser->set($user->toLegacyArray());
+            $this->currentUser->promote($user);
         }
     }
 

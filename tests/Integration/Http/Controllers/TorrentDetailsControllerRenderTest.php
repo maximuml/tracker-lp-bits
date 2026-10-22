@@ -67,4 +67,24 @@ final class TorrentDetailsControllerRenderTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
         $this->assertSame(200, $response->getStatusCode());
     }
+
+    public function test_show_filters_dangerous_returnto_scheme_in_go_back_link(): void
+    {
+        $user = User::factory()->create();
+        $torrent = Torrent::factory()->create(['owner' => $user->id]);
+        Auth::guard('nexus-web')->setUser($user);
+
+        $controller = app(TorrentDetailsController::class);
+        $request = Request::create('/details', 'GET', [
+            'id' => $torrent->id,
+            'edited' => 1,
+            'returnto' => 'javascript:alert(1)',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->show($request, $torrent->id, app(CustomField::class));
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertStringNotContainsString('href="javascript:', (string) $response->getContent());
+    }
 }

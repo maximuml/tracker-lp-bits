@@ -58,7 +58,7 @@ class TopicController extends Controller
             abort(401);
         }
 
-        $this->currentUser->set($user->toLegacyArray());
+        $this->currentUser->promote($user);
 
         $dto = StoreTopicDto::fromRequest($request);
 
@@ -105,7 +105,7 @@ class TopicController extends Controller
             abort(401);
         }
 
-        $this->currentUser->set($user->toLegacyArray());
+        $this->currentUser->promote($user);
 
         $dto = UpdateTopicDto::fromRequest($request);
 
@@ -150,7 +150,7 @@ class TopicController extends Controller
             abort(401);
         }
 
-        $this->currentUser->set($user->toLegacyArray());
+        $this->currentUser->promote($user);
 
         if (! SupportForum::isModerator((int) $topic->id, 'topic') && ! Permission::can(PermissionEnum::POST_MANAGE, $user)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);

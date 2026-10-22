@@ -18,6 +18,7 @@ use App\Repositories\UserDetailRepository;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Network;
@@ -386,7 +387,7 @@ class StaffModerationController extends BasePageController
         $returnto = (string) $request->post('returnto');
         $prefix = Url::absolute($baseUrl);
 
-        return redirect($prefix.'/'.($returnto !== '' ? $returnto : '/userdetails?id='.$userId));
+        return redirect($prefix.SafeReturnUrl::filter($returnto, '/userdetails?id='.$userId));
     }
 
     public function modrules(Request $request): View|RedirectResponse|Response

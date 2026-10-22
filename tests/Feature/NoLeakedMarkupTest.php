@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\UserAppendPromotion;
+use App\Models\Torrent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -94,6 +95,10 @@ final class NoLeakedMarkupTest extends TestCase
     public function test_torrent_list_renders_promotion_legend_as_markup(): void
     {
         $user = User::factory()->create(['appendpromotion' => UserAppendPromotion::HIGHLIGHT->value]);
+        // The default browse mode only lists categories from its searchbox
+        // catlist (401-409); the factory's random category ID would be
+        // filtered out and the empty list never reaches the legend.
+        Torrent::factory()->create(['category' => 401]);
 
         $response = $this->withNexusCookie($user)->get('/web/torrents');
 
@@ -102,11 +107,8 @@ final class NoLeakedMarkupTest extends TestCase
 
         // The promotion legend is a markup-bearing lang value rendered
         // through SafeHtml — its links must be real tags.
-        if (str_contains($html, 'Those highlighted are')) {
-            $this->assertStringContainsString('<a href="/web/torrents?spstate=2"', $html);
-            $this->assertStringNotContainsString('&lt;a href', $html);
-        } else {
-            $this->markTestSkipped('promotion legend not rendered in this fixture state');
-        }
+        $this->assertStringContainsString('Those highlighted are', $html);
+        $this->assertStringContainsString('<a href="/web/torrents?spstate=2"', $html);
+        $this->assertStringNotContainsString('&lt;a href', $html);
     }
 }

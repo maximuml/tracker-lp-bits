@@ -69,8 +69,6 @@ class TorrentEditController extends Controller
         $row['cat_mode'] = $sectionmode;
 
         $currentUser = $this->currentUser->get();
-        $this->currentUser->set($currentUser);
-
         $headTitle = (__('edit.head_edit_torrent')).'"'.$row['name'].'"';
         $cats = Category::listByModeWithContext($sectionmode);
 

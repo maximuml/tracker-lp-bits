@@ -15,6 +15,7 @@ use App\Repositories\MessageRepository;
 use App\Services\PermissionChecker;
 use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\TorrentOps;
@@ -194,8 +195,10 @@ class TorrentDeleteController extends BasePageController
             ]);
         }
 
+        $returnto = (string) $request->post('returnto');
+
         return $this->renderPage($request, 'delete', true, [
-            'returnto' => (string) $request->post('returnto'),
+            'returnto' => $returnto === '' ? '' : SafeReturnUrl::filter($returnto, '/web/index'),
             'message' => __('delete.text_torrent_deleted'),
         ]);
     }

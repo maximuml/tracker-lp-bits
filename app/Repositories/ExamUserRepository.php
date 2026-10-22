@@ -88,37 +88,45 @@ class ExamUserRepository extends BaseRepository
         if (! $examRepo->isExamMatchUser($exam, $user)) {
             throw new NexusException(Locale::trans('exam.not_match_target_user', [], $locale));
         }
-        if ($user->exams()->where('status', ExamUserStatus::NORMAL->value)->exists()) {
-            throw new NexusException(Locale::trans('exam.has_other_on_the_way', ['type_text' => $exam->typeText], $locale));
-        }
-        $exists = ExamUser::query()
-            ->where('uid', $uid)
-            ->where('exam_id', $exam->id)
-            ->where('status', ExamUserStatus::NORMAL->value)
-            ->exists();
-        if ($exists) {
-            throw new NexusException(Locale::trans('exam.claimed_already', [], $locale));
-        }
-        $data = [
-            'exam_id' => $exam->id,
-        ];
-        if (empty($begin)) {
-            $begin = $exam->getBeginForUser();
-        } else {
-            $begin = Carbon::parse($begin);
-        }
-        if (empty($end)) {
-            $end = $exam->getEndForUser();
-        } else {
-            $end = Carbon::parse($end);
-        }
-        $data['begin'] = $begin;
-        $data['end'] = $end;
-        Logger::writeWithContext((string) ("{$logPrefix}, data: ".Json::encode($data)), (string) 'info', (bool) false);
-        $examUser = $user->exams()->create($data);
-        $this->examProgressRepository->updateProgress($examUser, $user);
 
-        return $examUser;
+        return DB::transaction(function () use ($user, $exam, $uid, $begin, $end, $locale, $logPrefix) {
+            // Lock the user row: a user may hold only one NORMAL exam, an
+            // invariant no flat unique key can express — serializing on
+            // the users row makes concurrent claims check-then-act safely.
+            User::query()->where('id', $uid)->lockForUpdate()->firstOrFail();
+
+            if ($user->exams()->where('status', ExamUserStatus::NORMAL->value)->exists()) {
+                throw new NexusException(Locale::trans('exam.has_other_on_the_way', ['type_text' => $exam->typeText], $locale));
+            }
+            $exists = ExamUser::query()
+                ->where('uid', $uid)
+                ->where('exam_id', $exam->id)
+                ->where('status', ExamUserStatus::NORMAL->value)
+                ->exists();
+            if ($exists) {
+                throw new NexusException(Locale::trans('exam.claimed_already', [], $locale));
+            }
+            $data = [
+                'exam_id' => $exam->id,
+            ];
+            if (empty($begin)) {
+                $begin = $exam->getBeginForUser();
+            } else {
+                $begin = Carbon::parse($begin);
+            }
+            if (empty($end)) {
+                $end = $exam->getEndForUser();
+            } else {
+                $end = Carbon::parse($end);
+            }
+            $data['begin'] = $begin;
+            $data['end'] = $end;
+            Logger::writeWithContext((string) ("{$logPrefix}, data: ".Json::encode($data)), (string) 'info', (bool) false);
+            $examUser = $user->exams()->create($data);
+            $this->examProgressRepository->updateProgress($examUser, $user);
+
+            return $examUser;
+        });
     }
 
     /**

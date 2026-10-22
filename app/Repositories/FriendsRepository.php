@@ -51,7 +51,9 @@ class FriendsRepository
     {
         [$table, $field] = $this->resolveTable($type);
 
-        DB::table($table)->insert([
+        // (userid, friendid|blockid) is unique — a concurrent duplicate
+        // add loses silently, which matches the idempotent intent.
+        DB::table($table)->insertOrIgnore([
             'userid' => $userId,
             $field => $targetId,
         ]);

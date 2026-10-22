@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\Config\SiteConfig;
@@ -144,10 +145,10 @@ final class PageResponses
             return true;
         }
 
-        $CURUSER = CurrentUser::instance()->get() ?? [];
+        $actor = ActorContext::current();
 
-        $msg = 'Invalid ID Attempt: Username: '.(CurrentUser::instance()->username())
-            .' - UserID: '.(CurrentUser::instance()->value('id', ''))
+        $msg = 'Invalid ID Attempt: Username: '.$actor->username
+            .' - UserID: '.($actor->isAuthenticated() ? $actor->id : '')
             .' - UserIP : '.(Network::clientIp());
 
         if ($log && \function_exists('write_log')) {
@@ -185,14 +186,14 @@ final class PageResponses
      */
     public static function canUpload(string $where = 'torrents'): bool
     {
-        $CURUSER = CurrentUser::instance()->get() ?? [];
+        $actor = ActorContext::current();
 
-        if (! (CurrentUser::instance()->value('uploadpos', true))) {
+        if (! ($actor->value('uploadpos', true))) {
             return false;
         }
 
         $uploadDenyApprovalDenyCount = (int) SiteConfig::current()->main->uploadDenyApprovalDenyCount();
-        $approvalDenyCount = app(TorrentModerationRepository::class)->getApprovalDenyCount((int) (CurrentUser::instance()->id()));
+        $approvalDenyCount = app(TorrentModerationRepository::class)->getApprovalDenyCount($actor->id);
 
         if ($uploadDenyApprovalDenyCount > 0 && $approvalDenyCount >= $uploadDenyApprovalDenyCount) {
             self::abort(
@@ -204,7 +205,7 @@ final class PageResponses
 
         if ($where === 'torrents') {
             $offerSkipApprovedCount = (int) SiteConfig::current()->main->offerSkipApprovedCount();
-            if ((CurrentUser::instance()->value('offer_allowed_count', 0)) >= $offerSkipApprovedCount) {
+            if (($actor->value('offer_allowed_count', 0)) >= $offerSkipApprovedCount) {
                 return true;
             }
             if (Permission::canUploadToNormalSection()) {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Support\CurrentUser;
+use App\DTOs\Auth\ActorContext;
 use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +23,7 @@ abstract class BasePageController extends Controller
         // __construct without calling parent, and service-location is
         // ratcheted to zero in controllers. The ambient user singleton
         // stays the contract here like in SiteAccess / guards / middleware.
-        if ($auth && CurrentUser::instance()->get() === null) {
+        if ($auth && ActorContext::current()->isGuest()) {
             $qs = $request->getQueryString();
 
             return redirect('/'.$page.($qs ? '?'.$qs : ''));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserTimeType;
 use App\Support\Html\SafeHtml;
 use Carbon\Carbon;
@@ -279,11 +280,11 @@ final class Time
         bool $oneunit,
         bool $isfuturetime,
     ): array|false|null {
-        $CURUSER = CurrentUser::instance()->get();
+        $actor = ActorContext::current();
         $TIMENOW = defined('TIMENOW') ? (int) TIMENOW : time();
         $timeStr = $time instanceof Carbon ? $time->toDateTimeString() : (string) $time;
 
-        if (isset($CURUSER) && (CurrentUser::instance()->value('timetype', 1)) != UserTimeType::TIMEALIVE->value && ! $forceago) {
+        if ($actor->isAuthenticated() && ($actor->value('timetype', 1)) != UserTimeType::TIMEALIVE->value && ! $forceago) {
             return [
                 'mode' => 'absolute',
                 'inner' => self::formatAbsoluteTime($timeStr, $twoline),

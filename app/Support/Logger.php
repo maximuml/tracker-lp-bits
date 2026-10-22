@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\DTOs\Auth\ActorContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -94,10 +95,11 @@ final class Logger
         $passkey = '';
 
         if (RuntimeContext::instance()->isLegacy()) {
-            $curUser = CurrentUser::instance()->get();
-            if (is_array($curUser) && ! empty($curUser)) {
+            $actor = ActorContext::current();
+            $curUser = $actor->user?->toLegacyArray();
+            if (! empty($curUser)) {
                 $user = $curUser;
-                $passkey = (string) (CurrentUser::instance()->passkey());
+                $passkey = (string) ($actor->passkey ?? '');
             }
             if ($passkey === '') {
                 $passkey = (string) (request()->input('passkey') ?? request()->input('authkey') ?? '');

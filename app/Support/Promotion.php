@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
 use App\Enums\UserAppendPromotion;
@@ -113,13 +114,11 @@ final class Promotion
      */
     public static function rowClassWithContext(int $promotion, ?string $posState = '', ?array $torrent = []): ?string
     {
-        $user = CurrentUser::instance()->get() ?? [];
-
         return self::rowClass(
             $promotion,
             (string) ($posState ?? ''),
             $torrent ?? [],
-            UserAppendPromotion::tryFrom((int) (CurrentUser::instance()->value('appendpromotion', 2)))?->stringValue() ?? 'icon',
+            UserAppendPromotion::tryFrom((int) (ActorContext::current()->value('appendpromotion', 2)))?->stringValue() ?? 'icon',
         );
     }
 
@@ -275,8 +274,6 @@ final class Promotion
         ?string $promotionUntil,
         bool $ignoreGlobal,
     ): ?PromotionBadge {
-        $user = CurrentUser::instance()->get() ?? [];
-
         return self::badge(
             $promotion,
             $forceMode,
@@ -285,7 +282,7 @@ final class Promotion
             $promotionTimeType,
             $promotionUntil,
             $ignoreGlobal,
-            UserAppendPromotion::tryFrom((int) (CurrentUser::instance()->value('appendpromotion', 2)))?->stringValue() ?? 'icon',
+            UserAppendPromotion::tryFrom((int) (ActorContext::current()->value('appendpromotion', 2)))?->stringValue() ?? 'icon',
             self::expireTorrentGlobals(),
         );
     }

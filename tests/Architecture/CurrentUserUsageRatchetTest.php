@@ -29,7 +29,10 @@ use Tests\Attributes\TestCategory;
  * moved to `ActorContext`. The remainder is the deliberate auth/legacy
  * seam (Support/*, middleware, guards, `BasePageController`, and
  * `set()`/`reset()` mutation sites). Lower it as more surfaces
- * migrate; never raise it.
+ * migrate; never raise it. 32 after all Support ambient reads and
+ * `SharedViewVariables` moved to `ActorContext` — only the fromAuth
+ * bridge, cookie-auth `set()` writes, controller `promote*()`
+ * promotions, and imports of the write/lifecycle seam remain.
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class CurrentUserUsageRatchetTest extends TestCase
@@ -41,7 +44,7 @@ final class CurrentUserUsageRatchetTest extends TestCase
         'DTOs/Auth/ActorContext.php',
     ];
 
-    private const BASELINE = 67;
+    private const BASELINE = 32;
 
     public function test_current_user_references_do_not_exceed_baseline(): void
     {

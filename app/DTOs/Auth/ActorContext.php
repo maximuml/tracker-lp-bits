@@ -50,6 +50,15 @@ final readonly class ActorContext
     ) {}
 
     /**
+     * Resolve the per-request singleton — the `X::instance()` funnel
+     * convention for static helpers that cannot take DI.
+     */
+    public static function current(): self
+    {
+        return app(self::class);
+    }
+
+    /**
      * Build an ActorContext from the authenticated user.
      *
      * Falls back to the CurrentUser singleton (which reads from Auth)

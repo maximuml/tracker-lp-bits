@@ -87,10 +87,12 @@ final class TasksTest extends TestCase
         DB::table('topics')->where('id', $newTopicId)->update(['lastpost' => $newPostId]);
 
         $oldReportId = $this->createReport([
+            'reportid' => 101,
             'added' => Carbon::now()->subDays(30),
             'dealtwith' => 1,
         ]);
         $newReportId = $this->createReport([
+            'reportid' => 102,
             'added' => Carbon::now()->subDay(),
             'dealtwith' => 1,
         ]);

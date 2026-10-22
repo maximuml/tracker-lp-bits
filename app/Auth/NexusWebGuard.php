@@ -173,7 +173,7 @@ class NexusWebGuard implements StatefulGuard
         $duration = $remember ? 5 * 365 * 86400 : 0;
         AuthCookie::setLoginCookie((int) $user->getAuthIdentifier(), null, $duration);
 
-        $this->currentUser->set($user->toArray());
+        $this->currentUser->promote($user);
     }
 
     public function loginUsingId($id, $remember = false): Authenticatable|false
@@ -211,6 +211,6 @@ class NexusWebGuard implements StatefulGuard
     {
         AuthCookie::clear();
         $this->user = null;
-        $this->currentUser->set(null);
+        $this->currentUser->reset();
     }
 }

@@ -305,9 +305,10 @@ final class LogRepositoryTest extends TestCase
     public function test_delete_poll_removes_poll_and_answers(): void
     {
         $pollId = $this->insertPoll('Delete Me');
+        $other = User::factory()->create();
         DB::table('pollanswers')->insert([
             ['pollid' => $pollId, 'userid' => $this->userId, 'selection' => 0],
-            ['pollid' => $pollId, 'userid' => $this->userId, 'selection' => 1],
+            ['pollid' => $pollId, 'userid' => $other->id, 'selection' => 1],
         ]);
 
         $this->repository->deletePoll($pollId);
@@ -326,10 +327,11 @@ final class LogRepositoryTest extends TestCase
     public function test_get_poll_vote_counts_counts_votes_by_selection(): void
     {
         $pollId = $this->insertPoll('Vote Poll');
+        $voters = User::factory()->count(2)->create();
         DB::table('pollanswers')->insert([
             ['pollid' => $pollId, 'userid' => $this->userId, 'selection' => 0],
-            ['pollid' => $pollId, 'userid' => $this->userId, 'selection' => 0],
-            ['pollid' => $pollId, 'userid' => $this->userId, 'selection' => 1],
+            ['pollid' => $pollId, 'userid' => $voters[0]->id, 'selection' => 0],
+            ['pollid' => $pollId, 'userid' => $voters[1]->id, 'selection' => 1],
         ]);
 
         $result = $this->repository->getPollVoteCounts($pollId);
@@ -341,9 +343,10 @@ final class LogRepositoryTest extends TestCase
     public function test_get_poll_vote_counts_excludes_selections_above_limit(): void
     {
         $pollId = $this->insertPoll('High Selection');
+        $other = User::factory()->create();
         DB::table('pollanswers')->insert([
             ['pollid' => $pollId, 'userid' => $this->userId, 'selection' => 5],
-            ['pollid' => $pollId, 'userid' => $this->userId, 'selection' => 20],
+            ['pollid' => $pollId, 'userid' => $other->id, 'selection' => 20],
         ]);
 
         $result = $this->repository->getPollVoteCounts($pollId);

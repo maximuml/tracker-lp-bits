@@ -47,7 +47,11 @@ final class PollVoteService
             return false;
         }
 
-        $this->indexRepository->recordPollVote($pollId, $user['id'], $choice);
+        // A concurrent duplicate loses the unique-key race here; only the
+        // winning insert may award the vote bonus and invalidate caches.
+        if (! $this->indexRepository->recordPollVote($pollId, $user['id'], $choice)) {
+            return false;
+        }
 
         $this->cache?->forget('current_poll_content');
         $this->cache?->forget('current_poll_result', true);

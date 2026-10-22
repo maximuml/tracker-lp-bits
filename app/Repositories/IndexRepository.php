@@ -212,11 +212,18 @@ class IndexRepository
 
     public function recordPollVote(int $pollId, int $userId, int $choice): bool
     {
-        PollAnswer::create([
+        // insertOrIgnore + the (pollid, userid) unique key: a concurrent
+        // duplicate vote loses at the engine level instead of passing a
+        // stale hasVoted() check and double-inserting.
+        $inserted = PollAnswer::query()->insertOrIgnore([
             'pollid' => $pollId,
             'userid' => $userId,
             'selection' => $choice,
         ]);
+
+        if ($inserted === 0) {
+            return false;
+        }
 
         Cache::forget($this->cacheKey('poll_voted', [(string) $pollId, (string) $userId]));
         Cache::forget($this->cacheKey('poll_user_vote', [(string) $pollId, (string) $userId]));

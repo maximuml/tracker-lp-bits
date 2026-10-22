@@ -304,7 +304,11 @@ class PollController extends BasePageController
             return $this->fail([], 'Already voted');
         }
 
-        $this->indexRepository->recordPollVote($pollId, $userId, $choice);
+        // recordPollVote returns false when the (pollid, userid) unique
+        // key rejects a concurrent duplicate — surface it as Already voted.
+        if (! $this->indexRepository->recordPollVote($pollId, $userId, $choice)) {
+            return $this->fail([], 'Already voted');
+        }
 
         // Invalidate legacy poll cache so the index page shows fresh results
         // after an API vote — mirrors IndexController::handlePollVote().

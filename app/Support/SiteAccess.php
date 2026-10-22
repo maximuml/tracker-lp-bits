@@ -100,13 +100,13 @@ final class SiteAccess
                 return false;
             }
             $secret = request()->input('secret');
-            if ($secret !== $setting['login_secret']) {
-                Logger::writeWithContext('invlaid secret: '.$secret);
+            if (! is_string($secret) || ! hash_equals((string) $setting['login_secret'], $secret)) {
+                Logger::writeWithContext('invalid login secret supplied');
 
                 return false;
             }
             if ($setting['login_secret_deadline'] < date('Y-m-d H:i:s')) {
-                Logger::writeWithContext("secret: {$secret} expires(deadline: {$setting['login_secret_deadline']})");
+                Logger::writeWithContext("login secret expired (deadline: {$setting['login_secret_deadline']})");
 
                 return false;
             }

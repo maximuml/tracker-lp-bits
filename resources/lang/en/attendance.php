@@ -5,7 +5,7 @@ return [
     'target_date_can_no_be_retroactive' => 'Date：:date can not be retroactive',
     'already_attendance' => 'Already attendance',
     'card_not_enough' => 'Attendance card not enough',
-    'ranking' => "Today's Ranking: :ranking / :counts",
+    'ranking' => "Today's Ranking:",
     'fields' => [
         'date' => 'Date',
         'points' => 'Got bonus',

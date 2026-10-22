@@ -147,6 +147,10 @@ final class AuditStaffActionsTest extends TestCase
             'password' => 'hunter2',
             'passkey' => 'deadbeef',
             '_token' => 'csrf',
+            'two_step_secret' => 'TOTPS3CR3T',
+            'passagain' => 'hunter2',
+            'newpassword' => 'n3wp@ss',
+            'download_support_passkey' => 'dlkey123',
             'nested' => ['a' => 1],
             'long' => str_repeat('x', 100),
         ]);
@@ -157,6 +161,9 @@ final class AuditStaffActionsTest extends TestCase
         $this->assertStringNotContainsString('hunter2', $out);
         $this->assertStringNotContainsString('deadbeef', $out);
         $this->assertStringNotContainsString('csrf', $out);
+        $this->assertStringNotContainsString('TOTPS3CR3T', $out);
+        $this->assertStringNotContainsString('n3wp@ss', $out);
+        $this->assertStringNotContainsString('dlkey123', $out);
         $this->assertStringContainsString('nested=[complex]', $out);
         $this->assertStringContainsString('long='.str_repeat('x', 40), $out);
         $this->assertStringNotContainsString(str_repeat('x', 41), $out);

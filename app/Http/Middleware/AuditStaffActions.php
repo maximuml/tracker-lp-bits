@@ -89,6 +89,12 @@ final class AuditStaffActions
         'password', 'password2', 'passkey', 'secret', 'auth_key', 'signature',
         'token', '_token', 'pwd', 'passhash', 'chpassword', 'chpasswordagain',
         'iv', 'qr', 'totp', 'csrf', 'csrf_token',
+        // Legacy/confirmation field names found in views + controllers that
+        // carry credentials or tokens.
+        'passagain', 'password_confirmation', 'newpassword', 'newpasswordagain',
+        'wantpassword', 'resetauthkey', 'resetkey', 'resetpasskey',
+        'two_step_code', 'two_step_secret', 'download_support_passkey',
+        'answer', 'hash',
     ];
 
     /**

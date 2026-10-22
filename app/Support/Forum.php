@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass as UserClassEnum;
 use App\Models\Topic;
 use App\Models\User;
@@ -79,10 +80,8 @@ final class Forum
      */
     public static function isModerator(int|string $id, string $in = 'post'): bool
     {
-        $CURUSER = CurrentUser::instance()->get() ?? [];
-
         $forumRep = self::forumModRepository();
-        $userId = (int) (CurrentUser::instance()->id());
+        $userId = ActorContext::current()->id;
 
         switch ($in) {
             case 'post':

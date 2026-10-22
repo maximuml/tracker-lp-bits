@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Support\Config\SiteConfig;
 use Illuminate\Database\QueryException;
 
@@ -15,7 +16,6 @@ use Illuminate\Database\QueryException;
 final class SharedViewVariables
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
         private readonly SearchBoxRepositoryInterface $searchBoxRepository,
     ) {}
 
@@ -25,7 +25,7 @@ final class SharedViewVariables
     public function all(): array
     {
         return PageState::instance()->viewSettings($this->settings(...)) + [
-            'CURUSER' => $this->currentUser->get(),
+            'CURUSER' => ActorContext::current()->user?->toLegacyArray(),
         ];
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
 use App\Support\Cache\NexusCache;
@@ -105,7 +106,7 @@ final class PageLayoutContext
         $pageState = PageState::instance();
 
         return new self(
-            user: CurrentUser::instance()->get(),
+            user: ActorContext::current()->user?->toLegacyArray(),
             cache: NexusCache::instance(),
             defaultStylesheet: $main->defStylesheet(0),
             langDir: Locale::currentLangDir(),

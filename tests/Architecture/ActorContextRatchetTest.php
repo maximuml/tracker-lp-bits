@@ -41,8 +41,11 @@ final class ActorContextRatchetTest extends TestCase
      * accessor convention (one `app()` per class, like `X::instance()`);
      * +1 for `ActorContext::userRepo()` — static DTO factory keeps the
      * `self::xRepo()` accessor convention.
+     * +1 for `ActorContext::current()` — the static funnel that replaced
+     * `CurrentUser::instance()` reads across Support helpers (one `app()`
+     * line inside the accessor; call sites no longer appear in the count).
      */
-    private const BASELINE_APP_CALLS = 64;
+    private const BASELINE_APP_CALLS = 65;
 
     private const APP_DIR = __DIR__.'/../../app';
 

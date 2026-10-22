@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Models\UserMeta;
 use App\Repositories\UserMetaRepository;
 use App\Support\Html\SafeHtml;
@@ -48,9 +49,10 @@ final class UserDisplay
      */
     public static function currentClass(): string|int
     {
-        $user = CurrentUser::instance()->get();
         if (RuntimeContext::instance()->isLegacy()) {
-            return CurrentUser::instance()->value('class', '');
+            $actor = ActorContext::current();
+
+            return $actor->isAuthenticated() ? $actor->class->value : '';
         }
 
         if (! auth()->check()) {
@@ -86,9 +88,8 @@ final class UserDisplay
      */
     public static function currentId(): int
     {
-        $user = CurrentUser::instance()->get();
         if (RuntimeContext::instance()->isLegacy()) {
-            return (int) (CurrentUser::instance()->id());
+            return ActorContext::current()->id;
         }
 
         if (! auth()->check()) {
@@ -105,9 +106,8 @@ final class UserDisplay
      */
     public static function currentUsername(): string
     {
-        $user = CurrentUser::instance()->get();
         if (RuntimeContext::instance()->isLegacy()) {
-            return CurrentUser::instance()->username();
+            return ActorContext::current()->username;
         }
 
         if (! auth()->check()) {

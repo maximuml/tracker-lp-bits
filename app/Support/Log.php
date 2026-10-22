@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\SiteLogRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 
 /**
  * Legacy site-log helper extracted from `include/functions.php`.
@@ -22,8 +23,6 @@ final class Log
 
     public static function writeWithContext(string $text, string $security = 'normal'): void
     {
-        $user = CurrentUser::instance()->get() ?? [];
-
-        self::write($text, $security, (int) (CurrentUser::instance()->id()));
+        self::write($text, $security, ActorContext::current()->id);
     }
 }

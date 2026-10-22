@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Contracts\Repositories\StyleRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
@@ -123,10 +124,10 @@ final class Style
      */
     public static function cssUriWithContext(string $file = ''): string
     {
-        $user = CurrentUser::instance()->get() ?? [];
+        $actor = ActorContext::current();
         $defaultId = self::defaultStylesheetId();
 
-        return self::cssUri(NexusCache::instance(), $user ? CurrentUser::instance()->value('stylesheet') : $defaultId, $defaultId, $file);
+        return self::cssUri(NexusCache::instance(), $actor->isAuthenticated() ? $actor->stylesheet : $defaultId, $defaultId, $file);
     }
 
     /**
@@ -135,10 +136,10 @@ final class Style
      */
     public static function addiCodeWithContext(): SafeHtml
     {
-        $user = CurrentUser::instance()->get() ?? [];
+        $actor = ActorContext::current();
         $defaultId = self::defaultStylesheetId();
 
-        return SafeHtml::fromTrustedHtml(self::addiCode(NexusCache::instance(), $user ? CurrentUser::instance()->value('stylesheet') : $defaultId, $defaultId));
+        return SafeHtml::fromTrustedHtml(self::addiCode(NexusCache::instance(), $actor->isAuthenticated() ? $actor->stylesheet : $defaultId, $defaultId));
     }
 
     /**

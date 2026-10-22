@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Auth;
 
+use App\DTOs\Auth\ActorContext;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\RequestContext;
@@ -66,7 +66,7 @@ final class AuthContext
         }
 
         return new self(
-            user: CurrentUser::instance()->get(),
+            user: ActorContext::current()->user?->toLegacyArray(),
             cache: NexusCache::instance(),
             ip: \function_exists('getip') ? Network::clientIp((bool) true) : Network::clientIp(),
             requestUri: RequestValues::serverValue('REQUEST_URI'),

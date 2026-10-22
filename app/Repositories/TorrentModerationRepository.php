@@ -180,64 +180,79 @@ class TorrentModerationRepository extends BaseRepository
      * Delete one or more torrents and related records.
      *
      * Mirrors the legacy {@see TorrentOps::deleteTorrents()}.
+     * Deletes the given torrents plus child rows inside one transaction.
+     *
+     * The torrent rows are locked with FOR UPDATE first: a concurrent delete
+     * of the same ids blocks until the winner commits and then sees an empty
+     * set, so callers can use the returned list to gate bonuses, PMs and
+     * other one-time side effects on actually performing the delete.
      *
      * @param  int|int[]  $id
+     * @return list<int> ids that were actually deleted (empty when every
+     *                   requested id was already gone)
      */
-    public function deleteTorrents(int|array $id, bool $notify = false): void
+    public function deleteTorrents(int|array $id, bool $notify = false): array
     {
         $idArr = array_map('intval', is_array($id) ? $id : [$id]);
 
-        $torrentInfo = Torrent::query()
-            ->whereIn('id', $idArr)
-            ->get()
-            ->keyBy('id');
+        return DB::transaction(function () use ($idArr, $notify) {
+            $torrentInfo = Torrent::query()
+                ->whereIn('id', $idArr)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
 
-        $torrentDir = SiteConfig::current()->main->torrentDir();
-
-        $downloadRepo = $this->downloadRepository;
-        foreach ($idArr as $_id) {
-            /** @var Torrent|null $torrent */
-            $torrent = $torrentInfo->get($_id);
-
-            if ($torrent instanceof Torrent) {
-                $downloadRepo->delPiecesHashCache((string) $torrent->getAttribute('pieces_hash'));
+            if ($torrentInfo->isEmpty()) {
+                return [];
             }
 
-            Logger::writeWithContext("delete torrent: $_id", 'error');
-            @unlink(Path::resolve("$torrentDir/$_id.torrent", defined('ROOT_PATH') ? (string) ROOT_PATH : ''));
+            $deletedIds = array_values(array_map('intval', $torrentInfo->keys()->all()));
 
-            $this->operationLogRepository->add([
-                'torrent_id' => $_id,
-                'uid' => UserDisplay::currentId(),
-                'action_type' => TorrentOperationAction::DELETE->value,
-                'comment' => '',
-            ], $notify);
+            $torrentDir = SiteConfig::current()->main->torrentDir();
 
-            if ($torrent instanceof Torrent) {
+            $downloadRepo = $this->downloadRepository;
+            foreach ($deletedIds as $_id) {
+                /** @var Torrent $torrent */
+                $torrent = $torrentInfo->get($_id);
+
+                $downloadRepo->delPiecesHashCache((string) $torrent->getAttribute('pieces_hash'));
+
+                Logger::writeWithContext("delete torrent: $_id", 'error');
+                @unlink(Path::resolve("$torrentDir/$_id.torrent", defined('ROOT_PATH') ? (string) ROOT_PATH : ''));
+
+                $this->operationLogRepository->add([
+                    'torrent_id' => $_id,
+                    'uid' => UserDisplay::currentId(),
+                    'action_type' => TorrentOperationAction::DELETE->value,
+                    'comment' => '',
+                ], $notify);
+
                 event(new TorrentDeleted($torrent->toArray()));
             }
-        }
 
-        DB::table('torrents')->whereIn('id', $idArr)->delete();
-        DB::table('torrent_extras')->whereIn('torrent_id', $idArr)->delete();
-        DB::table('snatched')
-            ->whereIn('torrentid', $idArr)
-            ->whereNotExists(function ($query) {
-                $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
-            })
-            ->delete();
+            DB::table('torrents')->whereIn('id', $deletedIds)->delete();
+            DB::table('torrent_extras')->whereIn('torrent_id', $deletedIds)->delete();
+            DB::table('snatched')
+                ->whereIn('torrentid', $deletedIds)
+                ->whereNotExists(function ($query) {
+                    $query->selectRaw('1')->from('users')->whereColumn('users.id', '=', 'snatched.userid');
+                })
+                ->delete();
 
-        foreach (['peers', 'files', 'comments'] as $x) {
-            DB::table($x)->whereIn('torrent', $idArr)->delete();
-        }
+            foreach (['peers', 'files', 'comments'] as $x) {
+                DB::table($x)->whereIn('torrent', $deletedIds)->delete();
+            }
 
-        DB::table('hit_and_runs')->whereIn('torrent_id', $idArr)->delete();
+            DB::table('hit_and_runs')->whereIn('torrent_id', $deletedIds)->delete();
 
-        try {
-            $meiliSearchRep = $this->meiliSearchRepository;
-            $meiliSearchRep->deleteDocuments($idArr);
-        } catch (\Throwable $e) {
-            Logger::writeWithContext('MeiliSearch delete on torrent delete failed: '.$e->getMessage(), 'error');
-        }
+            try {
+                $meiliSearchRep = $this->meiliSearchRepository;
+                $meiliSearchRep->deleteDocuments($deletedIds);
+            } catch (\Throwable $e) {
+                Logger::writeWithContext('MeiliSearch delete on torrent delete failed: '.$e->getMessage(), 'error');
+            }
+
+            return $deletedIds;
+        });
     }
 }

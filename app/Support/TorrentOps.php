@@ -23,10 +23,12 @@ final class TorrentOps
      * Mirrors `deletetorrent($id, $notify = false)`.
      *
      * @param  int|int[]  $id
+     * @return list<int> ids that were actually deleted (see
+     *                   {@see TorrentModerationRepository::deleteTorrents()})
      */
-    public static function deleteTorrents($id, bool $notify = false): void
+    public static function deleteTorrents($id, bool $notify = false): array
     {
-        app(TorrentModerationRepository::class)->deleteTorrents($id, $notify);
+        return app(TorrentModerationRepository::class)->deleteTorrents($id, $notify);
     }
 
     /**

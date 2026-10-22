@@ -69,7 +69,12 @@ class TorrentDeleteController extends BasePageController
             );
         }
 
-        TorrentOps::deleteTorrents($id, false);
+        // The row lock inside deleteTorrents() serializes a concurrent
+        // double-delete: the loser gets [] and must not deduct the upload
+        // bonus or send the PM a second time.
+        if (TorrentOps::deleteTorrents($id, false) === []) {
+            return redirect('/web/torrents');
+        }
 
         $uploadtorrentBonus = (float) SiteConfig::current()->bonus->uploadTorrent();
         Bonus::updatePoints('-', $uploadtorrentBonus, $ownerId);
@@ -165,7 +170,12 @@ class TorrentDeleteController extends BasePageController
             $reasonstr = trim($reason[3]);
         }
 
-        TorrentOps::deleteTorrents($id, false);
+        // The row lock inside deleteTorrents() serializes a concurrent
+        // double-delete: the loser gets [] and must not deduct the upload
+        // bonus, log or send the PM a second time.
+        if (TorrentOps::deleteTorrents($id, false) === []) {
+            return $this->renderPage($request, 'delete', true);
+        }
 
         if ($anonymous == 1 && $currentUserId == $ownerId) {
             Log::writeWithContext("Torrent $id ({$name}) was deleted by its anonymous uploader ($reasonstr)", 'normal');

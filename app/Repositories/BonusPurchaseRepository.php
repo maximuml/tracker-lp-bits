@@ -159,7 +159,13 @@ class BonusPurchaseRepository extends BaseRepository
         if (UserMeta::query()->where('uid', $uid)->where('meta_key', UserMeta::META_KEY_CHANGE_USERNAME)->exists()) {
             throw new NexusException('user already has change username card');
         }
-        DB::transaction(function () use ($user, $requireBonus) {
+        DB::transaction(function () use ($user, $requireBonus, $uid) {
+            // Serialize the already-has-card check on the user row so a
+            // concurrent purchase can't pass it before the meta exists.
+            User::query()->where('id', $uid)->lockForUpdate()->firstOrFail();
+            if (UserMeta::query()->where('uid', $uid)->where('meta_key', UserMeta::META_KEY_CHANGE_USERNAME)->exists()) {
+                throw new NexusException('user already has change username card');
+            }
             $comment = Locale::trans('bonus.comment_buy_change_username_card', ['bonus' => $requireBonus], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
             $this->consumptionRepository->consumeUserBonus($user, $requireBonus, BusinessType::BUY_CHANGE_USERNAME_CARD->value, $comment);

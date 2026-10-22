@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\DTOs\Auth\ActorContext;
+use App\Enums\TorrentApprovalStatus;
+use App\Enums\TorrentVisible;
 use App\Http\Controllers\TorrentRssController;
+use App\Models\Torrent;
+use App\Models\User;
 use App\Repositories\TorrentRepository;
 use App\Services\PasskeyUserLookup;
 use App\Support\Cache\NexusCache;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\Concerns\MakesCurrentUser;
@@ -142,6 +148,45 @@ final class TorrentRssControllerTest extends TestCase
         Cache::shouldHaveReceived('remember')
             ->once()
             ->with(PasskeyUserLookup::userCacheKey($passkey, 'rss'), 3600, Mockery::type(\Closure::class));
+    }
+
+    public function test_torrentrss_splits_cdata_breakout_in_torrent_title(): void
+    {
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class)->shouldIgnoreMissing());
+        Cache::flush();
+        $this->mockCurrentUser(null);
+
+        $passkey = md5('rss-cdata-test');
+        /** @var User $user */
+        $user = User::factory()->create(['passkey' => $passkey]);
+        $catId = (int) DB::table('categories')
+            ->where('mode', SiteConfig::current()->main->browseCat())
+            ->value('id');
+        /** @var Torrent $torrent */
+        $torrent = Torrent::factory()->create([
+            'name' => 'Evil ]]> <script>alert(1)</script>',
+            'owner' => $user->id,
+            'category' => $catId,
+            'anonymous' => 0,
+            'visible' => TorrentVisible::YES->value,
+            'approval_status' => TorrentApprovalStatus::ALLOW->value,
+            'price' => 0,
+        ]);
+
+        $controller = app(TorrentRssController::class);
+        $request = Request::create('/torrentrss', 'GET', ['passkey' => $passkey]);
+        app()->instance('request', $request);
+
+        $response = $controller->torrentrss($request);
+
+        $content = (string) $response->getContent();
+        $this->assertSame(200, $response->getStatusCode());
+        // The literal "]]>" in a user-controlled torrent name is split
+        // across two CDATA blocks, so it can never close the section and
+        // inject markup into the cached feed.
+        $this->assertStringContainsString(']]]]><![CDATA[>', $content);
+        $this->assertStringNotContainsString(']]> <script>alert(1)</script>', $content);
+        $this->assertStringContainsString('alert(1)', $content);
     }
 
     /**

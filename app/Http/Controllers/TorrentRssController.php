@@ -234,6 +234,12 @@ class TorrentRssController extends BasePageController
             return sprintf('%02x', ord($matches[0]));
         };
 
+        // Text rendered inside <![CDATA[ ]]> sections must not contain the
+        // literal "]]>" terminator (torrent names and usernames are
+        // user-controlled). Split it across two CDATA blocks so the value
+        // displays verbatim but can never close the section early.
+        $cdata = static fn (string $value): HtmlString => new HtmlString(str_replace(']]>', ']]]]><![CDATA[>', $value));
+
         $items = [];
         foreach ($list as $row) {
             $ownerInfo = UserDisplay::row((int) ($row['owner'] ?? 0));
@@ -266,13 +272,13 @@ class TorrentRssController extends BasePageController
             }
 
             $items[] = [
-                'title' => new HtmlString($title),
+                'title' => $cdata($title),
                 'url' => $itemurl,
-                'content' => new HtmlString((string) Format::formatComment((string) ($row['descr'] ?? ''), true, false, false, false)),
+                'content' => $cdata((string) Format::formatComment((string) ($row['descr'] ?? ''), true, false, false, false)),
                 'author' => $author,
                 'categoryId' => (int) ($row['category'] ?? 0),
                 'categoryName' => (string) ($row['category_name'] ?? ''),
-                'commentsUrl' => new HtmlString($baseUrl.'/web/details/'.(int) ($row['id'] ?? 0).'?cmtpage=0#startcomments'),
+                'commentsUrl' => $cdata($baseUrl.'/web/details/'.(int) ($row['id'] ?? 0).'?cmtpage=0#startcomments'),
                 'downloadUrl' => $itemdlurl,
                 'size' => (int) ($row['size'] ?? 0),
                 'guid' => preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))),
@@ -283,8 +289,8 @@ class TorrentRssController extends BasePageController
         $xml = '<?xml version="1.0" encoding="utf-8"?>'
             .view('rss.torrents', [
                 'channelTitle' => $siteName.' Torrents',
-                'baseUrl' => new HtmlString($baseUrl),
-                'description' => new HtmlString('Latest torrents from '.$siteName.' - '.htmlspecialchars($slogan)),
+                'baseUrl' => $cdata($baseUrl),
+                'description' => $cdata('Latest torrents from '.$siteName.' - '.htmlspecialchars($slogan)),
                 'copyright' => $copyright,
                 'siteEmail' => $siteEmail,
                 'siteName' => $siteName,

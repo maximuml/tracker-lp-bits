@@ -56,7 +56,7 @@ final class HtmlInPhpRatchetTest extends TestCase
     ];
 
     /** Baseline: lines with a quoted '<table literal (layout markup in PHP). */
-    private const BASELINE_TABLE_LITERALS = 2;
+    private const BASELINE_TABLE_LITERALS = 0;
 
     /** Baseline: ob_start() calls (output buffering = inline page rendering). */
     private const BASELINE_OB_START = 2;
@@ -64,8 +64,12 @@ final class HtmlInPhpRatchetTest extends TestCase
     /** Baseline: lines with `echo` inside app/Services + app/Http/Controllers. */
     private const BASELINE_ECHO_IN_SERVICES = 0;
 
-    /** Baseline: lines where a quoted string starts an HTML tag ('<div', "</td", '<!--'). */
-    private const BASELINE_HTML_LITERAL_LINES = 5;
+    /**
+     * Baseline: lines where a quoted string starts an HTML tag ('<div', "</td", '<!--').
+     * All four remaining sites are CSP nonce injection in preg_replace()
+     * replacement strings (script/style tags get `nonce="…"` spliced in).
+     */
+    private const BASELINE_HTML_LITERAL_LINES = 4;
 
     /** Baseline: HTML literal lines inside app/Repositories (target: 0). */
     private const BASELINE_REPO_HTML_LITERALS = 0;
@@ -75,11 +79,11 @@ final class HtmlInPhpRatchetTest extends TestCase
      * Unverified raw output — byte-identical to {!! !!}; a usage needs
      * justification in the PR. Baseline captured 2026-10-21 after the
      * Tag.php attribute/text markers moved to escaped {{ }} and the
-     * text/empty-string sites moved to fromPlainText(); 244 after the
-     * VERSION powered-by constant reverted — it is deliberate markup
-     * (`<a href="aboutnexus.php">`), not plain text.
+     * text/empty-string sites moved to fromPlainText(); 241 after three
+     * provably-plain-text sites ('N/A', the '\1' preg back-reference,
+     * and the e()-wrapped sprintf version note) moved to fromPlainText().
      */
-    private const BASELINE_TRUSTED_HTML = 244;
+    private const BASELINE_TRUSTED_HTML = 241;
 
     public function test_table_literal_count_does_not_exceed_baseline(): void
     {

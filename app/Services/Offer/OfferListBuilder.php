@@ -285,7 +285,7 @@ final class OfferListBuilder
                     $dispname = mb_substr($dispname, 0, 68, 'UTF-8').'..';
                 }
 
-                $timeout = SafeHtml::fromTrustedHtml('N/A');
+                $timeout = SafeHtml::fromPlainText('N/A');
                 if ($showTimeout) {
                     $timeoutStr = '';
                     if ((int) ($arr['allowed'] ?? 1) === OfferAllowed::ALLOWED->value) {

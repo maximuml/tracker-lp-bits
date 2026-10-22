@@ -342,7 +342,7 @@ final class BBCode
         $open = trim(view('support._quote-open', ['label' => $quoteLabel])->render());
         $cite = trim(view('support._quote-cite', [
             'label' => $quoteLabel,
-            'cite' => SafeHtml::fromTrustedHtml('\\1'),
+            'cite' => SafeHtml::fromPlainText('\\1'),
         ])->render());
         $close = trim(view('support._quote-close')->render());
         $text = (string) preg_replace('/\[quote\]/i', $open, $text);

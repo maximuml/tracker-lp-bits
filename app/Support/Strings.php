@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Html\SafeHtml;
-use Illuminate\Support\Str;
 
 /**
  * Stateless string helpers extracted from `include/functions.php`.
@@ -79,14 +78,9 @@ final class Strings
 
     /**
      * Generate a random code of length `$length` from the legacy
-     * visually-unambiguous alphabet. Uses `rand()` — NOT
-     * `random_int()` — to match the legacy contract exactly.
-     *
-     * Note: the existing call sites use this for confirm tokens and
-     * CAPTCHA solutions, NOT for security-sensitive secrets. If a
-     * caller needs a cryptographically-secure code, they should use
-     * Laravel's `Str::random()` (which is backed by `random_int()`)
-     * instead of this helper.
+     * visually-unambiguous alphabet. Uses `random_int()` (CSPRNG) —
+     * the alphabet is unchanged, only the entropy source is stronger
+     * than the legacy `rand()`.
      */
     public static function randomCode(int $length): string
     {

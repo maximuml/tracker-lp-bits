@@ -188,7 +188,13 @@ class ExamUserResource extends Resource
                                 TextEntry::make('index_formatted'),
                                 TextEntry::make('require_value_formatted'),
                                 TextEntry::make('current_value_formatted'),
-                                TextEntry::make('index_result')->html(),
+                                TextEntry::make('index_result')
+                                    ->color(function (TextEntry $component): ?string {
+                                        $state = $component->getContainer()->getRawState();
+                                        $passed = is_array($state) ? ($state['passed'] ?? true) : true;
+
+                                        return $passed ? null : 'danger';
+                                    }),
                             ]),
                     ])->columnSpan(1),
                 ]),

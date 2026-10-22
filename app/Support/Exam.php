@@ -30,7 +30,7 @@ class Exam
                     Locale::trans('exam.require_value', [], null), $index['require_value_formatted'],
                     Locale::trans('exam.current_value', [], null), $index['current_value_formatted'],
                     Locale::trans('exam.result', [], null),
-                    $index['passed'] ? Locale::trans($exam->getPassResultTransKey('pass'), [], null) : Locale::trans($exam->getPassResultTransKey('not_pass'), [], null)
+                    $index['passed'] ? Locale::trans($exam->getPassResultTransKey('pass'), [], null) : view('exam._result-fail', ['text' => Locale::trans($exam->getPassResultTransKey('not_pass'), [], null)])->render()
                 );
             }
         }

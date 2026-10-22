@@ -12,7 +12,6 @@ use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
-use App\Support\Locale;
 use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -98,11 +97,10 @@ class AttendanceController extends BasePageController
                 'points' => $attendance->points,
                 'cards' => $this->actor->value('attendance_card', 0),
             ])->render());
-            $data['headerRight'] = SafeHtml::fromTrustedHtml(Locale::trans(
-                'attendance.ranking',
-                ['ranking' => $data['myRanking'], 'counts' => $data['todayCounts']],
-                null
-            ));
+            $data['headerRight'] = SafeHtml::fromTrustedHtml(view('attendance._header-right', [
+                'myRanking' => (int) $data['myRanking'],
+                'todayCounts' => (int) $data['todayCounts'],
+            ])->render());
         } else {
             if ($captchaEnabled && $data['iv'] === 'yes') {
                 $data['captchaHtml'] = SafeHtml::fromTrustedHtml(Captcha::renderHtml(layout: 'grid'));

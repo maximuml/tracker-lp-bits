@@ -42,8 +42,10 @@ final class LegacyLangMarkupTest extends TestCase
     /**
      * Files whose values may intentionally carry markup (Filament/admin
      * strings rendered via Htmlable). Shrink-only.
+     *
+     * @var list<string>
      */
-    private const MARKUP_ALLOWED_FILES = ['attendance.php', 'exam.php', 'label.php', 'token.php', 'upload.php'];
+    private const MARKUP_ALLOWED_FILES = [];
 
     /** Baseline: markup-bearing values across resources/lang/en. */
     private const BASELINE_MARKUP_VALUES = 0;

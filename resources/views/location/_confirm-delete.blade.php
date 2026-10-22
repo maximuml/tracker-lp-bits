@@ -1,0 +1,1 @@
+Are you sure you would like to delete this Location?(<strong><form method="post" action="/web/system/location" class="nx-inline">@csrf<input type="hidden" name="delid" value="{{ $delid }}"><input type="hidden" name="sure" value="yes"><button type="submit" class="nxm-linkbtn font-bold">Yes!</button></form></strong> / <strong><a href="{{ $actionUrl }}">No</a></strong>)

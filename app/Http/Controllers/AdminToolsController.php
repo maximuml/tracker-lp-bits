@@ -142,7 +142,7 @@ class AdminToolsController extends BasePageController
         }
 
         if ($delid > 0) {
-            $confirm = 'Are you sure you would like to delete this Location?(<strong><form method="post" action="/web/system/location" style="display:inline">'.csrf_field().'<input type="hidden" name="delid" value="'.$delid.'"><input type="hidden" name="sure" value="yes"><button type="submit" class="nxm-linkbtn" style="font-weight:bold">Yes!</button></form></strong> / <strong><a href="'.$actionUrl.'">No</a></strong>)';
+            $confirm = view('location._confirm-delete', ['delid' => $delid, 'actionUrl' => $actionUrl])->render();
 
             return $this->abortResponse('Confirm', $confirm, false);
         }

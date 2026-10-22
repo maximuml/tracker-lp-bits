@@ -419,9 +419,13 @@ final class OfferListBuilderTest extends TestCase
 
     public function test_timeout_computed_for_pending_and_allowed(): void
     {
+        // Dates must be in the future: under the legacy-runtime branch
+        // Time::format(t, isfuturetime: true) returns false for past
+        // timestamps, so a fixed 2024 date made the result depend on
+        // whether an earlier test left RuntimeContext in legacy mode.
         $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
-            $this->row(['id' => 1, 'allowed' => 1, 'added' => '2024-01-01 00:00:00']),
-            $this->row(['id' => 2, 'allowed' => 0, 'allowedtime' => '2024-01-02 00:00:00']),
+            $this->row(['id' => 1, 'allowed' => 1, 'added' => date('Y-m-d H:i:s', time() + 3600)]),
+            $this->row(['id' => 2, 'allowed' => 0, 'allowedtime' => date('Y-m-d H:i:s', time() + 7200)]),
         ], 2));
 
         $s = $this->builder()->build(

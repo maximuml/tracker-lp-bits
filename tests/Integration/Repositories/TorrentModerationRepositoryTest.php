@@ -434,6 +434,33 @@ final class TorrentModerationRepositoryTest extends TestCase
         ]);
     }
 
+    public function test_delete_torrents_returns_ids_and_loser_gets_empty(): void
+    {
+        /** @var User $staff */
+        $staff = User::factory()->create();
+        Auth::login($staff);
+
+        /** @var Torrent $torrent */
+        $torrent = Torrent::factory()->create();
+
+        $downloadMock = Mockery::mock(TorrentDownloadRepository::class);
+        $downloadMock->shouldReceive('delPiecesHashCache')->andReturnTrue();
+        $meiliMock = Mockery::mock(MeiliSearchRepository::class);
+        $meiliMock->shouldReceive('deleteDocuments')->andReturnNull();
+
+        /** @phpstan-ignore-next-line */
+        $repository = new TorrentModerationRepository($downloadMock, $meiliMock, new TorrentOperationLogRepository, new TorrentApprovalRepository(new TorrentOperationLogRepository));
+
+        $this->assertSame([$torrent->id], $repository->deleteTorrents($torrent->id));
+        $this->assertDatabaseMissing('torrents', ['id' => $torrent->id]);
+
+        // Concurrent-delete loser path: the row is already gone under the
+        // lock, so no ids come back and no second operation log is written.
+        $logCount = DB::table('torrent_operation_logs')->count();
+        $this->assertSame([], $repository->deleteTorrents($torrent->id));
+        $this->assertSame($logCount, DB::table('torrent_operation_logs')->count());
+    }
+
     private function setSetting(string $name, string $value): void
     {
         DB::table('settings')->updateOrInsert(

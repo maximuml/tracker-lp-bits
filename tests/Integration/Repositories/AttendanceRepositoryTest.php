@@ -119,6 +119,26 @@ final class AttendanceRepositoryTest extends TestCase
         $this->assertSame(1, $logCount);
     }
 
+    public function test_attend_loses_concurrent_checkin_without_double_bonus(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['seedbonus' => 100.0]);
+        $this->insertAttendance($user->id, now()->subDay());
+        // A concurrent request already committed today's log row.
+        AttendanceLog::query()->create([
+            'uid' => $user->id,
+            'points' => 10,
+            'date' => now()->format('Y-m-d'),
+        ]);
+
+        $attendance = $this->repository->attend($user->id);
+
+        $this->assertSame(0, (int) $attendance->getAttribute('is_updated'));
+        $user->refresh();
+        $this->assertSame(100.0, (float) $user->seedbonus);
+        $this->assertSame(1, AttendanceLog::query()->where('uid', $user->id)->count());
+    }
+
     public function test_get_continuous_points_returns_initial_for_day_one(): void
     {
         $points = $this->repository->getContinuousPoints(1);

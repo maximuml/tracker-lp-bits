@@ -190,6 +190,16 @@ final class TorrentDetailRepositoryTest extends TestCase
         $this->assertFalse($result['has_thanked']);
     }
 
+    public function test_insert_thanks_rejects_concurrent_duplicate(): void
+    {
+        $torrentId = $this->createTorrent();
+
+        $this->assertTrue($this->repository->insertThanks($torrentId, 10));
+        $this->assertFalse($this->repository->insertThanks($torrentId, 10));
+
+        $this->assertSame(1, DB::table('thanks')->where('torrentid', $torrentId)->where('userid', 10)->count());
+    }
+
     public function test_get_comment_count_returns_zero_when_none(): void
     {
         $torrentId = $this->createTorrent();

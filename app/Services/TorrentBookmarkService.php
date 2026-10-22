@@ -78,7 +78,9 @@ final class TorrentBookmarkService
             throw new \RuntimeException('You already said thanks!');
         }
 
-        $this->torrentDetailRepository->insertThanks($torrentId, $userId);
+        if (! $this->torrentDetailRepository->insertThanks($torrentId, $userId)) {
+            throw new \RuntimeException('You already said thanks!');
+        }
 
         $bonusConfig = SiteConfig::current()->bonus;
         $saythanksBonus = $bonusConfig->sayThanks();

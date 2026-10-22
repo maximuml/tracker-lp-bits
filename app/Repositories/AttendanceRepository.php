@@ -42,11 +42,7 @@ class AttendanceRepository extends BaseRepository
             'total_days' => 1,
         ];
         $update = $initialData;
-        if (! $attendance) {
-            // first time
-            Logger::writeWithContext((string) ('[DO_INSERT]: '.Json::encode($initialData)), (string) 'info', (bool) false);
-            $attendance = Attendance::query()->create($initialData);
-        } else {
+        if ($attendance !== null) {
             $added = $attendance->added->startOfDay();
             Logger::writeWithContext((string) ('[ORIGINAL_DATA]: '.$attendance->toJson()), (string) 'info', (bool) false);
             if ($added->gte($today)) {
@@ -71,27 +67,50 @@ class AttendanceRepository extends BaseRepository
                     $update['total_days'] = $attendance->total_days + 1;
                 }
                 Logger::writeWithContext((string) ('[DO_UPDATE]: '.Json::encode($update)), (string) 'info', (bool) false);
-                $attendance->update($update);
             }
         }
         if ($isUpdated) {
-            User::query()->where('id', $uid)->increment('seedbonus', $update['points']);
-            $attendanceLog = [
-                'uid' => $attendance->uid,
-                'points' => $update['points'],
-                'date' => $now->format('Y-m-d'),
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-            AttendanceLog::query()->insert($attendanceLog);
+            // The attendance_logs (uid, date) unique key picks the winner of
+            // a concurrent check-in — the attendance row write and the
+            // seedbonus increment run only for the request that inserted
+            // the log row, inside the same transaction.
+            $won = DB::transaction(function () use (&$attendance, $initialData, $update, $uid, $now) {
+                if (AttendanceLog::query()->insertOrIgnore([
+                    'uid' => $uid,
+                    'points' => $update['points'],
+                    'date' => $now->format('Y-m-d'),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]) !== 1) {
+                    return false;
+                }
+                if ($attendance === null) {
+                    Logger::writeWithContext((string) ('[DO_INSERT]: '.Json::encode($initialData)), (string) 'info', (bool) false);
+                    $attendance = Attendance::query()->create($initialData);
+                } else {
+                    $attendance->update($update);
+                }
+                User::query()->where('id', $uid)->increment('seedbonus', $update['points']);
+
+                return true;
+            });
+            if (! $won) {
+                $isUpdated = 0;
+                // The winning request committed the row — reload it so the
+                // summary below reflects committed state.
+                $attendance = $this->getAttendance($uid);
+            }
         }
-        $attendance->added_time = $now->toTimeString();
-        $attendance->is_updated = $isUpdated;
+        if (! $attendance instanceof Attendance) {
+            throw new \LogicException('attendance row missing after check-in');
+        }
+        $attendance->setAttribute('added_time', $now->toTimeString());
+        $attendance->setAttribute('is_updated', $isUpdated);
         $baseQuery = AttendanceLog::query()->where('date', $today->format('Y-m-d'));
-        $attendance->today_counts = (clone $baseQuery)->count();
+        $attendance->setAttribute('today_counts', (clone $baseQuery)->count());
         $myLog = (clone $baseQuery)->where('uid', $uid)->first(['id']);
         $myId = $myLog instanceof AttendanceLog ? $myLog->id : 0;
-        $attendance->my_ranking = (clone $baseQuery)->where('id', '<=', $myId)->count();
+        $attendance->setAttribute('my_ranking', (clone $baseQuery)->where('id', '<=', $myId)->count());
         Logger::writeWithContext((string) ('[FINAL_ATTENDANCE]: '.$attendance->toJson()), (string) 'info', (bool) false);
 
         return $attendance;
@@ -223,7 +242,16 @@ class AttendanceRepository extends BaseRepository
                 'date' => $date,
                 'is_retroactive' => 1,
             ];
-            $attendanceLog = AttendanceLog::query()->create($insert);
+            if (AttendanceLog::query()->insertOrIgnore($insert) !== 1) {
+                // Lost a concurrent insert on the (uid, date) unique key —
+                // roll back the card decrement and report already-attended.
+                throw new \RuntimeException(Locale::trans('attendance.already_attendance', [], null));
+            }
+            /** @var AttendanceLog $attendanceLog */
+            $attendanceLog = AttendanceLog::query()
+                ->where('uid', $user->id)
+                ->where('date', $date->format('Y-m-d'))
+                ->firstOrFail();
             // Increment total days and update days.
             $attendance->update([
                 'total_days' => DB::raw(DB::getQueryGrammar()->wrap('total_days').' + 1'), // @phpstan-ignore argument.type

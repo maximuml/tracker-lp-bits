@@ -138,6 +138,16 @@ final class OfferVoteRepositoryTest extends TestCase
         $this->assertSame(OfferVote::AGAINST->value, (int) DB::table('offervotes')->where('offerid', $id)->value('vote'));
     }
 
+    public function test_record_vote_rejects_concurrent_duplicate(): void
+    {
+        $id = $this->insertOffer('Duplicate Vote');
+
+        $this->assertTrue($this->repository->recordVote($id, $this->userId, 'yeah'));
+        $this->assertFalse($this->repository->recordVote($id, $this->userId, 'against'));
+
+        $this->assertSame(1, DB::table('offervotes')->where('offerid', $id)->where('userid', $this->userId)->count());
+    }
+
     public function test_increment_vote_increments_yeah_column(): void
     {
         $id = $this->insertOffer('Increment Yeah');

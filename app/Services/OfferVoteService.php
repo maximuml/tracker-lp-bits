@@ -81,6 +81,10 @@ final class OfferVoteService
             throw new LogicException('Expected non-null offer.');
         }
 
+        if (! $this->offerVoteRepository->recordVote($offerid, $userid, $vote)) {
+            $this->abort(__('offers.std_already_voted'), view('offers._back_to_details', ['note' => __('offers.std_already_voted_note'), 'url' => "/web/offers?id={$offerid}&off_details=1"])->render(), false);
+        }
+
         $this->offerVoteRepository->incrementVote($offerid, $vote);
         $locale = Locale::userLocale((int) $offer->userid);
 
@@ -125,7 +129,6 @@ final class OfferVoteService
             Log::writeWithContext("System denied offer {$offerVotes->name}", 'normal');
         }
 
-        $this->offerVoteRepository->recordVote($offerid, $userid, $vote);
         Bonus::updatePoints('+', $offervoteBonus, $userid);
     }
 

@@ -10,6 +10,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Locale;
 use App\Support\Logger;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 class BookmarkRepository extends BaseRepository
@@ -29,7 +30,16 @@ class BookmarkRepository extends BaseRepository
         if ($exists) {
             throw new NexusException(Locale::trans('bookmark.torrent_already_bookmarked', ['torrent_id' => $torrentId], null));
         }
-        $result = $user->bookmarks()->create(['torrentid' => $torrentId]);
+        try {
+            $result = $user->bookmarks()->create(['torrentid' => $torrentId]);
+        } catch (QueryException $e) {
+            // Lost a concurrent insert on the (userid, torrentid) unique key —
+            // report the same already-bookmarked failure as the fast path.
+            if ($e->getCode() === '23000') {
+                throw new NexusException(Locale::trans('bookmark.torrent_already_bookmarked', ['torrent_id' => $torrentId], null));
+            }
+            throw $e;
+        }
 
         return $result;
     }
@@ -68,14 +78,15 @@ class BookmarkRepository extends BaseRepository
     }
 
     /**
-     * @return int the new bookmark id
+     * @return bool false when the (userid, torrentid) bookmark already exists —
+     *              the unique key makes a concurrent duplicate insert lose
      */
-    public function insertForUser(int $userId, int $torrentId): int
+    public function insertForUser(int $userId, int $torrentId): bool
     {
-        return (int) DB::table('bookmarks')->insertGetId([
+        return DB::table('bookmarks')->insertOrIgnore([
             'torrentid' => $torrentId,
             'userid' => $userId,
-        ]);
+        ]) === 1;
     }
 
     public function deleteById(int $id): void

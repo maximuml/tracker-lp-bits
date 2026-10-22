@@ -316,10 +316,10 @@ final class SystemBulkControllerTest extends TestCase
         $user = $this->loginAsStaffLeader();
 
         $reportIds = collect(range(1, 2))->map(
-            fn (): int => (int) DB::table('reports')->insertGetId([
+            fn (int $i): int => (int) DB::table('reports')->insertGetId([
                 'addedby' => $user->id,
                 'added' => now(),
-                'reportid' => 1,
+                'reportid' => $i,
                 'type' => 0,
                 'reason' => 'spam',
                 'dealtwith' => 0,

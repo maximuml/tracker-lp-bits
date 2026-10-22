@@ -131,4 +131,16 @@ final class BookmarkRepositoryTest extends TestCase
         $this->assertTrue($result);
         $this->assertSame(0, DB::table('bookmarks')->where('userid', $user->id)->count());
     }
+
+    public function test_insert_for_user_rejects_concurrent_duplicate(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $torrent = $this->createTorrent($user->id);
+
+        $this->assertTrue($this->repository->insertForUser($user->id, $torrent->id));
+        $this->assertFalse($this->repository->insertForUser($user->id, $torrent->id));
+
+        $this->assertSame(1, DB::table('bookmarks')->where('userid', $user->id)->where('torrentid', $torrent->id)->count());
+    }
 }

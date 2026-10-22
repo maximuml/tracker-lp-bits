@@ -18,13 +18,18 @@ class ModerationRepository extends BaseRepository
             ->exists();
     }
 
-    /** @param  array<string, mixed>  $data */
-    public function createReport(array $data): void
+    /**
+     * @param  array<string, mixed>  $data
+     * @return bool false when the (addedby, reportid, type) report already
+     *              exists — the unique key makes a concurrent duplicate lose
+     */
+    public function createReport(array $data): bool
     {
         if (isset($data['type']) && is_string($data['type'])) {
             $data['type'] = ReportType::fromStringSafe($data['type'])->value;
         }
-        DB::table('reports')->insert($data);
+
+        return DB::table('reports')->insertOrIgnore($data) === 1;
     }
 
     /**

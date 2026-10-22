@@ -70,6 +70,24 @@ final class ModerationRepositoryTest extends TestCase
         $this->assertSame(1, DB::table('reports')->where('addedby', 10)->count());
     }
 
+    public function test_create_report_rejects_concurrent_duplicate(): void
+    {
+        $data = [
+            'addedby' => 10,
+            'added' => now()->toDateTimeString(),
+            'reportid' => 500,
+            'type' => 'torrent',
+            'reason' => 'spam',
+            'dealtby' => 0,
+            'dealtwith' => 0,
+        ];
+
+        $this->assertTrue($this->repository->createReport($data));
+        $this->assertFalse($this->repository->createReport($data));
+
+        $this->assertSame(1, DB::table('reports')->where('addedby', 10)->where('reportid', 500)->where('type', 'torrent')->count());
+    }
+
     public function test_get_forum_post_returns_null_when_not_found(): void
     {
         $this->assertNull($this->repository->getForumPost(999999));

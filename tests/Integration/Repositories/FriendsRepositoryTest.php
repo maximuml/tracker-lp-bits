@@ -160,6 +160,14 @@ final class FriendsRepositoryTest extends TestCase
         $this->assertSame(0, DB::table('friends')->count());
     }
 
+    public function test_add_ignores_concurrent_duplicate(): void
+    {
+        $this->repository->add(1, 'friend', 2);
+        $this->repository->add(1, 'friend', 2);
+
+        $this->assertSame(1, DB::table('friends')->where('userid', 1)->where('friendid', 2)->count());
+    }
+
     public function test_delete_removes_friend_and_returns_count(): void
     {
         DB::table('friends')->insert([

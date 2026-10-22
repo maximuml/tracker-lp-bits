@@ -391,7 +391,9 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
             return false;
         }
 
-        DB::table('shoutbox_reactions')->insert([
+        // The (shoutbox_id, user_id, reaction) unique key lets a concurrent
+        // toggle lose cleanly — either way the reaction ends up present.
+        DB::table('shoutbox_reactions')->insertOrIgnore([
             'shoutbox_id' => $shoutId,
             'user_id' => $userId,
             'reaction' => $reaction,

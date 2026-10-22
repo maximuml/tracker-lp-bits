@@ -12,7 +12,6 @@ use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
 use App\Services\TorrentBookmarkService;
 use App\Support\Torrent\TorrentStatus;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -199,14 +198,11 @@ final class TorrentBookmarkServiceTest extends TestCase
     public function test_thank_torrent_with_null_user_uses_zero_id(): void
     {
         $this->insertTorrent(502);
-        // User 0 doesn't exist, but thanks table may not have FK on userid=0
-        // Actually it does — so we need to handle this. Let's check the schema.
-        // The thanks table has FK on userid → users.id. User 0 doesn't exist.
-        // So this test should expect a constraint violation, OR we skip it.
-        // Actually, looking at the service code, it uses userid=0 when
-        // currentUser is null. This would fail with FK constraint.
-        // Let's test the actual behavior — it throws.
-        $this->expectException(QueryException::class);
+        // Userid 0 has no users row — the FK violation is downgraded to a
+        // warning by INSERT IGNORE, so the atomic insert reports "already
+        // thanked" instead of raising QueryException.
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('You already said thanks!');
 
         $this->service->thankTorrent(null, 502);
     }

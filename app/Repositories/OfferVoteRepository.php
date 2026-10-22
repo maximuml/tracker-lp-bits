@@ -49,13 +49,16 @@ final class OfferVoteRepository extends BaseRepository implements OfferVoteRepos
         return (bool) DB::table('offervotes')->where('offerid', $offerId)->where('userid', $userId)->exists();
     }
 
-    public function recordVote(int $offerId, int $userId, string $vote): void
+    public function recordVote(int $offerId, int $userId, string $vote): bool
     {
-        DB::table('offervotes')->insert([
+        // insertOrIgnore + the (offerid, userid) unique key: a concurrent
+        // duplicate vote loses at the engine level instead of passing a
+        // stale userVoted() check and double-counting.
+        return DB::table('offervotes')->insertOrIgnore([
             'offerid' => $offerId,
             'userid' => $userId,
             'vote' => OfferVote::fromStringSafe($vote)->value,
-        ]);
+        ]) === 1;
     }
 
     public function incrementVote(int $offerId, string $column): bool

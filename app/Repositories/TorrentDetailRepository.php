@@ -242,12 +242,16 @@ class TorrentDetailRepository
             ->exists();
     }
 
-    public function insertThanks(int $torrentId, int $userId): void
+    /**
+     * @return bool false when the (torrentid, userid) thank already exists —
+     *              the unique key makes a concurrent duplicate insert lose
+     */
+    public function insertThanks(int $torrentId, int $userId): bool
     {
-        DB::table('thanks')->insert([
+        return DB::table('thanks')->insertOrIgnore([
             'torrentid' => $torrentId,
             'userid' => $userId,
-        ]);
+        ]) === 1;
     }
 
     /**

@@ -70,13 +70,15 @@ class ModerationController extends BasePageController
                 return $this->abortResponse(__('report.std_error'), __('report.std_already_reported_this'));
             }
 
-            $repo->createReport([
+            if (! $repo->createReport([
                 'addedby' => $currentUserId,
                 'reportid' => $reportid,
                 'type' => $type,
                 'reason' => $reason,
                 'added' => date('Y-m-d H:i:s'),
-            ]);
+            ])) {
+                return $this->abortResponse(__('report.std_error'), __('report.std_already_reported_this'));
+            }
 
             $cache?->forget('staff_report_count');
             $cache?->forget('staff_new_report_count');

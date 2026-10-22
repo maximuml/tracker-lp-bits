@@ -59,6 +59,29 @@ class CurrentUser
     }
 
     /**
+     * Seed the ambient user only when nothing has resolved yet — for
+     * controllers that authenticated out-of-band (passkey, legacy
+     * cookie) and want downstream legacy readers to see the actor
+     * without clobbering an already-resolved user.
+     */
+    public function promoteIfAbsent(User $user): void
+    {
+        if ($this->get() === null) {
+            $this->set($user->toLegacyArray());
+        }
+    }
+
+    /**
+     * Unconditionally promote the given user into the ambient slot —
+     * the explicit seam for controllers that authenticate outside the
+     * nexus-web guard.
+     */
+    public function promote(User $user): void
+    {
+        $this->set($user->toLegacyArray());
+    }
+
+    /**
      * Reset the cache (used on logout or when the user changes).
      */
     public function reset(): void

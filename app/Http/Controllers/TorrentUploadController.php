@@ -52,8 +52,8 @@ class TorrentUploadController extends Controller
             return redirect('/login?returnto='.urlencode($request->fullUrl()));
         }
 
+        $this->currentUser->promoteIfAbsent($user);
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
-        $this->currentUser->set($currentUser);
 
         if ($this->currentUser->value('parked')) {
             PageResponses::abort(__('upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);

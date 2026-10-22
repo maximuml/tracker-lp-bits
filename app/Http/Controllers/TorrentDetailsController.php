@@ -94,8 +94,8 @@ class TorrentDetailsController extends Controller
             abort(404);
         }
 
+        $this->currentUser->promoteIfAbsent($user);
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
-        $this->currentUser->set($currentUser);
 
         $headTitle = empty($request->input('cmtpage'))
             ? (__('details.head_details_for_torrent')).'"'.$row['name'].'"'

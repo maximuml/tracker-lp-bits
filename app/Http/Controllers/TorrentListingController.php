@@ -40,8 +40,8 @@ class TorrentListingController extends Controller
             return redirect('/login?returnto='.urlencode($request->fullUrl()));
         }
 
+        $this->currentUser->promoteIfAbsent($user);
         $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
-        $this->currentUser->set($currentUser);
 
         $data = $this->torrentSearchRepository->getListingData($request->query->all(), $this->requestContext->getScript());
         foreach (['pagertop', 'pagerbottom'] as $pagerKey) {

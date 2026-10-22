@@ -48,12 +48,6 @@ class UserFactory extends Factory
         $username = sprintf('%s_%s', microtime(true), self::$sequence);
         $email = sprintf('%s@example.net', $username);
         self::$sequence++;
-        $randNum = random_int(1, 10);
-        if ($randNum >= 8) {
-            $class = random_int(UserClass::POWER_USER->value, UserClass::SYSOP->value);
-        } else {
-            $class = UserClass::USER->value;
-        }
 
         return [
             'username' => $username,
@@ -66,7 +60,7 @@ class UserFactory extends Factory
             'stylesheet' => self::$defaultStyleSheet,
             'added' => now()->toDateTimeString(),
             'status' => UserStatus::CONFIRMED->value,
-            'class' => $class,
+            'class' => UserClass::USER->value,
             'enabled' => UserEnabled::YES->value,
             'timetype' => UserTimeType::TIMEALIVE->value,
             'downloadpos' => true,

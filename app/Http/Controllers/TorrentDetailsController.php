@@ -19,6 +19,7 @@ use App\Support\CurrentUser;
 use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
+use App\Support\Http\SafeReturnUrl;
 use App\Support\Logger;
 use App\Support\Pagination;
 use App\Support\Strings;
@@ -112,7 +113,9 @@ class TorrentDetailsController extends Controller
             'uploaded' => $request->has('uploaded'),
             'edited' => $request->has('edited'),
             'existed' => $request->has('existed'),
-            'returnto' => (string) $request->input('returnto', ''),
+            'returnto' => ($returnto = (string) $request->input('returnto', '')) === ''
+                ? ''
+                : SafeReturnUrl::filter($returnto, '/'),
             'dllist' => (int) $request->input('dllist', 0) === 1,
         ];
 

@@ -148,14 +148,16 @@ class SeedBonusJob implements ShouldQueue
             $seed_points = $seedBonusResult['seed_points'] / $dividend;
             $rows[] = [
                 'id' => $uid,
-                'seed_points' => (float) ($userInfo['seed_points'] ?? 0) + (float) $seed_points,
                 'seed_points_per_hour' => (float) $seedBonusResult['seed_points'],
                 'seed_bonus_per_hour' => (float) $seedBonusResult['seed_bonus'],
-                'seedbonus' => (float) ($userInfo['seedbonus'] ?? 0) + (float) $all_bonus,
                 'seeding_torrent_count' => (int) $seedBonusResult['torrent_peer_count'],
                 'seeding_torrent_size' => (float) $seedBonusResult['size'],
                 'seed_points_updated_at' => $nowStr,
             ];
+            // The accumulating columns go in atomically here rather than
+            // through the upsert's absolute values: an updatePoints/credit
+            // landing after listStatRowsByIds read them must not be lost.
+            $userStatRepository->addSeedAccumulators($uid, (float) $seed_points, (float) $all_bonus);
             if ($fd) {
                 $log = sprintf(
                     '%s|%s|%s|%s|%s|%s|%s|%s',

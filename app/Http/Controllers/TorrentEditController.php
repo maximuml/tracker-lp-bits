@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\TorrentEditRequest;
 use App\Models\Torrent;
@@ -17,7 +18,6 @@ use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentEditRepository;
 use App\Support\Category;
 use App\Support\Config\SiteConfig;
-use App\Support\CurrentUser;
 use App\Support\CustomField;
 use App\Support\Format;
 use App\Support\Html;
@@ -37,7 +37,7 @@ class TorrentEditController extends Controller
         private readonly SearchBoxSchemaBuilder $searchBoxSchemaBuilder,
         private readonly TagRepositoryInterface $tagRepository,
         private readonly HitAndRunRepository $hitAndRunRepository,
-        private readonly CurrentUser $currentUser,
+        private readonly ActorContext $actor,
         private readonly TorrentDetailRepository $torrentDetailRepository,
         private readonly CustomField $customField,
     ) {}
@@ -68,11 +68,11 @@ class TorrentEditController extends Controller
         $sectionmode = (int) ($row['search_box_id'] ?? 0);
         $row['cat_mode'] = $sectionmode;
 
-        $currentUser = $this->currentUser->get();
+        $currentUser = $this->actor->user?->toLegacyArray();
         $headTitle = (__('edit.head_edit_torrent')).'"'.$row['name'].'"';
         $cats = Category::listByModeWithContext($sectionmode);
 
-        $canEdit = (int) ($this->currentUser->id()) === (int) ($row['owner'] ?? 0)
+        $canEdit = $this->actor->id === (int) ($row['owner'] ?? 0)
             || Permission::can(PermissionEnum::TORRENT_MANAGE);
 
         $priceRow = null;
@@ -93,7 +93,7 @@ class TorrentEditController extends Controller
         $pick = null;
         if (
             Permission::can(PermissionEnum::TORRENT_SET_STICKY)
-            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && $this->currentUser->yes('picker'))
+            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && $this->actor->yes('picker'))
         ) {
             $promotionOptions = Permission::can(PermissionEnum::TORRENT_ON_PROMOTION)
                 ? SafeHtml::fromTrustedHtml(Html::promotionSelection((int) $row['sp_state'], 0))

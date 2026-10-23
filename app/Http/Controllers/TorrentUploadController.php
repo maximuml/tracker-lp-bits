@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\TagRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentPosState;
 use App\Exceptions\NexusException;
@@ -53,13 +54,13 @@ class TorrentUploadController extends Controller
         }
 
         $this->currentUser->promoteIfAbsent($user);
-        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $currentUser = ActorContext::current()->toLegacyArray();
 
-        if ($this->currentUser->value('parked')) {
+        if (ActorContext::current()->value('parked')) {
             PageResponses::abort(__('upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
         }
 
-        if (! $this->currentUser->value('uploadpos')) {
+        if (! ActorContext::current()->value('uploadpos')) {
             PageResponses::abort(__('upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
         }
 
@@ -67,7 +68,7 @@ class TorrentUploadController extends Controller
         $has_allowed_offer = 0;
         $offerRows = [];
         if ($enableoffer === 'yes') {
-            $offerRows = $this->offerRepository->listAllowedForUser((int) $this->currentUser->id())
+            $offerRows = $this->offerRepository->listAllowedForUser(ActorContext::current()->id)
                 ->toArray();
             $has_allowed_offer = count($offerRows);
         }
@@ -151,7 +152,7 @@ class TorrentUploadController extends Controller
             'offerRows' => $offerRows,
             'pageTitle' => __('upload.head_upload'),
             'cats' => Category::listByModeWithContext($browsecatmode),
-            'trackerUrl' => Tracker::schemaAndHost((int) ($this->currentUser->value('tracker_url_id', 0)), true),
+            'trackerUrl' => Tracker::schemaAndHost((int) (ActorContext::current()->value('tracker_url_id', 0)), true),
             'torrentDirWritable' => is_writable(Path::resolve(SiteConfig::current()->main->torrentDir(), ROOT_PATH)),
             'nameValue' => $nameValue,
             'nameInvalid' => $nameInvalid,

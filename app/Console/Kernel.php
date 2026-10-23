@@ -57,10 +57,10 @@ class Kernel extends ConsoleKernel
         $schedule->job(new CheckQueueFailedJobs)->everySixHours();
         $schedule->job(new CleanupJob)->everyFifteenMinutes();
         $schedule->job(new AttendanceJob)->dailyAt('01:00');
-        $schedule->job(new SaveIpLogCacheToDB)->hourly();
-        $schedule->job(new RemoveUserWarning)->everyTwentySeconds();
-        $schedule->job(new RemoveUserVipStatus)->everyMinute();
-        $schedule->job(new RemoveUserDonorStatus)->everyMinute();
+        $schedule->job(new SaveIpLogCacheToDB)->hourly()->withoutOverlapping()->onOneServer();
+        $schedule->job(new RemoveUserWarning)->everyTwentySeconds()->withoutOverlapping()->onOneServer();
+        $schedule->job(new RemoveUserVipStatus)->everyMinute()->withoutOverlapping()->onOneServer();
+        $schedule->job(new RemoveUserDonorStatus)->everyMinute()->withoutOverlapping()->onOneServer();
         $schedule->command('outbox:dispatch --batch=50')->everyMinute()->withoutOverlapping()->onOneServer();
 
         // W3-06: Prune old log records daily in the maintenance queue.

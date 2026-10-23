@@ -6,6 +6,7 @@ namespace App\Jobs;
 
 use App\Enums\ModelEvent;
 use App\Enums\UserClass as UserClassEnum;
+use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserCleanupRepository;
 use App\Repositories\UserDetailRepository;
@@ -33,12 +34,6 @@ class RemoveUserVipStatus
         $userModifyLogs = [];
         foreach ($users as $user) {
             $locale = $user->locale;
-            $userModifyLogs[] = [
-                'user_id' => $user->id,
-                'content' => 'VIP status removed by - AutoSystem',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
             $message = [];
             $user->vip_added = false;
             $user->vip_until = null;
@@ -55,7 +50,23 @@ class RemoveUserVipStatus
                 ];
             }
             Logger::writeWithContext((string) sprintf('update user %s => %s', $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
-            $user->save();
+            // Overlapping sweeps select the same expired VIPs; only the
+            // worker that wins the conditional flag-clear may emit the
+            // message, event and modify log.
+            $claimed = User::query()
+                ->where('id', $user->id)
+                ->where('vip_added', true)
+                ->where('vip_until', '<', now())
+                ->update($user->getDirty()) > 0;
+            if (! $claimed) {
+                continue;
+            }
+            $userModifyLogs[] = [
+                'user_id' => $user->id,
+                'content' => 'VIP status removed by - AutoSystem',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
             Cache::clearUser($user->id, '');
             ModelEventPublisher::publish(ModelEvent::UserUpdated, $user->id, '');
             if (! empty($message)) {

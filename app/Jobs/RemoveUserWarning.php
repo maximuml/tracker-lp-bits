@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\ModelEvent;
+use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserCleanupRepository;
 use App\Repositories\UserDetailRepository;
@@ -32,16 +33,26 @@ class RemoveUserWarning
         $userModifyLogs = [];
         foreach ($users as $user) {
             $locale = $user->locale;
+            $user->warned = false;
+            $user->warneduntil = null;
+            Logger::writeWithContext((string) sprintf('update user %s => %s', $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
+            // Overlapping sweeps select the same expired users; only the
+            // worker that wins the conditional flag-clear may emit the
+            // message, event and modify log.
+            $claimed = User::query()
+                ->where('id', $user->id)
+                ->where('warned', true)
+                ->where('warneduntil', '<', now())
+                ->update($user->getDirty()) > 0;
+            if (! $claimed) {
+                continue;
+            }
             $userModifyLogs[] = [
                 'user_id' => $user->id,
                 'content' => 'Warning removed by System.',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-            $user->warned = false;
-            $user->warneduntil = null;
-            Logger::writeWithContext((string) sprintf('update user %s => %s', $user->id, json_encode($user->getDirty())), (string) 'info', (bool) false);
-            $user->save();
             Cache::clearUser($user->id, '');
             ModelEventPublisher::publish(ModelEvent::UserUpdated, $user->id, '');
             $subject = Locale::trans('cleanup.msg_warning_removed', [], $locale);

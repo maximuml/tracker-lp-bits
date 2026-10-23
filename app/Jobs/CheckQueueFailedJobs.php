@@ -7,12 +7,13 @@ namespace App\Jobs;
 use App\Repositories\CleanupRepository;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class CheckQueueFailedJobs implements ShouldQueue
+class CheckQueueFailedJobs implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -22,6 +23,9 @@ class CheckQueueFailedJobs implements ShouldQueue
 
     public int $timeout = 60;
 
+    /** @var int */
+    public $uniqueFor = 3600;
+
     /**
      * Create a new job instance.
      *
@@ -30,6 +34,11 @@ class CheckQueueFailedJobs implements ShouldQueue
     public function __construct()
     {
         $this->onQueue('maintenance');
+    }
+
+    public function uniqueId(): string
+    {
+        return self::class;
     }
 
     /**

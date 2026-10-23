@@ -6,10 +6,11 @@ namespace App\Jobs;
 
 use App\Repositories\IpLogRepository;
 use App\Support\Logger;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-class SaveIpLogCacheToDB implements ShouldQueue
+class SaveIpLogCacheToDB implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
@@ -19,12 +20,20 @@ class SaveIpLogCacheToDB implements ShouldQueue
 
     public int $timeout = 120;
 
+    /** @var int */
+    public $uniqueFor = 3600;
+
     /**
      * Create a new job instance.
      */
     public function __construct()
     {
         $this->onQueue('default');
+    }
+
+    public function uniqueId(): string
+    {
+        return self::class;
     }
 
     /**

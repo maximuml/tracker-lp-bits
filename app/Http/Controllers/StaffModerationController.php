@@ -124,8 +124,8 @@ class StaffModerationController extends BasePageController
             return $this->abortResponse('Error', "You have no permission to change user's class to ".UserClass::name((int) $class, false, false, true).'. BTW, how do you get here?');
         }
 
-        $arr = $this->modtaskRepository->getUserArray($userId);
-        if ($arr === null) {
+        $target = $this->modtaskRepository->getUser($userId);
+        if ($target === null) {
             Log::writeWithContext(
                 'User '.($this->actor->username)." (id: {$currentUserId}) is hacking user's profile. IP : ".Network::clientIp(),
                 'mod'
@@ -134,11 +134,11 @@ class StaffModerationController extends BasePageController
             return $this->abortResponse('Error', 'Permission denied. For security reason, we logged this action');
         }
 
-        $curUploadpos = $arr['uploadpos'];
-        $curDownloadpos = $arr['downloadpos'];
-        $curForumpost = $arr['forumpost'];
-        $curClass = $arr['class'];
-        $curWarned = $arr['warned'];
+        $curUploadpos = $target->uploadpos;
+        $curDownloadpos = $target->downloadpos;
+        $curForumpost = $target->forumpost;
+        $curClass = $target->class;
+        $curWarned = $target->warned;
 
         $updateset = [
             'stafffor' => $stafffor,
@@ -162,13 +162,13 @@ class StaffModerationController extends BasePageController
             $email = (string) ($request->post('email') ?? '');
             $username = (string) ($request->post('username') ?? '');
 
-            if ($arr['email'] !== $email) {
+            if ($target->email !== $email) {
                 $updateset['email'] = $email;
-                $modifyLog = "Email changed from {$arr['email']} to {$email} by {$this->actor->username}.";
+                $modifyLog = "Email changed from {$target->email} to {$email} by {$this->actor->username}.";
                 Log::writeWithContext($modifyLog, 'mod');
                 $userModifyLogs[] = $modifyLog;
                 $subject = Locale::trans('user.msg_email_change', [], $locale);
-                $msg = Locale::trans('user.msg_your_email_changed_from', [], $locale).$arr['email'].Locale::trans('user.msg_to_new', [], $locale).$email.Locale::trans('user.msg_by', [], $locale).$this->actor->username;
+                $msg = Locale::trans('user.msg_your_email_changed_from', [], $locale).$target->email.Locale::trans('user.msg_to_new', [], $locale).$email.Locale::trans('user.msg_by', [], $locale).$this->actor->username;
                 $this->messageRepository->add([
                     'sender' => null,
                     'receiver' => $userId,
@@ -178,11 +178,11 @@ class StaffModerationController extends BasePageController
                 ]);
             }
 
-            if ($arr['username'] !== $username) {
+            if ($target->username !== $username) {
                 $updateset['username'] = $username;
-                $userModifyLogs[] = "Username changed from {$arr['username']} to {$username} by {$this->actor->username}";
+                $userModifyLogs[] = "Username changed from {$target->username} to {$username} by {$this->actor->username}";
                 $subject = Locale::trans('user.msg_username_change', [], $locale);
-                $msg = Locale::trans('user.msg_your_username_changed_from', [], $locale).$arr['username'].Locale::trans('user.msg_to_new', [], $locale).$username.Locale::trans('user.msg_by', [], $locale).$this->actor->username;
+                $msg = Locale::trans('user.msg_your_username_changed_from', [], $locale).$target->username.Locale::trans('user.msg_to_new', [], $locale).$username.Locale::trans('user.msg_by', [], $locale).$this->actor->username;
                 $this->messageRepository->add([
                     'sender' => null,
                     'receiver' => $userId,
@@ -191,10 +191,10 @@ class StaffModerationController extends BasePageController
                     'added' => now(),
                 ]);
                 $this->userDetailRepository->insertUsernameChangeLog([
-                    'uid' => $arr['id'],
+                    'uid' => $target->id,
                     'operator' => $this->actor->username,
                     'change_type' => UsernameChangeType::ADMIN->value,
-                    'username_old' => $arr['username'],
+                    'username_old' => $target->username,
                     'username_new' => $username,
                 ]);
             }
@@ -207,11 +207,11 @@ class StaffModerationController extends BasePageController
             $donoruntil = $request->post('donoruntil') ?: null;
             $donated = (float) ($request->post('donated') ?? 0);
             $donatedCny = (float) ($request->post('donated_cny') ?? 0);
-            $thisDonatedUsd = $donated - (float) $arr['donated'];
-            $thisDonatedCny = $donatedCny - (float) $arr['donated_cny'];
+            $thisDonatedUsd = $donated - (float) $target->donated;
+            $thisDonatedCny = $donatedCny - (float) $target->donated_cny;
             $memo = htmlspecialchars((string) $request->post('donation_memo'));
 
-            if ($donated != (float) $arr['donated'] || $donatedCny != (float) $arr['donated_cny']) {
+            if ($donated != (float) $target->donated || $donatedCny != (float) $target->donated_cny) {
                 $this->modtaskRepository->addFund($userId, $thisDonatedUsd, $thisDonatedCny, $memo);
                 $updateset['donated'] = $donated;
                 $updateset['donated_cny'] = $donatedCny;
@@ -221,7 +221,7 @@ class StaffModerationController extends BasePageController
             $updateset['donoruntil'] = $donoruntil;
 
             $nowStr = date('Y-m-d H:i:s');
-            if (($donor !== (bool) $arr['donor']) && (($donor && $donoruntil && $donoruntil >= $nowStr) || (! $donor))) {
+            if (($donor !== (bool) $target->donor) && (($donor && $donoruntil && $donoruntil >= $nowStr) || (! $donor))) {
                 $subject = Locale::trans('user.msg_your_donor_status_changed', [], $locale);
                 $msg = Locale::trans('user.msg_donor_status_changed_by', [], $locale).$this->actor->username;
                 $this->messageRepository->add([
@@ -382,7 +382,7 @@ class StaffModerationController extends BasePageController
             $this->userDetailRepository->insertUserModifyLogs($insert);
         }
 
-        Cache::clearUser($userId, $arr['passhash']);
+        Cache::clearUser($userId, (string) ($target->passhash ?? ''));
 
         $returnto = (string) $request->post('returnto');
         $prefix = Url::absolute($baseUrl);

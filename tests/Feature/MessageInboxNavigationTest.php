@@ -40,6 +40,7 @@ final class MessageInboxNavigationTest extends TestCase
             ->assertSee('href="/web/messages?action=editmailboxes"', false)
             ->assertSee('aria-label="Search within"', false)
             ->assertSee('aria-label="Mailboxes"', false)
+            ->assertSee('placeholder="Search"', false)
             ->assertSee('name="keyword"', false)
             ->assertSee('name="place"', false)
             ->assertSee('name="box"', false)
@@ -65,5 +66,34 @@ final class MessageInboxNavigationTest extends TestCase
                 'href="/web/messages?action=viewmailbox&amp;box=1&amp;unread=yes"',
                 'aria-current="true"',
             ], false);
+    }
+
+    public function test_forward_and_mailbox_manager_pages_render(): void
+    {
+        $user = $this->createUser();
+        $recipient = $this->createUser();
+        $message = $this->createMessage($user, $recipient);
+
+        $this->withNexusCookie($user)
+            ->get('/web/messages?action=editmailboxes')
+            ->assertOk();
+
+        $this->withNexusCookie($user)
+            ->get('/web/messages?action=forward&id='.$message->id)
+            ->assertOk();
+    }
+
+    private function createUser(): User
+    {
+        $created = User::factory()->create();
+
+        return User::query()->whereKey($created->getKey())->firstOrFail();
+    }
+
+    private function createMessage(User $sender, User $receiver): Message
+    {
+        $created = Message::factory()->between($sender, $receiver)->create();
+
+        return Message::query()->whereKey($created->getKey())->firstOrFail();
     }
 }

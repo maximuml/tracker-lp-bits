@@ -1,7 +1,7 @@
 <form class="nx-mailsearch" action="/messages" method="get">
 <input type="hidden" name="action" value="viewmailbox">
 <label class="nx-sr-only" for="message-keyword">{{ __('messages.text_search') }}</label>
-<input id="message-keyword" name="keyword" type="text" value="{{ $viewmailbox['keyword'] }}" placeholder="{{ __('messages.text_search') }}">
+<input id="message-keyword" name="keyword" type="text" value="{{ $viewmailbox['keyword'] }}" placeholder="{{ rtrim(__('messages.text_search'), ': ') }}">
 <select id="message-place" name="place" aria-label="{{ __('messages.text_search_in') }}">
 <option value="both" {{ $viewmailbox['place'] === 'both' ? ' selected' : '' }}>{{ __('messages.select_both') }}</option>
 <option value="title" {{ $viewmailbox['place'] === 'title' ? ' selected' : '' }}>{{ __('messages.select_title') }}</option>

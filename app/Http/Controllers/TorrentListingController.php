@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\TorrentSearchRepository;
 use App\Support\Cache\NexusCache;
@@ -41,13 +42,13 @@ class TorrentListingController extends Controller
         }
 
         $this->currentUser->promoteIfAbsent($user);
-        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $currentUser = ActorContext::current()->toLegacyArray();
 
         $data = $this->torrentSearchRepository->getListingData($request->query->all(), $this->requestContext->getScript());
         foreach (['pagertop', 'pagerbottom'] as $pagerKey) {
             $data[$pagerKey] = SafeHtml::fromTrustedHtml((string) ($data[$pagerKey] ?? ''));
         }
-        $data['bookmarkedUsername'] = UserDisplay::username((int) ($this->currentUser->id()));
+        $data['bookmarkedUsername'] = UserDisplay::username(ActorContext::current()->id);
         $data['listVm'] = $this->torrentListFactory->create(
             $data['rows'] ?? [],
             (int) ($data['sectiontype'] ?? 0),

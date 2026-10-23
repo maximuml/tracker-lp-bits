@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\DTOs\Auth\ActorContext;
 use App\DTOs\Usercp\SecuritySettingsDto;
 use App\Enums\UserPrivacy;
 use App\Models\User;
@@ -21,7 +22,6 @@ use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\Validators;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -76,11 +76,14 @@ final class UsercpSecurityCommand
      */
     public function updateSecurityFromLegacyRequest(Request $request): string
     {
-        /** @var User $user */
-        $user = Auth::user();
-        if (! $user instanceof User) {
+        $actorUser = ActorContext::current()->user;
+        if (! $actorUser instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }
+        // The actor snapshot is hydrated from the legacy array, which hides
+        // credential columns — reload the row so passhash/secret checks see
+        // real values.
+        $user = User::query()->findOrFail($actorUser->id);
 
         $response = (string) $request->input('response', '');
         $oldPassword = (string) $request->input('oldpassword', '');
@@ -225,11 +228,13 @@ final class UsercpSecurityCommand
      */
     public function updateSecurityApi(SecuritySettingsDto $dto): array
     {
-        /** @var User $user */
-        $user = Auth::user();
-        if (! $user instanceof User) {
+        $actorUser = ActorContext::current()->user;
+        if (! $actorUser instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }
+        // See updateSecurityFromLegacyRequest — credential columns need a
+        // fresh row, not the hidden-field-trimmed actor snapshot.
+        $user = User::query()->findOrFail($actorUser->id);
 
         if (! $this->webAuthService->validatePassword($user, $dto->currentPassword)) {
             throw ValidationException::withMessages(['current_password' => ['Wrong password.']]);

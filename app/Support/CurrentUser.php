@@ -21,8 +21,6 @@ class CurrentUser
     /** @var array<string, mixed>|null */
     private ?array $cached = null;
 
-    private bool $initialized = false;
-
     public static function instance(): self
     {
         return app(self::class);
@@ -35,7 +33,11 @@ class CurrentUser
      */
     public function get(): ?array
     {
-        if (! $this->initialized) {
+        // Retry while guest: authentication can land after a null resolve
+        // (sanctum's shouldUse, SiteAccess's set(null) on a request that
+        // then authenticates out-of-band). Guards memoize their own
+        // resolution, so a repeat Auth::user() is cheap.
+        if ($this->cached === null) {
             $this->initialize();
         }
 
@@ -51,7 +53,6 @@ class CurrentUser
     public function set(?array $user): void
     {
         $this->cached = $user;
-        $this->initialized = true;
         // ActorContext is an immutable snapshot of this state — any change
         // must drop a previously resolved instance so late consumers
         // re-resolve fromAuth() with the new user.
@@ -87,7 +88,6 @@ class CurrentUser
     public function reset(): void
     {
         $this->cached = null;
-        $this->initialized = false;
         app()->forgetInstance(ActorContext::class);
     }
 
@@ -147,10 +147,13 @@ class CurrentUser
 
     private function initialize(): void
     {
-        $this->initialized = true;
         try {
             $user = Auth::user();
-            $this->cached = $user instanceof User ? $user->toLegacyArray() : null;
+            if ($user instanceof User) {
+                $this->cached = $user->toLegacyArray();
+
+                return;
+            }
         } catch (\Throwable $e) {
             // Auth may not be available yet (e.g. during Nexus::boot()
             // before all service providers are loaded). Fall back to the
@@ -161,5 +164,9 @@ class CurrentUser
                 $this->cached = null;
             }
         }
+        // No authenticated user yet — auth can still land later in the
+        // pipeline (sanctum's shouldUse, an out-of-band promote()). The
+        // cache stays null so the next get() retries instead of pinning a
+        // guest snapshot for the whole request.
     }
 }

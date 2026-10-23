@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Chrome;
 
+use App\Enums\Permission\PermissionEnum;
 use App\Support\PageLayoutContext;
 use App\Support\SearchBox;
 use App\Support\Settings;
@@ -58,15 +59,15 @@ final class ChromeNav
             $items[] = ['key' => 'offers', 'href' => '/web/offers', 'label' => __('functions.text_offers')];
         }
         $items[] = ['key' => 'upload', 'href' => '/web/upload', 'label' => __('functions.text_upload')];
-        if ($chrome->permissionChecker->userCan('topten', false, $userId)) {
+        if ($chrome->permissionChecker->userCan(PermissionEnum::TOP_TEN->value, false, $userId)) {
             $items[] = ['key' => 'topten', 'href' => '/web/topten', 'label' => __('functions.text_top_ten')];
         }
-        if ($chrome->permissionChecker->userCan('log', false, $userId)) {
+        if ($chrome->permissionChecker->userCan(PermissionEnum::LOG->value, false, $userId)) {
             $items[] = ['key' => 'log', 'href' => '/web/log', 'label' => __('functions.text_log')];
         }
         $items[] = ['key' => 'rules', 'href' => '/web/rules', 'label' => __('functions.text_rules')];
         $items[] = ['key' => 'faq', 'href' => '/web/faq', 'label' => __('functions.text_faq')];
-        if ($chrome->permissionChecker->userCan('staffmem', false, $userId)) {
+        if ($chrome->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $userId)) {
             $items[] = ['key' => 'staff', 'href' => '/web/staff', 'label' => __('functions.text_staff')];
         }
         $items[] = ['key' => 'contactstaff', 'href' => '/web/contactstaff', 'label' => __('functions.text_contactstaff')];

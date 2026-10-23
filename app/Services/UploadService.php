@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\BusinessType;
 use App\Enums\TorrentType;
 use App\Events\TorrentCreated;
@@ -24,7 +25,6 @@ use App\Support\TorrentTags;
 use App\Support\Url;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Rhilip\Bencode\Bencode;
 use Rhilip\Bencode\ParseException;
@@ -37,6 +37,7 @@ class UploadService
         private UploadRepositories $repositories,
         private CustomField $customField,
         private MessageRepository $messageRepository,
+        private ActorContext $actor,
     ) {}
 
     /**
@@ -46,7 +47,7 @@ class UploadService
      */
     public function upload(Request $request)
     {
-        $user = $request->user();
+        $user = $this->actor->user;
         if (! $user instanceof User) {
             throw new NexusException('Unauthenticated');
         }
@@ -190,7 +191,7 @@ class UploadService
     /** @param  mixed  $torrentId */
     private function sendReward($torrentId): void
     {
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             throw new NexusException('Unauthenticated');
         }

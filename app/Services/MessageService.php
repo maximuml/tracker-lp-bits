@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserAcceptPms;
 use App\Models\Message;
@@ -24,7 +25,6 @@ use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Handles message action mutations (takeMessage, deletemessage) and
@@ -48,7 +48,7 @@ class MessageService
             PageResponses::abort(__('takemessage.std_error'), __('takemessage.std_permission_denied'));
         }
 
-        $sender = Auth::user();
+        $sender = ActorContext::current()->user;
         if (! $sender instanceof User) {
             PageResponses::abort(__('takemessage.std_error'), __('takemessage.std_permission_denied'));
         }
@@ -171,7 +171,7 @@ class MessageService
 
     public function deletemessage(Request $request): RedirectResponse
     {
-        $sender = Auth::user();
+        $sender = ActorContext::current()->user;
         if (! $sender instanceof User) {
             PageResponses::abort(__('functions.std_error'), __('deletemessage.std_bad_message_id'));
         }
@@ -293,7 +293,7 @@ class MessageService
 
         if ($action === 'viewmessage') {
             $id = (int) $request->input('id', 0);
-            $user = Auth::user();
+            $user = ActorContext::current()->user;
             if ($id <= 0 || ! $user instanceof User) {
                 return redirect('/web/messages');
             }

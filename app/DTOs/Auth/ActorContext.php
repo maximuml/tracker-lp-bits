@@ -46,6 +46,12 @@ final readonly class ActorContext
         public ?string $passkey,
         /** @var list<PermissionEnum>|null */
         public ?array $permissions,
+        /**
+         * Carried user model. When hydrated from CurrentUser it is built
+         * from the legacy array, which trims hidden columns (passhash,
+         * secret, auth_version) — consumers needing credential fields must
+         * reload the row (User::findOrFail($actor->id)).
+         */
         public ?User $user = null,
     ) {}
 
@@ -55,7 +61,17 @@ final readonly class ActorContext
      */
     public static function current(): self
     {
-        return app(self::class);
+        $context = app(self::class);
+        if ($context->id === 0 && CurrentUser::instance()->id() !== 0) {
+            // The snapshot was built before authentication landed (an
+            // early resolver ran before sanctum's shouldUse or an
+            // out-of-band promote) — drop it and rebuild against the
+            // now-authenticated user.
+            app()->forgetInstance(self::class);
+            $context = app(self::class);
+        }
+
+        return $context;
     }
 
     /**

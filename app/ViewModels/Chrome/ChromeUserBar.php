@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ViewModels\Chrome;
 
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
+use App\Enums\Permission\PermissionEnum;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Support\AssetAppender;
@@ -96,7 +97,7 @@ final class ChromeUserBar
             );
         }
 
-        $canStaffmem = $chrome->permissionChecker->userCan('staffmem', false, $userId);
+        $canStaffmem = $chrome->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $userId);
         $cheaterCount = 0;
         $reportCount = 0;
         if ($canStaffmem) {

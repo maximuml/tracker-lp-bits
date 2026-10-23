@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\TorrentApprovalStatus;
 use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
@@ -95,7 +96,7 @@ class TorrentDetailsController extends Controller
         }
 
         $this->currentUser->promoteIfAbsent($user);
-        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $currentUser = ActorContext::current()->toLegacyArray();
 
         $headTitle = empty($request->input('cmtpage'))
             ? (__('details.head_details_for_torrent')).'"'.$row['name'].'"'
@@ -105,7 +106,7 @@ class TorrentDetailsController extends Controller
             ? $this->torrentDetailRepository->getLatestApprovalDenyLog($id)
             : null;
 
-        $hasBuy = $this->torrentPurchaseRepository->hasBuySuccess((int) ($this->currentUser->id()), $id);
+        $hasBuy = $this->torrentPurchaseRepository->hasBuySuccess(ActorContext::current()->id, $id);
 
         $requestFlags = [
             'hit' => $request->has('hit'),
@@ -204,7 +205,7 @@ class TorrentDetailsController extends Controller
         }
 
         $descr = $rawDescr !== '' ? Format::formatComment($rawDescr) : '';
-        $showDescription = ! $this->currentUser->no('showdescription') && $descr !== '';
+        $showDescription = ! ActorContext::current()->no('showdescription') && $descr !== '';
 
         $details = $this->detailsViewFactory->build(
             $id, $row, $currentUser, $denyLog, $hasBuy, $requestFlags
@@ -212,7 +213,7 @@ class TorrentDetailsController extends Controller
         $commentPagerTop = '';
         $commentPagerBottom = '';
         $commentCount = 0;
-        $commentsEnabled = ! $this->currentUser->no('showcomment');
+        $commentsEnabled = ! ActorContext::current()->no('showcomment');
         if ($commentsEnabled) {
             $commentCount = $this->torrentDetailRepository->getCommentCount($id);
             if ($commentCount > 0) {

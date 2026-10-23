@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentPosState;
 use App\Exceptions\NexusException;
@@ -24,7 +25,6 @@ use App\Support\Locale;
 use App\Support\Time;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class UploadMetadataService
 {
@@ -172,7 +172,7 @@ class UploadMetadataService
 
     private function canUploadToSection(Request $request, SearchBox $section): bool
     {
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             throw new NexusException('Unauthenticated');
         }

@@ -44,8 +44,12 @@ final class ActorContextRatchetTest extends TestCase
      * +1 for `ActorContext::current()` — the static funnel that replaced
      * `CurrentUser::instance()` reads across Support helpers (one `app()`
      * line inside the accessor; call sites no longer appear in the count).
+     * +2 for the late-auth self-heal in `current()` — when the snapshot
+     * was built before sanctum's shouldUse or an out-of-band promote,
+     * `app()->forgetInstance()` drops it and a second `app()` re-resolves
+     * the live actor.
      */
-    private const BASELINE_APP_CALLS = 65;
+    private const BASELINE_APP_CALLS = 67;
 
     private const APP_DIR = __DIR__.'/../../app';
 

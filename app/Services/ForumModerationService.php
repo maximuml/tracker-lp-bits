@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
@@ -17,7 +18,6 @@ use App\Support\Palette;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Forum moderation mutation actions (move, delete, lock, sticky,
@@ -64,7 +64,7 @@ final class ForumModerationService
         }
 
         // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User || ! $this->topicPolicy->move($user, $topic)) {
             PageResponses::permissionDenied();
         }
@@ -110,7 +110,7 @@ final class ForumModerationService
         $targetUserid = (int) $topic->userid;
 
         // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User || ! $this->topicPolicy->delete($user, $topic)) {
             PageResponses::permissionDenied();
         }
@@ -149,7 +149,7 @@ final class ForumModerationService
         }
 
         // W1-04: Use PostPolicy for authorization
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User || ! $this->postPolicy->delete($user, $post)) {
             PageResponses::permissionDenied();
         }
@@ -199,7 +199,7 @@ final class ForumModerationService
         }
 
         // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User || ! $this->topicPolicy->lock($user, $topic)) {
             PageResponses::permissionDenied();
         }
@@ -220,7 +220,7 @@ final class ForumModerationService
         }
 
         // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User || ! $this->topicPolicy->highlight($user, $topic)) {
             PageResponses::permissionDenied();
         }
@@ -251,7 +251,7 @@ final class ForumModerationService
         }
 
         // W1-04: Use TopicPolicy for authorization
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User || ! $this->topicPolicy->sticky($user, $topic)) {
             PageResponses::permissionDenied();
         }

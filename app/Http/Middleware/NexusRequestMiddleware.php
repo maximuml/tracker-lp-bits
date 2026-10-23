@@ -76,7 +76,13 @@ final class NexusRequestMiddleware
 
         $this->scriptContext->boot($script, $rootpath);
 
-        $this->pageLayoutRepository->prepareAccess($this->app->make(ActorContext::class));
+        if (! $request->is('api/*')) {
+            // API requests authenticate late (sanctum's shouldUse inside
+            // auth:sanctum) — resolving the actor snapshot here would pin
+            // a guest for the rest of the request, and layout access is
+            // meaningless without chrome anyway.
+            $this->pageLayoutRepository->prepareAccess($this->app->make(ActorContext::class));
+        }
 
         return $next($request);
     }
@@ -126,7 +132,9 @@ final class NexusRequestMiddleware
 
     public function terminate(Request $request, Response $response): void
     {
-        $this->pageLayoutRepository->flushAccess($this->app->make(ActorContext::class));
+        if (! $request->is('api/*')) {
+            $this->pageLayoutRepository->flushAccess($this->app->make(ActorContext::class));
+        }
 
         if ($this->detectScript($request) === 'index') {
             Bootstrap::autoClean((bool) false);

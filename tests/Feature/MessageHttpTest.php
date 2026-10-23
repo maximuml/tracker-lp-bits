@@ -179,12 +179,14 @@ final class MessageHttpTest extends TestCase
         // Recreate message for the other user test
         $message2 = Message::factory()->between($sender, $owner)->create();
 
-        // Other user cannot delete
+        // Other user cannot delete — denial renders the legacy error page
+        // (PageResponses::abort is an inline 200 stderr, not a redirect)
         $this->withNexusCookie($other)
             ->post('/web/messages/delete/in', [
                 'id' => (string) $message2->id,
             ])
-            ->assertRedirect();
+            ->assertOk();
+        $this->assertNotNull(Message::query()->find($message2->id));
     }
 
     public function test_deletemessage_sentbox_only_for_sender(): void
@@ -204,12 +206,14 @@ final class MessageHttpTest extends TestCase
         // Recreate message
         $message2 = Message::factory()->between($sender, $receiver)->create();
 
-        // Other user cannot delete from sentbox
+        // Other user cannot delete from sentbox — denial renders the
+        // legacy error page (PageResponses::abort is an inline 200 stderr)
         $this->withNexusCookie($other)
             ->post('/web/messages/delete/out', [
                 'id' => (string) $message2->id,
             ])
-            ->assertRedirect();
+            ->assertOk();
+        $this->assertNotNull(Message::query()->find($message2->id));
     }
 
     // ─── HTTP method boundaries ────────────────────────────────────────

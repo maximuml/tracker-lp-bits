@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Services\BitbucketService;
 use App\Support\Cache\NexusCache;
@@ -38,9 +39,9 @@ class BitbucketUploadController extends Controller
         }
 
         $this->currentUser->promoteIfAbsent($user);
-        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $currentUser = ActorContext::current()->toLegacyArray();
 
-        if ($this->currentUser->value('parked')) {
+        if (ActorContext::current()->value('parked')) {
             PageResponses::abort((''), (''), false);
         }
 
@@ -72,9 +73,9 @@ class BitbucketUploadController extends Controller
         }
 
         $this->currentUser->promoteIfAbsent($user);
-        $currentUser = $this->currentUser->get() ?? $user->toLegacyArray();
+        $currentUser = ActorContext::current()->toLegacyArray();
 
-        if ($this->currentUser->value('parked')) {
+        if (ActorContext::current()->value('parked')) {
             PageResponses::abort((''), (''), false);
         }
 

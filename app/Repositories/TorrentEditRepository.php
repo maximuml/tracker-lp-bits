@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\TorrentOperationAction;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
@@ -23,7 +24,6 @@ use App\Support\Logger;
 use App\Support\TorrentTags;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TorrentEditRepository extends BaseRepository
@@ -40,7 +40,7 @@ class TorrentEditRepository extends BaseRepository
      */
     public function update(Request $request): Torrent
     {
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user) {
             throw new NexusException(Locale::trans('takeedit.missing_form_data', [], null));
         }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories;
 
+use App\DTOs\Usercp\SecuritySettingsDto;
 use App\Models\User;
 use App\Repositories\UsercpSecurityCommand;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Validation\ValidationException;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -79,5 +81,53 @@ final class UsercpSecurityCommandTest extends TestCase
     {
         $this->assertNull($this->command->getChallenge('nouser'));
         $this->assertTrue($this->command->deleteChallenge('nouser'));
+    }
+
+    /**
+     * The actor snapshot hydrates from the legacy array, which hides
+     * credential columns (passhash/secret). Password validation must
+     * reload the row — a correct password has to pass even when the
+     * carried model lacks the hash.
+     */
+    public function test_update_security_api_validates_against_full_row(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->be($user);
+
+        $result = $this->command->updateSecurityApi(new SecuritySettingsDto(
+            currentPassword: '123456',
+            email: null,
+            newPassword: null,
+            privacy: 'normal',
+            resetpasskey: false,
+            resetauthkey: false,
+            twoStepSecret: null,
+            twoStepCode: null,
+            ip: '127.0.0.1',
+        ));
+
+        $this->assertNotEmpty($result);
+    }
+
+    public function test_update_security_api_rejects_wrong_password(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->be($user);
+
+        $this->expectException(ValidationException::class);
+
+        $this->command->updateSecurityApi(new SecuritySettingsDto(
+            currentPassword: 'not-the-password',
+            email: null,
+            newPassword: null,
+            privacy: null,
+            resetpasskey: false,
+            resetauthkey: false,
+            twoStepSecret: null,
+            twoStepCode: null,
+            ip: '127.0.0.1',
+        ));
     }
 }

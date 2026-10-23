@@ -46,6 +46,12 @@ final readonly class ActorContext
         public ?string $passkey,
         /** @var list<PermissionEnum>|null */
         public ?array $permissions,
+        /**
+         * Carried user model. When hydrated from CurrentUser it is built
+         * from the legacy array, which trims hidden columns (passhash,
+         * secret, auth_version) — consumers needing credential fields must
+         * reload the row (User::findOrFail($actor->id)).
+         */
         public ?User $user = null,
     ) {}
 

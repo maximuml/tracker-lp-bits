@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Jobs;
 
+use App\Enums\UserClass;
 use App\Jobs\RemoveUserDonorStatus;
 use App\Jobs\RemoveUserVipStatus;
 use App\Jobs\RemoveUserWarning;
@@ -87,7 +88,7 @@ final class RemoveUserSweepJobsTest extends TestCase
         $user = User::factory()->create([
             'vip_added' => 1,
             'vip_until' => now()->subHour(),
-            'class' => \App\Enums\UserClass::VIP->value,
+            'class' => UserClass::VIP->value,
         ]);
 
         $job = new RemoveUserVipStatus;
@@ -95,7 +96,7 @@ final class RemoveUserSweepJobsTest extends TestCase
 
         $row = DB::table('users')->where('id', $user->id)->first();
         $this->assertSame(0, (int) $row->vip_added);
-        $this->assertSame(\App\Enums\UserClass::USER->value, (int) $row->class);
+        $this->assertSame(UserClass::USER->value, (int) $row->class);
         $this->assertSame(1, DB::table('messages')->where('receiver', $user->id)->count());
         $this->assertSame(1, DB::table('user_modify_logs')->where('user_id', $user->id)->count());
 

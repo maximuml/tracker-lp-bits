@@ -201,10 +201,25 @@ class MessagePageService
         // User mailboxes for the "move to" select
         $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
         $moveBoxes = [];
+        $mailboxTabs = [
+            ['id' => self::PM_INBOX, 'label' => __('messages.text_inbox'), 'url' => '/web/messages'],
+            ['id' => self::PM_SENT_BOX, 'label' => __('messages.text_sentbox'), 'url' => '/web/messages?action=viewmailbox&box=-1'],
+        ];
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
-            $moveBoxes[] = new MessageBoxOption((int) $boxArr['boxnumber'], (string) $boxArr['name']);
+            $boxnumber = (int) $boxArr['boxnumber'];
+            $mailboxTabs[] = [
+                'id' => $boxnumber,
+                'label' => (string) $boxArr['name'],
+                'url' => '/web/messages?action=viewmailbox&box='.$boxnumber,
+            ];
+            $moveBoxes[] = new MessageBoxOption($boxnumber, (string) $boxArr['name']);
         }
+        $mailboxTabs[] = [
+            'id' => 'manager',
+            'label' => __('messages.text_mailbox_manager'),
+            'url' => '/web/messages?action=editmailboxes',
+        ];
 
         // Jump-to boxes for the search form
         $jumpToBoxes = $this->buildJumpToBoxOptions($pmBoxes, $mailbox);
@@ -221,6 +236,7 @@ class MessagePageService
             'pagerbottom' => $pagerbottom,
             'rows' => $rows,
             'hasMessages' => $messages->isNotEmpty(),
+            'mailboxTabs' => $mailboxTabs,
             'moveBoxes' => $moveBoxes,
             'jumpToBoxes' => $jumpToBoxes,
             'jumpToSelected' => $mailbox,

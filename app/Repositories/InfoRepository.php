@@ -205,11 +205,11 @@ final class InfoRepository implements InfoRepositoryInterface
             ->limit($perpage)
             ->get(['f.id AS f_id', 'f.name', 't.id AS t_id', 't.subject', 't.lastpost', 'r.lastpostread', 'p.*'])
             ->map(fn ($row) => (array) $row)
-            ->toArray();
+            ->all();
 
         $editorIds = array_filter(array_unique(array_column($posts, 'editedby')));
         $editorNames = ! empty($editorIds)
-            ? User::query()->whereIn('id', $editorIds)->pluck('username', 'id')->toArray()
+            ? User::query()->whereIn('id', $editorIds)->pluck('username', 'id')->all()
             : [];
 
         return [
@@ -242,7 +242,7 @@ final class InfoRepository implements InfoRepositoryInterface
             ->limit($perpage)
             ->get(['t.name', 'c.torrent AS t_id', 'c.id', 'c.added', 'c.text'])
             ->map(fn ($row) => (array) $row)
-            ->toArray();
+            ->all();
 
         $torrentIds = array_filter(array_unique(array_column($comments, 't_id')));
         $countsBefore = [];
@@ -257,7 +257,7 @@ final class InfoRepository implements InfoRepositoryInterface
                 ->groupBy('c1.id')
                 ->selectRaw('c1.id as comment_id, COUNT(c2.id) as count_before')
                 ->pluck('count_before', 'comment_id')
-                ->toArray();
+                ->all();
             foreach ($counts as $commentId => $count) {
                 $countsBefore[(int) $commentId] = (int) $count;
             }

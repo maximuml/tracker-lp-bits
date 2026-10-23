@@ -173,7 +173,7 @@ class TorrentDetailRepository
             TorrentTag::query()
                 ->where('torrent_id', $torrentId)
                 ->pluck('tag_id')
-                ->toArray()
+                ->all()
         );
     }
 

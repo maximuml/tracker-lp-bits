@@ -85,6 +85,6 @@ class PeerRepository
             ->where('userid', $uid)
             ->whereIn('torrent', $torrentIds)
             ->pluck('to_go', 'torrent')
-            ->toArray();
+            ->all();
     }
 }

@@ -71,7 +71,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             ->limit($rpp)
             ->get();
 
-        $snatchUserIds = $snatchedRows->pluck('userid')->filter()->unique()->map('intval')->toArray();
+        $snatchUserIds = $snatchedRows->pluck('userid')->filter()->unique()->map('intval')->all();
         if ($snatchUserIds !== []) {
             UserDisplay::preload($snatchUserIds);
         }

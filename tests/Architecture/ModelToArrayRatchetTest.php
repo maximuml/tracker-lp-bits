@@ -30,6 +30,9 @@ use Tests\Attributes\TestCategory;
  *
  * Baseline captured after typing the torrent-comment flow and
  * findById: 45 repository + 26 service call sites. May only be lowered.
+ * The remaining sites are deliberate serialization boundaries: cache
+ * payloads (allowed_classes:false forbids model instances), event
+ * payloads, AJAX/announce view contracts, and SiteConfig DTO exports.
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class ModelToArrayRatchetTest extends TestCase
@@ -38,7 +41,7 @@ final class ModelToArrayRatchetTest extends TestCase
 
     /** @var array<string, int> subdirectory → baseline call-site count */
     private const BASELINES = [
-        'Repositories' => 37,
+        'Repositories' => 20,
         'Services' => 17,
     ];
 

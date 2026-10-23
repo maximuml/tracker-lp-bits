@@ -95,7 +95,7 @@ final class UserModerationAccountCommand
         if (is_int($id)) {
             $uidArr = Arr::wrap($id);
         } else {
-            $uidArr = $id->pluck('id')->toArray();
+            $uidArr = $id->pluck('id')->all();
         }
         $users = User::query()->with('language')->whereIn('id', $uidArr)->get();
         if ($users->isEmpty()) {

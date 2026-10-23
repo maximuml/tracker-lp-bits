@@ -133,6 +133,6 @@ final class CategoryRepository implements CategoryRepositoryInterface
      */
     public function pluckIdsByModes(array $modes): array
     {
-        return Category::query()->whereIn('mode', $modes)->pluck('id')->toArray();
+        return Category::query()->whereIn('mode', $modes)->pluck('id')->all();
     }
 }

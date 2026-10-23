@@ -104,12 +104,11 @@ class MessageController extends BasePageController
             if (! $msg) {
                 return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
             }
-            $msga = $msg->toArray();
-            if ((int) ($msga['receiver'] ?? 0) !== (int) ($this->actor->id)) {
+            if ((int) ($msg->receiver ?? 0) !== (int) ($this->actor->id)) {
                 return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
             }
-            $body .= ($msga['msg'] ?? '')."\n\n-------- [url=/userdetails?id=".$this->actor->id.']'.$this->actor->username.'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
-            $subject = (string) ($msga['subject'] ?? '');
+            $body .= ($msg->msg ?? '')."\n\n-------- [url=/userdetails?id=".$this->actor->id.']'.$this->actor->username.'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
+            $subject = (string) ($msg->subject ?? '');
             if (preg_match('/^Re:\\s/', $subject)) {
                 $subject = preg_replace('/^Re:\\s(.*)$/', 'Re(2): \\1', $subject) ?? $subject;
             } elseif (preg_match('/^Re\\([0-9]*\\):\\s/', $subject)) {

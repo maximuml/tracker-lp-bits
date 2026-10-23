@@ -157,7 +157,7 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
             ->where('shoutbox_id', $shoutId)
             ->groupBy('reaction')
             ->pluck('cnt', 'reaction')
-            ->toArray();
+            ->all();
     }
 
     /**
@@ -169,7 +169,7 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
             ->where('shoutbox_id', $shoutId)
             ->where('user_id', $currentUserId)
             ->pluck('reaction')
-            ->toArray();
+            ->all();
 
         return array_values(array_map('strval', $values));
     }

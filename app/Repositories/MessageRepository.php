@@ -123,7 +123,7 @@ class MessageRepository extends BaseRepository
             return null;
         }
 
-        $messageArr = $message->toArray();
+        $messageArr = $message->getAttributes();
         if (($messageArr['receiver'] ?? 0) == $userId && ($messageArr['saved'] ?? 0) == 0) {
             $message->delete();
         } elseif (($messageArr['sender'] ?? 0) == $userId && ($messageArr['location'] ?? 0) == 0) { // PM_DELETED

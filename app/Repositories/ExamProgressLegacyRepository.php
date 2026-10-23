@@ -169,7 +169,7 @@ class ExamProgressLegacyRepository
             ->groupBy(['index'])
             ->get()
             ->pluck('sum', 'index')
-            ->toArray();
+            ->all();
         $logPrefix .= ', progressSum raw: '.json_encode($progressSum).', query: '.QueryLog::last();
         if ($allSum) {
             Logger::writeWithContext((string) $logPrefix, (string) 'info', (bool) false);

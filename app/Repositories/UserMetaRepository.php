@@ -236,6 +236,6 @@ class UserMetaRepository extends BaseRepository
                 $query->whereNull('deadline')->orWhere('deadline', '>=', now());
             })
             ->pluck('uid')
-            ->toArray();
+            ->all();
     }
 }

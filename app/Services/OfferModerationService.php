@@ -64,7 +64,7 @@ final class OfferModerationService
             $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
-        $offer = $this->offerRepository->findOfferWithUser($offid);
+        $offer = $this->offerRepository->findOffer($offid);
         if (! $offer) {
             $this->abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
@@ -72,9 +72,9 @@ final class OfferModerationService
             throw new LogicException('Expected non-null offer.');
         }
 
-        $arr = $offer->toArray();
-        $arr['username'] = $offer->user->username ?? '';
-        $locale = Locale::userLocale((int) ($arr['userid'] ?? 0));
+        $offerName = (string) ($offer->name ?? '');
+        $offerUserid = (int) ($offer->userid ?? 0);
+        $locale = Locale::userLocale($offerUserid);
         $offeruptimeout = SiteConfig::current()->main->offerUploadTimeout(0);
 
         if ($offeruptimeout) {
@@ -86,20 +86,20 @@ final class OfferModerationService
 
         $curuser = $this->curUser();
         $url = Url::absolute($this->baseUrl())."/web/offers?id={$offid}&off_details=1";
-        $msg = ($curuser['username'] ?? '').Locale::trans('offer.msg_has_allowed', [], $locale)."[b][url={$url}]".($arr['name'] ?? '').'[/url][/b]. '.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
+        $msg = ($curuser['username'] ?? '').Locale::trans('offer.msg_has_allowed', [], $locale)."[b][url={$url}]{$offerName}[/url][/b]. ".Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
         $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
         $allowedtime = date('Y-m-d H:i:s');
 
         $this->messageRepository->add([
             'sender' => null,
-            'receiver' => (int) ($arr['userid'] ?? 0),
+            'receiver' => $offerUserid,
             'msg' => $msg,
             'subject' => $subject,
             'added' => $allowedtime,
         ]);
 
         $this->offerRepository->allowOffer($offid, $allowedtime);
-        Log::writeWithContext(($curuser['username'] ?? '').' allowed offer '.($arr['name'] ?? ''), 'normal');
+        Log::writeWithContext(($curuser['username'] ?? '').' allowed offer '.$offerName, 'normal');
 
         return redirect("/web/offers?id={$offid}&off_details=1");
     }
@@ -115,7 +115,7 @@ final class OfferModerationService
             $this->abort(__('offers.std_error'), __('offers.std_smell_rat'));
         }
 
-        $offer = $this->offerRepository->findOfferWithUser($offid);
+        $offer = $this->offerRepository->findOffer($offid);
         if (! $offer) {
             $this->abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
@@ -123,9 +123,9 @@ final class OfferModerationService
             throw new LogicException('Expected non-null offer.');
         }
 
-        $arr = $offer->toArray();
-        $arr['username'] = $offer->user->username ?? '';
-        $locale = Locale::userLocale((int) ($arr['userid'] ?? 0));
+        $offerName = (string) ($offer->name ?? '');
+        $offerUserid = (int) ($offer->userid ?? 0);
+        $locale = Locale::userLocale($offerUserid);
         $offeruptimeout = SiteConfig::current()->main->offerUploadTimeout(0);
         $minoffervotes = SiteConfig::current()->main->minOfferVotes();
         $curuser = $this->curUser();
@@ -149,11 +149,11 @@ final class OfferModerationService
                 $timeoutnote = '';
             }
 
-            $msg = Locale::trans('offer.msg_offer_voted_on', [], $locale)."[b][url={$url}]".($arr['name'] ?? '').'[/url][/b].'.Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
+            $msg = Locale::trans('offer.msg_offer_voted_on', [], $locale)."[b][url={$url}]{$offerName}[/url][/b].".Locale::trans('offer.msg_find_offer_option', [], $locale).$timeoutnote;
             $subject = Locale::trans('offer.msg_your_offer_allowed', [], $locale);
             $this->offerRepository->allowOffer($offid, $finishvotetime);
         } elseif (($no - $yes) >= $minoffervotes) {
-            $msg = Locale::trans('offer.msg_offer_voted_off', [], $locale)."[b][url={$url}]".($arr['name'] ?? '').'[/url][/b].'.Locale::trans('offer.msg_offer_deleted', [], $locale);
+            $msg = Locale::trans('offer.msg_offer_voted_off', [], $locale)."[b][url={$url}]{$offerName}[/url][/b].".Locale::trans('offer.msg_offer_deleted', [], $locale);
             $subject = Locale::trans('offer.msg_offer_deleted', [], $locale);
             $this->offerRepository->denyOffer($offid);
         } else {
@@ -163,13 +163,13 @@ final class OfferModerationService
         $this->messageRepository->add([
             'sender' => null,
             'subject' => $subject,
-            'receiver' => (int) ($arr['userid'] ?? 0),
+            'receiver' => $offerUserid,
             'added' => $finishvotetime,
             'msg' => $msg,
         ]);
 
         $curuser = $this->curUser();
-        Log::writeWithContext(($curuser['username'] ?? '').' closed poll '.($arr['name'] ?? ''), 'normal');
+        Log::writeWithContext(($curuser['username'] ?? '').' closed poll '.$offerName, 'normal');
 
         return redirect("/web/offers?id={$offid}&off_details=1");
     }

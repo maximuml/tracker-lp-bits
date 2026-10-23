@@ -126,14 +126,6 @@ class PostLookupRepository extends BaseRepository
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    public function getPostArrayById(int $id): array
-    {
-        return Post::query()->findOrFail($id)->toArray();
-    }
-
-    /**
      * @return array<string, mixed>|null
      */
     public function findPostArrayById(int $id): ?array

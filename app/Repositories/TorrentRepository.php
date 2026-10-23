@@ -93,7 +93,7 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
         if (! $searchBox instanceof SearchBox) {
             throw new NexusException(Locale::trans('upload.invalid_section', [], null));
         }
-        $categoryIdList = $searchBox->categories()->pluck('id')->toArray();
+        $categoryIdList = $searchBox->categories()->pluck('id')->all();
         // query this info default
         $query = Torrent::query()->with(self::$defaultLoadRelationships)
             ->whereIn('category', $categoryIdList)

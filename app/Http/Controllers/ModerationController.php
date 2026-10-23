@@ -110,9 +110,9 @@ class ModerationController extends BasePageController
             if (! $userRow) {
                 return $this->abortResponse(__('report.std_error'), __('report.std_invalid_user_id'));
             }
-            $arr = $userRow->toArray();
-            if ((int) ($arr['class'] ?? 0) >= $staffmemClass) {
-                $msg = (__('report.std_cannot_report')).UserClass::name((int) ($arr['class'] ?? 0), false, true, true);
+            $userClassId = (int) ($userRow->class ?? 0);
+            if ($userClassId >= $staffmemClass) {
+                $msg = (__('report.std_cannot_report')).UserClass::name($userClassId, false, true, true);
 
                 return $this->abortResponse(__('report.std_sorry'), $msg);
             }
@@ -173,14 +173,13 @@ class ModerationController extends BasePageController
             if (! $comment) {
                 return $this->abortResponse(__('report.std_error'), __('report.std_invalid_comment_id'));
             }
-            $arr = $comment->toArray();
-            if ($arr['torrent'] ?? null) {
-                $name = $this->torrentRepository->getNameById((int) $arr['torrent']);
-                $url = '/web/details/'.$arr['torrent'].'#'.$commentid;
+            if ($comment->torrent ?? null) {
+                $name = $this->torrentRepository->getNameById((int) $comment->torrent);
+                $url = '/web/details/'.$comment->torrent.'#'.$commentid;
                 $of = __('report.text_of_torrent');
-            } elseif ($arr['offer'] ?? null) {
-                $name = $this->offerRepository->getOfferName((int) $arr['offer']);
-                $url = '/web/offers?id='.$arr['offer'].'&off_details=1#'.$commentid;
+            } elseif ($comment->offer ?? null) {
+                $name = $this->offerRepository->getOfferName((int) $comment->offer);
+                $url = '/web/offers?id='.$comment->offer.'&off_details=1#'.$commentid;
                 $of = __('report.text_of_offer');
             } else {
                 return $this->abortResponse(__('report.std_error'), __('report.std_orphaned_comment'));
@@ -192,7 +191,7 @@ class ModerationController extends BasePageController
                 'of' => (string) $of,
                 'url' => $url,
                 'name' => (string) $name,
-                'userHtml' => UserDisplay::username((int) ($arr['user'] ?? 0)),
+                'userHtml' => UserDisplay::username((int) ($comment->user ?? 0)),
                 'mid' => (string) __('report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'takecommentid',
@@ -206,12 +205,11 @@ class ModerationController extends BasePageController
             if (! $offer) {
                 return $this->abortResponse(__('report.std_error'), __('report.std_invalid_offer_id'));
             }
-            $arr = $offer->toArray();
             $form = view('moderation._confirm', [
                 'pre' => (string) __('report.text_are_you_sure_offer'),
                 'kind' => 'offer',
-                'id' => $arr['id'] ?? 0,
-                'name' => (string) ($arr['name'] ?? ''),
+                'id' => $offer->id ?? 0,
+                'name' => (string) ($offer->name ?? ''),
                 'mid' => (string) __('report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'takereportofferid',
@@ -264,11 +262,10 @@ class ModerationController extends BasePageController
                     if (! $torrent) {
                         $reporting = (string) (__('reports.text_torrent_does_not_exist'));
                     } else {
-                        $arr = $torrent->toArray();
                         $reporting = view('moderation._reporting_cell', [
                             'kind' => 'torrent',
-                            'id' => $arr['id'] ?? 0,
-                            'name' => (string) ($arr['name'] ?? ''),
+                            'id' => $torrent->id ?? 0,
+                            'name' => (string) ($torrent->name ?? ''),
                         ])->render();
                     }
                     break;
@@ -290,11 +287,10 @@ class ModerationController extends BasePageController
                     if (! $offer) {
                         $reporting = (string) (__('reports.text_offer_does_not_exist'));
                     } else {
-                        $arr = $offer->toArray();
                         $reporting = view('moderation._reporting_cell', [
                             'kind' => 'offer',
-                            'id' => $arr['id'] ?? 0,
-                            'name' => (string) ($arr['name'] ?? ''),
+                            'id' => $offer->id ?? 0,
+                            'name' => (string) ($offer->name ?? ''),
                         ])->render();
                     }
                     break;
@@ -319,14 +315,13 @@ class ModerationController extends BasePageController
                     if (! $comment) {
                         $reporting = (string) (__('reports.text_comment_does_not_exist'));
                     } else {
-                        $arr = $comment->toArray();
-                        if ($arr['torrent'] ?? null) {
-                            $name = $this->torrentRepository->getNameById((int) $arr['torrent']);
-                            $url = '/web/details/'.$arr['torrent'].'#cid'.$row['reportid'];
+                        if ($comment->torrent ?? null) {
+                            $name = $this->torrentRepository->getNameById((int) $comment->torrent);
+                            $url = '/web/details/'.$comment->torrent.'#cid'.$row['reportid'];
                             $of = __('reports.text_of_torrent');
-                        } elseif ($arr['offer'] ?? null) {
-                            $name = $this->offerRepository->getOfferName((int) $arr['offer']);
-                            $url = '/web/offers?id='.$arr['offer'].'&off_details=1#cid'.$row['reportid'];
+                        } elseif ($comment->offer ?? null) {
+                            $name = $this->offerRepository->getOfferName((int) $comment->offer);
+                            $url = '/web/offers?id='.$comment->offer.'&off_details=1#cid'.$row['reportid'];
                             $of = __('reports.text_of_offer');
                         } else {
                             $name = '';

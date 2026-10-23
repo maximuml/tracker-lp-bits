@@ -173,28 +173,28 @@ class MessagePageService
         // Build message rows
         $rows = [];
         foreach ($messages as $message) {
-            $row = $message->toArray();
-            if ((int) ($row['sender'] ?? 0) !== 0) {
+            $senderId = (int) ($message->sender ?? 0);
+            if ($senderId !== 0) {
                 if ($mailbox !== self::PM_SENT_BOX) {
-                    $username = UserDisplay::username((int) ($row['sender'] ?? 0));
+                    $username = UserDisplay::username($senderId);
                 } else {
-                    $username = UserDisplay::username((int) ($row['receiver'] ?? 0));
+                    $username = UserDisplay::username((int) ($message->receiver ?? 0));
                 }
             } else {
                 $username = (string) __('messages.text_system');
             }
 
-            $subject = (string) ($row['subject'] ?? '');
+            $subject = (string) ($message->subject ?? '');
             if (strlen($subject) <= 0) {
                 $subject = __('messages.text_no_subject');
             }
 
             $rows[] = [
-                'id' => (int) ($row['id'] ?? 0),
+                'id' => (int) ($message->id ?? 0),
                 'subject' => $subject,
                 'username' => SafeHtml::fromTrustedHtml($username),
-                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($row['added'] ?? ''), true, false)),
-                'unread' => (bool) ($row['unread'] ?? false),
+                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($message->added?->format('Y-m-d H:i:s') ?? ''), true, false)),
+                'unread' => (bool) ($message->unread ?? false),
             ];
         }
 

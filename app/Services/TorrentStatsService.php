@@ -206,13 +206,11 @@ class TorrentStatsService
     }
 
     /**
-     * Fetch a torrent as an array for the legacy "torrent to user" value calculation.
-     *
-     * @return array<string, mixed>|null
+     * Fetch a torrent for the legacy "torrent to user" value calculation.
      */
-    public function findForUserValue(int $torrentId): ?array
+    public function findForUserValue(int $torrentId): ?Torrent
     {
-        return $this->torrentDetailRepository->findArrayById((int) $torrentId);
+        return $this->torrentDetailRepository->findById((int) $torrentId);
     }
 
     /**

@@ -32,14 +32,12 @@ final class OfferEditBuilder
         if (! $offer) {
             PageResponses::abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
-        $num = $offer->toArray();
-
-        if ($userId !== (int) ($num['userid'] ?? 0) && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
+        if ($userId !== (int) ($offer->userid ?? 0) && ! Permission::can(PermissionEnum::OFFER_MANAGE)) {
             PageResponses::abort(__('offers.std_error'), __('offers.std_cannot_edit_others_offer'));
         }
 
-        $body = htmlspecialchars((string) ($num['descr'] ?? ''));
-        $id2 = (int) ($num['category'] ?? 0);
+        $body = htmlspecialchars((string) ($offer->descr ?? ''));
+        $id2 = (int) ($offer->category ?? 0);
 
         $catOptions = [];
         foreach (Category::listByModeWithContext($browsecatmode) as $row) {
@@ -49,7 +47,7 @@ final class OfferEditBuilder
 
         return [
             'id' => $id,
-            'title' => htmlspecialchars(trim((string) ($num['name'] ?? ''))),
+            'title' => htmlspecialchars(trim((string) ($offer->name ?? ''))),
             'catId' => $id2,
             'catOptions' => $catOptions,
             'bodyContent' => $body,

@@ -143,6 +143,7 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
                     'header' => "Content-type: application/x-www-form-urlencoded\r\n",
                     'content' => $payload,
                     'timeout' => 10,
+                    'follow_location' => 0,
                 ],
             ]);
 

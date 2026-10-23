@@ -146,17 +146,16 @@ class TorrentDetailRepository
     }
 
     /**
-     * @return array<int|string, mixed>
+     * @return Collection<int, Comment>
      */
-    public function getComments(int $torrentId, int $offset, int $limit): array
+    public function getComments(int $torrentId, int $offset, int $limit): Collection
     {
         return Comment::query()
             ->where('torrent', $torrentId)
             ->orderBy('id')
             ->offset($offset)
             ->limit($limit)
-            ->get(['id', 'text', 'user', 'added', 'editedby', 'editdate'])
-            ->toArray();
+            ->get(['id', 'text', 'user', 'added', 'editedby', 'editdate']);
     }
 
     public function incrementViews(int $id): void
@@ -174,7 +173,7 @@ class TorrentDetailRepository
             TorrentTag::query()
                 ->where('torrent_id', $torrentId)
                 ->pluck('tag_id')
-                ->toArray()
+                ->all()
         );
     }
 
@@ -265,13 +264,10 @@ class TorrentDetailRepository
         return TorrentTag::query()->whereIn('torrent_id', $torrentIds)->get()->groupBy('torrent_id');
     }
 
-    /** Plain-array torrent row for stats/sidecar rendering. */
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findArrayById(int $id): ?array
+    /** Torrent row for stats/sidecar rendering. */
+    public function findById(int $id): ?Torrent
     {
-        return Torrent::query()->find($id)?->toArray();
+        return Torrent::query()->find($id);
     }
 
     /**

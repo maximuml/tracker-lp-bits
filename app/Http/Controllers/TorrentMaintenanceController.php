@@ -150,7 +150,6 @@ class TorrentMaintenanceController extends BasePageController
 
         $reseedid = (int) ($request->query('reseedid') ?? $request->query('id') ?? 0);
         $torrent = $this->torrentRepository->findById($reseedid);
-        $row = $torrent instanceof Torrent ? $torrent->toArray() : null;
 
         $seederCount = $this->peerRepository->countForTorrent($reseedid);
         if ($seederCount > 0) {
@@ -158,7 +157,7 @@ class TorrentMaintenanceController extends BasePageController
         }
 
         $timeNow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
-        if ($row !== null && strtotime((string) ($row['last_reseed'] ?? '')) > ($timeNow - 900)) {
+        if ($torrent !== null && strtotime((string) ($torrent->last_reseed ?? '')) > ($timeNow - 900)) {
             return $this->abortResponse(__('takereseed.std_error'), __('takereseed.std_reseed_sent_recently'));
         }
 

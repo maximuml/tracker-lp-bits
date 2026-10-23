@@ -111,10 +111,9 @@ final class ForumListingService
 
         $postIds = [];
         foreach ($topicRows as $topic) {
-            $topicarr = $topic->toArray();
             foreach (['lastpost', 'firstpost'] as $col) {
-                if (! empty($topicarr[$col])) {
-                    $postIds[] = (int) $topicarr[$col];
+                if (! empty($topic->{$col})) {
+                    $postIds[] = (int) $topic->{$col};
                 }
             }
         }

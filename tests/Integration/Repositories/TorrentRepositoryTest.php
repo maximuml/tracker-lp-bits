@@ -116,7 +116,7 @@ final class TorrentRepositoryTest extends TestCase
         $result = $this->statsService->findForUserValue($torrent->id);
 
         $this->assertNotNull($result);
-        $this->assertSame($torrent->id, $result['id']);
+        $this->assertSame($torrent->id, $result->id);
     }
 
     public function test_find_for_user_value_returns_null_when_not_found(): void

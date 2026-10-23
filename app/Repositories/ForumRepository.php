@@ -16,7 +16,7 @@ class ForumRepository extends BaseRepository implements ForumRepositoryInterface
     public function deleteForum(int $id): void
     {
         $topics = DB::table('topics')->where('forumid', $id)->get(['id']);
-        DB::table('posts')->whereIn('topicid', $topics->pluck('id')->toArray())->delete();
+        DB::table('posts')->whereIn('topicid', $topics->pluck('id')->all())->delete();
 
         DB::table('topics')->where('forumid', $id)->delete();
         DB::table('forums')->where('id', $id)->delete();

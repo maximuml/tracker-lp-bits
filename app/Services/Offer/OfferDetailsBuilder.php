@@ -46,16 +46,17 @@ final class OfferDetailsBuilder
         if (! $offer) {
             PageResponses::abort(__('offers.std_error'), __('offers.text_nothing_found'));
         }
-        $num = $offer->toArray();
+        $offerState = $offer->allowed ?? OfferAllowed::PENDING;
+        $offerUserid = (int) ($offer->userid ?? 0);
 
-        $timeFormat = Time::format((string) ($num['added'] ?? ''), true, false);
+        $timeFormat = Time::format($offer->added?->format('Y-m-d H:i:s'), true, false);
         $offertime = ($actor->value('timetype', 1)) !== UserTimeType::TIMEALIVE->value
             ? __('offers.text_at').$timeFormat
             : __('offers.text_blank').$timeFormat;
 
-        $status = match ((int) ($num['allowed'] ?? 1)) {
-            OfferAllowed::PENDING->value => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-red'),
-            OfferAllowed::ALLOWED->value => new OfferAllowedBadge(__('offers.text_allowed'), 'nx-color-green'),
+        $status = match ($offerState) {
+            OfferAllowed::PENDING => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-red'),
+            OfferAllowed::ALLOWED => new OfferAllowedBadge(__('offers.text_allowed'), 'nx-color-green'),
             default => new OfferAllowedBadge(__('offers.text_denied'), 'nx-color-red'),
         };
 
@@ -63,25 +64,25 @@ final class OfferDetailsBuilder
         $yeah = (int) $voteCounts['yeah'];
         $against = (int) $voteCounts['against'];
 
-        $isPending = (int) ($num['allowed'] ?? 1) === OfferAllowed::PENDING->value;
-        $allowed = (int) ($num['allowed'] ?? 1) === OfferAllowed::ALLOWED->value;
+        $isPending = $offerState === OfferAllowed::PENDING;
+        $allowed = $offerState === OfferAllowed::ALLOWED;
 
         $allowedNote = '';
-        if ($allowed && $userId !== (int) ($num['userid'] ?? 0)) {
+        if ($allowed && $userId !== $offerUserid) {
             $allowedNote = __('offers.text_voter_receives_pm_note');
         }
-        if ($allowed && $userId === (int) ($num['userid'] ?? 0)) {
+        if ($allowed && $userId === $offerUserid) {
             $allowedNote = __('offers.text_urge_upload_offer_note');
         }
 
         $description = '';
-        if (! empty($num['descr'])) {
-            $descrKey = 'fmt_offer_'.md5((string) $num['descr']);
+        if (! empty($offer->descr)) {
+            $descrKey = 'fmt_offer_'.md5((string) $offer->descr);
             $cachedDescr = $this->cache->get($descrKey);
             if (is_string($cachedDescr)) {
                 $description = SafeHtml::fromTrustedHtml($cachedDescr);
             } else {
-                $description = Format::formatComment((string) $num['descr']);
+                $description = Format::formatComment((string) $offer->descr);
                 $this->cache->put($descrKey, (string) $description, 86400);
             }
         }
@@ -97,8 +98,8 @@ final class OfferDetailsBuilder
 
         return new OfferDetailsViewModel(
             id: $id,
-            name: (string) ($num['name'] ?? ''),
-            offeredBy: UserDisplay::username((int) ($num['userid'] ?? 0)),
+            name: (string) ($offer->name ?? ''),
+            offeredBy: UserDisplay::username($offerUserid),
             offerTime: SafeHtml::fromTrustedHtml($offertime),
             status: $status,
             showAllowRow: Permission::can(PermissionEnum::OFFER_MANAGE) && $isPending,
@@ -107,7 +108,7 @@ final class OfferDetailsBuilder
             yeah: $yeah,
             against: $against,
             allowedNote: $allowedNote,
-            showEditDelete: $userId === (int) ($num['userid'] ?? 0) || Permission::can(PermissionEnum::OFFER_MANAGE),
+            showEditDelete: $userId === $offerUserid || Permission::can(PermissionEnum::OFFER_MANAGE),
             description: SafeHtml::fromTrustedHtml($description),
             commentCount: $commentCount,
             pagerTop: SafeHtml::fromTrustedHtml($pagerTop),

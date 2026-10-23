@@ -197,10 +197,8 @@ class UserAdminController extends BasePageController
         if (! $user) {
             return $this->abortResponse('Error', "Sorry, that username doesn't exist.");
         }
-        $arr = $user->toArray();
-
-        if (UserDisplay::currentClass() <= (int) ($arr['class'] ?? 0)) {
-            $log = "Password Reset For {$username} by {$currentUsername} denied: operator class => ".UserDisplay::currentClass().' is not greater than target user => '.($arr['class'] ?? 0);
+        if (UserDisplay::currentClass() <= (int) ($user->class ?? 0)) {
+            $log = "Password Reset For {$username} by {$currentUsername} denied: operator class => ".UserDisplay::currentClass().' is not greater than target user => '.($user->class ?? 0);
             Log::writeWithContext($log);
             Logger::writeWithContext($log, 'alert', false);
 
@@ -209,7 +207,7 @@ class UserAdminController extends BasePageController
 
         $userRep = $this->userRepository;
         try {
-            $userRep->resetPassword((int) ($arr['id'] ?? 0), $newpassword, $newpasswordagain);
+            $userRep->resetPassword((int) ($user->id ?? 0), $newpassword, $newpasswordagain);
         } catch (\Exception $e) {
             return $this->abortResponse('Error', SafeExceptionMessage::message($e));
         }

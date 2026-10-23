@@ -203,7 +203,7 @@ class SearchBoxSchemaBuilder
             $items = SearchBox::listTaxonomyItems($searchBox, $torrentField);
 
             return Forms\Components\Select::make($name)
-                ->options($items->pluck('name', 'id')->toArray())
+                ->options($items->pluck('name', 'id')->all())
                 ->label($searchBox->getTaxonomyLabel($torrentField));
         }
     }

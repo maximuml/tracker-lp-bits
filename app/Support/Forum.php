@@ -135,7 +135,7 @@ final class Forum
     public static function canViewPost(int|string $uid, array|int|string $post): bool
     {
         if (! is_array($post)) {
-            $post = self::postLookupRepository()->getPostArrayById((int) $post);
+            $post = self::postLookupRepository()->getPostOrFail((int) $post)->toArray();
         }
 
         $topicId = $post['topicid'];

@@ -30,6 +30,12 @@ use Tests\Attributes\TestCategory;
  *     for download links.
  *   - Repositories/UsercpSecurityCommand — password/challenge verify on
  *     a fresh findOrFail() model (the fixed regression site).
+ *   - Http/Controllers/StaffModerationController — Cache::clearUser()
+ *     needs the target's passhash to invalidate its legacy cache keys
+ *     after a staff profile edit.
+ *   - Services/WebAuthService — the login service itself: password
+ *     verification reads passhash/secret/auth_key on the model loaded
+ *     by findForLogin().
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class CredentialFieldAccessRatchetTest extends TestCase
@@ -50,6 +56,12 @@ final class CredentialFieldAccessRatchetTest extends TestCase
         'Http/Controllers/AuthenticateController.php' => ['secret' => 1],
         'Repositories/TorrentDownloadRepository.php' => ['secret' => 1],
         'Repositories/UsercpSecurityCommand.php' => ['passhash' => 2],
+        'Http/Controllers/StaffModerationController.php' => ['passhash' => 1],
+        'Services/WebAuthService.php' => [
+            'secret' => 1,
+            'passhash' => 1,
+            'auth_key' => 2,
+        ],
     ];
 
     public function test_credential_fields_are_only_read_at_the_auth_boundary(): void

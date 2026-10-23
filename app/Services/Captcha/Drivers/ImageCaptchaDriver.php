@@ -101,7 +101,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
     public function outputImage(string $imagehash): void
     {
-        $imagestring = (string) ($this->regImageRepository->findAnswerByHash($imagehash)['imagestring'] ?? '');
+        $imagestring = (string) ($this->regImageRepository->findAnswerByHash($imagehash) ?? '');
 
         if ($imagestring === '') {
             $this->renderFallback();

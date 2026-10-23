@@ -14,14 +14,9 @@ use Illuminate\Support\Facades\DB;
 
 class InviteRepository
 {
-    /**
-     * @return ?array<int|string, mixed>
-     */
-    public function getUserArray(int $id): ?array
+    public function getUser(int $id): ?User
     {
-        $user = User::query()->find($id);
-
-        return $user === null ? null : $user->toArray();
+        return User::query()->find($id);
     }
 
     public function countPendingInvitees(int $inviterId): int

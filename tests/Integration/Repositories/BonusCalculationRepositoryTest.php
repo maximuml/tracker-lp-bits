@@ -139,15 +139,16 @@ final class BonusCalculationRepositoryTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $count);
     }
 
-    public function test_find_gift_receiver_returns_user_array_when_found(): void
+    public function test_find_gift_receiver_returns_user_model_when_found(): void
     {
         $user = User::factory()->create(['seedbonus' => 500.0]);
 
         $result = $this->repository->findGiftReceiver($user->username);
 
         $this->assertNotNull($result);
-        $this->assertSame($user->id, $result['id']);
-        $this->assertSame(500.0, (float) $result['seedbonus']);
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertSame($user->id, $result->id);
+        $this->assertSame(500.0, (float) $result->seedbonus);
     }
 
     public function test_find_gift_receiver_returns_null_when_not_found(): void

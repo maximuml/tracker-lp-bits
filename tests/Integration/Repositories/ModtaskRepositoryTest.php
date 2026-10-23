@@ -49,23 +49,22 @@ final class ModtaskRepositoryTest extends TestCase
         $this->assertNull($record->info);
     }
 
-    public function test_get_user_array_returns_null_when_not_found(): void
+    public function test_get_user_returns_null_when_not_found(): void
     {
-        $this->assertNull($this->repository->getUserArray(999999));
+        $this->assertNull($this->repository->getUser(999999));
     }
 
-    public function test_get_user_array_returns_array_with_passhash_visible(): void
+    public function test_get_user_returns_model_with_passhash_readable(): void
     {
         /** @var User $user */
         $user = User::factory()->create();
 
-        $result = $this->repository->getUserArray($user->id);
+        $result = $this->repository->getUser($user->id);
 
         $this->assertNotNull($result);
-        $this->assertSame($user->id, (int) $result['id']);
-        // passhash is in $hidden on the User model but makeVisible() exposes it.
-        $this->assertArrayHasKey('passhash', $result);
-        $this->assertSame($user->passhash, $result['passhash']);
+        $this->assertSame($user->id, $result->id);
+        // passhash is $hidden for serialization but attribute reads still work.
+        $this->assertSame($user->passhash, $result->passhash);
     }
 
     public function test_add_fund_inserts_record(): void

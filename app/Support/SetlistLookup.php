@@ -161,10 +161,10 @@ class SetlistLookup
     {
         $url = self::LINKINPEDIA_API.'?action=parse&page='.urlencode($page).'&prop=wikitext&format=json';
         $ctx = stream_context_create([
-            'http' => ['timeout' => 5, 'follow_location' => true],
+            'http' => ['timeout' => 5, 'follow_location' => 0],
         ]);
 
-        $json = @file_get_contents($url, false, $ctx);
+        $json = @file_get_contents($url, false, $ctx, 0, 5 * 1024 * 1024);
         if (! $json) {
             return null;
         }
@@ -480,11 +480,11 @@ class SetlistLookup
             'http' => [
                 'timeout' => 10,
                 'header' => "User-Agent: Mozilla/5.0 (compatible; tracker-lp-bits)\r\n",
-                'follow_location' => true,
+                'follow_location' => 0,
             ],
         ]);
 
-        $content = @file_get_contents($fullUrl, false, $ctx);
+        $content = @file_get_contents($fullUrl, false, $ctx, 0, 5 * 1024 * 1024);
 
         return $content !== false ? $content : null;
     }

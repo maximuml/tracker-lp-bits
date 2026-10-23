@@ -28,8 +28,8 @@ use Tests\Attributes\TestCategory;
  * repositories invokes a local row-shaping helper — a different (and
  * intentional) boundary mechanism.
  *
- * Baseline captured after typing the torrent-comment flow: 46 repository
- * + 26 service call sites. May only be lowered.
+ * Baseline captured after typing the torrent-comment flow and
+ * findById: 45 repository + 26 service call sites. May only be lowered.
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class ModelToArrayRatchetTest extends TestCase
@@ -38,7 +38,7 @@ final class ModelToArrayRatchetTest extends TestCase
 
     /** @var array<string, int> subdirectory → baseline call-site count */
     private const BASELINES = [
-        'Repositories' => 46,
+        'Repositories' => 45,
         'Services' => 26,
     ];
 

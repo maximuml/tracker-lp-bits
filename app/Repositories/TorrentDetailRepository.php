@@ -264,13 +264,10 @@ class TorrentDetailRepository
         return TorrentTag::query()->whereIn('torrent_id', $torrentIds)->get()->groupBy('torrent_id');
     }
 
-    /** Plain-array torrent row for stats/sidecar rendering. */
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findArrayById(int $id): ?array
+    /** Torrent row for stats/sidecar rendering. */
+    public function findById(int $id): ?Torrent
     {
-        return Torrent::query()->find($id)?->toArray();
+        return Torrent::query()->find($id);
     }
 
     /**

@@ -133,7 +133,7 @@ class MessagePageService
                     __('messages.std_invalid_mailbox')
                 );
             }
-            $mailboxName = htmlspecialchars((string) $pmBoxName);
+            $mailboxName = (string) $pmBoxName;
         } elseif ($mailbox === self::PM_INBOX) {
             $mailboxName = __('messages.text_inbox');
         } else {

@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\User;
 use App\Support\MessageSubject;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -88,6 +89,21 @@ final class MessageQuickReplyTest extends TestCase
             'msg' => 'A quick reply',
             'saved' => 1,
         ]);
+    }
+
+    public function test_custom_mailbox_name_is_escaped_once_in_mobile_back_link(): void
+    {
+        $sender = $this->createUser();
+        $receiver = $this->createUser();
+        $message = $this->createMessage($sender, $receiver, 'Custom mailbox');
+        DB::table('pmboxes')->insert(['userid' => $receiver->id, 'name' => 'A & B', 'boxnumber' => 2]);
+        $message->update(['location' => 2]);
+
+        $this->withNexusCookie($receiver)
+            ->get('/web/messages?action=viewmessage&id='.$message->id)
+            ->assertOk()
+            ->assertSee('‹ A &amp; B', false)
+            ->assertDontSee('‹ A &amp;amp; B', false);
     }
 
     private function createUser(bool $savePms = false): User

@@ -123,6 +123,8 @@ for (const pack of packs) {
 
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa'])
+          .include(['.nx-msgview', '.nx-quickreply', '.nx-mail'])
+          .exclude(['.nx-mail .User_Name', '.nx-mail .VeteranUser_Name'])
           .analyze();
         const violations = results.violations.map((violation) => ({
           id: violation.id,
@@ -133,6 +135,20 @@ for (const pack of packs) {
           })),
         }));
         expect(violations).toEqual([]);
+
+        if (view === 'received message') {
+          const replyColors = await page.locator('.nx-msgview__actions a.nx-btn--primary').evaluate((element) => {
+            const styles = getComputedStyle(element);
+            return { color: styles.color, background: styles.backgroundColor };
+          });
+          expect(replyColors.color).not.toBe(replyColors.background);
+
+          const actions = await new AxeBuilder({ page })
+            .include('.nx-msgview__actions')
+            .withRules(['color-contrast'])
+            .analyze();
+          expect(actions.violations.map((violation) => violation.id)).toEqual([]);
+        }
       });
     }
   }

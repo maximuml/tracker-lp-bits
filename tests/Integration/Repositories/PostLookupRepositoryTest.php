@@ -18,7 +18,7 @@ use Tests\TestCase;
  *
  * Covers postExists(), getPost(), getPostWithUser(), getPreviousPostId(),
  * getPostForQuote(), getPostForEdit(), getPostWithTopic(), getPostEditInfo(),
- * getPostArrayById(), findPostArrayById().
+ * getPostOrFail(), findPostArrayById().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class PostLookupRepositoryTest extends TestCase
@@ -141,13 +141,14 @@ final class PostLookupRepositoryTest extends TestCase
         $this->assertTrue($result['is_first_post']);
     }
 
-    public function test_get_post_array_by_id_returns_array(): void
+    public function test_get_post_or_fail_returns_model(): void
     {
         $post = Post::factory()->create(['body' => 'Array body']);
 
-        $result = $this->repository->getPostArrayById($post->id);
+        $result = $this->repository->getPostOrFail($post->id);
 
-        $this->assertSame('Array body', $result['body']);
+        $this->assertInstanceOf(Post::class, $result);
+        $this->assertSame('Array body', $result->body);
     }
 
     public function test_find_post_array_by_id_returns_array_when_found(): void

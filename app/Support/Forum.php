@@ -121,7 +121,7 @@ final class Forum
         static $forumMods = null;
 
         if (! is_array($post)) {
-            $post = self::postLookupRepository()->getPostArrayById((int) $post);
+            $post = self::postLookupRepository()->getPostOrFail((int) $post)->toArray();
         }
 
         $topicId = $post['topicid'];

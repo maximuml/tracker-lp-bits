@@ -169,6 +169,19 @@ class NexusCache
         return $deleted;
     }
 
+    /**
+     * Called by {@see ResetNexus} between requests/jobs. Clears the
+     * per-request bypass flag and debug counters; keeps the connection,
+     * enabled flag and lang folders (worker-level state).
+     */
+    public function reset(): void
+    {
+        $this->bypass = 0;
+        $this->readCount = 0;
+        $this->writeCount = 0;
+        $this->keyHits = [];
+    }
+
     public function readCount(): int
     {
         return $this->readCount;

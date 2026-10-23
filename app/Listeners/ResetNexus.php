@@ -14,6 +14,7 @@ use App\Repositories\TagRepository;
 use App\Services\Captcha\Drivers\TurnstileCaptchaDriver;
 use App\Services\ToolMaintenanceService;
 use App\Support\AssetAppender;
+use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use App\Support\Comment;
 use App\Support\CurrentUser;
@@ -100,6 +101,12 @@ class ResetNexus
         SearchBox::resetState();
         CleanupRepository::resetState();
         Comment::resetTempCode();
+        // The NexusCache singleton keeps its Redis connection for the
+        // worker lifetime, but the ?clearcache bypass flag and the debug
+        // read/write counters are per-request and must not accumulate.
+        if ($this->app->resolved(NexusCache::class)) {
+            $this->app->make(NexusCache::class)->reset();
+        }
         Setting::resetState();
         SearchBoxModel::resetState();
         SecondIconResource::resetState();

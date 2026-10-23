@@ -14,6 +14,7 @@ use App\Repositories\StyleRepository;
 use App\Repositories\TagRepository;
 use App\Services\Captcha\Drivers\TurnstileCaptchaDriver;
 use App\Services\ToolMaintenanceService;
+use App\Support\Cache\NexusCache;
 use App\Support\Comment;
 use App\Support\CurrentUser;
 use App\Support\Forum;
@@ -287,6 +288,13 @@ final class ResetNexusIsolationTest extends TestCase
         $this->setStaticProp(CleanupRepository::class, 'oneTaskSeconds', 42);
         $this->setStaticProp(ToolMaintenanceService::class, 'uidPermissionsCached', [1 => ['x']]);
 
+        // Singleton-level per-request state (NexusCache bypass + debug counters).
+        $cache = app(NexusCache::class);
+        $cache->setBypass(1);
+        $cache->readCount = 7;
+        $cache->writeCount = 3;
+        $cache->keyHits = ['read' => ['k' => 2]];
+
         // Simulate end of request A → ResetNexus
         $this->dispatchResetNexus();
 
@@ -304,6 +312,12 @@ final class ResetNexusIsolationTest extends TestCase
         $this->assertStaticPropEmpty(SearchBox::class, 'rows');
         $this->assertStaticPropEmpty(CleanupRepository::class, 'oneTaskSeconds');
         $this->assertStaticPropEmpty(ToolMaintenanceService::class, 'uidPermissionsCached');
+
+        $cache = app(NexusCache::class);
+        $this->assertSame(0, $cache->bypasses());
+        $this->assertSame(0, $cache->readCount());
+        $this->assertSame(0, $cache->writeCount());
+        $this->assertSame([], $cache->keyHits('read'));
     }
 
     /**

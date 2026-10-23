@@ -39,7 +39,7 @@ final class ModelToArrayRatchetTest extends TestCase
     /** @var array<string, int> subdirectory → baseline call-site count */
     private const BASELINES = [
         'Repositories' => 43,
-        'Services' => 26,
+        'Services' => 24,
     ];
 
     public function test_to_array_calls_do_not_grow_past_baseline(): void

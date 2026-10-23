@@ -78,19 +78,16 @@ class WebAuthService
             return false;
         }
 
-        $user->makeVisible(['passhash', 'secret', 'auth_key']);
-        $row = $user->toArray();
-
-        $secret = (string) ($row['secret'] ?? '');
-        $passhash = (string) ($row['passhash'] ?? '');
-        $authKey = (string) ($row['auth_key'] ?? '');
-        $algo = (string) ($row['passhash_algo'] ?? PasswordHasher::ALGO_SHA256);
+        $secret = (string) ($user->secret ?? '');
+        $passhash = (string) ($user->passhash ?? '');
+        $authKey = (string) ($user->auth_key ?? '');
+        $algo = (string) ($user->passhash_algo ?? PasswordHasher::ALGO_SHA256);
 
         // For legacy md5 hashes, only verify if auth_key is empty (very old accounts)
         if ($algo === PasswordHasher::ALGO_MD5 && empty($authKey)) {
             $ok = PasswordHasher::verify($password, $passhash, $secret, PasswordHasher::ALGO_MD5);
             if ($ok) {
-                $this->upgradePasswordHash((int) ($row['id'] ?? 0), $password, true);
+                $this->upgradePasswordHash((int) ($user->id ?? 0), $password, true);
             }
 
             return $ok;
@@ -107,7 +104,7 @@ class WebAuthService
 
         // Upgrade legacy hash to argon2id on successful login
         if (PasswordHasher::needsRehash($algo, $passhash)) {
-            $this->upgradePasswordHash((int) ($row['id'] ?? 0), $password, $algo !== PasswordHasher::ALGO_ARGON2ID);
+            $this->upgradePasswordHash((int) ($user->id ?? 0), $password, $algo !== PasswordHasher::ALGO_ARGON2ID);
         }
 
         return true;
@@ -158,28 +155,24 @@ class WebAuthService
             throw new AuthenticationException('Username or password invalid.');
         }
 
-        $user->makeVisible(['passhash', 'secret', 'auth_key']);
-
         if (! $this->validatePassword($user, $password)) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Username or password invalid.');
         }
 
-        $row = $user->toArray();
-
-        if (($row['status'] ?? null) === UserStatus::PENDING->value) {
+        if ($user->status === UserStatus::PENDING) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account unconfirmed.');
         }
 
-        if (! ($row['enabled'] ?? false) && (int) SiteConfig::current()->bonus->selfEnable() <= 0) {
+        if (! $user->enabled && (int) SiteConfig::current()->bonus->selfEnable() <= 0) {
             $this->recordFailedAttempt($ip);
             throw new AuthenticationException('Account disabled.');
         }
 
-        if (! empty($row['two_step_secret'])) {
+        if (! empty($user->two_step_secret)) {
             $code = (string) ($data['two_step_code'] ?? '');
-            if ($code === '' || ! TwoFactorAuthHelper::verifyCode($row['two_step_secret'], $code)) {
+            if ($code === '' || ! TwoFactorAuthHelper::verifyCode($user->two_step_secret, $code)) {
                 $this->recordFailedAttempt($ip);
                 throw new AuthenticationException($code === '' ? 'Require two-step code.' : 'Invalid two-step code.');
             }
@@ -187,21 +180,21 @@ class WebAuthService
 
         // Generate auth_key for very old accounts that don't have one
         $update = [];
-        if (empty($row['auth_key'])) {
+        if (empty($user->auth_key)) {
             $update['auth_key'] = hash('sha256', Token::randomHex(32));
             $update['auth_version'] = DB::raw('auth_version + 1');
         }
 
         if (! empty($update)) {
-            $this->userAccountRepository->updateById((int) ($row['id'] ?? 0), $update);
+            $this->userAccountRepository->updateById((int) ($user->id ?? 0), $update);
         }
 
         $duration = ! empty($data['logout']) && $data['logout'] === 'yes' ? 900 : 0;
-        AuthCookie::setLoginCookie((int) ($row['id'] ?? 0), null, $duration);
+        AuthCookie::setLoginCookie((int) ($user->id ?? 0), null, $duration);
 
-        $this->userRepository->saveLoginLog((int) ($row['id'] ?? 0), $ip, 'Web', true);
+        $this->userRepository->saveLoginLog((int) ($user->id ?? 0), $ip, 'Web', true);
 
-        Cache::clearUser((int) ($row['id'] ?? 0), '');
+        Cache::clearUser((int) ($user->id ?? 0), '');
 
         return $user;
     }

@@ -18,14 +18,9 @@ final class OfferCommentRepository extends BaseRepository implements OfferCommen
         return Comment::query()->where('offer', $offerId)->delete();
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getLastComment(int $offerId): ?array
+    public function getLastComment(int $offerId): ?Comment
     {
-        $row = Comment::query()->where('offer', $offerId)->orderByDesc('added')->first(['user', 'added', 'text']);
-
-        return $row ? $row->toArray() : null;
+        return Comment::query()->where('offer', $offerId)->orderByDesc('added')->first(['user', 'added', 'text']);
     }
 
     /**

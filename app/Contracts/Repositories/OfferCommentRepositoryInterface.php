@@ -11,10 +11,7 @@ interface OfferCommentRepositoryInterface
 {
     public function deleteOfferComments(int $offerId): int;
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getLastComment(int $offerId): ?array;
+    public function getLastComment(int $offerId): ?Comment;
 
     /**
      * Latest comment per offer, keyed by offer id.

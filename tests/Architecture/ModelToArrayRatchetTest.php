@@ -38,7 +38,7 @@ final class ModelToArrayRatchetTest extends TestCase
 
     /** @var array<string, int> subdirectory → baseline call-site count */
     private const BASELINES = [
-        'Repositories' => 41,
+        'Repositories' => 37,
         'Services' => 17,
     ];
 

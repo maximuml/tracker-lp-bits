@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories;
 
+use App\Models\Comment;
 use App\Models\User;
 use App\Repositories\OfferCommentRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -84,7 +85,8 @@ final class OfferCommentRepositoryTest extends TestCase
         $result = $this->repository->getLastComment($id);
 
         $this->assertNotNull($result);
-        $this->assertSame('newer comment', $result['text']);
+        $this->assertInstanceOf(Comment::class, $result);
+        $this->assertSame('newer comment', $result->text);
     }
 
     public function test_count_comments_returns_zero_when_none(): void

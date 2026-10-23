@@ -12,28 +12,13 @@ use App\Models\RegImage;
 final class RegImageRepository extends BaseRepository
 {
     /**
-     * Random image row older than the re-issue horizon.
-     *
-     * @return array{imagehash: string, question: string}|null
+     * Answer string for the image captcha hash, or null when unknown.
      */
-    public function pickRandomBefore(string $before): ?array
+    public function findAnswerByHash(string $imagehash): ?string
     {
-        /** @var array{imagehash: string, question: string}|null */
-        return RegImage::query()
-            ->where('dateline', '<', $before)
-            ->inRandomOrder()
-            ->first(['imagehash', 'question'])
-            ?->toArray();
-    }
-
-    /** @return array{imagestring: string}|null */
-    public function findAnswerByHash(string $imagehash): ?array
-    {
-        /** @var array{imagestring: string}|null */
         return RegImage::query()
             ->where('imagehash', $imagehash)
-            ->first(['imagestring'])
-            ?->toArray();
+            ->value('imagestring');
     }
 
     /** @param  array<string, mixed>  $attributes */

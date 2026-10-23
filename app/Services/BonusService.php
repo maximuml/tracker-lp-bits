@@ -280,11 +280,11 @@ final class BonusService
         $points = (float) $request->post('bonusgift', 0);
         $message = (string) $request->post('message', '');
         $usernamegift = trim((string) $request->post('username', ''));
-        $arr = $this->bonusCalculationRepository->findGiftReceiver($usernamegift);
-        if (empty($arr)) {
+        $giftReceiver = $this->bonusCalculationRepository->findGiftReceiver($usernamegift);
+        if ($giftReceiver === null) {
             PageResponses::abort(__('mybonus.text_error'), view('my.sections._abort-receiver-not-exists')->render(), false);
         }
-        $useridgift = (int) $arr['id'];
+        $useridgift = (int) $giftReceiver->id;
         if ($points < (float) $bonusarray['points']) {
             PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed'), false);
         }

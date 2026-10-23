@@ -23,14 +23,9 @@ class BonusCalculationRepository extends BaseRepository
             ->count();
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function findGiftReceiver(string $username): ?array
+    public function findGiftReceiver(string $username): ?User
     {
-        $receiver = User::query()->where('username', $username)->first(['id', 'seedbonus']);
-
-        return $receiver ? $receiver->toArray() : null;
+        return User::query()->where('username', $username)->first(['id', 'seedbonus']);
     }
 
     public function hasChangeUsernameCard(int $userId): bool

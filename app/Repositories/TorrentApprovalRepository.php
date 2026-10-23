@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Auth\Permission;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentOperationAction;
@@ -21,7 +22,6 @@ use App\Support\Locale;
 use App\Support\Logger;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -80,7 +80,7 @@ class TorrentApprovalRepository extends BaseRepository
      */
     public function approval($user, array $params): array
     {
-        $user = $this->getUser($user) ?? Auth::user();
+        $user = $this->getUser($user) ?? ActorContext::current()->user;
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL, $user);
         if (! $user instanceof User) {
             throw new InsufficientPermissionException;

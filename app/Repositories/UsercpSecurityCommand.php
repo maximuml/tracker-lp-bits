@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\DTOs\Auth\ActorContext;
 use App\DTOs\Usercp\SecuritySettingsDto;
 use App\Enums\UserPrivacy;
 use App\Models\User;
@@ -21,7 +22,6 @@ use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
 use App\Support\Validators;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache as CacheFacade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -77,7 +77,7 @@ final class UsercpSecurityCommand
     public function updateSecurityFromLegacyRequest(Request $request): string
     {
         /** @var User $user */
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }
@@ -226,7 +226,7 @@ final class UsercpSecurityCommand
     public function updateSecurityApi(SecuritySettingsDto $dto): array
     {
         /** @var User $user */
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }

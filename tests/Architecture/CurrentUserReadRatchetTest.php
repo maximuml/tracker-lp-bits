@@ -43,6 +43,18 @@ final class CurrentUserReadRatchetTest extends TestCase
         'DTOs/Auth/ActorContext.php', // builds the immutable snapshot from it
     ];
 
+    /**
+     * Domain layers where reading the ambient guard directly bypasses the
+     * ActorContext snapshot. Controllers/middleware legitimately resolve the
+     * guard (that is how the promote bridge authenticates), so the ban is
+     * scoped to Repositories/Services/Livewire.
+     */
+    private const DOMAIN_LAYER_PREFIXES = [
+        'Repositories/',
+        'Services/',
+        'Livewire/',
+    ];
+
     public function test_no_currentuser_reads_outside_bridge(): void
     {
         $violations = [];
@@ -68,6 +80,44 @@ final class CurrentUserReadRatchetTest extends TestCase
            .'immutable ActorContext snapshot instead (->id / ->value() / ->yes() '
            .'/ ->toLegacyArray()). Violations: '.implode(', ', $violations),
         );
+    }
+
+    public function test_no_ambient_guard_reads_in_domain_layers(): void
+    {
+        $violations = [];
+        $pattern = '/Auth::(?:user|id)\s*\(\s*\)/';
+
+        foreach ($this->phpFiles() as $file) {
+            $relative = $this->relativePath($file);
+            if (! $this->isDomainLayer($relative)) {
+                continue;
+            }
+
+            foreach (explode("\n", (string) file_get_contents($file)) as $lineno => $line) {
+                if (preg_match($pattern, $line)) {
+                    $violations[] = "$relative:".($lineno + 1);
+                }
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $violations,
+            'Repositories/Services/Livewire read the ambient guard via '
+           .'Auth::user()/Auth::id() — use ActorContext::current()->user or '
+           .'inject ActorContext instead. Violations: '.implode(', ', $violations),
+        );
+    }
+
+    private function isDomainLayer(string $relative): bool
+    {
+        foreach (self::DOMAIN_LAYER_PREFIXES as $prefix) {
+            if (str_starts_with($relative, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** @return list<string> */

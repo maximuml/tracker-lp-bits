@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Contracts\Repositories\UsercpRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\DTOs\Usercp\ForumSettingsDto;
 use App\DTOs\Usercp\PersonalSettingsDto;
 use App\DTOs\Usercp\SecuritySettingsDto;
@@ -15,7 +16,6 @@ use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 final class UsercpRepository extends BaseRepository implements UsercpRepositoryInterface
@@ -103,7 +103,7 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
     public function settings(): array
     {
         /** @var User $user */
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
 
         return $user->toApiArray();
     }
@@ -116,7 +116,7 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
     public function updatePersonal(PersonalSettingsDto $dto): array
     {
         /** @var User $user */
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
 
         $data = [
             'parked' => $dto->parked,
@@ -158,7 +158,7 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
     public function updateForum(ForumSettingsDto $dto): array
     {
         /** @var User $user */
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }
@@ -190,7 +190,7 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
     public function updateTracker(TrackerSettingsDto $dto): array
     {
         /** @var User $user */
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             throw new \RuntimeException('Unauthenticated');
         }

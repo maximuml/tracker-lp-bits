@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
 use App\Events\UserCreated;
@@ -29,7 +30,6 @@ use App\Support\Validators;
 use App\Utils\ApiQueryBuilder;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -178,7 +178,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         if (! empty($params['class'])) {
             $class = intval($params['class']);
             if (! $this->runtimeContext->isLegacy()) {
-                $authUser = Auth::user();
+                $authUser = ActorContext::current()->user;
                 if ($authUser && $class >= $authUser->class) {
                     throw new InsufficientPermissionException('No permission');
                 }

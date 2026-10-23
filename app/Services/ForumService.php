@@ -22,7 +22,6 @@ use App\Support\PageResponses;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Handles forum post submission (new topic, reply, edit). Moderation
@@ -234,7 +233,7 @@ final class ForumService
             }
 
             // W1-04: Use TopicPolicy for locked-topic reply authorization
-            $authUser = Auth::user();
+            $authUser = $this->actor->user;
             if ($topicModel->locked && (! $authUser instanceof User || ! $this->topicPolicy->reply($authUser, $topicModel))) {
                 PageResponses::abort(__('forums.std_error'), __('forums.std_topic_locked'));
             }
@@ -249,7 +248,7 @@ final class ForumService
 
             // W1-04: Use PostPolicy for edit authorization
             $postModel = $this->data->postLookup->getPost((int) $postid);
-            $authUser = Auth::user();
+            $authUser = $this->actor->user;
             if (! $authUser instanceof User || $postModel === null || ! $this->postPolicy->update($authUser, $postModel)) {
                 PageResponses::permissionDenied();
             }

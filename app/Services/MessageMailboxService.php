@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\MailboxRepository;
 use App\Repositories\MessageRepository;
@@ -11,7 +12,6 @@ use App\Support\Cache;
 use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Mailbox mutation handlers (moveordel bulk actions, editmailboxes2,
@@ -27,7 +27,7 @@ final class MessageMailboxService
 
     public function handleMoveOrDel(Request $request): RedirectResponse
     {
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             PageResponses::abort('Error', 'Permission denied.');
         }
@@ -92,7 +92,7 @@ final class MessageMailboxService
 
     public function handleEditMailboxes(Request $request): RedirectResponse
     {
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             PageResponses::abort('Error', 'Permission denied.');
         }
@@ -132,7 +132,7 @@ final class MessageMailboxService
 
     public function handleDeleteMessage(Request $request): RedirectResponse
     {
-        $user = Auth::user();
+        $user = ActorContext::current()->user;
         if (! $user instanceof User) {
             PageResponses::abort('Error', 'Permission denied.');
         }

@@ -207,7 +207,7 @@ class TorrentApprovalRepository extends BaseRepository
     public function paginateApprovalLogs(int $torrentId, array $actionTypes, int $perPage): LengthAwarePaginator
     {
         return TorrentOperationLog::query()
-            ->where('tid', $torrentId)
+            ->where('torrent_id', $torrentId)
             ->whereIn('action_type', $actionTypes)
             ->orderBy('id', 'desc')
             ->paginate($perPage);

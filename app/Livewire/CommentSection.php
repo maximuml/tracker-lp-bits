@@ -139,8 +139,8 @@ final class CommentSection extends Component
         $page = Pagination::resolvePage($this->page < 0 ? null : $this->page, $count, self::PER_PAGE, true);
         $rows = $this->enabled && $count > 0
             ? array_values(array_map(
-                fn ($comment) => (array) $comment,
-                $this->detailRepository()->getComments($this->parentId, $page * self::PER_PAGE, self::PER_PAGE)
+                fn (Comment $comment) => $comment->toArray(),
+                $this->detailRepository()->getComments($this->parentId, $page * self::PER_PAGE, self::PER_PAGE)->all()
             ))
             : [];
 

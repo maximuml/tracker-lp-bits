@@ -146,17 +146,16 @@ class TorrentDetailRepository
     }
 
     /**
-     * @return array<int|string, mixed>
+     * @return Collection<int, Comment>
      */
-    public function getComments(int $torrentId, int $offset, int $limit): array
+    public function getComments(int $torrentId, int $offset, int $limit): Collection
     {
         return Comment::query()
             ->where('torrent', $torrentId)
             ->orderBy('id')
             ->offset($offset)
             ->limit($limit)
-            ->get(['id', 'text', 'user', 'added', 'editedby', 'editdate'])
-            ->toArray();
+            ->get(['id', 'text', 'user', 'added', 'editedby', 'editdate']);
     }
 
     public function incrementViews(int $id): void

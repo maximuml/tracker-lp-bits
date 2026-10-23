@@ -220,11 +220,11 @@ final class TorrentDetailRepositoryTest extends TestCase
         $this->assertSame(2, $this->repository->getCommentCount($torrentId));
     }
 
-    public function test_get_comments_returns_empty_array_when_none(): void
+    public function test_get_comments_returns_empty_collection_when_none(): void
     {
         $torrentId = $this->createTorrent();
 
-        $this->assertSame([], $this->repository->getComments($torrentId, 0, 10));
+        $this->assertTrue($this->repository->getComments($torrentId, 0, 10)->isEmpty());
     }
 
     public function test_get_comments_returns_paginated_rows_ordered_by_id(): void
@@ -240,8 +240,8 @@ final class TorrentDetailRepositoryTest extends TestCase
         $result = $this->repository->getComments($torrentId, 0, 2);
 
         $this->assertCount(2, $result);
-        $this->assertSame('first', $result[0]['text']);
-        $this->assertSame('second', $result[1]['text']);
+        $this->assertSame('first', $result[0]->text);
+        $this->assertSame('second', $result[1]->text);
     }
 
     public function test_get_comments_respects_offset(): void
@@ -256,7 +256,7 @@ final class TorrentDetailRepositoryTest extends TestCase
         $result = $this->repository->getComments($torrentId, 1, 10);
 
         $this->assertCount(1, $result);
-        $this->assertSame('second', $result[0]['text']);
+        $this->assertSame('second', $result[0]->text);
     }
 
     public function test_increment_views_increases_views_by_one(): void

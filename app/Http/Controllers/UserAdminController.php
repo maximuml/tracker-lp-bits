@@ -25,6 +25,7 @@ use App\Support\Log;
 use App\Support\Logger;
 use App\Support\PageResponses;
 use App\Support\Pagination;
+use App\Support\SafeExceptionMessage;
 use App\Support\Time;
 use App\Support\User;
 use App\Support\UserClass;
@@ -210,7 +211,7 @@ class UserAdminController extends BasePageController
         try {
             $userRep->resetPassword((int) ($arr['id'] ?? 0), $newpassword, $newpasswordagain);
         } catch (\Exception $e) {
-            return $this->abortResponse('Error', $e->getMessage());
+            return $this->abortResponse('Error', SafeExceptionMessage::message($e));
         }
 
         Log::writeWithContext("Password Reset For {$username} by {$currentUsername}");
@@ -449,7 +450,7 @@ class UserAdminController extends BasePageController
                 'password_confirmation' => $request->post('password2'),
             ]);
         } catch (\Exception $e) {
-            return $this->abortResponse('ERROR', $e->getMessage());
+            return $this->abortResponse('ERROR', SafeExceptionMessage::message($e));
         }
 
         return redirect('/userdetails?id='.(int) $newUser->id);

@@ -21,6 +21,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\Ratio;
+use App\Support\SafeExceptionMessage;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -91,7 +92,7 @@ class InviteController extends BasePageController
                 return $this->abortResponse(
                     __('invite.std_sorry'),
                     view('invite._back_message', [
-                        'message' => $exception->getMessage(),
+                        'message' => SafeExceptionMessage::message($exception),
                         'backUrl' => '/web/invite?id='.(string) $currentUserId,
                         'backText' => (string) __('invite.std_here'),
                         'backSuffix' => (string) __('invite.std_to_go_back'),
@@ -157,7 +158,7 @@ class InviteController extends BasePageController
             try {
                 $sendBtnText = $this->userModerationRepository->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {
-                $sendBtnText = $exception->getMessage();
+                $sendBtnText = SafeExceptionMessage::message($exception);
                 $sendBtnDisabled = ' disabled';
             }
         }

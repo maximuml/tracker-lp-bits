@@ -343,9 +343,24 @@ final class TorrentListViewFactory
             $counter++;
         }
 
+        $sortedColumn = null;
+        foreach ($columns as $column) {
+            if (($column['ariaSort'] ?? null) !== null) {
+                $sortedColumn = $column;
+                break;
+            }
+        }
+        $sortLabel = $sortedColumn === null
+            ? __('torrents.sort_default')
+            : __('torrents.sorted_by', [
+                'field' => __('torrents.sort_field_'.$sortedColumn['key']),
+                'dir' => __('torrents.sort_dir_'.$sortedColumn['ariaSort']),
+            ]);
+
         // The legacy renderer also emitted a second (always empty) tooltip
         // container — dropped here; $torrent_tooltip was never populated.
         return new TorrentListViewModel(
+            sortLabel: $sortLabel,
             columns: $columns,
             rows: $outRows,
             showComments: $showComments,

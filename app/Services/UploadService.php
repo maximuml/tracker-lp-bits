@@ -37,6 +37,7 @@ class UploadService
         private UploadRepositories $repositories,
         private CustomField $customField,
         private MessageRepository $messageRepository,
+        private ActorContext $actor,
     ) {}
 
     /**
@@ -46,7 +47,7 @@ class UploadService
      */
     public function upload(Request $request)
     {
-        $user = $request->user();
+        $user = $this->actor->user;
         if (! $user instanceof User) {
             throw new NexusException('Unauthenticated');
         }

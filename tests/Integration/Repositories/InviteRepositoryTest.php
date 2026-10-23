@@ -14,7 +14,7 @@ use Tests\TestCase;
 /**
  * Unit tests for InviteRepository.
  *
- * Covers getUserArray(), countPendingInvitees(), countInvitees(),
+ * Covers getUser(), countPendingInvitees(), countInvitees(),
  * getInvitees(), countInvites(), and getInvites().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
@@ -36,21 +36,21 @@ final class InviteRepositoryTest extends TestCase
         $this->repository = new InviteRepository;
     }
 
-    public function test_get_user_array_returns_null_when_user_not_found(): void
+    public function test_get_user_returns_null_when_user_not_found(): void
     {
-        $this->assertNull($this->repository->getUserArray(99999));
+        $this->assertNull($this->repository->getUser(99999));
     }
 
-    public function test_get_user_array_returns_array_when_user_found(): void
+    public function test_get_user_returns_model_when_user_found(): void
     {
         /** @var User $user */
         $user = User::factory()->create();
 
-        $result = $this->repository->getUserArray($user->id);
+        $result = $this->repository->getUser($user->id);
 
-        $this->assertIsArray($result);
-        $this->assertSame($user->id, (int) $result['id']);
-        $this->assertSame($user->username, $result['username']);
+        $this->assertNotNull($result);
+        $this->assertSame($user->id, $result->id);
+        $this->assertSame($user->username, $result->username);
     }
 
     public function test_count_pending_invitees_returns_zero_when_none(): void

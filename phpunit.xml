@@ -43,7 +43,9 @@
     <env name="QUEUE_CONNECTION" value="sync"/>
     <server name="SESSION_DRIVER" value="array"/>
     <server name="TELESCOPE_ENABLED" value="false"/>
-    <ini name="memory_limit" value="512M"/>
+    <!-- 1G: the Feature suite peaks ~490M and the Clover XML writer
+         (php-code-coverage Util/Xml DOMDocument->saveXML) OOMed at 512M. -->
+    <ini name="memory_limit" value="1G"/>
     <ini name="session.save_handler" value="files"/>
     <ini name="session.save_path" value="/tmp"/>
   </php>

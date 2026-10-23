@@ -24,7 +24,7 @@ class TrustProxies extends Middleware
      */
     protected function proxies()
     {
-        $proxies = config('nexus.trusted_proxies', '*');
+        $proxies = config('nexus.trusted_proxies', '');
 
         // An empty or whitespace-only value means "trust no proxy".
         // Only the explicit wildcard '*' means "trust the calling peer".

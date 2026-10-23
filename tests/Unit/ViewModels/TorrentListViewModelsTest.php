@@ -111,6 +111,7 @@ final class TorrentListViewModelsTest extends TestCase
             showComments: true,
             showPromotionNote: true,
             lastCommentTooltips: [['id' => 'lastcom_0', 'content' => SafeHtml::fromTrustedHtml('<b>x</b>')]],
+            sortLabel: 'Sorted by recently added',
         );
 
         $this->assertCount(1, $vm->columns);

@@ -20,6 +20,7 @@ final class TorrentListViewModel
      * @param  list<TorrentListRow>  $rows
      * @param  list<Tooltip>  $lastCommentTooltips  tooltip bodies,
      *                                              rendered inside a hidden container by the template.
+     * @param  string  $sortLabel  human-readable current sort for the results line.
      */
     public function __construct(
         public readonly array $columns,
@@ -27,5 +28,6 @@ final class TorrentListViewModel
         public readonly bool $showComments,
         public readonly bool $showPromotionNote,
         public readonly array $lastCommentTooltips,
+        public readonly string $sortLabel,
     ) {}
 }

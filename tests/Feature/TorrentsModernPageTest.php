@@ -181,4 +181,40 @@ final class TorrentsModernPageTest extends TestCase
             $this->assertStringContainsString('nxm-th__label">'.$label.'</span>', $html);
         }
     }
+
+    public function test_torrents_results_line_shows_count_and_current_sort(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        Torrent::factory()->create([
+            'category' => 1,
+            'owner' => $user->id,
+            'visible' => 1,
+            'banned' => 0,
+        ]);
+
+        $default = $this->withNexusCookie($user)->get('/web/torrents?cat=1');
+        $default->assertOk();
+        $html = (string) $default->getContent();
+        $this->assertStringContainsString('class="nxm-results"', $html);
+        $this->assertStringContainsString('torrents found', $html);
+        $this->assertStringContainsString('Sorted by recently added', $html);
+
+        $sorted = $this->withNexusCookie($user)->get('/web/torrents?cat=1&sort=7&type=asc');
+        $sorted->assertOk();
+        $html = (string) $sorted->getContent();
+        $this->assertStringContainsString('Sorted by Seeders (asc)', $html);
+    }
+
+    public function test_torrents_empty_state_offers_reset_link_when_filters_applied(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        $filtered = $this->withNexusCookie($user)->get('/web/torrents?search=zzz-nothing-marker&incldead=2');
+        $filtered->assertOk();
+        $html = (string) $filtered->getContent();
+        $this->assertMatchesRegularExpression('/<div class="nxm-empty"[^>]*>.*?href="\/web\/torrents">Reset all<\/a>/s', $html);
+        $this->assertStringNotContainsString('No Torrents :(', $html);
+    }
 }

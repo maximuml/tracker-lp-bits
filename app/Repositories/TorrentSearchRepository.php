@@ -261,7 +261,7 @@ class TorrentSearchRepository
                 $emptyBody = __('torrents.std_try_again');
             } else {
                 $emptyTitle = __('torrents.std_nothing_found');
-                $emptyBody = __('torrents.std_no_active_torrents');
+                $emptyBody = __('torrents.empty_no_torrents');
             }
         }
         if ($CURUSER !== []) {

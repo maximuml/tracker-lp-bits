@@ -1616,6 +1616,8 @@ table.nx-torrents th.nxm-th--sorted :is(a:link, a:visited) { color: var(--nxm-te
 .nxm-empty { margin: 24px auto; max-width: 560px; text-align: center; padding: 20px; border: 1px solid var(--nxm-border, #d8dbe0); border-radius: 6px; background: var(--nxm-surface, #f6f7f9); }
 .nxm-empty__title { font-weight: 600; margin: 0 0 6px; }
 .nxm-empty__body { margin: 0; color: var(--nxm-muted, #666); }
+.nxm-empty__actions { margin: 12px 0 0; }
+.nxm-results { margin: 0 0 0.5rem; color: var(--nxm-muted, #666); font-size: 0.875rem; }
 @media (max-width: 720px) {
   table.nx-torrents { border: 0; border-radius: 0; background: transparent; overflow: visible; }
   .nxm-field { min-width: 0; }

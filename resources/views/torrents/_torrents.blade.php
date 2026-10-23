@@ -24,6 +24,7 @@
 @endif
 
 @if ($count && isset($rows))
+    <p class="nxm-results" role="status">{{ __('torrents.results_found', ['count' => number_format($count)]) }} <span class="nxm-results__sort">&middot; {{ $listVm->sortLabel }}</span></p>
 
     {{ $pagertop }}
     @include('torrents._table')
@@ -32,6 +33,9 @@
     <div class="nxm-empty" role="status">
         <p class="nxm-empty__title">{{ $emptyTitle }}</p>
         <p class="nxm-empty__body">{{ $emptyBody }}</p>
+        @if ($panelVm->appliedFilters !== [])
+            <p class="nxm-empty__actions"><a class="nx-btn nx-btn--ghost" href="{{ $panelVm->resetUrl }}">{{ __('torrents.reset_all') }}</a></p>
+        @endif
     </div>
 @endif
 

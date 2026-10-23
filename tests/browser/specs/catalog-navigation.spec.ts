@@ -491,4 +491,31 @@ test.describe('catalog navigation', () => {
       `query links resolved outside /web/torrents: ${JSON.stringify(offCatalogLinks)}`,
     ).toEqual([]);
   });
+
+  test('empty result offers a reset link, passes axe, and stays contained', async ({
+    page,
+  }) => {
+    await page.goto('/web/torrents?incldead=2&search=zzz-no-such-torrent-browser', {
+      waitUntil: 'networkidle',
+    });
+    const empty = page.locator('.nxm-empty');
+    await expect(empty).toBeVisible();
+    const reset = empty.getByRole('link', { name: 'Reset all' });
+    await expect(reset).toBeVisible();
+
+    const axe = await new AxeBuilder({ page }).include('.nxm-empty').analyze();
+    expect(axe.violations).toEqual([]);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    );
+    expect(overflow).toBe(false);
+
+    await Promise.all([
+      page.waitForURL((url) => url.search === ''),
+      reset.click(),
+    ]);
+    await expect(page.locator('.nxm-applied')).toHaveCount(0);
+  });
 });

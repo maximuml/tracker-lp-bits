@@ -2193,6 +2193,9 @@ a.nx-mail:hover { color: var(--nxm-text); }
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .nx-mail--active { background: var(--nxm-surface-alt); box-shadow: inset 3px 0 0 var(--nxm-accent); }
+html[data-theme="dark"] :is(#pmboxmenu a, .nx-maillist__filters a, .nx-mail__subject, .nx-mail__user b) { color: var(--nxm-text-dim); }
+html[data-theme="dark"] .nxm-main :is(.nx-msgview__meta b, .nx-msgview__actions .nx-postbtn) { color: var(--nxm-text-dim); }
+html[data-theme="dark"] .nxm-main :is(.User_Name b, .VeteranUser_Name b) { color: var(--nxm-text-dim); }
 
 .nx-bulkbar {
     display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
@@ -2224,12 +2227,28 @@ a.nx-mail:hover { color: var(--nxm-text); }
 .nx-msgview__subject { margin: 0 0 0.2rem; font-size: 1.05rem; }
 .nx-msgview__meta { font-size: 0.85em; color: var(--nxm-text-dim); }
 .nx-msgview__actions { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.55rem; }
+.nxm-main .nx-msgview__actions a.nx-btn--primary { color: var(--nxm-on-accent); }
 .nx-msgview__body { padding: 0.9rem; line-height: 1.55; }
+.nx-msgview__back {
+    display: none; padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid var(--nxm-border);
+    color: var(--nxm-text); text-decoration: none;
+}
+.nx-quickreply {
+    display: flex; flex-direction: column; gap: 0.55rem;
+    padding: 0.9rem; border-top: 1px solid var(--nxm-border);
+}
+.nx-quickreply textarea { box-sizing: border-box; width: 100%; min-width: 0; }
 
 @media (max-width: 55rem) {
     .nx-msgsplit { grid-template-columns: 1fr; }
     .nx-msgsplit__list { max-height: 14rem; overflow-y: auto; }
     .nx-mail__user { display: none; }
+}
+
+@media (max-width: 640px) {
+    .nx-msgsplit__list { display: none; }
+    .nx-msgview__back { display: block; }
 }
 
 /* E3 usercp: account/security/tokens/activity cards. */

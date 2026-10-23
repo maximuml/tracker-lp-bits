@@ -34,7 +34,9 @@ use Tests\Attributes\TestCategory;
  * payloads (allowed_classes:false forbids model instances), event
  * payloads, AJAX/announce view contracts, SiteConfig DTO exports, and
  * in Http/ the render boundary itself (PageService build() payloads,
- * DTO->toArray() fill contracts, response bodies).
+ * DTO->toArray() fill contracts, response bodies), and in Support/
+ * the $CURUSER-style legacy shims (UserDisplay row cache, cookie
+ * union normalization, SiteConfig section exports).
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class ModelToArrayRatchetTest extends TestCase
@@ -46,6 +48,7 @@ final class ModelToArrayRatchetTest extends TestCase
         'Repositories' => 20,
         'Services' => 17,
         'Http' => 22,
+        'Support' => 10,
     ];
 
     public function test_to_array_calls_do_not_grow_past_baseline(): void

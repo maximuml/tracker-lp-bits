@@ -166,10 +166,27 @@ class ExamCronRepository extends BaseRepository
                     'updated_at' => $now,
                 ];
                 Logger::writeWithContext((string) "{$currentLogPrefix}, exam will be assigned to this user.", (string) 'info', (bool) false);
-                $examUser = ExamUser::query()->create($insert);
-                $examUser->load('progresses');
-                $progressRepo->updateProgress($examUser, $user);
-                $result++;
+                // Overlapping assign runs can both pass the whereDoesntHave
+                // predicates above; serialize on the user row and re-check
+                // under the lock so a user never holds two NORMAL exam_users
+                // (there is no flat unique key for "one NORMAL per user").
+                $examUser = DB::transaction(function () use ($user, $exam, $insert, $progressRepo) {
+                    User::query()->where('id', $user->id)->lockForUpdate()->value('id');
+                    $hasExam = $user->exams()
+                        ->where(fn ($q) => $q->where('exam_id', $exam->id)->orWhere('status', ExamUserStatus::NORMAL->value))
+                        ->exists();
+                    if ($hasExam) {
+                        return null;
+                    }
+                    $created = ExamUser::query()->create($insert);
+                    $created->load('progresses');
+                    $progressRepo->updateProgress($created, $user);
+
+                    return $created;
+                });
+                if ($examUser instanceof ExamUser) {
+                    $result++;
+                }
             }
         }
 
@@ -242,7 +259,6 @@ class ExamCronRepository extends BaseRepository
             $userModifyLogs = [];
             foreach ($examUsers as $examUser) {
                 $minId = $examUser->id;
-                $examUserIdArr[] = $examUser->id;
                 $uid = $examUser->uid;
                 Cache::clearInboxCount($uid);
                 /** @var Exam $exam */
@@ -257,6 +273,10 @@ class ExamCronRepository extends BaseRepository
 
                     continue;
                 }
+                // Only rows that still exist may be counted in the
+                // conditional status flip below — a deleted row can never
+                // satisfy status = NORMAL.
+                $examUserIdArr[] = $examUser->id;
                 // update to the newest progress
                 $examUser = $progressRepo->updateProgress($examUser, $examUser->user);
                 if (! $examUser instanceof ExamUser) {
@@ -340,7 +360,18 @@ class ExamCronRepository extends BaseRepository
                 ];
             }
             DB::transaction(function () use ($uidToDisable, $messageToSend, $examUserIdArr, $examUserToInsert, $userBanLog, $userModifyLogs, $bonusLog, $uidToUpdateBonusPass, $uidToUpdateBonusFail, $userTable, $successRewardBonus, $failDeductBonus, $logPrefix) {
-                ExamUser::query()->whereIn('id', $examUserIdArr)->update(['status' => ExamUserStatus::FINISHED->value]);
+                // Flip only rows still NORMAL: an overlapping checkout that
+                // already committed leaves them FINISHED, and the bonus
+                // increments below must not fire a second time. A short
+                // count means another run is mid-flight — abort the batch
+                // and let the next scheduled run retry.
+                $flipped = ExamUser::query()
+                    ->whereIn('id', $examUserIdArr)
+                    ->where('status', ExamUserStatus::NORMAL->value)
+                    ->update(['status' => ExamUserStatus::FINISHED->value]);
+                if ($flipped !== count($examUserIdArr)) {
+                    throw new \RuntimeException("exam checkout lost a status race: flipped $flipped of ".count($examUserIdArr).' rows');
+                }
                 do {
                     $deleted = ExamProgress::query()->whereIn('exam_user_id', $examUserIdArr)->limit(10000)->delete();
                     Logger::writeWithContext((string) "{$logPrefix}, [DELETE_EXAM_PROGRESS], deleted: {$deleted}", (string) 'info', (bool) false);

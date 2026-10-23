@@ -315,6 +315,65 @@ final class ExamCronRepositoryTest extends TestCase
         $this->assertSame(0, ExamUser::query()->where('id', $examUser->id)->count());
     }
 
+    public function test_cronjob_checkout_is_idempotent_across_repeated_runs(): void
+    {
+        $exam = $this->createExam();
+        /** @var User $user */
+        $user = $this->createEligibleUser();
+
+        $this->repository->fetchUserAndDoAssign($exam);
+        $examUser = ExamUser::query()->where('exam_id', $exam->id)->where('uid', $user->id)->first();
+        $this->assertNotNull($examUser);
+        $examUser->update(['end' => now()->subDay()->toDateTimeString()]);
+
+        $this->assertGreaterThan(0, $this->repository->cronjobCheckout());
+        $messages = DB::table('messages')->where('receiver', $user->id)->count();
+        $this->assertGreaterThan(0, $messages);
+
+        // A second run must not re-process the FINISHED row: no extra
+        // messages, no extra bonus logs, no repeated status transition.
+        $this->assertSame(0, $this->repository->cronjobCheckout());
+        $this->assertSame($messages, DB::table('messages')->where('receiver', $user->id)->count());
+        $this->assertSame(
+            ExamUserStatus::FINISHED->value,
+            (int) ExamUser::query()->findOrFail($examUser->id)->status
+        );
+    }
+
+    public function test_cronjob_checkout_processes_valid_rows_alongside_orphans(): void
+    {
+        $exam = $this->createExam();
+
+        // Orphaned exam_user (lower id, iterated first) sharing the batch
+        // with a valid one — its deleted row must not break the conditional
+        // status-flip accounting.
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        ExamUser::query()->create([
+            'uid' => 999998,
+            'exam_id' => $exam->id,
+            'begin' => now()->subDay()->toDateTimeString(),
+            'end' => now()->subHour()->toDateTimeString(),
+            'status' => ExamUserStatus::NORMAL->value,
+            'is_done' => ExamUserIsDone::NO->value,
+            'progress' => [],
+        ]);
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+
+        /** @var User $user */
+        $user = $this->createEligibleUser();
+        $this->repository->fetchUserAndDoAssign($exam);
+        $examUser = ExamUser::query()->where('exam_id', $exam->id)->where('uid', $user->id)->firstOrFail();
+        $examUser->update(['end' => now()->subDay()->toDateTimeString()]);
+
+        $this->repository->cronjobCheckout(true);
+
+        $this->assertSame(0, ExamUser::query()->where('uid', 999998)->count());
+        $this->assertSame(
+            ExamUserStatus::FINISHED->value,
+            (int) ExamUser::query()->findOrFail($examUser->id)->status
+        );
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      */

@@ -176,7 +176,7 @@ class TorrentRssController extends BasePageController
                 $posStates[] = TorrentPosState::STICKY_SECOND->value;
             }
             if (! empty($posStates)) {
-                $prependIdArr = $this->torrentRepository->pluckIdsByPosStates($posStates)->toArray();
+                $prependIdArr = $this->torrentRepository->pluckIdsByPosStates($posStates)->all();
             }
         }
 

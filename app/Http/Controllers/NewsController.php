@@ -70,20 +70,19 @@ class NewsController extends BasePageController
                 return $this->abortResponse(__('news.std_error'), __('news.std_invalid_news_id').$newsid);
             }
 
-            $arr = $news->toArray();
             $newsTitle = __('news.text_edit_site_news');
             $returnto = (string) ($request->input('returnto') ?? $request->headers->get('referer', ''));
 
             return $this->renderPage($request, 'news', true, [
                 'mode' => 'edit',
                 'newsid' => $newsid,
-                'body' => $arr['body'] ?? '',
-                'subject' => $arr['title'] ?? '',
-                'notify' => ($arr['notify'] ?? false) ? 'yes' : 'no',
+                'body' => $news->body ?? '',
+                'subject' => $news->title ?? '',
+                'notify' => ($news->notify ?? false) ? 'yes' : 'no',
                 'returnto' => $returnto,
                 'title' => $newsTitle,
                 'composeTitle' => $newsTitle,
-                'checked' => ($arr['notify'] ?? false) ? ' checked' : '',
+                'checked' => ($news->notify ?? false) ? ' checked' : '',
                 'actionUrl' => '/web/news/edit?newsid='.$newsid,
             ]);
         }

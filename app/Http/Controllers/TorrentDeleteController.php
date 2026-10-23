@@ -55,10 +55,9 @@ class TorrentDeleteController extends BasePageController
         if (! $torrent instanceof Torrent) {
             return redirect('/web/torrents');
         }
-        $row = $torrent->toArray();
-        $ownerId = (int) ($row['owner'] ?? 0);
-        $name = (string) ($row['name'] ?? '');
-        $anonymous = (int) ($row['anonymous'] ?? 0);
+        $ownerId = (int) ($torrent->owner ?? 0);
+        $name = (string) ($torrent->name ?? '');
+        $anonymous = (int) ($torrent->anonymous ?? false);
 
         $sure = $request->input('sure');
         if (empty($sure)) {
@@ -131,10 +130,9 @@ class TorrentDeleteController extends BasePageController
         if ($torrent === null) {
             return $this->renderPage($request, 'delete', true);
         }
-        $row = $torrent->toArray();
-        $ownerId = (int) ($row['owner'] ?? 0);
-        $name = (string) ($row['name'] ?? '');
-        $anonymous = (int) ($row['anonymous'] ?? 0);
+        $ownerId = (int) ($torrent->owner ?? 0);
+        $name = (string) ($torrent->name ?? '');
+        $anonymous = (int) ($torrent->anonymous ?? false);
 
         if ($currentUserId != $ownerId && ! $this->permissionChecker->userCan(PermissionEnum::TORRENT_MANAGE->value, false, $currentUserId)) {
             return $this->abortResponse(__('delete.std_delete_failed'), __('delete.std_not_owner'));

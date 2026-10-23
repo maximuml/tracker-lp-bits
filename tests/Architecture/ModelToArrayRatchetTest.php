@@ -32,7 +32,9 @@ use Tests\Attributes\TestCategory;
  * findById: 45 repository + 26 service call sites. May only be lowered.
  * The remaining sites are deliberate serialization boundaries: cache
  * payloads (allowed_classes:false forbids model instances), event
- * payloads, AJAX/announce view contracts, and SiteConfig DTO exports.
+ * payloads, AJAX/announce view contracts, SiteConfig DTO exports, and
+ * in Http/ the render boundary itself (PageService build() payloads,
+ * DTO->toArray() fill contracts, response bodies).
  */
 #[TestCategory(TestCategory::ARCHITECTURE)]
 final class ModelToArrayRatchetTest extends TestCase
@@ -43,6 +45,7 @@ final class ModelToArrayRatchetTest extends TestCase
     private const BASELINES = [
         'Repositories' => 20,
         'Services' => 17,
+        'Http' => 22,
     ];
 
     public function test_to_array_calls_do_not_grow_past_baseline(): void

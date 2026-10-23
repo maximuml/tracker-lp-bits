@@ -41,6 +41,17 @@ class Setting extends NexusModel
     /** @var array<int|string, mixed> */
     public static array $permissionMustHaveClass = ['defaultclass', 'staffmem'];
 
+    /** @var array<string, mixed>|null */
+    private static ?array $autoloadedSettings = null;
+
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$autoloadedSettings = null;
+    }
+
     const DIRECT_PERMISSION_CACHE_KEY_PREFIX = 'nexus_direct_permissions_';
 
     const ROLE_PERMISSION_CACHE_KEY_PREFIX = 'nexus_role_permissions_';
@@ -54,17 +65,16 @@ class Setting extends NexusModel
      */
     public static function get(?string $name = null, mixed $default = null): mixed
     {
-        static $settings = null;
-        if ($settings === null) {
-            $settings = RedisGuard::attempt(
+        if (self::$autoloadedSettings === null) {
+            self::$autoloadedSettings = RedisGuard::attempt(
                 static fn () => Cache::remember('nexus_settings_in_laravel', 600, static fn () => self::getFromDb()),
             ) ?? self::getFromDb();
         }
         if ($name === null) {
-            return $settings;
+            return self::$autoloadedSettings;
         }
 
-        return Arr::get($settings, $name, $default);
+        return Arr::get(self::$autoloadedSettings ?? [], $name, $default);
     }
 
     /**

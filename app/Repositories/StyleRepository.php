@@ -14,6 +14,14 @@ final class StyleRepository implements StyleRepositoryInterface
     private static ?array $rows = null;
 
     /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$rows = null;
+    }
+
+    /**
      * @return Collection<int, \stdClass>
      */
     public function listOrderedByName(): Collection

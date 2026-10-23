@@ -65,6 +65,17 @@ final class UserClass
 
     public const RETIREE = UserClassEnum::RETIREE->value;
 
+    /** @var array<string, mixed>|null */
+    private static ?array $settingAccount = null;
+
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$settingAccount = null;
+    }
+
     public const UPLOADER = UserClassEnum::UPLOADER->value;
 
     public const MODERATOR = UserClassEnum::MODERATOR->value;
@@ -193,10 +204,8 @@ final class UserClass
             return SafeHtml::fromTrustedHtml(User::getClassName($class, $compact, $b_colored, $I18N));
         }
 
-        static $settingAccount = null;
-
-        if ($settingAccount === null) {
-            $settingAccount = SiteConfig::current()->account->toArray();
+        if (self::$settingAccount === null) {
+            self::$settingAccount = SiteConfig::current()->account->toArray();
         }
 
         $langKey = self::langKey((int) $class);
@@ -206,8 +215,8 @@ final class UserClass
             $I18N ? null : 'en'
         ) : '';
 
-        if (isset($options['with_alias']) && $options['with_alias'] && (int) $class < self::VIP && isset($settingAccount["{$class}_alias"])) {
-            $alias = trim($settingAccount["{$class}_alias"]);
+        if (isset($options['with_alias']) && $options['with_alias'] && (int) $class < self::VIP && isset(self::$settingAccount["{$class}_alias"])) {
+            $alias = trim(self::$settingAccount["{$class}_alias"]);
             if ($alias !== '') {
                 $className = sprintf('%s(%s)', $className, $alias);
             }

@@ -25,6 +25,16 @@ use App\ViewModels\Torrent\PromotionBadge;
  */
 final class Promotion
 {
+    private static ?int $globalSpecialState = null;
+
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$globalSpecialState = null;
+    }
+
     /**
      * CSS background class for a promotion / global-special-state code,
      * mirroring the duplicated if/elseif chains in get_torrent_bg_color().
@@ -373,23 +383,23 @@ final class Promotion
     public static function setGlobalSpecialState(int $state): void
     {
         self::torrentDetailRepository()->updateGlobalSpState($state);
+        self::$globalSpecialState = null;
     }
 
     public static function globalSpecialState(): int
     {
-        static $state;
-        if ($state === null) {
+        if (self::$globalSpecialState === null) {
             $timeline = TorrentState::resolveTimeline();
             $current = $timeline['current'] ?? null;
 
-            $state = TorrentPromotion::fromIntSafe(
+            self::$globalSpecialState = TorrentPromotion::fromIntSafe(
                 is_array($current) && isset($current['global_sp_state'])
                     ? (int) $current['global_sp_state']
                     : TorrentPromotion::NORMAL->value
             )->value;
         }
 
-        return $state;
+        return self::$globalSpecialState;
     }
 
     private static function torrentDetailRepository(): TorrentDetailRepository

@@ -11,6 +11,14 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
 {
     protected static bool $scriptInjected = false;
 
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$scriptInjected = false;
+    }
+
     /** @var array<string, mixed> */
     protected array $config;
 

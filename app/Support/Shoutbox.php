@@ -21,6 +21,21 @@ final class Shoutbox
     /** @var list<string> */
     public const REACTIONS = ['👍', '🔥', '❤️', '😂', '😮', '😢'];
 
+    /** @var array<string, array<string, mixed>|false> */
+    private static array $mentionUserCache = [];
+
+    /** @var array<int, bool> */
+    private static array $torrentExistsCache = [];
+
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$mentionUserCache = [];
+        self::$torrentExistsCache = [];
+    }
+
     /**
      * CSRF token for shoutbox actions. Derived from the app key and a short
      * rotating time window so a leaked token is only usable for ~1 hour.
@@ -281,32 +296,29 @@ final class Shoutbox
             return $html;
         }
 
-        /** @var array<string, array{id:int, name:string}|false> $cache */
-        static $cache = [];
-
         return (string) preg_replace_callback(
             '/(?<![\w\-\[\]\(\)])@([\w\-\[\]\(\)]{2,40})(?![\w\-\[\]\(\)])/u',
-            function (array $m) use ($currentUserId, &$mentionsMe, &$cache): string {
+            function (array $m) use ($currentUserId, &$mentionsMe): string {
                 $nick = $m[1];
                 $key = strtolower($nick);
-                if (! array_key_exists($key, $cache)) {
-                    $cache[$key] = self::shoutboxRepository()->findUserByUsername($nick) ?? false;
+                if (! array_key_exists($key, self::$mentionUserCache)) {
+                    self::$mentionUserCache[$key] = self::shoutboxRepository()->findUserByUsername($nick) ?? false;
                 }
-                if (! $cache[$key]) {
+                if (! self::$mentionUserCache[$key]) {
                     return $m[0];
                 }
-                $isMe = $currentUserId > 0 && $cache[$key]['id'] === $currentUserId;
+                $isMe = $currentUserId > 0 && self::$mentionUserCache[$key]['id'] === $currentUserId;
                 if ($isMe) {
                     $mentionsMe = true;
                 }
                 $cls = $isMe ? 'shout-mention shout-mention-me' : 'shout-mention';
-                $name = $cache[$key]['name'];
+                $name = self::$mentionUserCache[$key]['name'];
                 $tooltip = __('shoutbox.tooltip_nick_reply');
                 $title = $tooltip !== 'shoutbox.tooltip_nick_reply' ? (string) $tooltip : '';
 
                 return trim(view('support._shout-mention', [
                     'cls' => $cls,
-                    'userId' => $cache[$key]['id'],
+                    'userId' => self::$mentionUserCache[$key]['id'],
                     'name' => $name,
                     'title' => $title,
                     'mention' => '@'.$name,
@@ -326,20 +338,17 @@ final class Shoutbox
             return $html;
         }
 
-        /** @var array<int, bool> $cache */
-        static $cache = [];
-
         return (string) preg_replace_callback(
             '/(?<![\w&"\/=])#(\d{1,9})(?!\w)/',
-            function (array $m) use (&$cache): string {
+            function (array $m): string {
                 $id = (int) $m[1];
                 if ($id <= 0) {
                     return $m[0];
                 }
-                if (! array_key_exists($id, $cache)) {
-                    $cache[$id] = self::shoutboxRepository()->torrentExists($id);
+                if (! array_key_exists($id, self::$torrentExistsCache)) {
+                    self::$torrentExistsCache[$id] = self::shoutboxRepository()->torrentExists($id);
                 }
-                if (! $cache[$id]) {
+                if (! self::$torrentExistsCache[$id]) {
                     return $m[0];
                 }
 

@@ -38,6 +38,17 @@ class ToolMaintenanceService
         private readonly UserAccountRepository $userAccountRepository,
     ) {}
 
+    /** @var array<int|string, array<int|string, mixed>> */
+    private static array $uidPermissionsCached = [];
+
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$uidPermissionsCached = [];
+    }
+
     /**
      * @param  mixed  $to
      * @param  mixed  $subject
@@ -145,9 +156,8 @@ class ToolMaintenanceService
      */
     public function listUserAllPermissions($uid): array
     {
-        static $uidPermissionsCached = [];
-        if (isset($uidPermissionsCached[$uid])) {
-            return $uidPermissionsCached[$uid];
+        if (isset(self::$uidPermissionsCached[$uid])) {
+            return self::$uidPermissionsCached[$uid];
         }
         $log = "uid: $uid";
         $userInfo = UserDisplay::row($uid);
@@ -170,7 +180,7 @@ class ToolMaintenanceService
         $allPermissions = array_merge($classPermissions, $rolePermissions, $directPermissions);
         Logger::writeWithContext((string) ("{$log}, allPermissions: ".json_encode($allPermissions)), (string) 'info', (bool) false);
         $result = array_combine($allPermissions, $allPermissions);
-        $uidPermissionsCached[$uid] = $result;
+        self::$uidPermissionsCached[$uid] = $result;
 
         return $result;
     }

@@ -23,6 +23,29 @@ use Illuminate\Support\Facades\Cache;
  */
 final class Forum
 {
+    /** @var array<int|string, array<int, int>>|null */
+    private static ?array $moderatorsArray = null;
+
+    /** @var array<int, Topic> */
+    private static array $topics = [];
+
+    /** @var array<int, string>|null */
+    private static ?array $protectedForumIds = null;
+
+    /** @var array<int, int>|null */
+    private static ?array $forumMods = null;
+
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$moderatorsArray = null;
+        self::$topics = [];
+        self::$protectedForumIds = null;
+        self::$forumMods = null;
+    }
+
     /**
      * Return the relative forum-picture folder path.
      *
@@ -48,21 +71,19 @@ final class Forum
      */
     public static function moderators(?NexusCache $cache, int|string $forumId, bool $plainText = true): string
     {
-        static $moderatorsArray = null;
-
-        if ($moderatorsArray === null) {
+        if (self::$moderatorsArray === null) {
             $cached = $cache !== null ? $cache->get('forum_moderator_array') : false;
             if ($cached !== false && is_array($cached)) {
-                $moderatorsArray = $cached;
+                self::$moderatorsArray = $cached;
             } else {
-                $moderatorsArray = self::forumModRepository()->getModeratorArray();
+                self::$moderatorsArray = self::forumModRepository()->getModeratorArray();
                 if ($cache !== null) {
-                    $cache->put('forum_moderator_array', $moderatorsArray, 86200);
+                    $cache->put('forum_moderator_array', self::$moderatorsArray, 86200);
                 }
             }
         }
 
-        $userIds = $moderatorsArray[$forumId] ?? [];
+        $userIds = self::$moderatorsArray[$forumId] ?? [];
         UserDisplay::preload($userIds);
         $names = [];
         foreach ($userIds as $userId) {
@@ -113,50 +134,43 @@ final class Forum
      */
     public static function canViewPost(int|string $uid, array|int|string $post): bool
     {
-        /** @var array<int, Topic> $topics */
-        static $topics = [];
-        /** @var array<int, string>|null $protectedForumIds */
-        static $protectedForumIds = null;
-        /** @var array<int, int>|null $forumMods */
-        static $forumMods = null;
-
         if (! is_array($post)) {
             $post = self::postLookupRepository()->getPostArrayById((int) $post);
         }
 
         $topicId = $post['topicid'];
-        if (! isset($topics[$topicId])) {
-            $topics[$topicId] = self::topicRepository()->getTopicById($topicId);
+        if (! isset(self::$topics[$topicId])) {
+            self::$topics[$topicId] = self::topicRepository()->getTopicById($topicId);
         }
         /** @var Topic $topicInfo */
-        $topicInfo = $topics[$topicId];
+        $topicInfo = self::$topics[$topicId];
         $forumId = $topicInfo->forumid;
 
-        if ($protectedForumIds === null) {
+        if (self::$protectedForumIds === null) {
             $protected = Cache::remember('setting_protected_forum', 600, function () {
                 return app(SettingRepository::class)->getByName('misc.protected_forum') ?? false;
             });
-            $protectedForumIds = $protected ? (preg_split('/[,\s]+/', $protected) ?: []) : [];
+            self::$protectedForumIds = $protected ? (preg_split('/[,\s]+/', $protected) ?: []) : [];
         }
 
-        if ($forumMods === null) {
-            $forumMods = self::forumModRepository()->getForumMods();
+        if (self::$forumMods === null) {
+            self::$forumMods = self::forumModRepository()->getForumMods();
         }
 
-        $isForumMod = isset($forumMods[$forumId]) && $forumMods[$forumId] == $uid;
+        $isForumMod = isset(self::$forumMods[$forumId]) && self::$forumMods[$forumId] == $uid;
         $log = sprintf(
             'uid: %s, class: %s, post: %s, forumId: %s, protectedForumIdArr: %s, forumMods: %s, isForumMod: %s',
             $uid,
             UserDisplay::currentClass(),
             $post['id'],
             $forumId,
-            json_encode($protectedForumIds),
-            json_encode($forumMods),
+            json_encode(self::$protectedForumIds),
+            json_encode(self::$forumMods),
             $isForumMod
         );
 
         if (
-            in_array($forumId, $protectedForumIds)
+            in_array($forumId, self::$protectedForumIds)
             && UserDisplay::currentClass() < UserClassEnum::ADMINISTRATOR->value
             && $uid != $post['userid']
             && $uid != $topicInfo->userid

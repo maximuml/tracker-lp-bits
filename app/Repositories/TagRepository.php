@@ -24,6 +24,15 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
     private static $allTags;
 
     /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$orderByFieldIdString = null;
+        self::$allTags = null;
+    }
+
+    /**
      * @param  array<int|string, mixed>  $params
      * @return mixed
      */

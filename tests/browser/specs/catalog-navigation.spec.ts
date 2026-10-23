@@ -344,7 +344,7 @@ test.describe('catalog navigation', () => {
     await page.goto(query, { waitUntil: 'networkidle' });
     await Promise.all([
       page.waitForURL((url) => url.pathname === '/web/torrents' && url.search === ''),
-      page.getByRole('link', { name: 'Reset all' }).click(),
+      page.locator('.nxm-applied').getByRole('link', { name: 'Reset all' }).click(),
     ]);
     await expect(page.locator('.nxm-applied')).toHaveCount(0);
   });

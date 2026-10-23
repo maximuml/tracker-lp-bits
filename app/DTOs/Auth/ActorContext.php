@@ -61,7 +61,17 @@ final readonly class ActorContext
      */
     public static function current(): self
     {
-        return app(self::class);
+        $context = app(self::class);
+        if ($context->id === 0 && CurrentUser::instance()->id() !== 0) {
+            // The snapshot was built before authentication landed (an
+            // early resolver ran before sanctum's shouldUse or an
+            // out-of-band promote) — drop it and rebuild against the
+            // now-authenticated user.
+            app()->forgetInstance(self::class);
+            $context = app(self::class);
+        }
+
+        return $context;
     }
 
     /**

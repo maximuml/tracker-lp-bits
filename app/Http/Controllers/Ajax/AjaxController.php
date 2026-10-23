@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Ajax;
 use App\Http\Controllers\Controller;
 use App\Support\Api;
 use App\Support\Logger;
+use App\Support\SafeExceptionMessage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -27,22 +28,9 @@ abstract class AjaxController extends Controller
             Logger::writeWithContext((string) ($exception->getMessage().$exception->getTraceAsString()), (string) 'error', (bool) false);
 
             return response()->json(Api::failWithContext(
-                self::clientSafeMessage($exception),
+                SafeExceptionMessage::message($exception),
                 $request->only(['action', 'params']),
             ));
         }
-    }
-
-    /**
-     * Domain exceptions carry user-facing text the legacy JS displays;
-     * infrastructure failures (PDO/QueryException, PHP engine errors) must not leak.
-     */
-    private static function clientSafeMessage(\Throwable $exception): string
-    {
-        if ($exception instanceof \PDOException || $exception instanceof \Error) {
-            return 'Internal error';
-        }
-
-        return $exception->getMessage();
     }
 }

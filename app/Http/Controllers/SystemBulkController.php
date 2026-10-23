@@ -37,6 +37,7 @@ use App\Support\Mail;
 use App\Support\PageResponses;
 use App\Support\RedisGuard;
 use App\Support\RequestValues;
+use App\Support\SafeExceptionMessage;
 use App\Support\SetlistLookup;
 use App\Support\Url;
 use App\Support\UserDisplay;
@@ -150,7 +151,7 @@ class SystemBulkController extends BasePageController
                 $sendText = $userRep->getInviteBtnText($currentUserId);
             } catch (\Exception $exception) {
 
-                return $this->abortResponse(__('takeinvite.std_error'), $exception->getMessage());
+                return $this->abortResponse(__('takeinvite.std_error'), SafeExceptionMessage::message($exception));
             }
 
             $email = htmlspecialchars(trim((string) $request->post('email')));

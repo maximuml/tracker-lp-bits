@@ -9,6 +9,7 @@ use App\Http\Requests\BookmarkSubmitRequest;
 use App\Http\Requests\ThanksTorrentRequest;
 use App\Services\TorrentBookmarkService;
 use App\Support\PageResponses;
+use App\Support\SafeExceptionMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -67,7 +68,7 @@ class TorrentBookmarkController extends BasePageController
         try {
             $this->bookmarkService->thankTorrent($actor, $torrentid);
         } catch (\RuntimeException $e) {
-            PageResponses::abort('Error', $e->getMessage());
+            PageResponses::abort('Error', SafeExceptionMessage::message($e));
         }
 
         return $this->renderPage($request, 'thanks', true, [

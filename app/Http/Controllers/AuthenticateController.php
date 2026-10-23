@@ -19,6 +19,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Logger;
 use App\Support\Network;
 use App\Support\RedisGuard;
+use App\Support\SafeExceptionMessage;
 use App\Support\Token;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\RedirectResponse;
@@ -283,10 +284,9 @@ class AuthenticateController extends Controller
                 'passhash_algo' => $algo,
             ]);
         } catch (\Exception $exception) {
-            $msg = $exception->getMessage();
-            Logger::writeWithContext((string) sprintf('challenge fail: %s', $msg), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) sprintf('challenge fail: %s', $exception->getMessage()), (string) 'info', (bool) false);
 
-            return $this->fail([], $msg);
+            return $this->fail([], SafeExceptionMessage::message($exception));
         }
     }
 }

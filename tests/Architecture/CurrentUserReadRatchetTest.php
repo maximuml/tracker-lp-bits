@@ -85,7 +85,7 @@ final class CurrentUserReadRatchetTest extends TestCase
     public function test_no_ambient_guard_reads_in_domain_layers(): void
     {
         $violations = [];
-        $pattern = '/Auth::(?:user|id)\s*\(\s*\)|\$request->user\(\)|request\(\)->user\(\)/';
+        $pattern = '/Auth::(?:user|id|check|guest)\s*\(\s*\)|auth\(\)->(?:user|id|check|guest)\s*\(\s*\)|\$request->user\(\)|request\(\)->user\(\)/';
 
         foreach ($this->phpFiles() as $file) {
             $relative = $this->relativePath($file);
@@ -104,7 +104,7 @@ final class CurrentUserReadRatchetTest extends TestCase
             [],
             $violations,
             'Repositories/Services/Livewire read the ambient guard via '
-           .'Auth::user()/Auth::id()/$request->user() — use '
+           .'Auth::user()/Auth::id()/auth()->user()/$request->user() — use '
            .'ActorContext::current()->user or inject ActorContext instead. '
            .'Violations: '.implode(', ', $violations),
         );

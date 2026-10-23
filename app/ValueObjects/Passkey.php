@@ -48,7 +48,7 @@ final readonly class Passkey
 
     public function equals(self $other): bool
     {
-        return $this->value === $other->value;
+        return hash_equals($this->value, $other->value);
     }
 
     public function __toString(): string

@@ -10,6 +10,7 @@ use App\Http\Requests\TokenRequest;
 use App\Models\User;
 use App\Repositories\TokenRepository;
 use App\Support\Locale;
+use App\Support\SafeExceptionMessage;
 use Illuminate\Support\Facades\Auth;
 
 class TokenController extends Controller
@@ -44,7 +45,7 @@ class TokenController extends Controller
 
             return $this->success(['token' => $tokenText], $msg);
         } catch (\Exception $exception) {
-            return $this->fail(false, $exception->getMessage());
+            return $this->fail(false, SafeExceptionMessage::message($exception));
         }
     }
 
@@ -62,7 +63,7 @@ class TokenController extends Controller
 
             return $this->success(true);
         } catch (\Exception $exception) {
-            return $this->fail(false, $exception->getMessage());
+            return $this->fail(false, SafeExceptionMessage::message($exception));
         }
     }
 }

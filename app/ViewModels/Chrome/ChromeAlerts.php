@@ -6,6 +6,7 @@ namespace App\ViewModels\Chrome;
 
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
 use App\Enums\ExamType;
+use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentPromotion;
 use App\Models\TorrentState;
 use App\Support\Exam;
@@ -134,7 +135,7 @@ final class ChromeAlerts
             ];
         }
 
-        if ($chrome->permissionChecker->userCan('torrent-approval', false, $userId) && Settings::get('torrent.approval_status_none_visible') == 'no') {
+        if ($chrome->permissionChecker->userCan(PermissionEnum::TORRENT_APPROVAL->value, false, $userId) && Settings::get('torrent.approval_status_none_visible') == 'no') {
             $toApprovalCounts = $context->cache?->get('TORRENT_APPROVAL_NONE');
             if ($toApprovalCounts === false) {
                 $toApprovalCounts = $repo->getTorrentApprovalNoneCount();
@@ -150,7 +151,7 @@ final class ChromeAlerts
             }
         }
 
-        if ($chrome->permissionChecker->userCan('staffmem', false, $userId)) {
+        if ($chrome->permissionChecker->userCan(PermissionEnum::STAFF_MEMBER->value, false, $userId)) {
             $complaints = $context->cache?->get('COMPLAINTS_COUNT_CACHE');
             if ($complaints === false) {
                 $complaints = $repo->getOpenComplaintsCount();

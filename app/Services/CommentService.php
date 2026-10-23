@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Enums\Permission\PermissionEnum;
 use App\Models\Comment;
 use App\Models\User;
 use App\Repositories\CommentRepository;
@@ -65,7 +66,7 @@ final class CommentService
 
     public function assertNotFlood(User $user): void
     {
-        if ($this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
+        if ($this->permissionChecker->userCan(PermissionEnum::COM_MANAGE->value, false, (int) $user->id)) {
             return;
         }
 

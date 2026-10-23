@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Enums\Permission\PermissionEnum;
 use App\Services\PermissionChecker;
 use App\Support\Cache\NexusCache;
 use App\Support\Html\SafeHtml;
@@ -54,15 +55,15 @@ final class Menu
             $items[] = $this->item($selected, 'offers', '/web/offers', __('functions.text_offers'));
         }
         $items[] = $this->item($selected, 'upload', '/web/upload', __('functions.text_upload'));
-        if (PermissionChecker::instance()->userCan('topten', false, $userId)) {
+        if (PermissionChecker::instance()->userCan(PermissionEnum::TOP_TEN->value, false, $userId)) {
             $items[] = $this->item($selected, 'topten', '/web/topten', __('functions.text_top_ten'));
         }
-        if (PermissionChecker::instance()->userCan('log', false, $userId)) {
+        if (PermissionChecker::instance()->userCan(PermissionEnum::LOG->value, false, $userId)) {
             $items[] = $this->item($selected, 'log', '/web/log', __('functions.text_log'));
         }
         $items[] = $this->item($selected, 'rules', '/web/rules', __('functions.text_rules'));
         $items[] = $this->item($selected, 'faq', '/web/faq', __('functions.text_faq'));
-        if (PermissionChecker::instance()->userCan('staffmem', false, $userId)) {
+        if (PermissionChecker::instance()->userCan(PermissionEnum::STAFF_MEMBER->value, false, $userId)) {
             $items[] = $this->item($selected, 'staff', '/web/staff', __('functions.text_staff'));
         }
         $items[] = $this->item($selected, 'contactstaff', '/web/contactstaff', __('functions.text_contactstaff'));

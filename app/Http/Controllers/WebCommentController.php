@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Models\User;
@@ -87,7 +88,7 @@ class WebCommentController extends Controller
         }
 
         $user = $this->currentUser();
-        if ((int) $arr['user'] !== (int) $user->id && ! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
+        if ((int) $arr['user'] !== (int) $user->id && ! $this->permissionChecker->userCan(PermissionEnum::COM_MANAGE->value, false, (int) $user->id)) {
             abort(403, __('comment.std_permission_denied'));
         }
 
@@ -118,7 +119,7 @@ class WebCommentController extends Controller
         if (! $arr) {
             abort(404, __('comment.std_invalid_id'));
         }
-        if ((int) $arr['user'] !== (int) $user->id && ! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
+        if ((int) $arr['user'] !== (int) $user->id && ! $this->permissionChecker->userCan(PermissionEnum::COM_MANAGE->value, false, (int) $user->id)) {
             abort(403, __('comment.std_permission_denied'));
         }
 
@@ -136,7 +137,7 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $user = $this->currentUser();
-        if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::COM_MANAGE->value, false, (int) $user->id)) {
             abort(403, __('comment.std_permission_denied'));
         }
 
@@ -163,7 +164,7 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $user = $this->currentUser();
-        if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::COM_MANAGE->value, false, (int) $user->id)) {
             abort(403, __('comment.std_permission_denied'));
         }
 
@@ -194,7 +195,7 @@ class WebCommentController extends Controller
         $type = $this->type($request);
 
         $user = $this->currentUser();
-        if (! $this->permissionChecker->userCan('commanage', false, (int) $user->id)) {
+        if (! $this->permissionChecker->userCan(PermissionEnum::COM_MANAGE->value, false, (int) $user->id)) {
             abort(403, __('comment.std_permission_denied'));
         }
 

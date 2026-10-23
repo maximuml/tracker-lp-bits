@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Torrent;
 
+use App\Enums\Permission\PermissionEnum;
 use App\Services\PermissionChecker;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
@@ -35,7 +36,7 @@ final class PeerTableFactory
             $privacy = $privacyData[$e['userid']] ?? '';
             $secs = max(1, $e['la'] - $e['st']);
             $isStrongPrivacy = $privacy === 'strong' || (YesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
-            $canView = $this->permissionChecker->userCan('viewanonymous', false, $currentUserId) || $e['userid'] == $currentUserId;
+            $canView = $this->permissionChecker->userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUserId) || $e['userid'] == $currentUserId;
 
             $uploaded = (float) $e['uploaded'];
             $downloaded = (float) $e['downloaded'];

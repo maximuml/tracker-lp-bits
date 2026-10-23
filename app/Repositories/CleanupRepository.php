@@ -51,6 +51,14 @@ class CleanupRepository extends BaseRepository
 
     private static int $scanSize = 500;
 
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$oneTaskSeconds = 0;
+    }
+
     public function __construct(
         private readonly CleanupMonitorRepositoryInterface $monitor
     ) {}

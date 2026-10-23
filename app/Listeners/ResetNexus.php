@@ -5,17 +5,32 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\DTOs\Auth\ActorContext;
+use App\Filament\Resources\Section\SecondIconResource;
+use App\Models\SearchBox as SearchBoxModel;
+use App\Models\Setting;
+use App\Repositories\CleanupRepository;
+use App\Repositories\StyleRepository;
+use App\Repositories\TagRepository;
+use App\Services\Captcha\Drivers\TurnstileCaptchaDriver;
+use App\Services\ToolMaintenanceService;
 use App\Support\AssetAppender;
+use App\Support\Cache\NexusCache;
 use App\Support\Category;
+use App\Support\Comment;
 use App\Support\CurrentUser;
+use App\Support\Forum;
 use App\Support\HeaderBag;
 use App\Support\NexusContext;
 use App\Support\PageRenderer;
 use App\Support\Permissions;
+use App\Support\Promotion;
 use App\Support\RequestContext;
 use App\Support\RuntimeContext;
+use App\Support\SearchBox;
 use App\Support\Settings;
+use App\Support\Shoutbox;
 use App\Support\Style;
+use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Utils\MsgAlert;
 use Illuminate\Contracts\Foundation\Application;
@@ -71,5 +86,29 @@ class ResetNexus
         // critical for settings that affect security (e.g. login_secret,
         // enabled features) or per-user behavior.
         Settings::resetCache();
+
+        // Per-request memoized caches that used to live in function-static
+        // variables or class statics (invisible under FPM's per-request
+        // lifecycle, worker-global under Octane/RoadRunner).
+        TurnstileCaptchaDriver::resetState();
+        Forum::resetState();
+        ToolMaintenanceService::resetState();
+        Promotion::resetState();
+        Shoutbox::resetState();
+        UserClass::resetState();
+        TagRepository::resetState();
+        StyleRepository::resetState();
+        SearchBox::resetState();
+        CleanupRepository::resetState();
+        Comment::resetTempCode();
+        // The NexusCache singleton keeps its Redis connection for the
+        // worker lifetime, but the ?clearcache bypass flag and the debug
+        // read/write counters are per-request and must not accumulate.
+        if ($this->app->resolved(NexusCache::class)) {
+            $this->app->make(NexusCache::class)->reset();
+        }
+        Setting::resetState();
+        SearchBoxModel::resetState();
+        SecondIconResource::resetState();
     }
 }

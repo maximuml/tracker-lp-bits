@@ -20,6 +20,14 @@ final class SearchBox
     private static ?array $rows = null;
 
     /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$rows = null;
+    }
+
+    /**
      * Return a value from the searchbox configuration row.
      *
      * Mirrors `get_searchbox_value($mode, $item)`.

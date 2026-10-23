@@ -56,8 +56,21 @@ class SearchBox extends NexusModel
     /** @var array<int|string, mixed> */
     private static array $modeOptions = [];
 
+    /** @var array<int|string, list<int>> */
+    private static array $categoryIdsBySearchBox = [];
+
     /** @var string */
     protected $table = 'searchbox';
+
+    /**
+     * Reset per-request memoized state for long-lived workers (Octane).
+     */
+    public static function resetState(): void
+    {
+        self::$instances = [];
+        self::$modeOptions = [];
+        self::$categoryIdsBySearchBox = [];
+    }
 
     /** @var list<string> */
     protected $fillable = [
@@ -317,16 +330,18 @@ class SearchBox extends NexusModel
      */
     public static function listCategoryId($searchBoxId, $glue = null): array|string|null
     {
-        static $results = null;
-        if ($results === null) {
+        $key = (string) $searchBoxId;
+        if (! isset(self::$categoryIdsBySearchBox[$key])) {
             $results = [];
             $res = Category::listByModeWithContext($searchBoxId);
             foreach ($res as $item) {
                 $results[] = $item['id'];
             }
+            self::$categoryIdsBySearchBox[$key] = $results;
         }
+        $results = self::$categoryIdsBySearchBox[$key];
         if ($glue !== null) {
-            $results = implode($glue, $results);
+            return implode($glue, $results);
         }
 
         return $results;

@@ -5,12 +5,27 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Listeners\ResetNexus;
+use App\Models\SearchBox as SearchBoxModel;
 use App\Models\Setting;
+use App\Models\Topic;
 use App\Models\User;
+use App\Repositories\CleanupRepository;
+use App\Repositories\StyleRepository;
+use App\Repositories\TagRepository;
+use App\Services\Captcha\Drivers\TurnstileCaptchaDriver;
+use App\Services\ToolMaintenanceService;
+use App\Support\Cache\NexusCache;
+use App\Support\Comment;
 use App\Support\CurrentUser;
+use App\Support\Forum;
 use App\Support\NexusContext;
 use App\Support\PageState;
+use App\Support\Promotion;
+use App\Support\SearchBox;
 use App\Support\Settings;
+use App\Support\Shoutbox;
+use App\Support\UserClass;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Tests\Attributes\TestCategory;
@@ -254,6 +269,77 @@ final class ResetNexusIsolationTest extends TestCase
 
         $this->assertNull(app(CurrentUser::class)->get());
         $this->assertNull(Auth::guard()->user());
+    }
+
+    public function test_mutable_static_caches_do_not_leak_between_requests(): void
+    {
+        // Seed worker-global caches the way "request A" would.
+        $this->setStaticProp(TurnstileCaptchaDriver::class, 'scriptInjected', true);
+        $this->setStaticProp(Promotion::class, 'globalSpecialState', 5);
+        $this->setStaticProp(Setting::class, 'autoloadedSettings', ['k' => 'v']);
+        $this->setStaticProp(SearchBoxModel::class, 'categoryIdsBySearchBox', ['0' => [1, 2]]);
+        $this->setStaticProp(Comment::class, 'tempCode', ['snippet-A']);
+        $this->setStaticProp(Forum::class, 'topics', [1 => new Topic]);
+        $this->setStaticProp(Shoutbox::class, 'mentionUserCache', ['nick' => false]);
+        $this->setStaticProp(UserClass::class, 'settingAccount', ['k' => 'v']);
+        $this->setStaticProp(TagRepository::class, 'allTags', new EloquentCollection);
+        $this->setStaticProp(StyleRepository::class, 'rows', [1 => ['name' => 'x']]);
+        $this->setStaticProp(SearchBox::class, 'rows', [1 => ['name' => 'x']]);
+        $this->setStaticProp(CleanupRepository::class, 'oneTaskSeconds', 42);
+        $this->setStaticProp(ToolMaintenanceService::class, 'uidPermissionsCached', [1 => ['x']]);
+
+        // Singleton-level per-request state (NexusCache bypass + debug counters).
+        $cache = app(NexusCache::class);
+        $cache->setBypass(1);
+        $cache->readCount = 7;
+        $cache->writeCount = 3;
+        $cache->keyHits = ['read' => ['k' => 2]];
+
+        // Simulate end of request A → ResetNexus
+        $this->dispatchResetNexus();
+
+        // Request B must not inherit request A's memoized state.
+        $this->assertStaticPropEmpty(TurnstileCaptchaDriver::class, 'scriptInjected');
+        $this->assertStaticPropEmpty(Promotion::class, 'globalSpecialState');
+        $this->assertStaticPropEmpty(Setting::class, 'autoloadedSettings');
+        $this->assertStaticPropEmpty(SearchBoxModel::class, 'categoryIdsBySearchBox');
+        $this->assertStaticPropEmpty(Comment::class, 'tempCode');
+        $this->assertStaticPropEmpty(Forum::class, 'topics');
+        $this->assertStaticPropEmpty(Shoutbox::class, 'mentionUserCache');
+        $this->assertStaticPropEmpty(UserClass::class, 'settingAccount');
+        $this->assertStaticPropEmpty(TagRepository::class, 'allTags');
+        $this->assertStaticPropEmpty(StyleRepository::class, 'rows');
+        $this->assertStaticPropEmpty(SearchBox::class, 'rows');
+        $this->assertStaticPropEmpty(CleanupRepository::class, 'oneTaskSeconds');
+        $this->assertStaticPropEmpty(ToolMaintenanceService::class, 'uidPermissionsCached');
+
+        $cache = app(NexusCache::class);
+        $this->assertSame(0, $cache->bypasses());
+        $this->assertSame(0, $cache->readCount());
+        $this->assertSame(0, $cache->writeCount());
+        $this->assertSame([], $cache->keyHits('read'));
+    }
+
+    /**
+     * @param  class-string  $class
+     */
+    private function setStaticProp(string $class, string $prop, mixed $value): void
+    {
+        $ref = new \ReflectionProperty($class, $prop);
+        $ref->setValue(null, $value);
+    }
+
+    /**
+     * @param  class-string  $class
+     */
+    private function assertStaticPropEmpty(string $class, string $prop): void
+    {
+        $ref = new \ReflectionProperty($class, $prop);
+        $value = $ref->getValue();
+        $this->assertTrue(
+            $value === null || $value === [] || $value === false || $value === 0 || $value === 0.0,
+            "state leaked across requests: {$class}::\${$prop}",
+        );
     }
 
     /**

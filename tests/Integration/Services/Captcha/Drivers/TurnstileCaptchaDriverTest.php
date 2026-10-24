@@ -6,6 +6,9 @@ namespace Tests\Integration\Services\Captcha\Drivers;
 
 use App\Services\Captcha\Drivers\TurnstileCaptchaDriver;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -103,6 +106,52 @@ final class TurnstileCaptchaDriverTest extends TestCase
         $this->expectExceptionMessage('verification failed');
 
         $driver->verify(['request' => ['cf-turnstile-response' => 'token']]);
+    }
+
+    public function test_verify_posts_form_to_cloudflare_siteverify(): void
+    {
+        Http::fake(['*' => Http::response(['success' => true])]);
+
+        $this->assertTrue($this->driver->verify(
+            ['request' => ['cf-turnstile-response' => 'tok']],
+            ['ip' => '1.2.3.4'],
+        ));
+
+        Http::assertSent(fn (Request $r) => $r->url() === 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+            && $r['secret'] === 'secret-key'
+            && $r['response'] === 'tok'
+            && $r['remoteip'] === '1.2.3.4');
+        Http::assertSentCount(1);
+    }
+
+    public function test_verify_throws_on_provider_rejection(): void
+    {
+        Http::fake(['*' => Http::response(['success' => false])]);
+
+        $this->expectException(CaptchaValidationException::class);
+        $this->expectExceptionMessage('verification failed');
+
+        $this->driver->verify(['request' => ['cf-turnstile-response' => 'tok']]);
+    }
+
+    public function test_verify_throws_on_malformed_response(): void
+    {
+        Http::fake(['*' => Http::response('not json', 200)]);
+
+        $this->expectException(CaptchaValidationException::class);
+        $this->expectExceptionMessage('Unexpected captcha verification response');
+
+        $this->driver->verify(['request' => ['cf-turnstile-response' => 'tok']]);
+    }
+
+    public function test_verify_throws_on_connection_failure(): void
+    {
+        Http::fake(fn () => throw new ConnectionException('timed out'));
+
+        $this->expectException(CaptchaValidationException::class);
+        $this->expectExceptionMessage('request failed');
+
+        $this->driver->verify(['request' => ['cf-turnstile-response' => 'tok']]);
     }
 }
 

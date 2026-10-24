@@ -20,6 +20,7 @@ use App\Models\Message;
 use App\Repositories\MessageRepository;
 use App\Services\MessagePageService;
 use App\Services\MessageService;
+use App\Support\MessageSubject;
 use App\Support\UserDisplay;
 use App\Support\Validators;
 use Illuminate\Http\RedirectResponse;
@@ -108,17 +109,7 @@ class MessageController extends BasePageController
                 return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
             }
             $body .= ($msg->msg ?? '')."\n\n-------- [url=/userdetails?id=".$this->actor->id.']'.$this->actor->username.'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
-            $subject = (string) ($msg->subject ?? '');
-            if (preg_match('/^Re:\\s/', $subject)) {
-                $subject = preg_replace('/^Re:\\s(.*)$/', 'Re(2): \\1', $subject) ?? $subject;
-            } elseif (preg_match('/^Re\\([0-9]*\\):\\s/', $subject)) {
-                $replycount = (int) preg_replace('/^Re\\(([0-9]*)\\):\\s/', '\\1', $subject);
-                $replycount++;
-                $subject = preg_replace('/^Re\\(([0-9]*)\\):\\s(.*)$/', 'Re('.$replycount.'): \\2', $subject) ?? $subject;
-            } else {
-                $subject = 'Re: '.$subject;
-            }
-            $subject = htmlspecialchars($subject);
+            $subject = htmlspecialchars(MessageSubject::reply((string) ($msg->subject ?? '')));
         }
 
         $returnto = '';

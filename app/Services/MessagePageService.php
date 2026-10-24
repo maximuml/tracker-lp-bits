@@ -11,6 +11,7 @@ use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
+use App\Support\MessageSubject;
 use App\Support\PageResponses;
 use App\Support\Pagination;
 use App\Support\RequestValues;
@@ -132,7 +133,7 @@ class MessagePageService
                     __('messages.std_invalid_mailbox')
                 );
             }
-            $mailboxName = htmlspecialchars((string) $pmBoxName);
+            $mailboxName = (string) $pmBoxName;
         } elseif ($mailbox === self::PM_INBOX) {
             $mailboxName = __('messages.text_inbox');
         } else {
@@ -315,6 +316,8 @@ class MessagePageService
 
         $isSender = (int) ($message['sender'] ?? 0) === $userId;
         $replyHref = null;
+        $quickReply = null;
+        $rawSubject = (string) ($message['subject'] ?? '');
 
         if ($isSender) {
             $sender = UserDisplay::username((int) ($message['receiver'] ?? 0));
@@ -324,8 +327,16 @@ class MessagePageService
             if ((int) ($message['sender'] ?? 0) === 0) {
                 $sender = (string) __('messages.text_system');
             } else {
-                $sender = UserDisplay::username((int) ($message['sender'] ?? 0));
-                $replyHref = '/web/sendmessage?receiver='.(int) ($message['sender'] ?? 0).'&replyto='.$pmId;
+                $senderId = (int) ($message['sender'] ?? 0);
+                $sender = UserDisplay::username($senderId);
+                $replyHref = '/web/sendmessage?receiver='.$senderId.'&replyto='.$pmId;
+                $quickReply = [
+                    'receiver' => $senderId,
+                    'origmsg' => $pmId,
+                    'subject' => MessageSubject::reply($rawSubject),
+                    'save' => $actor->yes('savepms'),
+                    'returnto' => '/web/messages?action=viewmessage&id='.$pmId,
+                ];
             }
         }
 
@@ -334,7 +345,7 @@ class MessagePageService
 
         $showUnread = $isSender && (bool) ($message['unread'] ?? false);
 
-        $subject = (string) ($message['subject'] ?? '');
+        $subject = $rawSubject;
         if (strlen($subject) <= 0) {
             $subject = __('messages.text_no_subject');
         }
@@ -347,6 +358,11 @@ class MessagePageService
 
         // Mailbox for menu highlight
         $mailbox = $isSender ? self::PM_SENT_BOX : (int) ($message['location'] ?? self::PM_INBOX);
+        $backHref = match ($mailbox) {
+            self::PM_INBOX => '/web/messages',
+            self::PM_SENT_BOX => '/web/messages?action=viewmailbox&box=-1',
+            default => '/web/messages?action=viewmailbox&box='.$mailbox,
+        };
 
         // Move-to boxes
         $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
@@ -365,8 +381,10 @@ class MessagePageService
             'showUnread' => $showUnread,
             'body' => SafeHtml::fromTrustedHtml($body),
             'replyHref' => $replyHref,
+            'quickReply' => $quickReply,
             'isSender' => $isSender,
             'mailbox' => $mailbox,
+            'backHref' => $backHref,
             'moveBoxes' => $moveBoxes,
         ];
     }

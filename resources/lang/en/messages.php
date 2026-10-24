@@ -30,6 +30,8 @@ return [
     'text_from' => 'From',
     'text_new' => '(New)',
     'text_reply' => 'Reply',
+    'text_quick_reply' => 'Quick reply',
+    'submit_send' => 'Send',
     'text_delete' => 'Delete',
     'text_forward_pm' => 'Forward PM',
     'std_cannot_move_messages' => "Messages couldn't be moved! ",

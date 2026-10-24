@@ -2164,7 +2164,24 @@ ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
     display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
     padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--nxm-border);
 }
-.nx-maillist__filters { margin-left: auto; font-size: 0.85em; }
+.nx-mailsearch {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin: 0 0 1rem;
+}
+.nx-mailsearch input[type="text"] {
+    box-sizing: border-box; flex: 1 1 12rem; min-width: 0;
+}
+.nx-mailsearch select { max-width: 100%; }
+.nx-maillist__filters {
+    display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+    margin-left: auto;
+}
+.nx-maillist__filters .nx-chip { text-decoration: none; }
+.nx-maillist__filters .nx-chip--on {
+    border-color: var(--nxm-accent);
+    background: color-mix(in srgb, var(--nxm-accent) 14%, var(--nxm-surface));
+    font-weight: 600;
+}
 .nx-maillist__empty { padding: 1rem; text-align: center; color: var(--nxm-text-dim); }
 .nx-mail {
     display: flex; align-items: center; gap: 0.6rem;

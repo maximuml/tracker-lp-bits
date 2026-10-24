@@ -1,9 +1,6 @@
 @include('messages.sections._menu', ['selected' => $viewmailbox['mailbox']])
 
-<div>
-<div class="nx-colhead">{{ __('messages.col_search_message') }}</div>
-<div class="text-center p-[5px]">@include('messages.sections._jump_to')</div>
-</div>
+@include('messages.sections._jump_to')
 
 @if (! $viewmailbox['hasMessages'])
 <x-empty-state :title="__('messages.text_no_messages')" />
@@ -15,9 +12,9 @@
 <div class="nx-maillist__tools">
 	<input class="nx-postbtn" type="button" data-checkall data-label-check="{{ __('messages.input_check_all') }}" data-label-uncheck="{{ __('messages.input_uncheck_all') }}" value="{{ __('messages.input_check_all') }}">
 	<span class="nx-maillist__filters">
-		<a href="/web/messages?action=viewmailbox&amp;box={{ $viewmailbox['mailbox'] }}&amp;unread=yes">{{ __('messages.text_unread_messages') }}</a> &middot;
-		<a href="/web/messages?action=viewmailbox&amp;box={{ $viewmailbox['mailbox'] }}&amp;unread=no">{{ __('messages.text_read_messages') }}</a> &middot;
-		<a href="/web/messages?action=editmailboxes">{{ __('messages.text_mailbox_manager') }}</a>
+		<a class="nx-chip{{ $viewmailbox['unread'] === '' ? ' nx-chip--on' : '' }}" href="/web/messages?action=viewmailbox&amp;box={{ $viewmailbox['mailbox'] }}" @if ($viewmailbox['unread'] === '') aria-current="true" @endif>{{ __('messages.text_all_messages') }}</a>
+		<a class="nx-chip{{ in_array($viewmailbox['unread'], ['yes', '1'], true) ? ' nx-chip--on' : '' }}" href="/web/messages?action=viewmailbox&amp;box={{ $viewmailbox['mailbox'] }}&amp;unread=yes" @if (in_array($viewmailbox['unread'], ['yes', '1'], true)) aria-current="true" @endif>{{ __('messages.text_unread') }}</a>
+		<a class="nx-chip{{ in_array($viewmailbox['unread'], ['no', '0'], true) ? ' nx-chip--on' : '' }}" href="/web/messages?action=viewmailbox&amp;box={{ $viewmailbox['mailbox'] }}&amp;unread=no" @if (in_array($viewmailbox['unread'], ['no', '0'], true)) aria-current="true" @endif>{{ __('messages.text_read') }}</a>
 	</span>
 </div>
 @foreach ($viewmailbox['rows'] as $row)

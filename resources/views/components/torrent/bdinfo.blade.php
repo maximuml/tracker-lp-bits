@@ -1,3 +1,4 @@
+@props(['vm'])
 @if (! $vm->rawOnly)
     @foreach ($vm->discs as $disc)
         @if ($disc->heading !== null)

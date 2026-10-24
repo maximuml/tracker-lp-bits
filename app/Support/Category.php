@@ -6,7 +6,6 @@ namespace App\Support;
 
 use App\Contracts\Repositories\CategoryRepositoryInterface;
 use App\Support\Cache\NexusCache;
-use App\Support\Html\SafeHtml;
 
 /**
  * Legacy category / icon helpers extracted from `include/functions.php`.
@@ -153,24 +152,9 @@ final class Category
         return $ret;
     }
 
-    public static function imageTag(int|string $categoryId, string $link = ''): string
-    {
-        $catImg = self::iconImg($categoryId);
-
-        if ($link !== '') {
-            $catImg = trim(view('support._cat-link', [
-                'link' => $link,
-                'id' => $categoryId,
-                'img' => SafeHtml::fromTrustedHtml($catImg),
-            ])->render());
-        }
-
-        return $catImg;
-    }
-
     /**
-     * Typed category-icon data for view-model assembly — the data
-     * counterpart of {@see imageTag()}.
+     * Typed category-icon data for view-model assembly — rendered by
+     * the `x-torrent.category-icon` component.
      *
      * @return array{iconClass: string, name: string}
      */
@@ -225,13 +209,6 @@ final class Category
         }
 
         return ['iconClass' => (string) ($sirow['class_name'] ?? ''), 'name' => (string) ($sirow['name'] ?? '')];
-    }
-
-    private static function iconImg(int|string $categoryId): string
-    {
-        $data = self::iconData($categoryId);
-
-        return trim(view('support._cat-icon', $data)->render());
     }
 
     private static function categoryRepository(): CategoryRepositoryInterface

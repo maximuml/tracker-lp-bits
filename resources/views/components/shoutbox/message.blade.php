@@ -1,0 +1,2 @@
+@props(['id', 'isLong' => false, 'raw' => '', 'formatted' => '', 'editedTime' => null, 'labelMore' => '', 'labelLess' => ''])
+<span id="shout-msg-{{ $id }}" class="{{ $isLong ? 'shout-msg shout-msg-clamped' : 'shout-msg' }}" data-raw="{{ $raw }}">{{ $formatted }}</span>@if ($isLong)<a class="shout-msg-toggle" href="#" data-on="{{ $labelLess }}" data-off="{{ $labelMore }}">{{ $labelMore }}</a>@endif @if ($editedTime !== null && (string) $editedTime !== '')<span class="shout-edited-note">({{ __('shoutbox.text_edited') }} {{ $editedTime }})</span>@endif

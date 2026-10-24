@@ -95,7 +95,7 @@ final class TorrentDetailsViewFactory
                 text: $promotion->text,
                 timeout: $sub->timeout,
                 subColor: $sub->subColor,
-                domttHtml: $promotion->domttHtml,
+                domtt: $promotion->domtt,
             );
         }
 

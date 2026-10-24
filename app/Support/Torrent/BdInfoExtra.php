@@ -916,7 +916,7 @@ class BdInfoExtra
      */
     public function renderOnDetailsPage(): string
     {
-        return view('torrent._bdinfo', ['vm' => $this->detailsViewModel()])->render();
+        return view('components.torrent.bdinfo', ['vm' => $this->detailsViewModel()])->render();
     }
 
     private function detailsViewModel(): BdInfoViewModel
@@ -996,7 +996,7 @@ class BdInfoExtra
         if ($hiddenParts !== []) {
             $hiddenContent = '';
             foreach ($hiddenParts as $key => $value) {
-                $hiddenContent .= view('support._nti-hidden-line', [
+                $hiddenContent .= view('components.torrent.nti-hidden-line', [
                     'key' => $key,
                     'value' => $value,
                 ])->render();

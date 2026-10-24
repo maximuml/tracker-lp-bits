@@ -48,8 +48,15 @@ final class ActorContextRatchetTest extends TestCase
      * was built before sanctum's shouldUse or an out-of-band promote,
      * `app()->forgetInstance()` drops it and a second `app()` re-resolves
      * the live actor.
+     * +12 for the #[Scoped] static-state migration — per-request statics
+     * moved behind one `app()`-funnelled accessor per class
+     * (`AssetAppender::state`, `RequestContext::instance/boot/flush`,
+     * `MsgAlert::getInstance/resetState`, `TurnstileRenderState` lookups,
+     * `ToolMaintenanceService::resetState`). Call sites keep the static
+     * facade; the container flushes instances between jobs, so the app()
+     * call is the lifecycle seam, not service-location sprawl.
      */
-    private const BASELINE_APP_CALLS = 67;
+    private const BASELINE_APP_CALLS = 79;
 
     private const APP_DIR = __DIR__.'/../../app';
 

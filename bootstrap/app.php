@@ -35,7 +35,7 @@ $app = new Application(
 // so the instance is shared for the whole process; per-request mutations
 // happen in LegacyRequestMiddleware / TrackerThrottle and are flushed by
 // ResetNexus on queue-worker events.
-$app->instance(RuntimeContext::class, new RuntimeContext(
+$app->scoped(RuntimeContext::class, static fn (): RuntimeContext => new RuntimeContext(
     defined('IN_NEXUS') && IN_NEXUS,
     defined('IN_TRACKER') && IN_TRACKER,
 ));

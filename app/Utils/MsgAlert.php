@@ -7,18 +7,18 @@ namespace App\Utils;
 use App\Support\Html;
 use App\Support\RedisGuard;
 use App\Support\UserDisplay;
+use Illuminate\Container\Attributes\Scoped;
 use Illuminate\Support\Facades\Redis;
 
+#[Scoped]
 final class MsgAlert
 {
-    private static ?self $instance = null;
-
     /** @var array<string, array<string, mixed>> */
-    private static array $alerts = [];
+    private array $alerts = [];
 
     private string $redisKeyPrefix = 'nexus_alerts';
 
-    private function __construct()
+    public function __construct()
     {
         $result = RedisGuard::attempt(
             fn () => Redis::connection()->client()->lRange($this->getListKey(), 0, 10),
@@ -35,7 +35,7 @@ final class MsgAlert
                     RedisGuard::attempt(fn () => Redis::connection()->client()->lRem($this->getListKey(), $item, 0));
                 }
             }
-            self::$alerts = $valid;
+            $this->alerts = $valid;
         }
     }
 
@@ -43,24 +43,19 @@ final class MsgAlert
 
     public static function resetState(): void
     {
-        self::$instance = null;
-        self::$alerts = [];
+        app()->forgetInstance(self::class);
     }
 
     public static function getInstance(): MsgAlert
     {
-        if (isset(self::$instance)) {
-            return self::$instance;
-        }
-
-        return self::$instance = new self;
+        return app(self::class);
     }
 
     public function add(string $name, int $deadline, string $text, string $url = '', string $color = 'red'): void
     {
-        if (! isset(self::$alerts[$name])) {
+        if (! isset($this->alerts[$name])) {
             $params = compact('name', 'deadline', 'text', 'url', 'color');
-            self::$alerts[$name] = $params;
+            $this->alerts[$name] = $params;
             RedisGuard::attempt(fn () => Redis::connection()->client()->rPush($this->getListKey(), json_encode($params)));
         }
     }
@@ -85,11 +80,9 @@ final class MsgAlert
      */
     public static function pendingAlerts(): array
     {
-        self::getInstance();
-
         $nowTimestamp = time();
         $alerts = [];
-        foreach (self::$alerts as $item) {
+        foreach (self::getInstance()->alerts as $item) {
             if ($item['deadline'] > $nowTimestamp) {
                 $alerts[] = [
                     'url' => $item['url'] ?: '',
@@ -104,9 +97,9 @@ final class MsgAlert
 
     public function remove(string $name): void
     {
-        foreach (self::$alerts as $item) {
+        foreach ($this->alerts as $item) {
             if ($item['name'] == $name) {
-                unset(self::$alerts[$name]);
+                unset($this->alerts[$name]);
                 RedisGuard::attempt(fn () => Redis::connection()->client()->lRem($this->getListKey(), json_encode($item)));
             }
         }

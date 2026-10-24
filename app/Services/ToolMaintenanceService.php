@@ -20,6 +20,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Locale as SupportLocale;
 use App\Support\Logger;
 use App\Support\UserDisplay;
+use Illuminate\Container\Attributes\Scoped;
 use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\Transport\Dsn;
@@ -27,6 +28,7 @@ use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransportFactory;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
+#[Scoped]
 class ToolMaintenanceService
 {
     public function __construct(
@@ -39,14 +41,16 @@ class ToolMaintenanceService
     ) {}
 
     /** @var array<int|string, array<int|string, mixed>> */
-    private static array $uidPermissionsCached = [];
+    private array $uidPermissionsCached = [];
 
     /**
-     * Reset per-request memoized state for long-lived workers (Octane).
+     * Reset per-request memoized state — the #[Scoped] container binding
+     * already drops the instance between jobs/worker cycles; this stays
+     * for explicit mid-request flushes and tests.
      */
     public static function resetState(): void
     {
-        self::$uidPermissionsCached = [];
+        app()->forgetInstance(self::class);
     }
 
     /**
@@ -156,8 +160,8 @@ class ToolMaintenanceService
      */
     public function listUserAllPermissions($uid): array
     {
-        if (isset(self::$uidPermissionsCached[$uid])) {
-            return self::$uidPermissionsCached[$uid];
+        if (isset($this->uidPermissionsCached[$uid])) {
+            return $this->uidPermissionsCached[$uid];
         }
         $log = "uid: $uid";
         $userInfo = UserDisplay::row($uid);
@@ -180,7 +184,7 @@ class ToolMaintenanceService
         $allPermissions = array_merge($classPermissions, $rolePermissions, $directPermissions);
         Logger::writeWithContext((string) ("{$log}, allPermissions: ".json_encode($allPermissions)), (string) 'info', (bool) false);
         $result = array_combine($allPermissions, $allPermissions);
-        self::$uidPermissionsCached[$uid] = $result;
+        $this->uidPermissionsCached[$uid] = $result;
 
         return $result;
     }

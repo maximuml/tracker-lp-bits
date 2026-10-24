@@ -7,19 +7,23 @@ namespace App\Services\Captcha\Drivers;
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Concerns\SendsSiteVerifyRequest;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
+use App\Services\Captcha\TurnstileRenderState;
 
 class TurnstileCaptchaDriver implements CaptchaDriverInterface
 {
     use SendsSiteVerifyRequest;
 
-    protected static bool $scriptInjected = false;
+    private function renderState(): TurnstileRenderState
+    {
+        return app(TurnstileRenderState::class);
+    }
 
     /**
      * Reset per-request memoized state for long-lived workers (Octane).
      */
     public static function resetState(): void
     {
-        self::$scriptInjected = false;
+        app()->forgetInstance(TurnstileRenderState::class);
     }
 
     /** @var array<string, mixed> */
@@ -65,10 +69,10 @@ class TurnstileCaptchaDriver implements CaptchaDriverInterface
             'siteKey' => (string) $this->config['site_key'],
             'theme' => (string) $theme,
             'size' => $size === 'auto' ? null : $size,
-            'injectScript' => ! self::$scriptInjected,
+            'injectScript' => ! $this->renderState()->scriptInjected,
         ])->render();
 
-        self::$scriptInjected = true;
+        $this->renderState()->scriptInjected = true;
 
         return $markup;
     }

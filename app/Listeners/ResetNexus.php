@@ -4,43 +4,30 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\DTOs\Auth\ActorContext;
 use App\Filament\Resources\Section\SecondIconResource;
 use App\Models\SearchBox as SearchBoxModel;
 use App\Models\Setting;
 use App\Repositories\CleanupRepository;
 use App\Repositories\StyleRepository;
 use App\Repositories\TagRepository;
-use App\Services\Captcha\Drivers\TurnstileCaptchaDriver;
-use App\Services\ToolMaintenanceService;
-use App\Support\AssetAppender;
 use App\Support\Cache\NexusCache;
 use App\Support\Category;
 use App\Support\Comment;
-use App\Support\CurrentUser;
 use App\Support\Forum;
-use App\Support\HeaderBag;
-use App\Support\NexusContext;
-use App\Support\PageRenderer;
 use App\Support\Permissions;
 use App\Support\Promotion;
-use App\Support\RequestContext;
-use App\Support\RuntimeContext;
 use App\Support\SearchBox;
 use App\Support\Settings;
 use App\Support\Shoutbox;
 use App\Support\Style;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
-use App\Utils\MsgAlert;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 
 class ResetNexus
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
-        private readonly HeaderBag $headerBag,
         private readonly Application $app,
     ) {}
 
@@ -48,29 +35,20 @@ class ResetNexus
      * Clear per-request legacy state so a worker process does not leak
      * values from one request/job into the next.
      *
+     * Container `#[Scoped]`/scoped-bound state (CurrentUser, ActorContext,
+     * HeaderBag, PageRenderer, RuntimeContext, RequestContext, NexusContext,
+     * AssetAppender, MsgAlert, TurnstileRenderState, ToolMaintenanceService)
+     * is dropped by forgetScopedInstances() — invoked by the queue
+     * resetScope callback between jobs — no manual resets needed here.
+     *
      * @param  mixed  $event
      */
     public function handle($event): void
     {
-        NexusContext::reset();
-        $this->currentUser->reset();
-        // T-20: Flush the ActorContext singleton so the next request
-        // re-resolves it from the freshly-reset auth guard.
-        $this->app->forgetInstance(ActorContext::class);
-        RequestContext::flush();
-        AssetAppender::flush();
-        $this->app->forgetInstance(PageRenderer::class);
         Permissions::resetState();
-        MsgAlert::resetState();
         UserDisplay::resetState();
         Category::resetState();
         Style::resetState();
-        // T-11: Flush the per-request legacy header bag so headers/status
-        // set by one request do not leak into the next worker cycle.
-        $this->headerBag->flush();
-        // ADR 0017: restore entry-point legacy/tracker flags — per-request
-        // code may mutate them between worker cycles.
-        $this->app->make(RuntimeContext::class)->reset();
 
         // T-10: Drop all resolved guard instances to prevent cross-request
         // and cross-job user leakage in long-lived workers.
@@ -90,9 +68,7 @@ class ResetNexus
         // Per-request memoized caches that used to live in function-static
         // variables or class statics (invisible under FPM's per-request
         // lifecycle, worker-global under Octane/RoadRunner).
-        TurnstileCaptchaDriver::resetState();
         Forum::resetState();
-        ToolMaintenanceService::resetState();
         Promotion::resetState();
         Shoutbox::resetState();
         UserClass::resetState();

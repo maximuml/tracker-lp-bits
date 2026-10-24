@@ -22,26 +22,34 @@ final class RequestContext
 
     private string $platform;
 
-    private static bool $booted = false;
-
-    private static ?RequestContext $instance = null;
-
     const PLATFORM_ADMIN = 'admin';
 
     private function __construct() {}
 
     private function __clone() {}
 
-    public static function instance(): self
+    /**
+     * Build a booted context — invoked by the scoped container binding,
+     * so the instance lives exactly one request/job cycle.
+     */
+    public static function create(): self
     {
-        if (! self::$booted) {
-            self::boot();
-        }
-
-        /** @var self $instance */
-        $instance = self::$instance;
+        $instance = new self;
+        $instance->setStartTimestamp();
+        $instance->setRequestId();
+        $instance->setScript();
+        $instance->setPlatform();
 
         return $instance;
+    }
+
+    public static function instance(): self
+    {
+        if (! app()->bound(self::class)) {
+            app()->instance(self::class, self::create());
+        }
+
+        return app(self::class);
     }
 
     public function getRequestId(): string
@@ -251,22 +259,12 @@ final class RequestContext
 
     public static function boot(): void
     {
-        if (self::$booted) {
-            return;
-        }
-        $instance = new self;
-        $instance->setStartTimestamp();
-        $instance->setRequestId();
-        $instance->setScript();
-        $instance->setPlatform();
-        self::$instance = $instance;
-        self::$booted = true;
+        app()->instance(self::class, self::create());
     }
 
     public static function flush(): void
     {
-        self::$booted = false;
-        self::$instance = null;
+        app()->forgetInstance(self::class);
     }
 
     private function setRequestId(): void

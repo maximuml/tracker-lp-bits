@@ -32,7 +32,6 @@ auth.json
 /.vscode
 /.history
 /public/dev.php
-crowdin.yml
 install.lock
 update.lock
 .env.bak

@@ -55,8 +55,14 @@ final class ActorContextRatchetTest extends TestCase
      * `ToolMaintenanceService::resetState`). Call sites keep the static
      * facade; the container flushes instances between jobs, so the app()
      * call is the lifecycle seam, not service-location sprawl.
+     * +16 for the phase-B state holders — every remaining per-request
+     * static cache (Permissions, Category, Style, Settings, Forum,
+     * Promotion, Shoutbox, UserClass, SearchBox, Comment, TagRepository,
+     * StyleRepository, CleanupRepository, Setting, SearchBox-model,
+     * SecondIconResource) now lives behind a `XxxState::instance()`
+     * `app()` funnel in App\Support\State, same convention as above.
      */
-    private const BASELINE_APP_CALLS = 79;
+    private const BASELINE_APP_CALLS = 95;
 
     private const APP_DIR = __DIR__.'/../../app';
 

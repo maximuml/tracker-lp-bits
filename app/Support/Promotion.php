@@ -13,6 +13,7 @@ use App\Models\TorrentState;
 use App\Repositories\TorrentDetailRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
+use App\Support\State\PromotionState;
 use App\ViewModels\Torrent\PromotionBadge;
 use App\ViewModels\Torrent\PromotionDomtt;
 
@@ -26,14 +27,12 @@ use App\ViewModels\Torrent\PromotionDomtt;
  */
 final class Promotion
 {
-    private static ?int $globalSpecialState = null;
-
     /**
      * Reset per-request memoized state for long-lived workers (Octane).
      */
     public static function resetState(): void
     {
-        self::$globalSpecialState = null;
+        PromotionState::instance()->reset();
     }
 
     /**
@@ -285,23 +284,23 @@ final class Promotion
     public static function setGlobalSpecialState(int $state): void
     {
         self::torrentDetailRepository()->updateGlobalSpState($state);
-        self::$globalSpecialState = null;
+        PromotionState::instance()->globalSpecialState = null;
     }
 
     public static function globalSpecialState(): int
     {
-        if (self::$globalSpecialState === null) {
+        if (PromotionState::instance()->globalSpecialState === null) {
             $timeline = TorrentState::resolveTimeline();
             $current = $timeline['current'] ?? null;
 
-            self::$globalSpecialState = TorrentPromotion::fromIntSafe(
+            PromotionState::instance()->globalSpecialState = TorrentPromotion::fromIntSafe(
                 is_array($current) && isset($current['global_sp_state'])
                     ? (int) $current['global_sp_state']
                     : TorrentPromotion::NORMAL->value
             )->value;
         }
 
-        return self::$globalSpecialState;
+        return PromotionState::instance()->globalSpecialState;
     }
 
     private static function torrentDetailRepository(): TorrentDetailRepository

@@ -11,6 +11,7 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
+use App\Support\State\PermissionsState;
 
 /**
  * Legacy permission helpers extracted from `include/globalfunctions.php`.
@@ -20,17 +21,9 @@ use App\Support\Config\SiteConfig;
  */
 final class Permissions
 {
-    /**
-     * @var array<string, array<int, bool>>
-     */
-    private static array $userCanCache = [];
-
-    private static int $sequence = 0;
-
     public static function resetState(): void
     {
-        self::$userCanCache = [];
-        self::$sequence = 0;
+        PermissionsState::instance()->reset();
     }
 
     /**
@@ -58,8 +51,8 @@ final class Permissions
             return false;
         }
 
-        if (! $fail && isset(self::$userCanCache[$permission][$uid])) {
-            return self::$userCanCache[$permission][$uid];
+        if (! $fail && isset(PermissionsState::instance()->userCanCache[$permission][$uid])) {
+            return PermissionsState::instance()->userCanCache[$permission][$uid];
         }
 
         $userInfo = UserDisplay::row($uid);
@@ -68,7 +61,7 @@ final class Permissions
 
         if ($class == UserClassEnum::STAFFLEADER->value) {
             Logger::writeWithContext("$log, CLASS_STAFF_LEADER, true");
-            self::$userCanCache[$permission][$uid] = true;
+            PermissionsState::instance()->userCanCache[$permission][$uid] = true;
 
             return true;
         }
@@ -76,8 +69,8 @@ final class Permissions
         $userAllPermissions = app(ToolRepositoryInterface::class)->listUserAllPermissions($uid);
         $result = isset($userAllPermissions[$permission]);
 
-        if (self::$sequence === 0) {
-            self::$sequence++;
+        if (PermissionsState::instance()->sequence === 0) {
+            PermissionsState::instance()->sequence++;
             $log .= ', userAllPermissions: '.Json::encode($userAllPermissions);
         }
 
@@ -85,7 +78,7 @@ final class Permissions
 
         if (! $fail || $result) {
             Logger::writeWithContext($log);
-            self::$userCanCache[$permission][$uid] = $result;
+            PermissionsState::instance()->userCanCache[$permission][$uid] = $result;
 
             return $result;
         }

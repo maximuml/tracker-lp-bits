@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
+use App\Support\State\UserClassState;
 
 /**
  * Stateless mapping helpers for the legacy user-class ladder.
@@ -65,15 +66,9 @@ final class UserClass
 
     public const RETIREE = UserClassEnum::RETIREE->value;
 
-    /** @var array<string, mixed>|null */
-    private static ?array $settingAccount = null;
-
-    /**
-     * Reset per-request memoized state for long-lived workers (Octane).
-     */
     public static function resetState(): void
     {
-        self::$settingAccount = null;
+        UserClassState::instance()->reset();
     }
 
     public const UPLOADER = UserClassEnum::UPLOADER->value;
@@ -204,8 +199,8 @@ final class UserClass
             return SafeHtml::fromTrustedHtml(User::getClassName($class, $compact, $b_colored, $I18N));
         }
 
-        if (self::$settingAccount === null) {
-            self::$settingAccount = SiteConfig::current()->account->toArray();
+        if (UserClassState::instance()->settingAccount === null) {
+            UserClassState::instance()->settingAccount = SiteConfig::current()->account->toArray();
         }
 
         $langKey = self::langKey((int) $class);
@@ -215,8 +210,8 @@ final class UserClass
             $I18N ? null : 'en'
         ) : '';
 
-        if (isset($options['with_alias']) && $options['with_alias'] && (int) $class < self::VIP && isset(self::$settingAccount["{$class}_alias"])) {
-            $alias = trim(self::$settingAccount["{$class}_alias"]);
+        if (isset($options['with_alias']) && $options['with_alias'] && (int) $class < self::VIP && isset(UserClassState::instance()->settingAccount["{$class}_alias"])) {
+            $alias = trim(UserClassState::instance()->settingAccount["{$class}_alias"]);
             if ($alias !== '') {
                 $className = sprintf('%s(%s)', $className, $alias);
             }

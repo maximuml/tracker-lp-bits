@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Support\Html\SafeHtml;
+use App\Support\State\ShoutboxState;
 use Illuminate\Database\Query\Builder;
 
 /**
@@ -18,22 +19,11 @@ final class Shoutbox
 
     public const MAX_MESSAGE_LENGTH = 1000;
 
-    /** @var list<string> */
     public const REACTIONS = ['👍', '🔥', '❤️', '😂', '😮', '😢'];
 
-    /** @var array<string, array<string, mixed>|false> */
-    private static array $mentionUserCache = [];
-
-    /** @var array<int, bool> */
-    private static array $torrentExistsCache = [];
-
-    /**
-     * Reset per-request memoized state for long-lived workers (Octane).
-     */
     public static function resetState(): void
     {
-        self::$mentionUserCache = [];
-        self::$torrentExistsCache = [];
+        ShoutboxState::instance()->reset();
     }
 
     /**
@@ -300,24 +290,24 @@ final class Shoutbox
             function (array $m) use ($currentUserId, &$mentionsMe): string {
                 $nick = $m[1];
                 $key = strtolower($nick);
-                if (! array_key_exists($key, self::$mentionUserCache)) {
-                    self::$mentionUserCache[$key] = self::shoutboxRepository()->findUserByUsername($nick) ?? false;
+                if (! array_key_exists($key, ShoutboxState::instance()->mentionUserCache)) {
+                    ShoutboxState::instance()->mentionUserCache[$key] = self::shoutboxRepository()->findUserByUsername($nick) ?? false;
                 }
-                if (! self::$mentionUserCache[$key]) {
+                if (! ShoutboxState::instance()->mentionUserCache[$key]) {
                     return $m[0];
                 }
-                $isMe = $currentUserId > 0 && self::$mentionUserCache[$key]['id'] === $currentUserId;
+                $isMe = $currentUserId > 0 && ShoutboxState::instance()->mentionUserCache[$key]['id'] === $currentUserId;
                 if ($isMe) {
                     $mentionsMe = true;
                 }
                 $cls = $isMe ? 'shout-mention shout-mention-me' : 'shout-mention';
-                $name = self::$mentionUserCache[$key]['name'];
+                $name = ShoutboxState::instance()->mentionUserCache[$key]['name'];
                 $tooltip = __('shoutbox.tooltip_nick_reply');
                 $title = $tooltip !== 'shoutbox.tooltip_nick_reply' ? (string) $tooltip : '';
 
                 return trim(view('components.shoutbox.mention', [
                     'cls' => $cls,
-                    'userId' => self::$mentionUserCache[$key]['id'],
+                    'userId' => ShoutboxState::instance()->mentionUserCache[$key]['id'],
                     'name' => $name,
                     'title' => $title,
                     'mention' => '@'.$name,
@@ -344,10 +334,10 @@ final class Shoutbox
                 if ($id <= 0) {
                     return $m[0];
                 }
-                if (! array_key_exists($id, self::$torrentExistsCache)) {
-                    self::$torrentExistsCache[$id] = self::shoutboxRepository()->torrentExists($id);
+                if (! array_key_exists($id, ShoutboxState::instance()->torrentExistsCache)) {
+                    ShoutboxState::instance()->torrentExistsCache[$id] = self::shoutboxRepository()->torrentExists($id);
                 }
-                if (! self::$torrentExistsCache[$id]) {
+                if (! ShoutboxState::instance()->torrentExistsCache[$id]) {
                     return $m[0];
                 }
 

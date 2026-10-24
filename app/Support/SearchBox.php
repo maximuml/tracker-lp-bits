@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Contracts\Repositories\SearchBoxRepositoryInterface;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
+use App\Support\State\SearchBoxState;
 use Illuminate\Support\Arr;
 
 /**
@@ -16,15 +17,9 @@ use Illuminate\Support\Arr;
  */
 final class SearchBox
 {
-    /** @var array<int, array<string, mixed>>|null */
-    private static ?array $rows = null;
-
-    /**
-     * Reset per-request memoized state for long-lived workers (Octane).
-     */
     public static function resetState(): void
     {
-        self::$rows = null;
+        SearchBoxState::instance()->reset();
     }
 
     /**
@@ -34,19 +29,19 @@ final class SearchBox
      */
     public static function value(?NexusCache $cache, int|string $mode, string $item): mixed
     {
-        if (self::$rows === null) {
+        if (SearchBoxState::instance()->rows === null) {
             $cached = $cache !== null ? $cache->get('search_box_content') : false;
             if ($cached !== false && is_array($cached)) {
-                self::$rows = $cached;
+                SearchBoxState::instance()->rows = $cached;
             } else {
-                self::$rows = self::searchBoxRepository()->getAllRows();
+                SearchBoxState::instance()->rows = self::searchBoxRepository()->getAllRows();
                 if ($cache !== null) {
-                    $cache->put('search_box_content', self::$rows, 100500);
+                    $cache->put('search_box_content', SearchBoxState::instance()->rows, 100500);
                 }
             }
         }
 
-        return self::$rows[$mode][$item] ?? '';
+        return SearchBoxState::instance()->rows[$mode][$item] ?? '';
     }
 
     /**

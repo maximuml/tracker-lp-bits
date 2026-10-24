@@ -398,7 +398,7 @@ class LogController extends BasePageController
             }
             $sureLinkText = (string) __('log.std_here');
             $sureSuffix = (string) __('log.std_if_sure');
-            $confirm = view('log._delete_poll_confirm', [
+            $confirm = view('components.log.delete_poll_confirm', [
                 'pollid' => $pollid,
                 'returnto' => $returnto,
                 'token' => csrf_token(),

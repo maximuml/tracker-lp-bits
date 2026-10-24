@@ -142,7 +142,7 @@ class AdminToolsController extends BasePageController
         }
 
         if ($delid > 0) {
-            $confirm = view('location._confirm-delete', ['delid' => $delid, 'actionUrl' => $actionUrl])->render();
+            $confirm = view('components.location.confirm-delete', ['delid' => $delid, 'actionUrl' => $actionUrl])->render();
 
             return $this->abortResponse('Confirm', $confirm, false);
         }

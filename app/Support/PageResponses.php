@@ -72,7 +72,7 @@ final class PageResponses
             // the test environment), fall back to a minimal shell — mirroring
             // the old inline PHP which emitted partial HTML before throwing.
             if (($html ?? '') === '') {
-                $html = trim(view('support._error-shell')->render());
+                $html = trim(view('components.support.error-shell')->render());
             }
         }
 
@@ -226,7 +226,7 @@ final class PageResponses
      */
     public static function notFound(): void
     {
-        throw new HttpResponseException(new Response(view('support._not-found')->render(), 404));
+        throw new HttpResponseException(new Response(view('components.support.not-found')->render(), 404));
     }
 
     /**
@@ -245,7 +245,7 @@ final class PageResponses
         if (ob_get_level() > 0 && (string) ob_get_status()['name'] !== '') {
             $nonce = (string) request()->attributes->get('csp_nonce', '');
             $nonceAttr = $nonce !== '' ? ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"' : '';
-            throw new HttpResponseException(new Response(trim(view('support._js-redirect', [
+            throw new HttpResponseException(new Response(trim(view('components.support.js-redirect', [
                 'nonceAttr' => SafeHtml::fromTrustedHtml($nonceAttr),
                 'url' => $url,
             ])->render())));

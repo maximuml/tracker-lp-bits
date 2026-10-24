@@ -43,7 +43,7 @@ final class TorrentAccess
             return new HtmlString('');
         }
 
-        $name = view('filament._fi-torrent-link', [
+        $name = view('components.filament.fi-torrent-link', [
             'id' => $torrent->id,
             'title' => $torrent->name,
             'name' => Str::limit($torrent->name, $length),
@@ -53,7 +53,7 @@ final class TorrentAccess
             $tags = sprintf('&nbsp;<div>%s</div>', $torrent->tagsFormatted);
         }
 
-        return new HtmlString(view('filament._fi-torrent-cell', [
+        return new HtmlString(view('components.filament.fi-torrent-cell', [
             'name' => SafeHtml::fromTrustedHtml($name),
             'tags' => SafeHtml::fromTrustedHtml($tags),
         ])->render());

@@ -12,7 +12,7 @@
 @if ($info->perseedingBonus > 0)
 <li>{{ $info->perseedingBonus }}{{ __('mybonus.text_point') }}{{ \App\Support\Strings::addS($info->perseedingBonus) }}{{ __('mybonus.text_for_seeding_torrent') }}{{ $info->maxseedingBonus }}{{ __('mybonus.text_torrent') }}{{ \App\Support\Strings::addS($info->maxseedingBonus) }})</li>
 @endif
-<li>{{ view('my.sections._bonus-formula', ['info' => $info]) }}</li>
+<li>{{ view('components.my.sections.bonus-formula', ['info' => $info]) }}</li>
 @if ($info->minSizeLine !== null)
 <li>{{ $info->minSizeLine }}</li>
 @endif

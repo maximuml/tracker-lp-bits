@@ -1,4 +1,4 @@
-@include('usercp.sections._menu', ['selected' => 'home'])
+@include('components.usercp.sections.menu', ['selected' => 'home'])
 
 <div class="nx-ucards">
 <div class="nx-ucard">

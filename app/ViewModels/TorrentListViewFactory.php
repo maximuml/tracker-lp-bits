@@ -262,7 +262,7 @@ final class TorrentListViewFactory
                     $lastcomTooltip[] = [
                         'id' => $tooltipId,
                         'content' => SafeHtml::fromTrustedHtml(
-                            trim(view('support._last-comment', [
+                            trim(view('components.support.last-comment', [
                                 'isNew' => $commentIsNew,
                                 'newLabel' => (string) __('functions.text_new_uppercase'),
                                 'byLabel' => (string) __('functions.text_last_commented_by'),

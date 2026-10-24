@@ -230,9 +230,9 @@ class Torrent extends NexusModel
     public static function approvalStatusIcon(int $status): SafeHtml
     {
         $view = match ($status) {
-            TorrentApprovalStatus::ALLOW->value => 'torrents._icon-allow',
-            TorrentApprovalStatus::DENY->value => 'torrents._icon-deny',
-            TorrentApprovalStatus::NONE->value => 'torrents._icon-none',
+            TorrentApprovalStatus::ALLOW->value => 'components.torrents.icon-allow',
+            TorrentApprovalStatus::DENY->value => 'components.torrents.icon-deny',
+            TorrentApprovalStatus::NONE->value => 'components.torrents.icon-none',
             default => null,
         };
 

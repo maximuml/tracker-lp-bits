@@ -116,6 +116,7 @@ final class LegacyViewSurfaceTest extends TestCase
      */
     private const STYLE_ATTR_EXEMPT_DIRS = [
         'filament/',
+        'components/filament/',
     ];
 
     /**

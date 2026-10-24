@@ -150,7 +150,7 @@ class UserDetailController extends Controller
             if (! empty($user['ip'])) {
                 $locationInfo = Network::ipLocationWithContext($user['ip']);
             }
-            $locationInfoHtml = view('userdetails._location_info', ['locationInfo' => $locationInfo])->render();
+            $locationInfoHtml = view('components.userdetails.location_info', ['locationInfo' => $locationInfo])->render();
         }
 
         $peerRows = $this->userDetailRepository->getPeers($id);
@@ -174,7 +174,7 @@ class UserDetailController extends Controller
         }
         $clientSelectHtml = $clientRows === []
             ? ''
-            : view('userdetails._clients', ['rows' => $clientRows])->render();
+            : view('components.userdetails.clients', ['rows' => $clientRows])->render();
 
         $trueTraffic = $this->userDetailRepository->getTrueTraffic($id);
 
@@ -185,7 +185,7 @@ class UserDetailController extends Controller
             2,
             ''
         );
-        $migratedHelp = view('userdetails._migrated_help', [
+        $migratedHelp = view('components.userdetails.migrated_help', [
             'pre' => $migratedHelpPre,
             'post' => $migratedHelpPost,
             'url' => $userManageSystemUrl,
@@ -256,7 +256,7 @@ JS, \json_encode(__('userdetails.sure_to_remove_leech_warn'))), 'footer', false)
         if (($user['timeswarned'] ?? 0) > 0 && $user['warnedby'] !== 'System') {
             $arr = $this->userDetailRepository->getWarnedBy((int) $user['warnedby']);
             if ($arr !== null) {
-                $warnedByHtml = view('userdetails._warned_by', [
+                $warnedByHtml = view('components.userdetails.warned_by', [
                     'userHtml' => UserDisplay::username($arr['id']),
                 ])->render();
             }
@@ -318,7 +318,7 @@ JS, 'footer', false);
             $triggerId = "consume-$metaKey";
             $changeUsernameCards = $metas->get($metaKey);
             $cardName = $changeUsernameCards->first()->meta_key_text;
-            $userProps[] = SafeHtml::fromTrustedHtml(view('userdetails._prop', [
+            $userProps[] = SafeHtml::fromTrustedHtml(view('components.userdetails.prop', [
                 'name' => $cardName,
                 'detail' => $changeUsernameCards->count(),
                 'consumeLabel' => (string) __('userdetails.consume'),
@@ -327,7 +327,7 @@ JS, 'footer', false);
             if ($isOwner) {
                 $consumeLabel = __('userdetails.consume');
                 AssetAppender::html(
-                    view('userdetails._consume_template', [
+                    view('components.userdetails.consume_template', [
                         'metaKey' => $metaKey,
                         'metaKeyLabel' => (string) __('userdetails.meta_key_change_username_username'),
                     ])->render(),
@@ -363,7 +363,7 @@ JS, 'footer', false);
         if ($metas->has($metaKey)) {
             $rainbowID = $metas->get($metaKey)->first();
             if ($rainbowID->isValid()) {
-                $userProps[] = SafeHtml::fromTrustedHtml(view('userdetails._prop', [
+                $userProps[] = SafeHtml::fromTrustedHtml(view('components.userdetails.prop', [
                     'name' => $rainbowID->metaKeyText,
                     'detail' => $rainbowID->getDeadlineText(),
                     'consumeLabel' => '',

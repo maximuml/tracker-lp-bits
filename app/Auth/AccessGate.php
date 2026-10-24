@@ -118,7 +118,7 @@ final class AccessGate
             if ($ipCount > $settings['maxip']) {
                 PageResponses::abort(
                     __('functions.std_sorry'),
-                    view('auth._ip_used_many_times', ['ip' => $ip, 'siteName' => Setting::getSiteName()])->render(),
+                    view('components.auth.ip_used_many_times', ['ip' => $ip, 'siteName' => Setting::getSiteName()])->render(),
                     false,
                     true,
                 );

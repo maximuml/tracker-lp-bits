@@ -162,7 +162,7 @@ class CustomField
                 ];
             }
 
-            $html .= view('fields._upload_field', $params)->render();
+            $html .= view('components.fields.upload_field', $params)->render();
         }
 
         return $html;

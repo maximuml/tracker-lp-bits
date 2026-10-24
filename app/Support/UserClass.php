@@ -230,7 +230,7 @@ final class UserClass
         }
 
         if ($className && $b_colored) {
-            $className = trim(view('support._class-name-b', [
+            $className = trim(view('components.support.class-name-b', [
                 'cls' => str_replace(' ', '', $classNameColor),
                 'inner' => SafeHtml::fromTrustedHtml($className),
             ])->render());
@@ -259,7 +259,7 @@ final class UserClass
         $options = '';
 
         if ($includeNoClass) {
-            $options .= trim(view('support.tag._option', [
+            $options .= trim(view('components.support.tag.option', [
                 'value' => Setting::PERMISSION_NO_CLASS,
                 'label' => $labels['select_an_user_class'] ?? '---',
                 'selected' => false,
@@ -267,14 +267,14 @@ final class UserClass
         }
 
         for ($i = $minClass; $i <= $maxClass; $i++) {
-            $options .= trim(view('support.tag._option', [
+            $options .= trim(view('components.support.tag.option', [
                 'value' => $i,
                 'label' => self::name($i, false, false, true),
                 'selected' => (int) $selected === $i,
             ])->render())."\n";
         }
 
-        return SafeHtml::fromTrustedHtml(trim(view('support._class-select', [
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.class-select', [
             'name' => $selectName,
             'disabledAttr' => SafeHtml::fromTrustedHtml($disabled ? ' disabled = "disabled"' : ''),
             'options' => SafeHtml::fromTrustedHtml($options),

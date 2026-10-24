@@ -286,7 +286,7 @@ class HitAndRunRepository extends BaseRepository
         if (HitAndRunMode::fromStringSafe(
             is_string($mode = HitAndRun::getConfig('mode', $searchBoxId)) ? $mode : null
         ) === HitAndRunMode::MANUAL && Permission::canSetTorrentHitAndRun()) {
-            $hrRadio = view('upload._hr_radios', ['searchBoxId' => $searchBoxId, 'value' => $value])->render();
+            $hrRadio = view('components.upload.hr_radios', ['searchBoxId' => $searchBoxId, 'value' => $value])->render();
 
             return (string) Html::frow('H&R', $hrRadio, 1, "mode_$searchBoxId", true);
         }

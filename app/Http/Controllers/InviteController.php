@@ -91,7 +91,7 @@ class InviteController extends BasePageController
             } catch (\Exception $exception) {
                 return $this->abortResponse(
                     __('invite.std_sorry'),
-                    view('invite._back_message', [
+                    view('components.invite.back_message', [
                         'message' => SafeExceptionMessage::message($exception),
                         'backUrl' => '/web/invite?id='.(string) $currentUserId,
                         'backText' => (string) __('invite.std_here'),

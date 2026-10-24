@@ -51,10 +51,10 @@ final class InfoRepository implements InfoRepositoryInterface
             ],
             'notes' => [
                 'version' => SafeHtml::fromPlainText(sprintf(__('aboutnexus.text_version_note'), $siteName, PROJECTNAME)),
-                'nexus' => view('aboutnexus._nexus', ['projectName' => PROJECTNAME]),
-                'authorization' => view('aboutnexus._authorization', ['projectName' => PROJECTNAME]),
-                'translation' => view('aboutnexus._translation', ['projectName' => PROJECTNAME]),
-                'stylesheet' => view('aboutnexus._stylesheet', ['projectName' => PROJECTNAME, 'siteName' => $siteName]),
+                'nexus' => view('components.aboutnexus.nexus', ['projectName' => PROJECTNAME]),
+                'authorization' => view('components.aboutnexus.authorization', ['projectName' => PROJECTNAME]),
+                'translation' => view('components.aboutnexus.translation', ['projectName' => PROJECTNAME]),
+                'stylesheet' => view('components.aboutnexus.stylesheet', ['projectName' => PROJECTNAME, 'siteName' => $siteName]),
                 'contact' => SafeHtml::fromPlainText(__('aboutnexus.text_contact_note')),
             ],
         ];

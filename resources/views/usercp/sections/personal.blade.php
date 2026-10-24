@@ -1,4 +1,4 @@
-@include('usercp.sections._menu', ['selected' => 'personal'])
+@include('components.usercp.sections.menu', ['selected' => 'personal'])
 
 @if ($type === 'saved')
     <x-alert type="success">{{ __('usercp.text_settings_saved') }}</x-alert>

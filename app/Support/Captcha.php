@@ -133,7 +133,7 @@ final class Captcha
         } catch (CaptchaValidationException $exception) {
             $message = $exception->getMessage();
 
-            $defaultMessage = view('auth._invalid_image_code', ['where' => $where])->render();
+            $defaultMessage = view('components.auth.invalid_image_code', ['where' => $where])->render();
 
             if ($message === '' || $message === 'Invalid captcha response.' || $message === 'Missing captcha parameters.') {
                 $message = $defaultMessage;

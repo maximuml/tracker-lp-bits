@@ -57,11 +57,11 @@ class TorrentUploadController extends Controller
         $currentUser = ActorContext::current()->toLegacyArray();
 
         if (ActorContext::current()->value('parked')) {
-            PageResponses::abort(__('upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
+            PageResponses::abort(__('upload.std_sorry'), view('components.upload.unauthorized-upload')->render(), false);
         }
 
         if (! ActorContext::current()->value('uploadpos')) {
-            PageResponses::abort(__('upload.std_sorry'), view('upload._unauthorized-upload')->render(), false);
+            PageResponses::abort(__('upload.std_sorry'), view('components.upload.unauthorized-upload')->render(), false);
         }
 
         $enableoffer = SiteConfig::current()->main->showOffer(false) ? 'yes' : 'no';
@@ -76,7 +76,7 @@ class TorrentUploadController extends Controller
         $uploadFreely = PageResponses::canUpload('torrents');
         $allowtorrents = $has_allowed_offer || $uploadFreely;
         if (! $allowtorrents) {
-            PageResponses::abort(__('upload.std_sorry'), view('upload._please-offer')->render(), false);
+            PageResponses::abort(__('upload.std_sorry'), view('components.upload.please-offer')->render(), false);
         }
 
         $browsecatmode = SiteConfig::current()->main->browseCat(1);

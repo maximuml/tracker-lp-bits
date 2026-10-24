@@ -117,7 +117,7 @@ class ModerationController extends BasePageController
                 return $this->abortResponse(__('report.std_sorry'), $msg);
             }
 
-            $form = view('moderation._confirm', [
+            $form = view('components.moderation.confirm', [
                 'pre' => (string) __('report.text_are_you_sure_user'),
                 'kind' => 'user',
                 'userHtml' => UserDisplay::username($user),
@@ -135,7 +135,7 @@ class ModerationController extends BasePageController
             if (! $name) {
                 return $this->abortResponse(__('report.std_error'), __('report.std_invalid_torrent_id'));
             }
-            $form = view('moderation._confirm', [
+            $form = view('components.moderation.confirm', [
                 'pre' => (string) __('report.text_are_you_sure_torrent'),
                 'kind' => 'torrent',
                 'id' => $torrent,
@@ -153,7 +153,7 @@ class ModerationController extends BasePageController
             if ($arr === null) {
                 return $this->abortResponse(__('report.std_error'), __('report.std_invalid_post_id'));
             }
-            $form = view('moderation._confirm', [
+            $form = view('components.moderation.confirm', [
                 'pre' => (string) __('report.text_are_you_sure_post'),
                 'kind' => 'post',
                 'id' => $forumpost,
@@ -184,7 +184,7 @@ class ModerationController extends BasePageController
             } else {
                 return $this->abortResponse(__('report.std_error'), __('report.std_orphaned_comment'));
             }
-            $form = view('moderation._confirm', [
+            $form = view('components.moderation.confirm', [
                 'pre' => (string) __('report.text_are_you_sure_comment'),
                 'kind' => 'comment',
                 'id' => $commentid,
@@ -205,7 +205,7 @@ class ModerationController extends BasePageController
             if (! $offer) {
                 return $this->abortResponse(__('report.std_error'), __('report.std_invalid_offer_id'));
             }
-            $form = view('moderation._confirm', [
+            $form = view('components.moderation.confirm', [
                 'pre' => (string) __('report.text_are_you_sure_offer'),
                 'kind' => 'offer',
                 'id' => $offer->id ?? 0,
@@ -262,7 +262,7 @@ class ModerationController extends BasePageController
                     if (! $torrent) {
                         $reporting = (string) (__('reports.text_torrent_does_not_exist'));
                     } else {
-                        $reporting = view('moderation._reporting_cell', [
+                        $reporting = view('components.moderation.reporting_cell', [
                             'kind' => 'torrent',
                             'id' => $torrent->id ?? 0,
                             'name' => (string) ($torrent->name ?? ''),
@@ -275,7 +275,7 @@ class ModerationController extends BasePageController
                     if (! $userId) {
                         $reporting = (string) (__('reports.text_user_does_not_exist'));
                     } else {
-                        $reporting = view('moderation._reporting_cell', [
+                        $reporting = view('components.moderation.reporting_cell', [
                             'kind' => 'user',
                             'userHtml' => UserDisplay::username($userId),
                         ])->render();
@@ -287,7 +287,7 @@ class ModerationController extends BasePageController
                     if (! $offer) {
                         $reporting = (string) (__('reports.text_offer_does_not_exist'));
                     } else {
-                        $reporting = view('moderation._reporting_cell', [
+                        $reporting = view('components.moderation.reporting_cell', [
                             'kind' => 'offer',
                             'id' => $offer->id ?? 0,
                             'name' => (string) ($offer->name ?? ''),
@@ -300,7 +300,7 @@ class ModerationController extends BasePageController
                     if ($arr === null) {
                         $reporting = (string) (__('reports.text_post_does_not_exist'));
                     } else {
-                        $reporting = view('moderation._reporting_cell', [
+                        $reporting = view('components.moderation.reporting_cell', [
                             'kind' => 'post',
                             'id' => $row['reportid'],
                             'topicid' => $arr['topicid'],
@@ -328,7 +328,7 @@ class ModerationController extends BasePageController
                             $url = '';
                             $of = 'unknown';
                         }
-                        $reporting = view('moderation._reporting_cell', [
+                        $reporting = view('components.moderation.reporting_cell', [
                             'kind' => 'comment',
                             'id' => $row['reportid'],
                             'of' => (string) $of,

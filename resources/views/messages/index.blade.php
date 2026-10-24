@@ -5,7 +5,7 @@
 @section('content')
 <h1 class="nx-sr-only">{{ $title ?? 'Private messages' }}</h1>
 @if ($action === 'viewmessage')
-@include('messages.sections._menu', ['selected' => $viewmessage['mailbox']])
+@include('components.messages.sections.menu', ['selected' => $viewmessage['mailbox']])
 <div class="nx-msgsplit">
 	<div class="nx-msgsplit__list">
 	@foreach ($viewmailbox['rows'] ?? [] as $row)

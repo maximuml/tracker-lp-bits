@@ -1,7 +1,7 @@
 {{-- Modern torrents page body (Variant A, ADR 0014): search panel + torrent table + pager. --}}
 <div class="nxm-torrents">
 
-@include('torrents._search_form')
+@include('components.torrents.search_form')
 
 @if ($inclbookmarked == 1)
     <h1 class="nxm-pagehead">{{ $bookmarkedUsername }}{{ __('torrents.text_s_bookmarked_torrent') }}</h1>
@@ -27,7 +27,7 @@
     <p class="nxm-results" role="status">{{ __('torrents.results_found', ['count' => number_format($count)]) }} <span class="nxm-results__sort">&middot; {{ $listVm->sortLabel }}</span></p>
 
     {{ $pagertop }}
-    @include('torrents._table')
+    @include('components.torrents.table')
     {{ $pagerbottom }}
 @else
     <div class="nxm-empty" role="status">

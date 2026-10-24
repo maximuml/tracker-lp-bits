@@ -27,7 +27,7 @@
 </section>
 <br /><br />
 @if ($list->table !== null)
-@include('offers._table', ['table' => $list->table])
+@include('components.offers.table', ['table' => $list->table])
 @else
 {{ $list->emptyState }}
 @endif

@@ -118,7 +118,7 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
             ];
         }
 
-        return view('tags._checkboxes', ['searchBoxId' => $searchBoxId, 'tags' => $tags])->render();
+        return view('components.tags.checkboxes', ['searchBoxId' => $searchBoxId, 'tags' => $tags])->render();
     }
 
     /**
@@ -138,7 +138,7 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
             }
         }
 
-        return view('tags._spans', ['tags' => $tags, 'withLink' => (bool) $withFilterLink])->render();
+        return view('components.tags.spans', ['tags' => $tags, 'withLink' => (bool) $withFilterLink])->render();
     }
 
     /** @return  mixed */

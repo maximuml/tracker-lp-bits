@@ -37,7 +37,7 @@ final class Menu
 
         if ($customMenu !== null && $customMenu !== '') {
             return [
-                'html' => view('support._menu-custom', ['customMenu' => SafeHtml::fromTrustedHtml($customMenu)])->render(),
+                'html' => view('components.support.menu-custom', ['customMenu' => SafeHtml::fromTrustedHtml($customMenu)])->render(),
                 'selected' => $selected,
             ];
         }
@@ -68,7 +68,7 @@ final class Menu
         }
         $items[] = $this->item($selected, 'contactstaff', '/web/contactstaff', __('functions.text_contactstaff'));
 
-        $html = view('support._menu', ['items' => $items])->render();
+        $html = view('components.support.menu', ['items' => $items])->render();
 
         return ['html' => $html, 'selected' => $selected];
     }
@@ -95,7 +95,7 @@ final class Menu
 
     private function item(string $selected, string $key, string $href, string $label, bool $subMenu = false): SafeHtml
     {
-        return SafeHtml::fromTrustedHtml(trim(view('support._menu-item', [
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.menu-item', [
             'href' => $href,
             'label' => $label,
             'selected' => $selected === $key,

@@ -174,7 +174,7 @@ final class Comment
             static function (array $m): string {
                 $smile = Smilies::pathFor((int) (int) $m[1]);
 
-                return $smile ? trim(view('support._em-img', ['smile' => $smile, 'n' => $m[1]])->render()) : '[em'.$m[1].']';
+                return $smile ? trim(view('components.support.em-img', ['smile' => $smile, 'n' => $m[1]])->render()) : '[em'.$m[1].']';
             },
             $s,
         );

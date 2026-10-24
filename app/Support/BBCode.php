@@ -81,7 +81,7 @@ final class BBCode
         // rel="noopener noreferrer" prevents tabnabbing when target="_blank".
         $targetAttr = $newWindow ? ' target="_blank" rel="noopener noreferrer"' : '';
 
-        return trim(view('support._url-link', [
+        return trim(view('components.support.url-link', [
             'classAttr' => SafeHtml::fromTrustedHtml($classAttr),
             'url' => SafeHtml::fromTrustedHtml($escapedUrl),
             'targetAttr' => SafeHtml::fromTrustedHtml($targetAttr),
@@ -174,7 +174,7 @@ final class BBCode
      */
     public static function code(string $text, string $label): string
     {
-        return trim(view('support._code-block', [
+        return trim(view('components.support.code-block', [
             'label' => $label,
             'text' => SafeHtml::fromTrustedHtml($text),
         ])->render());
@@ -206,7 +206,7 @@ final class BBCode
             ? " data-scale=\"{$maxWidth}x{$maxHeight}\" data-zoomable "
             : '';
 
-        return trim(view('support._bbcode-img', [
+        return trim(view('components.support.bbcode-img', [
             'imgId' => $imgId,
             'escapedSrc' => SafeHtml::fromTrustedHtml($escapedSrc),
             'resizerAttrs' => SafeHtml::fromTrustedHtml($resizerAttrs),
@@ -245,7 +245,7 @@ final class BBCode
         // attribute. YouTube ids are [A-Za-z0-9_-]; strip everything else.
         $videoId = (string) preg_replace('/[^A-Za-z0-9_-]/', '', $videoId);
 
-        return trim(view('support._yt-iframe', [
+        return trim(view('components.support.yt-iframe', [
             'width' => $width,
             'height' => $height,
             'videoId' => $videoId,
@@ -281,7 +281,7 @@ final class BBCode
         $title = str_replace("\x08", '', $title);
         $contentClass = $defaultCollapsed ? '' : ' open';
 
-        return trim(view('support._spoiler-details', [
+        return trim(view('components.support.spoiler-details', [
             'contentClass' => SafeHtml::fromTrustedHtml($contentClass),
             'title' => SafeHtml::fromTrustedHtml($title),
             'content' => SafeHtml::fromTrustedHtml($content),
@@ -297,7 +297,7 @@ final class BBCode
      */
     public static function textAlign(string $text, string $align): string
     {
-        return trim(view('support._align-div', [
+        return trim(view('components.support.align-div', [
             'align' => $align,
             'text' => SafeHtml::fromTrustedHtml($text),
         ])->render());
@@ -339,12 +339,12 @@ final class BBCode
             }
         }
 
-        $open = trim(view('support._quote-open', ['label' => $quoteLabel])->render());
-        $cite = trim(view('support._quote-cite', [
+        $open = trim(view('components.support.quote-open', ['label' => $quoteLabel])->render());
+        $cite = trim(view('components.support.quote-cite', [
             'label' => $quoteLabel,
             'cite' => SafeHtml::fromPlainText('\\1'),
         ])->render());
-        $close = trim(view('support._quote-close')->render());
+        $close = trim(view('components.support.quote-close')->render());
         $text = (string) preg_replace('/\[quote\]/i', $open, $text);
         $text = (string) preg_replace('/\[quote=(.+?)\]/i', $cite, $text);
         $text = (string) preg_replace('/\[\/quote\]/i', $close, $text);

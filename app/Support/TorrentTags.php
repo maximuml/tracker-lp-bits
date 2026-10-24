@@ -50,13 +50,13 @@ final class TorrentTags
             $currentValue = (int) pow(2, $key);
             if ($type === 'checkbox') {
                 $checked = ($currentValue & $tags) ? 'checked' : '';
-                $html .= trim(view('support._tag-checkbox', [
+                $html .= trim(view('components.support.tag-checkbox', [
                     'value' => $currentValue,
                     'checked' => $checked,
                     'text' => $value['text'],
                 ])->render());
             } elseif ($type === 'span' && ($currentValue & $tags)) {
-                $html .= trim(view('support._nx-tag', ['text' => $value['text']])->render()).' ';
+                $html .= trim(view('components.support.nx-tag', ['text' => $value['text']])->render()).' ';
             }
         }
 

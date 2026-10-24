@@ -14,7 +14,7 @@
     <tr><td class="nx-embedded" colspan=6><hr class="border-nxm-accent"></td></tr>
     @foreach ($supportRows as $row)
     <tr>
-@include('staff._cells')
+@include('components.staff.cells')
         @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
     </tr>
     @endforeach
@@ -36,7 +36,7 @@
     <tr><td class="nx-embedded" colspan=5><hr class="border-nxm-accent"></td></tr>
     @foreach ($pickerRows as $row)
     <tr>
-@include('staff._cells')
+@include('components.staff.cells')
         @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
     </tr>
     @endforeach
@@ -58,7 +58,7 @@
     <tr><td class="nx-embedded" colspan=5><hr class="border-nxm-accent"></td></tr>
     @foreach ($forumModRows as $row)
     <tr>
-@include('staff._cells')
+@include('components.staff.cells')
         <td class="nx-embedded">@foreach (($row['forums'] ?? []) as $f)<a href=/forums?action=viewforum&forumid={{ $f['id'] }}>{{ $f['name'] }}</a>{{ $loop->last ? '' : ', ' }}@endforeach</td>
     </tr>
     @endforeach
@@ -84,7 +84,7 @@
             <tr height=15><td class="nx-embedded" colspan=5><hr class="border-nxm-accent"></td></tr>
         @else
             <tr>
-@include('staff._cells')
+@include('components.staff.cells')
                 @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
             </tr>
         @endif
@@ -107,7 +107,7 @@
     <tr><td class="nx-embedded" colspan=5><hr class="border-nxm-accent"></td></tr>
     @foreach ($vipRows as $row)
     <tr>
-@include('staff._cells')
+@include('components.staff.cells')
         @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
     </tr>
     @endforeach

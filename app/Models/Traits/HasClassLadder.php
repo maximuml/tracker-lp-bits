@@ -108,7 +108,7 @@ trait HasClassLadder
             $class_name = str_replace(' ', '', $class_name);
         }
         if ($class_name && $b_colored) {
-            return trim(view('support._class-name-b', [
+            return trim(view('components.support.class-name-b', [
                 'cls' => str_replace(' ', '', $class_name_color),
                 'inner' => SafeHtml::fromTrustedHtml($class_name),
             ])->render());

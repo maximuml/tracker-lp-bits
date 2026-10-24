@@ -210,7 +210,7 @@ class FriendsController extends BasePageController
             $sureLinkText = (string) __('friends.std_here');
             $sureSuffix = (string) __('friends.std_if_sure');
             $confirm = (__('friends.std_delete_note')).$typename.(__('friends.std_click')).
-                view('friends._confirm_delete', [
+                view('components.friends.confirm_delete', [
                     'userid' => $userid,
                     'type' => $type,
                     'targetid' => $targetid,

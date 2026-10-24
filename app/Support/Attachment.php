@@ -54,7 +54,7 @@ final class Attachment
     ): string {
         $onclick = $imageResizer ? ' data-zoomable data-zoom-src="'.htmlspecialchars($url).'"' : '';
 
-        return trim(view('support._attach-img', [
+        return trim(view('components.support.attach-img', [
             'id' => $id,
             'filename' => $filename,
             'url' => $url,
@@ -81,7 +81,7 @@ final class Attachment
         $downloadCount = number_format((int) ($row['downloads'] ?? 0));
         $href = "/web/getattachment?id=$id&dlkey=$dlkey";
 
-        return trim(view('support._attach-file', [
+        return trim(view('components.support.attach-file', [
             'icon' => SafeHtml::fromTrustedHtml($icon),
             'href' => $href,
             'id' => $id,
@@ -139,7 +139,7 @@ final class Attachment
         [$row, $url] = self::rowAndUrlByKey($dlkey);
 
         if (empty($row)) {
-            return trim(view('support._attach-notfound', [
+            return trim(view('components.support.attach-notfound', [
                 'before' => Locale::trans('attachment.text_key'),
                 'dlkey' => $dlkey,
                 'after' => Locale::trans('attachment.not_found'),
@@ -212,7 +212,7 @@ final class Attachment
             default => ['other', 'common'],
         };
 
-        return trim(view('support._attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
+        return trim(view('components.support.attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
     }
 
     private static function attachmentRepository(): AttachmentRepositoryInterface

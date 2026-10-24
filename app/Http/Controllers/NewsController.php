@@ -306,7 +306,7 @@ class NewsController extends BasePageController
             : (string) $request->headers->get('referer', '');
 
         if ((int) $request->input('sure', 0) !== 1) {
-            $confirm = view('news._delete_confirm', [
+            $confirm = view('components.news.delete_confirm', [
                 'actionUrl' => (string) url('/web/news/delete'),
                 'newsid' => $newsid,
                 'returnto' => $returnto,

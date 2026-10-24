@@ -220,7 +220,7 @@ final class TorrentDetailsViewFactory
                 spanClass: 'small approval',
                 spanId: 'approval',
                 dataTorrentId: $id,
-                iconHtml: SafeHtml::fromTrustedHtml(trim(view('torrents._icon-approval')->render())),
+                iconHtml: SafeHtml::fromTrustedHtml(trim(view('components.torrents.icon-approval')->render())),
             );
             $approvalTitle = Locale::trans('torrent.approval.modal_title', [], null);
             AssetAppender::js(sprintf(<<<'JS'

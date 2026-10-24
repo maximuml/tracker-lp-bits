@@ -89,15 +89,15 @@ final class Slots
     ): string {
         $unlimited = ['slotsLabel' => $slotsLabel, 'unlimited' => $unlimitedLabel];
         if ($maxdlsystem != 'yes' || $userClass >= $vipClass) {
-            return trim(view('support._slots', $unlimited)->render());
+            return trim(view('components.support.slots', $unlimited)->render());
         }
 
         $max = self::maxDownloadSlots($uploaded, $downloaded);
 
         if ($max > 0) {
-            return trim(view('support._slots', ['slotsLabel' => $slotsLabel, 'max' => $max])->render());
+            return trim(view('components.support.slots', ['slotsLabel' => $slotsLabel, 'max' => $max])->render());
         }
 
-        return trim(view('support._slots', $unlimited)->render());
+        return trim(view('components.support.slots', $unlimited)->render());
     }
 }

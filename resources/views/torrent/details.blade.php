@@ -22,7 +22,7 @@
 <h1 class="text-center" id="top">{{ $details->title->name }}@if ($details->title->banned) <b>(<span class="striking">{{ __('functions.text_banned') }}</span>)</b>@endif@if ($details->title->badges->paid)<x-torrent.paid-icon :size="20" />@endif@if ($details->title->badges->promotion !== null)&nbsp;&nbsp;&nbsp;<x-torrent.promotion :badge="$details->title->badges->promotion" />@endif@if ($details->title->badges->hitAndRun)<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />@endif@if ($details->title->badges->approval !== null)<span title="{{ $details->title->badges->approval->title }}">{{ $details->title->badges->approval->icon }}</span>@endif</h1>
 
 @if ($details->denyBanner !== null)
-@include('torrent.details._deny_banner', ['banner' => $details->denyBanner])
+@include('components.torrent.details.deny_banner', ['banner' => $details->denyBanner])
 @endif
 
 <x-data-table :caption="$details->title->name" captionHidden class="w-[97%] nxm-kv">
@@ -35,7 +35,7 @@
 <x-settings-row :label="__('details.row_tags')">{{ $tagHtml }}</x-settings-row>
 @endif
 <x-settings-row :label="__('details.row_basic_info')"><b>{{ __('details.text_size') }}</b>{{ \App\Support\Format::size((float) $torrentRow['size']) }}&nbsp;&nbsp;&nbsp;<b>{{ __('details.row_type') }}:</b>&nbsp;{{ $torrentRow['cat_name'] }}@foreach ($details->taxonomy as $entry)&nbsp;&nbsp;&nbsp;<b>{{ $entry->label }}: </b>{{ $entry->value }}@endforeach</x-settings-row>
-<x-settings-row :label="__('details.row_action')">@include('torrent.details._actions')</x-settings-row>
+<x-settings-row :label="__('details.row_action')">@include('components.torrent.details.actions')</x-settings-row>
 <x-settings-row :label="__('details.torrent_dl_url')"><a title="{{ __('details.torrent_dl_url_notice') ?? '' }}" href="{{ $downloadUrl }}">{{ __('details.torrent_dl_url_text') }}</a></x-settings-row>
 {{ $customFieldsHtml }}
 @if (! $technicalInfoResult->isEmpty())
@@ -63,5 +63,5 @@
 <h1 id="top">{{ __('details.text_comments_for') ?? '' }}<a href="/web/details/{{ $torrentId }}">{{ $torrentRow['name'] }}</a></h1>
 @endif
 
-@include('torrent._comments')
+@include('components.torrent.comments')
 @endsection

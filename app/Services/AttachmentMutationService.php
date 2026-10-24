@@ -271,9 +271,6 @@ class AttachmentMutationService
         if (function_exists('finfo_open')) {
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mime = $finfo !== false ? finfo_file($finfo, $tmpName) : false;
-            if ($finfo !== false) {
-                finfo_close($finfo);
-            }
         } elseif (function_exists('mime_content_type')) {
             $mime = mime_content_type($tmpName);
         } else {

@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Http;
 
 /**
  * Generate a local JPEG thumbnail for a remote torrent cover image.
@@ -84,8 +85,6 @@ class GenerateCoverThumbnail implements ShouldQueue
         }
 
         @imagejpeg($dst, $this->absolutePath, max(1, min(100, $this->quality)));
-        imagedestroy($src);
-        imagedestroy($dst);
     }
 
     /**
@@ -204,60 +203,51 @@ class GenerateCoverThumbnail implements ShouldQueue
     }
 
     /**
-     * Download the remote image with safe cURL options: no redirects,
+     * Download the remote image with safe HTTP options: no redirects,
      * limited protocols, SSL verification enabled, short timeouts, and
      * a hard cap on response body size. The host is pinned to the
-     * already-validated IP; without cURL there is no way to pin, so skip.
+     * already-validated IP via CURLOPT_RESOLVE — that option only exists
+     * on the cURL handler, so without ext-curl the request would silently
+     * re-resolve DNS and lose the SSRF pin; skip instead.
      */
     private static function fetch(string $url, string $pinnedIp): ?string
     {
-        if (! function_exists('curl_init')) {
+        if (! extension_loaded('curl')) {
             return null;
         }
 
-        $ch = curl_init($url);
-        if ($ch === false) {
-            return null;
-        }
-
-        $buffer = '';
         $maxBytes = 5 * 1024 * 1024; // 5 MB
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'NexusPHP/cover-thumb');
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
-        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
+        $curl = [
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+        ];
         $resolve = self::curlResolveEntry($url, $pinnedIp);
         if ($resolve !== null) {
-            curl_setopt($ch, CURLOPT_RESOLVE, [$resolve]);
+            $curl[CURLOPT_RESOLVE] = [$resolve];
         }
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($_, $chunk) use (&$buffer, $maxBytes): int {
-            $buffer .= $chunk;
-            if (strlen($buffer) > $maxBytes) {
-                return 0; // abort oversized download
-            }
 
-            return strlen($chunk);
-        });
-
-        curl_exec($ch);
-        $error = curl_errno($ch);
-        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($error === CURLE_ABORTED_BY_CALLBACK) {
+        try {
+            $response = Http::timeout(10)
+                ->connectTimeout(2)
+                ->withHeaders(['User-Agent' => 'NexusPHP/cover-thumb'])
+                ->withOptions([
+                    'allow_redirects' => false,
+                    'stream' => true,
+                    'curl' => $curl,
+                ])
+                ->get($url);
+        } catch (\Throwable) {
             return null;
         }
-        if ($error !== 0) {
+
+        if (! $response->successful()) {
             return null;
         }
-        if ($httpCode < 200 || $httpCode >= 300) {
+
+        $buffer = $response->toPsrResponse()->getBody()->read($maxBytes + 1);
+
+        if ($buffer === '' || strlen($buffer) > $maxBytes) {
             return null;
         }
 

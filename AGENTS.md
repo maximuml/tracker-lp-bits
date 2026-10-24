@@ -899,7 +899,7 @@ by final repository classes or static methods — see W2-01/W2-02).
   `row-small`/`text`/`yesno`/`select`/`radios`/`checkboxes`/`save` in
   `layout="grid"` mode (nx-fgrid cells, no layout tables); composite
   rows use the components' default slot. Passkey rendering moved to
-  `resources/views/usercp/sections/_passkeys.blade.php` fed by `getList()`/`getAaguids()`
+  `resources/views/components/usercp/sections/passkeys.blade.php` fed by `getList()`/`getAaguids()`
   data — `renderList()` was deleted and `renderLogin()` kept for the
   home login box. `x-settings-text` gained an optional `size` prop.
   Markup-bearing legacy lang values (`&nbsp;`, `<br />`, `<a>`) are

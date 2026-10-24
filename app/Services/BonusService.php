@@ -282,7 +282,7 @@ final class BonusService
         $usernamegift = trim((string) $request->post('username', ''));
         $giftReceiver = $this->bonusCalculationRepository->findGiftReceiver($usernamegift);
         if ($giftReceiver === null) {
-            PageResponses::abort(__('mybonus.text_error'), view('my.sections._abort-receiver-not-exists')->render(), false);
+            PageResponses::abort(__('mybonus.text_error'), view('components.my.sections.abort-receiver-not-exists')->render(), false);
         }
         $useridgift = (int) $giftReceiver->id;
         if ($points < (float) $bonusarray['points']) {
@@ -302,7 +302,7 @@ final class BonusService
             PageResponses::abort(__('mybonus.text_error'), __('mybonus.bonus_amount_not_allowed'), false);
         }
         if ($actor->id === $useridgift) {
-            PageResponses::abort(__('mybonus.text_huh'), view('my.sections._abort-karma-self')->render(), false);
+            PageResponses::abort(__('mybonus.text_huh'), view('components.my.sections.abort-karma-self')->render(), false);
         }
         $points2 = number_format($points, 1);
         $points2receiver = number_format($aftertaxpoint, 1);

@@ -156,7 +156,7 @@ trait HasTorrentAccessors
     {
         $html = [];
         foreach ($this->tags as $tag) {
-            $html[] = trim(view('filament._color-badge', [
+            $html[] = trim(view('components.filament.color-badge', [
                 'fontColor' => $tag->font_color,
                 'color' => $tag->color,
                 'radius' => $tag->border_radius,

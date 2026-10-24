@@ -14,6 +14,7 @@ use App\Repositories\TorrentDetailRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\ViewModels\Torrent\PromotionBadge;
+use App\ViewModels\Torrent\PromotionDomtt;
 
 /**
  * Pure promotion (special-state) presentation helpers, drained out of
@@ -142,50 +143,6 @@ final class Promotion
     ];
 
     /**
-     * Build the promotion suffix (word or icon) for a torrent title.
-     *
-     * Mirrors `get_torrent_promotion_append()`.
-     */
-    /**
-     * @param  array<string, int>  $expires
-     */
-    public static function append(
-        int $promotion,
-        string $forceMode,
-        bool $showTimeLeft,
-        ?string $added,
-        int $promotionTimeType,
-        ?string $promotionUntil,
-        bool $ignoreGlobal,
-        string $appendPromotion,
-        array $expires,
-    ): string {
-        return self::render($promotion, $forceMode, $showTimeLeft, $added, $promotionTimeType, $promotionUntil, $ignoreGlobal, $appendPromotion, $expires, false);
-    }
-
-    /**
-     * Build the promotion sub-suffix (timeout text) for a torrent title.
-     *
-     * Mirrors `get_torrent_promotion_append_sub()`.
-     */
-    /**
-     * @param  array<string, int>  $expires
-     */
-    public static function appendSub(
-        int $promotion,
-        string $forceMode,
-        bool $showTimeLeft,
-        ?string $added,
-        int $promotionTimeType,
-        ?string $promotionUntil,
-        bool $ignoreGlobal,
-        string $appendPromotion,
-        array $expires,
-    ): string {
-        return self::render($promotion, $forceMode, $showTimeLeft, $added, $promotionTimeType, $promotionUntil, $ignoreGlobal, $appendPromotion, $expires, true);
-    }
-
-    /**
      * Resolve the promotion badge for a torrent row as typed data.
      * Both the badge (word/icon) and its "will end in" suffix derive
      * from the single returned object.
@@ -216,7 +173,7 @@ final class Promotion
         $mode = $forceMode !== '' ? $forceMode : $appendPromotion;
         $timeout = null;
         $subColor = null;
-        $domttHtml = null;
+        $domtt = null;
 
         if ($globalSpState == 1 && isset(self::PROMOTION_CONFIG[$promotion])) {
             $config = self::PROMOTION_CONFIG[$promotion];
@@ -236,12 +193,12 @@ final class Promotion
                     $text = (string) __('functions.'.$config['text']);
                     $timeout = SafeHtml::fromTrustedHtml((string) $timeoutStr);
                     $subColor = $config['subColor'];
-                    $domttHtml = SafeHtml::fromTrustedHtml(trim(view('support._promo-domtt', [
-                        'cls' => $config['class'],
-                        'text' => $text,
-                        'endIn' => (string) __('functions.text_will_end_in'),
-                        'timeout' => SafeHtml::fromTrustedHtml($timeoutStr),
-                    ])->render()));
+                    $domtt = new PromotionDomtt(
+                        cssClass: (string) $config['class'],
+                        text: $text,
+                        endIn: (string) __('functions.text_will_end_in'),
+                        timeout: SafeHtml::fromTrustedHtml($timeoutStr),
+                    );
                 } else {
                     $promotion = 1;
                 }
@@ -263,7 +220,7 @@ final class Promotion
                 text: (string) __('functions.'.$config['text']),
                 timeout: $timeout,
                 subColor: $subColor,
-                domttHtml: $domttHtml,
+                domtt: $domtt,
             );
         }
 
@@ -298,63 +255,8 @@ final class Promotion
     }
 
     /**
-     * @param  array<string, int>  $expires
-     */
-    private static function render(
-        int $promotion,
-        string $forceMode,
-        bool $showTimeLeft,
-        ?string $added,
-        int $promotionTimeType,
-        ?string $promotionUntil,
-        bool $ignoreGlobal,
-        string $appendPromotion,
-        array $expires,
-        bool $sub,
-    ): string {
-        $badge = self::badge(
-            $promotion, $forceMode, $showTimeLeft, $added,
-            $promotionTimeType, $promotionUntil, $ignoreGlobal,
-            $appendPromotion, $expires,
-        );
-        if ($badge === null) {
-            return '';
-        }
-        if ($sub) {
-            if ($badge->timeout === null) {
-                return '';
-            }
-            $endIn = (string) __('functions.text_will_end_in');
-
-            return $badge->subColor !== null
-                ? ltrim(view('support._promo-sub', [
-                    'subColor' => $badge->subColor,
-                    'endIn' => $endIn,
-                    'timeout' => SafeHtml::fromTrustedHtml($badge->timeout->toHtml()),
-                ])->render(), "\n")
-                : ' '.$endIn.$badge->timeout->toHtml();
-        }
-        if ($badge->mode === 'word') {
-            $tip = $badge->domttHtml !== null ? ' data-domtt-promo' : '';
-
-            return ltrim(view('support._promo-word', [
-                'cls' => $badge->cssClass,
-                'tip' => SafeHtml::fromTrustedHtml($tip),
-                'text' => $badge->text,
-                'domtt' => $badge->domttHtml !== null ? SafeHtml::fromTrustedHtml($badge->domttHtml->toHtml()) : null,
-            ])->render(), "\n");
-        }
-
-        return ltrim(view('support._promo-icon', [
-            'cls' => $badge->cssClass,
-            'alt' => $badge->alt,
-            'text' => $badge->text,
-            'domtt' => $badge->domttHtml !== null ? SafeHtml::fromTrustedHtml($badge->domttHtml->toHtml()) : null,
-        ])->render(), "\n");
-    }
-
     /**
-     * Collect the promotion-expiry globals used by append/appendSub.
+     * Collect the promotion-expiry globals used by badge().
      *
      * @return array<string, int>
      */

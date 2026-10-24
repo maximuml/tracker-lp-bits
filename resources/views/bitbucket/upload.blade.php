@@ -3,5 +3,5 @@
 @section('title', $pageTitle)
 
 @section('content')
-    @include('bitbucket._upload')
+    @include('components.bitbucket.upload')
 @endsection

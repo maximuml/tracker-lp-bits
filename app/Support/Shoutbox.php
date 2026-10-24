@@ -92,13 +92,13 @@ final class Shoutbox
      * @param  string  $formName  Name of the form wrapping the textarea
      * @param  string  $fieldName  Name of the textarea element
      */
-    public static function toolbar(string $formName = 'shbox', string $fieldName = 'shbox_text'): string
+    public static function toolbar(string $formName = 'shbox', string $fieldName = 'shbox_text'): SafeHtml
     {
-        return view('shoutbox._toolbar', [
+        return SafeHtml::fromTrustedHtml(view('components.shoutbox.toolbar', [
             'formName' => $formName,
             'fieldName' => $fieldName,
             'smiliesHtml' => SafeHtml::fromTrustedHtml(Smilies::quickRow($formName, $fieldName)),
-        ])->render();
+        ])->render());
     }
 
     /**
@@ -124,10 +124,12 @@ final class Shoutbox
     }
 
     /**
-     * Build a small role badge for staff/VIP-tier classes.
-     * Returns empty string for regular users.
+     * Role badge data for staff/VIP-tier classes, rendered by the
+     * `x-shoutbox.class-badge` component. Returns null for regular users.
+     *
+     * @return array{label: string, modifier: string, tooltip: string}|null
      */
-    public static function classBadge(int $class): SafeHtml
+    public static function classBadgeData(int $class): ?array
     {
         static $map = null;
         if ($map === null) {
@@ -143,7 +145,7 @@ final class Shoutbox
         }
         $class = (int) $class;
         if (! isset($map[$class])) {
-            return SafeHtml::fromPlainText('');
+            return null;
         }
         [$label, $modifier] = $map[$class];
         $tooltip = '';
@@ -151,26 +153,25 @@ final class Shoutbox
             $tooltip = (string) UserClass::name($class, false, false, true);
         }
 
-        return SafeHtml::fromTrustedHtml(view('shoutbox._class_badge', [
-            'label' => $label,
-            'modifier' => $modifier,
-            'tooltip' => $tooltip,
-        ])->render());
+        return ['label' => $label, 'modifier' => $modifier, 'tooltip' => $tooltip];
     }
 
     /**
-     * Build the [edit]/[delete] action links for a single message.
+     * [edit]/[delete] action data for a single message, rendered by the
+     * `x-shoutbox.actions` component. Returns null when the viewer may
+     * neither edit nor delete.
      *
      * @param  array<string, mixed>  $message  Shoutbox row
+     * @return array{msgId: int, canEdit: bool, canDelete: bool}|null
      */
-    public static function renderActions(array $message, int $currentUserId, bool $isStaff): string
+    public static function actionsData(array $message, int $currentUserId, bool $isStaff): ?array
     {
         $msgUserId = (int) ($message['userid'] ?? 0);
         $msgDate = (int) ($message['date'] ?? 0);
         $msgId = (int) ($message['id'] ?? 0);
 
         if ($msgId <= 0) {
-            return '';
+            return null;
         }
 
         $now = defined('TIMENOW') ? (int) TIMENOW : time();
@@ -181,14 +182,10 @@ final class Shoutbox
         $canDelete = $isStaff || ($isOwn && $inWindow);
 
         if (! $canEdit && ! $canDelete) {
-            return '';
+            return null;
         }
 
-        return view('shoutbox._actions', [
-            'msgId' => $msgId,
-            'canEdit' => $canEdit,
-            'canDelete' => $canDelete,
-        ])->render();
+        return ['msgId' => $msgId, 'canEdit' => $canEdit, 'canDelete' => $canDelete];
     }
 
     /**
@@ -208,18 +205,20 @@ final class Shoutbox
     }
 
     /**
-     * Build the reaction button bar for a message (Discord/Slack style).
+     * Reaction button-bar data for a message (Discord/Slack style),
+     * rendered by the `x-shoutbox.reactions` component.
      *
      * @param  int  $shoutId  Message id
      * @param  int  $currentUserId  Id of the viewing user
      * @param  array<string, int>|null  $countsMap  Reaction counts (from prefetchReactions)
      * @param  list<string>|null  $myReactionsMap  Current user's reactions
      * @param  array<string, list<string>>|null  $reactorMap  Reactor names per emoji
+     * @return array{shoutId: int, reactions: list<array{emoji: string, count: int, active: bool, title: string}>, showPicker: bool, pickerEmojis: list<string>}|null
      */
-    public static function renderReactions(int $shoutId, int $currentUserId, ?array $countsMap = null, ?array $myReactionsMap = null, ?array $reactorMap = null): string
+    public static function reactionsData(int $shoutId, int $currentUserId, ?array $countsMap = null, ?array $myReactionsMap = null, ?array $reactorMap = null): ?array
     {
         if ($shoutId <= 0) {
-            return '';
+            return null;
         }
 
         if ($countsMap !== null || $myReactionsMap !== null) {
@@ -247,12 +246,12 @@ final class Shoutbox
             ];
         }
 
-        return view('shoutbox._reactions', [
+        return [
             'shoutId' => $shoutId,
             'reactions' => $reactionRows,
             'showPicker' => $currentUserId > 0,
             'pickerEmojis' => self::REACTIONS,
-        ])->render();
+        ];
     }
 
     /**
@@ -316,7 +315,7 @@ final class Shoutbox
                 $tooltip = __('shoutbox.tooltip_nick_reply');
                 $title = $tooltip !== 'shoutbox.tooltip_nick_reply' ? (string) $tooltip : '';
 
-                return trim(view('support._shout-mention', [
+                return trim(view('components.shoutbox.mention', [
                     'cls' => $cls,
                     'userId' => self::$mentionUserCache[$key]['id'],
                     'name' => $name,
@@ -352,7 +351,7 @@ final class Shoutbox
                     return $m[0];
                 }
 
-                return trim(view('support._shout-torrent', ['id' => $id])->render());
+                return trim(view('components.shoutbox.torrent-link', ['id' => $id])->render());
             },
             $html
         );
@@ -389,7 +388,7 @@ final class Shoutbox
                 && $prevDate > 0
                 && abs($prevDate - $currDate) <= $groupWindowSec;
 
-            $editedTime = '';
+            $editedTime = null;
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
                 $editedTime = SafeHtml::fromTrustedHtml(self::formatTime((int) $arr['edited_at'], true));
             }
@@ -401,7 +400,7 @@ final class Shoutbox
                 $userRow = UserDisplay::row($currUserId);
                 $userRow = is_array($userRow) ? $userRow : [];
                 $nickReplyName = trim((string) ($userRow['username'] ?? ''));
-                $classBadge = self::classBadge((int) ($userRow['class'] ?? 0));
+                $classBadge = self::classBadgeData((int) ($userRow['class'] ?? 0));
                 if ($showAvatars) {
                     $rawAvatar = trim((string) ($userRow['avatar'] ?? ''));
                     if ($rawAvatar !== '') {
@@ -418,7 +417,7 @@ final class Shoutbox
                 }
             } else {
                 $username = (string) (__('shoutbox.text_guest'));
-                $classBadge = '';
+                $classBadge = null;
             }
 
             $mentionsMe = false;
@@ -432,31 +431,31 @@ final class Shoutbox
             if ($isContinuation) {
                 $rowClasses[] = 'shout-row-grouped';
                 $username = '';
-                $classBadge = '';
+                $classBadge = null;
             }
 
             $items[] = [
                 'rowClass' => implode(' ', $rowClasses),
                 'time' => SafeHtml::fromTrustedHtml(self::formatTime($currDate, true)),
-                'actions' => SafeHtml::fromTrustedHtml(self::renderActions($arr, $currentUserId, $isStaff)),
+                'actions' => self::actionsData($arr, $currentUserId, $isStaff),
                 'avatarUrl' => $avatarUrl,
                 'avatarUserId' => $currUserId,
                 'avatarTooltip' => $tooltipAvatar,
                 'avatarSpacer' => $isContinuation,
-                'classBadge' => SafeHtml::fromTrustedHtml($classBadge),
+                'classBadge' => $classBadge,
                 'username' => SafeHtml::fromTrustedHtml($username),
                 'isGuest' => $currUserId <= 0,
-                'reactions' => SafeHtml::fromTrustedHtml(self::renderReactions(
+                'reactions' => self::reactionsData(
                     $shoutId,
                     $currentUserId,
                     is_array($reactionCounts[$shoutId] ?? null) ? $reactionCounts[$shoutId] : [],
                     is_array($reactionMine[$shoutId] ?? null) ? array_values($reactionMine[$shoutId]) : [],
                     is_array($reactionUsers[$shoutId] ?? null) ? $reactionUsers[$shoutId] : []
-                )),
+                ),
                 'msgId' => $shoutId,
                 'msgLong' => $isLong,
                 'msgRaw' => (string) ($arr['text'] ?? ''),
-                'msgFormatted' => SafeHtml::fromTrustedHtml($message),
+                'msgFormatted' => $message,
                 'editedTime' => $editedTime,
                 'labelMore' => $labelMore,
                 'labelLess' => $labelLess,

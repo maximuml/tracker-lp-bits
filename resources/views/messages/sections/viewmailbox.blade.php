@@ -1,6 +1,6 @@
-@include('messages.sections._menu', ['selected' => $viewmailbox['mailbox']])
+@include('components.messages.sections.menu', ['selected' => $viewmailbox['mailbox']])
 
-@include('messages.sections._jump_to')
+@include('components.messages.sections.jump_to')
 
 @if (! $viewmailbox['hasMessages'])
 <x-empty-state :title="__('messages.text_no_messages')" />

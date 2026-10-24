@@ -91,13 +91,13 @@ class AttendanceController extends BasePageController
         }
 
         if ($data['hasAttendedToday']) {
-            $data['headerLeft'] = SafeHtml::fromTrustedHtml(view('attendance._header-left', [
+            $data['headerLeft'] = SafeHtml::fromTrustedHtml(view('components.attendance.header-left', [
                 'totalDays' => $attendance->total_days,
                 'days' => $attendance->days,
                 'points' => $attendance->points,
                 'cards' => $this->actor->value('attendance_card', 0),
             ])->render());
-            $data['headerRight'] = SafeHtml::fromTrustedHtml(view('attendance._header-right', [
+            $data['headerRight'] = SafeHtml::fromTrustedHtml(view('components.attendance.header-right', [
                 'myRanking' => (int) $data['myRanking'],
                 'todayCounts' => (int) $data['todayCounts'],
             ])->render());

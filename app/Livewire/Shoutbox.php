@@ -9,7 +9,6 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Livewire\Concerns\PersistsKlappe;
 use App\Services\ShoutboxService;
-use App\Support\Html\SafeHtml;
 use App\Support\Shoutbox as ShoutboxSupport;
 use App\Support\UserDisplay;
 use Illuminate\Contracts\View\View;
@@ -177,7 +176,7 @@ final class Shoutbox extends Component
 
         return view('livewire.shoutbox', [
             'items' => $items,
-            'toolbar' => SafeHtml::fromTrustedHtml(ShoutboxSupport::toolbar('shbox', 'shbox_text')),
+            'toolbar' => ShoutboxSupport::toolbar('shbox', 'shbox_text'),
         ]);
     }
 }

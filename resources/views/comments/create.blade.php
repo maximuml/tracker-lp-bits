@@ -3,5 +3,5 @@
 @section('title', $headTitle)
 
 @section('content')
-@include('comments._form')
+@include('components.comments.form')
 @endsection

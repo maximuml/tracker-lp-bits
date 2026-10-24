@@ -46,7 +46,7 @@ class RemovedFeaturesTest extends TestCase
     {
         foreach ([
             base_path('resources/views/torrents/upload.blade.php'),
-            base_path('resources/views/torrents/_upload.blade.php'),
+            base_path('resources/views/components/torrents/upload.blade.php'),
             base_path('resources/views/torrent/edit.blade.php'),
             app_path('Http/Controllers/TorrentUploadController.php'),
             app_path('Http/Controllers/TorrentEditController.php'),

@@ -1,4 +1,4 @@
-@include('usercp.sections._menu', ['selected' => 'security'])
+@include('components.usercp.sections.menu', ['selected' => 'security'])
 
 @if (! $security->isConfirm && $type === 'saved')
     <x-alert type="success">{{ $security->savedMessage }}</x-alert>
@@ -110,7 +110,7 @@
     @unless ($security->isConfirm)
         <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="ucp-sec-passkeys">
             <h2 class="nx-setcard__title" id="ucp-sec-passkeys">{{ \App\Support\Locale::trans('passkey.passkey', [], null) }}</h2>
-            @include('usercp.sections._passkeys')
+            @include('components.usercp.sections.passkeys')
         </section>
         <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="ucp-sec-danger">
             <h2 class="nx-setcard__title" id="ucp-sec-danger">{{ __('usercp.section_danger') }}</h2>

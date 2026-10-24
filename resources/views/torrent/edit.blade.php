@@ -37,7 +37,7 @@
 @if ($showAnonymousCheck)<input type="hidden" name="anonymous" value="0" /><label><input type="checkbox" name="anonymous"@if ($anonymousChecked) checked="checked"@endif value="1" />{{ __('edit.checkbox_anonymous_note') }}</label>@endif</x-settings-row>
 @endif
 @if ($pick !== null && ($pick->promotionOptions !== null || $pick->posStates !== null))
-<x-settings-row layout="grid" :label="__('edit.row_pick')">@include('torrent.edit._pick', ['pick' => $pick])</x-settings-row>
+<x-settings-row layout="grid" :label="__('edit.row_pick')">@include('components.torrent.edit.pick', ['pick' => $pick])</x-settings-row>
 @endif
 <div class="nx-ffull text-center"><input id="qr" type="submit" value="{{ __('edit.submit_edit_it') ?? '' }}" /> <input type="reset" value="{{ __('edit.submit_revert_changes') ?? '' }}" /></div>
 </div>

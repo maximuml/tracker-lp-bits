@@ -265,7 +265,7 @@ class Bonus
             ];
         }
 
-        $table = view('bonus._table', [
+        $table = view('components.bonus.table', [
             'headers' => $headers,
             'baseRow' => $baseRow,
             'extraRows' => $extraRows,

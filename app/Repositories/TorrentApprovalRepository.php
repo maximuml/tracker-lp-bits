@@ -61,7 +61,7 @@ class TorrentApprovalRepository extends BaseRepository
             'id' => $id,
             'form_id' => $formId,
             'title' => Locale::trans('torrent.approval.modal_title', [], null),
-            'content' => view('torrents._approval_modal', [
+            'content' => view('components.torrents.approval_modal', [
                 'boxId' => $id,
                 'formId' => $formId,
                 'statusLabel' => Locale::trans('torrent.approval.status_label', [], null),

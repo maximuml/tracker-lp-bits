@@ -201,7 +201,7 @@ class TechnicalInformation
 
         // .nti-* styles live in public/css/nxt.css — an inline <style>
         // block here is blocked by CSP style-src (no nonce available).
-        return view('torrent._technical_info', ['vm' => $this->detailsViewModel()])->render();
+        return view('components.torrent.technical_info', ['vm' => $this->detailsViewModel()])->render();
     }
 
     private function detailsViewModel(): TechnicalInfoViewModel
@@ -234,10 +234,10 @@ class TechnicalInformation
             $visibleTracks[] = $this->audioTrackVm($track);
         }
         foreach (array_slice($audios, 3) as $track) {
-            $hiddenTracksHtml .= view('torrent._nti_track', ['track' => $this->audioTrackVm($track)])->render();
+            $hiddenTracksHtml .= view('components.torrent.nti_track', ['track' => $this->audioTrackVm($track)])->render();
         }
         $hiddenAudioSpoiler = $hiddenTracksHtml !== ''
-            ? SafeHtml::fromTrustedHtml(trim(view('support._nti-more', [
+            ? SafeHtml::fromTrustedHtml(trim(view('components.support.nti-more', [
                 'inner' => SafeHtml::fromTrustedHtml(Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)),
             ])->render()))
             : null;
@@ -265,10 +265,10 @@ class TechnicalInformation
      */
     private function columnSpoiler(string $title, array $items): SafeHtml
     {
-        $body = view('torrent._nti_spoiler_kv', ['items' => $items])->render();
+        $body = view('components.torrent.nti_spoiler_kv', ['items' => $items])->render();
         $bbcode = sprintf('[spoiler=%s]%s[/spoiler]', $title, $body);
 
-        return SafeHtml::fromTrustedHtml(trim(view('support._nti-more', [
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.nti-more', [
             'inner' => SafeHtml::fromTrustedHtml(Format::formatComment($bbcode, false)),
         ])->render()));
     }

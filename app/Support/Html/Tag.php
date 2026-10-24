@@ -26,7 +26,7 @@ final class Tag
      */
     public static function tableRow(string $class, string ...$cells): string
     {
-        $row = trim(view('support.tag._tr', [
+        $row = trim(view('components.support.tag.tr', [
             'class' => $class,
             'cells' => array_map(SafeHtml::fromTrustedHtml(...), $cells),
         ])->render());
@@ -45,7 +45,7 @@ final class Tag
         $currentpage = 'var currentpage='.$page.';';
         $maxpage = 'var maxpage='.$pages.';';
 
-        return "\n".ltrim(view('support.tag._key-shortcut', [
+        return "\n".ltrim(view('components.support.tag.key-shortcut', [
             'nonce' => $nonce,
             'maxpage' => $maxpage,
             'currentpage' => $currentpage,
@@ -79,7 +79,7 @@ final class Tag
                 continue;
             }
             $label = (string) ($labels[$key] ?? '');
-            $html .= trim(view('support.tag._option', [
+            $html .= trim(view('components.support.tag.option', [
                 'value' => $id,
                 'selected' => $selected === $id,
                 'label' => $label,
@@ -113,14 +113,14 @@ final class Tag
         $options = [];
         foreach ($items as $row) {
             $rowId = (int) ($row['id'] ?? 0);
-            $options[] = SafeHtml::fromTrustedHtml(trim(view('support.tag._option', [
+            $options[] = SafeHtml::fromTrustedHtml(trim(view('components.support.tag.option', [
                 'value' => $rowId,
                 'selected' => $rowId === $selectedId,
                 'label' => (string) ($row['name'] ?? ''),
             ])->render()));
         }
 
-        return ltrim(view('support.tag._torrent-select', [
+        return ltrim(view('components.support.tag.torrent-select', [
             'name' => $name,
             'selectName' => $selectName,
             'chooseOneLabel' => $chooseOneLabel,
@@ -152,7 +152,7 @@ final class Tag
             ? nl2br(htmlspecialchars($follow))
             : $follow;
 
-        return trim(view('support.tag._settings-row', [
+        return trim(view('components.support.tag.settings-row', [
             'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => SafeHtml::fromTrustedHtml($cell),
@@ -183,7 +183,7 @@ final class Tag
     ): string {
         $cell = $escape ? htmlspecialchars($follow) : $follow;
 
-        return trim(view('support.tag._settings-row-small', [
+        return trim(view('components.support.tag.settings-row-small', [
             'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => SafeHtml::fromTrustedHtml($cell),
@@ -207,7 +207,7 @@ final class Tag
             ? nl2br(htmlspecialchars($follow))
             : $follow;
 
-        return trim(view('support.tag._settings-frow', [
+        return trim(view('components.support.tag.settings-frow', [
             'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => SafeHtml::fromTrustedHtml($cell),
@@ -268,7 +268,7 @@ final class Tag
      */
     public static function settingsCells(string $head, string $follow): string
     {
-        return trim(view('support.tag._settings-cells', [
+        return trim(view('components.support.tag.settings-cells', [
             'head' => SafeHtml::fromTrustedHtml($head),
             'follow' => SafeHtml::fromTrustedHtml($follow),
         ])->render());
@@ -332,7 +332,7 @@ final class Tag
     {
         $children = [];
         foreach ($items as $item) {
-            $children[] = SafeHtml::fromTrustedHtml(trim(view('support.tag._tooltip-child', [
+            $children[] = SafeHtml::fromTrustedHtml(trim(view('components.support.tag.tooltip-child', [
                 'id' => (string) ($item['id'] ?? ''),
                 'content' => SafeHtml::fromTrustedHtml((string) ($item['content'] ?? '')),
             ])->render()));
@@ -341,7 +341,7 @@ final class Tag
             return '';
         }
 
-        return trim(view('support.tag._tooltip-container', ['children' => $children])->render());
+        return trim(view('components.support.tag.tooltip-container', ['children' => $children])->render());
     }
 
     /**
@@ -369,7 +369,7 @@ final class Tag
     {
         $tdClass = ! empty($options['td-center']) ? 'colfollow' : '';
 
-        return trim(view('support.tag._build-table', [
+        return trim(view('components.support.tag.build-table', [
             'header' => $header,
             'rows' => $rows,
             'tdClass' => $tdClass,
@@ -383,7 +383,7 @@ final class Tag
      */
     public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
     {
-        return trim(view('support.tag._quick-reply', [
+        return trim(view('components.support.tag.quick-reply', [
             'name' => $textareaName,
             'label' => (string) (__('functions.row_body')),
             'smileRow' => SafeHtml::fromTrustedHtml(Smilies::quickRow($formName, $textareaName)),

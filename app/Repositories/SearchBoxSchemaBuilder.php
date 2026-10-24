@@ -145,7 +145,7 @@ class SearchBoxSchemaBuilder
                 ];
             }
 
-            return view('upload._taxonomy_select', [
+            return view('components.upload.taxonomy_select', [
                 'label' => $searchBox->getTaxonomyLabel($torrentField),
                 'field' => $torrentField,
                 'searchBoxId' => $searchBoxId,

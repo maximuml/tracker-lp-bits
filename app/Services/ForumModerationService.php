@@ -117,7 +117,7 @@ final class ForumModerationService
 
         $sure = (int) $request->input('sure', 0);
         if ($sure !== 1 || ! $request->isMethod('POST')) {
-            PageResponses::abort(__('forums.std_delete_topic'), (__('forums.std_delete_topic_note')).view('forums._confirm-form', ['action' => 'deletetopic', 'name' => 'topicid', 'value' => $topicid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
+            PageResponses::abort(__('forums.std_delete_topic'), (__('forums.std_delete_topic_note')).view('components.forums.confirm-form', ['action' => 'deletetopic', 'name' => 'topicid', 'value' => $topicid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
         }
 
         $postCount = $this->data->posts->countTopicPosts($topicid);
@@ -163,7 +163,7 @@ final class ForumModerationService
         }
 
         if ($sure !== 1 || ! $request->isMethod('POST')) {
-            PageResponses::abort(__('forums.std_delete_post'), (__('forums.std_delete_post_note')).view('forums._confirm-form', ['action' => 'deletepost', 'name' => 'postid', 'value' => $postid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
+            PageResponses::abort(__('forums.std_delete_post'), (__('forums.std_delete_post_note')).view('components.forums.confirm-form', ['action' => 'deletepost', 'name' => 'postid', 'value' => $postid, 'text' => __('forums.std_here')])->render().__('forums.std_if_sure'), false);
         }
 
         $redirtopost = '&page=p'.$prevPostId.'#pid'.$prevPostId;

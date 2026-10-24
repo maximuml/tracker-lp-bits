@@ -141,27 +141,27 @@ class ShoutboxController extends BasePageController
                 : (string) (__('shoutbox.text_guest'));
             $mentionsMe = false;
             $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
-            $editedTime = '';
+            $editedTime = null;
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
                 $editedTime = SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) $arr['edited_at'], true));
             }
             $items[] = [
                 'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) ($arr['date'] ?? 0), true)),
-                'actions' => SafeHtml::fromTrustedHtml(Shoutbox::renderActions($arr, $currentUserId, $isStaff)),
+                'actions' => Shoutbox::actionsData($arr, $currentUserId, $isStaff),
                 'username' => SafeHtml::fromTrustedHtml($username),
                 'isGuest' => $uid <= 0,
-                'reactions' => SafeHtml::fromTrustedHtml(Shoutbox::renderReactions(
+                'reactions' => Shoutbox::reactionsData(
                     $shoutId,
                     $currentUserId,
                     is_array($reactionCounts[$shoutId] ?? null) ? $reactionCounts[$shoutId] : [],
                     is_array($reactionMine[$shoutId] ?? null) ? array_values($reactionMine[$shoutId]) : [],
                     is_array($reactionUsers[$shoutId] ?? null) ? $reactionUsers[$shoutId] : []
-                )),
+                ),
                 'mentionsMe' => $mentionsMe,
                 'msgId' => $shoutId,
                 'msgLong' => false,
                 'msgRaw' => (string) ($arr['text'] ?? ''),
-                'msgFormatted' => SafeHtml::fromTrustedHtml($message),
+                'msgFormatted' => $message,
                 'editedTime' => $editedTime,
             ];
         }

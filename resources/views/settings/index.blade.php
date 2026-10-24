@@ -56,8 +56,8 @@
         :options="['email' => __('settings.text_email'), 'admin' => __('settings.text_admin'), 'automatic' => __('settings.text_automatically')]"
         :selected="$config['verification'] ?? 'email'"
         :note="__('settings.text_verification_type_note')" />
-    <x-settings-yesno layout="grid" :label="__('settings.row_enable_wait_system')" name="waitsystem" :value="$config['waitsystem'] ?? 'no'" :note="view('settings._faq-note', ['pre' => __('settings.text_wait_system_note'), 'anchor' => 'id46'])" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
-    <x-settings-yesno layout="grid" :label="__('settings.row_enable_max_slots_system')" name="maxdlsystem" :value="$config['maxdlsystem'] ?? 'no'" :note="view('settings._faq-note', ['pre' => __('settings.text_max_slots_system_note'), 'anchor' => 'id66'])" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('settings.row_enable_wait_system')" name="waitsystem" :value="$config['waitsystem'] ?? 'no'" :note="view('components.settings.faq-note', ['pre' => __('settings.text_wait_system_note'), 'anchor' => 'id46'])" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('settings.row_enable_max_slots_system')" name="maxdlsystem" :value="$config['maxdlsystem'] ?? 'no'" :note="view('components.settings.faq-note', ['pre' => __('settings.text_max_slots_system_note'), 'anchor' => 'id66'])" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_show_polls')" name="showpolls" :value="$config['showpolls'] ?? 'yes'" :note="__('settings.text_show_polls_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_show_stats')" name="showstats" :value="$config['showstats'] ?? 'yes'" :note="__('settings.text_show_stats_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_show_last_posts')" name="showlastxforumposts" :value="$config['showlastxforumposts'] ?? 'yes'" :note="__('settings.text_show_last_posts_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
@@ -65,14 +65,14 @@
     <x-settings-yesno layout="grid" :label="__('settings.row_show_forum_stats')" name="showforumstats" :value="$config['showforumstats'] ?? 'yes'" :note="__('settings.text_show_forum_stats_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_show_top_uploader')" name="show_top_uploader" :value="$config['show_top_uploader'] ?? 'yes'" :note="__('settings.text_show_top_uploader_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_nfo')" name="enablenfo" :value="$config['enablenfo'] ?? 'yes'" :note="__('settings.text_enable_nfo_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
-    <x-settings-yesno layout="grid" :label="__('settings.row_enable_technical_info')" name="enable_technical_info" :value="$config['enable_technical_info'] ?? 'yes'" :note="view('settings._technical-info-note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('settings.row_enable_technical_info')" name="enable_technical_info" :value="$config['enable_technical_info'] ?? 'yes'" :note="view('components.settings.technical-info-note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_global_search_system')" name="enable_global_search" :value="$config['enable_global_search'] ?? 'no'" :note="__('settings.text_global_search_system_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_show_shoutbox')" name="showshoutbox" :value="$config['showshoutbox'] ?? 'yes'" :note="__('settings.text_show_shoutbox_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_offer_section')" name="showoffer" :value="$config['showoffer'] ?? 'yes'" :note="__('settings.text_offer_section_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_show_donation')" name="donation" :value="$config['donation'] ?? 'no'" :note="__('settings.text_show_donation_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_weekend_free_uploading')" name="sptime" :value="$config['sptime'] ?? 'no'" :note="__('settings.text_weekend_free_uploading_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_bitbucket')" name="enablebitbucket" :value="$config['enablebitbucket'] ?? 'no'" :note="__('settings.text_bitbucket_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
-    <x-settings-yesno layout="grid" :label="__('settings.row_ptshow_naming_style')" name="altname" :value="$config['altname'] ?? 'no'" :note="view('settings._ptshow-note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
+    <x-settings-yesno layout="grid" :label="__('settings.row_ptshow_naming_style')" name="altname" :value="$config['altname'] ?? 'no'" :note="view('components.settings.ptshow-note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-radios layout="grid"         :label="__('settings.row_torrents_category_mode')"
         name="browsecat"
         :options="collect($searchboxes ?? [])->mapWithKeys(fn ($sb) => [(string)((array)$sb)['id'] => ((array)$sb)['name']])->all()"
@@ -119,9 +119,9 @@
     <x-settings-text layout="grid" :label="__('settings.row_offer_skip_approved_count')" name="offer_skip_approved_count" :value="$config['offer_skip_approved_count'] ?? ''" :note="__('settings.text_offer_skip_approved_count_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_upload_deny_approval_deny_count')" name="upload_deny_approval_deny_count" :value="$config['upload_deny_approval_deny_count'] ?? ''" :note="__('settings.text_upload_deny_approval_deny_count_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_max_subtitle_size')" name="maxsubsize" :value="$config['maxsubsize'] ?? 3145728" :note="__('settings.text_max_subtitle_size_note')" />
-    <x-settings-text layout="grid" :label="__('settings.row_posts_per_page')" name="postsperpage" :value="$config['postsperpage'] ?? 10" :note="view('settings._break-note', ['pre' => __('settings.text_posts_per_page_note'), 'tail' => __('settings.text_posts_per_page_note_tail')])" />
-    <x-settings-text layout="grid" :label="__('settings.row_topics_per_page')" name="topicsperpage" :value="$config['topicsperpage'] ?? 20" :note="view('settings._break-note', ['pre' => __('settings.text_topics_per_page_note'), 'tail' => __('settings.text_topics_per_page_note_tail')])" />
-    <x-settings-text layout="grid" :label="__('settings.row_torrents_per_page')" name="torrentsperpage" :value="$config['torrentsperpage'] ?? 50" :note="view('settings._break-note', ['pre' => __('settings.text_torrents_per_page_note'), 'tail' => __('settings.text_torrents_per_page_note_tail')])" />
+    <x-settings-text layout="grid" :label="__('settings.row_posts_per_page')" name="postsperpage" :value="$config['postsperpage'] ?? 10" :note="view('components.settings.break-note', ['pre' => __('settings.text_posts_per_page_note'), 'tail' => __('settings.text_posts_per_page_note_tail')])" />
+    <x-settings-text layout="grid" :label="__('settings.row_topics_per_page')" name="topicsperpage" :value="$config['topicsperpage'] ?? 20" :note="view('components.settings.break-note', ['pre' => __('settings.text_topics_per_page_note'), 'tail' => __('settings.text_topics_per_page_note_tail')])" />
+    <x-settings-text layout="grid" :label="__('settings.row_torrents_per_page')" name="torrentsperpage" :value="$config['torrentsperpage'] ?? 50" :note="view('components.settings.break-note', ['pre' => __('settings.text_torrents_per_page_note'), 'tail' => __('settings.text_torrents_per_page_note_tail')])" />
     <x-settings-text layout="grid" :label="__('settings.row_number_of_news')" name="maxnewsnum" :value="$config['maxnewsnum'] ?? 3" :note="__('settings.text_number_of_news_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_torrent_dead_time')" name="max_dead_torrent_time" :value="$config['max_dead_torrent_time'] ?? 21600" :note="__('settings.text_torrent_dead_time_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_max_users')" name="maxusers" :value="$config['maxusers'] ?? 2500" :note="__('settings.text_max_users')" />
@@ -443,7 +443,7 @@
                 ['randomtwouphalfdown', 0, 'twouphalfdown', 'text_promo_twouphalfdown_chance'],
                 ['randomthirtypercentdown', 0, 'thirtypercent', 'text_promo_thirtypercent'],
             ] as [$field, $default, $cls, $labelKey])
-                <li><input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('settings.text_chance_becoming') }}{{ view('settings._promo-label', ['cls' => $cls, 'label' => __('settings.'.$labelKey)]) }}{{ __('settings.text_chance_becoming_default', ['default' => $default]) }}</li>
+                <li><input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('settings.text_chance_becoming') }}{{ view('components.settings.promo-label', ['cls' => $cls, 'label' => __('settings.'.$labelKey)]) }}{{ __('settings.text_chance_becoming_default', ['default' => $default]) }}</li>
             @endforeach
         </ul>
         {{ __('settings.text_random_promotion_note_two') ?? '' }}
@@ -463,7 +463,7 @@
                 ['thirtypercentleechbecome', 'expirethirtypercentleech', 1, 7, 'twouphalfdown', 'text_promo_thirtypercent', 'text_thirtypercentleech_timeout_default', 30],
                 ['normalbecome', 'expirenormal', 1, 0, null, 'text_promo_normal', 'text_normal_timeout_default', 0],
             ] as [$become, $expire, $defBecome, $hide, $cls, $labelKey, $defKey, $defExpire])
-                <li>{{ view('settings._promo-label', ['cls' => $cls, 'label' => __('settings.'.$labelKey)]) }}{{ __('settings.text_will_become') }}<select name="{{ $become }}">{{ $promotionSelects[$become] ?? '' }}</select>{{ __('settings.text_after') ?? ' after ' }}<input type="text" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ __('settings.'.$defKey) }}</li>
+                <li>{{ view('components.settings.promo-label', ['cls' => $cls, 'label' => __('settings.'.$labelKey)]) }}{{ __('settings.text_will_become') }}<select name="{{ $become }}">{{ $promotionSelects[$become] ?? '' }}</select>{{ __('settings.text_after') ?? ' after ' }}<input type="text" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ __('settings.'.$defKey) }}</li>
             @endforeach
         </ul>
         {{ __('settings.text_promotion_timeout_note_two') ?? '' }}

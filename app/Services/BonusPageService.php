@@ -55,7 +55,7 @@ final class BonusPageService
         if ($bonusTweak === 'disable' || $bonusTweak === 'disablesave') {
             PageResponses::abort(
                 __('mybonus.std_sorry'),
-                view('my.sections._bonus_disabled', [
+                view('components.my.sections.bonus_disabled', [
                     'disabled' => __('mybonus.std_karma_system_disabled'),
                     'pointsActive' => $bonusTweak === 'disablesave' ? __('mybonus.std_points_active') : null,
                 ])->render(),
@@ -122,9 +122,9 @@ final class BonusPageService
         // 100.0 GB Uploaded
         $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->hundredGbUpload(), 'traffic', 107374182400, __('mybonus.text_uploaded_four'), __('mybonus.text_uploaded_note'));
         // 10.0 GB Downloaded
-        $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->tenGbDownload(), 'traffic_downloaded', 10737418240, view('my.sections._data-color', ['pre' => __('mybonus.text_downloaded_ten_gb'), 'color' => '#ff4500', 'text' => __('mybonus.text_downloaded_label')]), view('my.sections._download-note'));
+        $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->tenGbDownload(), 'traffic_downloaded', 10737418240, view('components.my.sections.data-color', ['pre' => __('mybonus.text_downloaded_ten_gb'), 'color' => '#ff4500', 'text' => __('mybonus.text_downloaded_label')]), view('components.my.sections.download-note'));
         // 100.0 GB Downloaded
-        $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->hundredGbDownload(), 'traffic_downloaded', 107374182400, view('my.sections._data-color', ['pre' => __('mybonus.text_downloaded_hundred_gb'), 'color' => '#ff4500', 'text' => __('mybonus.text_downloaded_label')]), view('my.sections._download-note'));
+        $results[] = $this->bonusItem((float) SiteConfig::current()->bonus->hundredGbDownload(), 'traffic_downloaded', 107374182400, view('components.my.sections.data-color', ['pre' => __('mybonus.text_downloaded_hundred_gb'), 'color' => '#ff4500', 'text' => __('mybonus.text_downloaded_label')]), view('components.my.sections.download-note'));
 
         // Invite
         if ($oneinviteBonus > 0) {
@@ -148,7 +148,7 @@ final class BonusPageService
         if ($basictaxBonus || $taxpercentageBonus) {
             $onehundredaftertax = 100 - $taxpercentageBonus - $basictaxBonus;
             $giftTax = [
-                'charges' => view('my.sections._gift-charges'),
+                'charges' => view('components.my.sections.gift-charges'),
                 'amounts' => ($basictaxBonus ? $basictaxBonus.(__('mybonus.text_tax_bonus_point')).Strings::addS($basictaxBonus).($taxpercentageBonus ? (__('mybonus.text_tax_plus')) : '') : '').($taxpercentageBonus ? $taxpercentageBonus.(__('mybonus.text_percent_of_transfered_amount')) : ''),
                 'rest' => (__('mybonus.text_as_tax')).$onehundredaftertax.(__('mybonus.text_tax_example_note')),
             ];
@@ -192,23 +192,23 @@ final class BonusPageService
     private function resolveDoMessage(string $do, ActorContext $actor, string $lockText): string
     {
         return match ($do) {
-            'upload' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_upload'), 'b' => __('mybonus.text_uploaded_amount'), 'post' => '!'])->render(),
-            'download' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_download'), 'b' => __('mybonus.text_downloaded_amount'), 'post' => '!'])->render(),
-            'invite' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_invites'), 'b' => '1', 'post' => __('mybonus.text_new_invite')])->render(),
-            'tmp_invite' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_tmp_invites'), 'b' => '1', 'post' => __('mybonus.text_new_tmp_invite')])->render(),
-            'vip' => view('my.sections._vip_msg', [
+            'upload' => view('components.my.sections.b-msg', ['pre' => __('mybonus.text_success_upload'), 'b' => __('mybonus.text_uploaded_amount'), 'post' => '!'])->render(),
+            'download' => view('components.my.sections.b-msg', ['pre' => __('mybonus.text_success_download'), 'b' => __('mybonus.text_downloaded_amount'), 'post' => '!'])->render(),
+            'invite' => view('components.my.sections.b-msg', ['pre' => __('mybonus.text_success_invites'), 'b' => '1', 'post' => __('mybonus.text_new_invite')])->render(),
+            'tmp_invite' => view('components.my.sections.b-msg', ['pre' => __('mybonus.text_success_tmp_invites'), 'b' => '1', 'post' => __('mybonus.text_new_tmp_invite')])->render(),
+            'vip' => view('components.my.sections.vip_msg', [
                 'pre' => __('mybonus.text_success_vip'),
                 'name' => UserClass::name(UC_VIP, false, false, true),
                 'post' => __('mybonus.text_success_vip_two'),
             ])->render(),
-            'vipfalse' => view('my.sections._b-msg', ['pre' => '', 'b' => __('mybonus.text_error_bang'), 'post' => __('mybonus.text_no_permission')])->render(),
-            'title' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_custom_title'), 'b' => (string) $actor->value('title', ''), 'post' => '!'])->render(),
-            'transfer' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_gift'), 'b' => __('mybonus.text_karma'), 'post' => __('mybonus.text_karma_well')])->render(),
+            'vipfalse' => view('components.my.sections.b-msg', ['pre' => '', 'b' => __('mybonus.text_error_bang'), 'post' => __('mybonus.text_no_permission')])->render(),
+            'title' => view('components.my.sections.b-msg', ['pre' => __('mybonus.text_success_custom_title'), 'b' => (string) $actor->value('title', ''), 'post' => '!'])->render(),
+            'transfer' => view('components.my.sections.b-msg', ['pre' => __('mybonus.text_success_gift'), 'b' => __('mybonus.text_karma'), 'post' => __('mybonus.text_karma_well')])->render(),
             'charity' => __('mybonus.text_success_charity'),
             'cancel_hr' => __('mybonus.text_success_cancel_hr'),
             'attendance_card' => __('mybonus.text_success_buy_attendance_card'),
-            'rainbow_id' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_buy_rainbow_id'), 'b' => '30', 'post' => __('mybonus.text_rainbow_days')])->render(),
-            'change_username_card' => view('my.sections._b-msg', ['pre' => __('mybonus.text_success_buy_change_username_card'), 'b' => __('mybonus.text_change_username_card'), 'post' => '!'])->render(),
+            'rainbow_id' => view('components.my.sections.b-msg', ['pre' => __('mybonus.text_success_buy_rainbow_id'), 'b' => '30', 'post' => __('mybonus.text_rainbow_days')])->render(),
+            'change_username_card' => view('components.my.sections.b-msg', ['pre' => __('mybonus.text_success_buy_change_username_card'), 'b' => __('mybonus.text_change_username_card'), 'post' => '!'])->render(),
             'duplicated' => $lockText,
             default => '',
         };

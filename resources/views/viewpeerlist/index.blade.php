@@ -1,2 +1,2 @@
-@include('viewpeerlist._table', ['table' => $seederTable])
-@include('viewpeerlist._table', ['table' => $leecherTable])
+@include('components.viewpeerlist.table', ['table' => $seederTable])
+@include('components.viewpeerlist.table', ['table' => $leecherTable])

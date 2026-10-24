@@ -72,7 +72,7 @@ final class OfferVoteService
             $this->abort(__('offers.std_error'), __('offers.std_cannot_vote_youself'));
         }
         if ($this->offerVoteRepository->userVoted($offerid, $userid)) {
-            $this->abort(__('offers.std_already_voted'), view('offers._back_to_details', ['note' => __('offers.std_already_voted_note'), 'url' => "/web/offers?id={$offerid}&off_details=1"])->render(), false);
+            $this->abort(__('offers.std_already_voted'), view('components.offers.back_to_details', ['note' => __('offers.std_already_voted_note'), 'url' => "/web/offers?id={$offerid}&off_details=1"])->render(), false);
         }
 
         $offer = $this->offerRepository->findOfferWithUser($offerid);
@@ -82,7 +82,7 @@ final class OfferVoteService
         }
 
         if (! $this->offerVoteRepository->recordVote($offerid, $userid, $vote)) {
-            $this->abort(__('offers.std_already_voted'), view('offers._back_to_details', ['note' => __('offers.std_already_voted_note'), 'url' => "/web/offers?id={$offerid}&off_details=1"])->render(), false);
+            $this->abort(__('offers.std_already_voted'), view('components.offers.back_to_details', ['note' => __('offers.std_already_voted_note'), 'url' => "/web/offers?id={$offerid}&off_details=1"])->render(), false);
         }
 
         $this->offerVoteRepository->incrementVote($offerid, $vote);

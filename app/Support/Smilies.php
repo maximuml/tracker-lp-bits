@@ -30,7 +30,7 @@ final class Smilies
 
     public static function link(string $formname, string $taname, int $smilyNumber): SafeHtml
     {
-        return SafeHtml::fromTrustedHtml(trim(view('support._smile-link', [
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.smile-link', [
             'formname' => $formname,
             'taname' => $taname,
             'n' => $smilyNumber,
@@ -44,7 +44,7 @@ final class Smilies
             $links[] = self::link($formname, $taname, $smilyNumber);
         }
 
-        return trim(view('support._smile-row', ['links' => $links])->render());
+        return trim(view('components.support.smile-row', ['links' => $links])->render());
     }
 
     /**

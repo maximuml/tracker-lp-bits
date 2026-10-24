@@ -37,6 +37,6 @@ final class Progress
             $segments[] = ['class' => 'progbarrest', 'width' => (int) round((100 - $p) * ($maxpx / 100))];
         }
 
-        return trim(view('support._progress-bar', ['segments' => $segments])->render());
+        return trim(view('components.support.progress-bar', ['segments' => $segments])->render());
     }
 }

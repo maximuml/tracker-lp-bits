@@ -1,4 +1,4 @@
-@include('usercp.sections._menu', ['selected' => 'tracker'])
+@include('components.usercp.sections.menu', ['selected' => 'tracker'])
 
 @if ($type === 'saved')
 <x-alert type="success">{{ __('usercp.text_settings_saved') }}</x-alert>
@@ -9,7 +9,7 @@
         <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="ucp-sec-catalog">
             <h2 class="nx-setcard__title" id="ucp-sec-catalog">{{ __('usercp.section_catalog_defaults') }}</h2>
             <p class="nx-setcard__hint">{{ __('usercp.text_catalog_defaults_hint') }}</p>
-            @include('usercp._category-chips', ['vm' => $tracker->categoriesTable])
+            @include('components.usercp.category-chips', ['vm' => $tracker->categoriesTable])
 
             <div class="nx-setrow" role="group" aria-labelledby="ucp-g-catalog-status">
                 <div class="nx-setrow__label" id="ucp-g-catalog-status">{{ __('usercp.text_additional_selection') }}</div>

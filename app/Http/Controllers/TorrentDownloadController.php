@@ -154,7 +154,7 @@ class TorrentDownloadController extends BasePageController
         switch ($type) {
             case 'client':
                 $title = __('downloadnotice.text_client_banned_notice');
-                $note = view('downloadnotice._note', ['type' => 'client'])->render();
+                $note = view('components.downloadnotice.note', ['type' => 'client'])->render();
                 $noticenexttime = __('downloadnotice.text_notice_not_show_again');
                 $showrationotice = false;
                 $showclientnotice = true;
@@ -165,7 +165,7 @@ class TorrentDownloadController extends BasePageController
                 $note = '';
                 if ($leechwarnuntiltime && $timenow < $leechwarnuntiltime) {
                     $kicktimeout = Time::format($this->actor->value('leechwarnuntil'), false, false, true);
-                    $note = view('downloadnotice._note', ['type' => 'ratio', 'kicktimeout' => $kicktimeout])->render();
+                    $note = view('components.downloadnotice.note', ['type' => 'ratio', 'kicktimeout' => $kicktimeout])->render();
                 }
                 $title = __('downloadnotice.text_low_ratio_notice');
                 $noticenexttime = __('downloadnotice.text_notice_always_show');
@@ -177,7 +177,7 @@ class TorrentDownloadController extends BasePageController
             default:
                 $type = 'firsttime';
                 $title = __('downloadnotice.text_first_time_download_notice');
-                $note = view('downloadnotice._note', ['type' => 'firsttime'])->render();
+                $note = view('components.downloadnotice.note', ['type' => 'firsttime'])->render();
                 $noticenexttime = __('downloadnotice.text_notice_not_show_again');
                 $showrationotice = true;
                 $showclientnotice = true;

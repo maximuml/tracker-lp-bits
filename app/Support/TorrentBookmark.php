@@ -52,12 +52,12 @@ final class TorrentBookmark
         if (! $bookmarked) {
             return $text
                 ? ($labels['title_bookmark_torrent'] ?? '')
-                : trim(view('support._bookmark-img', ['cls' => 'delbookmark', 'alt' => 'Unbookmarked', 'title' => (string) ($labels['title_bookmark_torrent'] ?? '')])->render());
+                : trim(view('components.support.bookmark-img', ['cls' => 'delbookmark', 'alt' => 'Unbookmarked', 'title' => (string) ($labels['title_bookmark_torrent'] ?? '')])->render());
         }
 
         return $text
             ? ($labels['title_delbookmark_torrent'] ?? '')
-            : trim(view('support._bookmark-img', ['cls' => 'bookmark', 'alt' => 'Bookmarked', 'title' => (string) ($labels['title_delbookmark_torrent'] ?? '')])->render());
+            : trim(view('components.support.bookmark-img', ['cls' => 'bookmark', 'alt' => 'Bookmarked', 'title' => (string) ($labels['title_delbookmark_torrent'] ?? '')])->render());
     }
 
     /**

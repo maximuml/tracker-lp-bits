@@ -35,7 +35,7 @@ final class Message
             ? 'msg-alert-'.$bgcolor
             : 'msg-alert-red';
 
-        return trim(view('support.html._msg-alert', [
+        return trim(view('components.support.html.msg-alert', [
             'colorClass' => $colorClass,
             'url' => $url,
             'text' => SafeHtml::fromTrustedHtml($text),

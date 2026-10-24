@@ -149,7 +149,7 @@ final class ForumService
         $user = $this->user();
 
         if (! ($user['forumpost'] ?? true)) {
-            PageResponses::abort(__('forums.std_sorry'), view('forums._unauthorized-post')->render(), false);
+            PageResponses::abort(__('forums.std_sorry'), view('components.forums.unauthorized-post')->render(), false);
         }
 
         $id = (int) $request->input('id');

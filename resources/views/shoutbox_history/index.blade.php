@@ -22,8 +22,8 @@
 <x-data-table :caption="__('shoutbox.text_history_title')" captionHidden>
 @foreach ($items ?? [] as $item)
     <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
-    <span class="date">[{{ $item['time'] }}]</span> {{ $item['actions'] }} {{ $item['username'] }} {{ $item['reactions'] }}
-    <div>@include('shoutbox._message', ['id' => $item['msgId'], 'isLong' => $item['msgLong'], 'raw' => $item['msgRaw'], 'formatted' => $item['msgFormatted'], 'editedTime' => $item['editedTime'], 'labelMore' => '', 'labelLess' => ''])</div>
+    <span class="date">[{{ $item['time'] }}]</span> @if ($item['actions'] !== null)<x-shoutbox.actions :msg-id="$item['actions']['msgId']" :can-edit="$item['actions']['canEdit']" :can-delete="$item['actions']['canDelete']" />@endif {{ $item['username'] }} @if ($item['reactions'] !== null)<x-shoutbox.reactions :shout-id="$item['reactions']['shoutId']" :reactions="$item['reactions']['reactions']" :show-picker="$item['reactions']['showPicker']" :picker-emojis="$item['reactions']['pickerEmojis']" />@endif
+    <div><x-shoutbox.message :id="$item['msgId']" :is-long="$item['msgLong']" :raw="$item['msgRaw']" :formatted="$item['msgFormatted']" :edited-time="$item['editedTime']" /></div>
     </td></tr>
 @endforeach
 </x-data-table>

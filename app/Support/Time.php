@@ -194,7 +194,7 @@ final class Time
 
     private static function spanTitle(string $title, string $inner): string
     {
-        return trim(view('support._span-title', [
+        return trim(view('components.support.span-title', [
             'title' => $title,
             'inner' => SafeHtml::fromTrustedHtml($inner),
         ])->render());
@@ -205,7 +205,7 @@ final class Time
      */
     private static function breakJoin(array $parts): string
     {
-        return trim(view('support._break-join', [
+        return trim(view('components.support.break-join', [
             'parts' => array_map(SafeHtml::fromPlainText(...), $parts),
         ])->render());
     }

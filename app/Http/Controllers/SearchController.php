@@ -83,7 +83,7 @@ class SearchController extends BasePageController
                 return $raw;
             }
 
-            return view('tags._ph', ['parts' => $parts]);
+            return view('components.tags.ph', ['parts' => $parts]);
         };
         $tag = function (string $name, string $description, string|ViewContract $syntax, string $example, string|ViewContract $remarks = ''): array {
             return [
@@ -97,7 +97,7 @@ class SearchController extends BasePageController
         };
         $syntax = fn (string $key): string|ViewContract => $ph($t($key));
         $remarks = fn (string $key): string|ViewContract => $ph($t($key));
-        $imageRemarks = fn (string $key): ViewContract => view('tags._image-ext', ['pre' => $t($key)]);
+        $imageRemarks = fn (string $key): ViewContract => view('components.tags.image-ext', ['pre' => $t($key)]);
 
         return [
             $tag($t('text_bold'), $t('text_bold_description'), $syntax('text_bold_syntax'), $t('text_bold_example')),

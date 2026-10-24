@@ -21,6 +21,10 @@ RUN apk upgrade --no-cache zlib
 # upgrade to 4.7.2 until the pinned digest moves past it.
 RUN apk upgrade --no-cache tiff
 
+# CVE-2026-111497: Brotli decoder OOB write; upgrade to 1.2.1-r0 until
+# the pinned digest moves past it.
+RUN apk upgrade --no-cache brotli-libs
+
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY .docker/openresty/render-config.sh /usr/local/bin/render-config.sh

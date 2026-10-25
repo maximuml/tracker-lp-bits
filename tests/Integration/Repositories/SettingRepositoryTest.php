@@ -96,7 +96,15 @@ final class SettingRepositoryTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $this->repository->store(['test_basic' => 'not-an-array']);
+        $this->repository->store(['basic' => 'not-an-array']);
+    }
+
+    public function test_store_throws_on_prefix_without_schema(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unsupported settings prefix: test_noschema');
+
+        $this->repository->store(['test_noschema' => ['key' => 'value']]);
     }
 
     public function test_store_returns_true_when_params_empty(): void
@@ -109,29 +117,25 @@ final class SettingRepositoryTest extends TestCase
     public function test_store_upserts_settings(): void
     {
         $result = $this->repository->store([
-            'test_basic' => ['SITENAME' => 'MySite', 'BASEURL' => 'http://example.com'],
+            'basic' => ['SITENAME' => 'MySite', 'BASEURL' => 'http://example.com'],
         ]);
 
-        $this->assertGreaterThan(0, $result);
-        $sitename = DB::table('settings')->where('name', 'test_basic.SITENAME')->first();
+        $this->assertTrue($result);
+        $sitename = DB::table('settings')->where('name', 'basic.SITENAME')->first();
         $this->assertNotNull($sitename);
         $this->assertSame('MySite', $sitename->value);
-        $baseurl = DB::table('settings')->where('name', 'test_basic.BASEURL')->first();
+        $baseurl = DB::table('settings')->where('name', 'basic.BASEURL')->first();
         $this->assertNotNull($baseurl);
         $this->assertSame('http://example.com', $baseurl->value);
     }
 
     public function test_store_updates_existing_setting(): void
     {
-        DB::table('settings')->insert([
-            ['name' => 'test_basic.SITENAME', 'value' => 'OldName', 'autoload' => 1],
-        ]);
-
         $this->repository->store([
-            'test_basic' => ['SITENAME' => 'NewName'],
+            'basic' => ['SITENAME' => 'NewName'],
         ]);
 
-        $sitename = DB::table('settings')->where('name', 'test_basic.SITENAME')->first();
+        $sitename = DB::table('settings')->where('name', 'basic.SITENAME')->first();
         $this->assertNotNull($sitename);
         $this->assertSame('NewName', $sitename->value);
     }
@@ -139,10 +143,10 @@ final class SettingRepositoryTest extends TestCase
     public function test_store_serializes_array_values_as_json(): void
     {
         $this->repository->store([
-            'test_torrent' => ['tags' => ['a', 'b']],
+            'torrent' => ['tags' => ['a', 'b']],
         ]);
 
-        $row = DB::table('settings')->where('name', 'test_torrent.tags')->first();
+        $row = DB::table('settings')->where('name', 'torrent.tags')->first();
         $this->assertNotNull($row);
         $decoded = json_decode((string) $row->value, true);
         $this->assertSame(['a', 'b'], $decoded);

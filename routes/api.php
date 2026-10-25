@@ -89,7 +89,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::TORRENT_SEARCH_BOX));
 
         Route::get('/profile/{id?}', [UserController::class, 'show'])
-            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_VIEW));
+            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_ME));
 
         Route::post('bookmarks', [BookmarkController::class, 'store'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::BOOKMARK_STORE));
@@ -117,7 +117,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::get('news-latest', [NewsController::class, 'latest'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::NEWS_LATEST));
 
-        Route::get('attend', [AttendanceController::class, 'attend'])
+        Route::post('attend', [AttendanceController::class, 'attend'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::ATTENDANCE_ATTEND));
 
         Route::apiResource('polls', PollController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::POLL_LIST));

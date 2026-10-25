@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Models\HitAndRun;
+use App\Support\SettingsSchemaValidator;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class SettingStoreRequest extends FormRequest
@@ -20,7 +21,6 @@ class SettingStoreRequest extends FormRequest
     public function rules(): array
     {
         $data = $this->all();
-        $prefix = Arr::first(array_keys($data));
 
         $allRules = [
             'hr' => [
@@ -32,16 +32,34 @@ class SettingStoreRequest extends FormRequest
             ],
         ];
 
+        // Every top-level key must be an array of name => value pairs so all
+        // schema-registered prefixes reach the repository — field-level
+        // validation for them is delegated to the JSON schemas in saveBatch.
         $result = [];
+        foreach (array_keys($data) as $key) {
+            $result[$key] = 'array';
+        }
         foreach ($allRules as $rulePrefix => $rules) {
-            if ($rulePrefix != $prefix) {
+            if (! array_key_exists($rulePrefix, $data)) {
                 continue;
             }
             foreach ($rules as $key => $value) {
-                $result["$prefix.$key"] = $value;
+                $result["$rulePrefix.$key"] = $value;
             }
         }
 
         return $result;
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $schemas = app(SettingsSchemaValidator::class)->schemas();
+            foreach (array_keys($this->all()) as $prefix) {
+                if (! is_string($prefix) || ! isset($schemas[$prefix])) {
+                    $validator->errors()->add((string) $prefix, "Unsupported settings prefix: $prefix");
+                }
+            }
+        });
     }
 }

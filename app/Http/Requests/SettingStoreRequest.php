@@ -6,7 +6,6 @@ namespace App\Http\Requests;
 
 use App\Models\HitAndRun;
 use App\Support\SettingsSchemaValidator;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +17,7 @@ class SettingStoreRequest extends FormRequest
     }
 
     /** @return array<int|string, mixed> */
-    public function rules(): array
+    public function rules(SettingsSchemaValidator $schemas): array
     {
         $data = $this->all();
 
@@ -32,12 +31,13 @@ class SettingStoreRequest extends FormRequest
             ],
         ];
 
-        // Every top-level key must be an array of name => value pairs so all
-        // schema-registered prefixes reach the repository — field-level
-        // validation for them is delegated to the JSON schemas in saveBatch.
+        // Every top-level key must be a schema-registered prefix containing an
+        // array of name => value pairs — unknown prefixes are prohibited so
+        // they fail as 422 instead of reaching the repository. Field-level
+        // validation is delegated to the JSON schemas in saveBatch.
         $result = [];
         foreach (array_keys($data) as $key) {
-            $result[$key] = 'array';
+            $result[$key] = $schemas->hasSchema((string) $key) ? 'array' : 'prohibited';
         }
         foreach ($allRules as $rulePrefix => $rules) {
             if (! array_key_exists($rulePrefix, $data)) {
@@ -49,17 +49,5 @@ class SettingStoreRequest extends FormRequest
         }
 
         return $result;
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator): void {
-            $schemas = app(SettingsSchemaValidator::class)->schemas();
-            foreach (array_keys($this->all()) as $prefix) {
-                if (! is_string($prefix) || ! isset($schemas[$prefix])) {
-                    $validator->errors()->add((string) $prefix, "Unsupported settings prefix: $prefix");
-                }
-            }
-        });
     }
 }

@@ -171,8 +171,13 @@ test.describe('compose form', () => {
     // -> submit button.
     await page.locator('input#subject').focus();
     await page.keyboard.type('a11y spec subject');
+    const tabStopCount = await page
+      .locator(
+        '#compose a[href], #compose button:not([disabled]), #compose input:not([type="hidden"]):not([disabled]), #compose select:not([disabled]), #compose textarea:not([disabled]), #compose iframe, #compose summary, #compose [tabindex]:not([tabindex="-1"])',
+      )
+      .count();
     let bodyFocused = false;
-    for (let i = 0; i < 15 && !bodyFocused; i++) {
+    for (let i = 0; i < tabStopCount && !bodyFocused; i++) {
       await page.keyboard.press('Tab');
       bodyFocused = await page.evaluate(
         () => document.activeElement?.id === 'body',

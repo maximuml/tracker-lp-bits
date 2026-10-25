@@ -2,7 +2,7 @@
 FROM openresty/openresty:alpine@sha256:b3a6f1f432eabdbda4adcb6ec3e6461e621782eaa82dbe67154ddd1afd109569
 
 # 安装基础依赖
-RUN apk add --no-cache gettext~=0.24 bash~=5.3 curl~=8.22 openssl~=3.5 socat~=1.8
+RUN apk add --no-cache gettext~=0.24 bash~=5.3 curl~=8.23 openssl~=3.5 socat~=1.8
 
 # CVE-2026-93990: base image ships libexpat 2.8.4; apk add does not
 # upgrade packages already present in the base layer, so pull the fix

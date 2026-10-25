@@ -12,11 +12,10 @@ use App\Services\RegistrationService;
 use App\Services\SecureTokenService;
 use App\Services\WebAuthService;
 use App\Support\Config\SiteConfig;
-use App\Support\Settings;
+use App\Support\State\SettingsState;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Mockery;
-use ReflectionClass;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -53,11 +52,8 @@ final class RegistrationServiceTest extends TestCase
 
     private function resetSettingsCache(): void
     {
-        $reflection = new ReflectionClass(Settings::class);
-        $settings = $reflection->getProperty('settings');
-        $settings->setValue(null, null);
-        $fromDb = $reflection->getProperty('fromDb');
-        $fromDb->setValue(null, null);
+        SettingsState::instance()->settings = null;
+        SettingsState::instance()->fromDb = null;
     }
 
     private function service(): RegistrationService

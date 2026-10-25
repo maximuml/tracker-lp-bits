@@ -393,7 +393,7 @@ final class TorrentGateTest extends TestCase
     {
         Bus::fake();
         $this->setSetting('torrent.paid_torrent_enabled', 'yes');
-        (new ReflectionProperty(MsgAlert::class, 'alerts'))->setValue(null, []);
+        (new ReflectionProperty(MsgAlert::class, 'alerts'))->setValue(MsgAlert::getInstance(), []);
 
         $buyer = $this->makeUser(['class' => 1, 'seedbonus' => 100]);
         $owner = $this->makeUser();
@@ -424,7 +424,7 @@ final class TorrentGateTest extends TestCase
     {
         Bus::fake();
         $this->setSetting('torrent.paid_torrent_enabled', 'yes');
-        (new ReflectionProperty(MsgAlert::class, 'alerts'))->setValue(null, []);
+        (new ReflectionProperty(MsgAlert::class, 'alerts'))->setValue(MsgAlert::getInstance(), []);
 
         $buyer = $this->makeUser(['class' => 1, 'seedbonus' => 100]);
         $owner = $this->makeUser();
@@ -452,7 +452,7 @@ final class TorrentGateTest extends TestCase
     {
         Bus::fake();
         $this->setSetting('torrent.paid_torrent_enabled', 'yes');
-        (new ReflectionProperty(MsgAlert::class, 'alerts'))->setValue(null, []);
+        (new ReflectionProperty(MsgAlert::class, 'alerts'))->setValue(MsgAlert::getInstance(), []);
 
         $buyer = $this->makeUser(['class' => 1, 'seedbonus' => 100]);
         $owner = $this->makeUser();

@@ -9,6 +9,7 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\BaseRepository;
 use App\Support\Permissions;
+use App\Support\State\PermissionsState;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -307,11 +308,6 @@ final class BaseRepositoryTest extends TestCase
      */
     private function setUserCanCache(string $permission, int $uid, bool $value): void
     {
-        $reflection = new \ReflectionClass(Permissions::class);
-        $cache = $reflection->getProperty('userCanCache');
-        $cache->setAccessible(true);
-        $current = $cache->getValue();
-        $current[$permission][$uid] = $value;
-        $cache->setValue(null, $current);
+        PermissionsState::instance()->userCanCache[$permission][$uid] = $value;
     }
 }

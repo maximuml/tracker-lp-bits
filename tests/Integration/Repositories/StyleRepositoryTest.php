@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Repositories;
 
 use App\Repositories\StyleRepository;
+use App\Support\State\StyleRepositoryState;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -169,7 +170,6 @@ final class StyleRepositoryTest extends TestCase
 
     private function resetStaticCache(): void
     {
-        $property = new \ReflectionProperty(StyleRepository::class, 'rows');
-        $property->setValue(null, null);
+        StyleRepositoryState::instance()->rows = null;
     }
 }

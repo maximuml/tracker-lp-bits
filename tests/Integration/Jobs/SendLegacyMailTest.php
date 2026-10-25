@@ -7,12 +7,11 @@ namespace Tests\Integration\Jobs;
 use App\Contracts\Repositories\ToolRepositoryInterface;
 use App\Jobs\SendLegacyMail;
 use App\Support\Mail;
-use App\Support\Settings;
+use App\Support\State\SettingsState;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Mockery;
-use ReflectionClass;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -27,9 +26,8 @@ final class SendLegacyMailTest extends TestCase
 
     private function resetSettingsCache(): void
     {
-        $reflection = new ReflectionClass(Settings::class);
-        $reflection->getProperty('settings')->setValue(null, null);
-        $reflection->getProperty('fromDb')->setValue(null, null);
+        SettingsState::instance()->settings = null;
+        SettingsState::instance()->fromDb = null;
     }
 
     private function setSmtpType(string $type): void

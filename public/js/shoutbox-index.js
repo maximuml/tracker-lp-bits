@@ -156,7 +156,12 @@ document.addEventListener('error', function (e) {
     var img = e.target;
     if (img && img.tagName === 'IMG' && img.classList && img.classList.contains('shout-avatar')) {
         var fb = img.getAttribute('data-fallback');
-        if (fb && img.src.indexOf(fb) === -1) { img.src = fb; }
+        if (fb && img.src.indexOf(fb) === -1) {
+            try {
+                var u = new URL(fb, window.location.href);
+                if (u.protocol === 'http:' || u.protocol === 'https:') { img.src = u.href; }
+            } catch (err) { /* not a URL — ignore */ }
+        }
     }
 }, true);
 

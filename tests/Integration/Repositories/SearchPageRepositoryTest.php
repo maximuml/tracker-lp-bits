@@ -10,7 +10,7 @@ use App\Models\User;
 use App\Repositories\SearchPageRepository;
 use App\Services\PermissionChecker;
 use App\Support\Permissions;
-use App\Support\Settings;
+use App\Support\State\SettingsState;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,14 +56,11 @@ final class SearchPageRepositoryTest extends TestCase
 
         // Disable MeiliSearch, set browse_cat to match the seeded category mode,
         // and make all approval statuses visible so the query is not filtered.
-        $settingsRef = new \ReflectionClass(Settings::class);
-        $prop = $settingsRef->getProperty('settings');
-        $prop->setAccessible(true);
-        $prop->setValue(null, [
+        SettingsState::instance()->settings = [
             'meilisearch' => ['enabled' => 'no'],
             'main' => ['browsecat' => (string) $this->categoryMode],
             'torrent' => ['approval_status_none_visible' => 'yes'],
-        ]);
+        ];
 
         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('torrents')->delete();
@@ -75,10 +72,7 @@ final class SearchPageRepositoryTest extends TestCase
 
     protected function tearDown(): void
     {
-        $settingsRef = new \ReflectionClass(Settings::class);
-        $prop = $settingsRef->getProperty('settings');
-        $prop->setAccessible(true);
-        $prop->setValue(null, null);
+        SettingsState::instance()->settings = null;
 
         parent::tearDown();
     }

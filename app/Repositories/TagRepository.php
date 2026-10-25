@@ -11,25 +11,16 @@ use App\Models\Torrent;
 use App\Models\TorrentTag;
 use App\Support\Json;
 use App\Support\Logger;
+use App\Support\State\TagRepositoryState;
 use App\Support\TorrentTags;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
 
 class TagRepository extends BaseRepository implements TagRepositoryInterface
 {
-    /** @var mixed */
-    private static $orderByFieldIdString;
-
-    /** @var EloquentCollection<int, Tag>|null */
-    private static $allTags;
-
-    /**
-     * Reset per-request memoized state for long-lived workers (Octane).
-     */
     public static function resetState(): void
     {
-        self::$orderByFieldIdString = null;
-        self::$allTags = null;
+        TagRepositoryState::instance()->reset();
     }
 
     /**
@@ -200,12 +191,15 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
 
     public function getOrderByFieldIdString(): string
     {
-        if (self::$orderByFieldIdString === null) {
+        $state = TagRepositoryState::instance();
+        $orderByFieldIdString = $state->orderByFieldIdString;
+        if ($orderByFieldIdString === null) {
             $results = $this->createBasicQuery()->get(['id']);
-            self::$orderByFieldIdString = $results->isEmpty() ? '0' : $results->implode('id', ',');
+            $orderByFieldIdString = $results->isEmpty() ? '0' : $results->implode('id', ',');
+            $state->orderByFieldIdString = $orderByFieldIdString;
         }
 
-        return self::$orderByFieldIdString;
+        return $orderByFieldIdString;
     }
 
     /**
@@ -263,13 +257,15 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
      */
     public function listAll(int $searchBoxId = 0): EloquentCollection
     {
-        if (empty(self::$allTags)) {
-            self::$allTags = $this->createBasicQuery()->get();
+        $state = TagRepositoryState::instance();
+        $allTags = $state->allTags;
+        if ($allTags === null) {
+            $allTags = $state->allTags = $this->createBasicQuery()->get();
         }
         if ($searchBoxId > 0) {
-            return self::$allTags->filter(fn (Tag $d) => in_array($d->mode, [0, $searchBoxId]));
+            return $allTags->filter(fn (Tag $d) => in_array($d->mode, [0, $searchBoxId]));
         }
 
-        return self::$allTags;
+        return $allTags;
     }
 }

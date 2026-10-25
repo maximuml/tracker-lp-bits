@@ -5,7 +5,7 @@ namespace Tests\Unit\Repositories;
 use App\Models\SearchBox;
 use App\Repositories\MeiliSearchRepository;
 use App\Services\MeiliSearchService;
-use App\Support\Settings;
+use App\Support\State\SettingsState;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -16,20 +16,14 @@ final class MeiliSearchRepositoryQueryTest extends TestCase
     {
         parent::setUp();
 
-        $settingsRef = new \ReflectionClass(Settings::class);
-        $prop = $settingsRef->getProperty('settings');
-        $prop->setAccessible(true);
-        $prop->setValue(null, [
+        SettingsState::instance()->settings = [
             'meilisearch' => ['enabled' => 'no'],
-        ]);
+        ];
     }
 
     protected function tearDown(): void
     {
-        $settingsRef = new \ReflectionClass(Settings::class);
-        $prop = $settingsRef->getProperty('settings');
-        $prop->setAccessible(true);
-        $prop->setValue(null, null);
+        SettingsState::instance()->settings = null;
 
         parent::tearDown();
     }

@@ -9,6 +9,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
+use App\Support\State\StyleState;
 
 /**
  * Legacy stylesheet helpers extracted from `include/functions.php`.
@@ -22,9 +23,6 @@ use App\Support\Html\SafeHtml;
  */
 final class Style
 {
-    /** @var array<int, array<string, mixed>>|null */
-    private static ?array $stylesheetRows = null;
-
     /**
      * Return the stylesheet row for the given id, falling back to
      * `$defaultId`.
@@ -37,14 +35,14 @@ final class Style
     public static function cssRow(?NexusCache $cache, int|string $cssId, int|string $defaultId): ?array
     {
         $fromCache = false;
-        if (self::$stylesheetRows === null) {
+        if (StyleState::instance()->stylesheetRows === null) {
             $cached = $cache?->get('stylesheet_content') ?? false;
             if ($cached !== false) {
-                self::$stylesheetRows = is_array($cached) ? $cached : [];
+                StyleState::instance()->stylesheetRows = is_array($cached) ? $cached : [];
                 $fromCache = true;
             } else {
-                self::$stylesheetRows = self::styleRepository()->fetchAll();
-                $cache?->put('stylesheet_content', self::$stylesheetRows, 95400);
+                StyleState::instance()->stylesheetRows = self::styleRepository()->fetchAll();
+                $cache?->put('stylesheet_content', StyleState::instance()->stylesheetRows, 95400);
             }
         }
 
@@ -53,12 +51,12 @@ final class Style
         // than silently serving the fallback stylesheet for the whole TTL.
         // ($fromCache implies first call per process, so this runs at most
         // once per request.)
-        if ($fromCache && ! array_key_exists((int) $cssId, self::$stylesheetRows)) {
-            self::$stylesheetRows = self::styleRepository()->fetchAll();
-            $cache?->put('stylesheet_content', self::$stylesheetRows, 95400);
+        if ($fromCache && ! array_key_exists((int) $cssId, StyleState::instance()->stylesheetRows)) {
+            StyleState::instance()->stylesheetRows = self::styleRepository()->fetchAll();
+            $cache?->put('stylesheet_content', StyleState::instance()->stylesheetRows, 95400);
         }
 
-        return self::$stylesheetRows[$cssId] ?? self::$stylesheetRows[$defaultId] ?? null;
+        return StyleState::instance()->stylesheetRows[$cssId] ?? StyleState::instance()->stylesheetRows[$defaultId] ?? null;
     }
 
     /**
@@ -66,7 +64,7 @@ final class Style
      */
     public static function resetState(): void
     {
-        self::$stylesheetRows = null;
+        StyleState::instance()->reset();
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Models\SearchBox;
 use App\Models\SecondIcon;
 use App\Repositories\SearchBoxSchemaBuilder;
 use App\Support\Config\SiteConfig;
+use App\Support\State\SecondIconState;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -34,15 +35,9 @@ class SecondIconResource extends Resource
 
     protected static ?int $navigationSort = 11;
 
-    /** @var array<string, Collection<int|string, mixed>> */
-    private static array $taxonomyList = [];
-
-    /**
-     * Reset per-request memoized state for long-lived workers (Octane).
-     */
     public static function resetState(): void
     {
-        self::$taxonomyList = [];
+        SecondIconState::instance()->reset();
     }
 
     public static function getNavigationLabel(): string
@@ -124,13 +119,13 @@ class SecondIconResource extends Resource
     /** @return array<string, Collection<int|string, mixed>> */
     private static function listTaxonomy(): array
     {
-        if (empty(self::$taxonomyList)) {
+        if (empty(SecondIconState::instance()->taxonomyList)) {
             foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
-                self::$taxonomyList[$torrentField] = SearchBox::pluckTaxonomyNames((string) $taxonomyTableModel['table']);
+                SecondIconState::instance()->taxonomyList[$torrentField] = SearchBox::pluckTaxonomyNames((string) $taxonomyTableModel['table']);
             }
         }
 
-        return self::$taxonomyList;
+        return SecondIconState::instance()->taxonomyList;
     }
 
     public static function getRelations(): array

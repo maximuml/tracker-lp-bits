@@ -7,6 +7,7 @@ namespace Tests\Integration\Repositories;
 use App\Models\Tag;
 use App\Models\Torrent;
 use App\Repositories\TagRepository;
+use App\Support\State\TagRepositoryState;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -295,10 +296,7 @@ final class TagRepositoryTest extends TestCase
 
     private function resetStaticCache(): void
     {
-        $reflection = new \ReflectionClass(TagRepository::class);
-        $allTags = $reflection->getProperty('allTags');
-        $allTags->setValue(null, null);
-        $orderBy = $reflection->getProperty('orderByFieldIdString');
-        $orderBy->setValue(null, null);
+        TagRepositoryState::instance()->allTags = null;
+        TagRepositoryState::instance()->orderByFieldIdString = null;
     }
 }

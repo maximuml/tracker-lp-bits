@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Repositories\SettingRepository;
+use App\Support\State\SettingsState;
 
 /**
  * Legacy settings helpers extracted from `include/globalfunctions.php`.
@@ -13,12 +14,6 @@ use App\Repositories\SettingRepository;
  */
 final class Settings
 {
-    /** @var array<string, mixed>|null */
-    private static ?array $settings = null;
-
-    /** @var array<string, mixed>|null */
-    private static ?array $fromDb = null;
-
     /**
      * Read a setting from the in-request cache, falling back to the DB.
      *
@@ -26,15 +21,15 @@ final class Settings
      */
     public static function get(?string $name = null, mixed $default = null): mixed
     {
-        if (self::$settings === null) {
-            self::$settings = self::settingRepository()->getAll();
+        if (SettingsState::instance()->settings === null) {
+            SettingsState::instance()->settings = self::settingRepository()->getAll();
         }
 
         if ($name === null) {
-            return self::$settings;
+            return SettingsState::instance()->settings;
         }
 
-        return Arrays::get(self::$settings, $name, $default);
+        return Arrays::get(SettingsState::instance()->settings, $name, $default);
     }
 
     /**
@@ -44,15 +39,15 @@ final class Settings
      */
     public static function fromDb(?string $name = null, mixed $default = null): mixed
     {
-        if (self::$fromDb === null) {
-            self::$fromDb = self::settingRepository()->getAll();
+        if (SettingsState::instance()->fromDb === null) {
+            SettingsState::instance()->fromDb = self::settingRepository()->getAll();
         }
 
         if ($name === null) {
-            return self::$fromDb;
+            return SettingsState::instance()->fromDb;
         }
 
-        return Arrays::get(self::$fromDb, $name, $default);
+        return Arrays::get(SettingsState::instance()->fromDb, $name, $default);
     }
 
     /**
@@ -76,8 +71,7 @@ final class Settings
      */
     public static function resetCache(): void
     {
-        self::$settings = null;
-        self::$fromDb = null;
+        SettingsState::instance()->reset();
     }
 
     private static function settingRepository(): SettingRepository

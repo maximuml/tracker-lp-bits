@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Contracts\Repositories\CategoryRepositoryInterface;
 use App\Support\Cache\NexusCache;
+use App\Support\State\CategoryState;
 
 /**
  * Legacy category / icon helpers extracted from `include/functions.php`.
@@ -15,25 +16,9 @@ use App\Support\Cache\NexusCache;
  */
 final class Category
 {
-    /** @var array<int, array<string, mixed>>|null */
-    private static ?array $iconRows = null;
-
-    /** @var array<int, array<string, mixed>>|null */
-    private static ?array $categoryRows = null;
-
-    /** @var array<int|string, array{iconClass: string, name: string}> */
-    private static array $iconDataCache = [];
-
-    /**
-     * Clear per-request memoized state so long-running workers re-read
-     * categories/icons instead of serving stale names
-     * cached before an admin edit or delete.
-     */
     public static function resetState(): void
     {
-        self::$iconRows = null;
-        self::$categoryRows = null;
-        self::$iconDataCache = [];
+        CategoryState::instance()->reset();
     }
 
     /**
@@ -48,19 +33,19 @@ final class Category
     {
         $typeId = (int) $typeId ?: 1;
 
-        if (self::$iconRows === null) {
+        if (CategoryState::instance()->iconRows === null) {
             $cached = $cache !== null ? $cache->get('category_icon_content') : false;
             if ($cached !== false && is_array($cached)) {
-                self::$iconRows = $cached;
+                CategoryState::instance()->iconRows = $cached;
             } else {
-                self::$iconRows = self::categoryRepository()->getIconRows();
+                CategoryState::instance()->iconRows = self::categoryRepository()->getIconRows();
                 if ($cache !== null) {
-                    $cache->put('category_icon_content', self::$iconRows, 156400);
+                    $cache->put('category_icon_content', CategoryState::instance()->iconRows, 156400);
                 }
             }
         }
 
-        return self::$iconRows[$typeId] ?? null;
+        return CategoryState::instance()->iconRows[$typeId] ?? null;
     }
 
     /**
@@ -72,23 +57,23 @@ final class Category
      */
     public static function row(?NexusCache $cache, int|string|null $catId = null): ?array
     {
-        if (self::$categoryRows === null) {
+        if (CategoryState::instance()->categoryRows === null) {
             $cached = $cache !== null ? $cache->get('category_content') : false;
             if ($cached !== false && is_array($cached)) {
-                self::$categoryRows = $cached;
+                CategoryState::instance()->categoryRows = $cached;
             } else {
-                self::$categoryRows = self::categoryRepository()->getCategoryRows();
+                CategoryState::instance()->categoryRows = self::categoryRepository()->getCategoryRows();
                 if ($cache !== null) {
-                    $cache->put('category_content', self::$categoryRows, 126400);
+                    $cache->put('category_content', CategoryState::instance()->categoryRows, 126400);
                 }
             }
         }
 
         if ($catId === null || $catId === '') {
-            return self::$categoryRows;
+            return CategoryState::instance()->categoryRows;
         }
 
-        return self::$categoryRows[$catId] ?? null;
+        return CategoryState::instance()->categoryRows[$catId] ?? null;
     }
 
     /**
@@ -160,10 +145,10 @@ final class Category
      */
     public static function iconData(int|string $categoryId): array
     {
-        if (! isset(self::$iconDataCache[$categoryId])) {
+        if (! isset(CategoryState::instance()->iconDataCache[$categoryId])) {
             $categoryRow = self::rowWithContext($categoryId);
             $name = (string) ($categoryRow['name'] ?? '');
-            self::$iconDataCache[$categoryId] = [
+            CategoryState::instance()->iconDataCache[$categoryId] = [
                 'iconClass' => (string) ($categoryRow['class_name'] ?? ''),
                 // Missing/stale cache row must not leave links nameless —
                 // an empty alt makes the ?cat= anchor a link-name violation.
@@ -171,7 +156,7 @@ final class Category
             ];
         }
 
-        return self::$iconDataCache[$categoryId];
+        return CategoryState::instance()->iconDataCache[$categoryId];
     }
 
     /**

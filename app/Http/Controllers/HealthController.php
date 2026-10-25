@@ -8,6 +8,7 @@ use App\Support\UserDisplay;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
 use Laravel\Horizon\Contracts\MasterSupervisorRepository;
 use Laravel\Horizon\Horizon;
@@ -335,29 +336,22 @@ final class HealthController extends Controller
     /**
      * Fetch MeiliSearch /health with a bounded connect+total timeout.
      * file_get_contents' http.timeout does not cover the TCP connect phase,
-     * which can stall for seconds on an unreachable host — curl bounds both.
+     * which can stall for seconds on an unreachable host — connectTimeout
+     * bounds both.
      *
      * @return array<string, mixed>|null decoded body, or null on failure
      */
     private function fetchMeiliHealth(string $host): ?array
     {
-        $ch = curl_init(rtrim($host, '/').'/health');
-        if ($ch === false) {
-            return null;
-        }
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT_MS => 1000,
-            CURLOPT_TIMEOUT_MS => 3000,
-        ]);
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        if (! is_string($response)) {
+        try {
+            $response = Http::connectTimeout(1)
+                ->timeout(3)
+                ->get(rtrim($host, '/').'/health');
+        } catch (\Throwable) {
             return null;
         }
 
-        $data = json_decode($response, true);
+        $data = $response->json();
 
         return is_array($data) ? $data : null;
     }

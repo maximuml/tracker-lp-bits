@@ -82,7 +82,7 @@ final class ToolMaintenanceServiceTest extends TestCase
         ToolMaintenanceService::resetState();
 
         $ref = new \ReflectionProperty(ToolMaintenanceService::class, 'uidPermissionsCached');
-        $this->assertSame([], $ref->getValue());
+        $this->assertSame([], $ref->getValue(app(ToolMaintenanceService::class)));
     }
 
     public function test_get_notification_count_returns_expected_keys(): void

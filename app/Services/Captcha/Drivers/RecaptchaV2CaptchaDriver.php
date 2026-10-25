@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Captcha\Drivers;
 
 use App\Services\Captcha\CaptchaDriverInterface;
+use App\Services\Captcha\Concerns\SendsSiteVerifyRequest;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 
 class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
 {
+    use SendsSiteVerifyRequest;
+
     /** @var array<string, mixed> */
     protected array $config;
 
@@ -89,59 +92,5 @@ class RecaptchaV2CaptchaDriver implements CaptchaDriverInterface
         }
 
         return true;
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    protected function sendVerificationRequest(string $url, array $data): array
-    {
-        $payload = http_build_query($data);
-
-        if (function_exists('curl_init')) {
-            $ch = curl_init($url);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => $payload,
-                CURLOPT_TIMEOUT => 10,
-                CURLOPT_SSL_VERIFYPEER => true,
-            ]);
-
-            $response = curl_exec($ch);
-
-            if (! is_string($response) || $response === '') {
-                $error = curl_error($ch);
-                curl_close($ch);
-                throw new CaptchaValidationException('Captcha verification request failed: '.$error);
-            }
-
-            curl_close($ch);
-        } else {
-            $context = stream_context_create([
-                'http' => [
-                    'method' => 'POST',
-                    'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-                    'content' => $payload,
-                    'timeout' => 10,
-                    'follow_location' => 0,
-                ],
-            ]);
-
-            $response = file_get_contents($url, false, $context);
-
-            if (! is_string($response) || $response === '') {
-                throw new CaptchaValidationException('Captcha verification request failed.');
-            }
-        }
-
-        $decoded = json_decode($response, true);
-
-        if (! is_array($decoded)) {
-            throw new CaptchaValidationException('Unexpected captcha verification response.');
-        }
-
-        return $decoded;
     }
 }

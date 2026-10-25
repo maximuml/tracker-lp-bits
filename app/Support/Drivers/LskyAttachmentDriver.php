@@ -8,8 +8,7 @@ use App\Support\AttachmentDriver;
 use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7;
+use Illuminate\Support\Facades\Http;
 
 /**
  * Lsky Pro image-hosting driver.
@@ -23,25 +22,22 @@ final class LskyAttachmentDriver implements AttachmentDriver
         $api = SiteConfig::current()->imageHosting->lskyUploadApiEndpoint();
         $token = SiteConfig::current()->imageHosting->lskyUploadToken();
         $logPrefix = "filepath: $filepath, api: $api, token: $token";
-        $httpClient = new Client;
-        $response = $httpClient->request('POST', $api, [
-            'headers' => [
-                'Authorization' => sprintf('Bearer %s', $token),
-            ],
-            'multipart' => [
-                [
-                    'name' => 'file',
-                    'contents' => Psr7\Utils::tryFopen($filepath, 'r'),
-                ],
-            ],
-        ]);
-        $statusCode = $response->getStatusCode();
+        $fileHandle = fopen($filepath, 'r');
+        if ($fileHandle === false) {
+            throw new \Exception("Unable to open file for upload: {$filepath}");
+        }
+        $response = Http::asMultipart()
+            ->attach('file', $fileHandle, basename($filepath))
+            ->withToken($token)
+            ->timeout(30)
+            ->post($api);
+        $statusCode = $response->status();
         $logPrefix .= ", status code: $statusCode";
         if ($statusCode != 200) {
             Logger::writeWithContext((string) "{$logPrefix}, statusCode != 200", (string) 'error', (bool) false);
             throw new \Exception("Unable to upload file, status code {$statusCode}");
         }
-        $stringBody = (string) $response->getBody();
+        $stringBody = $response->body();
         $logPrefix .= ", body: $stringBody";
         $result = json_decode($stringBody, true);
         if (! is_array($result)) {

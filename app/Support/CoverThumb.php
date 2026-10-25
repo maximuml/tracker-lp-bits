@@ -144,8 +144,6 @@ final class CoverThumb
         $dst = imagecreatetruecolor($dstWidth, $dstHeight);
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $dstWidth, $dstHeight, $srcWidth, $srcHeight);
         $ok = @imagejpeg($dst, $absolutePath, max(1, min(100, $quality)));
-        imagedestroy($src);
-        imagedestroy($dst);
 
         if (! $ok) {
             return $url;

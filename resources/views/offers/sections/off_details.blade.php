@@ -17,7 +17,7 @@
 <tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('offers.row_description')}}</td><td class="align-top px-2.5 py-1.5">{{ $off_details->description }}</td></tr>
 @endif
 </x-data-table>
-<p class="text-center"><a class="index" href="/comment/add?amp;pid={{ $off_details->id }}&amp;type=offer">{{ __('offers.text_add_comment') }}</a></p>
+<p class="text-center"><a class="index" href="/comment/add?pid={{ $off_details->id }}&amp;type=offer">{{ __('offers.text_add_comment') }}</a></p>
 @if (! $off_details->commentCount)
 <h1 id="startcomments" class="text-center">{{ __('offers.text_no_comments') }}</h1>
 @else
@@ -27,5 +27,5 @@
 @if ($off_details->commentCount)
 {{ $off_details->pagerBottom }}
 @endif
-<p class="text-center"><a class="index" href="/comment/add?amp;pid={{ $off_details->id }}&amp;type=offer">{{ __('offers.text_add_comment') }}</a></p>
+<p class="text-center"><a class="index" href="/comment/add?pid={{ $off_details->id }}&amp;type=offer">{{ __('offers.text_add_comment') }}</a></p>
 @endif

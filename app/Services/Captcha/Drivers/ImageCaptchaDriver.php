@@ -161,7 +161,6 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
         // cross-request header leakage.
         $this->headerBag->set('Content-Type', 'image/png');
         imagepng($im);
-        imagedestroy($im);
     }
 
     protected function deleteByHash(string $imagehash): void

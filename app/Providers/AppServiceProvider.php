@@ -89,6 +89,7 @@ use App\Support\Locale;
 use App\Support\Metrics\Collectors;
 use App\Support\Metrics\MetricsRegistry;
 use App\Support\Metrics\PrometheusFormatter;
+use App\Support\NexusContext;
 use App\Support\PageRenderer;
 use App\Support\RequestContext;
 use App\Support\RuntimeContext;
@@ -125,32 +126,32 @@ class AppServiceProvider extends ServiceProvider
 
             return $cache;
         });
-        $this->app->singleton(CurrentUser::class);
+        $this->app->scoped(CurrentUser::class);
         $this->app->singleton(UserUpdateBatch::class);
-        // T-20: ActorContext is a per-request singleton — the instance is
-        // resolved lazily from the authenticated user and must be flushed
-        // between requests. See ResetNexus listener.
-        $this->app->singleton(ActorContext::class, static function (): ActorContext {
+        // T-20: ActorContext is a per-request scoped binding — the instance
+        // is resolved lazily from the authenticated user and flushed by
+        // forgetScopedInstances() between queue jobs (and worker cycles).
+        $this->app->scoped(ActorContext::class, static function (): ActorContext {
             return ActorContext::fromAuth();
         });
         // T-11: Per-request header bag for the legacy bridge — replaces
         // SAPI globals headers_list()/http_response_code()/header_remove()
         // that can persist across requests in a long-lived process.
-        $this->app->singleton(HeaderBag::class);
+        $this->app->scoped(HeaderBag::class);
         // Per-request page chrome renderer — carries the layout context
-        // between stdhead()/stdfoot(); flushed by ResetNexus.
-        $this->app->singleton(PageRenderer::class);
+        // between stdhead()/stdfoot(); scoped-flushed between jobs.
+        $this->app->scoped(PageRenderer::class);
         // ADR 0017: request-scoped legacy/tracker flags. bootstrap/app.php
-        // binds the entry-seeded instance before providers register; this is
-        // only a safety net for contexts that boot the container differently.
+        // scoped-binds the entry-seeded factory before providers register;
+        // this is only a safety net for contexts that boot the container
+        // differently.
         if (! $this->app->bound(RuntimeContext::class)) {
-            $this->app->singleton(RuntimeContext::class);
+            $this->app->scoped(RuntimeContext::class);
         }
-        // Per-request context is managed by RequestContext's own static
-        // boot/flush lifecycle (bootstrap/app.php + ResetNexus) — bind, not
-        // singleton, so every injection resolves the CURRENT instance and a
-        // container-cached copy can never outlive the current request.
-        $this->app->bind(RequestContext::class, static fn (): RequestContext => RequestContext::instance());
+        $this->app->scoped(NexusContext::class);
+        // Per-request context — the scoped factory builds the booted
+        // instance; RequestContext::instance()/flush() stay as the facade.
+        $this->app->scoped(RequestContext::class, static fn (): RequestContext => RequestContext::create());
 
         // W3-07: Repository contracts for the 10 most-used repositories.
         $this->app->bind(CleanupServiceInterface::class, CleanupService::class);

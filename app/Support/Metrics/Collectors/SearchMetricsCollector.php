@@ -7,6 +7,7 @@ namespace App\Support\Metrics\Collectors;
 use App\Support\Metrics\MetricsCollector;
 use App\Support\Metrics\PrometheusFormatter;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
 
 /**
@@ -64,20 +65,12 @@ final class SearchMetricsCollector implements MetricsCollector
         try {
             $host = config('scout.meilisearch.host');
             $key = config('scout.meilisearch.key');
-            $ch = curl_init($host.'/health');
-            if ($ch === false) {
-                return 0;
-            }
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+            $request = Http::timeout(2);
             if ($key) {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer '.$key]);
+                $request = $request->withToken((string) $key);
             }
-            curl_exec($ch);
-            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
 
-            return $code === 200 ? 1 : 0;
+            return $request->get($host.'/health')->status() === 200 ? 1 : 0;
         } catch (\Throwable) {
             return 0;
         }

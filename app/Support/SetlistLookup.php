@@ -4,11 +4,19 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Illuminate\Http\Client\Pool;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
+
 class SetlistLookup
 {
     private const JINA_BASE = 'https://r.jina.ai/http://';
 
     private const LINKINPEDIA_API = 'https://linkinpedia.com/api.php';
+
+    private const USER_AGENT = 'Mozilla/5.0 (compatible; tracker-lp-bits)';
+
+    private const MAX_BODY_BYTES = 5 * 1024 * 1024;
 
     /**
      * Try to build a structured setlist from a torrent name.
@@ -29,11 +37,17 @@ class SetlistLookup
             return $linkinpediaResult;
         }
 
-        // 2. Fallback to setlist.fm search
+        // 2. Fallback to setlist.fm search — all search pages fetched in
+        // one Http::pool so the worst case is one timeout, not N×timeout.
         $queries = self::buildSearchQueries($meta);
+        $searchUrls = [];
         foreach ($queries as $query) {
-            $searchUrl = 'www.setlist.fm/search?query='.urlencode($query);
-            $searchMarkdown = self::fetchJina($searchUrl);
+            $searchUrls[$query] = self::JINA_BASE.'www.setlist.fm/search?query='.urlencode($query);
+        }
+        $searchBodies = self::httpGetBatch(array_values($searchUrls), 10);
+
+        foreach ($queries as $query) {
+            $searchMarkdown = $searchBodies[$searchUrls[$query]] ?? null;
             $setlistUrl = $searchMarkdown ? self::extractFirstSetlistUrl($searchMarkdown) : null;
             if ($setlistUrl && self::isRelevantSetlistUrl($setlistUrl, $meta)) {
                 $result = self::fromUrl($setlistUrl, $meta);
@@ -126,14 +140,20 @@ class SetlistLookup
         [$year, $month, $day] = $parts;
         $pageBase = $year.$month.$day;
 
-        // Some dates have multiple shows (a, b, c...)
+        // Some dates have multiple shows (a, b, c...) — the candidate
+        // pages are fetched in one pool; the sequential "missing page
+        // means no more shows" semantics are kept when consuming them.
         $suffixes = ['', 'a', 'b', 'c', 'd'];
+        $pages = array_map(fn (string $s) => 'Live:'.$pageBase.$s, $suffixes);
+        $urls = array_map(
+            fn (string $p) => self::LINKINPEDIA_API.'?action=parse&page='.urlencode($p).'&prop=wikitext&format=json',
+            $pages
+        );
+        $bodies = self::httpGetBatch($urls, 5);
 
-        foreach ($suffixes as $suffix) {
-            $page = 'Live:'.$pageBase.$suffix;
-            $wikitext = self::fetchLinkinpediaWikitext($page);
+        foreach ($pages as $i => $page) {
+            $wikitext = self::decodeLinkinpediaWikitext($bodies[$urls[$i]] ?? null);
             if ($wikitext === null) {
-                // Linkinpedia show pages are sequential; a missing page means no more shows.
                 break;
             }
 
@@ -157,15 +177,12 @@ class SetlistLookup
         return ['success' => false, 'error' => 'No matching Linkinpedia page found.'];
     }
 
-    private static function fetchLinkinpediaWikitext(string $page): ?string
+    /**
+     * Decode a Linkinpedia `action=parse` JSON body into wikitext.
+     */
+    private static function decodeLinkinpediaWikitext(?string $json): ?string
     {
-        $url = self::LINKINPEDIA_API.'?action=parse&page='.urlencode($page).'&prop=wikitext&format=json';
-        $ctx = stream_context_create([
-            'http' => ['timeout' => 5, 'follow_location' => 0],
-        ]);
-
-        $json = @file_get_contents($url, false, $ctx, 0, 5 * 1024 * 1024);
-        if (! $json) {
+        if ($json === null || $json === '') {
             return null;
         }
 
@@ -474,19 +491,68 @@ class SetlistLookup
 
     private static function fetchJina(string $urlPath): ?string
     {
-        $fullUrl = self::JINA_BASE.ltrim($urlPath, '/');
+        return self::httpGet(self::JINA_BASE.ltrim($urlPath, '/'), 10);
+    }
 
-        $ctx = stream_context_create([
-            'http' => [
-                'timeout' => 10,
-                'header' => "User-Agent: Mozilla/5.0 (compatible; tracker-lp-bits)\r\n",
-                'follow_location' => 0,
-            ],
-        ]);
+    private static function httpGet(string $url, int $timeout): ?string
+    {
+        try {
+            $response = Http::timeout($timeout)
+                ->withHeaders(['User-Agent' => self::USER_AGENT])
+                ->withOptions(['allow_redirects' => false, 'stream' => true])
+                ->get($url);
+        } catch (\Throwable) {
+            return null;
+        }
 
-        $content = @file_get_contents($fullUrl, false, $ctx, 0, 5 * 1024 * 1024);
+        return self::readCappedBody($response);
+    }
 
-        return $content !== false ? $content : null;
+    /**
+     * Concurrent GETs via Http::pool — the batch costs one slowest
+     * timeout instead of N sequential ones, and Http::fake() intercepts
+     * it in tests. Bodies are capped like the old file_get_contents path.
+     *
+     * @param  list<string>  $urls
+     * @return array<string, string|null> keyed by request URL
+     */
+    private static function httpGetBatch(array $urls, int $timeout): array
+    {
+        $urls = array_values(array_unique($urls));
+        if ($urls === []) {
+            return [];
+        }
+
+        $responses = Http::pool(fn (Pool $pool) => array_map(
+            fn (string $url) => $pool->as($url)
+                ->timeout($timeout)
+                ->withHeaders(['User-Agent' => self::USER_AGENT])
+                ->withOptions(['allow_redirects' => false, 'stream' => true])
+                ->get($url),
+            $urls,
+        ));
+
+        $bodies = [];
+        foreach ($urls as $url) {
+            $response = $responses[$url] ?? null;
+            $bodies[$url] = $response instanceof Response ? self::readCappedBody($response) : null;
+        }
+
+        return $bodies;
+    }
+
+    private static function readCappedBody(Response $response): ?string
+    {
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $content = $response->toPsrResponse()->getBody()->read(self::MAX_BODY_BYTES + 1);
+        if ($content === '' || strlen($content) > self::MAX_BODY_BYTES) {
+            return null;
+        }
+
+        return $content;
     }
 
     private static function extractFirstSetlistUrl(string $searchMarkdown): ?string

@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
+use App\Support\State\CommentState;
 
 /**
  * Legacy BBCode formatter extracted from `include/functions.php`.
@@ -17,22 +18,16 @@ use App\Support\Html\SafeHtml;
  */
 final class Comment
 {
-    /** @var array<int, string> */
-    private static array $tempCode = [];
-
-    private static int $tempCodeCount = 0;
-
     public static function resetTempCode(): void
     {
-        self::$tempCode = [];
-        self::$tempCodeCount = 0;
+        CommentState::instance()->reset();
     }
 
     public static function addTempCode(string $value): string
     {
-        $key = self::$tempCodeCount;
-        self::$tempCode[$key] = $value;
-        self::$tempCodeCount++;
+        $key = CommentState::instance()->tempCodeCount;
+        CommentState::instance()->tempCode[$key] = $value;
+        CommentState::instance()->tempCodeCount++;
 
         return "\x08tempCode_$key\x08";
     }
@@ -214,11 +209,11 @@ final class Comment
     private static function resolveTempCodes(string $s): string
     {
         $j = 0;
-        while (count(self::$tempCode) > 0 && $j <= 5) {
-            foreach (self::$tempCode as $key => $code) {
+        while (count(CommentState::instance()->tempCode) > 0 && $j <= 5) {
+            foreach (CommentState::instance()->tempCode as $key => $code) {
                 $s = str_replace("\x08tempCode_$key\x08", $code, $s, $count);
                 if ($count) {
-                    unset(self::$tempCode[$key]);
+                    unset(CommentState::instance()->tempCode[$key]);
                 }
             }
             $j++;

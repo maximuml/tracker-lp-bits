@@ -10,6 +10,7 @@ use App\Jobs\UpdateTorrentSeedersEtc;
 use App\Jobs\UpdateUserSeedingLeechingTime;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
+use App\Support\State\CleanupRepositoryState;
 use App\Support\Time;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
@@ -25,10 +26,6 @@ class CleanupRepository extends BaseRepository
 
     const IDS_KEY_PREFIX = 'cleanup_batch_job_ids:';
 
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
     /** @var array<int|string, mixed> */
     private static array $batchKeyActionsMap = [
         self::USER_SEED_BONUS_BATCH_KEY => [
@@ -47,16 +44,11 @@ class CleanupRepository extends BaseRepository
 
     private static int $totalTask = 3;
 
-    private static float|int $oneTaskSeconds = 0;
-
     private static int $scanSize = 500;
 
-    /**
-     * Reset per-request memoized state for long-lived workers (Octane).
-     */
     public static function resetState(): void
     {
-        self::$oneTaskSeconds = 0;
+        CleanupRepositoryState::instance()->reset();
     }
 
     public function __construct(
@@ -258,14 +250,14 @@ LUA;
 
     private function getOneTaskSeconds(): float|int
     {
-        if (self::$oneTaskSeconds == 0) {
+        if (CleanupRepositoryState::instance()->oneTaskSeconds == 0) {
             // 最低间隔，要在这个时间内执行掉全部任务
             $totalSeconds = SiteConfig::current()->main->autocleanIntervalOne();
             // 每个任务能分到的秒数，不能到顶，任务数+1计算
-            self::$oneTaskSeconds = floor($totalSeconds / (self::$totalTask + 1));
+            CleanupRepositoryState::instance()->oneTaskSeconds = floor($totalSeconds / (self::$totalTask + 1));
         }
 
-        return self::$oneTaskSeconds;
+        return CleanupRepositoryState::instance()->oneTaskSeconds;
     }
 
     /** @param  mixed  $taskIndex */

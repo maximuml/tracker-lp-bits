@@ -3,7 +3,19 @@
 @section('title', $title ?? (__('shoutbox.text_history_title')))
 
 @section('content')
-<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $csrfToken ?? '' }}';</script>
+<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $csrfToken ?? '' }}';window.SHOUT_LANG = {{ Illuminate\Support\Js::from([
+    'requestFailed' => __('shoutbox.js_request_failed'),
+    'invalidResponse' => __('shoutbox.js_invalid_response'),
+    'spoilerTitle' => __('shoutbox.js_spoiler_title'),
+    'quoteAuthor' => __('shoutbox.js_quote_author'),
+    'url' => __('shoutbox.js_url'),
+    'linkText' => __('shoutbox.js_link_text'),
+    'confirmDelete' => __('shoutbox.js_confirm_delete'),
+    'collapse' => __('shoutbox.js_collapse'),
+    'expand' => __('shoutbox.js_expand'),
+    'newMentions' => __('shoutbox.js_new_mentions'),
+]) }};</script>
+<script src="{{ \App\Support\AssetAppender::versionedSrc('js/shoutbox.js') }}" type="text/javascript"></script>
 
 <section class="nx-idx-card">
 <h2>{{ __('shoutbox.text_history_title')}}</h2>

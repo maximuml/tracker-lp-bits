@@ -35,7 +35,7 @@
     @if ($listVm->showComments)
     <td class="nx-rowfollow nxm-td-comments" data-label="{{ 'Com' }}">
         @if ($row->comments === 0)
-            <a href="/comment/add?amp;pid={{ $row->id }}&amp;type=torrent" title="{{ __('functions.title_add_comments') }}">0</a>
+            <a href="/comment/add?pid={{ $row->id }}&amp;type=torrent" title="{{ __('functions.title_add_comments') }}">0</a>
         @else
             <b><a href="{{ $row->commentsUrl }}"@if ($row->lastCommentTooltipId) data-domtt-src="{{ $row->lastCommentTooltipId }}"@endif>@if ($row->commentIsNew)<span class="new">@endif{{ $row->comments }}@if ($row->commentIsNew)</span>@endif</a></b>
         @endif

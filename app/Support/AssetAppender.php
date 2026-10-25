@@ -5,15 +5,22 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Container\Attributes\Scoped;
 use Illuminate\Http\Request;
 
+#[Scoped]
 final class AssetAppender
 {
     /** @var array<string, string> */
-    private static array $appendHeaders = [];
+    private array $appendHeaders = [];
 
     /** @var array<string, string> */
-    private static array $appendFooters = [];
+    private array $appendFooters = [];
+
+    private static function state(): self
+    {
+        return app(self::class);
+    }
 
     public static function js(string $js, string $position, bool $isFile, ?string $key = null): void
     {
@@ -80,20 +87,21 @@ final class AssetAppender
 
     private static function appendJsCss(string $append, string $position, ?string $key = null): void
     {
+        $state = self::state();
         $log = "position: $position, key: $key";
         if ($key === null) {
             $key = md5($append);
             $log .= ", md5 key: $key";
         }
         if ($position == 'header') {
-            if (! isset(self::$appendHeaders[$key])) {
-                self::$appendHeaders[$key] = $append;
+            if (! isset($state->appendHeaders[$key])) {
+                $state->appendHeaders[$key] = $append;
             } else {
                 Logger::writeWithContext((string) "{$log}, [DUPLICATE]", (string) 'info', (bool) false);
             }
         } elseif ($position == 'footer') {
-            if (! isset(self::$appendFooters[$key])) {
-                self::$appendFooters[$key] = $append;
+            if (! isset($state->appendFooters[$key])) {
+                $state->appendFooters[$key] = $append;
             } else {
                 Logger::writeWithContext((string) "{$log}, [DUPLICATE]", (string) 'info', (bool) false);
             }
@@ -113,7 +121,7 @@ final class AssetAppender
     {
         return array_values(array_map(
             static fn (string $html): SafeHtml => SafeHtml::fromTrustedHtml($html),
-            self::$appendHeaders,
+            self::state()->appendHeaders,
         ));
     }
 
@@ -122,13 +130,12 @@ final class AssetAppender
     {
         return array_values(array_map(
             static fn (string $html): SafeHtml => SafeHtml::fromTrustedHtml($html),
-            self::$appendFooters,
+            self::state()->appendFooters,
         ));
     }
 
     public static function flush(): void
     {
-        self::$appendHeaders = [];
-        self::$appendFooters = [];
+        app()->forgetInstance(self::class);
     }
 }

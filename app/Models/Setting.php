@@ -17,6 +17,7 @@ use App\Models\Traits\NexusActivityLogTrait;
 use App\Support\Locale;
 use App\Support\RedisGuard;
 use App\Support\RequestValues;
+use App\Support\State\SettingState;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
@@ -41,15 +42,9 @@ class Setting extends NexusModel
     /** @var array<int|string, mixed> */
     public static array $permissionMustHaveClass = ['defaultclass', 'staffmem'];
 
-    /** @var array<string, mixed>|null */
-    private static ?array $autoloadedSettings = null;
-
-    /**
-     * Reset per-request memoized state for long-lived workers (Octane).
-     */
     public static function resetState(): void
     {
-        self::$autoloadedSettings = null;
+        SettingState::instance()->reset();
     }
 
     const DIRECT_PERMISSION_CACHE_KEY_PREFIX = 'nexus_direct_permissions_';
@@ -65,16 +60,16 @@ class Setting extends NexusModel
      */
     public static function get(?string $name = null, mixed $default = null): mixed
     {
-        if (self::$autoloadedSettings === null) {
-            self::$autoloadedSettings = RedisGuard::attempt(
+        if (SettingState::instance()->autoloadedSettings === null) {
+            SettingState::instance()->autoloadedSettings = RedisGuard::attempt(
                 static fn () => Cache::remember('nexus_settings_in_laravel', 600, static fn () => self::getFromDb()),
             ) ?? self::getFromDb();
         }
         if ($name === null) {
-            return self::$autoloadedSettings;
+            return SettingState::instance()->autoloadedSettings;
         }
 
-        return Arr::get(self::$autoloadedSettings ?? [], $name, $default);
+        return Arr::get(SettingState::instance()->autoloadedSettings ?? [], $name, $default);
     }
 
     /**

@@ -4,43 +4,14 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\DTOs\Auth\ActorContext;
-use App\Filament\Resources\Section\SecondIconResource;
-use App\Models\SearchBox as SearchBoxModel;
-use App\Models\Setting;
-use App\Repositories\CleanupRepository;
-use App\Repositories\StyleRepository;
-use App\Repositories\TagRepository;
-use App\Services\Captcha\Drivers\TurnstileCaptchaDriver;
-use App\Services\ToolMaintenanceService;
-use App\Support\AssetAppender;
 use App\Support\Cache\NexusCache;
-use App\Support\Category;
-use App\Support\Comment;
-use App\Support\CurrentUser;
-use App\Support\Forum;
-use App\Support\HeaderBag;
-use App\Support\NexusContext;
-use App\Support\PageRenderer;
-use App\Support\Permissions;
-use App\Support\Promotion;
-use App\Support\RequestContext;
-use App\Support\RuntimeContext;
-use App\Support\SearchBox;
-use App\Support\Settings;
-use App\Support\Shoutbox;
-use App\Support\Style;
-use App\Support\UserClass;
 use App\Support\UserDisplay;
-use App\Utils\MsgAlert;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 
 class ResetNexus
 {
     public function __construct(
-        private readonly CurrentUser $currentUser,
-        private readonly HeaderBag $headerBag,
         private readonly Application $app,
     ) {}
 
@@ -48,29 +19,24 @@ class ResetNexus
      * Clear per-request legacy state so a worker process does not leak
      * values from one request/job into the next.
      *
+     * Container `#[Scoped]`/scoped-bound state (CurrentUser, ActorContext,
+     * HeaderBag, PageRenderer, RuntimeContext, RequestContext, NexusContext,
+     * AssetAppender, MsgAlert, TurnstileRenderState, ToolMaintenanceService,
+     * plus the App\Support\State\* holders behind the Permissions, Category,
+     * Style, Settings, Forum, Promotion, Shoutbox, UserClass, SearchBox,
+     * Comment, TagRepository, StyleRepository, CleanupRepository, Setting,
+     * SearchBox-model and SecondIconResource facades) is dropped by
+     * forgetScopedInstances() at the end of handle() — the queue worker
+     * issues the same call via resetScope(), which then becomes a no-op.
+     *
      * @param  mixed  $event
      */
     public function handle($event): void
     {
-        NexusContext::reset();
-        $this->currentUser->reset();
-        // T-20: Flush the ActorContext singleton so the next request
-        // re-resolves it from the freshly-reset auth guard.
-        $this->app->forgetInstance(ActorContext::class);
-        RequestContext::flush();
-        AssetAppender::flush();
-        $this->app->forgetInstance(PageRenderer::class);
-        Permissions::resetState();
-        MsgAlert::resetState();
+        // UserDisplay::resetState() stays explicit: besides clearing its
+        // in-process row/username caches it also invalidates the Redis
+        // "user_{id}_content" entries, which container scoping cannot do.
         UserDisplay::resetState();
-        Category::resetState();
-        Style::resetState();
-        // T-11: Flush the per-request legacy header bag so headers/status
-        // set by one request do not leak into the next worker cycle.
-        $this->headerBag->flush();
-        // ADR 0017: restore entry-point legacy/tracker flags — per-request
-        // code may mutate them between worker cycles.
-        $this->app->make(RuntimeContext::class)->reset();
 
         // T-10: Drop all resolved guard instances to prevent cross-request
         // and cross-job user leakage in long-lived workers.
@@ -81,34 +47,19 @@ class ResetNexus
         // forgetGuards() clears every resolved guard instance at once.
         Auth::forgetGuards();
 
-        // T-10: Reset Settings static cache so workers reload settings from DB
-        // instead of serving stale values for the worker's lifetime. This is
-        // critical for settings that affect security (e.g. login_secret,
-        // enabled features) or per-user behavior.
-        Settings::resetCache();
-
-        // Per-request memoized caches that used to live in function-static
-        // variables or class statics (invisible under FPM's per-request
-        // lifecycle, worker-global under Octane/RoadRunner).
-        TurnstileCaptchaDriver::resetState();
-        Forum::resetState();
-        ToolMaintenanceService::resetState();
-        Promotion::resetState();
-        Shoutbox::resetState();
-        UserClass::resetState();
-        TagRepository::resetState();
-        StyleRepository::resetState();
-        SearchBox::resetState();
-        CleanupRepository::resetState();
-        Comment::resetTempCode();
         // The NexusCache singleton keeps its Redis connection for the
         // worker lifetime, but the ?clearcache bypass flag and the debug
         // read/write counters are per-request and must not accumulate.
         if ($this->app->resolved(NexusCache::class)) {
             $this->app->make(NexusCache::class)->reset();
         }
-        Setting::resetState();
-        SearchBoxModel::resetState();
-        SecondIconResource::resetState();
+
+        // Drop every #[Scoped]/scoped-bound instance (CurrentUser,
+        // ActorContext, HeaderBag, state holders, ...) so the next
+        // job/request resolves a clean slate. The queue worker also
+        // calls this via resetScope(); doing it here keeps the
+        // isolation boundary inside the listener — identical for
+        // tests that dispatch ResetNexus without a worker.
+        $this->app->forgetScopedInstances();
     }
 }

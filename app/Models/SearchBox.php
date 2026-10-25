@@ -30,6 +30,7 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\State\SearchBoxModelState;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 
@@ -50,26 +51,12 @@ class SearchBox extends NexusModel
 {
     use HasSearchBoxAccessors, HasSearchBoxRelationships, NexusActivityLogTrait;
 
-    /** @var array<int|string, mixed> */
-    private static array $instances = [];
-
-    /** @var array<int|string, mixed> */
-    private static array $modeOptions = [];
-
-    /** @var array<int|string, list<int>> */
-    private static array $categoryIdsBySearchBox = [];
-
     /** @var string */
     protected $table = 'searchbox';
 
-    /**
-     * Reset per-request memoized state for long-lived workers (Octane).
-     */
     public static function resetState(): void
     {
-        self::$instances = [];
-        self::$modeOptions = [];
-        self::$categoryIdsBySearchBox = [];
+        SearchBoxModelState::instance()->reset();
     }
 
     /** @var list<string> */
@@ -201,11 +188,11 @@ class SearchBox extends NexusModel
      */
     public static function get(int $id)
     {
-        if (! isset(self::$instances[$id])) {
-            self::$instances[$id] = self::query()->find($id);
+        if (! isset(SearchBoxModelState::instance()->instances[$id])) {
+            SearchBoxModelState::instance()->instances[$id] = self::query()->find($id);
         }
 
-        return self::$instances[$id];
+        return SearchBoxModelState::instance()->instances[$id];
     }
 
     /**
@@ -251,14 +238,14 @@ class SearchBox extends NexusModel
     /** @return  array<int|string, mixed> */
     public static function listModeOptions(): array
     {
-        if (! empty(self::$modeOptions)) {
-            return self::$modeOptions;
+        if (! empty(SearchBoxModelState::instance()->modeOptions)) {
+            return SearchBoxModelState::instance()->modeOptions;
         }
-        self::$modeOptions = SearchBox::query()
+        SearchBoxModelState::instance()->modeOptions = SearchBox::query()
             ->pluck('name', 'id')
             ->toArray();
 
-        return self::$modeOptions;
+        return SearchBoxModelState::instance()->modeOptions;
     }
 
     /** @return  array<int|string, mixed> */
@@ -331,15 +318,15 @@ class SearchBox extends NexusModel
     public static function listCategoryId($searchBoxId, $glue = null): array|string|null
     {
         $key = (string) $searchBoxId;
-        if (! isset(self::$categoryIdsBySearchBox[$key])) {
+        if (! isset(SearchBoxModelState::instance()->categoryIdsBySearchBox[$key])) {
             $results = [];
             $res = Category::listByModeWithContext($searchBoxId);
             foreach ($res as $item) {
                 $results[] = $item['id'];
             }
-            self::$categoryIdsBySearchBox[$key] = $results;
+            SearchBoxModelState::instance()->categoryIdsBySearchBox[$key] = $results;
         }
-        $results = self::$categoryIdsBySearchBox[$key];
+        $results = SearchBoxModelState::instance()->categoryIdsBySearchBox[$key];
         if ($glue !== null) {
             return implode($glue, $results);
         }

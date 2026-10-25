@@ -240,10 +240,6 @@ function shoutboxRefresh() {
         shoutPoll();
         return;
     }
-    if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
-        window.Livewire.dispatch('shout-refresh');
-        return;
-    }
     window.location.reload();
 }
 
@@ -499,76 +495,6 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// Index-page collapse is a server-side Livewire toggle: morph swaps the
-// plus/minus icon and .nx-hidden on #kshoutbox. This block only surfaces
-// new @-mentions via a badge while the panel is collapsed. Runs only in
-// the parent page — the iframe document is detected via
-// window.self !== window.top.
-(function () {
-    if (window.self !== window.top) { return; }
-
-    var panel = document.getElementById('kshoutbox');
-    var badge = document.getElementById('shoutbox-mentions');
-    if (!panel || !badge) { return; }
-
-    var mentionBaseline = -1;
-
-    function isCollapsed() {
-        return panel.classList.contains('nx-hidden');
-    }
-
-    function shoutMentionCount() {
-        return panel.querySelectorAll('.shoutrow-mentions-me').length;
-    }
-
-    function shoutCollapseScan() {
-        if (!isCollapsed()) {
-            badge.hidden = true;
-            mentionBaseline = -1;
-            return;
-        }
-        if (mentionBaseline < 0) { mentionBaseline = shoutMentionCount(); return; }
-        var delta = shoutMentionCount() - mentionBaseline;
-        if (delta > 0) {
-            badge.hidden = false;
-            badge.textContent = shoutboxT('newMentions', '%d new mentions').replace('%d', String(delta));
-        } else {
-            badge.hidden = true;
-        }
-    }
-
-    badge.addEventListener('click', function () {
-        if (isCollapsed() && window.Livewire && typeof window.Livewire.dispatch === 'function') {
-            window.Livewire.dispatch('shoutbox-expand');
-        }
-    });
-
-    // Capture the mention baseline at the moment the panel collapses — a
-    // scan-scheduled capture would let mentions arriving between collapse
-    // and the first scan slip into the baseline unseen.
-    if (typeof MutationObserver !== 'undefined') {
-        var observer = new MutationObserver(function () {
-            mentionBaseline = isCollapsed() ? shoutMentionCount() : -1;
-            badge.hidden = true;
-        });
-        observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
-    }
-
-    // New shouts arrive inside the iframe via shoutPoll() DOM updates — no
-    // iframe 'load' event fires. The iframe broadcasts 'refresh' on this
-    // channel when SSE delivers; scan shortly after (poll is async).
-    if (typeof BroadcastChannel !== 'undefined') {
-        try {
-            var bus = new BroadcastChannel('nx-shout-shoutbox');
-            bus.onmessage = function (e) {
-                if (e && e.data === 'refresh') {
-                    setTimeout(shoutCollapseScan, 500);
-                    setTimeout(shoutCollapseScan, 2500);
-                }
-            };
-        } catch (e) {}
-    }
-    setInterval(shoutCollapseScan, 15000);
-
-    shoutCollapseScan();
-})();
+// The index page runs the Livewire shoutbox card instead — its remaining
+// DOM-only helpers live in public/js/shoutbox-index.js. This file backs
+// the standalone /web/shoutbox document and /web/shoutbox_history only.

@@ -47,6 +47,7 @@ final class LivewireLockedPropertiesTest extends TestCase
         'App\\Livewire\\PeerList::open' => true,
         'App\\Livewire\\SetlistLookup::invalid' => true,
         'App\\Livewire\\SetlistLookup::name' => true,
+        'App\\Livewire\\Shoutbox::editText' => true,
         'App\\Livewire\\Shoutbox::open' => true,
         'App\\Livewire\\Shoutbox::status' => true,
         'App\\Livewire\\Shoutbox::text' => true,

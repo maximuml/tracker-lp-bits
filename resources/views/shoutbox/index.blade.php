@@ -4,7 +4,18 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc(\App\Support\Style::cssUriWithContext().'theme.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/nxt.css') }}" type="text/css">
-<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $shoutCsrf }}';</script><script src="{{ \App\Support\AssetAppender::versionedSrc('js/shoutbox.js') }}" type="text/javascript"></script><link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('styles/shoutbox.css') }}" type="text/css"><link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/modern.css') }}" type="text/css">
+<script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $shoutCsrf }}';window.SHOUT_LANG = {{ Illuminate\Support\Js::from([
+    'requestFailed' => __('shoutbox.js_request_failed'),
+    'invalidResponse' => __('shoutbox.js_invalid_response'),
+    'spoilerTitle' => __('shoutbox.js_spoiler_title'),
+    'quoteAuthor' => __('shoutbox.js_quote_author'),
+    'url' => __('shoutbox.js_url'),
+    'linkText' => __('shoutbox.js_link_text'),
+    'confirmDelete' => __('shoutbox.js_confirm_delete'),
+    'collapse' => __('shoutbox.js_collapse'),
+    'expand' => __('shoutbox.js_expand'),
+    'newMentions' => __('shoutbox.js_new_mentions'),
+]) }};</script><script src="{{ \App\Support\AssetAppender::versionedSrc('js/shoutbox.js') }}" type="text/javascript"></script><link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('styles/shoutbox.css') }}" type="text/css"><link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/modern.css') }}" type="text/css">
 {{ \App\Support\Style::addiCodeWithContext() }}
 <script type="text/javascript" nonce="{{ $cspNonce ?? '' }}">
 //<![CDATA[

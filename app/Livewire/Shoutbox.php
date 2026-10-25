@@ -17,11 +17,13 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
- * Index-page shoutbox card: collapse toggle + polling refresh + compose form.
- * Edit/delete/react stay on the delegated ajax.php handlers in
- * public/js/shoutbox.js; they dispatch 'shout-refresh' afterwards.
- * The h2 elements owned by legacy JS (countdown, mentions badge,
- * clear link) render wire:ignored so morph never resets their state.
+ * Index-page shoutbox card: collapse toggle + polling refresh + compose
+ * form + edit/delete/react/clear — all server-side via Livewire.
+ * public/js/shoutbox-index.js keeps only DOM-native concerns the server
+ * cannot own: toolbar cursor insertion, the collapsed-mentions badge,
+ * long-message clamp toggling and avatar fallbacks. The full
+ * public/js/shoutbox.js (polling + SSE + ajax actions) is loaded solely
+ * by the standalone /web/shoutbox document.
  */
 final class Shoutbox extends Component
 {
@@ -30,6 +32,14 @@ final class Shoutbox extends Component
     public string $text = '';
 
     public string $status = '';
+
+    public string $editText = '';
+
+    #[Locked]
+    public ?int $editingId = null;
+
+    #[Locked]
+    public ?int $openPickerId = null;
 
     #[Locked]
     public int $refresh = 120;
@@ -151,6 +161,84 @@ final class Shoutbox extends Component
             return;
         }
         $this->reset('text');
+    }
+
+    public function startEdit(int $id): void
+    {
+        $msg = $id > 0 ? $this->repository()->findById($id) : null;
+        if (! $msg) {
+            return;
+        }
+        $this->editingId = $id;
+        $this->editText = (string) ($msg->text ?? '');
+    }
+
+    public function cancelEdit(): void
+    {
+        $this->editingId = null;
+        $this->editText = '';
+    }
+
+    public function saveEdit(): void
+    {
+        $id = $this->editingId;
+        if ($id === null) {
+            return;
+        }
+        $text = trim($this->editText);
+        if ($text === '') {
+            $this->status = __('shoutbox.js_request_failed');
+
+            return;
+        }
+        if (! ($this->shoutboxService ?? throw new \LogicException('Shoutbox component used before boot()'))->editMessage($this->actor(), $id, $text)) {
+            $this->status = __('shoutbox.js_request_failed');
+
+            return;
+        }
+        $this->cancelEdit();
+        $this->status = '';
+    }
+
+    public function delete(int $id): void
+    {
+        if ($id <= 0 || ! ($this->shoutboxService ?? throw new \LogicException('Shoutbox component used before boot()'))->deleteMessage($this->actor(), $id)) {
+            $this->status = __('shoutbox.js_request_failed');
+
+            return;
+        }
+        if ($this->editingId === $id) {
+            $this->cancelEdit();
+        }
+        $this->status = '';
+    }
+
+    public function react(int $id, string $emoji): void
+    {
+        if ($id <= 0) {
+            return;
+        }
+        ($this->shoutboxService ?? throw new \LogicException('Shoutbox component used before boot()'))->toggleReaction($this->actor(), $id, $emoji);
+        if ($this->openPickerId === $id) {
+            $this->openPickerId = null;
+        }
+    }
+
+    public function togglePicker(int $id): void
+    {
+        $this->openPickerId = $this->openPickerId === $id ? null : $id;
+    }
+
+    public function clear(): void
+    {
+        if (! ($this->shoutboxService ?? throw new \LogicException('Shoutbox component used before boot()'))->clearAll($this->actor())) {
+            $this->status = __('shoutbox.js_request_failed');
+
+            return;
+        }
+        $this->cancelEdit();
+        $this->openPickerId = null;
+        $this->status = '';
     }
 
     #[On('shout-refresh')]

@@ -45,7 +45,7 @@ final class LegacyHeaderIsolationTest extends TestCase
         $this->dispatchResetNexus();
 
         // Request B: Location should be cleared
-        $this->assertNull($bag->first('Location'));
+        $this->assertNull(app(HeaderBag::class)->first('Location'));
     }
 
     public function test_status_code_does_not_leak_between_requests(): void
@@ -60,7 +60,7 @@ final class LegacyHeaderIsolationTest extends TestCase
         $this->dispatchResetNexus();
 
         // Request B: status code should be cleared
-        $this->assertNull($bag->getStatusCode());
+        $this->assertNull(app(HeaderBag::class)->getStatusCode());
     }
 
     public function test_content_type_header_does_not_leak_between_requests(): void
@@ -75,7 +75,7 @@ final class LegacyHeaderIsolationTest extends TestCase
         $this->dispatchResetNexus();
 
         // Request B: Content-Type should be cleared
-        $this->assertNull($bag->first('Content-Type'));
+        $this->assertNull(app(HeaderBag::class)->first('Content-Type'));
     }
 
     public function test_multiple_headers_cleared_between_requests(): void
@@ -92,10 +92,10 @@ final class LegacyHeaderIsolationTest extends TestCase
         $this->dispatchResetNexus();
 
         // Request B: all should be cleared
-        $this->assertNull($bag->first('Location'));
-        $this->assertNull($bag->first('Content-Type'));
-        $this->assertNull($bag->first('X-Custom'));
-        $this->assertNull($bag->getStatusCode());
+        $this->assertNull(app(HeaderBag::class)->first('Location'));
+        $this->assertNull(app(HeaderBag::class)->first('Content-Type'));
+        $this->assertNull(app(HeaderBag::class)->first('X-Custom'));
+        $this->assertNull(app(HeaderBag::class)->getStatusCode());
     }
 
     public function test_alternating_requests_no_leak(): void
@@ -112,7 +112,9 @@ final class LegacyHeaderIsolationTest extends TestCase
         ];
 
         foreach ($sequence as $i => [$header, $value, $status]) {
-            // Start of request
+            // Start of request — resolve the current scoped instance
+            // (the previous dispatchResetNexus dropped the old one)
+            $bag = app(HeaderBag::class);
             $bag->set($header, $value);
             $bag->setStatusCode($status);
 
@@ -132,8 +134,8 @@ final class LegacyHeaderIsolationTest extends TestCase
             $this->dispatchResetNexus();
 
             // After reset, should be cleared
-            $this->assertNull($bag->first($header), "Request $i: $header leaked after reset");
-            $this->assertNull($bag->getStatusCode(), "Request $i: status leaked after reset");
+            $this->assertNull(app(HeaderBag::class)->first($header), "Request $i: $header leaked after reset");
+            $this->assertNull(app(HeaderBag::class)->getStatusCode(), "Request $i: status leaked after reset");
         }
     }
 
@@ -148,8 +150,8 @@ final class LegacyHeaderIsolationTest extends TestCase
         $this->dispatchResetNexus();
         $this->dispatchResetNexus();
 
-        $this->assertNull($bag->first('Location'));
-        $this->assertNull($bag->getStatusCode());
+        $this->assertNull(app(HeaderBag::class)->first('Location'));
+        $this->assertNull(app(HeaderBag::class)->getStatusCode());
     }
 
     /**

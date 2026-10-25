@@ -5,26 +5,27 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Listeners\ResetNexus;
-use App\Models\SearchBox as SearchBoxModel;
 use App\Models\Setting;
 use App\Models\Topic;
 use App\Models\User;
-use App\Repositories\CleanupRepository;
-use App\Repositories\StyleRepository;
-use App\Repositories\TagRepository;
-use App\Services\Captcha\Drivers\TurnstileCaptchaDriver;
+use App\Services\Captcha\TurnstileRenderState;
 use App\Services\ToolMaintenanceService;
 use App\Support\Cache\NexusCache;
-use App\Support\Comment;
 use App\Support\CurrentUser;
-use App\Support\Forum;
 use App\Support\NexusContext;
 use App\Support\PageState;
-use App\Support\Promotion;
-use App\Support\SearchBox;
 use App\Support\Settings;
-use App\Support\Shoutbox;
-use App\Support\UserClass;
+use App\Support\State\CleanupRepositoryState;
+use App\Support\State\CommentState;
+use App\Support\State\ForumState;
+use App\Support\State\PromotionState;
+use App\Support\State\SearchBoxModelState;
+use App\Support\State\SearchBoxState;
+use App\Support\State\SettingState;
+use App\Support\State\ShoutboxState;
+use App\Support\State\StyleRepositoryState;
+use App\Support\State\TagRepositoryState;
+use App\Support\State\UserClassState;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
@@ -273,20 +274,22 @@ final class ResetNexusIsolationTest extends TestCase
 
     public function test_mutable_static_caches_do_not_leak_between_requests(): void
     {
-        // Seed worker-global caches the way "request A" would.
-        $this->setStaticProp(TurnstileCaptchaDriver::class, 'scriptInjected', true);
-        $this->setStaticProp(Promotion::class, 'globalSpecialState', 5);
-        $this->setStaticProp(Setting::class, 'autoloadedSettings', ['k' => 'v']);
-        $this->setStaticProp(SearchBoxModel::class, 'categoryIdsBySearchBox', ['0' => [1, 2]]);
-        $this->setStaticProp(Comment::class, 'tempCode', ['snippet-A']);
-        $this->setStaticProp(Forum::class, 'topics', [1 => new Topic]);
-        $this->setStaticProp(Shoutbox::class, 'mentionUserCache', ['nick' => false]);
-        $this->setStaticProp(UserClass::class, 'settingAccount', ['k' => 'v']);
-        $this->setStaticProp(TagRepository::class, 'allTags', new EloquentCollection);
-        $this->setStaticProp(StyleRepository::class, 'rows', [1 => ['name' => 'x']]);
-        $this->setStaticProp(SearchBox::class, 'rows', [1 => ['name' => 'x']]);
-        $this->setStaticProp(CleanupRepository::class, 'oneTaskSeconds', 42);
-        $this->setStaticProp(ToolMaintenanceService::class, 'uidPermissionsCached', [1 => ['x']]);
+        // Seed worker-global caches the way "request A" would — they live
+        // on #[Scoped] state holders now, dropped by forgetScopedInstances().
+        app(TurnstileRenderState::class)->scriptInjected = true;
+        PromotionState::instance()->globalSpecialState = 5;
+        SettingState::instance()->autoloadedSettings = ['k' => 'v'];
+        SearchBoxModelState::instance()->categoryIdsBySearchBox = ['0' => [1, 2]];
+        CommentState::instance()->tempCode = ['snippet-A'];
+        ForumState::instance()->topics = [1 => new Topic];
+        ShoutboxState::instance()->mentionUserCache = ['nick' => false];
+        UserClassState::instance()->settingAccount = ['k' => 'v'];
+        TagRepositoryState::instance()->allTags = new EloquentCollection;
+        StyleRepositoryState::instance()->rows = [1 => ['name' => 'x']];
+        SearchBoxState::instance()->rows = [1 => ['name' => 'x']];
+        CleanupRepositoryState::instance()->oneTaskSeconds = 42;
+        (new \ReflectionProperty(ToolMaintenanceService::class, 'uidPermissionsCached'))
+            ->setValue(app(ToolMaintenanceService::class), [1 => ['x']]);
 
         // Singleton-level per-request state (NexusCache bypass + debug counters).
         $cache = app(NexusCache::class);
@@ -298,20 +301,26 @@ final class ResetNexusIsolationTest extends TestCase
         // Simulate end of request A → ResetNexus
         $this->dispatchResetNexus();
 
-        // Request B must not inherit request A's memoized state.
-        $this->assertStaticPropEmpty(TurnstileCaptchaDriver::class, 'scriptInjected');
-        $this->assertStaticPropEmpty(Promotion::class, 'globalSpecialState');
-        $this->assertStaticPropEmpty(Setting::class, 'autoloadedSettings');
-        $this->assertStaticPropEmpty(SearchBoxModel::class, 'categoryIdsBySearchBox');
-        $this->assertStaticPropEmpty(Comment::class, 'tempCode');
-        $this->assertStaticPropEmpty(Forum::class, 'topics');
-        $this->assertStaticPropEmpty(Shoutbox::class, 'mentionUserCache');
-        $this->assertStaticPropEmpty(UserClass::class, 'settingAccount');
-        $this->assertStaticPropEmpty(TagRepository::class, 'allTags');
-        $this->assertStaticPropEmpty(StyleRepository::class, 'rows');
-        $this->assertStaticPropEmpty(SearchBox::class, 'rows');
-        $this->assertStaticPropEmpty(CleanupRepository::class, 'oneTaskSeconds');
-        $this->assertStaticPropEmpty(ToolMaintenanceService::class, 'uidPermissionsCached');
+        // Request B must not inherit request A's memoized state — fresh
+        // scoped instances expose defaults again.
+        $this->assertFalse(app(TurnstileRenderState::class)->scriptInjected, 'state leaked: TurnstileRenderState::$scriptInjected');
+        $this->assertNull(PromotionState::instance()->globalSpecialState, 'state leaked: PromotionState::$globalSpecialState');
+        $this->assertNull(SettingState::instance()->autoloadedSettings, 'state leaked: SettingState::$autoloadedSettings');
+        $this->assertSame([], SearchBoxModelState::instance()->categoryIdsBySearchBox, 'state leaked: SearchBoxModelState::$categoryIdsBySearchBox');
+        $this->assertSame([], CommentState::instance()->tempCode, 'state leaked: CommentState::$tempCode');
+        $this->assertSame([], ForumState::instance()->topics, 'state leaked: ForumState::$topics');
+        $this->assertSame([], ShoutboxState::instance()->mentionUserCache, 'state leaked: ShoutboxState::$mentionUserCache');
+        $this->assertNull(UserClassState::instance()->settingAccount, 'state leaked: UserClassState::$settingAccount');
+        $this->assertNull(TagRepositoryState::instance()->allTags, 'state leaked: TagRepositoryState::$allTags');
+        $this->assertNull(StyleRepositoryState::instance()->rows, 'state leaked: StyleRepositoryState::$rows');
+        $this->assertNull(SearchBoxState::instance()->rows, 'state leaked: SearchBoxState::$rows');
+        $this->assertSame(0, CleanupRepositoryState::instance()->oneTaskSeconds, 'state leaked: CleanupRepositoryState::$oneTaskSeconds');
+        $this->assertSame(
+            [],
+            (new \ReflectionProperty(ToolMaintenanceService::class, 'uidPermissionsCached'))
+                ->getValue(app(ToolMaintenanceService::class)),
+            'state leaked: ToolMaintenanceService::$uidPermissionsCached',
+        );
 
         $cache = app(NexusCache::class);
         $this->assertSame(0, $cache->bypasses());

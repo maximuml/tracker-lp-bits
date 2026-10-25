@@ -26,8 +26,8 @@ class ResetNexus
      * Style, Settings, Forum, Promotion, Shoutbox, UserClass, SearchBox,
      * Comment, TagRepository, StyleRepository, CleanupRepository, Setting,
      * SearchBox-model and SecondIconResource facades) is dropped by
-     * forgetScopedInstances() — invoked by the queue resetScope callback
-     * between jobs — no manual resets needed here.
+     * forgetScopedInstances() at the end of handle() — the queue worker
+     * issues the same call via resetScope(), which then becomes a no-op.
      *
      * @param  mixed  $event
      */
@@ -53,5 +53,13 @@ class ResetNexus
         if ($this->app->resolved(NexusCache::class)) {
             $this->app->make(NexusCache::class)->reset();
         }
+
+        // Drop every #[Scoped]/scoped-bound instance (CurrentUser,
+        // ActorContext, HeaderBag, state holders, ...) so the next
+        // job/request resolves a clean slate. The queue worker also
+        // calls this via resetScope(); doing it here keeps the
+        // isolation boundary inside the listener — identical for
+        // tests that dispatch ResetNexus without a worker.
+        $this->app->forgetScopedInstances();
     }
 }

@@ -154,7 +154,7 @@
 @endif
 <tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.row_auto_warning') ?? '' }}<br /><i>({{ __('userdetails.text_low_ratio') ?? '' }})</i></td>
 @if ($leechwarn)
-<td class="align-top px-2.5 py-1.5"><span class="text-nxm-danger">{{ __('userdetails.text_leech_warned') ?? '' }}</span> {{ __('userdetails.text_until') ?? '' }}{{ $user['leechwarnuntil'] }}<br />({{ $leechwarnUntilPretty }}{{ __('userdetails.text_to_go') ?? '' }})&nbsp;<input id="remove-leech-warn" type="button" class="nx-btn nx-btn--primary" value="Remove" data-uid="{{ $user['id'] }}" /></td></tr>
+<td class="align-top px-2.5 py-1.5"><span class="text-nxm-danger">{{ __('userdetails.text_leech_warned') ?? '' }}</span> {{ __('userdetails.text_until') ?? '' }}{{ $user['leechwarnuntil'] }}<br />({{ $leechwarnUntilPretty }}{{ __('userdetails.text_to_go') ?? '' }})@if ($canRemoveLeechWarn)&nbsp;<input id="remove-leech-warn" type="button" class="nx-btn nx-btn--primary" value="Remove" data-uid="{{ $user['id'] }}" />@endif</td></tr>
 @else
 <td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_not_warned') ?? '' }}</td></tr>
 @endif

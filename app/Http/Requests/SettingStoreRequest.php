@@ -17,9 +17,10 @@ class SettingStoreRequest extends FormRequest
     }
 
     /** @return array<int|string, mixed> */
-    public function rules(SettingsSchemaValidator $schemas): array
+    public function rules(): array
     {
         $data = $this->all();
+        $schemas = new SettingsSchemaValidator;
 
         $allRules = [
             'hr' => [

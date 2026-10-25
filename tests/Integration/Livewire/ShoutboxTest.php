@@ -194,6 +194,23 @@ final class ShoutboxTest extends TestCase
         $this->assertSame('not yours', (string) DB::table('shoutbox')->where('id', $id)->value('text'));
     }
 
+    public function test_confirm_dialogs_set_and_cancel_state(): void
+    {
+        app()->instance(ActorContext::class, $this->actor(1));
+        $id = $this->insertMessage(1, 'bye');
+
+        Livewire::test(Shoutbox::class, $this->mountParams())
+            ->call('confirmDelete', $id)
+            ->assertSet('confirmingDeleteId', $id)
+            ->assertSet('confirmingClear', false)
+            ->call('cancelConfirm')
+            ->assertSet('confirmingDeleteId', null)
+            ->call('confirmClear')
+            ->assertSet('confirmingClear', true)
+            ->call('cancelConfirm')
+            ->assertSet('confirmingClear', false);
+    }
+
     public function test_delete_removes_own_message(): void
     {
         app()->instance(ActorContext::class, $this->actor(1));

@@ -220,11 +220,19 @@ document.addEventListener('error', function (e) {
 
     // Livewire poll morphs in new rows — scan shortly after each render
     // cycle is pointless to time exactly, so use the same poll interval
-    // plus a slow safety scan.
+    // plus a slow safety scan. The shout BroadcastChannel carries refresh
+    // pings from other tabs/the iframe — scan on those too.
     if (window.Livewire && typeof window.Livewire.hook === 'function') {
         try {
             window.Livewire.hook('morph.updated', function () {
                 setTimeout(shoutCollapseScan, 0);
+            });
+        } catch (e) {}
+    }
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            new BroadcastChannel('nx-shout-shoutbox').addEventListener('message', function () {
+                shoutCollapseScan();
             });
         } catch (e) {}
     }

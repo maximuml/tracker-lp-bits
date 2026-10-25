@@ -42,6 +42,12 @@ final class Shoutbox extends Component
     public ?int $openPickerId = null;
 
     #[Locked]
+    public ?int $confirmingDeleteId = null;
+
+    #[Locked]
+    public bool $confirmingClear = false;
+
+    #[Locked]
     public int $refresh = 120;
 
     #[Locked]
@@ -200,8 +206,27 @@ final class Shoutbox extends Component
         $this->status = '';
     }
 
+    public function confirmDelete(int $id): void
+    {
+        $this->confirmingDeleteId = $id > 0 ? $id : null;
+        $this->confirmingClear = false;
+    }
+
+    public function confirmClear(): void
+    {
+        $this->confirmingClear = true;
+        $this->confirmingDeleteId = null;
+    }
+
+    public function cancelConfirm(): void
+    {
+        $this->confirmingDeleteId = null;
+        $this->confirmingClear = false;
+    }
+
     public function delete(int $id): void
     {
+        $this->confirmingDeleteId = null;
         if ($id <= 0 || ! ($this->shoutboxService ?? throw new \LogicException('Shoutbox component used before boot()'))->deleteMessage($this->actor(), $id)) {
             $this->status = __('shoutbox.js_request_failed');
 
@@ -231,6 +256,7 @@ final class Shoutbox extends Component
 
     public function clear(): void
     {
+        $this->confirmingClear = false;
         if (! ($this->shoutboxService ?? throw new \LogicException('Shoutbox component used before boot()'))->clearAll($this->actor())) {
             $this->status = __('shoutbox.js_request_failed');
 

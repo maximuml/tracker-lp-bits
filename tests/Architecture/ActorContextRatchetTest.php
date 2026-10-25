@@ -61,8 +61,12 @@ final class ActorContextRatchetTest extends TestCase
      * StyleRepository, CleanupRepository, Setting, SearchBox-model,
      * SecondIconResource) now lives behind a `XxxState::instance()`
      * `app()` funnel in App\Support\State, same convention as above.
+     * +2 for the final static caches — UserDisplayState (row/username
+     * caches behind the UserDisplay facade, resetState() keeps its Redis
+     * invalidation) and TorrentDownloadState (downhash hkdf memo, scoped
+     * so a passkey rotation cannot serve a stale hash).
      */
-    private const BASELINE_APP_CALLS = 95;
+    private const BASELINE_APP_CALLS = 97;
 
     private const APP_DIR = __DIR__.'/../../app';
 

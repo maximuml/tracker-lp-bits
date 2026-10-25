@@ -10,6 +10,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Models\UserMeta;
 use App\Repositories\UserMetaRepository;
 use App\Support\Html\SafeHtml;
+use App\Support\State\UserDisplayState;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
 
@@ -21,12 +22,6 @@ use Illuminate\Support\HtmlString;
  */
 final class UserDisplay
 {
-    /** @var array<int|string, array<int|string, mixed>|false> */
-    private static array $rowCache = [];
-
-    /** @var array<int, string> */
-    private static array $usernameCache = [];
-
     /**
      * Clear the in-process caches. Called between tests and on each
      * queue job reset so rows read under a rolled-back transaction
@@ -34,11 +29,10 @@ final class UserDisplay
      */
     public static function resetState(): void
     {
-        foreach (array_keys(self::$rowCache) as $id) {
+        foreach (array_keys(UserDisplayState::instance()->rowCache) as $id) {
             RedisGuard::attempt(static fn () => Cache::forget("user_{$id}_content"), false);
         }
-        self::$rowCache = [];
-        self::$usernameCache = [];
+        UserDisplayState::instance()->reset();
     }
 
     /**
@@ -126,8 +120,8 @@ final class UserDisplay
      */
     public static function row(int|string $id): array|false
     {
-        if (isset(self::$rowCache[$id])) {
-            return self::$rowCache[$id];
+        if (isset(UserDisplayState::instance()->rowCache[$id])) {
+            return UserDisplayState::instance()->rowCache[$id];
         }
 
         $row = RedisGuard::remember("user_{$id}_content", 3600, function () use ($id) {
@@ -147,12 +141,12 @@ final class UserDisplay
 
         if (is_array($row)) {
             /** @var array<int|string, mixed> $row */
-            self::$rowCache[$id] = $row;
+            UserDisplayState::instance()->rowCache[$id] = $row;
 
             return $row;
         }
 
-        self::$rowCache[$id] = false;
+        UserDisplayState::instance()->rowCache[$id] = false;
 
         return false;
     }
@@ -173,7 +167,7 @@ final class UserDisplay
             return;
         }
 
-        $missing = array_values(array_diff($ids, array_keys(self::$rowCache)));
+        $missing = array_values(array_diff($ids, array_keys(UserDisplayState::instance()->rowCache)));
         if ($missing === []) {
             return;
         }
@@ -187,7 +181,7 @@ final class UserDisplay
         $users = self::userRepository()->getByIds($missing, $columns);
         if ($users->isEmpty()) {
             foreach ($missing as $id) {
-                self::$rowCache[$id] = false;
+                UserDisplayState::instance()->rowCache[$id] = false;
             }
 
             return;
@@ -203,12 +197,12 @@ final class UserDisplay
             $arr['__is_rainbow'] = isset($rainbowIds[$id]) ? 1 : 0;
             $arr['__is_donor'] = self::isDonor($arr);
 
-            self::$rowCache[$id] = $arr;
+            UserDisplayState::instance()->rowCache[$id] = $arr;
         }
 
         foreach ($missing as $id) {
-            if (! isset(self::$rowCache[$id])) {
-                self::$rowCache[$id] = false;
+            if (! isset(UserDisplayState::instance()->rowCache[$id])) {
+                UserDisplayState::instance()->rowCache[$id] = false;
             }
         }
     }
@@ -287,8 +281,8 @@ final class UserDisplay
     ): SafeHtml {
         $id = (int) $id;
 
-        if (func_num_args() === 1 && isset(self::$usernameCache[$id])) {
-            return SafeHtml::fromTrustedHtml(self::$usernameCache[$id]);
+        if (func_num_args() === 1 && isset(UserDisplayState::instance()->usernameCache[$id])) {
+            return SafeHtml::fromTrustedHtml(UserDisplayState::instance()->usernameCache[$id]);
         }
 
         $arr = UserDisplay::row($id);
@@ -370,7 +364,7 @@ final class UserDisplay
         }
 
         if (func_num_args() === 1) {
-            self::$usernameCache[$id] = $username;
+            UserDisplayState::instance()->usernameCache[$id] = $username;
         }
 
         return SafeHtml::fromTrustedHtml($username);

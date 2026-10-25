@@ -13,6 +13,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Env;
 use App\Support\Logger;
 use App\Support\RedisGuard;
+use App\Support\State\TorrentDownloadState;
 use App\Support\Url;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -32,9 +33,6 @@ use Rhilip\Bencode\Bencode;
 class TorrentDownloadRepository extends BaseRepository implements TorrentDownloadRepositoryInterface
 {
     public const PIECES_HASH_CACHE_KEY = 'torrent_pieces_hash';
-
-    /** @var array<string, string> */
-    private static array $downHashKeys = [];
 
     /**
      * @param  mixed  $id
@@ -138,8 +136,8 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
     private function getHkdfDownHashKey(int $userId, string $passkey): string
     {
         $cacheKey = $userId.':'.$passkey;
-        if (isset(self::$downHashKeys[$cacheKey])) {
-            return self::$downHashKeys[$cacheKey];
+        if (isset(TorrentDownloadState::instance()->downHashKeys[$cacheKey])) {
+            return TorrentDownloadState::instance()->downHashKeys[$cacheKey];
         }
 
         $appKey = (string) Env::get('APP_KEY', '');
@@ -151,7 +149,7 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
             $appKey = base64_decode(substr($appKey, 7));
         }
 
-        return self::$downHashKeys[$cacheKey] = hash_hkdf('sha256', $appKey, 32, 'nexus-downhash-'.$userId.'-'.$passkey);
+        return TorrentDownloadState::instance()->downHashKeys[$cacheKey] = hash_hkdf('sha256', $appKey, 32, 'nexus-downhash-'.$userId.'-'.$passkey);
     }
 
     private function getLegacyMd5DownHashKey(int $userId, string $passkey, string $dateYmd): string

@@ -6,6 +6,7 @@ namespace Tests\Integration\Repositories;
 
 use App\Enums\UserClass as UserClassEnum;
 use App\Enums\UserStatus;
+use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Repositories\UserModerationRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -150,5 +151,69 @@ final class UserModerationRepositoryTest extends TestCase
         $latestLog = $user->modifyLogs()->orderByDesc('id')->first();
         $this->assertNotNull($latestLog);
         $this->assertStringContainsString('Warning Removed By AdminOp', $latestLog->content);
+    }
+
+    public function test_remove_leech_warn_denies_self_removal_for_regular_user(): void
+    {
+        $user = User::factory()->create(['class' => UserClassEnum::PEASANT->value]);
+        DB::table('users')->where('id', $user->id)->update([
+            'leechwarn' => 1,
+            'leechwarnuntil' => now()->addDays(7)->toDateTimeString(),
+        ]);
+
+        try {
+            $this->repository->removeLeechWarn($user, $user->id);
+            $this->fail('Expected InsufficientPermissionException');
+        } catch (InsufficientPermissionException) {
+            $this->assertSame(1, (int) User::query()->where('id', $user->id)->value('leechwarn'));
+        }
+    }
+
+    public function test_remove_leech_warn_denies_regular_operator_on_other_user(): void
+    {
+        $operator = User::factory()->create(['class' => UserClassEnum::PEASANT->value]);
+        $user = User::factory()->create(['class' => UserClassEnum::PEASANT->value]);
+
+        $this->expectException(InsufficientPermissionException::class);
+
+        $this->repository->removeLeechWarn($operator, $user->id);
+    }
+
+    public function test_remove_leech_warn_allows_staff_on_lower_class_user(): void
+    {
+        $operator = User::factory()->create(['class' => UserClassEnum::MODERATOR->value]);
+        $user = User::factory()->create(['class' => UserClassEnum::PEASANT->value]);
+        DB::table('users')->where('id', $user->id)->update([
+            'leechwarn' => 1,
+            'leechwarnuntil' => now()->addDays(7)->toDateTimeString(),
+        ]);
+
+        $this->assertTrue($this->repository->removeLeechWarn($operator, $user->id));
+
+        $updated = User::query()->find($user->id);
+        $this->assertSame(0, (int) $updated->leechwarn);
+        $this->assertNull($updated->leechwarnuntil);
+    }
+
+    public function test_remove_leech_warn_allows_staff_on_self(): void
+    {
+        $operator = User::factory()->create(['class' => UserClassEnum::MODERATOR->value]);
+        DB::table('users')->where('id', $operator->id)->update([
+            'leechwarn' => 1,
+            'leechwarnuntil' => now()->addDays(7)->toDateTimeString(),
+        ]);
+
+        $this->assertTrue($this->repository->removeLeechWarn($operator, $operator->id));
+        $this->assertSame(0, (int) User::query()->where('id', $operator->id)->value('leechwarn'));
+    }
+
+    public function test_remove_leech_warn_denies_equal_class_target(): void
+    {
+        $operator = User::factory()->create(['class' => UserClassEnum::MODERATOR->value]);
+        $user = User::factory()->create(['class' => UserClassEnum::MODERATOR->value]);
+
+        $this->expectException(InsufficientPermissionException::class);
+
+        $this->repository->removeLeechWarn($operator, $user->id);
     }
 }

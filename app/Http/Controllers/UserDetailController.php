@@ -233,7 +233,8 @@ class UserDetailController extends Controller
         if ($leechwarnUntilTs !== false) {
             $leechwarnUntilPretty = Format::prettyTimeWithLocale($leechwarnUntilTs - time());
         }
-        if ($leechwarn) {
+        $canRemoveLeechWarn = $leechwarn && $canManageBasic && (int) $user['class'] < $currentClass;
+        if ($canRemoveLeechWarn) {
             AssetAppender::js(sprintf(<<<'JS'
 document.getElementById('remove-leech-warn').addEventListener('click', function () {
     if (!window.confirm(%s)) {
@@ -402,6 +403,7 @@ JS, 'footer', false);
             'joinWeeks' => $joinWeeks,
             'warned' => $warned,
             'leechwarn' => $leechwarn,
+            'canRemoveLeechWarn' => $canRemoveLeechWarn,
             'elapsedLastWarn' => $elapsedLastWarn,
             'warnedUntilPretty' => $warnedUntilPretty,
             'leechwarnUntilPretty' => $leechwarnUntilPretty,

@@ -36,7 +36,7 @@ final class ModerationService
     {
         $operator = $this->getUser($operator);
         $user = $this->userAccountRepository->findOrFailByIdFields((int) $uid, User::$commonFields);
-        $this->checkPermission($operator, $user);
+        $this->checkPermission($operator, $user, 'authority.prfmanage', false);
         $this->clearCache($user);
         $user->leechwarn = false;
         $user->leechwarnuntil = null;
@@ -252,19 +252,22 @@ final class ModerationService
      * @param  mixed  $minAuthClass
      * @return void
      */
-    private function checkPermission($operator, User $user, $minAuthClass = 'authority.prfmanage')
+    private function checkPermission($operator, User $user, $minAuthClass = 'authority.prfmanage', bool $allowSelf = true)
     {
         $operator = $this->getUser($operator);
         if ($operator === null) {
             throw new \RuntimeException('Operator not found');
         }
-        if ($operator->id == $user->id) {
-            return;
-        }
         $permissionName = str_starts_with($minAuthClass, 'authority.')
             ? substr($minAuthClass, strlen('authority.'))
             : $minAuthClass;
         $classRequire = SiteConfig::current()->authority->permission($permissionName);
+        if ($operator->id == $user->id) {
+            if ($allowSelf || ($classRequire !== null && $operator->class >= $classRequire)) {
+                return;
+            }
+            throw new InsufficientPermissionException;
+        }
         if ($classRequire === null || $operator->class < $classRequire || $operator->class <= $user->class) {
             throw new InsufficientPermissionException;
         }

@@ -5,6 +5,9 @@
     </div>
     <div>
         <input type="button" class="nexus-action-btn nx-postbtn" value="{{ __('upload.fill_setlist') }}" wire:click="lookup" wire:loading.attr="disabled" wire:target="lookup">
-        <span class="medium" wire:loading wire:target="lookup">Loading...</span>
+        <span class="medium" wire:loading wire:target="lookup">{{ __('upload.fill_setlist_loading') }}</span>
+        @if ($error !== '')
+            <div class="nx-field__error" role="alert">{{ $error }}</div>
+        @endif
     </div>
 </div>

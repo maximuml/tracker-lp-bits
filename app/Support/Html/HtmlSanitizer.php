@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support\Html;
 
+use Dom\CDATASection;
+use Dom\Comment;
+use Dom\Element;
+use Dom\HTMLDocument;
+use Dom\Node;
+use Dom\ProcessingInstruction;
+
 /**
  * HTML sanitizer with whitelist-based tag/attribute/URL filtering.
  *
@@ -13,6 +20,13 @@ namespace App\Support\Html;
  *
  * The whitelist approach is more secure than blocklist-based filtering
  * because new/unknown tags are automatically stripped.
+ *
+ * Sanitization runs on the real DOM tree produced by the HTML5 parser
+ * (\Dom\HTMLDocument), not on the raw byte stream, so markup-obfuscation
+ * bypasses (recombined fragments like <<script>script>, stray closing
+ * tags like </script >, unquoted attributes, comments, CDATA) can never
+ * smuggle a live element past the filter — anything the parser turns
+ * into a node is filtered as a node.
  */
 final class HtmlSanitizer
 {
@@ -92,6 +106,28 @@ final class HtmlSanitizer
     ];
 
     /**
+     * Elements removed together with their whole subtree — active content,
+     * raw-text containers (whose text could re-tokenize as markup), foreign
+     * content, and interactive/form elements. Unknown-but-inert elements
+     * (e.g. <marquee>) are only unwrapped, keeping their text children.
+     *
+     * @var array<string, bool>
+     */
+    private const DROP_WITH_CONTENT = [
+        'script' => true, 'style' => true, 'iframe' => true,
+        'object' => true, 'embed' => true, 'applet' => true,
+        'form' => true, 'input' => true, 'button' => true,
+        'select' => true, 'option' => true, 'optgroup' => true,
+        'meta' => true, 'link' => true, 'base' => true, 'title' => true,
+        'svg' => true, 'math' => true, 'template' => true,
+        'textarea' => true, 'xmp' => true, 'plaintext' => true,
+        'listing' => true, 'frame' => true, 'frameset' => true,
+        'audio' => true, 'video' => true, 'source' => true,
+        'track' => true, 'map' => true, 'area' => true, 'param' => true,
+        'picture' => true, 'noscript' => true,
+    ];
+
+    /**
      * Sanitize an HTML string, removing dangerous tags, attributes, and URLs.
      */
     public static function sanitize(string $html): string
@@ -100,95 +136,117 @@ final class HtmlSanitizer
             return '';
         }
 
-        // Remove HTML comments (can hide conditional IE XSS payloads)
-        $html = (string) preg_replace('/<!--.*?-->/s', '', $html);
+        try {
+            $doc = HTMLDocument::createFromString(
+                $html,
+                LIBXML_NOERROR | LIBXML_COMPACT,
+            );
+        } catch (\Throwable) {
+            // Parser failure: degrade to escaped plain text, never raw HTML.
+            return htmlspecialchars($html, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8');
+        }
 
-        // Parse and filter tags
-        $html = (string) preg_replace_callback(
-            '/<(\w+)([^>]*)>/s',
-            static fn (array $m): string => self::filterTag((string) $m[1], (string) $m[2]),
-            $html
-        );
-
-        // Filter closing tags
-        $html = (string) preg_replace_callback(
-            '/<\/(\w+)>/s',
-            static fn (array $m): string => self::ALLOWED_TAGS[strtolower((string) $m[1])] ?? ''
-                ? '</'.strtolower((string) $m[1]).'>'
-                : '',
-            $html
-        );
-
-        return $html;
-    }
-
-    /**
-     * Filter an opening tag: keep it only if the tag is allowed
-     * and all its attributes are safe.
-     */
-    private static function filterTag(string $tag, string $attrString): string
-    {
-        $tag = strtolower($tag);
-
-        if (! isset(self::ALLOWED_TAGS[$tag])) {
+        $body = $doc->getElementsByTagName('body')->item(0);
+        if (! $body instanceof Element) {
             return '';
         }
 
+        // Iterative traversal — recursion could blow the stack on deeply
+        // nested hostile markup. Only <body> children are visited and
+        // serialized, so parser-level context tags (<html>, <body onload=…>,
+        // <head>, <!doctype>) never reach the output.
+        /** @var list<Node> $pending */
+        $pending = [];
+        foreach ($body->childNodes as $child) {
+            $pending[] = $child;
+        }
+
+        while ($pending !== []) {
+            $node = array_pop($pending);
+
+            if ($node instanceof Comment
+                || $node instanceof ProcessingInstruction
+                || $node instanceof CDATASection) {
+                $node->remove();
+
+                continue;
+            }
+
+            if (! $node instanceof Element) {
+                continue; // text — serialized escaped by saveHtml()
+            }
+
+            $tag = strtolower($node->localName);
+
+            if (! isset(self::ALLOWED_TAGS[$tag])) {
+                if (isset(self::DROP_WITH_CONTENT[$tag])) {
+                    $node->remove();
+                } else {
+                    // Unwrap unknown-but-inert elements: hoist children into
+                    // the parent and keep them pending for filtering too.
+                    foreach ($node->childNodes as $child) {
+                        $pending[] = $child;
+                    }
+                    $parent = $node->parentNode;
+                    while ($node->firstChild !== null) {
+                        $parent?->insertBefore($node->firstChild, $node);
+                    }
+                    $node->remove();
+                }
+
+                continue;
+            }
+
+            self::filterElementAttributes($node, $tag);
+
+            foreach ($node->childNodes as $child) {
+                $pending[] = $child;
+            }
+        }
+
+        $result = '';
+        foreach ($body->childNodes as $child) {
+            $result .= $doc->saveHtml($child);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Remove every attribute that is not on the tag's whitelist, and any
+     * whitelisted attribute whose value fails the URL/CSS checks.
+     */
+    private static function filterElementAttributes(Element $element, string $tag): void
+    {
         $allowedAttrs = self::ALLOWED_ATTRIBUTES[$tag] ?? [];
-        $safeAttrs = self::filterAttributes($attrString, $allowedAttrs, $tag);
 
-        return $safeAttrs !== '' ? '<'.$tag.' '.$safeAttrs.'>' : '<'.$tag.'>';
-    }
+        foreach ($element->getAttributeNames() as $name) {
+            $lower = strtolower($name);
+            $value = (string) $element->getAttribute($name);
 
-    /**
-     * Filter attributes on a tag, keeping only allowed ones.
-     */
-    /**
-     * @param  array<string, bool>  $allowedAttrs
-     */
-    private static function filterAttributes(string $attrString, array $allowedAttrs, string $tag): string
-    {
-        if ($attrString === '' || $allowedAttrs === []) {
-            return '';
-        }
+            // Event handlers are never whitelisted; the str_starts_with
+            // guard is a second layer in case one ever were added.
+            if (! isset($allowedAttrs[$lower]) || str_starts_with($lower, 'on')) {
+                $element->removeAttribute($name);
 
-        // Parse attributes
-        preg_match_all('/(\w+)\s*=\s*"([^"]*)"/', $attrString, $matches, PREG_SET_ORDER);
-        preg_match_all("/(\w+)\s*=\s*'([^']*)'/", $attrString, $singleMatches, PREG_SET_ORDER);
-
-        $allAttrs = array_merge($matches, $singleMatches);
-        $safeAttrs = [];
-
-        foreach ($allAttrs as $attr) {
-            $name = strtolower((string) $attr[1]);
-            $value = (string) $attr[2];
-
-            if (! isset($allowedAttrs[$name])) {
                 continue;
             }
 
-            // Check for event handler attributes (on*)
-            if (str_starts_with($name, 'on')) {
+            if (($lower === 'href' || $lower === 'src') && ! self::isSafeUrl($value)) {
+                $element->removeAttribute($name);
+
                 continue;
             }
 
-            // Check URL attributes for dangerous schemes
-            if (($name === 'href' || $name === 'src') && ! self::isSafeUrl($value)) {
-                continue;
-            }
-
-            // Check style attribute for dangerous CSS
-            if ($name === 'style') {
-                $value = self::filterStyle($value);
-                if ($value === '') {
-                    continue;
+            if ($lower === 'style') {
+                $filtered = self::filterStyle($value);
+                if ($filtered === '') {
+                    $element->removeAttribute($name);
+                } else {
+                    $element->setAttribute($name, $filtered);
                 }
             }
-
-            $safeAttrs[] = $name.'="'.htmlspecialchars($value, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8').'"';
         }
-
-        return implode(' ', $safeAttrs);
     }
 
     /**
@@ -206,6 +264,13 @@ final class HtmlSanitizer
         // Check for protocol-relative URLs (//evil.com)
         if (str_starts_with($url, '//')) {
             return true; // allowed — same scheme as page
+        }
+
+        // U+FFFD in a URL means the parser replaced a raw NUL or malformed
+        // byte — never legitimate in an href/src, and rejecting it keeps
+        // java\x00script:-style payloads out even after normalization.
+        if (str_contains($url, "\xEF\xBF\xBD")) {
+            return false;
         }
 
         // Parse scheme — any URL with a scheme must use an allowed one.
@@ -234,6 +299,10 @@ final class HtmlSanitizer
      */
     private static function filterStyle(string $style): string
     {
+        // Strip CSS comments up front — otherwise ex/**/pression() and
+        // u/**/rl() sail past the substring checks below.
+        $style = (string) preg_replace('#/\*.*?\*/#s', '', $style);
+
         $declarations = explode(';', $style);
         $safe = [];
 
@@ -255,12 +324,18 @@ final class HtmlSanitizer
                 continue;
             }
 
-            // Block expression() and url() with javascript:
-            if (preg_match('/expression\s*\(/i', $value)) {
+            // A backslash can encode any character as a CSS escape
+            // (e.g. \65 xpression) — none of the whitelisted properties
+            // legitimately need escapes, so reject the whole declaration.
+            if (str_contains($value, '\\')) {
                 continue;
             }
-            if (preg_match('/url\s*\(\s*["\']?\s*javascript:/i', $value)) {
-                continue;
+
+            $squashed = strtolower((string) preg_replace('/\s+/', '', $value));
+            foreach (['expression(', 'url(', 'javascript:', 'vbscript:', 'behavior:', 'binding', '@import', '@charset'] as $bad) {
+                if (str_contains($squashed, $bad)) {
+                    continue 2;
+                }
             }
 
             $safe[] = $property.': '.$value;

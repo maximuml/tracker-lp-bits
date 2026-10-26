@@ -115,6 +115,19 @@ final class SafeHtmlTest extends TestCase
             'HTML comment' => ['<!-- <script>alert(1)</script> -->', '<script'],
             'malformed tag' => ['<script>alert(1)<script>', '<script'],
             'encoded script' => ['<scr&#105;pt>alert(1)</script>', '<script'],
+            // DOM-parser bypasses that defeated the single-pass regex version.
+            'recombined script fragments' => ['<<script>script>alert(1)<</script>/script>', '<script'],
+            'closing tag with space' => ['<b>x</b></script ><script>y</script>', '<script'],
+            'nested script in unknown tag' => ['<x-unknown><script>evil()</script>keep</x-unknown>', '<script'],
+            'style tag' => ['<style>body{display:none}</style>', '<style'],
+            'template tag' => ['<template><img src=x onerror=alert(1)></template>', 'onerror'],
+            'svg foreign content' => ['<svg><script>alert(1)</script></svg>', '<script'],
+            'textarea rawtext' => ['<textarea><img src=x onerror=alert(1)></textarea>', 'onerror'],
+            'css comment in expression' => ['<div style="width: ex/**/pression(alert(1))">x</div>', 'pression'],
+            'css comment in url' => ['<div style="width: u/**/rl(javascript:alert(1))">x</div>', 'javascript:'],
+            'css escape sequence' => ['<div style="width: \\65 xpression(alert(1))">x</div>', '\\65'],
+            'form tag' => ['<form action="/steal"><input name="pw"></form>', '<form'],
+            'meta refresh' => ['<meta http-equiv="refresh" content="0;url=javascript:alert(1)">', '<meta'],
         ];
     }
 
@@ -229,6 +242,39 @@ final class SafeHtmlTest extends TestCase
     public function test_sanitizer_handles_empty_input(): void
     {
         $this->assertSame('', HtmlSanitizer::sanitize(''));
+    }
+
+    /**
+     * Unknown-but-inert elements are unwrapped, keeping their children —
+     * while the children's own dangerous descendants still get filtered.
+     */
+    public function test_sanitizer_unwraps_unknown_tags_and_filters_children(): void
+    {
+        $result = HtmlSanitizer::sanitize('<marquee>scroll <b>x</b></marquee>');
+        $this->assertStringNotContainsString('<marquee', $result);
+        $this->assertStringContainsString('scroll', $result);
+        $this->assertStringContainsString('<b>x</b>', $result);
+    }
+
+    /**
+     * Dangerous raw-text/active elements are dropped with their content —
+     * their text must not leak back into the output.
+     */
+    public function test_sanitizer_drops_active_content_with_subtree(): void
+    {
+        $result = HtmlSanitizer::sanitize('<textarea><img src=x onerror=alert(1)></textarea><b>ok</b>');
+        $this->assertSame('<b>ok</b>', $result);
+    }
+
+    /**
+     * Unquoted attributes are parsed by the DOM (the regex version dropped
+     * them): the safe value survives, the event handler does not.
+     */
+    public function test_sanitizer_keeps_safe_unquoted_attributes(): void
+    {
+        $result = HtmlSanitizer::sanitize('<img src=x onerror=alert(1)>');
+        $this->assertStringContainsString('src="x"', $result);
+        $this->assertStringNotContainsStringIgnoringCase('onerror', $result);
     }
 
     /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Support;
+namespace Tests\Integration\Support;
 
 use App\Support\Format;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -13,7 +13,7 @@ use Tests\TestCase;
  * Render-layer XSS regressions for Comment::format (via Format::formatComment)
  * — the path used to render forum signatures and BBCode bodies.
  */
-#[TestCategory(TestCategory::PURE_UNIT)]
+#[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class CommentRenderSecurityTest extends TestCase
 {
     /**

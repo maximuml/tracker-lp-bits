@@ -37,9 +37,13 @@ class PeerRepository
     {
         return Peer::query()
             ->where('torrent', $torrentId)
-            ->groupBy('peer_id')
             ->with(['user', 'relative_torrent'])
-            ->get();
+            ->get()
+            // GROUP BY peer_id with select * violated ONLY_FULL_GROUP_BY —
+            // dedupe in the collection instead (first row per peer_id, the
+            // same row non-strict sql_mode returned).
+            ->unique('peer_id')
+            ->values();
     }
 
     /** Row lock for update inside the caller's announce transaction. */

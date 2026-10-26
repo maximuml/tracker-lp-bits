@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Auth\Permission;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Models\SearchBox;
 use App\Models\Torrent;
+use App\Models\User;
 use App\Support\Format;
 use App\Support\Time;
 
@@ -27,6 +29,11 @@ class TorrentResource extends BaseResource
      */
     public function toArray($request): array
     {
+        $viewer = $request->user();
+        $revealOwner = ! $this->anonymous
+            || ($viewer instanceof User
+                && ((int) $this->owner === (int) $viewer->id || Permission::canViewAnonymous($viewer)));
+
         $out = [
             'id' => $this->id,
             'name' => $this->name,
@@ -65,7 +72,7 @@ class TorrentResource extends BaseResource
             'images' => $this->whenHas('images'),
             'download_url' => $this->whenHas('download_url'),
             'active_status' => $this->whenHas('active_status'),
-            'user' => new UserResource($this->whenLoaded('user')),
+            'user' => $revealOwner ? new UserResource($this->whenLoaded('user')) : null,
             'extra' => new TorrentExtraResource($this->whenLoaded('extra')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'thanks' => ThankResource::collection($this->whenLoaded('thanks')),

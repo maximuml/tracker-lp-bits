@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Models\HitAndRun;
+use App\Support\SettingsSchemaValidator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 class SettingStoreRequest extends FormRequest
@@ -20,7 +20,7 @@ class SettingStoreRequest extends FormRequest
     public function rules(): array
     {
         $data = $this->all();
-        $prefix = Arr::first(array_keys($data));
+        $schemas = new SettingsSchemaValidator;
 
         $allRules = [
             'hr' => [
@@ -32,13 +32,20 @@ class SettingStoreRequest extends FormRequest
             ],
         ];
 
+        // Every top-level key must be a schema-registered prefix containing an
+        // array of name => value pairs — unknown prefixes are prohibited so
+        // they fail as 422 instead of reaching the repository. Field-level
+        // validation is delegated to the JSON schemas in saveBatch.
         $result = [];
+        foreach (array_keys($data) as $key) {
+            $result[$key] = $schemas->hasSchema((string) $key) ? 'array' : 'prohibited';
+        }
         foreach ($allRules as $rulePrefix => $rules) {
-            if ($rulePrefix != $prefix) {
+            if (! array_key_exists($rulePrefix, $data)) {
                 continue;
             }
             foreach ($rules as $key => $value) {
-                $result["$prefix.$key"] = $value;
+                $result["$rulePrefix.$key"] = $value;
             }
         }
 

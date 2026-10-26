@@ -152,14 +152,31 @@ enum RoutePermissionEnum: string
 
     /**
      * Map the API ability to the legacy permission enum, if one exists.
+     *
+     * Scopes deliberately left unmapped (null) are user-facing actions that
+     * any authenticated user may perform — their Sanctum ability check still
+     * applies, but no legacy permission gate is layered on top. Every staff
+     * or cross-user scope MUST map to a legacy permission: API clients are
+     * issued wildcard ('*') tokens, so an unmapped staff scope would be
+     * reachable by any authenticated user.
      */
     public function toPermissionEnum(): ?PermissionEnum
     {
         return match ($this) {
+            // User-facing scopes: torrent browsing, comment posting, thanks,
+            // rewards, poll votes, own torrents/messages/bookmarks/profile.
+            self::TORRENT_VIEW,
+            self::USER_TORRENTS,
+            self::COMMENT_STORE,
+            self::THANK_MANAGE,
+            self::REWARD_MANAGE,
+            self::POLL_VOTE => null,
             self::TORRENT_UPLOAD => PermissionEnum::UPLOAD,
-            self::TORRENT_VIEW => null,
             self::USER_VIEW => PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO,
-            self::USER_TORRENTS => PermissionEnum::TORRENT_HISTORY,
+            self::USER_CLASSES => PermissionEnum::VIEW_USER_LIST,
+            self::USER_INVITE_INFO => PermissionEnum::VIEW_INVITE,
+            self::USER_MATCH_EXAMS => PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO,
+            self::USER_MOD_COMMENT,
             self::USER_DISABLE,
             self::USER_ENABLE,
             self::USER_RESET_PASSWORD,
@@ -168,20 +185,39 @@ enum RoutePermissionEnum: string
             self::USER_STORE,
             self::USER_UPDATE,
             self::USER_DESTROY => PermissionEnum::MANAGE_USER_BASIC_INFO,
-            self::COMMENT_STORE => PermissionEnum::POST_MANAGE,
+            self::COMMENT_UPDATE,
+            self::COMMENT_DESTROY => PermissionEnum::POST_MANAGE,
             self::NEWS_MANAGE => PermissionEnum::NEWS_MANAGE,
             self::POLL_MANAGE => PermissionEnum::POLL_MANAGE,
             self::FORUM_MANAGE,
             self::OVER_FORUM_MANAGE,
             self::TOPIC_MANAGE => PermissionEnum::FORUM_MANAGE,
+            self::AGENT_ALLOW_LIST,
             self::AGENT_ALLOW_MANAGE,
+            self::AGENT_ALLOW_ALL,
+            self::AGENT_ALLOW_CHECK,
+            self::AGENT_DENY_LIST,
             self::AGENT_DENY_MANAGE => PermissionEnum::CHR_MANAGE,
+            self::PEER_MANAGE,
+            self::FILE_MANAGE,
+            self::SNATCH_MANAGE,
+            self::EXAM_LIST,
             self::EXAM_MANAGE,
+            self::EXAM_ALL,
+            self::EXAM_INDEXES,
+            self::EXAM_USER_LIST,
             self::EXAM_USER_MANAGE,
+            self::EXAM_USER_AVOID,
+            self::EXAM_USER_RECOVER,
+            self::EXAM_USER_AVOID_BULK,
+            self::EXAM_USER_DELETE_BULK,
             self::DASHBOARD_VIEW,
+            self::SETTING_LIST,
             self::SETTING_MANAGE,
             self::TAG_MANAGE,
+            self::HIT_AND_RUN_LIST,
             self::HIT_AND_RUN_MANAGE,
+            self::HIT_AND_RUN_LIST_STATUS,
             self::HIT_AND_RUN_PARDON,
             self::HIT_AND_RUN_BULK_PARDON,
             self::HIT_AND_RUN_BULK_DELETE => PermissionEnum::STAFF_MEMBER,

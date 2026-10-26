@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Auth\Permission;
 use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
@@ -46,7 +47,14 @@ class UserController extends Controller
      */
     public function index(UserIndexRequest $request): array
     {
-        $result = $this->repository->getList($request->validated());
+        $params = $request->validated();
+        // The email filter is a staff-only lookup — drop it when the actor
+        // lacks View Confidential Info so a relaxed ability scope can never
+        // turn it into an email-enumeration primitive.
+        if (isset($params['email']) && ! Permission::canViewUserConfidentialInfo()) {
+            unset($params['email']);
+        }
+        $result = $this->repository->getList($params);
         $resource = UserResource::collection($result);
 
         return $this->success($resource);

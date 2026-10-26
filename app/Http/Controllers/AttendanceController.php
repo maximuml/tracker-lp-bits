@@ -16,6 +16,7 @@ use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Js;
 use Illuminate\View\View;
 
 class AttendanceController extends BasePageController
@@ -117,20 +118,20 @@ class AttendanceController extends BasePageController
      */
     private function calendarScript(array $data): string
     {
-        $eventStr = (string) json_encode($data['events'] ?? []);
-        $validRangeStr = (string) json_encode($data['validRange'] ?? []);
-        $localeJs = (string) ($data['localeJs'] ?? '');
-        $confirmTip = (string) (__('attendance.retroactive_confirm_tip'));
+        $eventsExpr = Js::from($data['events'] ?? []);
+        $validRangeExpr = Js::from($data['validRange'] ?? []);
+        $localeExpr = Js::from((string) ($data['localeJs'] ?? ''));
+        $confirmExpr = Js::from((string) (__('attendance.retroactive_confirm_tip')));
 
         return <<<EOP
-let events = JSON.parse('$eventStr')
-let validRange = JSON.parse('$validRangeStr')
-let confirmText = "{$confirmTip}"
+let events = {$eventsExpr}
+let validRange = {$validRangeExpr}
+let confirmText = {$confirmExpr}
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
-      locale: '$localeJs',
+      locale: {$localeExpr},
       events: events,
       validRange: validRange,
       eventClick: function(info) {

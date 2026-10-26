@@ -37,13 +37,23 @@ final class SetlistLookupTest extends TestCase
             ->assertOk();
     }
 
-    public function test_lookup_with_empty_name_alerts_instead_of_dispatching(): void
+    public function test_lookup_with_empty_name_sets_error_instead_of_dispatching(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user, 'nexus-web');
 
         Livewire::test(SetlistLookup::class)
             ->call('lookup')
+            ->assertSet('error', 'Enter the torrent name first.')
+            ->assertNotDispatched('setlist-append')
+            ->assertOk();
+    }
+
+    public function test_lookup_for_guest_is_a_noop(): void
+    {
+        Livewire::test(SetlistLookup::class, ['name' => 'Some Release'])
+            ->call('lookup')
+            ->assertSet('error', '')
             ->assertNotDispatched('setlist-append')
             ->assertOk();
     }
@@ -54,10 +64,12 @@ final class SetlistLookupTest extends TestCase
         $this->actingAs($user, 'nexus-web');
 
         // A name that cannot resolve to a setlist.fm entry — the lookup
-        // takes the failure branch and alerts, without dispatching
-        // setlist-append into the descr editor.
+        // takes the failure branch and surfaces $error in the view (the
+        // strict public CSP forbids the old alert() path), without
+        // dispatching setlist-append into the descr editor.
         Livewire::test(SetlistLookup::class, ['name' => '  xyzzy-not-a-real-release-000  '])
             ->call('lookup')
+            ->assertSet('error', fn (string $error): bool => $error !== '')
             ->assertNotDispatched('setlist-append')
             ->assertOk();
     }

@@ -178,7 +178,7 @@ class RssController extends BasePageController
 
         $searchstr = trim((string) $request->input('search', ''));
         if ($searchstr !== '') {
-            $query['search'] = rawurlencode($searchstr);
+            $query['search'] = $searchstr;
             if ($request->filled('search_mode')) {
                 $searchMode = (int) $request->input('search_mode');
                 if (! in_array($searchMode, [0, 2], true)) {
@@ -205,7 +205,7 @@ class RssController extends BasePageController
 
         $link = Url::absolute($baseUrl).'/web/torrentrss?'.http_build_query($query).$addinclbm;
         $msg = (__('getrss.std_use_following_url'))."\n".$link."\n\n"
-            .(__('getrss.std_utorrent_feed_url'))."\n".$link.'&linktype=dl'.$addinclbm;
+            .(__('getrss.std_utorrent_feed_url'))."\n".$link.'&linktype=dl';
 
         return $this->getrssMessageResponse(__('getrss.std_done'), (string) Format::formatComment($msg), __('getrss.head_rss_feeds'));
     }

@@ -38,7 +38,7 @@ final readonly class ForumSettingsDto
             $clicktopic = null;
         }
 
-        $signature = htmlspecialchars(trim((string) $request->input('signature', '')));
+        $signature = trim((string) $request->input('signature', ''));
 
         // ttlastpost is a plain checkbox: absent from POST means the user
         // unchecked it — that is an explicit "no", not "leave unchanged".

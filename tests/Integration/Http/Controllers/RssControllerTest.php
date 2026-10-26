@@ -94,6 +94,46 @@ final class RssControllerTest extends TestCase
         $this->assertStringContainsString('must select rows', (string) $response->getContent());
     }
 
+    public function test_getrss_post_does_not_double_encode_search_or_duplicate_bookmark_flag(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $this->actingAs($user);
+        $this->mockCurrentUserWithDefaults($user);
+        app()->bind(NexusCache::class, fn () => null);
+        Settings::saveBatch('basic', ['BASEURL' => 'http://localhost']);
+        Settings::saveBatch('main', ['browsecat' => 1]);
+        Settings::resetCache();
+
+        $controller = app(RssController::class);
+        $request = GetrssRequest::create('/web/rss/generate', 'POST', [
+            'showrows' => '10',
+            'search' => 'My Release',
+            'inclbookmarked' => '1',
+        ]);
+        app()->instance('request', $request);
+
+        $response = $controller->getrssSubmit($request);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $content = (string) $response->getContent();
+
+        // rawurlencode() before http_build_query() used to emit
+        // search=My%2BRelease (the literal string "%2B" in the feed URL).
+        $this->assertStringContainsString('search=My+Release', $content);
+        $this->assertStringNotContainsString('My%2B', $content);
+        $this->assertStringNotContainsString('%25', $content);
+
+        // The uTorrent feed URL used to carry the flag twice: $addinclbm
+        // inside $link AND appended again after &linktype=dl, producing
+        // "linktype=dl&inclbookmarked=1". The single correct position is
+        // before linktype (the page chrome also contains an unrelated
+        // /web/torrents?inclbookmarked=1 nav link, so count the joined
+        // fragment, not the flag alone).
+        $this->assertSame(2, substr_count($content, 'inclbookmarked=1&amp;linktype=dl'));
+        $this->assertStringNotContainsString('linktype=dl&amp;inclbookmarked', $content);
+    }
+
     /**
      * Bind a partial mock of CurrentUser that returns the given user array.
      *

@@ -34,7 +34,7 @@ return [
     // Ordered regex substitutions: pattern => replacement (applied via
     // preg_replace; `\1`/`$1` backrefs refer to the pattern's groups).
     'span_map' => [
-        "/\[font=([^\[\(&\\\\;]+?)\]/is" => '<span face="\\1">',
+        '/\[font=([a-zA-Z0-9 ,_-]{1,50})\]/i' => '<span face="\\1">',
         '/\[color=([#0-9a-z]{1,15})\]/is' => '<span>',
         '/\[color=([a-z]+)\]/is' => '<span>',
         '/\[size=([1-7])\]/is' => '<span>',

@@ -159,7 +159,7 @@ final class ForumTopicViewService
                 foreach ($allPosts as $p) {
                     $sig = (string) (optional($userInfoArr->get((int) ($p['userid'] ?? 0)))->signature ?? '');
                     if ($sig !== '') {
-                        $fmtKeys[] = 'fmt_sig_'.md5($sig);
+                        $fmtKeys[] = 'fmt_sig2_'.md5($sig);
                     }
                 }
             }
@@ -241,7 +241,7 @@ final class ForumTopicViewService
                 ratio: SafeHtml::fromTrustedHtml((string) Ratio::forUserId((int) ($arr2['id'] ?? 0))),
                 body: $bodyContent,
                 signature: $signature !== ''
-                    ? $renderFmt('fmt_sig_'.md5($signature), static fn () => Format::formatComment($signature, false, false, false, true, 500, true, false, 1, 200))
+                    ? $renderFmt('fmt_sig2_'.md5($signature), static fn () => Format::formatComment($signature, true, false, false, true, 500, true, false, 1, 200))
                     : null,
                 editedBy: $editedBy,
                 editedAtRaw: $editedAtRaw,

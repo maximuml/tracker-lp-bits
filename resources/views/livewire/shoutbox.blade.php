@@ -10,7 +10,7 @@
     <button type="button" class="nx-shoutbox-mentions" id="shoutbox-mentions" hidden wire:ignore></button>
 </h2>
 <div id="kshoutbox" class="p-[10pt] @if(!$open) nx-hidden @endif">
-<div wire:poll.{{ $refresh }}s>
+<div wire:poll.visible.{{ $refresh }}s>
     <x-data-table :caption="__('index.text_shoutbox')" captionHidden>
     @foreach ($items as $item)
         <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[{{ $item['time'] }}]</span> @if ($item['actions'] !== null)<span class="shout-actions">@if ($item['actions']['canEdit']) <a href="#" class="shout-action-edit" wire:click.prevent="startEdit({{ $item['actions']['msgId'] }})" title="{{ __('shoutbox.title_edit_shout') }}">[{{ __('shoutbox.text_edit') }}]</a>@endif
@@ -23,7 +23,7 @@
         <p>{{ $status }}</p>
     @endif
     <form wire:submit="send" name="shbox" method="post" action="#">
-        {{ $toolbar }}
+        <div wire:ignore>{{ $toolbar }}</div>
         <div class="nx-flex">
             <label for="shbox_text">{{ __('index.text_message') }}</label>
             <input type="text" name="shbox_text" id="shbox_text" wire:model="text" class="grow" maxlength="1000" autocomplete="off" />

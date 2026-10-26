@@ -102,6 +102,10 @@
     line-height: 1;
     padding: .8rem;
     margin: -.8rem;
+    background: none;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
 }
 
 .nx-notif-bell svg {

@@ -15,9 +15,16 @@
  * A yes/callback returning false keeps the dialog open.
  */
 (function () {
+    var OPTS = window.nexusLayerOptions || {};
     var seq = 0;
     var dialogs = {};
     var loaders = [];
+
+    function opt(section, key, fallback) {
+        var s = OPTS[section];
+        var v = s ? s[key] : undefined;
+        return v !== undefined && v !== null ? v : fallback;
+    }
 
     function mk(tag, cls, text) {
         var el = document.createElement(tag);
@@ -44,10 +51,10 @@
         var dlg = mk('dialog', 'nx-modal');
         var box = mk('div', 'nx-modal__box');
         var header = mk('div', 'nx-modal__header');
-        header.appendChild(mk('h2', 'nx-modal__title', title || 'Info'));
+        header.appendChild(mk('h2', 'nx-modal__title', title || opt('alert', 'title', 'Info')));
         var x = mk('button', 'nx-modal__close', '×');
         x.type = 'button';
-        x.setAttribute('aria-label', 'Close');
+        x.setAttribute('aria-label', opt('labels', 'close', 'Close'));
         x.addEventListener('click', function () { closeDlg(dlg); });
         header.appendChild(x);
         box.appendChild(header);
@@ -108,9 +115,9 @@
         alert: function (msg, opts, yes) {
             var o = opts || {};
             var idx;
-            var s = shell(o.title || 'Info');
+            var s = shell(o.title || opt('alert', 'title', 'Info'));
             fillBody(s.body, typeof msg === 'string' ? msg : String(msg));
-            addBtn(s.btns, (o.btn && o.btn[0]) || 'OK', o.btnAlign, function () {
+            addBtn(s.btns, (o.btn && o.btn[0]) || opt('confirm', 'btn', ['OK'])[0] || 'OK', o.btnAlign, function () {
                 var res = yes ? yes(idx) : undefined;
                 if (res !== false) { closeDlg(s.dlg); }
             });
@@ -120,14 +127,14 @@
         confirm: function (msg, opts, yes, cancel) {
             var o = opts || {};
             var idx;
-            var s = shell(o.title || 'Confirm');
+            var s = shell(o.title || opt('confirm', 'title', 'Confirm'));
             fillBody(s.body, typeof msg === 'string' ? msg : String(msg));
-            var labels = o.btn || ['OK', 'Cancel'];
+            var labels = o.btn || opt('confirm', 'btn', ['OK', 'Cancel']);
             addBtn(s.btns, labels[0], o.btnAlign, function () {
                 var res = yes ? yes(idx) : undefined;
                 if (res !== false) { closeDlg(s.dlg); }
             });
-            addBtn(s.btns, labels[1] || 'Cancel', o.btnAlign, function () {
+            addBtn(s.btns, labels[1] || opt('alert', 'btn', ['OK', 'Cancel'])[1] || 'Cancel', o.btnAlign, function () {
                 var res = cancel ? cancel(idx) : undefined;
                 if (res !== false) { closeDlg(s.dlg); }
             });
@@ -136,6 +143,7 @@
         },
         load: function () {
             var dlg = mk('dialog', 'nx-modal nx-modal--loading');
+            dlg.setAttribute('aria-label', opt('labels', 'loading', 'Loading...'));
             dlg.appendChild(mk('div', 'nx-modal__spinner'));
             var idx = register(dlg);
             loaders.push(dlg);

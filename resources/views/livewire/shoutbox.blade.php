@@ -15,7 +15,7 @@
     @foreach ($items as $item)
         <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[{{ $item['time'] }}]</span> @if ($item['actions'] !== null)<span class="shout-actions">@if ($item['actions']['canEdit']) <a href="#" class="shout-action-edit" wire:click.prevent="startEdit({{ $item['actions']['msgId'] }})" title="{{ __('shoutbox.title_edit_shout') }}">[{{ __('shoutbox.text_edit') }}]</a>@endif
 @if ($item['actions']['canDelete']) <a href="#" class="shout-action-del" data-shout-del wire:click.prevent="confirmDelete({{ $item['actions']['msgId'] }})" title="{{ __('shoutbox.title_delete_shout') }}">[{{ __('shoutbox.text_del') }}]</a>@endif</span>@endif <x-shoutbox.avatar :url="$item['avatarUrl']" :user-id="$item['avatarUserId']" :tooltip="$item['avatarTooltip']" :spacer="$item['avatarSpacer']" /> @if ($item['classBadge'] !== null)<x-shoutbox.class-badge :modifier="$item['classBadge']['modifier']" :tooltip="$item['classBadge']['tooltip']" :label="$item['classBadge']['label']" />@endif@if (! empty($item['isGuest']))<b>{{ $item['username'] }}</b>@else{{ $item['username'] }}@endif @if ($item['reactions'] !== null)<span class="shout-reactions">@foreach ($item['reactions']['reactions'] as $r)<button type="button" class="shout-reaction{{ $r['active'] ? ' active' : '' }}" wire:click.prevent="react({{ $item['reactions']['shoutId'] }}, @js($r['emoji']))" title="{{ $r['title'] }}">{{ $r['emoji'] }} {{ $r['count'] }}</button>@endforeach
-@if ($item['reactions']['showPicker'])<button type="button" class="shout-reaction shout-reaction-add" wire:click.prevent="togglePicker({{ $item['reactions']['shoutId'] }})" title="{{ __('shoutbox.title_add_reaction') }}">+</button><span class="shout-reaction-picker{{ $openPickerId === $item['reactions']['shoutId'] ? '' : ' nx-hidden' }}" id="shout-reaction-picker-{{ $item['reactions']['shoutId'] }}">@foreach ($item['reactions']['pickerEmojis'] as $emoji)<button type="button" class="shout-reaction" wire:click.prevent="react({{ $item['reactions']['shoutId'] }}, @js($emoji))" title="{{ __('shoutbox.title_react') }}">{{ $emoji }}</button>@endforeach</span>@endif</span>@endif @if ($editingId === $item['msgId'])<span class="shoutbox-editing"><input type="text" wire:model="editText" wire:keydown.enter.prevent="saveEdit" wire:keydown.escape="cancelEdit" /><button type="button" class="nx-btn nx-btn--primary" wire:click="saveEdit">Save</button><button type="button" class="nx-btn nx-btn--primary" wire:click="cancelEdit">Cancel</button></span>@else<x-shoutbox.message :id="$item['msgId']" :is-long="$item['msgLong']" :raw="$item['msgRaw']" :formatted="$item['msgFormatted']" :edited-time="$item['editedTime']" :label-more="$item['labelMore']" :label-less="$item['labelLess']" />@endif
+@if ($item['reactions']['showPicker'])<button type="button" class="shout-reaction shout-reaction-add" wire:click.prevent="togglePicker({{ $item['reactions']['shoutId'] }})" title="{{ __('shoutbox.title_add_reaction') }}">+</button><span class="shout-reaction-picker{{ $openPickerId === $item['reactions']['shoutId'] ? '' : ' nx-hidden' }}" id="shout-reaction-picker-{{ $item['reactions']['shoutId'] }}">@foreach ($item['reactions']['pickerEmojis'] as $emoji)<button type="button" class="shout-reaction" wire:click.prevent="react({{ $item['reactions']['shoutId'] }}, @js($emoji))" title="{{ __('shoutbox.title_react') }}">{{ $emoji }}</button>@endforeach</span>@endif</span>@endif @if ($editingId === $item['msgId'])<span class="shoutbox-editing"><input type="text" wire:model="editText" wire:keydown.enter.prevent="saveEdit" wire:keydown.escape="cancelEdit" /><button type="button" class="nx-btn nx-btn--primary" wire:click="saveEdit">{{ __('label.save') }}</button><button type="button" class="nx-btn nx-btn--primary" wire:click="cancelEdit">{{ __('label.cancel') }}</button></span>@else<x-shoutbox.message :id="$item['msgId']" :is-long="$item['msgLong']" :raw="$item['msgRaw']" :formatted="$item['msgFormatted']" :edited-time="$item['editedTime']" :label-more="$item['labelMore']" :label-less="$item['labelLess']" />@endif
 </td></tr>
     @endforeach
     </x-data-table>
@@ -34,24 +34,24 @@
 </div>
 </div>
 @if ($confirmingDeleteId !== null)
-<dialog class="nx-modal" open wire:key="shoutbox-delete-confirm">
+<dialog class="nx-modal" wire:key="shoutbox-delete-confirm" wire:keydown.escape.window="cancelConfirm">
     <div class="nx-modal__box">
-        <div class="nx-modal__header"><h2 class="nx-modal__title">Info</h2><button type="button" class="nx-modal__close" wire:click="cancelConfirm">×</button></div>
+        <div class="nx-modal__header"><h2 class="nx-modal__title">{{ __('functions.text_info') }}</h2><button type="button" class="nx-modal__close" wire:click="cancelConfirm" aria-label="{{ __('functions.text_close') }}">×</button></div>
         <div class="nx-modal__body">{{ __('shoutbox.js_confirm_delete') }}</div>
         <div class="nx-modal__btns nx-modal__btns--center">
-            <button type="button" class="nx-modal__btn" wire:click="delete({{ $confirmingDeleteId }})">Yes</button>
+            <button type="button" class="nx-modal__btn" wire:click="delete({{ $confirmingDeleteId }})">{{ __('functions.text_yes') }}</button>
             <button type="button" class="nx-modal__btn" wire:click="cancelConfirm">{{ __('label.cancel') }}</button>
         </div>
     </div>
 </dialog>
 @endif
 @if ($confirmingClear)
-<dialog class="nx-modal" open wire:key="shoutbox-clear-confirm">
+<dialog class="nx-modal" wire:key="shoutbox-clear-confirm" wire:keydown.escape.window="cancelConfirm">
     <div class="nx-modal__box">
-        <div class="nx-modal__header"><h2 class="nx-modal__title">Info</h2><button type="button" class="nx-modal__close" wire:click="cancelConfirm">×</button></div>
+        <div class="nx-modal__header"><h2 class="nx-modal__title">{{ __('functions.text_info') }}</h2><button type="button" class="nx-modal__close" wire:click="cancelConfirm" aria-label="{{ __('functions.text_close') }}">×</button></div>
         <div class="nx-modal__body">{{ $clearConfirm }}</div>
         <div class="nx-modal__btns nx-modal__btns--center">
-            <button type="button" class="nx-modal__btn" wire:click="clear">Yes</button>
+            <button type="button" class="nx-modal__btn" wire:click="clear">{{ __('functions.text_yes') }}</button>
             <button type="button" class="nx-modal__btn" wire:click="cancelConfirm">{{ __('label.cancel') }}</button>
         </div>
     </div>

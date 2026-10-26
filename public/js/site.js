@@ -110,6 +110,7 @@ ajax.postText=function(url,body){return fetch(url,{method:'POST',credentials:'sa
         timer = setTimeout(function () {
             tip = document.createElement('div');
             tip.className = 'nx-tt-pop';
+            tip.setAttribute('role', 'tooltip');
             tip.style.maxWidth = maxWidth + 'px';
             tip.appendChild(content.cloneNode(true));
             document.body.appendChild(tip);
@@ -122,19 +123,47 @@ ajax.postText=function(url,body){return fetch(url,{method:'POST',credentials:'sa
 
     var SELECTOR = '[data-domtt-content],[data-domtt-src],[data-domtt-promo]';
 
+    function openFor(el, delay, lifetime) {
+        if (el.hasAttribute('data-domtt-src')) {
+            var src = document.getElementById(el.getAttribute('data-domtt-src'));
+            if (src) { show(el, src, 400, delay, lifetime); }
+            return;
+        }
+        if (el.hasAttribute('data-domtt-promo')) {
+            show(el, inlineContent(el), 300, delay, lifetime);
+            return;
+        }
+        show(el, inlineContent(el), 400, delay, lifetime);
+    }
+
     document.addEventListener('mouseover', function (e) {
         var el = e.target && e.target.closest ? e.target.closest(SELECTOR) : null;
         if (!el) { return; }
         if (el.hasAttribute('data-domtt-src')) {
-            var src = document.getElementById(el.getAttribute('data-domtt-src'));
-            if (src) { show(el, src, 400, 500, 3000); }
+            openFor(el, 500, 3000);
             return;
         }
         if (el.hasAttribute('data-domtt-promo')) {
-            show(el, inlineContent(el), 300, 500, 3000);
+            openFor(el, 500, 3000);
             return;
         }
-        show(el, inlineContent(el), 400, 0, 10000);
+        openFor(el, 0, 10000);
+    });
+
+    // Keyboard parity with hover: focusable tooltip sources (links,
+    // buttons, tabindex'd spans) open instantly and stay until blur.
+    document.addEventListener('focusin', function (e) {
+        var el = e.target && e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (!el) { return; }
+        openFor(el, 0, 0);
+    });
+
+    document.addEventListener('focusout', function (e) {
+        if (!current || !e.target || !e.target.closest) { return; }
+        if (e.target.closest(SELECTOR) !== current) { return; }
+        var into = e.relatedTarget;
+        if (into && current.contains(into)) { return; }
+        hide();
     });
 
     document.addEventListener('mouseout', function (e) {

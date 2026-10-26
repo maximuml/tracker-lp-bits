@@ -123,7 +123,7 @@
                                     @endif
 
                                     @if ($item->pointsShort !== null)
-                                        <progress class="nx-bshop__progress" max="{{ $item->price }}" value="{{ $shop->bonus }}" aria-label="{{ $item->trade->note }}"></progress>
+                                        <progress class="nx-bshop__progress" max="{{ $item->price }}" value="{{ $shop->balance }}" aria-label="{{ $item->trade->note }}"></progress>
                                         <p class="nx-bshop__need">{{ $item->trade->note }}</p>
                                     @elseif ($item->trade->note !== null)
                                         <p class="nx-bshop__need">{{ $item->trade->note }}</p>

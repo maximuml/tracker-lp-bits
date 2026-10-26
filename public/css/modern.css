@@ -2576,6 +2576,11 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
     border-radius: 999px;
     background: var(--nxm-surface);
     color: var(--nxm-text);
+}
+.nxm-main .nx-bshop a.nx-bshop__chip:link,
+.nxm-main .nx-bshop a.nx-bshop__chip:visited,
+.nxm-main .nx-bshop a.nx-bshop__chip:hover,
+.nxm-main .nx-bshop a.nx-bshop__chip:focus-visible {
     text-decoration: none;
 }
 .nx-bshop__chip:hover {
@@ -2624,6 +2629,9 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
 .nx-bshop__field select {
     box-sizing: border-box;
     width: 100%;
+    border: 1px solid var(--nxm-text-dim);
+    background-color: var(--nxm-surface-alt);
+    color: var(--nxm-text);
 }
 .nx-bshop__fields {
     display: grid;
@@ -2673,6 +2681,19 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
 .nx-bshop__price { color: var(--nxm-text); }
 .nx-bshop__buy input[type="submit"] { margin-left: auto; }
 .nx-bshop__buy .nx-btn--primary { color: var(--nxm-on-accent); }
+.nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled,
+.nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled:hover,
+.nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled:focus,
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled,
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled:hover,
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled:focus {
+    background-color: var(--nxm-surface-alt);
+    background-image: none;
+    border: 1px solid var(--nxm-border);
+    box-shadow: none;
+    color: var(--nxm-text-dim);
+    cursor: not-allowed;
+}
 .nx-bshop__info {
     margin-top: 1.5rem;
 }
@@ -2697,7 +2718,6 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
     margin-top: 0.75rem;
     overflow: auto;
 }
-.nx-bshop__info-body h1,
 .nx-bshop__info-body h3 { color: var(--nxm-text); }
 
 html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__chip,

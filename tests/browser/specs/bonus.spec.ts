@@ -94,6 +94,49 @@ test('bonus shop fits a 390px viewport and keeps a buy button visible', async ({
   expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(844);
 });
 
+test('one-time submit reset preserves disabled shop buttons', async ({ page }) => {
+  await page.addInitScript(() => {
+    document.addEventListener(
+      'DOMContentLoaded',
+      () => {
+        const button = document.querySelector('.nx-bshop__buy input[type="submit"][data-submit-once]');
+        if (button instanceof HTMLInputElement) {
+          button.disabled = true;
+        }
+      },
+      { once: true },
+    );
+  });
+  await page.goto('/web/mybonus', { waitUntil: 'networkidle' });
+
+  const state = await page.evaluate(() => {
+    const buttons = Array.from(
+      document.querySelectorAll<HTMLInputElement>('.nx-bshop__buy input[type="submit"][data-submit-once]'),
+    );
+    const permanentlyDisabled = buttons.find((button) => button.disabled);
+    const enabled = buttons.find((button) => !button.disabled);
+    if (!permanentlyDisabled || !enabled?.form) {
+      return null;
+    }
+
+    enabled.form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    const disabledWhileSubmitting = enabled.disabled;
+    window.dispatchEvent(new Event('pageshow'));
+
+    return {
+      permanentlyDisabled: permanentlyDisabled.disabled,
+      disabledWhileSubmitting,
+      reenabledAfterPageshow: !enabled.disabled,
+    };
+  });
+
+  expect(state).toEqual({
+    permanentlyDisabled: true,
+    disabledWhileSubmitting: true,
+    reenabledAfterPageshow: true,
+  });
+});
+
 test('bonus shop gifts chip lands on the gifts group', async ({ page }) => {
   await page.goto('/web/mybonus', { waitUntil: 'networkidle' });
   await page.locator('.nx-bshop__chip', { hasText: 'Gifts' }).click();

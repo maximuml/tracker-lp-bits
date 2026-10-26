@@ -1509,13 +1509,15 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('submit', function (e) {
         if (e.defaultPrevented) { return; }
         var form = e.target;
-        form.querySelectorAll('[data-submit-once]').forEach(function (button) {
+        form.querySelectorAll('[data-submit-once]:not(:disabled)').forEach(function (button) {
             button.disabled = true;
+            button.setAttribute('data-submit-once-submitting', '');
         });
     });
     window.addEventListener('pageshow', function () {
-        document.querySelectorAll('[data-submit-once]').forEach(function (button) {
+        document.querySelectorAll('[data-submit-once-submitting]').forEach(function (button) {
             button.disabled = false;
+            button.removeAttribute('data-submit-once-submitting');
         });
     });
 })();

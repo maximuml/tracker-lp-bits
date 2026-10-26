@@ -99,12 +99,36 @@ final class BonusShopPageTest extends TestCase
         /** @var User $user */
         $user = User::factory()->create(['class' => 1, 'seedbonus' => 150]);
 
-        $this->withNexusCookie($user)
+        $response = $this->withNexusCookie($user)
             ->get('/web/mybonus')
             ->assertOk()
             ->assertSee('max="300"', false)
-            ->assertSee('150 more points needed')
-            ->assertSee('disabled', false);
+            ->assertSee('150 more points needed');
+        $html = (string) $response->getContent();
+        preg_match('/<form id="bx0"[^>]*>.*?<\/form>/s', $html, $form);
+        $formHtml = $form[0] ?? '';
+        $this->assertNotSame('', $formHtml);
+        $this->assertMatchesRegularExpression('/<input type="submit"[^>]*\sdisabled(?:\s|>)/', $formHtml);
+    }
+
+    public function test_progress_uses_numeric_balance_for_large_values(): void
+    {
+        DB::table('settings')
+            ->where('name', 'bonus.tengbupload')
+            ->update(['value' => '2000']);
+        Settings::resetCache();
+
+        /** @var User $user */
+        $user = User::factory()->create(['class' => 1, 'seedbonus' => 1500]);
+        $response = $this->withNexusCookie($user)->get('/web/mybonus')->assertOk();
+        $html = (string) $response->getContent();
+
+        preg_match('/<form id="bx2"[^>]*>.*?<\/form>/s', $html, $form);
+        $formHtml = $form[0] ?? '';
+        $this->assertNotSame('', $formHtml);
+        $this->assertStringContainsString('max="2000"', $formHtml);
+        $this->assertStringContainsString('value="1500"', $formHtml);
+        $this->assertStringContainsString('500 more points needed', $formHtml);
     }
 
     public function test_affordable_item_has_primary_enabled_button(): void
@@ -115,7 +139,12 @@ final class BonusShopPageTest extends TestCase
         $response = $this->withNexusCookie($user)->get('/web/mybonus');
 
         $response->assertOk();
-        $this->assertMatchesRegularExpression('/class="nx-btn nx-btn--primary"[^>]*value="Exchange!"/', (string) $response->getContent());
+        $buttonPattern = '/<input type="submit"[^>]*class="nx-btn nx-btn--primary"[^>]*value="Exchange!"[^>]*>/';
+        $this->assertMatchesRegularExpression($buttonPattern, (string) $response->getContent());
+        preg_match($buttonPattern, (string) $response->getContent(), $button);
+        $buttonHtml = $button[0] ?? '';
+        $this->assertNotSame('', $buttonHtml);
+        $this->assertDoesNotMatchRegularExpression('/\sdisabled(?:\s|>)/', $buttonHtml);
     }
 
     public function test_gift_labels_and_info_disclosure_are_accessible(): void

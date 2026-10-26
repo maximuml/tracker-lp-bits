@@ -22,6 +22,7 @@ final readonly class BonusShopViewModel
         public string $sitename,
         public SafeHtml $msg,
         public string $bonus,
+        public float $balance,
         public string $lockText,
         public array $items,
     ) {}

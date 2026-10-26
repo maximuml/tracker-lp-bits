@@ -23,23 +23,23 @@
         <div class="text-center">{{ __('mybonus.text_you_are_currently_getting') }}{{ $info->currentSeedBonus }}{{ __('mybonus.text_point') }}{{ \App\Support\Strings::addS((float) $info->currentSeedBonus) }}{{ __('mybonus.text_per_hour') }} (A = {{ $info->aFactor }})</div>
         <div class="mx-auto w-[400px]"><span class="block h-[15px] rounded-[3px] bg-nxm-surface-alt"><img class="{{ $info->loadbarClass }}" src="pic/trans.gif" alt="{{ $info->percentLabel }}%" /></span></div>
         @if ($info->officialAdditionFactor !== null)
-        <h1>{{ __('mybonus.text_get_by_seeding_official') }}</h1>
+        <h3>{{ __('mybonus.text_get_by_seeding_official') }}</h3>
         <ul>
         <li>{{ __('mybonus.official_calculate_method') }}</li>
         <li>{{ __('mybonus.official_tag_bonus_additional_factor') }}{{ $info->officialAdditionFactor }}</li>
         </ul>
         @endif
         @if ($info->haremAdditionFactor !== null)
-        <h1>{{ __('mybonus.text_get_by_harem') }}</h1>
+        <h3>{{ __('mybonus.text_get_by_harem') }}</h3>
         <ul>
         <li>{{ __('mybonus.harem_additional_desc') }}<a href="/web/invite?id={{ $info->userId }}" class="altlink" target="_blank">{{ __('mybonus.text_here') }}</a></li>
         <li>{{ __('mybonus.harem_additional_factor') }}{{ $info->haremAdditionFactor }}</li>
         <li>{{ __('mybonus.harem_additional_note') }}</li>
         </ul>
         @endif
-        <h1>{{ __('mybonus.text_bonus_summary') }}</h1>
+        <h3>{{ __('mybonus.text_bonus_summary') }}</h3>
         <div>{{ $info->summaryTable }}</div>
-        <h1>{{ __('mybonus.text_other_things_get_bonus') }}</h1>
+        <h3>{{ __('mybonus.text_other_things_get_bonus') }}</h3>
         <ul>
         @if ($info->uploadtorrentBonus > 0)
         <li>{{ __('mybonus.text_upload_torrent') }}{{ $info->uploadtorrentBonus }}{{ __('mybonus.text_point') }}{{ \App\Support\Strings::addS($info->uploadtorrentBonus) }}</li>
@@ -66,7 +66,7 @@
         <li>{{ __('mybonus.text_receive_thanks') }}{{ $info->receivethanksBonus }}{{ __('mybonus.text_point') }}{{ \App\Support\Strings::addS($info->receivethanksBonus) }}</li>
         @endif
         </ul>
-        <h1>{{ __('mybonus.text_howto_get_karma_four') }}</h1>
+        <h3>{{ __('mybonus.text_howto_get_karma_four') }}</h3>
         <ul>
         @if ($info->ratiolimitBonus > 0)
         <li>{{ __('mybonus.text_user_with_ratio_above') }}{{ $info->ratiolimitBonus }}{{ __('mybonus.text_and_uploaded_amount_above') }}{{ $info->dlamountlimitBonus }}{{ __('mybonus.text_cannot_exchange_uploading') }}</li>

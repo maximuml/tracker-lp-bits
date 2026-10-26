@@ -282,6 +282,7 @@ final class BonusPageService
             sitename: SiteConfig::current()->basic->siteName(),
             msg: SafeHtml::fromUntrustedHtml($msg),
             bonus: $bonus,
+            balance: $actor->seedbonus(),
             lockText: $lockText,
             items: $items,
         );

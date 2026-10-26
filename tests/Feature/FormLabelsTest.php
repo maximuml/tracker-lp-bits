@@ -71,16 +71,16 @@ final class FormLabelsTest extends TestCase
         $response = $this->withNexusCookie($user)->get('/web/mybonus');
 
         $response->assertOk()
-            ->assertSee('aria-label="'.e(__('mybonus.text_special_title')).'"', false)
-            ->assertSee('<label for="giftusername"><b>'.e(__('mybonus.text_username')).'</b></label>', false)
+            ->assertSee('<label for="bonustitle">'.e(__('mybonus.text_special_title')).'</label>', false)
+            ->assertSee('<label for="giftusername">'.e(__('mybonus.text_username')).'</label>', false)
             ->assertSee('id="giftusername"', false)
-            ->assertSee('<label for="giftcustom"><b>'.e(__('mybonus.text_to_be_given')).'</b></label>', false)
+            ->assertSee('<label for="giftcustom">'.e(__('mybonus.text_to_be_given')).'</label>', false)
             ->assertSee('id="giftcustom"', false)
-            ->assertSee('<label for="giftmessage"><b>'.e(__('mybonus.text_message')).'</b></label>', false)
+            ->assertSee('<label for="giftmessage">'.e(__('mybonus.text_message')).'</label>', false)
             ->assertSee('id="giftmessage"', false)
             ->assertSee('<label for="ratiocharity">'.e(__('mybonus.text_ratio_below')).'</label>', false)
             ->assertSee('id="ratiocharity"', false)
-            ->assertSee('<label for="charityselect"><b>'.e(__('mybonus.text_to_be_given')).'</b></label>', false)
+            ->assertSee('<label for="charityselect">'.e(__('mybonus.text_to_be_given')).'</label>', false)
             ->assertSee('id="charityselect"', false);
     }
 }

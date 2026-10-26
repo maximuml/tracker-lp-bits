@@ -8,6 +8,9 @@ use App\DTOs\Auth\ActorContext;
 use App\Repositories\BonusCalculationRepository;
 use App\Services\BonusPageService;
 use App\Support\Strings;
+use App\ViewModels\Bonus\BonusShopItem;
+use App\ViewModels\Bonus\BonusShopViewModel;
+use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -119,7 +122,7 @@ final class BonusPageServiceTest extends TestCase
             'taxpercentage_bonus' => 0.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $this->assertNotEmpty($result);
         $this->assertGreaterThan(10, count($result));
@@ -132,7 +135,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 0.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $this->assertSame('traffic', $result[0]['art']);
         $this->assertSame(1073741824, $result[0]['menge']);
@@ -146,7 +149,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 0.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $this->assertSame('traffic', $result[1]['art']);
         $this->assertSame(5368709120, $result[1]['menge']);
@@ -159,7 +162,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 0.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $arts = array_column($result, 'art');
         $this->assertNotContains('invite', $arts);
@@ -171,7 +174,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 500.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $arts = array_column($result, 'art');
         $this->assertContains('invite', $arts);
@@ -184,7 +187,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 0.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $titleItems = array_filter($result, fn ($item): bool => $item['art'] === 'title');
         $this->assertCount(1, $titleItems);
@@ -197,7 +200,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 0.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $vipItems = array_filter($result, fn ($item): bool => $item['art'] === 'class');
         $this->assertCount(1, $vipItems);
@@ -209,7 +212,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 0.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $giftItems = array_filter($result, fn ($item): bool => $item['art'] === 'gift_1');
         $this->assertCount(1, $giftItems);
@@ -223,7 +226,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 0.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         $hrItems = array_filter($result, fn ($item): bool => $item['art'] === 'cancel_hr');
         $this->assertCount(1, $hrItems);
@@ -235,7 +238,7 @@ final class BonusPageServiceTest extends TestCase
             'oneinvite_bonus' => 500.0,
         ]);
 
-        $result = $this->service->buildBonusArray([]);
+        $result = $this->service->buildBonusArray();
 
         foreach ($result as $item) {
             $this->assertArrayHasKey('points', $item);
@@ -332,6 +335,38 @@ final class BonusPageServiceTest extends TestCase
         $result = $this->service->build($request)->toArray();
 
         $this->assertSame('1,234.6', (string) ($result['bonus']));
+    }
+
+    public function test_build_shop_groups_items_and_describes_unaffordable_trades(): void
+    {
+        $this->seedSettings([
+            'bonus_tweak' => '',
+            'bonusgift_bonus' => 'yes',
+            'onegbupload_bonus' => 300.0,
+            'oneinvite_bonus' => 0.0,
+        ]);
+        $this->setCurrentUser(['seedbonus' => 50.0, 'donor' => 0]);
+
+        $result = $this->service->build($this->requestWithQuery())->toArray();
+        $this->assertInstanceOf(BonusShopViewModel::class, $result['shop']);
+        $items = collect($result['shop']->items);
+        $upload = $items->firstWhere('index', 0);
+        $gift = $items->firstWhere('art', 'gift_1');
+        $charity = $items->firstWhere('art', 'gift_2');
+        $this->assertInstanceOf(BonusShopItem::class, $upload);
+        $this->assertInstanceOf(BonusShopItem::class, $gift);
+        $this->assertInstanceOf(BonusShopItem::class, $charity);
+
+        $this->assertSame('upload', $upload->group);
+        $this->assertSame(300.0, $upload->price);
+        $this->assertSame(250, $upload->pointsShort);
+        $this->assertTrue($upload->trade->disabled);
+        $this->assertSame((string) __('mybonus.submit_exchange'), $upload->trade->label);
+        $this->assertSame('250 more points needed', $upload->trade->note);
+        $this->assertSame('gifts', $gift->group);
+        $this->assertSame((string) __('mybonus.submit_karma_gift'), $gift->trade->label);
+        $this->assertSame('50 more points needed', $gift->trade->note);
+        $this->assertSame((string) __('mybonus.submit_charity_giving'), $charity->trade->label);
     }
 
     public function test_build_with_bonus_tweak_disable_throws(): void
@@ -483,9 +518,15 @@ final class BonusPageServiceTest extends TestCase
             $result['allBonus'],
         ));
 
-        $byArt = collect($result['allBonus'])->keyBy('art');
-        $this->assertSame(100.0, (float) $byArt->get('gift_1')['points']);
-        $this->assertSame(1000.0, (float) $byArt->get('gift_2')['points']);
+        /** @var list<array<string, mixed>> $allBonus */
+        $allBonus = $result['allBonus'];
+        $byArt = collect($allBonus)->keyBy('art');
+        $giftOne = $byArt->get('gift_1');
+        $giftTwo = $byArt->get('gift_2');
+        $this->assertIsArray($giftOne);
+        $this->assertIsArray($giftTwo);
+        $this->assertSame(100.0, (float) $giftOne['points']);
+        $this->assertSame(1000.0, (float) $giftTwo['points']);
     }
 
     public function test_build_downloaded_item_names_contain_size_labels(): void
@@ -498,8 +539,17 @@ final class BonusPageServiceTest extends TestCase
 
         $result = $this->service->build($this->requestWithQuery(['action' => 'exchange']))->toArray();
 
-        $downloaded = collect($result['allBonus'])->where('art', 'traffic_downloaded')->values();
+        /** @var list<array<string, mixed>> $allBonus */
+        $allBonus = $result['allBonus'];
+        $downloaded = array_values(array_filter(
+            $allBonus,
+            static fn (array $item): bool => $item['art'] === 'traffic_downloaded',
+        ));
         $this->assertCount(2, $downloaded);
+        $this->assertIsArray($downloaded[0]);
+        $this->assertIsArray($downloaded[1]);
+        $this->assertInstanceOf(ViewContract::class, $downloaded[0]['name']);
+        $this->assertInstanceOf(ViewContract::class, $downloaded[1]['name']);
         $this->assertStringContainsString(
             (string) __('mybonus.text_downloaded_ten_gb'),
             (string) $downloaded[0]['name']->render(),
@@ -522,8 +572,15 @@ final class BonusPageServiceTest extends TestCase
 
         $result = $this->service->build($this->requestWithQuery(['action' => 'exchange']))->toArray();
 
-        $gift = collect($result['allBonus'])->firstWhere('art', 'gift_1');
+        /** @var list<array<string, mixed>> $allBonus */
+        $allBonus = $result['allBonus'];
+        $gifts = array_values(array_filter(
+            $allBonus,
+            static fn (array $item): bool => $item['art'] === 'gift_1',
+        ));
+        $gift = $gifts[0] ?? null;
         $this->assertNotNull($gift);
+        $this->assertIsArray($gift);
         $giftTax = $gift['giftTax'];
         $this->assertArrayHasKey('charges', $giftTax);
         $this->assertArrayHasKey('amounts', $giftTax);

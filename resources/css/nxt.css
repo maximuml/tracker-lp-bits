@@ -251,7 +251,7 @@ img.hitandrun {
     margin-left: 0.5em;
 }
 
-details:not(.nxm-more):not(.nxm-usermenu):not(.nxm-filters) > summary {
+details:not(.nxm-more):not(.nxm-usermenu):not(.nxm-filters):not(.nx-bshop__info) > summary {
     width: fit-content;
     line-height: 28px;
     color: var(--nxm-accent-text, var(--nxm-accent, #4d6c99));

@@ -14,5 +14,6 @@ final readonly class BonusTradeButton
     public function __construct(
         public string $label,
         public bool $disabled,
+        public ?string $note = null,
     ) {}
 }

@@ -2531,3 +2531,192 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
     font-size: 0.88rem;
 }
 .nxm-footer__copy { font-size: 0.82rem; color: var(--nxm-muted, #666); }
+
+/* Bonus shop cards */
+.nx-bshop {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 0.75rem 1.5rem;
+    color: var(--nxm-text);
+}
+.nx-bshop__title {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    text-align: left;
+}
+.nx-bshop__summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+.nx-bshop__summary > .nx-ucard {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.nx-bshop__summary-value { font-size: 1.35rem; }
+.nx-bshop__summary-sub { color: var(--nxm-text-dim); }
+.nx-bshop .nx-bshop__history a {
+    color: var(--nxm-text);
+    text-decoration: underline;
+}
+.nx-bshop__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1.25rem;
+}
+.nx-bshop__chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.25rem 0.8rem;
+    border: 1px solid var(--nxm-border);
+    border-radius: 999px;
+    background: var(--nxm-surface);
+    color: var(--nxm-text);
+    text-decoration: none;
+}
+.nx-bshop__chip:hover {
+    border-color: var(--nxm-accent);
+    background: var(--nxm-surface-alt);
+}
+.nx-bshop__chip:focus-visible {
+    outline: var(--nxm-focus-outline);
+    outline-offset: 2px;
+}
+.nx-bshop__group { margin-top: 1.25rem; }
+.nx-bshop__group-title {
+    margin: 0 0 0.65rem;
+    font-size: 1.15rem;
+}
+.nx-bshop__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+.nx-bshop__item {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+.nx-bshop__item--wide { grid-column: 1 / -1; }
+.nx-bshop__item h3 { margin: 0 0 0.4rem; }
+.nx-bshop__desc {
+    margin: 0 0 0.8rem;
+    color: var(--nxm-text-dim);
+}
+.nx-bshop__item form {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+}
+.nx-bshop__field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.nx-bshop__field label { color: var(--nxm-text); }
+.nx-bshop__field input:not([type="hidden"]):not([type="submit"]),
+.nx-bshop__field select {
+    box-sizing: border-box;
+    width: 100%;
+}
+.nx-bshop__fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+.nx-bshop__tax {
+    margin: 0.8rem 0 0;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--nxm-info-border);
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-info-bg);
+}
+.nx-bshop__progress {
+    display: block;
+    width: 100%;
+    height: 6px;
+    margin-top: 0.8rem;
+    appearance: none;
+    border: 0;
+}
+.nx-bshop__progress::-webkit-progress-bar {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-surface-alt);
+}
+.nx-bshop__progress::-webkit-progress-value {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-accent);
+}
+.nx-bshop__progress::-moz-progress-bar {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-accent);
+}
+.nx-bshop__need {
+    margin: 0.35rem 0 0;
+    color: var(--nxm-text-dim);
+    font-size: 0.88rem;
+}
+.nx-bshop__buy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 0.9rem;
+}
+.nx-bshop__price { color: var(--nxm-text); }
+.nx-bshop__buy input[type="submit"] { margin-left: auto; }
+.nx-bshop__buy .nx-btn--primary { color: var(--nxm-on-accent); }
+.nx-bshop__info {
+    margin-top: 1.5rem;
+}
+.nx-bshop__info > summary {
+    width: auto;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-surface-alt);
+    color: var(--nxm-text);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 700;
+    list-style: none;
+}
+.nx-bshop__info > summary::-webkit-details-marker { display: none; }
+.nx-bshop__info > summary:focus-visible {
+    outline: var(--nxm-focus-outline);
+    outline-offset: 2px;
+}
+.nx-bshop__info-body {
+    margin-top: 0.75rem;
+    overflow: auto;
+}
+.nx-bshop__info-body h1,
+.nx-bshop__info-body h3 { color: var(--nxm-text); }
+
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__chip,
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__history a {
+    color: var(--nxm-text);
+}
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__chip:hover {
+    color: var(--nxm-on-accent);
+}
+html[data-theme="dark"] .nxm-main .nx-bshop input.nx-btn--primary {
+    color: var(--nxm-on-accent);
+}
+
+@media (max-width: 40rem) {
+    .nx-bshop { padding-right: 0.5rem; padding-left: 0.5rem; }
+    .nx-bshop__summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .nx-bshop__history { grid-column: 1 / -1; }
+    .nx-bshop__grid,
+    .nx-bshop__fields { grid-template-columns: minmax(0, 1fr); }
+    .nx-bshop__item--wide { grid-column: auto; }
+    .nx-bshop__buy input[type="submit"] { width: 100%; }
+}

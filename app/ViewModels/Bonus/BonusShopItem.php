@@ -20,6 +20,9 @@ final readonly class BonusShopItem
     public function __construct(
         public int $index,
         public string $art,
+        public string $group,
+        public float $price,
+        public ?int $pointsShort,
         public SafeHtml $name,
         public SafeHtml $description,
         public SafeHtml $pointsLabel,

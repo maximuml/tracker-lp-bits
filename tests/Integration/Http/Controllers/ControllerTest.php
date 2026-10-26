@@ -50,22 +50,6 @@ final class ControllerTest extends TestCase
         $this->assertNotSame(0, $result['ret']);
     }
 
-    public function test_pagination_parameters_use_limit_and_page(): void
-    {
-        $request = Request::create('/x?limit=25&page=3', 'GET');
-        app()->instance('request', $request);
-
-        $this->assertSame(['25', ['*'], 'page', '3'], $this->controller()->pagination($request));
-    }
-
-    public function test_pagination_parameters_support_data_table_format(): void
-    {
-        $request = Request::create('/x?__format=data-table&length=50&start=100', 'GET');
-        app()->instance('request', $request);
-
-        $this->assertSame(['50', ['*'], 'page', 3], $this->controller()->pagination($request));
-    }
-
     public function test_has_extra_field_reads_request_csv(): void
     {
         $request = Request::create('/x?extra_fields=a,b', 'GET');

@@ -66,7 +66,7 @@ final class PageRenderer
 
     private function renderHeader(PageLayoutContext $context, string $title, bool $msgalert, string $script, string $place): string
     {
-        $chrome = SiteChromeViewModel::load($title, $this->layoutRepository, $this->chromeRepositories, $context, 'legacy', $msgalert);
+        $chrome = SiteChromeViewModel::load($title, $this->layoutRepository, $this->chromeRepositories, $context, 'boxed', $msgalert);
 
         return view('layouts.partials.head-assets', ['chrome' => $chrome])->render()
             .view('layouts.partials.header', ['chrome' => $chrome])->render();
@@ -79,7 +79,7 @@ final class PageRenderer
             throw new \RuntimeException('PageRenderer context not set');
         }
 
-        $chrome = SiteChromeViewModel::load('', $this->layoutRepository, $this->chromeRepositories, $context, 'legacy', false, true);
+        $chrome = SiteChromeViewModel::load('', $this->layoutRepository, $this->chromeRepositories, $context, 'boxed', false, true);
 
         return view('layouts.partials.footer', ['chrome' => $chrome])->render();
     }

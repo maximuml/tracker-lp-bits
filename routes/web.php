@@ -171,7 +171,6 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::post('usercp/logout-all', [AuthWebController::class, 'logoutAllDevices'])
         ->name('usercp.logout-all');
     Route::get('torrent-approval-page', [TorrentController::class, 'approvalPage']);
-    Route::get('torrent-approval-logs', [TorrentController::class, 'approvalLogs']);
     Route::post('torrent-approval', [TorrentController::class, 'approval']);
     Route::post('token/add', [TokenController::class, 'addToken']);
     Route::post('token/del', [TokenController::class, 'delToken']);

@@ -26,7 +26,7 @@ final class CsrfEnforcementTest extends TestCase
 
     public function test_csrf_meta_tag_present_in_main_layout(): void
     {
-        $view = view('layui-page')->render();
+        $view = view('layouts.app')->render();
         $this->assertStringContainsString('name="csrf-token"', $view);
     }
 

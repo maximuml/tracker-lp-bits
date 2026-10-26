@@ -7,13 +7,15 @@ namespace App\Http\Controllers;
 use App\Auth\Permission;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentOperationAction;
+use App\Enums\UserFontsize;
+use App\Enums\UserTheme;
 use App\Http\Requests\TorrentApprovalRequest;
 use App\Http\Requests\TorrentIdRequest;
 use App\Http\Requests\TorrentPiecesHashRequest;
 use App\Http\Requests\TorrentRequest;
-use App\Http\Resources\TorrentOperationLogResource;
 use App\Http\Resources\TorrentResource;
 use App\Models\Setting;
 use App\Models\Torrent;
@@ -114,30 +116,24 @@ class TorrentController extends Controller
     public function approvalPage(TorrentIdRequest $request): View
     {
         Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
-        $torrentId = $request->torrent_id;
+        $torrentId = (int) $request->torrent_id;
         $torrent = $this->repository->findOrFailById($torrentId, Torrent::$commentFields);
         $denyReasons = $this->torrentApprovalRepository->listDenyReasons();
-
-        return view('torrent/approval', compact('torrent', 'denyReasons'));
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function approvalLogs(TorrentIdRequest $request): array
-    {
-        Permission::assertCan(PermissionEnum::TORRENT_APPROVAL);
-        $torrentId = $request->torrent_id;
-        $actionTypes = [
+        $logs = $this->torrentApprovalRepository->paginateApprovalLogs($torrentId, [
             TorrentOperationAction::APPROVAL_NONE->value,
             TorrentOperationAction::APPROVAL_ALLOW->value,
             TorrentOperationAction::APPROVAL_DENY->value,
-        ];
-        $records = $this->torrentApprovalRepository->paginateApprovalLogs($torrentId, $actionTypes, (int) $request->limit);
+        ], 20);
+        $actor = ActorContext::current();
+        $theme = $actor->value('theme');
 
-        $resource = TorrentOperationLogResource::collection($records);
-
-        return $this->success($resource);
+        return view('torrent/approval', [
+            'torrent' => $torrent,
+            'denyReasons' => $denyReasons,
+            'logs' => $logs,
+            'theme' => UserTheme::fromStringSafe(is_string($theme) ? $theme : null)->value,
+            'fontSize' => UserFontsize::fromMixed($actor->value('fontsize'))->stringValue(),
+        ]);
     }
 
     /**

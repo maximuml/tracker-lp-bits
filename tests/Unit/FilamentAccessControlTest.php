@@ -13,6 +13,11 @@ use App\Filament\Resources\Security\BanResource;
 use App\Filament\Resources\Security\CheaterResource;
 use App\Filament\Resources\Security\LoginAttemptResource;
 use App\Filament\Resources\Security\StaffMessageResource;
+use App\Filament\Resources\System\ActivityLogs\ActivityLogResource;
+use App\Filament\Resources\System\MessageTemplateResource;
+use App\Filament\Resources\System\TrackerUrlResource;
+use App\Filament\Resources\User\TokenResource;
+use App\Filament\Resources\User\UserPasskeyResource;
 use App\Filament\Resources\User\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -168,6 +173,90 @@ final class FilamentAccessControlTest extends TestCase
         $this->assertFalse(LoginAttemptResource::canAccess());
         $this->assertFalse(CheaterResource::canAccess());
         $this->assertFalse(RefererSources::canAccess());
+        $this->assertFalse(TrackerUrlResource::canAccess());
+        $this->assertFalse(ActivityLogResource::canAccess());
+        $this->assertFalse(MessageTemplateResource::canAccess());
+        $this->assertFalse(TokenResource::canAccess());
+        $this->assertFalse(UserPasskeyResource::canAccess());
+    }
+
+    /**
+     * TrackerUrlResource requires SYSOP — tracker announce URLs are
+     * infrastructure-critical.
+     */
+    public function test_tracker_url_resource_sysop_access(): void
+    {
+        $this->assertTrue($this->canAccessWithClass(TrackerUrlResource::class, UserClass::SYSOP));
+        $this->assertTrue($this->canAccessWithClass(TrackerUrlResource::class, UserClass::STAFFLEADER));
+    }
+
+    public function test_tracker_url_resource_denied_below_sysop(): void
+    {
+        $this->assertFalse($this->canAccessWithClass(TrackerUrlResource::class, UserClass::ADMINISTRATOR));
+        $this->assertFalse($this->canAccessWithClass(TrackerUrlResource::class, UserClass::MODERATOR));
+        $this->assertFalse($this->canAccessWithClass(TrackerUrlResource::class, UserClass::USER));
+    }
+
+    /**
+     * ActivityLogResource requires SYSOP — the audit trail maps every
+     * staff action.
+     */
+    public function test_activity_log_resource_sysop_access(): void
+    {
+        $this->assertTrue($this->canAccessWithClass(ActivityLogResource::class, UserClass::SYSOP));
+    }
+
+    public function test_activity_log_resource_denied_below_sysop(): void
+    {
+        $this->assertFalse($this->canAccessWithClass(ActivityLogResource::class, UserClass::ADMINISTRATOR));
+        $this->assertFalse($this->canAccessWithClass(ActivityLogResource::class, UserClass::USER));
+    }
+
+    /**
+     * MessageTemplateResource requires SYSOP — templates render in
+     * system emails (welcome/reset flows).
+     */
+    public function test_message_template_resource_sysop_access(): void
+    {
+        $this->assertTrue($this->canAccessWithClass(MessageTemplateResource::class, UserClass::SYSOP));
+    }
+
+    public function test_message_template_resource_denied_below_sysop(): void
+    {
+        $this->assertFalse($this->canAccessWithClass(MessageTemplateResource::class, UserClass::ADMINISTRATOR));
+        $this->assertFalse($this->canAccessWithClass(MessageTemplateResource::class, UserClass::USER));
+    }
+
+    /**
+     * TokenResource requires ADMINISTRATOR — it lists every API token
+     * on the site.
+     */
+    public function test_token_resource_administrator_access(): void
+    {
+        $this->assertTrue($this->canAccessWithClass(TokenResource::class, UserClass::ADMINISTRATOR));
+        $this->assertTrue($this->canAccessWithClass(TokenResource::class, UserClass::SYSOP));
+    }
+
+    public function test_token_resource_denied_below_administrator(): void
+    {
+        $this->assertFalse($this->canAccessWithClass(TokenResource::class, UserClass::MODERATOR));
+        $this->assertFalse($this->canAccessWithClass(TokenResource::class, UserClass::USER));
+    }
+
+    /**
+     * UserPasskeyResource requires ADMINISTRATOR — passkeys are login
+     * credentials.
+     */
+    public function test_user_passkey_resource_administrator_access(): void
+    {
+        $this->assertTrue($this->canAccessWithClass(UserPasskeyResource::class, UserClass::ADMINISTRATOR));
+        $this->assertTrue($this->canAccessWithClass(UserPasskeyResource::class, UserClass::SYSOP));
+    }
+
+    public function test_user_passkey_resource_denied_below_administrator(): void
+    {
+        $this->assertFalse($this->canAccessWithClass(UserPasskeyResource::class, UserClass::MODERATOR));
+        $this->assertFalse($this->canAccessWithClass(UserPasskeyResource::class, UserClass::USER));
     }
 
     /**

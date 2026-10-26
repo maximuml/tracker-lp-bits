@@ -137,6 +137,35 @@ final class UserModerationRepositoryTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
+    public function test_remove_warnings_skips_equal_and_higher_class_targets(): void
+    {
+        $operator = User::factory()->create(['class' => UserClassEnum::MODERATOR->value]);
+        $peer = User::factory()->create(['class' => UserClassEnum::MODERATOR->value]);
+        $admin = User::factory()->create(['class' => UserClassEnum::ADMINISTRATOR->value]);
+        $lower = User::factory()->create(['class' => UserClassEnum::USER->value]);
+        DB::table('users')->whereIn('id', [$peer->id, $admin->id, $lower->id])
+            ->update(['warned' => 1, 'warneduntil' => now()->addDays(7)->toDateTimeString()]);
+
+        $this->repository->removeWarnings($operator, [$peer->id, $admin->id, $lower->id]);
+
+        $this->assertSame(1, (int) User::query()->where('id', $peer->id)->value('warned'));
+        $this->assertSame(1, (int) User::query()->where('id', $admin->id)->value('warned'));
+        $this->assertSame(0, (int) User::query()->where('id', $lower->id)->value('warned'));
+    }
+
+    public function test_remove_warnings_denies_operator_on_self(): void
+    {
+        $operator = User::factory()->create(['class' => UserClassEnum::MODERATOR->value]);
+        DB::table('users')->where('id', $operator->id)->update([
+            'warned' => 1,
+            'warneduntil' => now()->addDays(7)->toDateTimeString(),
+        ]);
+
+        $this->repository->removeWarnings($operator, [$operator->id]);
+
+        $this->assertSame(1, (int) User::query()->where('id', $operator->id)->value('warned'));
+    }
+
     public function test_remove_warnings_logs_modcomment_via_modify_logs(): void
     {
         $operator = User::factory()->create(['class' => UserClassEnum::SYSOP->value, 'username' => 'AdminOp']);

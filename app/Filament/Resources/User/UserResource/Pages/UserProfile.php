@@ -94,7 +94,7 @@ class UserProfile extends ViewRecord implements HasActions
         $user = $this->currentUser();
         $record = $this->getUserRecord();
         if ($user->class > $record->class) {
-            if ($record->status == UserStatus::PENDING->value) {
+            if ($record->status === UserStatus::PENDING) {
                 $actions[] = $this->buildConfirmAction();
             }
             $actions[] = $this->buildWarnAction();
@@ -122,15 +122,14 @@ class UserProfile extends ViewRecord implements HasActions
             ->schema([
                 TextInput::make('reason')->label(__('admin.resources.user.actions.enable_disable_reason'))->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
                 Hidden::make('action')->default($this->getUserRecord()->enabled ? 'disable' : 'enable'),
-                Hidden::make('uid')->default($this->getUserRecord()->id),
             ])
             ->action(function ($data) {
                 $userRep = $this->rep;
                 try {
                     if ($data['action'] == 'enable') {
-                        $this->moderationRep->enableUser($this->currentUser(), $data['uid'], $data['reason']);
+                        $this->moderationRep->enableUser($this->currentUser(), $this->getUserRecord()->id, $data['reason']);
                     } elseif ($data['action'] == 'disable') {
-                        $this->moderationRep->disableUser($this->currentUser(), $data['uid'], $data['reason']);
+                        $this->moderationRep->disableUser($this->currentUser(), $this->getUserRecord()->id, $data['reason']);
                     }
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {

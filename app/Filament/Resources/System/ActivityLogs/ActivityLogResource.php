@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\System\ActivityLogs;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\System\ActivityLogs\Pages\ManageActivityLogs;
+use App\Models\User;
 use BackedEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
@@ -20,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\Models\Activity;
 use UnitEnum;
 
@@ -46,6 +46,13 @@ class ActivityLogResource extends Resource
     public static function getLabel(): ?string
     {
         return self::getNavigationLabel();
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->class >= UserClassEnum::SYSOP->value;
     }
 
     public static function form(Schema $schema): Schema
@@ -149,12 +156,6 @@ class ActivityLogResource extends Resource
                         return $fields;
                     })
                     ->action(null), // 无需执行任何操作
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 

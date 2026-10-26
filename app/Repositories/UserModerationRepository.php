@@ -197,8 +197,10 @@ class UserModerationRepository extends BaseRepository implements UserModerationR
         $modcomment = date('Y-m-d').' - Warning Removed By '.$operator->username;
 
         foreach ($userIds as $uid) {
-            $user = User::query()->find($uid, ['id', 'warned']);
-            if ($user === null || ! $user->warned) {
+            $user = User::query()->find($uid, ['id', 'warned', 'class']);
+            // Same ladder rule as warnUser/disableUser: an operator may
+            // only touch accounts strictly below their own class.
+            if ($user === null || ! $user->warned || $operator->class <= $user->class) {
                 continue;
             }
 

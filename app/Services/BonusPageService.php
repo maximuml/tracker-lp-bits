@@ -241,14 +241,30 @@ final class BonusPageService
                 default => SafeHtml::fromUntrustedHtml(number_format((float) $bonusarray['points'])),
             };
 
-            $affordable = $actor->seedbonus() >= (float) $bonusarray['points'];
-            $trade = $affordable
+            $points = (float) $bonusarray['points'];
+            $pointsShort = $actor->seedbonus() < $points
+                ? (int) ceil($points - $actor->seedbonus())
+                : null;
+            $trade = $pointsShort === null
                 ? $this->resolveTradeButton($art, $actor, $ratiolimitBonus, $dlamountlimitBonus)
-                : $this->tradeButton('mybonus.text_more_points_needed', true);
+                : $this->tradeButton(
+                    match ($art) {
+                        'gift_1' => 'mybonus.submit_karma_gift',
+                        'gift_2' => 'mybonus.submit_charity_giving',
+                        default => 'mybonus.submit_exchange',
+                    },
+                    true,
+                    (string) __('mybonus.text_points_short', [
+                        'count' => number_format($pointsShort),
+                    ]),
+                );
 
             $items[] = new BonusShopItem(
                 index: $i,
                 art: $art,
+                group: $this->groupForArt($art),
+                price: $points,
+                pointsShort: $pointsShort,
                 name: $bonusarray['name'] instanceof ViewContract
                     ? SafeHtml::fromTrustedHtml($bonusarray['name']->render())
                     : SafeHtml::fromUntrustedHtml((string) $bonusarray['name']),
@@ -266,9 +282,22 @@ final class BonusPageService
             sitename: SiteConfig::current()->basic->siteName(),
             msg: SafeHtml::fromUntrustedHtml($msg),
             bonus: $bonus,
+            balance: $actor->seedbonus(),
             lockText: $lockText,
             items: $items,
         );
+    }
+
+    private function groupForArt(string $art): string
+    {
+        return match ($art) {
+            'traffic' => 'upload',
+            'traffic_downloaded' => 'download',
+            'invite', 'tmp_invite' => 'invites',
+            'title', 'class', 'attendance_card', 'rainbow_id', 'change_username_card', 'cancel_hr' => 'profile',
+            'gift_1', 'gift_2' => 'gifts',
+            default => 'profile',
+        };
     }
 
     private function resolveTradeButton(string $art, ActorContext $actor, float $ratiolimitBonus, int $dlamountlimitBonus): BonusTradeButton
@@ -281,19 +310,27 @@ final class BonusPageService
         }
         if ($art === 'invite' || $art === 'tmp_invite') {
             if (! SiteConfig::current()->main->inviteSystem()) {
-                return $this->tradeButtonRaw((string) Locale::trans('invite.send_deny_reasons.invite_system_closed', [], null), true);
+                return $this->tradeButton(
+                    'mybonus.submit_exchange',
+                    true,
+                    (string) Locale::trans('invite.send_deny_reasons.invite_system_closed', [], null),
+                );
             }
             if (! Permission::can(PermissionEnum::SEND_INVITE)) {
                 $requireClass = SiteConfig::current()->authority->permission(PermissionEnum::SEND_INVITE->value);
 
-                return $this->tradeButtonRaw((string) Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass ?? 0)], null), true);
+                return $this->tradeButton(
+                    'mybonus.submit_exchange',
+                    true,
+                    (string) Locale::trans('invite.send_deny_reasons.no_permission', ['class' => User::getClassText($requireClass ?? 0)], null),
+                );
             }
 
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'class') {
             if (UserDisplay::currentClass() >= UC_VIP) {
-                return $this->tradeButton('mybonus.std_class_above_vip', true);
+                return $this->tradeButton('mybonus.submit_exchange', true, (string) __('mybonus.std_class_above_vip'));
             }
 
             return $this->tradeButton('mybonus.submit_exchange', false);
@@ -311,21 +348,21 @@ final class BonusPageService
                 $ratio = $ratiolimitBonus + 1;
             }
             if ($ratiolimitBonus > 0 && $ratio > $ratiolimitBonus) {
-                return $this->tradeButton('mybonus.text_ratio_too_high', true);
+                return $this->tradeButton('mybonus.submit_exchange', true, (string) __('mybonus.text_ratio_too_high'));
             }
 
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'change_username_card') {
             if ($this->bonusCalculationRepository->hasChangeUsernameCard($actor->id)) {
-                return $this->tradeButton('mybonus.text_change_username_card_already_has', true);
+                return $this->tradeButton('mybonus.submit_exchange', true, (string) __('mybonus.text_change_username_card_already_has'));
             }
 
             return $this->tradeButton('mybonus.submit_exchange', false);
         }
         if ($art === 'rainbow_id') {
             if ($this->bonusCalculationRepository->hasRainbowIdForever($actor->id)) {
-                return $this->tradeButton('mybonus.text_rainbow_id_already_valid_forever', true);
+                return $this->tradeButton('mybonus.submit_exchange', true, (string) __('mybonus.text_rainbow_id_already_valid_forever'));
             }
 
             return $this->tradeButton('mybonus.submit_exchange', false);
@@ -339,14 +376,18 @@ final class BonusPageService
      * needed`) — the old code echoed them raw into `value="..."`, so the
      * browser decoded them. Decode here so `{{ }}` escaping stays on.
      */
-    private function tradeButton(string $langKey, bool $disabled): BonusTradeButton
+    private function tradeButton(string $langKey, bool $disabled, ?string $note = null): BonusTradeButton
     {
-        return $this->tradeButtonRaw((string) __($langKey), $disabled);
+        return $this->tradeButtonRaw((string) __($langKey), $disabled, $note);
     }
 
-    private function tradeButtonRaw(string $label, bool $disabled): BonusTradeButton
+    private function tradeButtonRaw(string $label, bool $disabled, ?string $note = null): BonusTradeButton
     {
-        return new BonusTradeButton(html_entity_decode($label, ENT_QUOTES | ENT_HTML5, 'UTF-8'), $disabled);
+        return new BonusTradeButton(
+            html_entity_decode($label, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            $disabled,
+            $note !== null ? html_entity_decode($note, ENT_QUOTES | ENT_HTML5, 'UTF-8') : null,
+        );
     }
 
     private function buildInfo(ActorContext $actor): BonusInfoViewModel

@@ -319,12 +319,12 @@ JS, 'footer', false);
             $triggerId = "consume-$metaKey";
             $changeUsernameCards = $metas->get($metaKey);
             $cardName = $changeUsernameCards->first()->meta_key_text;
-            $userProps[] = SafeHtml::fromTrustedHtml(view('components.userdetails.prop', [
+            $userProps[] = view('components.userdetails.prop', [
                 'name' => $cardName,
                 'detail' => $changeUsernameCards->count(),
                 'consumeLabel' => (string) __('userdetails.consume'),
                 'triggerId' => $isOwner ? $triggerId : '',
-            ])->render());
+            ]);
             if ($isOwner) {
                 $consumeLabel = __('userdetails.consume');
                 AssetAppender::html(
@@ -364,12 +364,12 @@ JS, 'footer', false);
         if ($metas->has($metaKey)) {
             $rainbowID = $metas->get($metaKey)->first();
             if ($rainbowID->isValid()) {
-                $userProps[] = SafeHtml::fromTrustedHtml(view('components.userdetails.prop', [
+                $userProps[] = view('components.userdetails.prop', [
                     'name' => $rainbowID->metaKeyText,
                     'detail' => $rainbowID->getDeadlineText(),
                     'consumeLabel' => '',
                     'triggerId' => '',
-                ])->render());
+                ]);
             }
         }
 

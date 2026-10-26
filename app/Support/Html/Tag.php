@@ -113,11 +113,13 @@ final class Tag
         $options = [];
         foreach ($items as $row) {
             $rowId = (int) ($row['id'] ?? 0);
-            $options[] = SafeHtml::fromTrustedHtml(trim(view('components.support.tag.option', [
+            // Passed as View objects — the parent template renders
+            // (and trims) each via {{ }} instead of a trusted wrap.
+            $options[] = view('components.support.tag.option', [
                 'value' => $rowId,
                 'selected' => $rowId === $selectedId,
                 'label' => (string) ($row['name'] ?? ''),
-            ])->render()));
+            ]);
         }
 
         return ltrim(view('components.support.tag.torrent-select', [
@@ -332,10 +334,12 @@ final class Tag
     {
         $children = [];
         foreach ($items as $item) {
-            $children[] = SafeHtml::fromTrustedHtml(trim(view('components.support.tag.tooltip-child', [
+            // Passed as View objects — the container renders (and
+            // trims) each via {{ }} instead of a trusted wrap.
+            $children[] = view('components.support.tag.tooltip-child', [
                 'id' => (string) ($item['id'] ?? ''),
                 'content' => SafeHtml::fromTrustedHtml((string) ($item['content'] ?? '')),
-            ])->render()));
+            ]);
         }
         if ($children === []) {
             return '';

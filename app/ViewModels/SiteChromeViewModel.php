@@ -14,6 +14,7 @@ use App\ViewModels\Chrome\ChromeNav;
 use App\ViewModels\Chrome\ChromeRepositories;
 use App\ViewModels\Chrome\ChromeSearch;
 use App\ViewModels\Chrome\ChromeUserBar;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 
@@ -46,7 +47,7 @@ final class SiteChromeViewModel
         public readonly array $navItems,
         public readonly array $alerts,
         public readonly bool $offlineMsg,
-        public readonly SafeHtml $offlineMsgHtml,
+        public readonly Htmlable $offlineMsgHtml,
         public readonly bool $enableDonation,
         public readonly ChromeUserBar $userBar,
         public readonly ChromeSearch $search,
@@ -86,7 +87,7 @@ final class SiteChromeViewModel
             navItems: $navItems,
             alerts: $alerts,
             offlineMsg: $context->offlineMsg,
-            offlineMsgHtml: SafeHtml::fromTrustedHtml(view('components.offline-warning')->render()),
+            offlineMsgHtml: view('components.offline-warning'),
             enableDonation: $context->enableDonation === 'yes',
             userBar: $userBar,
             search: ChromeSearch::load($context),

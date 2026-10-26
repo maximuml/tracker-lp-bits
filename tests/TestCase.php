@@ -43,8 +43,12 @@ abstract class TestCase extends BaseTestCase
 
         // Same for per-process static caches: rolled-back rows reuse ids,
         // so a cached user row or permission verdict from a previous test
-        // must not leak into the next one.
+        // must not leak into the next one. flushCachedRows() must run
+        // before resetState() — it forgets the shared Redis
+        // "user_{id}_content" entries (including rows cached inside a
+        // rolled-back transaction) using the id list resetState() clears.
         Permissions::resetState();
+        UserDisplay::flushCachedRows();
         UserDisplay::resetState();
 
         // And the shared Redis-backed caches: the unit/feature databases

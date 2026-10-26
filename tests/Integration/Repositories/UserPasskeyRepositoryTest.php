@@ -8,7 +8,9 @@ use App\Models\Passkey;
 use App\Models\User;
 use App\Repositories\UserPasskeyRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -131,6 +133,26 @@ final class UserPasskeyRepositoryTest extends TestCase
 
         $this->assertCount(1, $result);
         $this->assertSame('aabbccdd-1122-3344-eeff-556677889900', $result[0]->getAaguidFormatted());
+    }
+
+    public function test_get_aaguids_returns_decoded_map(): void
+    {
+        Cache::forget('aaguids');
+        Http::fake([
+            'raw.githubusercontent.com/*' => Http::response(['aaguid-1' => ['name' => 'Test Key']]),
+        ]);
+
+        $this->assertSame(['aaguid-1' => ['name' => 'Test Key']], $this->repository->getAaguids());
+    }
+
+    public function test_get_aaguids_returns_false_on_http_failure(): void
+    {
+        Cache::forget('aaguids');
+        Http::fake([
+            'raw.githubusercontent.com/*' => Http::response('upstream error', 502),
+        ]);
+
+        $this->assertFalse($this->repository->getAaguids());
     }
 
     private function insertPasskey(int $userId, string $aaguid, string $credentialId, string $publicKey): void

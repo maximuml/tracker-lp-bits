@@ -26,6 +26,7 @@ use App\Support\RuntimeContext;
 use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
 use App\Support\UserDisplay;
+use App\Support\UserPartitionSync;
 use App\Support\Validators;
 use App\Utils\ApiQueryBuilder;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -399,5 +400,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     public function updateFields(int $id, array $fields): void
     {
         User::query()->where('id', $id)->update($fields);
+        // Builder updates bypass the partition observer — mirror the
+        // vertical-partition columns explicitly.
+        UserPartitionSync::sync($id, $fields);
     }
 }

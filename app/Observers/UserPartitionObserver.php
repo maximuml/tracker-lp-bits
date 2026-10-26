@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserActivity;
 use App\Models\UserPreference;
 use App\Models\UserSeedStats;
+use App\Support\UserPartitionSync;
 
 /**
  * W3-01: Dual-write observer for user vertical partitioning.
@@ -81,18 +82,14 @@ class UserPartitionObserver
             return;
         }
 
-        $partitions = User::$partitionedColumns;
-
-        $affectedTables = [];
+        $data = [];
         foreach (array_keys($dirty) as $column) {
-            if (isset($partitions[$column])) {
-                $affectedTables[$partitions[$column]][] = $column;
+            if (isset(User::$partitionedColumns[$column])) {
+                $data[$column] = $user->getAttribute($column);
             }
         }
 
-        foreach ($affectedTables as $table => $columns) {
-            $this->updatePartition($user, $table, $columns);
-        }
+        UserPartitionSync::sync($user->id, $data);
     }
 
     public function deleted(User $user): void
@@ -101,23 +98,5 @@ class UserPartitionObserver
         UserPreference::where('user_id', $user->id)->delete();
         UserActivity::where('user_id', $user->id)->delete();
         UserSeedStats::where('user_id', $user->id)->delete();
-    }
-
-    /**
-     * @param  list<string>  $columns
-     */
-    private function updatePartition(User $user, string $table, array $columns): void
-    {
-        $data = [];
-        foreach ($columns as $column) {
-            $data[$column] = $user->getAttribute($column);
-        }
-
-        match ($table) {
-            'user_preferences' => UserPreference::updateOrCreate(['user_id' => $user->id], $data),
-            'user_activity' => UserActivity::updateOrCreate(['user_id' => $user->id], $data),
-            'user_seed_stats' => UserSeedStats::updateOrCreate(['user_id' => $user->id], $data),
-            default => null,
-        };
     }
 }

@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
+use App\Support\UserPartitionSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -63,7 +64,13 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
 
     public function updateLastOffer(int $userId): bool
     {
-        return (bool) User::query()->where('id', $userId)->update(['last_offer' => date('Y-m-d H:i:s')]);
+        $data = ['last_offer' => date('Y-m-d H:i:s')];
+        $updated = (bool) User::query()->where('id', $userId)->update($data);
+        // Builder updates bypass the partition observer — last_offer
+        // is a user_activity column.
+        UserPartitionSync::sync($userId, $data);
+
+        return $updated;
     }
 
     public function emailExistsForOther(string $email, int $userId): bool
@@ -145,6 +152,9 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
         }
 
         User::query()->where('id', $user->id)->update($data);
+        // Builder updates bypass the partition observer — these
+        // payloads are mostly user_preferences columns.
+        UserPartitionSync::sync($user->id, $data);
         Cache::clearUser($user->id, (string) $user->passkey);
 
         return User::query()->find($user->id)?->toApiArray() ?? [];
@@ -177,6 +187,9 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
         }
 
         User::query()->where('id', $user->id)->update($data);
+        // Builder updates bypass the partition observer — these
+        // payloads are mostly user_preferences columns.
+        UserPartitionSync::sync($user->id, $data);
         Cache::clearUser($user->id, (string) $user->passkey);
 
         return User::query()->find($user->id)?->toApiArray() ?? [];
@@ -296,6 +309,9 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
         }
 
         User::query()->where('id', $user->id)->update($data);
+        // Builder updates bypass the partition observer — these
+        // payloads are mostly user_preferences columns.
+        UserPartitionSync::sync($user->id, $data);
         Cache::clearUser($user->id, (string) $user->passkey);
 
         return User::query()->find($user->id)?->toApiArray() ?? [];

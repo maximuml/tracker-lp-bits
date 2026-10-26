@@ -6,6 +6,7 @@ namespace App\ViewModels\Forum;
 
 use App\Support\Html\SafeHtml;
 use App\View\Components\Pagination;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * The `viewtopic` section: breadcrumb, paginated posts, moderator
@@ -40,7 +41,7 @@ final readonly class ViewTopicViewModel
         /** @var list<array{value: int, label: string}> */
         public array $highlightColorOptions,
         public ?SafeHtml $quickReply,
-        public ?SafeHtml $deniedNotice,
+        public ?Htmlable $deniedNotice,
         public SafeHtml $keyScript,
     ) {}
 

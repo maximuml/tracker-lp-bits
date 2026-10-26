@@ -12,7 +12,9 @@ use App\Support\Locale;
 use App\Support\Network;
 use App\Support\RequestContext;
 use Exception;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use lbuchs\WebAuthn\WebAuthn;
 use RuntimeException;
 
@@ -216,9 +218,13 @@ class UserPasskeyRepository extends BaseRepository
     public function getAaguids()
     {
         return Cache::remember('aaguids', 60 * 60 * 24 * 14, function () {
-            $json = file_get_contents('https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json');
+            try {
+                $response = Http::timeout(5)->get('https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json');
+            } catch (ConnectionException) {
+                return false;
+            }
 
-            return $json === false ? false : json_decode($json, true);
+            return $response->successful() ? $response->json() : false;
         });
     }
 

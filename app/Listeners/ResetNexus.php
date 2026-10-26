@@ -33,9 +33,11 @@ class ResetNexus
      */
     public function handle($event): void
     {
-        // UserDisplay::resetState() stays explicit: besides clearing its
-        // in-process row/username caches it also invalidates the Redis
-        // "user_{id}_content" entries, which container scoping cannot do.
+        // UserDisplay::resetState() stays explicit: it drops the
+        // in-process row/username caches — the shared Redis
+        // "user_{id}_content" entries must NOT be evicted here (they
+        // belong to all workers; tests flush them explicitly via
+        // flushCachedRows() before resetState()).
         UserDisplay::resetState();
 
         // T-10: Drop all resolved guard instances to prevent cross-request

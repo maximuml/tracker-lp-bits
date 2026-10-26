@@ -26,13 +26,32 @@ final class UserDisplay
      * Clear the in-process caches. Called between tests and on each
      * queue job reset so rows read under a rolled-back transaction
      * or a previous request cannot leak stale data.
+     *
+     * Only the in-memory state is dropped — the shared Redis entries
+     * belong to every worker, so per-request cleanup must not evict
+     * them (that turned the 1 h cache into a per-request write storm).
+     * Test-only invalidation of the shared entries lives in
+     * {@see flushCachedRows()}.
      */
     public static function resetState(): void
+    {
+        UserDisplayState::instance()->reset();
+    }
+
+    /**
+     * Forget the Redis `user_{id}_content` entries backing the current
+     * in-process row cache.
+     *
+     * Must run BEFORE {@see resetState()} (which clears the id list).
+     * Intended for tests: rows cached inside a `DatabaseTransactions`
+     * block survive the rollback in Redis and would otherwise leak
+     * phantom users into later tests/processes.
+     */
+    public static function flushCachedRows(): void
     {
         foreach (array_keys(UserDisplayState::instance()->rowCache) as $id) {
             RedisGuard::attempt(static fn () => Cache::forget("user_{$id}_content"), false);
         }
-        UserDisplayState::instance()->reset();
     }
 
     /**
@@ -340,7 +359,7 @@ final class UserDisplay
                 ? trim(view('components.support.user-link', [
                     'linkExt' => SafeHtml::fromTrustedHtml($link_ext),
                     'href' => $href,
-                    'targetAttr' => SafeHtml::fromTrustedHtml($target ? ' target="_blank"' : ''),
+                    'target' => $target,
                     'cls' => $classNameColored,
                     'inner' => SafeHtml::fromTrustedHtml($username),
                 ])->render())

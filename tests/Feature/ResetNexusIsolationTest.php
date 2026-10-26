@@ -26,9 +26,11 @@ use App\Support\State\ShoutboxState;
 use App\Support\State\StyleRepositoryState;
 use App\Support\State\TagRepositoryState;
 use App\Support\State\UserClassState;
+use App\Support\UserDisplay;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -259,6 +261,27 @@ final class ResetNexusIsolationTest extends TestCase
         $this->assertNull(app(CurrentUser::class)->get());
         $this->assertSame('', PageState::instance()->keyShortcutScript());
         $this->assertNull(Auth::guard()->user());
+    }
+
+    public function test_reset_nexus_keeps_shared_user_display_cache(): void
+    {
+        $user = User::factory()->create(['status' => 1, 'enabled' => true]);
+
+        // Prime the shared Redis row cache the way UserDisplay::row() does.
+        UserDisplay::row($user->id);
+        $this->assertNotNull(Cache::get("user_{$user->id}_content"));
+
+        $this->dispatchResetNexus();
+
+        // The shared Redis entry must survive a request reset — only
+        // the in-process row cache is dropped. Evicting it per request
+        // defeated the 1 h TTL and added a Redis write per cached user
+        // on every request boundary (M-01). Tests that need rollback
+        // safety call UserDisplay::flushCachedRows() explicitly.
+        $this->assertNotNull(
+            Cache::get("user_{$user->id}_content"),
+            'resetState() evicted the shared Redis user cache',
+        );
     }
 
     public function test_consecutive_resets_are_idempotent(): void

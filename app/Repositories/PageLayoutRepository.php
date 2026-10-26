@@ -13,6 +13,7 @@ use App\Support\Menu;
 use App\Support\PageState;
 use App\Support\RequestContext;
 use App\Support\RequestValues;
+use App\Support\UserPartitionSync;
 use App\Support\UserUpdateBatch;
 use Illuminate\Support\Facades\DB;
 
@@ -131,6 +132,10 @@ class PageLayoutRepository extends BaseRepository implements PageLayoutRepositor
     public function updateUser(int $userId, array $data): void
     {
         DB::table('users')->where('id', $userId)->update($data);
+        // DB::table bypasses the partition observer — the batched
+        // flushAccess() writes include last_access (user_activity)
+        // and page (user_preferences).
+        UserPartitionSync::sync($userId, $data);
     }
 
     /**

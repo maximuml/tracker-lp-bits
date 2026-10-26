@@ -82,8 +82,12 @@ final class HtmlInPhpRatchetTest extends TestCase
      * text/empty-string sites moved to fromPlainText(); 241 after three
      * provably-plain-text sites ('N/A', the '\1' preg back-reference,
      * and the e()-wrapped sprintf version note) moved to fromPlainText().
+     * Lowered to 219 (2026-10-26): Tag torrentSelect/tooltipContainer
+     * now pass View objects, user-link takes a bool target prop,
+     * UserDetailController props and the offline-warning/denied-notice
+     * ViewModels hold View instances instead of trusted wraps.
      */
-    private const BASELINE_TRUSTED_HTML = 241;
+    private const BASELINE_TRUSTED_HTML = 219;
 
     public function test_table_literal_count_does_not_exceed_baseline(): void
     {

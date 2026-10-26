@@ -20,6 +20,7 @@ use App\Support\Security\PasskeyGenerator;
 use App\Support\Token;
 use App\Support\TwoFactorAuthHelper;
 use App\Support\Url;
+use App\Support\UserPartitionSync;
 use App\Support\Validators;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache as CacheFacade;
@@ -43,7 +44,11 @@ final class UsercpSecurityCommand
      */
     public function updateUser(int $userId, array $data): bool
     {
-        return (bool) User::query()->where('id', $userId)->update($data);
+        $updated = (bool) User::query()->where('id', $userId)->update($data);
+        // Builder updates bypass the partition observer.
+        UserPartitionSync::sync($userId, $data);
+
+        return $updated;
     }
 
     /**
@@ -57,6 +62,8 @@ final class UsercpSecurityCommand
                 $data['auth_version'] = DB::raw('auth_version + 1');
             }
             User::query()->where('id', $userId)->update($data);
+            // Builder updates bypass the partition observer.
+            UserPartitionSync::sync($userId, $data);
             if ($resetAuthKey) {
                 $this->torrentDownloadRepository->resetTrackerReportAuthKeySecret($userId);
             }

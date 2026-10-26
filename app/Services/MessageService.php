@@ -156,7 +156,7 @@ class MessageService
         if ($origmsg > 0 && $delete) {
             $orig = $this->messageLookupRepository->findById($origmsg);
             if ($orig && $orig->receiver == $sender->id) {
-                if ($orig->saved === 'no') {
+                if (! $orig->saved) {
                     $orig->delete();
                 } else {
                     $orig->update(['location' => '0']);
@@ -193,7 +193,7 @@ class MessageService
                 PageResponses::abort(__('functions.std_error'), __('deletemessage.std_not_in_inbox'));
             }
 
-            if ($msg->saved === 'yes') {
+            if ($msg->saved) {
                 $msg->update(['location' => '0', 'unread' => false]);
             } else {
                 $msg->delete();
@@ -206,7 +206,7 @@ class MessageService
                 PageResponses::abort(__('functions.std_error'), __('deletemessage.std_not_suggested'));
             }
 
-            if ((int) $msg->location === 0 && $msg->saved === 'no') {
+            if ((int) $msg->location === 0 && ! $msg->saved) {
                 PageResponses::abort(__('functions.std_error'), __('deletemessage.std_not_in_sentbox'));
             }
 

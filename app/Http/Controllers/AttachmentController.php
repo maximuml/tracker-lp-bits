@@ -139,7 +139,13 @@ class AttachmentController extends BasePageController
         $basePath = realpath(base_path($httpdirectory));
         $realFile = realpath(base_path($httpdirectory.'/'.$row['location']));
 
-        if ($basePath === false || $realFile === false || ! str_starts_with($realFile, $basePath) || ! is_file($realFile) || ! is_readable($realFile)) {
+        // Prefix must include the trailing separator — a bare prefix
+        // match would also admit sibling dirs like "attachments_evil/".
+        if ($basePath === false
+            || $realFile === false
+            || ! str_starts_with($realFile, rtrim($basePath, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR)
+            || ! is_file($realFile)
+            || ! is_readable($realFile)) {
             return response('File not found or cannot be read.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
@@ -167,7 +173,9 @@ class AttachmentController extends BasePageController
             'Content-Type' => 'application/octet-stream',
             'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             'X-Content-Type-Options' => 'nosniff',
-            'X-Accel-Redirect' => '/attachments/'.$row['location'],
+            // No X-Accel-Redirect here: the body is streamed by PHP, and a
+            // user-controlled location value in the redirect header could
+            // point nginx's internal alias outside the attachments dir.
         ]);
     }
 }

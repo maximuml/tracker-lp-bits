@@ -27,12 +27,14 @@ final class PrivateAttachmentsTest extends TestCase
     }
 
     /**
-     * The controller uses X-Accel-Redirect to serve files.
+     * The controller streams the body itself and must not set
+     * X-Accel-Redirect — a user-controlled location could redirect
+     * nginx's internal alias outside the attachments dir.
      */
-    public function test_controller_uses_x_accel_redirect(): void
+    public function test_controller_does_not_send_x_accel_redirect(): void
     {
         $source = file_get_contents(app_path('Http/Controllers/AttachmentController.php'));
-        $this->assertStringContainsString('X-Accel-Redirect', $source, 'getattachment must use X-Accel-Redirect');
+        $this->assertStringNotContainsString("'X-Accel-Redirect' =>", $source, 'getattachment must not set X-Accel-Redirect');
     }
 
     /**

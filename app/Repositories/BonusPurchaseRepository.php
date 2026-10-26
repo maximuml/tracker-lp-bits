@@ -54,11 +54,21 @@ class BonusPurchaseRepository extends BaseRepository
         if ($hitAndRun->uid != $uid) {
             throw new \LogicException("H&R: $hitAndRunId not belongs to user: $uid.");
         }
-        if ($hitAndRun->status == HitAndRunStatus::PARDONED->value) {
-            throw new \LogicException("H&R: $hitAndRunId already pardoned.");
-        }
         $requireBonus = BonusLogs::getBonusForCancelHitAndRun();
-        DB::transaction(function () use ($user, $hitAndRun, $requireBonus) {
+        DB::transaction(function () use ($user, $hitAndRunId, $requireBonus, $uid) {
+            // Re-check under a row lock: the status test outside the
+            // transaction raced — two concurrent requests could both
+            // pass it and consume bonus twice.
+            $hitAndRun = HitAndRun::query()
+                ->where('id', (int) $hitAndRunId)
+                ->lockForUpdate()
+                ->firstOrFail();
+            if ($hitAndRun->uid != $uid) {
+                throw new \LogicException("H&R: $hitAndRunId not belongs to user: $uid.");
+            }
+            if ($hitAndRun->status == HitAndRunStatus::PARDONED->value) {
+                throw new \LogicException("H&R: $hitAndRunId already pardoned.");
+            }
             $comment = Locale::trans('hr.bonus_cancel_comment', ['bonus' => $requireBonus], $user->locale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);
 
@@ -194,6 +204,12 @@ class BonusPurchaseRepository extends BaseRepository
             // consumeUserBonus now locks the user row internally via lockForUpdate,
             // so we don't need a separate lockForUpdate here.
             $user = User::query()->findOrFail((int) $uid);
+            if (TorrentBuyLog::query()
+                ->where('uid', $user->id)
+                ->where('torrent_id', $torrent->id)
+                ->exists()) {
+                throw new NexusException("User {$user->id} already bought torrent {$torrent->id}.");
+            }
             $buyerLocale = $user->locale;
             $comment = Locale::trans('bonus.comment_buy_torrent', ['bonus' => $requireBonus, 'torrent_id' => $torrent->id], $buyerLocale);
             Logger::writeWithContext((string) "comment: {$comment}", (string) 'info', (bool) false);

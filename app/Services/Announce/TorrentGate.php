@@ -86,8 +86,11 @@ final class TorrentGate
 
     public function checkPaid(AnnounceContext $ctx): void
     {
-        if ($ctx->seeder === 1
-            || $ctx->user->seedbonus === null
+        // NOTE: $ctx->seeder === 1 must NOT short-circuit — announcing
+        // left=0 is client-controlled, so a non-buyer could bypass the
+        // paid gate just by claiming to seed. getBuyStatus() still lets
+        // legitimate buyers through via hasBuySuccess.
+        if ($ctx->user->seedbonus === null
             || ! isset($ctx->torrent['price'])
             || (int) $ctx->torrent['price'] <= 0
             || (int) $ctx->torrent['owner'] == $ctx->userId()

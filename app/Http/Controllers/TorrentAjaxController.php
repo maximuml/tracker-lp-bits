@@ -136,7 +136,7 @@ class TorrentAjaxController extends BasePageController
             $privacy = is_array($userrow) ? (string) ($userrow['privacy'] ?? '') : '';
             $anonymous = $privacy == 'strong';
             $revealName = $anonymous
-                && (Permission::can(PermissionEnum::VIEW_ANONYMOUS) || $arr['id'] == $currentUserId);
+                && (Permission::can(PermissionEnum::VIEW_ANONYMOUS) || (int) $arr['userid'] === $currentUserId);
 
             $rows[] = [
                 'highlight' => $currentUserId == $arr['userid'],

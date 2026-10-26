@@ -111,7 +111,12 @@ class TorrentRssController extends BasePageController
         $inclbookmarked = (int) $request->input('inclbookmarked', 0);
         if ($inclbookmarked === 1) {
             $bookmarkarray = TorrentBookmark::bookmarkArray($cache, (int) ($rssUser['id'] ?? 0));
-            if (! empty($bookmarkarray)) {
+            // An empty bookmark set must yield an empty feed — without the
+            // guard the whereIn is skipped and the user receives every
+            // torrent on the tracker.
+            if ($bookmarkarray === []) {
+                $baseQuery->whereRaw('1 = 0');
+            } else {
                 $baseQuery->whereIn('torrents.id', $bookmarkarray);
             }
         }
@@ -189,8 +194,10 @@ class TorrentRssController extends BasePageController
             if ($hasStickyNormal) {
                 $normalQuery->where('torrents.pos_state', TorrentPosState::NONE->value);
             }
-            $normalSql = $normalQuery->toSql();
-            $normalCacheKey = sprintf('nexus_rss:normal:%s', hash('xxh128', $normalSql.':'.$showrows));
+            // toSql() keeps placeholders as "?", so hashing SQL alone
+            // collides across different category/bookmark binding sets —
+            // include the bindings in the key material.
+            $normalCacheKey = sprintf('nexus_rss:normal:%s', hash('xxh128', $normalQuery->toSql().':'.json_encode($normalQuery->getBindings()).':'.$showrows));
             $normalRows = RedisGuard::remember($normalCacheKey, 300, function () use ($normalQuery, $showrows) {
                 return $normalQuery->orderBy('torrents.id', 'desc')->limit($showrows)->get()->map(fn ($row) => (array) $row)->all();
             });
@@ -202,7 +209,7 @@ class TorrentRssController extends BasePageController
             $prependQuery = clone $baseQuery;
             $prependQuery->whereIn('torrents.id', $prependIds);
             $placeholders = implode(',', array_fill(0, count($prependIds), '?'));
-            $prependCacheKey = sprintf('nexus_rss:prepend:%s', hash('xxh128', $prependQuery->toSql().':'.$prependIdStr));
+            $prependCacheKey = sprintf('nexus_rss:prepend:%s', hash('xxh128', $prependQuery->toSql().':'.json_encode($prependQuery->getBindings()).':'.$prependIdStr));
             $prependRows = RedisGuard::remember($prependCacheKey, 300, function () use ($prependQuery, $placeholders, $prependIds) {
                 return $prependQuery->orderByRaw("FIELD(torrents.id, {$placeholders})", $prependIds)->get()->map(fn ($row) => (array) $row)->all();
             });

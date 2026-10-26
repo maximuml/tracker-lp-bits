@@ -31,12 +31,15 @@ final class PeerTableFactory
         $rows = [];
         $now = time();
         $currentUserId = (int) ($curUser['id'] ?? 0);
+        $locationEnabled = YesNo::isYes($enablelocationTweak);
+        $canViewAnonymous = $this->permissionChecker->userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUserId);
+        $canViewConfidential = $this->permissionChecker->userCan(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO->value, false, $currentUserId);
 
         foreach ($arr as $e) {
             $privacy = $privacyData[$e['userid']] ?? '';
             $secs = max(1, $e['la'] - $e['st']);
             $isStrongPrivacy = $privacy === 'strong' || (YesNo::isYes($torrent['anonymous'] ?? null) && $e['userid'] == $torrent['owner']);
-            $canView = $this->permissionChecker->userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUserId) || $e['userid'] == $currentUserId;
+            $canView = $canViewAnonymous || $e['userid'] == $currentUserId;
 
             $uploaded = (float) $e['uploaded'];
             $downloaded = (float) $e['downloaded'];
@@ -64,12 +67,21 @@ final class PeerTableFactory
                 revealUsername: $canView,
                 username: $usernameHtmlMap[$e['userid']] ?? SafeHtml::fromPlainText(''),
                 revealLocation: ! $isStrongPrivacy || $canView,
-                locationTitle: $enablelocationTweak === 'yes'
-                    ? ($canView ? sprintf('%s%s%s', self::plainTitle('functions.text_user_ip'), ":\u{00A0}", implode(', ', array_column($peerIpInfo[$e['id']] ?? [], 'ip'))) : '')
+                // Raw IPs go to the title only for viewers with the
+                // confidential-info right (or the peer's owner). The
+                // enablelocation tweak arrives as bool — a strict 'yes'
+                // comparison silently fell into the raw-IP branch and
+                // leaked addresses to every viewer.
+                locationTitle: $locationEnabled
+                    ? ($canViewConfidential || $e['userid'] == $currentUserId
+                        ? sprintf('%s%s%s', self::plainTitle('functions.text_user_ip'), ":\u{00A0}", implode(', ', array_column($peerIpInfo[$e['id']] ?? [], 'ip')))
+                        : '')
                     : null,
-                locationLines: $enablelocationTweak === 'yes'
+                locationLines: $locationEnabled
                     ? array_column($peerIpInfo[$e['id']] ?? [], 'public')
-                    : array_column($peerIpInfo[$e['id']] ?? [], 'ip'),
+                    : (($canViewConfidential || $e['userid'] == $currentUserId)
+                        ? array_column($peerIpInfo[$e['id']] ?? [], 'ip')
+                        : []),
                 connectableYes: YesNo::isYes($e['connectable'] ?? null),
                 uploaded: Format::size($uploaded),
                 uploadRate: Format::size(($uploaded - $e['uploadoffset']) / $secs),

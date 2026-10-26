@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Auth\Permission;
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Enums\BookmarkFilter;
+use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentVisible;
 use App\Exceptions\NexusException;
@@ -32,6 +34,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Torrent repository: listing, detail, peer/snatch, and presentation helpers.
@@ -143,6 +146,7 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
                 }
             });
         $query = $apiQueryBuilder->build();
+        $this->applyViewerScope($query, $request, $user);
         if (! $apiQueryBuilder->hasSort() || ! $apiQueryBuilder->hasSort('id')) {
             $query->orderBy('id', 'desc');
         }
@@ -166,10 +170,43 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
             ->allowIncludeFields(self::$allowIncludeFields);
         Logger::writeWithContext((string) 'before query torrent detail', (string) 'info', (bool) false);
         $torrent = $apiQueryBuilder->build()->findOrFail($id);
+        Gate::forUser($user)->authorize('view', $torrent);
         Logger::writeWithContext((string) 'before query torrent detail', (string) 'info', (bool) false);
         $torrentList = $this->appendIncludeFields($apiQueryBuilder, $user, [$torrent]);
 
         return $torrentList[0];
+    }
+
+    /**
+     * Row-level visibility rules the API list used to skip entirely:
+     * anonymous uploads, banned torrents, and unapproved torrents are
+     * hidden from viewers without the matching rights — and
+     * filter[owner]=X must not enumerate someone's anonymous releases.
+     *
+     * @param  Builder<Torrent>  $query
+     */
+    private function applyViewerScope(Builder $query, Request $request, User $user): void
+    {
+        if (! SiteConfig::current()->torrent->approvalStatusNoneVisible()
+            && ! Permission::can(PermissionEnum::STAFF_MEMBER, $user)) {
+            $query->where('approval_status', TorrentApprovalStatus::ALLOW->value);
+        }
+
+        if (! Permission::canViewBannedTorrent($user)) {
+            $query->where(static function (Builder $q) use ($user) {
+                $q->where('banned', 0)->orWhere('owner', $user->id);
+            });
+        }
+
+        if (! Permission::canViewAnonymous($user)) {
+            $ownerFiltered = $request->input(ApiQueryBuilder::PARAM_NAME_FILTER.'.owner') !== null
+                || $request->input(ApiQueryBuilder::PARAM_NAME_FILTER_ANY.'.owner') !== null;
+            if ($ownerFiltered) {
+                $query->where(static function (Builder $q) use ($user) {
+                    $q->where('anonymous', 0)->orWhere('owner', $user->id);
+                });
+            }
+        }
     }
 
     /**

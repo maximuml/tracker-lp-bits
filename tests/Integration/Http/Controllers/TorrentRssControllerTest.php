@@ -8,6 +8,8 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\TorrentApprovalStatus;
 use App\Enums\TorrentVisible;
 use App\Http\Controllers\TorrentRssController;
+use App\Models\Bookmark;
+use App\Models\Category;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\TorrentRepository;
@@ -159,9 +161,9 @@ final class TorrentRssControllerTest extends TestCase
         $passkey = md5('rss-cdata-test');
         /** @var User $user */
         $user = User::factory()->create(['passkey' => $passkey]);
-        $catId = (int) DB::table('categories')
-            ->where('mode', SiteConfig::current()->main->browseCat())
-            ->value('id');
+        $browseMode = (int) SiteConfig::current()->main->browseCat();
+        $catId = (int) (DB::table('categories')->where('mode', $browseMode)->value('id')
+            ?? Category::factory()->mode($browseMode)->create()->id);
         /** @var Torrent $torrent */
         $torrent = Torrent::factory()->create([
             'name' => 'Evil ]]> <script>alert(1)</script>',
@@ -197,6 +199,78 @@ final class TorrentRssControllerTest extends TestCase
         /** @var TorrentRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(TorrentRepository::class)->shouldIgnoreMissing();
         app()->instance(TorrentRepository::class, $repository);
+    }
+
+    public function test_torrentrss_inclbookmarked_with_empty_bookmarks_returns_no_items(): void
+    {
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class)->shouldIgnoreMissing());
+        Cache::flush();
+        $this->mockCurrentUser(null);
+
+        $passkey = md5('rss-empty-bookmarks');
+        User::factory()->create(['passkey' => $passkey]);
+        $browseMode = (int) SiteConfig::current()->main->browseCat();
+        $catId = (int) (DB::table('categories')->where('mode', $browseMode)->value('id')
+            ?? Category::factory()->mode($browseMode)->create()->id);
+        Torrent::factory()->create([
+            'name' => 'Unbookmarked Release',
+            'category' => $catId,
+            'visible' => TorrentVisible::YES->value,
+            'approval_status' => TorrentApprovalStatus::ALLOW->value,
+        ]);
+
+        $controller = app(TorrentRssController::class);
+        $request = Request::create('/torrentrss', 'GET', ['passkey' => $passkey, 'inclbookmarked' => 1]);
+        app()->instance('request', $request);
+
+        $response = $controller->torrentrss($request);
+
+        $this->assertSame(200, $response->getStatusCode());
+        // Empty bookmark set must produce an empty feed, not the whole tracker.
+        $this->assertStringNotContainsString('<item>', (string) $response->getContent());
+    }
+
+    public function test_torrentrss_inclbookmarked_feeds_are_isolated_per_user(): void
+    {
+        app()->instance(NexusCache::class, Mockery::mock(NexusCache::class)->shouldIgnoreMissing());
+        Cache::flush();
+        $this->mockCurrentUser(null);
+
+        $browseMode = (int) SiteConfig::current()->main->browseCat();
+        $catId = (int) (DB::table('categories')->where('mode', $browseMode)->value('id')
+            ?? Category::factory()->mode($browseMode)->create()->id);
+        $userA = User::factory()->create(['passkey' => md5('rss-bookmark-a')]);
+        $userB = User::factory()->create(['passkey' => md5('rss-bookmark-b')]);
+        $t1 = Torrent::factory()->create([
+            'name' => 'Bookmarked Release Alpha',
+            'category' => $catId,
+            'visible' => TorrentVisible::YES->value,
+            'approval_status' => TorrentApprovalStatus::ALLOW->value,
+        ]);
+        $t2 = Torrent::factory()->create([
+            'name' => 'Bookmarked Release Beta',
+            'category' => $catId,
+            'visible' => TorrentVisible::YES->value,
+            'approval_status' => TorrentApprovalStatus::ALLOW->value,
+        ]);
+        Bookmark::factory()->create(['userid' => $userA->id, 'torrentid' => $t1->id]);
+        Bookmark::factory()->create(['userid' => $userB->id, 'torrentid' => $t2->id]);
+
+        $controller = app(TorrentRssController::class);
+        $requestA = Request::create('/torrentrss', 'GET', ['passkey' => $userA->passkey, 'inclbookmarked' => 1]);
+        $responseA = $controller->torrentrss($requestA);
+        $this->assertSame(200, $responseA->getStatusCode());
+        $contentA = (string) $responseA->getContent();
+        $this->assertStringContainsString('Bookmarked Release Alpha', $contentA);
+
+        // Without the bindings in the row-cache key, B's bookmark-only
+        // query hashes identically to A's and leaks A's cached rows.
+        $requestB = Request::create('/torrentrss', 'GET', ['passkey' => $userB->passkey, 'inclbookmarked' => 1]);
+        $responseB = $controller->torrentrss($requestB);
+        $this->assertSame(200, $responseB->getStatusCode());
+        $contentB = (string) $responseB->getContent();
+        $this->assertStringContainsString('Bookmarked Release Beta', $contentB);
+        $this->assertStringNotContainsString('Bookmarked Release Alpha', $contentB);
     }
 
     /**

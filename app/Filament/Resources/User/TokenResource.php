@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\User\TokenResource\Pages\ManageTokens;
 use App\Models\PersonalAccessToken;
+use App\Models\User;
 use App\Support\UserDisplay;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -14,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class TokenResource extends Resource
 {
@@ -35,6 +38,13 @@ class TokenResource extends Resource
         return self::getNavigationLabel();
     }
 
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->class >= UserClassEnum::ADMINISTRATOR->value;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -52,7 +62,6 @@ class TokenResource extends Resource
                 TextColumn::make('abilities')
                     ->label(__('token.permission'))
                     ->formatStateUsing(fn ($record): string => $record->abilitiesText),
-                TextColumn::make('token')->label(__('token.token')),
                 TextColumn::make('tokenable_id')
                     ->label(__('label.username'))
                     ->formatStateUsing(fn ($state) => UserDisplay::adminUsername($state)),
@@ -64,13 +73,34 @@ class TokenResource extends Resource
                 //
             ])
             ->recordActions([
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->visible(fn (PersonalAccessToken $record): bool => self::canManageTarget($record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords(fn (PersonalAccessToken $record): bool => self::canManageTarget($record)),
                 ]),
             ]);
+    }
+
+    /**
+     * A staff member may only revoke tokens whose owner sits below them in
+     * the class ladder — or their own. Peers and higher classes are
+     * untouchable.
+     */
+    private static function canManageTarget(PersonalAccessToken $record): bool
+    {
+        $operator = Auth::user();
+        if (! $operator instanceof User) {
+            return false;
+        }
+        $owner = $record->tokenable;
+        if (! $owner instanceof User) {
+            return false;
+        }
+
+        return $operator->id === $owner->id || $operator->class > $owner->class;
     }
 
     public static function getPages(): array

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\User;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\User\UserPasskeyResource\Pages;
 use App\Models\Passkey;
+use App\Models\User;
 use App\Support\UserDisplay;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -15,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class UserPasskeyResource extends Resource
 {
@@ -34,6 +37,13 @@ class UserPasskeyResource extends Resource
     public static function getBreadcrumb(): string
     {
         return self::getNavigationLabel();
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->class >= UserClassEnum::ADMINISTRATOR->value;
     }
 
     public static function form(Schema $schema): Schema
@@ -81,11 +91,31 @@ class UserPasskeyResource extends Resource
                     }),
             ])
             ->recordActions([
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->visible(fn (Passkey $record): bool => self::canManageTarget($record)),
             ])
             ->toolbarActions([
-                DeleteBulkAction::make(),
+                DeleteBulkAction::make()
+                    ->authorizeIndividualRecords(fn (Passkey $record): bool => self::canManageTarget($record)),
             ]);
+    }
+
+    /**
+     * Passkeys are login credentials — an operator may only delete them
+     * for users below their own class (or their own passkeys).
+     */
+    private static function canManageTarget(Passkey $record): bool
+    {
+        $operator = Auth::user();
+        if (! $operator instanceof User) {
+            return false;
+        }
+        $owner = $record->user;
+        if (! $owner instanceof User) {
+            return false;
+        }
+
+        return $operator->id === $owner->id || $operator->class > $owner->class;
     }
 
     public static function getPages(): array

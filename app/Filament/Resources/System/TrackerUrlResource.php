@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\System;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\OptionsTrait;
 use App\Filament\Resources\System\TrackerUrlResource\Pages\ManageTrackerUrls;
 use App\Models\TrackerUrl;
+use App\Models\User;
 use App\Support\Url;
 use Closure;
 use Filament\Actions\BulkActionGroup;
@@ -21,6 +23,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class TrackerUrlResource extends Resource
 {
@@ -42,6 +45,13 @@ class TrackerUrlResource extends Resource
     public static function getBreadcrumb(): string
     {
         return self::getNavigationLabel();
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->class >= UserClassEnum::SYSOP->value;
     }
 
     public static function form(Schema $schema): Schema

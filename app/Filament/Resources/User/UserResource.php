@@ -326,10 +326,11 @@ class UserResource extends Resource
     {
         return Action::make(__('admin.resources.user.actions.confirm_btn'))
             ->modalHeading(__('admin.resources.user.actions.confirm_btn'))
-            ->visible(fn (User $record): bool => (self::currentUser()->class > $record->class))
             ->button()
             ->color('success')
-            ->visible(fn ($record) => $record->status == UserStatus::PENDING->value)
+            // visible() replaces — it does not stack — so the class check
+            // must live in the same call as the pending-status check.
+            ->visible(fn (User $record): bool => self::currentUser()->class > $record->class && $record->status === UserStatus::PENDING)
             ->schema([
                 Forms\Components\Checkbox::make('send_email')
                     ->label(__('admin.resources.user.actions.confirm_send_email'))
@@ -393,7 +394,7 @@ class UserResource extends Resource
 
     private static function buildActionEnableDisable(): Action
     {
-        return Action::make('changeClass')
+        return Action::make('enableDisable')
             ->label(fn (User $record) => $record->enabled ? __('admin.resources.user.actions.disable_modal_btn') : __('admin.resources.user.actions.enable_modal_btn'))
             ->modalHeading(fn (User $record) => $record->enabled ? __('admin.resources.user.actions.disable_modal_title') : __('admin.resources.user.actions.enable_modal_title'))
             ->button()
@@ -401,15 +402,14 @@ class UserResource extends Resource
             ->schema([
                 TextInput::make('reason')->label(__('admin.resources.user.actions.enable_disable_reason'))->placeholder(__('admin.resources.user.actions.enable_disable_reason_placeholder')),
                 Hidden::make('action')->default(fn (User $record) => $record->enabled ? 'disable' : 'enable'),
-                Hidden::make('uid')->default(fn (User $record) => $record->id),
             ])
             ->action(function (User $record, array $data) {
                 $userRep = self::getRep();
                 try {
                     if ($data['action'] == 'enable') {
-                        $userRep->enableUser(self::currentUser(), $data['uid'], $data['reason']);
+                        $userRep->enableUser(self::currentUser(), $record->id, $data['reason']);
                     } elseif ($data['action'] == 'disable') {
-                        $userRep->disableUser(self::currentUser(), $data['uid'], $data['reason']);
+                        $userRep->disableUser(self::currentUser(), $record->id, $data['reason']);
                     }
                     Admin::successNotification('');
                 } catch (Exception $exception) {
@@ -442,7 +442,7 @@ class UserResource extends Resource
         return Action::make('twoStepAuthentication')
             ->label(__('admin.resources.user.actions.disable_two_step_authentication'))
             ->button()
-            ->visible(fn (User $record) => $record->two_step_secret != '')
+            ->visible(fn (User $record): bool => $record->two_step_secret != '' && self::currentUser()->class > $record->class)
             ->modalHeading(__('admin.resources.user.actions.disable_two_step_authentication'))
             ->requiresConfirmation()
             ->action(function (User $record) {

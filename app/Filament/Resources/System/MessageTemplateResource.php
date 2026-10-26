@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\System;
 
+use App\Enums\UserClass as UserClassEnum;
 use App\Filament\Resources\System\MessageTemplateResource\Pages\ManageMessageTemplates;
 use App\Models\Language;
 use App\Models\MessageTemplate;
 use App\Models\Setting;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -19,6 +21,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
 class MessageTemplateResource extends Resource
@@ -39,6 +42,13 @@ class MessageTemplateResource extends Resource
     public static function getBreadcrumb(): string
     {
         return self::getNavigationLabel();
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+
+        return $user instanceof User && $user->class >= UserClassEnum::SYSOP->value;
     }
 
     public static function form(Schema $schema): Schema

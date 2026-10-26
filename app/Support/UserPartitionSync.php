@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Models\User;
-use App\Models\UserActivity;
-use App\Models\UserPreference;
-use App\Models\UserSeedStats;
 use Illuminate\Contracts\Database\Query\Expression;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Mirrors `users` writes into the vertical partition tables
@@ -39,12 +37,10 @@ final class UserPartitionSync
         }
 
         foreach ($grouped as $table => $data) {
-            match ($table) {
-                'user_preferences' => UserPreference::query()->updateOrCreate(['user_id' => $userId], $data),
-                'user_activity' => UserActivity::query()->updateOrCreate(['user_id' => $userId], $data),
-                'user_seed_stats' => UserSeedStats::query()->updateOrCreate(['user_id' => $userId], $data),
-                default => null,
-            };
+            // Single atomic upsert — user_id is the PRIMARY KEY on all
+            // three partition tables. updateOrInsert keeps the
+            // dual-write to one statement (query budgets count it).
+            DB::table($table)->updateOrInsert(['user_id' => $userId], $data);
         }
     }
 }

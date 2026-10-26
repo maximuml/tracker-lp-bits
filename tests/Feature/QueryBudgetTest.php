@@ -232,16 +232,18 @@ final class QueryBudgetTest extends TestCase
     }
 
     /**
-     * Filament /nexusphp shell — actual 2 → budget 3.
+     * Filament /nexusphp shell — actual 3 → budget 4.
      * (Livewire widgets fetch data over XHR; this guards the initial
-     * page render and panel navigation queries.)
+     * page render and panel navigation queries. +1 since M-03: the
+     * flushAccess last_access write is now mirrored into
+     * user_activity via a single updateOrInsert.)
      */
     public function test_admin_dashboard_query_budget(): void
     {
         $admin = User::factory()->create(['class' => 16]);
         $this->actingAs($admin, 'nexus-web');
 
-        $this->assertQueryCountBelow(3, function (): void {
+        $this->assertQueryCountBelow(4, function (): void {
             $this->get('/nexusphp');
         });
     }

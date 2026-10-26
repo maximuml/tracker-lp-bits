@@ -218,7 +218,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->assertInstanceOf(ForumComposeViewModel::class, $result);
         $this->assertSame(
-            __('forums.text_new_topic_in').' <a href="?action=viewforum&amp;forumid=1">Test Forum</a> '.__('forums.text_forum'),
+            __('forums.text_new_topic_in').' <a href="/forums?action=viewforum&amp;forumid=1">Test Forum</a> '.__('forums.text_forum'),
             rtrim((string) $result->titleHtml, "\n"),
         );
         $this->assertTrue($result->hasSubject);
@@ -240,7 +240,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->assertInstanceOf(ForumComposeViewModel::class, $result);
         $this->assertSame(
-            __('forums.text_reply_to_topic').' <a href="?action=viewtopic&amp;topicid=1">Test Topic</a> ',
+            __('forums.text_reply_to_topic').' <a href="/forums?action=viewtopic&amp;topicid=1">Test Topic</a> ',
             rtrim((string) $result->titleHtml, "\n"),
         );
         $this->assertFalse($result->hasSubject);
@@ -265,7 +265,7 @@ final class ForumComposeServiceTest extends TestCase
 
         $this->assertInstanceOf(ForumComposeViewModel::class, $result);
         $this->assertSame(
-            __('forums.text_reply_to_topic').' <a href="?action=viewtopic&amp;topicid=5">Quoted Topic</a> ',
+            __('forums.text_reply_to_topic').' <a href="/forums?action=viewtopic&amp;topicid=5">Quoted Topic</a> ',
             rtrim((string) $result->titleHtml, "\n"),
         );
         $this->assertStringContainsString('[quote=poster]', $result->body);

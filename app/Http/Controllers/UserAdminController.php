@@ -130,7 +130,7 @@ class UserAdminController extends BasePageController
             $L = chr($i - 32);
             $href = null;
             if ($l !== $letter) {
-                $href = "?letter={$l}".($class !== '-' ? "&class={$class}" : '').($country > 0 ? "&country={$country}" : '');
+                $href = "/web/users?letter={$l}".($class !== '-' ? "&class={$class}" : '').($country > 0 ? "&country={$country}" : '');
             }
             $letterItems[] = ['label' => $L, 'href' => $href];
         }

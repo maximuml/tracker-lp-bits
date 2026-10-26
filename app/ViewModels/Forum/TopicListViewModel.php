@@ -51,7 +51,7 @@ final class TopicListViewModel
      */
     public function pagerHref(): string
     {
-        return '?action=viewforum&forumid='.$this->forumId.$this->addParam().'&';
+        return '/forums?action=viewforum&forumid='.$this->forumId.$this->addParam().'&';
     }
 
     /**

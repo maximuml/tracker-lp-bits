@@ -47,13 +47,13 @@ final class ForumComposeService
         switch ($type) {
             case 'new':
                 $forumname = $this->forumRepository->getForumName((int) $id) ?? '';
-                $title = view('components.title-link', ['before' => __('forums.text_new_topic_in').' ', 'url' => '?action=viewforum&forumid='.$id, 'text' => $forumname, 'after' => ' '.__('forums.text_forum')])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_new_topic_in').' ', 'url' => '/forums?action=viewforum&forumid='.$id, 'text' => $forumname, 'after' => ' '.__('forums.text_forum')])->render();
                 $hassubject = true;
                 break;
 
             case 'reply':
                 $topicname = $this->topicRepository->getTopicSubject((int) $id) ?? '';
-                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$id, 'text' => $topicname, 'after' => ' '])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '/forums?action=viewtopic&topicid='.$id, 'text' => $topicname, 'after' => ' '])->render();
                 break;
 
             case 'quote':
@@ -63,7 +63,7 @@ final class ForumComposeService
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
-                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '?action=viewtopic&topicid='.$topicid, 'text' => $topicname, 'after' => ' '])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '/forums?action=viewtopic&topicid='.$topicid, 'text' => $topicname, 'after' => ' '])->render();
                 $body = '[quote='.(string) $post['username'].']'.(string) $post['body'].'[/quote]';
                 $postid = $id;
                 $hiddenId = $topicid;

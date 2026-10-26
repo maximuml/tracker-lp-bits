@@ -54,6 +54,6 @@ final class ForumSearchViewModel
      */
     public function resultUrl(int $topicId, int $postId): string
     {
-        return '?action=viewtopic&topicid='.$topicId.'&highlight='.rawurlencode($this->keywords).'&page=p'.$postId.'#pid'.$postId;
+        return '/forums?action=viewtopic&topicid='.$topicId.'&highlight='.rawurlencode($this->keywords).'&page=p'.$postId.'#pid'.$postId;
     }
 }

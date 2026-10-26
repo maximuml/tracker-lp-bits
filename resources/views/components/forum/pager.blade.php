@@ -1,12 +1,14 @@
 @props(['page', 'pages', 'href', 'items', 'label' => 'Pagination'])
 {{-- Forum listings keep the legacy 0-based `page=` query param; `items`
-     is the 1-based display window precomputed by the view model. --}}
+     is the 1-based display window precomputed by the view model.
+     `?`-only href bases are anchored to the current path because
+     <base href="/"> would resolve them to the home page. --}}
 @if ($pages > 1)
 <nav class="nx-pagination" aria-label="{{ $label }}">
     <ul class="nx-pagination__list">
         @if ($page > 0)
             <li class="nx-pagination__item">
-                <a class="nx-pagination__link inline-flex min-h-8 min-w-8 items-center justify-center rounded-md px-2.5 hover:bg-nxm-surface-alt focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-nxm-accent" href="{{ $href }}page={{ $page - 1 }}" rel="prev">{{ __('functions.text_prev') }}</a>
+                <a class="nx-pagination__link inline-flex min-h-8 min-w-8 items-center justify-center rounded-md px-2.5 hover:bg-nxm-surface-alt focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-nxm-accent" href="{{ \App\Support\Pagination::resolveHref($href) }}page={{ $page - 1 }}" rel="prev">{{ __('functions.text_prev') }}</a>
             </li>
         @endif
         @foreach ($items as $item)
@@ -17,14 +19,14 @@
                     @if ($item === $page + 1)
                         <span class="nx-pagination__link nx-pagination__link--current inline-flex min-h-8 min-w-8 items-center justify-center rounded-md px-2.5" aria-current="page">{{ $item }}</span>
                     @else
-                        <a class="nx-pagination__link inline-flex min-h-8 min-w-8 items-center justify-center rounded-md px-2.5 hover:bg-nxm-surface-alt focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-nxm-accent" href="{{ $href }}page={{ $item - 1 }}">{{ $item }}</a>
+                        <a class="nx-pagination__link inline-flex min-h-8 min-w-8 items-center justify-center rounded-md px-2.5 hover:bg-nxm-surface-alt focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-nxm-accent" href="{{ \App\Support\Pagination::resolveHref($href) }}page={{ $item - 1 }}">{{ $item }}</a>
                     @endif
                 </li>
             @endif
         @endforeach
         @if ($page < $pages - 1)
             <li class="nx-pagination__item">
-                <a class="nx-pagination__link inline-flex min-h-8 min-w-8 items-center justify-center rounded-md px-2.5 hover:bg-nxm-surface-alt focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-nxm-accent" href="{{ $href }}page={{ $page + 1 }}" rel="next">{{ __('functions.text_next') }}</a>
+                <a class="nx-pagination__link inline-flex min-h-8 min-w-8 items-center justify-center rounded-md px-2.5 hover:bg-nxm-surface-alt focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-nxm-accent" href="{{ \App\Support\Pagination::resolveHref($href) }}page={{ $page + 1 }}" rel="next">{{ __('functions.text_next') }}</a>
             </li>
         @endif
     </ul>

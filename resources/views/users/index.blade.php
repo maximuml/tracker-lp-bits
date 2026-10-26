@@ -5,20 +5,20 @@
 @section('content')
 <h1>{{ __('users.text_users') }}</h1>
 
-<form method=get action=?>
-{{ __('users.text_search')}} <input type=text name=search value="{{ $search }}">
-<select name=class>
-<option value='-'>{{ __('users.select_any_class')}}</option>
+<form method="get" action="/web/users">
+{{ __('users.text_search')}} <input type="text" name="search" value="{{ $search }}">
+<select name="class">
+<option value="-">{{ __('users.select_any_class')}}</option>
 @foreach ($classOptions as $opt)
 <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
 @endforeach
 </select>
-<select name=country>
+<select name="country">
 @foreach ($countryOptions as $opt)
 <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
 @endforeach
 </select>
-<input type=submit value="{{ __('users.submit_okay')}}">
+<input type="submit" value="{{ __('users.submit_okay')}}">
 </form>
 
 <p>

@@ -47,7 +47,7 @@ final readonly class ViewTopicViewModel
 
     public function pagerHref(): string
     {
-        $href = '?action=viewtopic&topicid='.$this->topicid;
+        $href = '/forums?action=viewtopic&topicid='.$this->topicid;
 
         return $this->authorid !== 0 ? $href.'&authorid='.$this->authorid.'&' : $href.'&';
     }

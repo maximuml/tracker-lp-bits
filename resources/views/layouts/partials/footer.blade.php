@@ -34,7 +34,7 @@
     {{ $chrome->footer->analyticsHtml }}
 </footer>
 
-<img id="nexus-preview" alt="" role="presentation" class="nx-hidden" src="" />
+<img id="nexus-preview" alt="" role="presentation" class="nx-hidden" />
 @foreach($chrome->footer->footScripts as $src)
 <script type="text/javascript" src="{{ \App\Support\AssetAppender::versionedSrc($src) }}"></script>
 @endforeach

@@ -109,14 +109,14 @@ class MessageController extends BasePageController
                 return $this->abortResponse(__('sendmessage.std_error'), __('sendmessage.std_permission_denied'));
             }
             $body .= ($msg->msg ?? '')."\n\n-------- [url=/userdetails?id=".$this->actor->id.']'.$this->actor->username.'[/url][i] Wrote at '.date('Y-m-d H:i:s').":[/i] --------\n";
-            $subject = htmlspecialchars(MessageSubject::reply((string) ($msg->subject ?? '')));
+            $subject = MessageSubject::reply((string) ($msg->subject ?? ''));
         }
 
         $returnto = '';
         if ($request->input('returnto') !== null && $request->input('returnto') !== '') {
-            $returnto = htmlspecialchars((string) $request->input('returnto'));
+            $returnto = (string) $request->input('returnto');
         } elseif ($request->headers->get('referer') !== null) {
-            $returnto = htmlspecialchars((string) $request->headers->get('referer'));
+            $returnto = (string) $request->headers->get('referer');
         }
 
         $messageTo = __('sendmessage.text_message_to');
@@ -132,8 +132,8 @@ class MessageController extends BasePageController
             'title' => $title,
             'frameTitle' => $frameTitle,
             'stdheadMsgalert' => false,
-            'deleteChecked' => $this->actor->yes('deletepms') ? ' checked' : '',
-            'saveChecked' => $this->actor->yes('savepms') ? ' checked' : '',
+            'deleteChecked' => $this->actor->yes('deletepms'),
+            'saveChecked' => $this->actor->yes('savepms'),
         ]);
     }
 

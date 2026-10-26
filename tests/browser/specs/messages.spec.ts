@@ -198,3 +198,82 @@ test('quick reply returns to the original message and stores a Re subject', asyn
     ).trim(),
   ).toBe(`Re: ${originalSubject}`);
 });
+
+for (const pack of packs) {
+  for (const theme of themes) {
+    test(`compose passes axe in ${pack.name} ${theme}`, async ({ page }) => {
+      mysql(`UPDATE users SET stylesheet=${pack.id} WHERE id=${userId}`);
+      await page.goto(`/sendmessage?receiver=${senderId}`, { waitUntil: 'networkidle' });
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa'])
+        .include('#compose')
+        .analyze();
+      expect(results.violations.map((violation) => ({
+        id: violation.id,
+        nodes: violation.nodes.map((node) => ({
+          target: node.target,
+          html: node.html,
+          failureSummary: node.failureSummary,
+        })),
+      }))).toEqual([]);
+    });
+  }
+}
+
+test('compose has no mobile overflow in Classic and Unshatter', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  for (const pack of packs) {
+    mysql(`UPDATE users SET stylesheet=${pack.id} WHERE id=${userId}`);
+    await page.goto(`/sendmessage?receiver=${senderId}`, { waitUntil: 'networkidle' });
+    await page.evaluate(() => {
+      document.documentElement.dataset.theme = 'light';
+    });
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, `${pack.name}: horizontal overflow`).toBeLessThanOrEqual(1);
+  }
+});
+
+test('compose expands smilies, toggles preview, and submits to a canonical URL', async ({ page }) => {
+  mysql(`UPDATE users SET stylesheet=4 WHERE id=${userId}`);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(`/sendmessage?receiver=${senderId}&returnto=%2Fweb%2Fmessages`, { waitUntil: 'networkidle' });
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = 'light';
+  });
+
+  const smile = page.locator('.bbcode-smile a').first();
+  const smileCode = await smile.getAttribute('data-smile');
+  await page.locator('.bbcode-smilies-details summary').click();
+  await smile.click();
+  expect(await page.locator('#body').inputValue()).toContain(smileCode);
+
+  const preview = page.locator('.bbcode-editor__head button');
+  await preview.click();
+  await expect(preview).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.bbcode-editor__head').locator('..').locator('.nx-box')).toBeVisible();
+  await preview.click();
+  await expect(preview).toHaveAttribute('aria-pressed', 'false');
+
+  const subject = `PM Compose E2E ${Date.now()}`;
+  const body = `Compose browser smoke ${Date.now()}`;
+  await page.fill('#subject', subject);
+  await page.fill('#body', body);
+  await Promise.all([
+    page.waitForURL((url) => url.pathname === '/web/messages'),
+    page.locator('#qr').click(),
+  ]);
+
+  expect(
+    mysql(
+      `SELECT COUNT(*) FROM messages WHERE sender=${userId} AND receiver=${senderId} ` +
+        `AND subject='${subject}' AND msg='${body}'`,
+    ).trim(),
+  ).toBe('1');
+});

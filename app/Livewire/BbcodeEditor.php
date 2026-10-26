@@ -23,6 +23,9 @@ final class BbcodeEditor extends Component
     #[Locked]
     public string $text = 'body';
 
+    #[Locked]
+    public bool $compact = false;
+
     public string $body = '';
 
     public bool $previewMode = false;
@@ -42,6 +45,7 @@ final class BbcodeEditor extends Component
         bool $invalid = false,
         string $describedBy = '',
         string $label = '',
+        bool $compact = false,
     ): void {
         $this->form = $form;
         $this->text = $text;
@@ -49,6 +53,7 @@ final class BbcodeEditor extends Component
         $this->invalid = $invalid;
         $this->describedBy = $describedBy;
         $this->label = $label;
+        $this->compact = $compact;
     }
 
     public function preview(): void

@@ -3,7 +3,7 @@
      dispatched by the delegated data-bbcode-action listener in common.js.
      Toolbar controls keep their name attributes — legacy code addresses them
      via document.forms[form][name]. --}}
-<div class="bbcode-editor" data-bbcode-editor
+<div class="bbcode-editor{{ $compact ? ' bbcode-editor--compact' : '' }}" data-bbcode-editor
      data-form="{{ $form }}" data-text="{{ $text }}">
     <div class="bbcode-edit">
         <div class="bbcode-toolbar">
@@ -103,6 +103,17 @@
         @endif
         <div class="bbcode-body">
             <textarea class="bbcode" cols="100" name="{{ $text }}" id="{{ $text }}" rows="20" aria-label="{{ $label !== '' ? $label : $text }}" data-ctrlenter="compose:qr"@if ($invalid) aria-invalid="true"@if ($describedBy !== '') aria-describedby="{{ $describedBy }}"@endif @endif @if ($wireModel !== '') wire:model="{{ $wireModel }}"@endif>{{ $content }}</textarea>
+            @if ($compact)
+            <details class="bbcode-smilies-wrap bbcode-smilies-details">
+                <summary>{{ __('functions.text_smilies') }}</summary>
+                <div class="bbcode-smilies">
+                    @foreach ($quickSmilies as $smily)
+                        <span class="bbcode-smile">{{ \App\Support\Smilies::link($form, $text, (int) $smily) }}</span>
+                    @endforeach
+                </div>
+                <a href="#" data-bbcode-action="winop">{{ __('functions.text_more_smilies')}}</a>
+            </details>
+            @else
             <div class="bbcode-smilies-wrap">
                 <div class="bbcode-smilies">
                     @foreach ($quickSmilies as $smily)
@@ -111,6 +122,7 @@
                 </div>
                 <a href="#" data-bbcode-action="winop">{{ __('functions.text_more_smilies')}}</a>
             </div>
+            @endif
         </div>
     </div>
 </div>

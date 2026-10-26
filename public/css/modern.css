@@ -2587,6 +2587,12 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
     border-color: var(--nxm-accent);
     background: var(--nxm-surface-alt);
 }
+.nxm-main .nx-bshop a.nx-bshop__chip:hover,
+.nxm-main .nx-bshop a.nx-bshop__chip:focus-visible {
+    border-color: var(--nxm-accent);
+    background: var(--nxm-surface-alt);
+    color: var(--nxm-text);
+}
 .nx-bshop__chip:focus-visible {
     outline: var(--nxm-focus-outline);
     outline-offset: 2px;
@@ -2723,9 +2729,6 @@ html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:
 html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__chip,
 html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__history a {
     color: var(--nxm-text);
-}
-html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__chip:hover {
-    color: var(--nxm-on-accent);
 }
 html[data-theme="dark"] .nxm-main .nx-bshop input.nx-btn--primary {
     color: var(--nxm-on-accent);

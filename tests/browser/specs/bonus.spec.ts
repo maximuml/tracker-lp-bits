@@ -65,6 +65,44 @@ for (const pack of packs) {
         document.documentElement.dataset.theme = value;
       }, theme);
 
+      const chip = page.locator('.nx-bshop__chip').first();
+      await chip.hover();
+      const hover = await chip.evaluate((element) => {
+        const actual = getComputedStyle(element);
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--nxm-text)';
+        probe.style.border = '1px solid var(--nxm-accent)';
+        probe.style.background = 'var(--nxm-surface-alt)';
+        document.body.append(probe);
+        const expected = getComputedStyle(probe);
+        const channels = (color: string) => color.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+        const luminance = (color: string) => {
+          const rgb = channels(color).map((channel) => channel / 255).map((channel) =>
+            channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+          );
+          return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+        };
+        const values = [luminance(actual.color), luminance(actual.backgroundColor)].sort((a, b) => b - a);
+        const contrast = (values[0] + 0.05) / (values[1] + 0.05);
+        const result = {
+          color: actual.color,
+          background: actual.backgroundColor,
+          border: actual.borderTopColor,
+          contrast: Number(contrast.toFixed(2)),
+          textToken: actual.color === expected.color,
+          backgroundToken: actual.backgroundColor === expected.backgroundColor,
+          borderToken: actual.borderTopColor === expected.borderTopColor,
+        };
+        probe.remove();
+        return result;
+      });
+      console.log(`chip hover ${pack.name} ${theme}: ${JSON.stringify(hover)}`);
+      expect(hover.textToken).toBe(true);
+      expect(hover.backgroundToken).toBe(true);
+      expect(hover.borderToken).toBe(true);
+      expect(hover.contrast).toBeGreaterThanOrEqual(4.5);
+      await page.mouse.move(0, 0);
+
       const results = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa'])
         .include(['.nx-bshop', '.nx-bshop__info'])

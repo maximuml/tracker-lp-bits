@@ -9,12 +9,6 @@ use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
-    /** @return array<int|string, mixed> */
-    public function pagination(Request $request): array
-    {
-        return $this->getPaginationParameters($request);
-    }
-
     public function extraField(Request $request, string $field): bool
     {
         return $this->hasExtraField($request, $field);

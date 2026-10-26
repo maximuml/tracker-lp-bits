@@ -134,17 +134,30 @@ class BackupService
 
         $dumpCommand = Environment::commandExists('mariadb-dump') ? 'mariadb-dump' : 'mysqldump';
         $sslFlag = Environment::commandExists('mariadb-dump') ? '--ssl=0' : '--ssl-mode=DISABLED';
+        $errFile = tempnam(sys_get_temp_dir(), 'db.err');
+        // stderr goes to its own file — a `2>&1` after `>>` would append
+        // warnings/errors inside the .sql dump and corrupt it.
         $command = sprintf(
-            '%s --defaults-extra-file=%s --single-transaction --no-create-db --no-tablespaces %s %s >> %s 2>&1',
+            '%s --defaults-extra-file=%s --single-transaction --no-create-db --no-tablespaces %s %s >> %s 2>> %s',
             $dumpCommand,
             escapeshellarg($tmpFile),
             $sslFlag,
             escapeshellarg($config['database']),
-            escapeshellarg($filename)
+            escapeshellarg($filename),
+            escapeshellarg($errFile ?: '/dev/null')
         );
-        $result = exec($command, $output, $result_code);
-        @unlink($tmpFile);
-        Logger::writeWithContext((string) sprintf('command: %s, output: %s, result_code: %s, result: %s, filename: %s', $command, json_encode($output), $result_code, $result, $filename), (string) 'info', (bool) false);
+        try {
+            $result = exec($command, $output, $result_code);
+        } finally {
+            // The tmp file holds DB credentials — it must not outlive
+            // the dump even when exec throws.
+            @unlink($tmpFile);
+            $stderr = $errFile !== false && is_file($errFile) ? trim((string) @file_get_contents($errFile)) : '';
+            if (is_string($errFile)) {
+                @unlink($errFile);
+            }
+        }
+        Logger::writeWithContext((string) sprintf('command: %s, output: %s, stderr: %s, result_code: %s, result: %s, filename: %s', $command, json_encode($output), $stderr, $result_code, $result, $filename), (string) 'info', (bool) false);
         if (! $transfer) {
             return compact('result_code', 'filename');
         }
@@ -204,9 +217,16 @@ class BackupService
         // Optional GPG encryption of the backup archive
         $gpgRecipient = SiteConfig::current()->backup->gpgRecipient();
         if ($gpgRecipient !== '' && Environment::commandExists('gpg')) {
+            // Recipient is an email or key-id — anything else (leading
+            // dash, whitespace, shell metachars) is rejected outright.
+            if (! preg_match('/^[A-Za-z0-9._%+\-@=]+$/', $gpgRecipient)) {
+                throw new \RuntimeException('Invalid gpg recipient configured.');
+            }
             $encryptedFile = $filename.'.gpg';
+            // `--` stops option parsing so the positional file argument
+            // can never be reinterpreted as a flag.
             $gpgCommand = sprintf(
-                'gpg --batch --yes --trust-model always --recipient %s --encrypt %s 2>&1',
+                'gpg --batch --yes --trust-model always --recipient %s --encrypt -- %s 2>&1',
                 escapeshellarg($gpgRecipient),
                 escapeshellarg($filename)
             );

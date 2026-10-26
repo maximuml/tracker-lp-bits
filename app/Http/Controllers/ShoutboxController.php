@@ -205,9 +205,17 @@ class ShoutboxController extends BasePageController
         try {
             $redis = Redis::connection()->client();
             $active = (int) $redis->incr($globalKey);
-            if ($active === 1) {
-                $redis->expire($globalKey, $ttl + 60);
+            if ($active < 1) {
+                // The key lapsed while displaced streams still held
+                // slots — their later decr() drove the count negative.
+                // Snap back so the admission bound keeps working.
+                $redis->set($globalKey, 1);
+                $active = 1;
             }
+            // Refresh the expiry on every admission — a long-lived
+            // stream would otherwise let the key lapse while it still
+            // holds a slot.
+            $redis->expire($globalKey, $ttl + 60);
             if ($active > $maxStreams) {
                 try {
                     $redis->decr($globalKey);

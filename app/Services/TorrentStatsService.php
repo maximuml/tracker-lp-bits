@@ -109,7 +109,9 @@ class TorrentStatsService
     /** @param  mixed  $peer */
     public function getDownloadProgress($peer): string
     {
-        return sprintf('%.2f%%', 100 * (1 - ($peer->to_go / $peer->relative_torrent->size)));
+        $size = max(1, (int) ($peer->relative_torrent->size ?? 0));
+
+        return sprintf('%.2f%%', 100 * (1 - ($peer->to_go / $size)));
     }
 
     /**

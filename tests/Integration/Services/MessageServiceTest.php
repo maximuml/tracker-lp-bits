@@ -463,6 +463,140 @@ final class MessageServiceTest extends TestCase
         $this->assertSame(0, (int) $saved);
     }
 
+    /**
+     * B-01: the receiver deleting an inbox PM the sender saved must not
+     * destroy the row — it leaves the inbox (location=0) but stays in
+     * the sender's saved box. The old `$msg->saved === 'yes'` compare
+     * was always false on the boolean-cast attribute and hard-deleted.
+     */
+    public function test_delete_message_inbox_saved_by_sender_sets_location_zero(): void
+    {
+        $sender = $this->createUser();
+        $receiver = $this->createUser();
+        $this->login($receiver);
+
+        $msgId = $this->createMessage($sender->id, $receiver->id, [
+            'location' => 1,
+            'saved' => 1,
+        ]);
+
+        $request = Request::create('/messages.php', 'POST', [
+            'id' => $msgId,
+            'type' => 'in',
+        ]);
+
+        $result = $this->callService(fn () => $this->service->deletemessage($request));
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $row = DB::table('messages')->where('id', $msgId)->first();
+        $this->assertNotNull($row);
+        $this->assertSame(0, (int) $row->location);
+        $this->assertSame(0, (int) $row->unread);
+        $this->assertSame(1, (int) $row->saved);
+    }
+
+    /**
+     * B-01: outbox delete of a message already gone from the inbox AND
+     * not saved must abort "not in sentbox" — the old `=== 'no'`
+     * compare fell through and deleted the row instead.
+     */
+    public function test_delete_message_outbox_not_in_sentbox_aborts(): void
+    {
+        $sender = $this->createUser();
+        $receiver = $this->createUser();
+        $this->login($sender);
+
+        $msgId = $this->createMessage($sender->id, $receiver->id, [
+            'location' => 0,
+            'saved' => 0,
+        ]);
+
+        $request = Request::create('/messages.php', 'POST', [
+            'id' => $msgId,
+            'type' => 'out',
+        ]);
+
+        $this->assertServiceThrows(fn () => $this->service->deletemessage($request));
+        $this->assertSame(1, (int) DB::table('messages')->where('id', $msgId)->count());
+    }
+
+    public function test_delete_message_outbox_location_zero_deletes_row(): void
+    {
+        $sender = $this->createUser();
+        $receiver = $this->createUser();
+        $this->login($sender);
+
+        $msgId = $this->createMessage($sender->id, $receiver->id, [
+            'location' => 0,
+            'saved' => 1,
+        ]);
+
+        $request = Request::create('/messages.php', 'POST', [
+            'id' => $msgId,
+            'type' => 'out',
+        ]);
+
+        $result = $this->callService(fn () => $this->service->deletemessage($request));
+
+        $this->assertInstanceOf(RedirectResponse::class, $result);
+        $this->assertSame(0, (int) DB::table('messages')->where('id', $msgId)->count());
+    }
+
+    /**
+     * B-01: reply-with-delete on an UNSAVED original message must delete
+     * the row — the old `=== 'no'` compare sent everything to the
+     * location=0 branch and leaked the row.
+     */
+    public function test_take_message_reply_delete_unsaved_origmsg_removes_row(): void
+    {
+        $other = $this->createUser();
+        $sender = $this->createUser();
+        $this->login($sender);
+
+        $origId = $this->createMessage($other->id, $sender->id, [
+            'location' => 1,
+            'saved' => 0,
+        ]);
+
+        $request = Request::create('/messages.php', 'POST', [
+            'receiver' => $other->id,
+            'body' => 'Reply body',
+            'subject' => 'Re: test',
+            'origmsg' => $origId,
+            'delete' => 'yes',
+        ]);
+
+        $this->callService(fn () => $this->service->takeMessage($request));
+
+        $this->assertSame(0, (int) DB::table('messages')->where('id', $origId)->count());
+    }
+
+    public function test_take_message_reply_delete_saved_origmsg_sets_location_zero(): void
+    {
+        $other = $this->createUser();
+        $sender = $this->createUser();
+        $this->login($sender);
+
+        $origId = $this->createMessage($other->id, $sender->id, [
+            'location' => 1,
+            'saved' => 1,
+        ]);
+
+        $request = Request::create('/messages.php', 'POST', [
+            'receiver' => $other->id,
+            'body' => 'Reply body',
+            'subject' => 'Re: test',
+            'origmsg' => $origId,
+            'delete' => 'yes',
+        ]);
+
+        $this->callService(fn () => $this->service->takeMessage($request));
+
+        $row = DB::table('messages')->where('id', $origId)->first();
+        $this->assertNotNull($row);
+        $this->assertSame(0, (int) $row->location);
+    }
+
     public function test_delete_message_rejects_unknown_type(): void
     {
         $sender = $this->createUser();

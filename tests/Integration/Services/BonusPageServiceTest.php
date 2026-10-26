@@ -369,6 +369,23 @@ final class BonusPageServiceTest extends TestCase
         $this->assertSame((string) __('mybonus.submit_charity_giving'), $charity->trade->label);
     }
 
+    public function test_build_shop_does_not_report_a_shortfall_at_exact_price(): void
+    {
+        $this->seedSettings([
+            'bonus_tweak' => '',
+            'onegbupload_bonus' => 300.0,
+            'oneinvite_bonus' => 0.0,
+        ]);
+        $this->setCurrentUser(['seedbonus' => 300.0, 'donor' => 0]);
+
+        $result = $this->service->build($this->requestWithQuery())->toArray();
+        $this->assertInstanceOf(BonusShopViewModel::class, $result['shop']);
+        $upload = collect($result['shop']->items)->firstWhere('index', 0);
+
+        $this->assertInstanceOf(BonusShopItem::class, $upload);
+        $this->assertNull($upload->pointsShort);
+    }
+
     public function test_build_with_bonus_tweak_disable_throws(): void
     {
         $this->seedSettings([

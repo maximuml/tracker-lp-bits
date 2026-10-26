@@ -68,8 +68,9 @@
 <script type="text/javascript">
 @endif
     window.nexusLayerOptions = {
-        confirm: {btnAlign: 'c', title: 'Confirm', btn: ['OK', 'Cancel']},
-        alert: {btnAlign: 'c', title: 'Info', btn: ['OK', 'Cancel']}
+        confirm: {btnAlign: 'c', title: @json(__('functions.text_confirm')), btn: [@json(__('functions.text_ok')), @json(__('label.cancel'))]},
+        alert: {btnAlign: 'c', title: @json(__('functions.text_info')), btn: [@json(__('functions.text_ok')), @json(__('label.cancel'))]},
+        labels: {close: @json(__('functions.text_close')), loading: @json(__('functions.text_loading'))}
     }
 </script>
 <script type="text/javascript" src="{{ \App\Support\AssetAppender::versionedSrc('js/nx-layer.js') }}"></script>

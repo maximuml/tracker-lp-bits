@@ -240,3 +240,35 @@ document.addEventListener('error', function (e) {
 
     shoutCollapseScan();
 })();
+
+// Livewire confirm dialogs render as inert <dialog> markup; promote them
+// to modal so the native focus trap applies. Escape is kept in sync via
+// wire:keydown.escape.window — suppress the native cancel default, which
+// would close the dialog while Livewire still considers it open.
+(function () {
+    function promote(node) {
+        if (node.nodeType !== 1) { return; }
+        var list = [];
+        if (node.matches && node.matches('dialog.nx-modal')) { list.push(node); }
+        if (node.querySelectorAll) {
+            list = list.concat([].slice.call(node.querySelectorAll('dialog.nx-modal')));
+        }
+        list.forEach(function (dlg) {
+            if (!dlg.open) {
+                try { dlg.showModal(); } catch (e) {}
+            }
+        });
+    }
+
+    new MutationObserver(function (records) {
+        records.forEach(function (r) {
+            [].forEach.call(r.addedNodes, promote);
+        });
+    }).observe(document.body, { childList: true, subtree: true });
+
+    document.addEventListener('cancel', function (e) {
+        if (e.target && e.target.matches && e.target.matches('dialog.nx-modal')) {
+            e.preventDefault();
+        }
+    }, true);
+})();

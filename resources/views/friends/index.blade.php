@@ -49,6 +49,6 @@
 
 </div>
 @if ($canViewUserList)
-    <p><a href=/web/users><b>{{ __('friends.text_find_user')}}</b></a></p>
+    <p><a href="/web/users"><b>{{ __('friends.text_find_user')}}</b></a></p>
 @endif
 @endsection

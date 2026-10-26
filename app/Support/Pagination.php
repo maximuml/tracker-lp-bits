@@ -158,9 +158,7 @@ final class Pagination
      */
     public static function pager(int $rpp, int $count, string $href, array $opts = [], string $pagename = 'page'): array
     {
-        if (str_starts_with($href, '?')) {
-            $href = request()->getPathInfo().$href;
-        }
+        $href = self::resolveHref($href);
         $pages = (int) ceil($count / $rpp);
         $rawPage = request()->query($pagename);
         if (! is_scalar($rawPage) || is_bool($rawPage)) {
@@ -185,6 +183,19 @@ final class Pagination
         PageState::instance()->setKeyShortcutScript(Html::keyShortcutScript($page, $pages - 1));
 
         return $result;
+    }
+
+    /**
+     * Anchor a query-only `?foo=bar` base to the current request path —
+     * `<base href="/">` would otherwise resolve it against the home page.
+     */
+    public static function resolveHref(string $href): string
+    {
+        if (str_starts_with($href, '?')) {
+            return request()->getPathInfo().$href;
+        }
+
+        return $href;
     }
 
     public static function resolvePage(

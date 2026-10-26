@@ -9,10 +9,10 @@
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
         <div class="nx-fcell">Title:</div><div class="nx-fcell"><input type="text" name="title"/></div>
-        <div class="nx-fcell">Rules:</div><div class="nx-fcell"><textarea cols=90 rows=20 name="text"></textarea></div>
+        <div class="nx-fcell">Rules:</div><div class="nx-fcell"><textarea cols="90" rows="20" name="text"></textarea></div>
             <div class="nx-fcell">Language:</div>
             <div class="nx-fcell text-center">
-                <select name=language>
+                <select name="language">
                     @foreach ($langs as $row)
                     <option value="{{ (int) $row['id'] }}"@if (($row['site_lang_folder'] ?? '') == $deflang) selected @endif>{{ $row['lang_name'] }}</option>
                     @endforeach
@@ -27,21 +27,21 @@
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
         <div class="nx-fcell">Title:</div><div class="nx-fcell"><input type="text" name="title" value="{{ $rule['title'] ?? '' }}" /></div>
-        <div class="nx-fcell">Rules:</div><div class="nx-fcell"><textarea cols=90 rows=20 name="text">{{ $rule['text'] ?? '' }}</textarea></div>
+        <div class="nx-fcell">Rules:</div><div class="nx-fcell"><textarea cols="90" rows="20" name="text">{{ $rule['text'] ?? '' }}</textarea></div>
             <div class="nx-fcell">Language:</div>
             <div class="nx-fcell text-center">
-                <select name=language>
+                <select name="language">
                     @foreach ($langs as $row)
                     <option value="{{ (int) $row['id'] }}"@if (($row['id'] ?? 0) == ($rule['lang_id'] ?? 0)) selected @endif>{{ $row['lang_name'] }}</option>
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type=hidden value="{{ (int) ($rule['id'] ?? 0) }}" name=id><input type="submit" value="Save"></div>
+        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($rule['id'] ?? 0) }}" name="id"><input type="submit" value="Save"></div>
     </div>
 </form>
 @else
 <h1 class="text-center">Rules Management</h1>
-<br /><div class="text-center p-[5px] w-[940px]"><a href=/web/modrules?act=newsect>Add Section</a></div>
+<br /><div class="text-center p-[5px] w-[940px]"><a href="/web/modrules?act=newsect">Add Section</a></div>
 @foreach ($rows as $arr)
 <br /><x-data-table caption="Rules Management" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $arr['title'] }} - {{ $arr['lang_name'] }}</th></tr></thead></x-slot:head>
     <tr><td>{{ $arr['textHtml'] }}</td></tr>

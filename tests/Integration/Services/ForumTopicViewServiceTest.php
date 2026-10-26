@@ -663,7 +663,7 @@ final class ForumTopicViewServiceTest extends TestCase
         $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1, 'authorid' => 42]);
 
         $this->assertSame(__('forums.text_view_all_posts'), $vm->posts[0]->authorToggleLabel);
-        $this->assertSame('?action=viewtopic&topicid=1', $vm->posts[0]->authorToggleUrl);
+        $this->assertSame('/forums?action=viewtopic&topicid=1', $vm->posts[0]->authorToggleUrl);
     }
 
     public function test_viewtopic_cache_key_and_ttl_contract(): void

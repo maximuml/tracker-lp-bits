@@ -227,8 +227,8 @@ final class ForumTopicViewService
                 addedRaw: (string) ($arr['added'] ?? ''),
                 by: SafeHtml::fromTrustedHtml(UserDisplay::username($posterid, false, true, true, false, false, true)),
                 authorToggleUrl: $authorid
-                    ? '?action=viewtopic&topicid='.$topicid
-                    : '?action=viewtopic&topicid='.$topicid.'&authorid='.$posterid,
+                    ? '/forums?action=viewtopic&topicid='.$topicid
+                    : '/forums?action=viewtopic&topicid='.$topicid.'&authorid='.$posterid,
                 authorToggleLabel: (string) ($authorid
                     ? __('forums.text_view_all_posts')
                     : __('forums.text_view_this_author_only')),

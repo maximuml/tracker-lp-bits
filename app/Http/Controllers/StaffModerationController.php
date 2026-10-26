@@ -498,7 +498,7 @@ class StaffModerationController extends BasePageController
             $id = (int) ($request->post('id') ?? 0);
             $sure = (int) ($request->post('sure') ?? 0);
             if (! $sure) {
-                return $this->abortResponse('Delete Rule', 'You are about to delete a rule. Click <a class=altlink href="?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
+                return $this->abortResponse('Delete Rule', 'You are about to delete a rule. Click <a class="altlink" href="/web/modrules?act=edit&id='.$id.'">here</a> to go back. To confirm deletion, use the delete button on the rules page.', false);
             }
             $this->ruleRepository->deleteById($id);
             Cache::forgetWithLocales('rules');

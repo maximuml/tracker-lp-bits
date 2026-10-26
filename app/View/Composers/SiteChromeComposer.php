@@ -45,7 +45,13 @@ final class SiteChromeComposer
             default => 'bare',
         }));
 
-        $title = trim($view->getFactory()->yieldContent('title'));
+        // Two-argument @section('title', $val) stores e($val) — decode so
+        // the single {{ }} escape in <title> does not double-escape.
+        $title = html_entity_decode(
+            trim($view->getFactory()->yieldContent('title')),
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8',
+        );
         $view->with('chrome', SiteChromeViewModel::load(
             $title,
             $this->layouts,

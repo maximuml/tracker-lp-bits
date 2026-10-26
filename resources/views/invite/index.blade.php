@@ -11,26 +11,26 @@
 @endif
 
 @if ($type == 'new')
-    <form method=post action="/web/invites/send?id={{ (string) $id }}">@csrf
+    <form method="post" action="/web/invites/send?id={{ (string) $id }}">@csrf
     <div class="nx-fgrid">
     <div class="nx-ffull text-center"><b>{{ __('invite.text_invite_someone')}}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ __('invite.text_invitation')}}{{ $_s }}{{ __('invite.text_left')}} + {{ sprintf(__('invite.text_temporary_left'), count($temporaryInvites)) }})</b></div>
-    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_email_address')}}</div><div class="nx-fcell"><input type=text size=40 name=email><br /><span class="small">{{ __('invite.text_email_address_note') }}</span></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_email_address')}}</div><div class="nx-fcell"><input type="text" size="40" name="email"><br /><span class="small">{{ __('invite.text_email_address_note') }}</span></div>
     @if ($showPreUsername)
-    <div class="nx-fhead whitespace-nowrap">{{ $preUsernameLabel }}</div><div class="nx-fcell"><input type=text size=40 name=pre_register_username><br /><span class="small">{{ $preUsernameHelp }}</span></div>
+    <div class="nx-fhead whitespace-nowrap">{{ $preUsernameLabel }}</div><div class="nx-fcell"><input type="text" size="40" name="pre_register_username"><br /><span class="small">{{ $preUsernameHelp }}</span></div>
     @endif
     <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
-    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_message')}}</div><div class="nx-fcell"><textarea name=body rows=10>{{ $invitation_body }}</textarea></div>
-    <div class="nx-ffull text-center"><input type=submit value='{{ __('invite.submit_invite')}}'></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_message')}}</div><div class="nx-fcell"><textarea name="body" rows="10">{{ $invitation_body }}</textarea></div>
+    <div class="nx-ffull text-center"><input type="submit" value='{{ __('invite.submit_invite')}}'></div>
     </form></div></div>
 
 @else
     {{-- Invite menu nav --}}
     <div id="invitenav"><ul id="invitemenu" class="menu">
-    <li{{ $menuSelected == 'invitee' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=invitee">{{ __('invite.text_invite_status')}}</a></li>
-    <li{{ $menuSelected == 'sent' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=sent">{{ __('invite.text_sent_invites_status')}}</a></li>
-    <li{{ $menuSelected == 'tmp' ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=tmp">{{ __('invite.text_tmp_status')}}</a></li>
+    <li{{ $menuSelected == 'invitee' ? ' class="selected"' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=invitee">{{ __('invite.text_invite_status')}}</a></li>
+    <li{{ $menuSelected == 'sent' ? ' class="selected"' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=sent">{{ __('invite.text_sent_invites_status')}}</a></li>
+    <li{{ $menuSelected == 'tmp' ? ' class="selected"' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=tmp">{{ __('invite.text_tmp_status')}}</a></li>
     @if (($CURUSER['id'] ?? 0) == $id)
-        </ul><form method=post action="/web/invites/submit?id={{ (string) $id }}&type=new">@csrf<input type=submit{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
+        </ul><form method="post" action="/web/invites/submit?id={{ (string) $id }}&type=new">@csrf<input type="submit"{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
     @else
         </ul></div>
     @endif
@@ -57,10 +57,10 @@
             </form>
         </div>
         <x-data-table :caption="__('invite.text_invite_status')" captionHidden>
-        <form method=post action=takeconfirm.php?id={{ (string) $id }}>
+        <form method="post" action="/takeconfirm?id={{ (string) $id }}">
 
         @if (! $inviteeCount)
-            <tr><td colspan=7 class="text-center">{{ __('invite.text_no_invites')}}</tr>
+            <tr><td colspan="7" class="text-center">{{ __('invite.text_no_invites')}}</tr>
         @else
             <tr>
             <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_username')}}</b></th>
@@ -98,7 +98,7 @@
                     <td class="align-top px-2.5 py-1.5">{{ number_format(floatval($arr['seed_points_per_hour']) * $haremAdditionFactor, 3) }}</td>
                 @endif
                     <td class="align-top px-2.5 py-1.5">{{ $arr['last_announce_at'] }}</td>
-                    <td class="align-top px-2.5 py-1.5">@if (($arr['status'] ?? '') === 'confirmed')<a href=/userdetails?id={{ (int) $arr['id'] }}><span class="nx-color-1f7309">{{ __('invite.text_confirmed') }}</span></a>@else<a href=/checkuser?id={{ (int) $arr['id'] }}><span class="nx-color-ca0226">{{ __('invite.text_pending') }}</span></a>@endif</td>
+                    <td class="align-top px-2.5 py-1.5">@if (($arr['status'] ?? '') === 'confirmed')<a href="/userdetails?id={{ (int) $arr['id'] }}"><span class="nx-color-1f7309">{{ __('invite.text_confirmed') }}</span></a>@else<a href="/checkuser?id={{ (int) $arr['id'] }}"><span class="nx-color-ca0226">{{ __('invite.text_pending') }}</span></a>@endif</td>
                     @if ($canConfirm)
                         <td class="align-top px-2.5 py-1.5">
                         @if ($arr['status'] == 'pending')
@@ -112,7 +112,7 @@
 
         @if ($canConfirm)
             @if ($pendingCount)
-                <tr><td colspan={{ $inviteeColSpan }} class="text-right"><input type=submit value='{{ __('invite.submit_confirm_users')}}'></td></tr>
+                <tr><td colspan="{{ $inviteeColSpan }}" class="text-right"><input type="submit" value='{{ __('invite.submit_confirm_users')}}'></td></tr>
             @endif
             </form>
         @endif
@@ -122,7 +122,7 @@
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
         <x-data-table :caption="$menuSelected == 'sent' ? __('invite.text_sent_invites_status') : __('invite.text_tmp_status')" captionHidden>
         @if (! $sentTmpCount)
-            <tr class="text-center"><td colspan=6>{{ __('functions.text_none')}}</tr>
+            <tr class="text-center"><td colspan="6">{{ __('functions.text_none')}}</tr>
         @else
             <tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_email')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_hash')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_send_date')}}</th>
             @if ($menuSelected == 'sent')
@@ -142,7 +142,7 @@
                 @if ($menuSelected == 'sent')
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['validText'] ?? '' }}</td>
                 @endif
-                <td class="align-top px-2.5 py-1.5">@if (! ($arr1['hashValid'] ?? false))<a href=/userdetails?id={{ (int) $arr1['invitee_register_uid'] }}><span class="nx-color-1f7309">{{ $arr1['invitee_register_username'] }}</span></a>@endif</td>
+                <td class="align-top px-2.5 py-1.5">@if (! ($arr1['hashValid'] ?? false))<a href="/userdetails?id={{ (int) $arr1['invitee_register_uid'] }}"><span class="nx-color-1f7309">{{ $arr1['invitee_register_username'] }}</span></a>@endif</td>
                 @if ($menuSelected == 'tmp')
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['expired_at'] }}</td>
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['created_at'] }}</td>

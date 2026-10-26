@@ -137,9 +137,12 @@ test('one-time submit reset preserves disabled shop buttons', async ({ page }) =
     document.addEventListener(
       'DOMContentLoaded',
       () => {
-        const button = document.querySelector('.nx-bshop__buy input[type="submit"][data-submit-once]');
-        if (button instanceof HTMLInputElement) {
-          button.disabled = true;
+        const buttons = document.querySelectorAll<HTMLInputElement>(
+          '.nx-bshop__buy input[type="submit"][data-submit-once]',
+        );
+        if (buttons.length > 1) {
+          buttons[0].disabled = true;
+          buttons[1].disabled = false;
         }
       },
       { once: true },

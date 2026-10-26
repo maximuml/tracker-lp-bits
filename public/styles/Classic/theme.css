@@ -27,6 +27,17 @@
     --nxm-accent-text-hover: #003f7d;
     --nxm-on-accent: #ffffff;
 
+    /* status tints (alert / error-summary / status surfaces) */
+    --nxm-info-bg: #eef6fd;
+    --nxm-info-border: #b8daff;
+    --nxm-success-bg: #effaf2;
+    --nxm-success-border: #b7e4c7;
+    --nxm-warning-bg: #fff8e5;
+    --nxm-warning-border: #ffe3a3;
+    --nxm-danger-bg: #fdf0f0;
+    --nxm-danger-border: #f5c2c7;
+    --nxm-panel-bg: var(--nxm-surface-alt);
+
     --nxm-name-crazyuser: #005977;
     --nxm-name-eliteuser: #005858;
     --nxm-name-extremeuser: #7d4400;
@@ -113,6 +124,17 @@ html[data-theme="dark"]:root {
     --nxm-accent-text-hover: #a5cdf0;
     --nxm-on-accent: #10151b;
 
+    /* status tints — keep alerts readable on the dark surface */
+    --nxm-info-bg: #16283a;
+    --nxm-info-border: #2c4a66;
+    --nxm-success-bg: #16301f;
+    --nxm-success-border: #2c5c3c;
+    --nxm-warning-bg: #332a16;
+    --nxm-warning-border: #665223;
+    --nxm-danger-bg: #35191c;
+    --nxm-danger-border: #6b3237;
+    --nxm-panel-bg: var(--nxm-surface-alt);
+
     --nxm-name-insaneuser: #e793e8;
     --nxm-name-staffleader: #f59595;
     --nxm-name-sysop: #e2a683;
@@ -190,6 +212,16 @@ html[data-theme="dark"]:root {
         --nxm-accent-text: #7fb2e8;
         --nxm-accent-text-hover: #a5cdf0;
         --nxm-on-accent: #10151b;
+
+        --nxm-info-bg: #16283a;
+        --nxm-info-border: #2c4a66;
+        --nxm-success-bg: #16301f;
+        --nxm-success-border: #2c5c3c;
+        --nxm-warning-bg: #332a16;
+        --nxm-warning-border: #665223;
+        --nxm-danger-bg: #35191c;
+        --nxm-danger-border: #6b3237;
+        --nxm-panel-bg: var(--nxm-surface-alt);
 
         --nxm-name-insaneuser: #e793e8;
         --nxm-name-staffleader: #f59595;

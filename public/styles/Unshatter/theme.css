@@ -31,6 +31,17 @@ html[data-theme="dark"]:root {
     --nxm-on-warning: #111114;
     --nxm-on-danger: #111114;
 
+    /* status tints — keep alerts readable on the near-black surface */
+    --nxm-info-bg: #16283a;
+    --nxm-info-border: #2c4a66;
+    --nxm-success-bg: #16301f;
+    --nxm-success-border: #2c5c3c;
+    --nxm-warning-bg: #332a16;
+    --nxm-warning-border: #665223;
+    --nxm-danger-bg: #35191c;
+    --nxm-danger-border: #6b3237;
+    --nxm-panel-bg: var(--nxm-surface-alt);
+
     /* chrome */
     --nxm-header-bg: #0d0d10;
     --nxm-header-text: #f2f2f4;
@@ -91,6 +102,17 @@ html[data-theme="light"]:root {
     --nxm-warning: #a87e00;
     --nxm-on-success: #ffffff;
     --nxm-on-warning: #111114;
+
+    /* status tints — override the dark :root defaults above */
+    --nxm-info-bg: #eef6fd;
+    --nxm-info-border: #b8daff;
+    --nxm-success-bg: #effaf2;
+    --nxm-success-border: #b7e4c7;
+    --nxm-warning-bg: #fff8e5;
+    --nxm-warning-border: #ffe3a3;
+    --nxm-danger-bg: #fdf0f0;
+    --nxm-danger-border: #f5c2c7;
+    --nxm-panel-bg: var(--nxm-surface-alt);
 
     --nxm-header-bg: #0d0d10;
     --nxm-header-text: #f2f2f4;
@@ -205,6 +227,15 @@ html[data-theme="light"]:root {
         --nxm-warning: #a87e00;
     --nxm-on-success: #ffffff;
     --nxm-on-warning: #111114;
+        --nxm-info-bg: #eef6fd;
+        --nxm-info-border: #b8daff;
+        --nxm-success-bg: #effaf2;
+        --nxm-success-border: #b7e4c7;
+        --nxm-warning-bg: #fff8e5;
+        --nxm-warning-border: #ffe3a3;
+        --nxm-danger-bg: #fdf0f0;
+        --nxm-danger-border: #f5c2c7;
+        --nxm-panel-bg: var(--nxm-surface-alt);
         --nxm-header-bg: #0d0d10;
         --nxm-header-text: #f2f2f4;
         --nxm-header-dim: #8a8d97;

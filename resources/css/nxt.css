@@ -13,7 +13,7 @@
     border: none;
 }
 
-textarea {
+textarea:not([class]) {
     width: 300px;
     padding: 4px;
 }
@@ -209,11 +209,29 @@ table.main {
 /* Dark variants mirror modern.css so legacy-variant pages match themed ones. */
 @media (prefers-color-scheme: dark) {
     :where(html:not([data-theme])), :where(html[data-theme="auto"]) {
+        --nxm-info-bg: #16283a;
+        --nxm-info-border: #2c4a66;
+        --nxm-success-bg: #16301f;
+        --nxm-success-border: #2c5c3c;
+        --nxm-warning-bg: #332a16;
+        --nxm-warning-border: #665223;
+        --nxm-danger-bg: #35191c;
+        --nxm-danger-border: #6b3237;
+        --nxm-panel-bg: var(--nxm-surface-alt);
         --nxm-highlight: #4e4438;
         --nxm-highlight-ok: #1b5e20;
     }
 }
 :where(html[data-theme="dark"]) {
+    --nxm-info-bg: #16283a;
+    --nxm-info-border: #2c4a66;
+    --nxm-success-bg: #16301f;
+    --nxm-success-border: #2c5c3c;
+    --nxm-warning-bg: #332a16;
+    --nxm-warning-border: #665223;
+    --nxm-danger-bg: #35191c;
+    --nxm-danger-border: #6b3237;
+    --nxm-panel-bg: var(--nxm-surface-alt);
     --nxm-highlight: #4e4438;
     --nxm-highlight-ok: #1b5e20;
 }
@@ -521,7 +539,7 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
 
 .nx-align-justify { text-align: justify; }
 
-.nx-tag { display: inline-block; padding: 0 .4em; border-radius: var(--nxm-radius, 4px); background: var(--nxm-accent); color: var(--nxm-on-accent, #fff); }
+.nx-tag { display: inline-block; margin: 0 4px 0 0; padding: 0 .4em; border-radius: var(--nxm-radius, 4px); background: var(--nxm-accent); color: var(--nxm-on-accent, #fff); }
 
 img.nx-smiley { max-width: 25px; }
 
@@ -644,13 +662,6 @@ img.nx-smiley { max-width: 25px; }
     overflow: hidden;
 }
 
-.skip-link:focus {
-    left: 0;
-    width: auto;
-    height: auto;
-    z-index: 1000;
-}
-
 img.bitbucket-shot { max-width: 400px; }
 
 .nx-grow { flex-grow: 1; }
@@ -707,8 +718,6 @@ button.nx-btn-link {
 @media (max-width: 760px) {
 .nti-grid { grid-template-columns: 1fr; }
 }
-
-.nx-tag { display: inline-block; margin: 0 4px 0 0; padding: 1px 6px; border-radius: 4px; }
 
 .search {
 	background-image:url(/pic/search.gif);

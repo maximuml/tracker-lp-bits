@@ -71,9 +71,14 @@ for (const pack of packs) {
       expect(results.violations.map((violation) => violation.id)).toEqual([]);
 
       const contrasts = await page.locator('.nx-hr').evaluate((root) => {
-        const channels = (color: string) => color.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+        const channels = (color: string) => {
+          const srgb = color.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*[\d.]+)?\)$/);
+          if (srgb) return srgb.slice(1).map(Number);
+
+          return color.match(/[\d.]+/g)!.slice(0, 3).map(Number).map((channel) => channel / 255);
+        };
         const luminance = (color: string) => {
-          const rgb = channels(color).map((channel) => channel / 255).map((channel) =>
+          const rgb = channels(color).map((channel) =>
             channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
           );
           return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
@@ -87,9 +92,21 @@ for (const pack of packs) {
         const card = root.querySelector<HTMLElement>('.nx-hr__status-link');
         const progress = root.querySelector<HTMLProgressElement>('.nx-hr__progress');
         const disabled = root.querySelector<HTMLInputElement>('.remove-hr:disabled');
+        const ratio = root.querySelector<HTMLElement>('.nx-hr__ratio--low') ?? root.querySelector<HTMLElement>('.nx-hr__ratio');
+        ratio?.classList.add('nx-hr__ratio--low');
+        const backgroundColor = (element: HTMLElement) => {
+          let current: HTMLElement | null = element;
+          while (current && root.contains(current)) {
+            const color = getComputedStyle(current).backgroundColor;
+            if (color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)') return color;
+            current = current.parentElement;
+          }
+
+          return getComputedStyle(document.body).backgroundColor;
+        };
         const textContrast = (element: HTMLElement) => {
           const style = getComputedStyle(element);
-          return contrast(style.color, style.backgroundColor);
+          return contrast(style.color, backgroundColor(element));
         };
         const progressContrast = () => {
           const colorProbe = document.createElement('span');
@@ -109,6 +126,7 @@ for (const pack of packs) {
             : null,
           progress: progress ? progressContrast() : null,
           disabled: disabled ? textContrast(disabled) : null,
+          ratio: ratio ? textContrast(ratio) : null,
         };
       });
       console.log(`H&R contrast ${pack.name} ${theme}: ${JSON.stringify(contrasts)}`);
@@ -117,9 +135,36 @@ for (const pack of packs) {
       if (contrasts.cardBorder !== null) expect(contrasts.cardBorder).toBeGreaterThanOrEqual(3);
       if (contrasts.progress !== null) expect(contrasts.progress).toBeGreaterThanOrEqual(3);
       if (contrasts.disabled !== null) expect(contrasts.disabled).toBeGreaterThanOrEqual(4.5);
+      if (contrasts.ratio !== null) expect(contrasts.ratio).toBeGreaterThanOrEqual(4.5);
     });
   }
 }
+
+test('H&R desktop table cells remain aligned with their headers', async ({ page }) => {
+  mysql(`UPDATE users SET stylesheet=4 WHERE id=${userId}`);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/web/myhr', { waitUntil: 'networkidle' });
+
+  const layout = await page.locator('#hr-table').evaluate((table) => {
+    const headers = Array.from(table.querySelectorAll('thead th'));
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+    return {
+      headers: headers.map((header) => header.getBoundingClientRect().left),
+      displays: Array.from(table.querySelectorAll('tbody td')).map((cell) => getComputedStyle(cell).display),
+      rows: rows.map((row) => Array.from(row.querySelectorAll('td')).map((cell) => cell.getBoundingClientRect().left)),
+    };
+  });
+  expect(layout.headers).toHaveLength(6);
+  expect(layout.rows.length).toBeGreaterThan(0);
+  expect(layout.displays.every((display) => display === 'table-cell')).toBe(true);
+  for (const row of layout.rows) {
+    expect(row).toHaveLength(layout.headers.length);
+    row.forEach((left, index) => {
+      expect(Math.abs(left - layout.headers[index])).toBeLessThanOrEqual(1);
+    });
+  }
+});
 
 test('H&R cards and first-row action fit a 390px viewport', async ({ page }) => {
   mysql(`UPDATE users SET stylesheet=4 WHERE id=${userId}`);

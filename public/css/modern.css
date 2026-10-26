@@ -2871,8 +2871,7 @@ html[data-theme="dark"] .nxm-main .nx-bshop input.nx-btn--primary {
 .nx-hr__traffic strong { color: var(--nxm-text); }
 .nx-hr__traffic span { color: var(--nxm-text-dim); }
 .nx-hr__ratio { color: var(--nxm-text); white-space: nowrap; }
-.nx-hr__ratio :where(*) { color: inherit; }
-.nx-hr__ratio--low { color: var(--nxm-danger); font-weight: 700; }
+.nx-hr__ratio--low { color: color-mix(in srgb, var(--nxm-danger) 93%, var(--nxm-text) 7%); font-weight: 700; }
 .nx-hr__seeding { display: flex; flex-direction: column; gap: 0.28rem; }
 .nx-hr__seed-hours { font-weight: 700; }
 .nx-hr__seed-remaining,
@@ -2902,7 +2901,13 @@ html[data-theme="dark"] .nxm-main .nx-bshop input.nx-btn--primary {
 }
 .nx-hr__badge--unreached { border-color: var(--nxm-danger); color: var(--nxm-danger); }
 .nx-hr__status-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem; }
-.nx-hr__action { min-width: 0; }
+.nx-hr__action {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
 .nxm-main .nx-hr .nx-hr__action input[type="button"].remove-hr {
     max-width: 100%;
     white-space: normal;

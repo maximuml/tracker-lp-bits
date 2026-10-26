@@ -76,42 +76,50 @@
                         <div class="nx-hr__comment"><x-nl2br :text="$row->comment" /></div>
                     @endif
                 </td>
-                <td class="nx-hr__traffic" data-label="{{ __('myhr.th_up_down') }}">
-                    <strong>{{ $row->uploaded }}</strong>
-                    <span>{{ $row->downloaded }}</span>
+                <td data-label="{{ __('myhr.th_up_down') }}">
+                    <div class="nx-hr__traffic">
+                        <strong>{{ $row->uploaded }}</strong>
+                        <span>{{ $row->downloaded }}</span>
+                    </div>
                 </td>
                 <td data-label="{{ __('myhr.th_share_ratio') }}">
                     <span class="nx-hr__ratio {{ $row->ratioLow ? 'nx-hr__ratio--low' : '' }}">{{ $row->ratio }}</span>
                 </td>
-                <td class="nx-hr__seeding" data-label="{{ __('myhr.th_seeding') }}">
-                    @if ($row->seedDone !== null && $row->seedRequired !== null)
-                        <span class="nx-hr__seed-hours">{{ number_format(min($row->seedDone, $row->seedRequired) / 3600) }} h of {{ number_format($row->seedRequired / 3600) }} h</span>
-                        <progress class="nx-hr__progress" max="{{ $row->seedRequired }}" value="{{ min($row->seedDone, $row->seedRequired) }}" aria-label="{{ __('myhr.progress_label', ['done' => number_format(min($row->seedDone, $row->seedRequired) / 3600), 'required' => number_format($row->seedRequired / 3600)]) }}"></progress>
-                        <span class="nx-hr__seed-remaining">
-                            {{ __('myhr.seed_remaining', ['hours' => number_format(ceil(max(0, $row->seedRequired - $row->seedDone) / 3600))]) }}
-                            @if ($page->ignoreWhenRatioReach !== null)
-                                {{ __('myhr.seed_or_ratio', ['ratio' => number_format($page->ignoreWhenRatioReach, 1)]) }}
-                            @endif
-                        </span>
-                    @else
-                        <span class="nx-hr__empty-value">—</span>
-                    @endif
-                </td>
-                <td class="nx-hr__status-cell" data-label="{{ __('myhr.th_status') }}">
-                    <span class="nx-hr__badge {{ $row->status === \App\Enums\HitAndRunStatus::UNREACHED->value ? 'nx-hr__badge--unreached' : '' }}">{{ $row->statusText }}</span>
-                    @if ($row->status === \App\Enums\HitAndRunStatus::INSPECTING->value && $row->inspectEndsIn !== null)
-                        <span class="nx-hr__ends-in">{{ __('myhr.status_ends_in', ['duration' => $row->inspectEndsIn]) }}</span>
-                    @endif
-                </td>
-                <td class="nx-hr__action" data-label="{{ __('myhr.th_action') }}">
-                    @if ($row->canRemove)
-                        <input type="button" class="remove-hr nx-btn{{ $row->removeDisabled ? '' : ' nx-btn--primary' }}" value="{{ __('myhr.action_remove_price', ['bonus' => number_format($page->price)]) }}" data-id="{{ $row->id }}" @disabled($row->removeDisabled)>
-                        @if ($row->removeDisabled && $row->pointsShort !== null)
-                            <span class="nx-hr__need">{{ __('myhr.points_needed', ['count' => number_format($row->pointsShort)]) }}</span>
+                <td data-label="{{ __('myhr.th_seeding') }}">
+                    <div class="nx-hr__seeding">
+                        @if ($row->seedDone !== null && $row->seedRequired !== null)
+                            <span class="nx-hr__seed-hours">{{ number_format(min($row->seedDone, $row->seedRequired) / 3600) }} h of {{ number_format($row->seedRequired / 3600) }} h</span>
+                            <progress class="nx-hr__progress" max="{{ $row->seedRequired }}" value="{{ min($row->seedDone, $row->seedRequired) }}" aria-label="{{ __('myhr.progress_label', ['done' => number_format(min($row->seedDone, $row->seedRequired) / 3600), 'required' => number_format($row->seedRequired / 3600)]) }}"></progress>
+                            <span class="nx-hr__seed-remaining">
+                                {{ __('myhr.seed_remaining', ['hours' => number_format(ceil(max(0, $row->seedRequired - $row->seedDone) / 3600))]) }}
+                                @if ($page->ignoreWhenRatioReach !== null)
+                                    {{ __('myhr.seed_or_ratio', ['ratio' => number_format($page->ignoreWhenRatioReach, 1)]) }}
+                                @endif
+                            </span>
+                        @else
+                            <span class="nx-hr__empty-value">—</span>
                         @endif
-                    @else
-                        <span class="nx-hr__empty-value">—</span>
-                    @endif
+                    </div>
+                </td>
+                <td data-label="{{ __('myhr.th_status') }}">
+                    <div class="nx-hr__status-cell">
+                        <span class="nx-hr__badge {{ $row->status === \App\Enums\HitAndRunStatus::UNREACHED->value ? 'nx-hr__badge--unreached' : '' }}">{{ $row->statusText }}</span>
+                        @if ($row->status === \App\Enums\HitAndRunStatus::INSPECTING->value && $row->inspectEndsIn !== null)
+                            <span class="nx-hr__ends-in">{{ __('myhr.status_ends_in', ['duration' => $row->inspectEndsIn]) }}</span>
+                        @endif
+                    </div>
+                </td>
+                <td data-label="{{ __('myhr.th_action') }}">
+                    <div class="nx-hr__action">
+                        @if ($row->canRemove)
+                            <input type="button" class="remove-hr nx-btn{{ $row->removeDisabled ? '' : ' nx-btn--primary' }}" value="{{ __('myhr.action_remove_price', ['bonus' => number_format($page->price)]) }}" data-id="{{ $row->id }}" @disabled($row->removeDisabled)>
+                            @if ($row->removeDisabled && $row->pointsShort !== null)
+                                <span class="nx-hr__need">{{ __('myhr.points_needed', ['count' => number_format($row->pointsShort)]) }}</span>
+                            @endif
+                        @else
+                            <span class="nx-hr__empty-value">—</span>
+                        @endif
+                    </div>
                 </td>
             </tr>
         @empty

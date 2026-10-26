@@ -126,7 +126,7 @@ final class MyHrPageTest extends TestCase
         $this->assertStringContainsString('max="259200"', $html);
         $this->assertStringContainsString('value="64800"', $html);
         $this->assertStringContainsString('ends in', $html);
-        $this->assertStringContainsString('nx-hr__ratio--low', $html);
+        $this->assertStringContainsString('class="nx-hr__ratio nx-hr__ratio--low">0.732</span>', $html);
     }
 
     public function test_remove_button_is_enabled_for_an_affordable_own_row_and_appends_confirmation_script(): void

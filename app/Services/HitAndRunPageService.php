@@ -45,7 +45,7 @@ final class HitAndRunPageService
             $snatch = $row->snatch;
             $uploaded = $snatch->uploaded ?? 0;
             $downloaded = $snatch->downloaded ?? 0;
-            $ratio = Ratio::hr($uploaded, $downloaded);
+            $ratio = strip_tags(Ratio::hr($uploaded, $downloaded)->toHtml());
             $numericRatio = Ratio::share($uploaded, $downloaded);
             $status = (int) $row->status;
             $seedDone = null;

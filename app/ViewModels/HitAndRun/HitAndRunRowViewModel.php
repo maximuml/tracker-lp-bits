@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\ViewModels\HitAndRun;
 
-use App\Support\Html\SafeHtml;
-
 final readonly class HitAndRunRowViewModel
 {
     public function __construct(
@@ -14,7 +12,7 @@ final readonly class HitAndRunRowViewModel
         public string $torrentName,
         public string $uploaded,
         public string $downloaded,
-        public SafeHtml $ratio,
+        public string $ratio,
         public bool $ratioLow,
         public ?string $completedAt,
         public int $status,

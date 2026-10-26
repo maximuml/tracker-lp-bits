@@ -2,7 +2,7 @@
    Sections in dependency order: ajax, ajaxbasic, nx-tooltip, nx-zoom,
    common, goup, theme-toggle, nx-chrome, nexus.
    nx-layer.js stays standalone (head-loaded for non-auth chrome);
-   csrf.js and toast.js stay standalone too: layui admin pages load
+   csrf.js and toast.js stay standalone too: bare standalone pages load
    csrf.js alone and toast.js is appended only where TOAST_LANG is set. */
 
 /* ===== ajax.js ===== */

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\ViewModels\Chrome;
 
 use App\Support\Forum;
-use App\Support\Html\SafeHtml;
 use App\Support\PageLayoutContext;
 use App\Support\SearchBox;
 use App\Support\Style;
@@ -13,8 +12,8 @@ use Illuminate\Support\Facades\App;
 
 /**
  * `<head>` chrome data (ADR 0018): title assembly, html-lang/theme/fontsize
- * attributes, meta tags, per-variant stylesheet and script lists, the
- * legacy `addicode` inline block and the forum pic folder.
+ * attributes, meta tags, per-variant stylesheet and script lists, and the
+ * forum pic folder.
  */
 final class ChromeHead
 {
@@ -32,7 +31,6 @@ final class ChromeHead
         public readonly string $metaDescription,
         public readonly array $headStyles,
         public readonly array $headScripts,
-        public readonly SafeHtml $inlineHeadHtml,
         public readonly string $picFolder,
         public readonly ?string $packThemeUrl,
     ) {}
@@ -50,7 +48,7 @@ final class ChromeHead
         }
         $fullTitle .= ' - Powered by '.PROJECTNAME;
 
-        [$headStyles, $headScripts, $inlineHeadHtml, $picFolder, $packThemeUrl] = self::headAssets($context, $variant, $cspNonce, $chrome);
+        [$headStyles, $headScripts, $picFolder, $packThemeUrl] = self::headAssets($context, $variant, $chrome);
 
         return new self(
             title: $fullTitle,
@@ -62,20 +60,18 @@ final class ChromeHead
             metaDescription: $context->metaDescriptionTweak,
             headStyles: $headStyles,
             headScripts: $headScripts,
-            inlineHeadHtml: $inlineHeadHtml,
             picFolder: $picFolder,
             packThemeUrl: $packThemeUrl,
         );
     }
 
     /**
-     * Stylesheets/scripts that only the legacy variant needs on top of the
-     * shared chrome assets: the user's theme, font size and forum sprites,
-     * plus the `addicode` block keyed to the chosen stylesheet.
+     * Stylesheets/scripts that the boxed variant needs on top of the
+     * shared chrome assets: the user's theme, font size and forum sprites.
      *
-     * @return array{0: list<string>, 1: list<string>, 2: SafeHtml, 3: string, 4: ?string}
+     * @return array{0: list<string>, 1: list<string>, 2: string, 3: ?string}
      */
-    private static function headAssets(PageLayoutContext $context, string $variant, string $cspNonce, ChromeRepositories $chrome): array
+    private static function headAssets(PageLayoutContext $context, string $variant, ChromeRepositories $chrome): array
     {
         $picFolder = Forum::picFolder($context->langDir);
         $cssUpdateDate = $context->cssDateTweak !== '' ? '?'.$context->cssDateTweak : '';
@@ -101,39 +97,19 @@ final class ChromeHead
             $picFolder.'/forumsprites.css'.$cssUpdateDate,
         ], $iconStyles);
 
-        if ($variant !== 'legacy') {
-            // Modern chrome only loads Classic's pack files historically;
-            // a non-Classic pack still gets its theme.css — after
-            // css/modern.css in head-assets.blade.php so its variable
-            // overrides win the cascade outright.
-            $packThemeUrl = $cssUri === 'styles/Classic/' ? null : $cssUri.'theme.css'.$cssUpdateDate;
-
-            return [
-                $baseStyles,
-                [],
-                SafeHtml::fromPlainText(''),
-                $picFolder,
-                $packThemeUrl,
-            ];
-        }
-
-        // Legacy chrome shares the modern cascade order: theme.css rides in
+        // Boxed chrome shares the modern cascade order: theme.css rides in
         // the packThemeUrl slot AFTER css/modern.css so the pack palette
         // overrides the base instead of being stomped by it, and nxt.css
         // loads once via head-assets.blade.php (Tailwind utilities layer
-        // stays last). Unlike modern pages, legacy markup still needs
+        // stays last). Unlike modern pages, boxed markup still needs
         // Classic's theme.css — the pack file carries table.colhead styles.
-        $packThemeUrl = $cssUri.'theme.css'.$cssUpdateDate;
-
-        $addiCode = Style::addiCode($context->cache, $context->userStylesheet(), $context->defaultStylesheet);
-        if ($cspNonce !== '' && $addiCode !== '') {
-            $addiCode = (string) preg_replace('/<style(?![^>]*\snonce=)/i', '<style nonce="'.$cspNonce.'"', $addiCode);
-        }
+        $packThemeUrl = $variant === 'boxed' || $cssUri !== 'styles/Classic/'
+            ? $cssUri.'theme.css'.$cssUpdateDate
+            : null;
 
         return [
             $baseStyles,
             [],
-            SafeHtml::fromTrustedHtml($addiCode),
             $picFolder,
             $packThemeUrl,
         ];

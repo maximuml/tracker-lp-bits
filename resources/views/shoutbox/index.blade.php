@@ -16,7 +16,6 @@
     'expand' => __('shoutbox.js_expand'),
     'newMentions' => __('shoutbox.js_new_mentions'),
 ]) }};</script><script src="{{ \App\Support\AssetAppender::versionedSrc('js/shoutbox.js') }}" type="text/javascript"></script><link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('styles/shoutbox.css') }}" type="text/css"><link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/modern.css') }}" type="text/css">
-{{ \App\Support\Style::addiCodeWithContext() }}
 <script type="text/javascript" nonce="{{ $cspNonce ?? '' }}">
 //<![CDATA[
 var t;

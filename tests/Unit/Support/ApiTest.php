@@ -27,37 +27,23 @@ class ApiTest extends TestCase
         $this->assertArrayHasKey('rid', $response);
     }
 
-    public function test_call_supports_data_table_format(): void
+    public function test_call_ignores_legacy_format_envelopes(): void
     {
+        // The layui-table/data-table envelopes were removed with the vendor
+        // libs — a stray __format param must not change the ret/msg shape.
         $response = Api::call(
             0,
             'OK',
             ['data' => [['id' => 1]], 'meta' => ['total' => 42]],
-            ['__format' => 'data-table', 'draw' => 7]
+            ['__format' => 'layui-table', 'draw' => 7]
         );
 
-        $this->assertSame(0, $response['code']);
+        $this->assertSame(0, $response['ret']);
         $this->assertSame('OK', $response['msg']);
-        $this->assertSame([['id' => 1]], $response['data']);
-        $this->assertSame(7, $response['draw']);
-        $this->assertSame(42, $response['recordsTotal']);
-        $this->assertSame(42, $response['recordsFiltered']);
-    }
-
-    public function test_call_supports_layui_table_format(): void
-    {
-        $response = Api::call(
-            0,
-            'OK',
-            ['data' => [['id' => 2]], 'meta' => ['total' => 5]],
-            ['__format' => 'layui-table']
-        );
-
-        $this->assertSame(0, $response['code']);
-        $this->assertSame('OK', $response['msg']);
-        $this->assertSame([['id' => 2]], $response['data']);
-        $this->assertSame(5, $response['count']);
+        $this->assertSame(['data' => [['id' => 1]], 'meta' => ['total' => 42]], $response['data']);
         $this->assertArrayNotHasKey('draw', $response);
+        $this->assertArrayNotHasKey('count', $response);
+        $this->assertArrayNotHasKey('recordsTotal', $response);
     }
 
     public function test_success_and_fail_helpers(): void

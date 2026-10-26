@@ -18,8 +18,9 @@ use Illuminate\View\View;
  * instead of service location inside the view model. The page title is read
  * from the already-rendered child's `title` section. The chrome variant is
  * read from the `chromeVariant` view data (`@extends('layouts.app', [...])`);
- * `legacy` is the default while the bulk of the site still renders legacy
- * page bodies — modern pages opt in explicitly. Views that already carry
+ * `boxed` is the default — the bulk of the site renders inside the
+ * `nx-pagebox` wrapper; modern and auth pages opt in explicitly. Views
+ * that already carry
  * a `chrome` variable (the procedural `PageRenderer` partials) are left
  * untouched.
  */
@@ -37,10 +38,10 @@ final class SiteChromeComposer
         }
 
         $data = $view->getData();
-        $variant = (string) ($data['chromeVariant'] ?? 'legacy');
+        $variant = (string) ($data['chromeVariant'] ?? 'boxed');
         $view->with('chromeVariant', $variant);
         $view->with('shell', (string) ($data['shell'] ?? match ($variant) {
-            'legacy' => 'boxed',
+            'boxed' => 'boxed',
             'auth' => 'auth',
             default => 'bare',
         }));

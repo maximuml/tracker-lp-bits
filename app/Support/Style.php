@@ -8,7 +8,6 @@ use App\Contracts\Repositories\StyleRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\Html\SafeHtml;
 use App\Support\State\StyleState;
 
 /**
@@ -86,18 +85,6 @@ final class Style
     }
 
     /**
-     * Return the extra CSS (`addicode`) for the current stylesheet row.
-     *
-     * Mirrors `get_style_addicode()`.
-     */
-    public static function addiCode(?NexusCache $cache, int|string $cssId, int|string $defaultId): string
-    {
-        $row = self::cssRow($cache, $cssId, $defaultId);
-
-        return (string) ($row['addicode'] ?? '');
-    }
-
-    /**
      * Return the highlight row CSS for the current user, falling back to
      * the stylesheet with id `5`.
      *
@@ -126,18 +113,6 @@ final class Style
         $defaultId = self::defaultStylesheetId();
 
         return self::cssUri(NexusCache::instance(), $actor->isAuthenticated() ? $actor->stylesheet : $defaultId, $defaultId, $file);
-    }
-
-    /**
-     * Convenience wrapper that reads the current user / default stylesheet
-     * from the support context and returns the extra CSS (`addicode`).
-     */
-    public static function addiCodeWithContext(): SafeHtml
-    {
-        $actor = ActorContext::current();
-        $defaultId = self::defaultStylesheetId();
-
-        return SafeHtml::fromTrustedHtml(self::addiCode(NexusCache::instance(), $actor->isAuthenticated() ? $actor->stylesheet : $defaultId, $defaultId));
     }
 
     /**

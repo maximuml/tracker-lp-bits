@@ -41,36 +41,13 @@ final class Api
 
         $nexus = RequestContext::instance();
         $time = (float) number_format(microtime(true) - $nexus->getStartTimestamp(), 3);
-        $count = null;
-        $resultKey = 'ret';
-        $msgKey = 'msg';
-        $format = $request['__format'] ?? '';
-
-        if (in_array($format, ['layui-table', 'data-table'], true)) {
-            $resultKey = 'code';
-            $count = $data['meta']['total'] ?? 0;
-            if (isset($data['data'])) {
-                $data = $data['data'];
-            }
-        }
-
         $results = [
-            $resultKey => (int) $ret,
-            $msgKey => (string) $msg,
+            'ret' => (int) $ret,
+            'msg' => (string) $msg,
             'data' => $data,
             'time' => $time,
             'rid' => $nexus->getRequestId(),
         ];
-
-        if ($format === 'layui-table') {
-            $results['count'] = $count;
-        }
-
-        if ($format === 'data-table') {
-            $results['draw'] = (int) ($request['draw'] ?? 1);
-            $results['recordsTotal'] = $count;
-            $results['recordsFiltered'] = $count;
-        }
 
         if (! RuntimeContext::instance()->isLegacy() && Config::get('app.debug')) {
             $results['queries'] = QueryLog::all();
@@ -119,12 +96,10 @@ final class Api
      */
     public static function successWithContext(mixed ...$args): array
     {
-        $request = request()->only(['__format', 'draw']);
-
         return match (count($args)) {
-            0 => self::success('OK', [], $request),
-            1 => self::success('OK', $args[0], $request),
-            default => self::success((string) $args[0], $args[1] ?? [], $request),
+            0 => self::success('OK'),
+            1 => self::success('OK', $args[0]),
+            default => self::success((string) $args[0], $args[1] ?? []),
         };
     }
 
@@ -138,12 +113,10 @@ final class Api
      */
     public static function failWithContext(mixed ...$args): array
     {
-        $request = request()->only(['__format', 'draw']);
-
         return match (count($args)) {
-            0 => self::fail('ERROR', [], $request),
-            1 => self::fail('ERROR', $args[0], $request),
-            default => self::fail((string) $args[0], $args[1] ?? [], $request),
+            0 => self::fail('ERROR'),
+            1 => self::fail('ERROR', $args[0]),
+            default => self::fail((string) $args[0], $args[1] ?? []),
         };
     }
 }

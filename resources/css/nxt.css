@@ -237,13 +237,13 @@ table.main {
 }
 
 /* The same interactive-state recipe modern.css applies — unlayered so it
-   survives on legacy-variant pages that do not load modern.css. */
+   survives on boxed-variant pages that do not load modern.css. */
 :focus-visible { outline: var(--nxm-focus-outline); outline-offset: 2px; }
 :is(input, textarea, select):disabled { opacity: var(--nxm-disabled-opacity); cursor: default; }
 :is(input, textarea, select)[aria-invalid="true"] { border-color: var(--nxm-danger); }
 
 /* Legacy-fallback rules drained from styles/nexus.css (retired): identical
-   rendering for chromeVariant=legacy pages that never load modern.css. */
+   rendering for boxed-variant pages that never load modern.css. */
 img.hitandrun {
     width: 35px;
     height: 12px;

@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 /**
  * Phase 2.3 regression: `layouts.app` renders every chrome variant
- * through the shared composer/partials — the `legacy` flag moved from
+ * through the shared composer/partials — the `boxed` default moved from
  * per-view `@extends` data to the composer default, and the maintenance
  * check moved from `PageRenderer` into `SiteChromeViewModel::load`.
  */
@@ -23,7 +23,7 @@ final class ChromeVariantUnificationTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_legacy_page_renders_boxed_shell_without_view_flag(): void
+    public function test_default_page_renders_boxed_shell_without_view_flag(): void
     {
         /** @var User $user */
         $user = User::factory()->create();
@@ -32,9 +32,9 @@ final class ChromeVariantUnificationTest extends TestCase
         $response->assertOk();
         $html = (string) $response->getContent();
 
-        // The legacy variant is the composer default: boxed shell, pack
-        // theme and sprite head styles still reach legacy page bodies.
-        $this->assertStringContainsString('data-chrome="legacy"', $html);
+        // The boxed variant is the composer default: boxed shell, pack
+        // theme and sprite head styles still reach boxed page bodies.
+        $this->assertStringContainsString('data-chrome="boxed"', $html);
         $this->assertStringContainsString('class="nx-pagebox nx-main"', $html);
         $this->assertStringContainsString('styles/Classic/theme.css', $html);
         $this->assertStringContainsString('styles/sprites.css', $html);
@@ -62,8 +62,8 @@ final class ChromeVariantUnificationTest extends TestCase
         $response->assertOk();
         $html = (string) $response->getContent();
 
-        // ok/index declares shell => 'bare' only: legacy chrome, no wrapper.
-        $this->assertStringContainsString('data-chrome="legacy"', $html);
+        // ok/index declares shell => 'bare' only: boxed chrome, no wrapper.
+        $this->assertStringContainsString('data-chrome="boxed"', $html);
         $this->assertStringNotContainsString('nx-pagebox', $html);
     }
 

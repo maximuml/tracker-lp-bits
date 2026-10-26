@@ -112,8 +112,8 @@ final class ChromeFooter
         // site.js is the consolidated always-on toolkit (ajax, ajaxbasic,
         // nx-tooltip, nx-zoom, common, goup, theme-toggle, nx-chrome,
         // nexus) — one footer request instead of nine. csrf.js stays
-        // standalone (layui admin pages load it alone), nx-layer.js stays
-        // head-loaded, and toast.js stays opt-in via AssetAppender.
+        // standalone (bare standalone pages load it alone), nx-layer.js
+        // stays head-loaded, and toast.js stays opt-in via AssetAppender.
         return ['js/csrf.js', 'js/site.js'];
     }
 }

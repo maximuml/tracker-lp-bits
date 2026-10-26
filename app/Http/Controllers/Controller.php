@@ -87,21 +87,6 @@ class Controller extends BaseController
         return Str::slug("$title.$action", '.');
     }
 
-    /** @return  array<int|string, mixed> */
-    protected function getPaginationParameters(Request $request): array
-    {
-        $format = $request->__format;
-        if ($format == 'data-table') {
-            $perPage = $request->length;
-            $page = intval($request->start / $perPage) + 1;
-        } else {
-            $perPage = $request->limit;
-            $page = $request->page;
-        }
-
-        return [$perPage, ['*'], 'page', $page];
-    }
-
     /** @param  mixed  $field */
     protected function hasExtraField(Request $request, $field): bool
     {

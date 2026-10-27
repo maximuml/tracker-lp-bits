@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Html\SafeHtml;
-use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Stateless string helpers extracted from `include/functions.php`.
@@ -102,12 +101,12 @@ final class Strings
      * Does NOT escape the input — every existing call site already
      * passes an escaped value (e.g. an IP address). Pinned by test.
      */
-    public static function hidden(string $text): Htmlable
+    public static function hidden(string $text): SafeHtml
     {
-        return view('components.support.span-class', [
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.span-class', [
             'cls' => 'hidden-text',
             'text' => SafeHtml::fromTrustedHtml($text),
-        ]);
+        ])->render()));
     }
 
     /**

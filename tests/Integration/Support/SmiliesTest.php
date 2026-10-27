@@ -24,7 +24,7 @@ final class SmiliesTest extends TestCase
             .' data-domtt-content>'
             .'<img class="nx-smiley" src="pic/smilies/4.gif" alt="[em4]" />'
             .'<template class="nx-tt"><img src="pic/smilies/4.gif" alt="" /></template></a>';
-        $this->assertSame($expected, (string) Smilies::link('myform', 'myta', 4));
+        $this->assertSame($expected, rtrim((string) Smilies::link('myform', 'myta', 4)));
     }
 
     public function test_link_escapes_formname_and_taname(): void

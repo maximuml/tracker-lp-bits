@@ -503,5 +503,4 @@ final class ComponentLayerTest extends TestCase
 
         $this->assertStringContainsString('oops', $html);
     }
-
 }

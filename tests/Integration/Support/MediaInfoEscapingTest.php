@@ -28,7 +28,7 @@ final class MediaInfoEscapingTest extends TestCase
 
     public function test_media_info_raw_dump_escapes_html_payload(): void
     {
-        $html = (new TechnicalInformation('</pre><script>alert(1)</script><pre>'))->renderOnDetailsPage();
+        $html = (new TechnicalInformation('</pre><script>alert(1)</script><pre>'))->renderOnDetailsPage()->render();
 
         $this->assertStringNotContainsString('<script>', $html);
         $this->assertStringContainsString('&lt;script&gt;', $html);
@@ -36,7 +36,7 @@ final class MediaInfoEscapingTest extends TestCase
 
     public function test_bd_info_raw_dump_escapes_html_payload(): void
     {
-        $html = (new BdInfoExtra('</pre><script>alert(1)</script><pre>'))->renderOnDetailsPage();
+        $html = (new BdInfoExtra('</pre><script>alert(1)</script><pre>'))->renderOnDetailsPage()->render();
 
         $this->assertStringNotContainsString('<script>', $html);
         $this->assertStringContainsString('&lt;script&gt;', $html);

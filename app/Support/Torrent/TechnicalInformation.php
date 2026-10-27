@@ -9,6 +9,7 @@ use App\Support\Locale;
 use App\ViewModels\Torrent\AudioTrackViewModel;
 use App\ViewModels\Torrent\TechnicalInfoViewModel;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\View\View;
 
 class TechnicalInformation
 {
@@ -193,15 +194,15 @@ class TechnicalInformation
         return $this->mediaInfoArr['Video']['Bit depth'] ?? '';
     }
 
-    public function renderOnDetailsPage(): string
+    public function renderOnDetailsPage(): ?View
     {
         if (empty($this->mediaInfo)) {
-            return '';
+            return null;
         }
 
         // .nti-* styles live in public/css/nxt.css — an inline <style>
         // block here is blocked by CSP style-src (no nonce available).
-        return view('components.torrent.technical_info', ['vm' => $this->detailsViewModel()])->render();
+        return view('components.torrent.technical_info', ['vm' => $this->detailsViewModel()]);
     }
 
     private function detailsViewModel(): TechnicalInfoViewModel

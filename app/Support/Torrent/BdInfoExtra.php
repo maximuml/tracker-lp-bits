@@ -9,6 +9,7 @@ use App\Support\Locale;
 use App\ViewModels\Torrent\BdInfoColumnViewModel;
 use App\ViewModels\Torrent\BdInfoDiscViewModel;
 use App\ViewModels\Torrent\BdInfoViewModel;
+use Illuminate\Contracts\View\View;
 
 class BdInfoExtra
 {
@@ -913,9 +914,9 @@ class BdInfoExtra
     /**
      * 在详情页面渲染
      */
-    public function renderOnDetailsPage(): string
+    public function renderOnDetailsPage(): View
     {
-        return view('components.torrent.bdinfo', ['vm' => $this->detailsViewModel()])->render();
+        return view('components.torrent.bdinfo', ['vm' => $this->detailsViewModel()]);
     }
 
     private function detailsViewModel(): BdInfoViewModel

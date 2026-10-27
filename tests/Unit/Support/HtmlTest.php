@@ -34,8 +34,6 @@ final class HtmlTest extends TestCase
         $this->assertSame('', Html::tooltipContainer([]));
     }
 
-    // ---------- messageAlert ----------
-
     // ---------- buildTable() ----------
 
 }

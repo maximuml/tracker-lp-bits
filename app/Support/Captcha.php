@@ -37,25 +37,6 @@ final class Captcha
     }
 
     /**
-     * Render the active captcha markup when enabled.
-     *
-     * Mirrors `show_image_code()`. The `$secret` value is passed by the
-     * caller instead of being read from `$_GET` inside the helper.
-     */
-    public static function render(string $enabledFlag, ?string $secret = null, string $layout = 'tr'): void
-    {
-        if ($enabledFlag !== 'yes') {
-            return;
-        }
-
-        $markup = self::markup($secret ?? '', $layout);
-
-        if ($markup !== '') {
-            echo $markup;
-        }
-    }
-
-    /**
      * Return the active captcha markup instead of echoing it — for callers
      * that pass markup into a view rather than printing inline.
      * Defaults mirror `showImageCode()` (iv flag + secret from the query).

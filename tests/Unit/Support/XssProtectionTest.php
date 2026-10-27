@@ -85,18 +85,6 @@ final class XssProtectionTest extends TestCase
     }
 
     /**
-     * Html::messageAlert URL must be htmlspecialchars'd to prevent
-     * href attribute injection.
-     */
-    public function test_message_alert_escapes_url(): void
-    {
-        $evilUrl = '" onclick="alert(1)';
-        $escaped = htmlspecialchars($evilUrl, ENT_QUOTES, 'UTF-8');
-
-        $this->assertStringNotContainsString('" onclick', $escaped);
-    }
-
-    /**
      * Html::quickReply textarea name and submit label must be escaped.
      */
     public function test_quick_reply_escapes_attributes(): void

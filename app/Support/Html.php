@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Html\Escape;
-use App\Support\Html\Message;
 use App\Support\Html\SafeHtml;
 use App\Support\Html\Tag;
 
@@ -16,7 +15,7 @@ use App\Support\Html\Tag;
  * Lives under `App\Support` (not `App\Services`) because every method
  * is pure — no DI, no DB, no config, no global state.
  *
- * W2-02: Decomposed into {@see Escape}, {@see Tag}, and {@see Message}.
+ * W2-02: Decomposed into {@see Escape} and {@see Tag}.
  * This class remains as a facade for backward compatibility.
  */
 final class Html
@@ -98,13 +97,6 @@ final class Html
     public static function formatTextAlign(string $text, string $align): string
     {
         return Tag::formatTextAlign($text, $align);
-    }
-
-    // ── Message ─────────────────────────────────────────────────────
-
-    public static function messageAlert(string $url, string $text, string $bgcolor = 'red'): string
-    {
-        return Message::messageAlert($url, $text, $bgcolor);
     }
 
     // ── Layout (delegates to PageRenderer) ──────────────────────────

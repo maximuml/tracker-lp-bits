@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
-use App\Support\Html;
 use App\Support\RedisGuard;
 use App\Support\UserDisplay;
 use Illuminate\Container\Attributes\Scoped;
@@ -63,13 +62,6 @@ final class MsgAlert
     private function getListKey(): string
     {
         return sprintf('%s:%s', $this->redisKeyPrefix, UserDisplay::currentId());
-    }
-
-    public static function render(): void
-    {
-        foreach (self::pendingAlerts() as $item) {
-            echo Html::messageAlert($item['url'], $item['text'], $item['color']);
-        }
     }
 
     /**

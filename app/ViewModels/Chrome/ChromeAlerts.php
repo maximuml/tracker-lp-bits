@@ -215,7 +215,7 @@ final class ChromeAlerts
     /**
      * Banner colour whitelist — mirrors the legacy `msg-alert-*` classes;
      * unknown colours (e.g. a free-form exam `background_color`) fall back
-     * to red just as `Html::messageAlert` did.
+     * to red just as the removed `msgalert()` helper did.
      */
     private static function alertColor(string $color): string
     {

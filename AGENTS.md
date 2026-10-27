@@ -580,8 +580,9 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   unchanged inside the new shell (theme.css still styles them).
   `a11y.spec` stays green — the alert banner and labelled select fix
   would have been new `color-contrast`/`select-name` violations.
-  `Html::messageAlert` remains for alert markup emitted inside page
-  bodies. Page-HTML caches (`topten`, `faq`, `rules`) may serve the old
+  Alert markup emitted inside page bodies goes through `ChromeAlerts`
+  (the `Html::messageAlert`/`MsgAlert::render` path was removed as dead
+  code — PR #1313). Page-HTML caches (`topten`, `faq`, `rules`) may serve the old
   chrome until their TTL expires. The static `PageLayout::$context`
   stays per-request state set by `headerHtml()`/`Html::stdhead()`.
 

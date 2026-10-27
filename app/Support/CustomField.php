@@ -90,7 +90,7 @@ class CustomField
      * @param  array<int|string, mixed>  $overrideValues  field-id => submitted
      *                                                    value, used to restore user input after a failed upload POST
      */
-    public function renderOnUploadPage(int $torrentId, int $searchBoxId, array $overrideValues = []): string
+    public function renderOnUploadPage(int $torrentId, int $searchBoxId, array $overrideValues = []): SafeHtml
     {
         $searchBox = $this->searchBoxRepository->findById($searchBoxId);
         if (empty($searchBox)) {
@@ -165,7 +165,7 @@ class CustomField
             $html .= view('components.fields.upload_field', $params)->render();
         }
 
-        return $html;
+        return SafeHtml::fromTrustedHtml($html);
     }
 
     /**

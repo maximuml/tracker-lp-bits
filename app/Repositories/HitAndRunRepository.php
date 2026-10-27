@@ -13,6 +13,7 @@ use App\Models\SearchBox;
 use App\Models\User;
 use App\Services\HitAndRunCronjobService;
 use App\Support\Html;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
@@ -281,17 +282,17 @@ class HitAndRunRepository extends BaseRepository
      * @param  mixed  $value
      * @param  mixed  $searchBoxId
      */
-    public function renderOnUploadPage($value, $searchBoxId): string
+    public function renderOnUploadPage($value, $searchBoxId): SafeHtml
     {
         if (HitAndRunMode::fromStringSafe(
             is_string($mode = HitAndRun::getConfig('mode', $searchBoxId)) ? $mode : null
         ) === HitAndRunMode::MANUAL && Permission::canSetTorrentHitAndRun()) {
             $hrRadio = view('components.upload.hr_radios', ['searchBoxId' => $searchBoxId, 'value' => $value])->render();
 
-            return (string) Html::frow('H&R', $hrRadio, 1, "mode_$searchBoxId", true);
+            return SafeHtml::fromTrustedHtml((string) Html::frow('H&R', $hrRadio, 1, "mode_$searchBoxId", true));
         }
 
-        return '';
+        return SafeHtml::fromPlainText('');
     }
 
     public function countForUser(int $userId, string|int $status): int

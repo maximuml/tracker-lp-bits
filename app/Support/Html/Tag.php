@@ -237,7 +237,7 @@ final class Tag
         return SafeHtml::fromTrustedHtml(trim(view('components.support.tag.quick-reply', [
             'name' => $textareaName,
             'label' => (string) (__('functions.row_body')),
-            'smileRow' => SafeHtml::fromTrustedHtml(Smilies::quickRow($formName, $textareaName)),
+            'smileRow' => Smilies::quickRow($formName, $textareaName),
             'submitLabel' => $submitLabel,
         ])->render()));
     }

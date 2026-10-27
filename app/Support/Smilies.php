@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Html\SafeHtml;
 use Illuminate\Contracts\Support\Htmlable;
 
 /**
@@ -37,14 +38,14 @@ final class Smilies
         ]);
     }
 
-    public static function quickRow(string $formname, string $taname): string
+    public static function quickRow(string $formname, string $taname): SafeHtml
     {
         $links = [];
         foreach (self::QUICK_NUMBERS as $smilyNumber) {
             $links[] = self::link($formname, $taname, $smilyNumber);
         }
 
-        return trim(view('components.support.smile-row', ['links' => $links])->render());
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.smile-row', ['links' => $links])->render()));
     }
 
     /**

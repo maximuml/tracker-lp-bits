@@ -87,7 +87,7 @@ final class Shoutbox
         return SafeHtml::fromTrustedHtml(view('components.shoutbox.toolbar', [
             'formName' => $formName,
             'fieldName' => $fieldName,
-            'smiliesHtml' => SafeHtml::fromTrustedHtml(Smilies::quickRow($formName, $fieldName)),
+            'smiliesHtml' => Smilies::quickRow($formName, $fieldName),
         ])->render());
     }
 

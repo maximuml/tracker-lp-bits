@@ -11,7 +11,6 @@ use App\Repositories\AttendanceRepository;
 use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
-use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -104,7 +103,7 @@ class AttendanceController extends BasePageController
             ]);
         } else {
             if ($captchaEnabled && $data['iv'] === 'yes') {
-                $data['captchaHtml'] = SafeHtml::fromTrustedHtml(Captcha::renderHtml(layout: 'grid'));
+                $data['captchaHtml'] = Captcha::renderHtml(layout: 'grid');
             }
         }
         AssetAppender::js($this->calendarScript($data), 'footer', false);

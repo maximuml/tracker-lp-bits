@@ -256,7 +256,7 @@ class SupportController extends BasePageController
         return $this->renderPage($request, 'complains', false, [
             'mode' => 'compose',
             'title' => __('complains.text_complain'),
-            'captchaHtml' => SafeHtml::fromTrustedHtml($captchaHtml),
+            'captchaHtml' => $captchaHtml,
         ]);
     }
 }

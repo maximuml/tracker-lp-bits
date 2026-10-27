@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Hello World!</title>
+    <style>
+        .guest-wrap { padding: 15px; display: flex; justify-content: center; }
+        .guest-inner { max-width: 1120px; }
+    </style>
 </head>
 <body>
-<div style="padding: 15px;display: flex;justify-content: center">
-    <div style="max-width: 1120px;">
+<div class="guest-wrap">
+    <div class="guest-inner">
         {{ $content }}
     </div>
 </div>

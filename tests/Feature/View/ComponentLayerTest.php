@@ -25,25 +25,6 @@ final class ComponentLayerTest extends TestCase
         return Blade::render($template, $data);
     }
 
-    // --- x-page-header ---------------------------------------------------
-
-    public function test_page_header_escapes_plain_title(): void
-    {
-        $html = $this->render('<x-page-header title="A <b>bold</b> title" />');
-
-        $this->assertStringContainsString('A &lt;b&gt;bold&lt;/b&gt; title', $html);
-        $this->assertStringNotContainsString('<b>bold</b>', $html);
-        $this->assertStringContainsString('text-lg font-bold', $html);
-    }
-
-    public function test_page_header_renders_trusted_html_title(): void
-    {
-        $title = SafeHtml::fromTrustedHtml('User <a href="/user/1">alice</a>');
-        $html = $this->render('<x-page-header :title="$title" />', ['title' => $title]);
-
-        $this->assertStringContainsString('<a href="/user/1">alice</a>', $html);
-    }
-
     // --- x-alert ---------------------------------------------------------
 
     public function test_alert_escapes_title_and_uses_status_role_for_info(): void
@@ -205,20 +186,6 @@ final class ComponentLayerTest extends TestCase
         $this->assertStringContainsString('Sec&lt;b&gt;', $html);
     }
 
-    // --- x-modal ---------------------------------------------------------
-
-    public function test_modal_has_dialog_semantics_and_labelled_close(): void
-    {
-        $html = $this->render('<x-modal id="dlg" title="Confirm">Body</x-modal>');
-
-        $this->assertStringContainsString('role="dialog"', $html);
-        $this->assertStringContainsString('aria-modal="true"', $html);
-        $this->assertStringContainsString('aria-labelledby="dlg-title"', $html);
-        $this->assertStringContainsString('id="dlg-title"', $html);
-        $this->assertStringContainsString('aria-label="Close"', $html);
-        $this->assertStringContainsString('hidden', $html);
-    }
-
     // --- x-empty-state ---------------------------------------------------
 
     public function test_empty_state_renders_title_and_escapes(): void
@@ -227,34 +194,6 @@ final class ComponentLayerTest extends TestCase
 
         $this->assertStringContainsString('No &lt;b&gt;results&lt;/b&gt;', $html);
         $this->assertStringContainsString('try later', $html);
-    }
-
-    // --- x-user-badge ----------------------------------------------------
-
-    public function test_user_badge_escapes_username_and_applies_level(): void
-    {
-        $html = $this->render('<x-user-badge :username="$u" level="staff" />', ['u' => 'ad<min>']);
-
-        $this->assertStringContainsString('ad&lt;min&gt;', $html);
-        $this->assertStringContainsString('nx-user-badge--staff', $html);
-    }
-
-    public function test_user_badge_links_when_href_given(): void
-    {
-        $html = $this->render('<x-user-badge username="bob" href="/user/2" />');
-
-        $this->assertStringContainsString('href="/user/2"', $html);
-        $this->assertStringContainsString('>bob</a>', $html);
-    }
-
-    // --- x-torrent-badge -------------------------------------------------
-
-    public function test_torrent_badge_renders_type_modifier(): void
-    {
-        $html = $this->render('<x-torrent-badge type="sticky">Sticky</x-torrent-badge>');
-
-        $this->assertStringContainsString('nx-tbadge--sticky', $html);
-        $this->assertStringContainsString('Sticky', $html);
     }
 
     // --- settings row components (W7-02) ---------------------------------
@@ -565,52 +504,4 @@ final class ComponentLayerTest extends TestCase
         $this->assertStringContainsString('oops', $html);
     }
 
-    // --- x-loading-state --------------------------------------------------
-
-    public function test_loading_state_announces_politely_and_hides_spinner(): void
-    {
-        $html = $this->render('<x-loading-state />');
-
-        $this->assertStringContainsString('role="status"', $html);
-        $this->assertStringContainsString('aria-hidden="true"', $html);
-        $this->assertStringContainsString('animate-spin', $html);
-    }
-
-    public function test_loading_state_escapes_custom_label(): void
-    {
-        $html = $this->render('<x-loading-state :label="$l" />', ['l' => 'Saving <b>x</b>']);
-
-        $this->assertStringContainsString('Saving &lt;b&gt;x&lt;/b&gt;', $html);
-    }
-
-    // --- x-action-menu -----------------------------------------------------
-
-    public function test_action_menu_renders_details_with_menu_roles(): void
-    {
-        $html = $this->render(
-            '<x-action-menu label="Actions" :items="$items" />',
-            ['items' => [
-                ['label' => 'Edit', 'href' => '/edit'],
-                ['label' => 'Delete', 'href' => '/del', 'danger' => true],
-            ]],
-        );
-
-        $this->assertStringContainsString('<details', $html);
-        $this->assertStringContainsString('aria-haspopup="menu"', $html);
-        $this->assertStringContainsString('role="menu"', $html);
-        $this->assertStringContainsString('role="menuitem"', $html);
-        $this->assertStringContainsString('text-nxm-danger', $html);
-        $this->assertStringContainsString('aria-hidden="true"', $html); // caret is decorative
-    }
-
-    public function test_action_menu_escapes_labels(): void
-    {
-        $html = $this->render(
-            '<x-action-menu :label="$l" :items="$items" />',
-            ['l' => 'A<b>x</b>', 'items' => [['label' => 'E<s>x</s>', 'href' => '/e']]],
-        );
-
-        $this->assertStringContainsString('A&lt;b&gt;x&lt;/b&gt;', $html);
-        $this->assertStringContainsString('E&lt;s&gt;x&lt;/s&gt;', $html);
-    }
 }

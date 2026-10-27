@@ -60,9 +60,9 @@ use App\Enums\TorrentVisible;
 use App\Models\Traits\HasTorrentAccessors;
 use App\Models\Traits\HasTorrentRelationships;
 use App\Models\Traits\HasTorrentScopes;
-use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Collection;
 use Laravel\Scout\ModelObserver;
 use Laravel\Scout\Searchable;
@@ -227,7 +227,7 @@ class Torrent extends NexusModel
     /**
      * Approval-status badge icon, keyed by TorrentApprovalStatus value.
      */
-    public static function approvalStatusIcon(int $status): SafeHtml
+    public static function approvalStatusIcon(int $status): ?Htmlable
     {
         $view = match ($status) {
             TorrentApprovalStatus::ALLOW->value => 'components.torrents.icon-allow',
@@ -236,9 +236,7 @@ class Torrent extends NexusModel
             default => null,
         };
 
-        return SafeHtml::fromTrustedHtml(
-            $view === null ? '' : trim(view($view)->render())
-        );
+        return $view === null ? null : view($view);
     }
 
     const REQUIRE_SEED_SECTION_DEFAULT_PROMOTION_STATE = TorrentPromotion::FREE->value;

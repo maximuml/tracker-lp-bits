@@ -153,8 +153,8 @@ class WebCommentController extends Controller
         $confirmLabel = (string) __('comment.std_here');
         $confirmSuffix = (string) __('comment.std_if_sure');
         $cancelLabel = $this->lang('text_back');
-        $cancelUrl = $referer !== '' ? $referer : $this->buildScript($type, (int) $arr['pid']);
-        $returnto = $referer;
+        $cancelUrl = SafeReturnUrl::filter($referer, $this->buildScript($type, (int) $arr['pid']));
+        $returnto = $referer === '' ? '' : SafeReturnUrl::filter($referer, $this->buildScript($type, (int) $arr['pid']));
 
         return view('comments.delete', compact('heading', 'message', 'formAction', 'commentId', 'confirmLabel', 'confirmSuffix', 'cancelLabel', 'cancelUrl', 'type', 'returnto'));
     }

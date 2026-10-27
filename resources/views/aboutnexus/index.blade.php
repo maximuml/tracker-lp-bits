@@ -71,7 +71,7 @@
 {{ $notes['contact'] }}
 <br /><br />
 <x-data-table :caption="$captions['contact']" captionHidden class="nx-main">
-    <x-settings-row :label="__('aboutnexus.text_web_site')"><a href="{{ NEXUSPHPURL }}" target="_blank">{{ NEXUSPHPURL }}</a></x-settings-row>
+    <x-settings-row :label="__('aboutnexus.text_web_site')"><a href="{{ NEXUSPHPURL }}" target="_blank" rel="noopener">{{ NEXUSPHPURL }}</a></x-settings-row>
 </x-data-table>
 <br /><br />
 </x-frame>

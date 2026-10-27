@@ -5,7 +5,9 @@ namespace Database\Seeders;
 use App\Enums\SitelogSecurityLevel;
 use App\Models\Category;
 use App\Models\Forum;
+use App\Models\HitAndRun;
 use App\Models\Post;
+use App\Models\Snatch;
 use App\Models\Topic;
 use App\Models\Torrent;
 use App\Models\User;
@@ -22,6 +24,7 @@ class BrowserSmokeSeeder extends Seeder
 {
     public function run(): void
     {
+        /** @var User $owner */
         $owner = User::query()->where('username', 'sysop')->first()
             ?? User::query()->first()
             ?? User::factory()->create();
@@ -30,6 +33,7 @@ class BrowserSmokeSeeder extends Seeder
             // The category must be a real seeded row — details.php maps
             // categories.mode to the search box id and a missing join
             // yields "Invalid search box: 0" (HTTP 500).
+            /** @var Category $category */
             $category = Category::query()->first() ?? Category::factory()->create();
             // MeiliSearch may not be running when this seeder runs (CI
             // seeds before the search container is up) — the browser
@@ -40,6 +44,46 @@ class BrowserSmokeSeeder extends Seeder
                     'category' => $category->id,
                 ]),
             );
+        }
+
+        $hrTorrentName = 'Browser Smoke H&R Fixture Torrent';
+        $hrTorrent = Torrent::query()->where('name', $hrTorrentName)->first();
+        if (! $hrTorrent instanceof Torrent) {
+            /** @var Category $category */
+            $category = Category::query()->first() ?? Category::factory()->create();
+            $hrTorrent = Torrent::withoutSyncingToSearch(
+                fn () => Torrent::factory()->owner($owner)->create([
+                    'name' => $hrTorrentName,
+                    'category' => $category->id,
+                ]),
+            );
+        }
+        $hrSnatch = Snatch::query()->firstOrCreate(
+            ['torrentid' => $hrTorrent->id, 'userid' => $owner->id],
+            [
+                'ip' => '127.0.0.1',
+                'port' => 51413,
+                'uploaded' => 900000000,
+                'downloaded' => 647865608,
+                'to_go' => 0,
+                'seedtime' => 18 * 3600,
+                'leechtime' => 3600,
+                'last_action' => now()->toDateTimeString(),
+                'startdat' => now()->subDays(2)->toDateTimeString(),
+                'completedat' => now()->subDay()->toDateTimeString(),
+                'finished' => 1,
+            ],
+        );
+        $hrRow = HitAndRun::query()->firstOrCreate(
+            ['uid' => $owner->id, 'torrent_id' => $hrTorrent->id],
+            [
+                'snatched_id' => $hrSnatch->id,
+                'status' => 1,
+                'comment' => 'Browser smoke H&R fixture comment',
+            ],
+        );
+        if ($hrSnatch->hit_and_run_id !== $hrRow->id) {
+            $hrSnatch->update(['hit_and_run_id' => $hrRow->id]);
         }
 
         $logPrefix = 'Browser smoke pager fixture ';
@@ -68,10 +112,13 @@ class BrowserSmokeSeeder extends Seeder
             return;
         }
 
+        /** @var Forum $forum */
         $forum = Forum::query()->first() ?? Forum::factory()->create();
+        /** @var Topic $topic */
         $topic = Topic::factory()->forum($forum)->author($owner)->create([
             'subject' => 'Browser smoke fixture topic',
         ]);
+        /** @var Post $post */
         $post = Post::factory()->topic($topic)->author($owner)->create();
         $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
     }

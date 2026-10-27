@@ -302,6 +302,30 @@ class HitAndRunRepository extends BaseRepository
             ->count();
     }
 
+    /** @return array<int, int> */
+    public function countsByStatusForUser(int $userId): array
+    {
+        $counts = [];
+        foreach (HitAndRunStatus::cases() as $status) {
+            $counts[$status->value] = 0;
+        }
+
+        $results = DB::table('hit_and_runs')
+            ->where('uid', $userId)
+            ->selectRaw('status, COUNT(*) AS counts')
+            ->groupBy('status')
+            ->get();
+
+        foreach ($results as $result) {
+            $status = (int) $result->status;
+            if (array_key_exists($status, $counts)) {
+                $counts[$status] = (int) $result->counts;
+            }
+        }
+
+        return $counts;
+    }
+
     /**
      * @return Collection<int, HitAndRun>
      */

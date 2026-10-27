@@ -9,14 +9,15 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\HitAndRunStatus;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\ExchangeBonusRequest;
+use App\Models\BonusLogs;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
 use App\Services\BonusPageService;
 use App\Services\BonusService;
+use App\Services\HitAndRunPageService;
 use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
-use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\PageResponses;
 use App\Support\Pagination;
@@ -34,7 +35,7 @@ class MyController extends Controller
 
     private ActorContext $actor;
 
-    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly HitAndRunRepository $hitAndRunRepository, private readonly UserRepositoryInterface $userRepository, BonusPageService $bonusPageService, BonusService $bonusService, ActorContext $actor)
+    public function __construct(private readonly PermissionChecker $permissionChecker, private readonly HitAndRunRepository $hitAndRunRepository, private readonly UserRepositoryInterface $userRepository, private readonly HitAndRunPageService $hitAndRunPageService, BonusPageService $bonusPageService, BonusService $bonusService, ActorContext $actor)
     {
         $this->bonusPageService = $bonusPageService;
         $this->bonusService = $bonusService;
@@ -118,7 +119,7 @@ class MyController extends Controller
         $headerFilters = [];
         foreach ($allStatus as $key => $value) {
             $filterParams['status'] = $key;
-            $headerFilters[] = ['query' => http_build_query($filterParams), 'active' => $key == $status, 'text' => $value['text']];
+            $headerFilters[] = ['query' => http_build_query($filterParams), 'active' => $key == $status, 'text' => $value['text'], 'status' => (int) $key];
         }
 
         $q = htmlspecialchars((string) ($request->query('q') ?? ''));
@@ -132,7 +133,8 @@ class MyController extends Controller
             $list = $this->hitAndRunRepository->paginateForUser($userid, $status, $offset, $pageSize, $searchId);
         }
 
-        $cancelHrBonus = SiteConfig::current()->bonus->cancelHr();
+        $cancelHrBonus = BonusLogs::getBonusForCancelHitAndRun();
+        $page = $this->hitAndRunPageService->build($userid, $viewerId, $list);
 
         $hasActionRemove = collect($list)->contains(
             fn ($row) => $row->uid == $this->actor->id && in_array($row->status, HitAndRun::CAN_PARDON_STATUS)
@@ -173,6 +175,7 @@ JS;
             'pagerbottom' => $pagerbottom,
             'list' => $list,
             'cancelHrBonus' => $cancelHrBonus,
+            'page' => $page,
         ]);
     }
 }

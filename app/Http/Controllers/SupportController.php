@@ -16,7 +16,6 @@ use App\Models\Setting;
 use App\Services\ComplainService;
 use App\Support\Captcha;
 use App\Support\Html;
-use App\Support\Html\SafeHtml;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
@@ -245,7 +244,7 @@ class SupportController extends BasePageController
             'isAdmin' => $isAdmin,
             'isLogin' => $uid > 0,
             'title' => __('complains.text_complain'),
-            'replyBoxHtml' => SafeHtml::fromTrustedHtml($replyBoxHtml),
+            'replyBoxHtml' => $replyBoxHtml,
         ]);
     }
 

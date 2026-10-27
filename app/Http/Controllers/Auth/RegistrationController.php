@@ -64,7 +64,7 @@ class RegistrationController extends Controller
         }
 
         $captchaEnabled = $this->authService->isCaptchaEnabled();
-        $captchaMarkup = '';
+        $captchaMarkup = SafeHtml::fromPlainText('');
 
         if ($captchaEnabled) {
             $captchaMarkup = Captcha::renderHtml('yes', $secret, 'grid');
@@ -93,7 +93,7 @@ class RegistrationController extends Controller
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
+            'captchaMarkup' => $captchaMarkup,
             'secret' => $secret,
             'type' => $type,
             'isInvite' => $isInvite,
@@ -175,7 +175,7 @@ class RegistrationController extends Controller
 
         $secret = (string) $request->query('secret', '');
         $captchaEnabled = $this->authService->isCaptchaEnabled();
-        $captchaMarkup = '';
+        $captchaMarkup = SafeHtml::fromPlainText('');
 
         if ($captchaEnabled) {
             $captchaMarkup = Captcha::renderHtml('yes', $secret, 'grid');
@@ -185,7 +185,7 @@ class RegistrationController extends Controller
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
+            'captchaMarkup' => $captchaMarkup,
             'secret' => $secret,
             'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
             'maxAttempts' => $this->authService->maxLoginAttempts(),

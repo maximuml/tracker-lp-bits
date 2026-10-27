@@ -267,11 +267,11 @@ final class Shoutbox
     /**
      * Render a formatted relative/absolute timestamp for a shoutbox row.
      */
-    public static function formatTime(int $timestamp, bool $oneUnit = true): string
+    public static function formatTime(int $timestamp, bool $oneUnit = true): SafeHtml
     {
         $timeString = date('Y-m-d H:i:s', $timestamp);
 
-        return (string) Time::format($timeString, true, false, true, $oneUnit);
+        return SafeHtml::fromTrustedHtml((string) Time::format($timeString, true, false, true, $oneUnit));
     }
 
     /**
@@ -380,7 +380,7 @@ final class Shoutbox
 
             $editedTime = null;
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-                $editedTime = SafeHtml::fromTrustedHtml(self::formatTime((int) $arr['edited_at'], true));
+                $editedTime = self::formatTime((int) $arr['edited_at'], true);
             }
 
             $avatarUrl = 'pic/default_avatar.png';
@@ -426,7 +426,7 @@ final class Shoutbox
 
             $items[] = [
                 'rowClass' => implode(' ', $rowClasses),
-                'time' => SafeHtml::fromTrustedHtml(self::formatTime($currDate, true)),
+                'time' => self::formatTime($currDate, true),
                 'actions' => self::actionsData($arr, $currentUserId, $isStaff),
                 'avatarUrl' => $avatarUrl,
                 'avatarUserId' => $currUserId,

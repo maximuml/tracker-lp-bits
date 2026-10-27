@@ -245,14 +245,12 @@ final class OfferListBuilder
                             $tooltipId = 'lastcom_'.$i;
                             $tooltips[] = new OfferTooltip(
                                 id: $tooltipId,
-                                content: SafeHtml::fromTrustedHtml(
-                                    view('components.offers.lastcom_tooltip', [
-                                        'hasNew' => $hasnewcom,
-                                        'username' => UserDisplay::username((int) ($lastcom['user'] ?? 0)),
-                                        'time' => SafeHtml::fromTrustedHtml($lastcomtime),
-                                        'comment' => $renderTt((string) ($lastcom['text'] ?? '')),
-                                    ])->render()
-                                ),
+                                content: view('components.offers.lastcom_tooltip', [
+                                    'hasNew' => $hasnewcom,
+                                    'username' => UserDisplay::username((int) ($lastcom['user'] ?? 0)),
+                                    'time' => SafeHtml::fromTrustedHtml($lastcomtime),
+                                    'comment' => $renderTt((string) ($lastcom['text'] ?? '')),
+                                ]),
                             );
                         }
                     } else {

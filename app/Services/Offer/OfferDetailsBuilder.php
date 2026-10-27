@@ -75,7 +75,7 @@ final class OfferDetailsBuilder
             $allowedNote = __('offers.text_urge_upload_offer_note');
         }
 
-        $description = '';
+        $description = SafeHtml::fromPlainText('');
         if (! empty($offer->descr)) {
             $descrKey = 'fmt_offer_'.md5((string) $offer->descr);
             $cachedDescr = $this->cache->get($descrKey);
@@ -109,7 +109,7 @@ final class OfferDetailsBuilder
             against: $against,
             allowedNote: $allowedNote,
             showEditDelete: $userId === $offerUserid || Permission::can(PermissionEnum::OFFER_MANAGE),
-            description: SafeHtml::fromTrustedHtml($description),
+            description: $description,
             commentCount: $commentCount,
             pagerTop: $pagerTop,
             pagerBottom: $pagerBottom,

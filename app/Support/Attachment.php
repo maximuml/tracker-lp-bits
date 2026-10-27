@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -82,7 +83,7 @@ final class Attachment
         $href = "/web/getattachment?id=$id&dlkey=$dlkey";
 
         return trim(view('components.support.attach-file', [
-            'icon' => SafeHtml::fromTrustedHtml($icon),
+            'icon' => $icon,
             'href' => $href,
             'id' => $id,
             'filename' => $filename,
@@ -198,7 +199,7 @@ final class Attachment
         }, $text, 20);
     }
 
-    private static function iconForFileType(string $filetype): string
+    private static function iconForFileType(string $filetype): View
     {
         [$alt, $icon] = match ($filetype) {
             'application/x-bittorrent' => ['torrent', 'torrent'],
@@ -212,7 +213,7 @@ final class Attachment
             default => ['other', 'common'],
         };
 
-        return trim(view('components.support.attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
+        return view('components.support.attach-icon', ['alt' => $alt, 'icon' => $icon]);
     }
 
     private static function attachmentRepository(): AttachmentRepositoryInterface

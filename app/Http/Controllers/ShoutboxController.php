@@ -143,10 +143,10 @@ class ShoutboxController extends BasePageController
             $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
             $editedTime = null;
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-                $editedTime = SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) $arr['edited_at'], true));
+                $editedTime = Shoutbox::formatTime((int) $arr['edited_at'], true);
             }
             $items[] = [
-                'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) ($arr['date'] ?? 0), true)),
+                'time' => Shoutbox::formatTime((int) ($arr['date'] ?? 0), true),
                 'actions' => Shoutbox::actionsData($arr, $currentUserId, $isStaff),
                 'username' => SafeHtml::fromTrustedHtml($username),
                 'isGuest' => $uid <= 0,

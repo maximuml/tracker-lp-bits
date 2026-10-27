@@ -7,7 +7,6 @@ namespace App\Support;
 use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -199,7 +198,7 @@ final class Attachment
         }, $text, 20);
     }
 
-    private static function iconForFileType(string $filetype): View
+    private static function iconForFileType(string $filetype): SafeHtml
     {
         [$alt, $icon] = match ($filetype) {
             'application/x-bittorrent' => ['torrent', 'torrent'],
@@ -213,7 +212,7 @@ final class Attachment
             default => ['other', 'common'],
         };
 
-        return view('components.support.attach-icon', ['alt' => $alt, 'icon' => $icon]);
+        return SafeHtml::fromTrustedHtml(view('components.support.attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
     }
 
     private static function attachmentRepository(): AttachmentRepositoryInterface

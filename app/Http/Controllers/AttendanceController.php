@@ -11,6 +11,7 @@ use App\Repositories\AttendanceRepository;
 use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -91,16 +92,16 @@ class AttendanceController extends BasePageController
         }
 
         if ($data['hasAttendedToday']) {
-            $data['headerLeft'] = view('components.attendance.header-left', [
+            $data['headerLeft'] = SafeHtml::fromTrustedHtml(view('components.attendance.header-left', [
                 'totalDays' => $attendance->total_days,
                 'days' => $attendance->days,
                 'points' => $attendance->points,
                 'cards' => $this->actor->value('attendance_card', 0),
-            ]);
-            $data['headerRight'] = view('components.attendance.header-right', [
+            ])->render());
+            $data['headerRight'] = SafeHtml::fromTrustedHtml(view('components.attendance.header-right', [
                 'myRanking' => (int) $data['myRanking'],
                 'todayCounts' => (int) $data['todayCounts'],
-            ]);
+            ])->render());
         } else {
             if ($captchaEnabled && $data['iv'] === 'yes') {
                 $data['captchaHtml'] = Captcha::renderHtml(layout: 'grid');

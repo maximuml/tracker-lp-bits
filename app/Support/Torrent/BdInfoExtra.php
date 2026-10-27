@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Support\Torrent;
 
 use App\Support\Format;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\ViewModels\Torrent\BdInfoColumnViewModel;
 use App\ViewModels\Torrent\BdInfoDiscViewModel;
 use App\ViewModels\Torrent\BdInfoViewModel;
-use Illuminate\Contracts\View\View;
 
 class BdInfoExtra
 {
@@ -914,9 +914,9 @@ class BdInfoExtra
     /**
      * 在详情页面渲染
      */
-    public function renderOnDetailsPage(): View
+    public function renderOnDetailsPage(): SafeHtml
     {
-        return view('components.torrent.bdinfo', ['vm' => $this->detailsViewModel()]);
+        return SafeHtml::fromTrustedHtml(view('components.torrent.bdinfo', ['vm' => $this->detailsViewModel()])->render());
     }
 
     private function detailsViewModel(): BdInfoViewModel

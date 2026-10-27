@@ -174,7 +174,7 @@ class UserDetailController extends Controller
         }
         $clientSelectHtml = $clientRows === []
             ? null
-            : view('components.userdetails.clients', ['rows' => $clientRows]);
+            : SafeHtml::fromTrustedHtml(view('components.userdetails.clients', ['rows' => $clientRows])->render());
 
         $trueTraffic = $this->userDetailRepository->getTrueTraffic($id);
 
@@ -185,12 +185,12 @@ class UserDetailController extends Controller
             2,
             ''
         );
-        $migratedHelp = view('components.userdetails.migrated_help', [
+        $migratedHelp = SafeHtml::fromTrustedHtml(view('components.userdetails.migrated_help', [
             'pre' => $migratedHelpPre,
             'post' => $migratedHelpPost,
             'url' => $userManageSystemUrl,
             'linkLabel' => (string) __('functions.text_management_system'),
-        ]);
+        ])->render());
 
         $usernameHtml = UserDisplay::username($user['id'], true, false);
         $invitedByHtml = $user['invited_by'] > 0 ? UserDisplay::username($user['invited_by']) : SafeHtml::fromPlainText('');
@@ -257,9 +257,9 @@ JS, \json_encode(__('userdetails.sure_to_remove_leech_warn'))), 'footer', false)
         if (($user['timeswarned'] ?? 0) > 0 && $user['warnedby'] !== 'System') {
             $arr = $this->userDetailRepository->getWarnedBy((int) $user['warnedby']);
             if ($arr !== null) {
-                $warnedByHtml = view('components.userdetails.warned_by', [
+                $warnedByHtml = SafeHtml::fromTrustedHtml(view('components.userdetails.warned_by', [
                     'userHtml' => UserDisplay::username($arr['id']),
-                ]);
+                ])->render());
             }
         }
 

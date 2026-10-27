@@ -7,7 +7,9 @@ namespace Tests\Feature;
 use App\Enums\UserAppendPromotion;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Config\SiteConfig;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -41,6 +43,7 @@ final class NoLeakedMarkupTest extends TestCase
         '&lt;script',
         '&lt;font',
         '&lt;br',
+        '&lt;a href',
         '&amp;nbsp;',
     ];
 
@@ -55,10 +58,33 @@ final class NoLeakedMarkupTest extends TestCase
         ];
     }
 
+    /**
+     * `/web/torrents` needs a `searchbox` row matching `main.browsecat`;
+     * without it the listing builder throws "Invalid search box" and the
+     * page 404s before reaching the markup assertions. The row is created
+     * inside the test transaction so it is environment-independent.
+     */
+    private function seedBrowseSearchbox(): void
+    {
+        $browsecat = (int) SiteConfig::current()->main->browseCat(1);
+        if (DB::table('searchbox')->where('id', $browsecat)->exists()) {
+            return;
+        }
+
+        DB::table('searchbox')->insert([
+            'id' => $browsecat,
+            'name' => 'test-browse',
+            'showsubcat' => 1,
+            'catsperrow' => 7,
+            'catpadding' => 7,
+        ]);
+    }
+
     #[DataProvider('pageProvider')]
     public function test_page_renders_no_escaped_markup_text(string $path): void
     {
         $user = User::factory()->create();
+        $this->seedBrowseSearchbox();
 
         $response = $this->withNexusCookie($user)->get($path);
 
@@ -99,6 +125,7 @@ final class NoLeakedMarkupTest extends TestCase
         // catlist (401-409); the factory's random category ID would be
         // filtered out and the empty list never reaches the legend.
         Torrent::factory()->create(['category' => 401]);
+        $this->seedBrowseSearchbox();
 
         $response = $this->withNexusCookie($user)->get('/web/torrents');
 

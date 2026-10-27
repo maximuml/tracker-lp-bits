@@ -33,7 +33,10 @@ use Tests\Attributes\TestCategory;
  *     excluded). Raised to 121 on 2026-10-27: six View-in-view-data
  *     conversions were reverted after `gatherData` escaping leaks were
  *     identified (technicalInfoResult, clientSelectHtml, migratedHelp,
- *     warnedByHtml, attendance headers, attach-icon).
+ *     warnedByHtml, attendance headers, attach-icon). Raised to 117 later
+ *     that day: the VERSION constant carries a markup-bearing footer
+ *     string (`Powered by <a href=…>`), so its fromPlainText conversion
+ *     was reverted after NoLeakedMarkupTest caught the escaped link.
  *
  * The baseline may only be lowered, never raised.
  *
@@ -46,7 +49,7 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
     private const APP_DIR = __DIR__.'/../../app';
 
     /** Baseline: fromTrustedHtml() call sites in app/ PHP code. */
-    private const BASELINE_TRUSTED_HTML_CALLS = 116;
+    private const BASELINE_TRUSTED_HTML_CALLS = 117;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

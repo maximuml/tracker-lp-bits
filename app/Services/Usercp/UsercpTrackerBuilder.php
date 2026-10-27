@@ -13,7 +13,6 @@ use App\Enums\UserTooltip;
 use App\Repositories\StyleRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Html;
-use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\RequestValues;
 use App\Support\Strings;
@@ -85,7 +84,7 @@ final class UsercpTrackerBuilder
             incldead: $incldead,
             specialState: $specialState,
             inclbookmarked: $inclbookmarked,
-            promotionOptionsHtml: SafeHtml::fromTrustedHtml(Html::promotionSelection($specialState)),
+            promotionOptionsHtml: Html::promotionSelection($specialState),
             stylesheetOptions: $stylesheetOptions,
             currentStylesheet: (int) $actor->value('stylesheet', 0),
             themeOptions: $themeOptions,

@@ -9,62 +9,6 @@ use Tests\TestCase;
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 class HtmlTagTest extends TestCase
 {
-    public function test_table_row_with_no_cells_returns_empty_row(): void
-    {
-        // Legacy `EchoRow` returns `<tr></tr>` (no trailing newline)
-        // when invoked with only the class arg; preserved verbatim.
-        $this->assertSame('<tr></tr>', Html::tableRow('any-class'));
-    }
-
-    public function test_table_row_with_no_cells_and_empty_class(): void
-    {
-        $this->assertSame('<tr></tr>', Html::tableRow(''));
-    }
-
-    public function test_table_row_single_cell_with_class(): void
-    {
-        $this->assertSame(
-            '<tr><td class="rowfollow">value</td></tr>'."\n",
-            Html::tableRow('rowfollow', 'value'),
-        );
-    }
-
-    public function test_table_row_multiple_cells_share_one_class(): void
-    {
-        // Legacy contract: the class applies to every `<td>`, not the `<tr>`.
-        $this->assertSame(
-            '<tr><td class="colhead">A</td><td class="colhead">B</td><td class="colhead">C</td></tr>'."\n",
-            Html::tableRow('colhead', 'A', 'B', 'C'),
-        );
-    }
-
-    public function test_table_row_empty_class_omits_attribute(): void
-    {
-        $this->assertSame(
-            '<tr><td>X</td><td>Y</td></tr>'."\n",
-            Html::tableRow('', 'X', 'Y'),
-        );
-    }
-
-    public function test_table_row_does_not_escape_cell_content(): void
-    {
-        // Legacy `EchoRow` does NOT escape — callers pre-escape
-        // (e.g. `htmlspecialchars($row['email'])` in `public/complains.php`).
-        // Preserved so existing call sites keep rendering pre-built HTML.
-        $this->assertSame(
-            '<tr><td><a href="#">link</a></td></tr>'."\n",
-            Html::tableRow('', '<a href="#">link</a>'),
-        );
-    }
-
-    public function test_table_row_escapes_class_attribute(): void
-    {
-        $this->assertSame(
-            '<tr><td class="a&quot;b">cell</td></tr>'."\n",
-            Html::tableRow('a"b', 'cell'),
-        );
-    }
-
     public function test_key_shortcut_default_args(): void
     {
         $this->assertSame(
@@ -98,7 +42,7 @@ class HtmlTagTest extends TestCase
             .'<option value="5">50% Down</option>'
             .'<option value="6">50% Down 2× Up</option>'
             .'<option value="7">30% Down</option>';
-        $this->assertSame($expected, Html::promotionSelectOptions(0, 0, self::promoLabels()));
+        $this->assertSame($expected, Html::promotionSelectOptions(0, 0, self::promoLabels())->toHtml());
     }
 
     public function test_promotion_select_options_marks_selected(): void
@@ -152,92 +96,6 @@ class HtmlTagTest extends TestCase
     {
         $result = Html::promotionSelectOptions(0, 0, ['normal' => '<b>bold</b>'] + self::promoLabels());
         $this->assertStringContainsString('<option value="1">&lt;b&gt;bold&lt;/b&gt;</option>', $result);
-    }
-
-    public function test_torrent_select_full_block_with_items(): void
-    {
-        $items = [
-            ['id' => 1, 'name' => 'Blu-ray'],
-            ['id' => 2, 'name' => 'DVD'],
-            ['id' => 3, 'name' => 'HDTV'],
-        ];
-        $expected = '<b>Medium</b>&nbsp;<select name="medium_sel">'."\n"
-            .'<option value="0">Choose one</option>'."\n"
-            .'<option value="1">Blu-ray</option>'."\n"
-            .'<option value="2">DVD</option>'."\n"
-            .'<option value="3">HDTV</option>'."\n"
-            ."</select>&nbsp;&nbsp;&nbsp;\n";
-        $this->assertSame($expected, Html::torrentSelect('Medium', 'medium_sel', 'Choose one', 0, $items));
-    }
-
-    public function test_torrent_select_marks_selected_item(): void
-    {
-        $items = [['id' => 5, 'name' => 'A'], ['id' => 6, 'name' => 'B']];
-        $result = Html::torrentSelect('X', 'x', 'pick', 6, $items);
-        $this->assertStringContainsString('<option value="6" selected="selected">B</option>', $result);
-        $this->assertStringContainsString('<option value="5">A</option>', $result);
-    }
-
-    public function test_torrent_select_empty_items_still_emits_choose_one(): void
-    {
-        $expected = '<b>X</b>&nbsp;<select name="x">'."\n"
-            .'<option value="0">Choose</option>'."\n"
-            ."</select>&nbsp;&nbsp;&nbsp;\n";
-        $this->assertSame($expected, Html::torrentSelect('X', 'x', 'Choose', 0, []));
-    }
-
-    public function test_torrent_select_escapes_item_names(): void
-    {
-        // Legacy `htmlspecialchars($row["name"])` — items come from
-        // user-editable lookup tables (sources/codecs/teams) so names
-        // can contain quotes. Pinned to keep XSS protection in place.
-        $items = [['id' => 1, 'name' => '<script>alert("x")</script>']];
-        $result = Html::torrentSelect('T', 't', 'C', 0, $items);
-        $this->assertStringContainsString(
-            '<option value="1">&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;</option>',
-            $result,
-        );
-    }
-
-    public function test_torrent_select_escapes_name_and_selname(): void
-    {
-        $result = Html::torrentSelect('<b>raw</b>', 'a"b', 'C', 0, []);
-        $this->assertStringContainsString('<b>&lt;b&gt;raw&lt;/b&gt;</b>', $result);
-        $this->assertStringContainsString('name="a&quot;b"', $result);
-    }
-
-    public function test_torrent_select_coerces_string_ids(): void
-    {
-        // `searchbox_item_list()` returns rows where `id` may be a
-        // string when fetched via the legacy DB query. We cast to
-        // int so the strict `===` comparison against `$selectedId`
-        // still picks up matches.
-        $items = [['id' => '7', 'name' => 'seven']];
-        $result = Html::torrentSelect('N', 'n', 'c', 7, $items);
-        $this->assertStringContainsString('<option value="7" selected="selected">seven</option>', $result);
-    }
-
-    public function test_torrent_select_missing_keys_degrade_safely(): void
-    {
-        // If a row is malformed (missing `id`/`name`) the helper falls
-        // through to value 0 / empty label rather than blowing up.
-        // Use $selectedId = -1 so id=0 fallbacks don't get accidentally
-        // marked selected — that quirk is covered separately below.
-        $items = [['id' => 1], ['name' => 'orphan'], []];
-        $result = Html::torrentSelect('N', 'n', 'c', -1, $items);
-        $this->assertStringContainsString('<option value="1"></option>', $result);
-        $this->assertStringContainsString('<option value="0">orphan</option>', $result);
-    }
-
-    public function test_torrent_select_id_zero_fallback_collides_with_default_select_legacy_quirk(): void
-    {
-        // Legacy quirk preserved: when `$selectedid = 0` (the default)
-        // AND a row's `id` is missing/0, the option matches the
-        // "no selection" sentinel and renders with `selected="selected"`.
-        // Real call sites never have id=0 rows, but pin the contract.
-        $items = [['name' => 'orphan']];
-        $result = Html::torrentSelect('N', 'n', 'c', 0, $items);
-        $this->assertStringContainsString('<option value="0" selected="selected">orphan</option>', $result);
     }
 
     public function test_settings_row_default_escapes_and_replaces_newlines(): void
@@ -313,81 +171,6 @@ class HtmlTagTest extends TestCase
         $this->assertStringNotContainsString('<br />', $noEscape);
     }
 
-    public function test_settings_row_small_default_escapes_but_does_not_replace_newlines(): void
-    {
-        // Legacy `tr_small()` quirk: the `\n` → `<br />\n` substitution
-        // is commented out in the source. Preserved — `usercp.php`
-        // call sites pass pre-built `<select>` blocks where embedded
-        // newlines are syntactic, not line breaks.
-        $this->assertSame(
-            '<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim w-[1%]">L</td>'
-            .'<td class="align-top px-2.5 py-1.5 w-[99%]">a &amp; b'."\n".'c</td></tr>',
-            Html::settingsRowSmall('L', "a & b\nc"),
-        );
-    }
-
-    public function test_settings_row_small_carries_width_classes(): void
-    {
-        $row = Html::settingsRowSmall('L', 'v');
-        $this->assertStringContainsString('w-[1%]', $row);
-        $this->assertStringContainsString('w-[99%]', $row);
-    }
-
-    public function test_settings_row_small_relation_uses_single_attribute_with_spaces(): void
-    {
-        // Legacy quirk: `tr_small()` writes ` relation = "X"` (with
-        // spaces around `=`), and does NOT emit the dual `class="X"`
-        // attribute that {@see settingsRow()} does. Both shapes are
-        // preserved bit-for-bit.
-        $row = Html::settingsRowSmall('L', 'v', relation: 'mode_1');
-        $this->assertStringContainsString('<tr relation = "mode_1">', $row);
-        $this->assertStringNotContainsString('class="mode_1"', $row);
-    }
-
-    public function test_settings_row_small_with_escape_disabled_passes_through(): void
-    {
-        $row = Html::settingsRowSmall('L', '<select><option>x</option></select>', escape: false);
-        $this->assertStringContainsString('<select><option>x</option></select>', $row);
-    }
-
-    public function test_settings_row_small_has_no_trailing_newline(): void
-    {
-        $row = Html::settingsRowSmall('L', 'v');
-        $this->assertStringEndsWith('</tr>', $row);
-    }
-
-    public function test_settings_cells_emits_two_bare_tds(): void
-    {
-        $this->assertSame(
-            '<td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">Label</td><td class="align-top px-2.5 py-1.5">value</td>',
-            Html::settingsCells('Label', 'value'),
-        );
-    }
-
-    public function test_settings_cells_does_not_wrap_in_tr(): void
-    {
-        // Legacy `twotd()` is the inner half of an open `<tr>` row
-        // built elsewhere (e.g. `public/index.php` stats panel).
-        $cells = Html::settingsCells('L', 'v');
-        $this->assertStringStartsWith('<td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">', $cells);
-        $this->assertStringNotContainsString('<tr', $cells);
-        $this->assertStringNotContainsString('</tr>', $cells);
-    }
-
-    public function test_settings_cells_does_not_escape_either_argument_legacy_quirk(): void
-    {
-        // Legacy quirk preserved: the original `twotd($x, $y, $nosec)`
-        // computed `htmlspecialchars($y)` into a local `$a` when
-        // `$nosec` was falsy, then printed `$y` (unescaped) anyway —
-        // the escape result was dead code. Pin that: `$follow` is
-        // always emitted verbatim, no matter what the legacy caller
-        // passed for `$nosec`.
-        $this->assertSame(
-            '<td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim"><b>L</b></td><td class="align-top px-2.5 py-1.5">a & b</td>',
-            Html::settingsCells('<b>L</b>', 'a & b'),
-        );
-    }
-
     public function test_tooltip_container_single_child(): void
     {
         $this->assertSame(
@@ -439,85 +222,6 @@ class HtmlTagTest extends TestCase
             '<div class="nx-hidden"><div id="x">1</div><div id="y">2</div></div>',
             Html::tooltipContainer($generator),
         );
-    }
-
-    public function test_build_table_renders_header_and_rows(): void
-    {
-        $output = Html::buildTable(
-            ['name' => 'Name', 'age' => 'Age'],
-            [
-                ['name' => 'Alice', 'age' => '30'],
-                ['name' => 'Bob', 'age' => '25'],
-            ],
-        );
-
-        $this->assertStringContainsString('class="overflow-x-auto"', $output);
-        $this->assertStringContainsString(
-            '<th scope="col">Name</th>'
-            .'<th scope="col">Age</th>'
-            .'</tr>'
-            .'</thead>'
-            .'<tbody>'
-            .'<tr><td class="">Alice</td><td class="">30</td></tr>'
-            .'<tr><td class="">Bob</td><td class="">25</td></tr>',
-            str_replace(["\n", '    '], '', $output),
-        );
-    }
-
-    public function test_build_table_column_order_follows_header_not_row(): void
-    {
-        // Cell values are pulled by header key, so column order is the
-        // header's order regardless of how the row is keyed.
-        $output = Html::buildTable(
-            ['a' => 'A', 'b' => 'B'],
-            [['b' => 'second', 'a' => 'first']],
-        );
-
-        $this->assertStringContainsString('<td class="">first</td><td class="">second</td>', $output);
-    }
-
-    public function test_build_table_missing_key_yields_empty_cell(): void
-    {
-        $output = Html::buildTable(
-            ['x' => 'X', 'y' => 'Y'],
-            [['x' => 'only-x']],
-        );
-
-        $this->assertStringContainsString('<td class="">only-x</td><td class=""></td>', $output);
-    }
-
-    public function test_build_table_td_center_option_sets_colfollow_class(): void
-    {
-        $output = Html::buildTable(
-            ['x' => 'X'],
-            [['x' => 'v']],
-            ['td-center' => true],
-        );
-
-        $this->assertStringContainsString('<td class="colfollow">v</td>', $output);
-        // header cells keep their surface-alt look via the component's thead_th utility.
-        $this->assertStringContainsString('<th scope="col">X</th>', $output);
-    }
-
-    public function test_build_table_escapes_markup_for_xss_safety(): void
-    {
-        // Security hardening: cell values are htmlspecialchars'd to
-        // prevent XSS via user-controlled data (e.g. ban-log reasons).
-        $output = Html::buildTable(
-            ['c' => '<b>H</b>'],
-            [['c' => '<i>v</i>']],
-        );
-
-        $this->assertStringContainsString('<th scope="col">&lt;b&gt;H&lt;/b&gt;</th>', $output);
-        $this->assertStringContainsString('<td class="">&lt;i&gt;v&lt;/i&gt;</td>', $output);
-    }
-
-    public function test_build_table_with_no_rows_renders_empty_body(): void
-    {
-        $output = Html::buildTable(['x' => 'X'], []);
-
-        $this->assertStringContainsString('</thead>', $output);
-        $this->assertStringEndsWith("</tbody>\n    </table>\n</div>", $output);
     }
 
     private static function promoLabels(): array

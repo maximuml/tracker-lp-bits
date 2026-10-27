@@ -9,6 +9,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\ViewModels\Torrent\AudioTrackViewModel;
 use App\ViewModels\Torrent\TechnicalInfoViewModel;
+use Illuminate\Contracts\Support\Htmlable;
 
 class TechnicalInformation
 {
@@ -237,9 +238,9 @@ class TechnicalInformation
             $hiddenTracksHtml .= view('components.torrent.nti_track', ['track' => $this->audioTrackVm($track)])->render();
         }
         $hiddenAudioSpoiler = $hiddenTracksHtml !== ''
-            ? SafeHtml::fromTrustedHtml(trim(view('components.support.nti-more', [
+            ? view('components.support.nti-more', [
                 'inner' => SafeHtml::fromTrustedHtml(Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)),
-            ])->render()))
+            ])
             : null;
 
         return new TechnicalInfoViewModel(
@@ -263,14 +264,14 @@ class TechnicalInformation
     /**
      * @param  array<string, string>  $items
      */
-    private function columnSpoiler(string $title, array $items): SafeHtml
+    private function columnSpoiler(string $title, array $items): Htmlable
     {
         $body = view('components.torrent.nti_spoiler_kv', ['items' => $items])->render();
         $bbcode = sprintf('[spoiler=%s]%s[/spoiler]', $title, $body);
 
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.nti-more', [
+        return view('components.support.nti-more', [
             'inner' => SafeHtml::fromTrustedHtml(Format::formatComment($bbcode, false)),
-        ])->render()));
+        ]);
     }
 
     /** @param  array<string, mixed>  $track */

@@ -96,7 +96,7 @@ class TorrentEditController extends Controller
             || (Permission::can(PermissionEnum::TORRENT_MANAGE) && $this->actor->yes('picker'))
         ) {
             $promotionOptions = Permission::can(PermissionEnum::TORRENT_ON_PROMOTION)
-                ? SafeHtml::fromTrustedHtml(Html::promotionSelection((int) $row['sp_state'], 0))
+                ? Html::promotionSelection((int) $row['sp_state'], 0)
                 : null;
 
             $posStates = null;

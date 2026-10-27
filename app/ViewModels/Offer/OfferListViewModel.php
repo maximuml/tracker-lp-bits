@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Offer;
 
-use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * The offers list section: rules panel, add-offer link, search box and
@@ -20,7 +20,7 @@ final class OfferListViewModel
         public readonly bool $canAddOffer,
         public readonly array $categories,
         public readonly ?OfferTableViewModel $table,
-        public readonly SafeHtml $emptyState,
+        public readonly Htmlable $emptyState,
         public readonly int $count,
     ) {}
 }

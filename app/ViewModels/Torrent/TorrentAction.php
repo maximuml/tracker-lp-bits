@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Torrent;
 
-use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * One action link in the details "Action" row — sprite icon plus small
@@ -23,7 +23,7 @@ final class TorrentAction
         public readonly string $spanClass = 'small',
         public readonly ?string $spanId = null,
         public readonly ?int $dataTorrentId = null,
-        public readonly ?SafeHtml $iconHtml = null,
+        public readonly ?Htmlable $iconHtml = null,
         /** Render as a POST form instead of an anchor (mutating actions). */
         public readonly bool $isPost = false,
         /** @var array<string, string|int> */

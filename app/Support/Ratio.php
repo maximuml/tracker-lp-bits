@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Stateless helpers for computing and rendering share / seed-leech
@@ -208,7 +209,7 @@ final class Ratio
      * monotonic order in the source images — pinning them here so
      * a renumber doesn't silently flip every legacy user-card).
      */
-    public static function image(mixed $ratio): SafeHtml
+    public static function image(mixed $ratio): Htmlable
     {
         if ($ratio >= 16) {
             $s = '163';
@@ -228,7 +229,7 @@ final class Ratio
             $s = '52';
         }
 
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.smiley-img', ['s' => $s])->render()));
+        return view('components.support.smiley-img', ['s' => $s]);
     }
 
     /**
@@ -291,14 +292,14 @@ final class Ratio
      * value in the colour from {@see color()}, and caps very large
      * ratios at the literal `Inf.`.
      */
-    public static function hr(int|float $uped, int|float $downed): SafeHtml
+    public static function hr(int|float $uped, int|float $downed): Htmlable
     {
         if ($downed > 0) {
             $ratio = $uped / $downed;
             $color = self::color($ratio);
             $ratio = $ratio > 10000 ? 'Inf.' : number_format($ratio, 3);
             if ($color) {
-                $ratio = trim(view('components.support.span-class', ['cls' => self::colorClass($ratio), 'text' => $ratio])->render());
+                return view('components.support.span-class', ['cls' => self::colorClass($ratio), 'text' => $ratio]);
             }
         } elseif ($uped > 0) {
             $ratio = 'Inf.';
@@ -306,7 +307,7 @@ final class Ratio
             $ratio = '---';
         }
 
-        return SafeHtml::fromTrustedHtml($ratio);
+        return SafeHtml::fromPlainText($ratio);
     }
 
     /**
@@ -316,16 +317,16 @@ final class Ratio
      * `<span class="">` for healthy ratios). Caller renders the
      * `$infinite` label when `$down <= 0` (views stay free of division).
      */
-    public static function leaderboard(int|float $up, int|float $down, int $decimals = 2, bool $alwaysWrap = false): SafeHtml
+    public static function leaderboard(int|float $up, int|float $down, int $decimals = 2, bool $alwaysWrap = false): Htmlable
     {
         $ratio = $up / $down;
         $color = self::color($ratio);
         $formatted = number_format($ratio, $decimals);
         if ($color !== '' || $alwaysWrap) {
-            return SafeHtml::fromTrustedHtml(trim(view('components.support.span-class', ['cls' => self::colorClass($ratio), 'text' => $formatted])->render()));
+            return view('components.support.span-class', ['cls' => self::colorClass($ratio), 'text' => $formatted]);
         }
 
-        return SafeHtml::fromTrustedHtml($formatted);
+        return SafeHtml::fromPlainText($formatted);
     }
 
     /**

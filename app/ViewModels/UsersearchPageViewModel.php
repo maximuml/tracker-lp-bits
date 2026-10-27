@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
-use App\Support\Html\SafeHtml;
 use App\ViewModels\Usersearch\UsersearchResultsViewModel;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * ViewModel for the user search page.
@@ -23,7 +23,7 @@ final class UsersearchPageViewModel extends ViewModel
         public readonly array $form,
         public readonly bool $hasResults,
         public readonly ?UsersearchResultsViewModel $results,
-        public readonly ?SafeHtml $resultsError,
+        public readonly ?Htmlable $resultsError,
         public readonly string $pagemenu,
         public readonly string $browsemenu,
     ) {}

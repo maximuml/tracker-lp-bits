@@ -91,7 +91,7 @@ final class UsercpHomeBuilder
 
         // IP location
         $enableLocationTweak = SiteConfig::current()->tweak->enableLocation();
-        $ipLocation = '';
+        $ipLocation = SafeHtml::fromPlainText('');
         if ($enableLocationTweak) {
             [$locPub, $locMod] = Network::ipLocationWithContext((string) $actor->value('ip', ''));
             $ipLocation = Strings::hidden(e((string) $actor->value('ip', ''))." <span title='".e($locMod, false)."'>[".e($locPub).']</span>');
@@ -132,7 +132,7 @@ final class UsercpHomeBuilder
         return new UsercpHomeSection(
             joinDate: ($added === '0000-00-00 00:00:00' || $added === '') ? null : $added,
             email: (string) $actor->value('email', ''),
-            ipLocation: SafeHtml::fromTrustedHtml($ipLocation),
+            ipLocation: $ipLocation,
             showAvatar: ! empty($actor->value('avatar')),
             avatarUrl: (string) $actor->value('avatar', ''),
             passkey: Strings::hidden(e($actor->passkey ?? '')),

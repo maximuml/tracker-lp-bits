@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\Support\State\UserClassState;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Stateless mapping helpers for the legacy user-class ladder.
@@ -250,7 +251,7 @@ final class UserClass
         bool $includeNoClass = false,
         bool $disabled = false,
         array $labels = [],
-    ): SafeHtml {
+    ): Htmlable {
         $options = '';
 
         if ($includeNoClass) {
@@ -269,11 +270,11 @@ final class UserClass
             ])->render())."\n";
         }
 
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.class-select', [
+        return view('components.support.class-select', [
             'name' => $selectName,
             'disabledAttr' => SafeHtml::fromTrustedHtml($disabled ? ' disabled = "disabled"' : ''),
             'options' => SafeHtml::fromTrustedHtml($options),
-        ])->render()));
+        ]);
     }
 
     /**
@@ -288,7 +289,7 @@ final class UserClass
         int $minClass = 0,
         bool $includeNoClass = false,
         bool $disabled = false,
-    ): SafeHtml {
+    ): Htmlable {
 
         return self::classSelect(
             $selectName,

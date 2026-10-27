@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Html;
 
 use App\Support\BBCode;
-use App\Support\Cache\NexusCache;
 use App\Support\Comment;
-use App\Support\SearchBox;
 use App\Support\Security;
 use App\Support\Smilies;
 
@@ -19,21 +17,6 @@ use App\Support\Smilies;
  */
 final class Tag
 {
-    /**
-     * Build a `<tr><td>…</td>…</tr>\n` row. Legacy `EchoRow($class, ...$cells)`
-     * returns the bare `<tr></tr>` (with no trailing newline) when no
-     * cells are supplied; that bare-row contract is preserved.
-     */
-    public static function tableRow(string $class, string ...$cells): string
-    {
-        $row = trim(view('components.support.tag.tr', [
-            'class' => $class,
-            'cells' => array_map(SafeHtml::fromTrustedHtml(...), $cells),
-        ])->render());
-
-        return $cells === [] ? $row : $row."\n";
-    }
-
     /**
      * Emit the `<script>` block that legacy `key_shortcut()` injects
      * into paginated views to expose `currentpage` / `maxpage` to
@@ -61,7 +44,7 @@ final class Tag
      *
      * @param  array<string, string>  $labels
      */
-    public static function promotionSelectOptions(int $selected, int $hide, array $labels): string
+    public static function promotionSelectOptions(int $selected, int $hide, array $labels): SafeHtml
     {
         $options = [
             1 => 'normal',
@@ -86,48 +69,7 @@ final class Tag
             ])->render());
         }
 
-        return $html;
-    }
-
-    /**
-     * Full labelled torrent attribute `<select>` block — `<b>NAME</b>`
-     * prefix, "choose one" default `<option value="0">`, then one
-     * `<option>` per item. Backs the legacy `torrent_selection()`
-     * helper. The DB lookup that produces `$items` stays in the
-     * proxy because `searchbox_item_list()` is DB-backed.
-     *
-     * Escaping contract: `$name`, `$selectName`, `$chooseOneLabel` and
-     * item names are all Blade-escaped; only the assembled `<option>`
-     * fragments are emitted raw. The trailing `&nbsp;&nbsp;&nbsp;\n`
-     * after `</select>` is intentional spacing in the source markup.
-     *
-     * @param  iterable<array{id?: mixed, name?: mixed}>  $items
-     */
-    public static function torrentSelect(
-        string $name,
-        string $selectName,
-        string $chooseOneLabel,
-        int $selectedId,
-        iterable $items,
-    ): string {
-        $options = [];
-        foreach ($items as $row) {
-            $rowId = (int) ($row['id'] ?? 0);
-            // Passed as View objects — the parent template renders
-            // (and trims) each via {{ }} instead of a trusted wrap.
-            $options[] = view('components.support.tag.option', [
-                'value' => $rowId,
-                'selected' => $rowId === $selectedId,
-                'label' => (string) ($row['name'] ?? ''),
-            ]);
-        }
-
-        return ltrim(view('components.support.tag.torrent-select', [
-            'name' => $name,
-            'selectName' => $selectName,
-            'chooseOneLabel' => $chooseOneLabel,
-            'options' => $options,
-        ])->render(), "\n");
+        return SafeHtml::fromTrustedHtml($html);
     }
 
     /**
@@ -155,37 +97,6 @@ final class Tag
             : $follow;
 
         return trim(view('components.support.tag.settings-row', [
-            'relation' => $relation,
-            'head' => SafeHtml::fromTrustedHtml($head),
-            'cell' => SafeHtml::fromTrustedHtml($cell),
-        ])->render());
-    }
-
-    /**
-     * Narrow-label variant of {@see settingsRow()}. Backs legacy
-     * `tr_small()`. The two `<td>` cells carry `nx-w-1p`/`nx-w-99p`
-     * so the label hugs its content while the value
-     * stretches; otherwise the row shape is identical.
-     *
-     * Legacy quirks preserved bit-for-bit:
-     *  - `$escape` controls `htmlspecialchars` on `$follow` BUT does
-     *    NOT trigger the `\n` → `<br />\n` substitution. The legacy
-     *    source has that line commented out — kept that way because
-     *    `usercp.php` passes pre-built `<select>` / `<input>` markup
-     *    that should not gain `<br />` for embedded newlines.
-     *  - Non-empty `$relation` is emitted as a SINGLE attribute with
-     *    surrounding spaces: ` relation = "X"`. (Different shape
-     *    from {@see settingsRow()} — both are preserved verbatim.)
-     */
-    public static function settingsRowSmall(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-    ): string {
-        $cell = $escape ? htmlspecialchars($follow) : $follow;
-
-        return trim(view('components.support.tag.settings-row-small', [
             'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => SafeHtml::fromTrustedHtml($cell),
@@ -257,42 +168,10 @@ final class Tag
     }
 
     /**
-     * Two bare `<td>` cells (no `<tr>` wrap) — the inner half of a
-     * legacy `twotd()` call, used by `public/index.php`'s stats panel
-     * to glue two cells into an already-open `<tr>`.
-     *
-     * Legacy quirk preserved: the original `twotd($x, $y, $nosec=0)`
-     * computed `htmlspecialchars($y)` into a local `$a` when `$nosec`
-     * was falsy but then printed `$y` (unescaped) anyway — the escape
-     * result was dead code. The proxy still accepts the third
-     * parameter for ABI compatibility but the emitted string is
-     * always `$follow` verbatim.
-     */
-    public static function settingsCells(string $head, string $follow): string
-    {
-        return trim(view('components.support.tag.settings-cells', [
-            'head' => SafeHtml::fromTrustedHtml($head),
-            'follow' => SafeHtml::fromTrustedHtml($follow),
-        ])->render());
-    }
-
-    /**
-     * Build a `<select>` for searchbox taxonomy items. Backs the legacy
-     * `torrent_selection()` helper.
-     */
-    public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
-    {
-        $items = SearchBox::itemList(NexusCache::instance(), $listName, $mode);
-        $chooseOne = __('functions.select_choose_one');
-
-        return self::torrentSelect($name, $selName, $chooseOne, $selectedId, $items);
-    }
-
-    /**
      * Build a `<select>` of promotion types with localized labels.
      * Backs the legacy `promotion_selection()` helper.
      */
-    public static function promotionSelection(int $selected = 0, int $hide = 0): string
+    public static function promotionSelection(int $selected = 0, int $hide = 0): SafeHtml
     {
         $labels = [
             'normal' => (string) (__('functions.text_normal')),
@@ -346,38 +225,6 @@ final class Tag
         }
 
         return trim(view('components.support.tag.tooltip-container', ['children' => $children])->render());
-    }
-
-    /**
-     * Render a simple full-width data table. Backs the legacy
-     * `build_table($header, $rows, $options)` helper.
-     *
-     * `$header` is a `columnKey => columnLabel` map: the labels build
-     * the `<thead>` cells, and the *keys* are used to pull each cell
-     * value out of every row (so column order follows `$header`, not
-     * the row's own key order). A missing key yields an empty cell
-     * (legacy `$row[$key] ?? ''`).
-     *
-     * Legacy quirks preserved bit-for-bit:
-     *  - neither labels nor cell values are escaped — call sites pass
-     *    pre-built markup / trusted strings;
-     *  - header cells are always `class="colhead"`; body cells take
-     *    `class="colfollow"` only when `$options['td-center']` is
-     *    truthy, otherwise an empty `class=""`.
-     *
-     * @param  array<array-key, string>  $header
-     * @param  iterable<array<array-key, mixed>>  $rows
-     * @param  array<string, mixed>  $options
-     */
-    public static function buildTable(array $header, iterable $rows, array $options = []): string
-    {
-        $tdClass = ! empty($options['td-center']) ? 'colfollow' : '';
-
-        return trim(view('components.support.tag.build-table', [
-            'header' => $header,
-            'rows' => $rows,
-            'tdClass' => $tdClass,
-        ])->render());
     }
 
     /**

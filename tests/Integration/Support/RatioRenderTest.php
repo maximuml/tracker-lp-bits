@@ -15,17 +15,17 @@ class RatioRenderTest extends TestCase
         // not-quite-monotonic smiley index ordering. The indexes
         // (163 / 117 / 5 / 3 / 2 / 34 / 10 / 52) reference real
         // files under `public/pic/smilies/*.gif`.
-        $this->assertSame('<img src="pic/smilies/163.gif" alt="" />', (string) Ratio::image(16));
-        $this->assertSame('<img src="pic/smilies/163.gif" alt="" />', (string) Ratio::image(32));
-        $this->assertSame('<img src="pic/smilies/117.gif" alt="" />', (string) Ratio::image(8));
-        $this->assertSame('<img src="pic/smilies/117.gif" alt="" />', (string) Ratio::image(15.999));
-        $this->assertSame('<img src="pic/smilies/5.gif" alt="" />', (string) Ratio::image(4));
-        $this->assertSame('<img src="pic/smilies/3.gif" alt="" />', (string) Ratio::image(2));
-        $this->assertSame('<img src="pic/smilies/2.gif" alt="" />', (string) Ratio::image(1));
-        $this->assertSame('<img src="pic/smilies/34.gif" alt="" />', (string) Ratio::image(0.5));
-        $this->assertSame('<img src="pic/smilies/10.gif" alt="" />', (string) Ratio::image(0.25));
-        $this->assertSame('<img src="pic/smilies/52.gif" alt="" />', (string) Ratio::image(0));
-        $this->assertSame('<img src="pic/smilies/52.gif" alt="" />', (string) Ratio::image(0.24));
+        $this->assertSame('<img src="pic/smilies/163.gif" alt="" />', rtrim((string) Ratio::image(16)));
+        $this->assertSame('<img src="pic/smilies/163.gif" alt="" />', rtrim((string) Ratio::image(32)));
+        $this->assertSame('<img src="pic/smilies/117.gif" alt="" />', rtrim((string) Ratio::image(8)));
+        $this->assertSame('<img src="pic/smilies/117.gif" alt="" />', rtrim((string) Ratio::image(15.999)));
+        $this->assertSame('<img src="pic/smilies/5.gif" alt="" />', rtrim((string) Ratio::image(4)));
+        $this->assertSame('<img src="pic/smilies/3.gif" alt="" />', rtrim((string) Ratio::image(2)));
+        $this->assertSame('<img src="pic/smilies/2.gif" alt="" />', rtrim((string) Ratio::image(1)));
+        $this->assertSame('<img src="pic/smilies/34.gif" alt="" />', rtrim((string) Ratio::image(0.5)));
+        $this->assertSame('<img src="pic/smilies/10.gif" alt="" />', rtrim((string) Ratio::image(0.25)));
+        $this->assertSame('<img src="pic/smilies/52.gif" alt="" />', rtrim((string) Ratio::image(0)));
+        $this->assertSame('<img src="pic/smilies/52.gif" alt="" />', rtrim((string) Ratio::image(0.24)));
     }
 
     public function test_user_ratio_html_three_decimals_with_color_below_one(): void

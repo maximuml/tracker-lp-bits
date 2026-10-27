@@ -246,31 +246,6 @@ final class Cache
         NexusCache::instance()?->forget($key, true);
     }
 
-    /**
-     * Delete all cache keys matching a glob-style pattern.
-     *
-     * Replicates the Laravel-context behaviour of NexusDB::cache_del_by_pattern(),
-     * which scans Redis for keys matching the pattern and forgets each one
-     * (plus its locale-prefixed variants) from the Laravel cache store.
-     *
-     * The pattern uses Redis SCAN glob syntax (e.g. `prefix:*`).
-     */
-    public static function forgetByPattern(string $pattern): void
-    {
-        $redis = Redis::connection()->client();
-        /** @var int|string $it */
-        $it = 0;
-        do {
-            $keys = $redis->scan($it, $pattern);
-            if ($keys !== false) {
-                foreach ($keys as $key) {
-                    Logger::writeWithContext((string) "[SCAN_KEY] {$key}", (string) 'info', (bool) false);
-                    self::forgetWithLocales($key);
-                }
-            }
-        } while ($it > 0);
-    }
-
     private static function searchBoxRepository(): SearchBoxRepositoryInterface
     {
         return app(SearchBoxRepositoryInterface::class);

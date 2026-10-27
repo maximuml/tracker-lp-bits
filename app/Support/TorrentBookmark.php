@@ -68,18 +68,4 @@ final class TorrentBookmark
     {
         return in_array((int) $torrentId, self::bookmarkArray($cache, (int) $userId), false);
     }
-
-    /**
-     * Context-aware wrapper for {@see stateMarkup()}.
-     * Mirrors the legacy `get_torrent_bookmark_state()` helper.
-     */
-    public static function stateMarkupWithContext(int|string $userId, int|string $torrentId, bool $text = false): string
-    {
-        $cache = NexusCache::instance();
-
-        return self::stateMarkup($cache, $userId, $torrentId, $text, [
-            'title_bookmark_torrent' => __('functions.title_bookmark_torrent'),
-            'title_delbookmark_torrent' => __('functions.title_delbookmark_torrent'),
-        ]);
-    }
 }

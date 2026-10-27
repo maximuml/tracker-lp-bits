@@ -10,7 +10,6 @@ namespace App\Support;
  * Phase 5 of the legacy migration.
  * The legacy procedural helpers
  *
- *   - `base64()`     (boolean-dispatched `base64_encode`/`base64_decode` wrapper)
  *   - `code()`       (older IBM-437 → HTML-entity converter using a literal byte
  *                     table and `htmlspecialchars` pass; ONE call site remains
  *                     and it is commented out, but the function is preserved
@@ -121,16 +120,6 @@ final class Codec
     public static function base64Decode(string $value): string
     {
         return (string) base64_decode($value);
-    }
-
-    /**
-     * Boolean-dispatched base64 encode/decode wrapper.
-     *
-     * Backs the legacy `base64()` helper.
-     */
-    public static function base64(string $value, bool $encode = true): string
-    {
-        return $encode ? self::base64Encode($value) : self::base64Decode($value);
     }
 
     /**

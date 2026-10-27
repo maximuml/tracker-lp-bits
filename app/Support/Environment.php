@@ -16,11 +16,6 @@ final class Environment
         return PHP_SAPI === 'cli';
     }
 
-    public static function isFpm(): bool
-    {
-        return php_sapi_name() === 'fpm-fcgi';
-    }
-
     public static function isTesting(): bool
     {
         return config('app.env') === 'testing' || app()->runningUnitTests();

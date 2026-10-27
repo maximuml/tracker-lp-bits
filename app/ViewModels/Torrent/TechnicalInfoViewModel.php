@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ViewModels\Torrent;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 final readonly class TechnicalInfoViewModel
 {
@@ -19,14 +20,14 @@ final readonly class TechnicalInfoViewModel
         public string $generalTitle = '',
         public bool $hasGeneral = false,
         public array $generalMain = [],
-        public ?SafeHtml $generalExtraSpoiler = null,
+        public ?Htmlable $generalExtraSpoiler = null,
         public string $videoTitle = '',
         public bool $hasVideo = false,
         public array $videosMain = [],
-        public ?SafeHtml $encodingSpoiler = null,
+        public ?Htmlable $encodingSpoiler = null,
         public string $audioTitle = '',
         public bool $hasAudio = false,
         public array $audioTracks = [],
-        public ?SafeHtml $hiddenAudioSpoiler = null,
+        public ?Htmlable $hiddenAudioSpoiler = null,
     ) {}
 }

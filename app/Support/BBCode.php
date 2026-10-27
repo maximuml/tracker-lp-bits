@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Stateless HTML builders for BBCode tags, extracted from
@@ -257,7 +258,7 @@ final class BBCode
      * Thin delegation to {@see Strings::hidden} — kept on the
      * BBCode surface for symmetry with the other `[…]` tag helpers.
      */
-    public static function hidden(string $content): SafeHtml
+    public static function hidden(string $content): Htmlable
     {
         return Strings::hidden($content);
     }

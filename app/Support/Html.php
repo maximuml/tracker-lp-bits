@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Support\Html\Escape;
 use App\Support\Html\Message;
+use App\Support\Html\SafeHtml;
 use App\Support\Html\Tag;
 
 /**
@@ -29,11 +30,6 @@ final class Html
 
     // ── Tag ─────────────────────────────────────────────────────────
 
-    public static function tableRow(string $class, string ...$cells): string
-    {
-        return Tag::tableRow($class, ...$cells);
-    }
-
     public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): string
     {
         return Tag::keyShortcutScript($page, $pages, $nonce);
@@ -42,30 +38,12 @@ final class Html
     /**
      * @param  array<string, string>  $labels
      */
-    public static function promotionSelectOptions(int $selected, int $hide, array $labels): string
+    public static function promotionSelectOptions(int $selected, int $hide, array $labels): SafeHtml
     {
         return Tag::promotionSelectOptions($selected, $hide, $labels);
     }
 
-    /**
-     * @param  iterable<array{id?: mixed, name?: mixed}>  $items
-     */
-    public static function torrentSelect(
-        string $name,
-        string $selectName,
-        string $chooseOneLabel,
-        int $selectedId,
-        iterable $items,
-    ): string {
-        return Tag::torrentSelect($name, $selectName, $chooseOneLabel, $selectedId, $items);
-    }
-
-    public static function torrentSelection(string $name, string $selName, string $listName, int $selectedId = 0, int $mode = 0): string
-    {
-        return Tag::torrentSelection($name, $selName, $listName, $selectedId, $mode);
-    }
-
-    public static function promotionSelection(int $selected = 0, int $hide = 0): string
+    public static function promotionSelection(int $selected = 0, int $hide = 0): SafeHtml
     {
         return Tag::promotionSelection($selected, $hide);
     }
@@ -77,15 +55,6 @@ final class Html
         string $relation = '',
     ): string {
         return Tag::settingsRow($head, $follow, $escape, $relation);
-    }
-
-    public static function settingsRowSmall(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-    ): string {
-        return Tag::settingsRowSmall($head, $follow, $escape, $relation);
     }
 
     public static function emitSettingsRow(
@@ -108,27 +77,12 @@ final class Html
         return Tag::emitSettingsFrow($head, $follow, $escape, $relation, $return);
     }
 
-    public static function settingsCells(string $head, string $follow): string
-    {
-        return Tag::settingsCells($head, $follow);
-    }
-
     /**
      * @param  iterable<array{id?: mixed, content?: mixed}>  $items
      */
     public static function tooltipContainer(iterable $items, int $width = 400): string
     {
         return Tag::tooltipContainer($items, $width);
-    }
-
-    /**
-     * @param  array<array-key, string>  $header
-     * @param  iterable<array<array-key, mixed>>  $rows
-     * @param  array<string, mixed>  $options
-     */
-    public static function buildTable(array $header, iterable $rows, array $options = []): string
-    {
-        return Tag::buildTable($header, $rows, $options);
     }
 
     public static function quickReply(string $formName, string $textareaName, string $submitLabel): string

@@ -64,8 +64,8 @@ final class TorrentDetailsViewFactory
                 ? (string) __('details.text_at')
                 : (string) __('details.text_blank'),
             uploadTime: ($currentUser['timetype'] ?? '') !== 'timealive'
-                ? SafeHtml::fromTrustedHtml((string) $row['added'])
-                : SafeHtml::fromTrustedHtml((string) Time::format((string) $row['added'], true, false)),
+                ? SafeHtml::fromPlainText((string) $row['added'])
+                : SafeHtml::fromPlainText((string) Time::format((string) $row['added'], true, false)),
             showOrHideTitle: self::plainTitle('details.title_show_or_hide'),
             downloadAllowed: $downloadAllowed,
             saveAs: (string) $row['save_as'],
@@ -220,7 +220,7 @@ final class TorrentDetailsViewFactory
                 spanClass: 'small approval',
                 spanId: 'approval',
                 dataTorrentId: $id,
-                iconHtml: SafeHtml::fromTrustedHtml(trim(view('components.torrents.icon-approval')->render())),
+                iconHtml: view('components.torrents.icon-approval'),
             );
             $approvalTitle = Locale::trans('torrent.approval.modal_title', [], null);
             AssetAppender::js(sprintf(<<<'JS'
@@ -273,7 +273,7 @@ JS, \json_encode($approvalTitle)), 'footer', false);
             hits: $row['hits'],
             timesCompleted: $row['times_completed'],
             torrentId: $id,
-            lastSeeder: SafeHtml::fromTrustedHtml((string) Time::format((string) $row['last_action'])),
+            lastSeeder: SafeHtml::fromPlainText((string) Time::format((string) $row['last_action'])),
             lastSeederLabel: self::plainTitle('details.row_last_seeder'),
             snatchesPre: $snatchesPre,
             snatchesPost: $snatchesPost,

@@ -11,8 +11,8 @@ class StringsRenderTest extends TestCase
 {
     public function test_hidden_wraps_in_span(): void
     {
-        $this->assertSame('<span class="hidden-text">1.2.3.4</span>', (string) Strings::hidden('1.2.3.4'));
-        $this->assertSame('<span class="hidden-text"></span>', (string) Strings::hidden(''));
+        $this->assertSame('<span class="hidden-text">1.2.3.4</span>', rtrim((string) Strings::hidden('1.2.3.4')));
+        $this->assertSame('<span class="hidden-text"></span>', rtrim((string) Strings::hidden('')));
     }
 
     public function test_hidden_does_not_escape_input(): void
@@ -24,7 +24,7 @@ class StringsRenderTest extends TestCase
         // every existing call site.
         $this->assertSame(
             '<span class="hidden-text"><b>raw</b></span>',
-            (string) Strings::hidden('<b>raw</b>'),
+            rtrim((string) Strings::hidden('<b>raw</b>')),
         );
     }
 

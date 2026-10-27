@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ViewModels\Usersearch;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * The user-search results block: either the rows table with pagers, or
@@ -20,6 +21,6 @@ final class UsersearchResultsViewModel
         public readonly bool $showPager,
         public readonly SafeHtml $pagerTop,
         public readonly SafeHtml $pagerBottom,
-        public readonly ?SafeHtml $emptyMessage,
+        public readonly ?Htmlable $emptyMessage,
     ) {}
 }

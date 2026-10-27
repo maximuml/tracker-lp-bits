@@ -146,12 +146,12 @@ final class OfferListBuilder
         $table = null;
         $emptyState = SafeHtml::fromPlainText('');
         if (! $num) {
-            $emptyState = SafeHtml::fromTrustedHtml(view('partials.std-message', [
+            $emptyState = view('partials.std-message', [
                 'heading' => __('offers.text_nothing_found'),
                 'text' => __('offers.text_nothing_found'),
                 'htmlstrip' => false,
                 'body' => null,
-            ])->render());
+            ]);
         } else {
             $catid = is_string($catq = $request->query('category', '')) ? $catq : '';
             $sortUrl = static fn (string $column, string $type): string => '/web/offers?category='.$catid.'&sort='.$column.'&type='.$type;
@@ -279,7 +279,7 @@ final class OfferListBuilder
                     ? null
                     : new OfferVoteResults($yeah, $against, '/web/offers?id='.$offerId.'&offer_vote=1');
 
-                $addtime = SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? 'now'), false, true));
+                $addtime = SafeHtml::fromPlainText((string) Time::format((string) ($arr['added'] ?? 'now'), false, true));
                 $dispname = (string) ($arr['name'] ?? '');
                 if (mb_strlen($dispname, 'UTF-8') > 70) {
                     $dispname = mb_substr($dispname, 0, 68, 'UTF-8').'..';
@@ -295,7 +295,7 @@ final class OfferListBuilder
                         $futuretime = strtotime((string) ($arr['added'] ?? 'now')) + $globalData['offervotetimeoutMain'];
                         $timeoutStr = (string) Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
                     }
-                    $timeout = SafeHtml::fromTrustedHtml($timeoutStr !== '' ? $timeoutStr : 'N/A');
+                    $timeout = SafeHtml::fromPlainText($timeoutStr !== '' ? $timeoutStr : 'N/A');
                 }
 
                 $catIconData = Category::iconData((int) ($arr['cat_id'] ?? 0));

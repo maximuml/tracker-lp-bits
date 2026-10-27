@@ -380,7 +380,7 @@ final class Shoutbox
 
             $editedTime = null;
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-                $editedTime = SafeHtml::fromTrustedHtml(self::formatTime((int) $arr['edited_at'], true));
+                $editedTime = SafeHtml::fromPlainText(self::formatTime((int) $arr['edited_at'], true));
             }
 
             $avatarUrl = 'pic/default_avatar.png';
@@ -426,7 +426,7 @@ final class Shoutbox
 
             $items[] = [
                 'rowClass' => implode(' ', $rowClasses),
-                'time' => SafeHtml::fromTrustedHtml(self::formatTime($currDate, true)),
+                'time' => SafeHtml::fromPlainText(self::formatTime($currDate, true)),
                 'actions' => self::actionsData($arr, $currentUserId, $isStaff),
                 'avatarUrl' => $avatarUrl,
                 'avatarUserId' => $currUserId,

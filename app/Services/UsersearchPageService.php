@@ -67,12 +67,12 @@ final class UsersearchPageService
             try {
                 $results = $this->buildResults($actor, $hasModcomment, $requestUri);
             } catch (\InvalidArgumentException $e) {
-                $resultsError = SafeHtml::fromTrustedHtml(view('partials.std-message', [
+                $resultsError = view('partials.std-message', [
                     'heading' => 'Error',
                     'text' => $e->getMessage(),
                     'htmlstrip' => false,
                     'body' => null,
-                ])->render());
+                ]);
             }
         }
 
@@ -207,12 +207,12 @@ final class UsersearchPageService
         $bannedIps = $extraStats['bannedIps'];
 
         if (count($res) == 0) {
-            return new UsersearchResultsViewModel([], false, SafeHtml::fromPlainText(''), SafeHtml::fromPlainText(''), SafeHtml::fromTrustedHtml(view('partials.std-message', [
+            return new UsersearchResultsViewModel([], false, SafeHtml::fromPlainText(''), SafeHtml::fromPlainText(''), view('partials.std-message', [
                 'heading' => 'Warning',
                 'text' => 'No user was found.',
                 'htmlstrip' => false,
                 'body' => null,
-            ])->render()));
+            ]));
         }
 
         $rows = [];

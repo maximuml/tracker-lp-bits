@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Usercp;
 
-use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Home section of the user control panel.
@@ -22,10 +22,10 @@ final readonly class UsercpHomeSection
     public function __construct(
         public ?string $joinDate,
         public string $email,
-        public SafeHtml $ipLocation,
+        public Htmlable $ipLocation,
         public bool $showAvatar,
         public string $avatarUrl,
-        public SafeHtml $passkey,
+        public Htmlable $passkey,
         public ?PasskeyLoginForm $passkeyLogin,
         public int $invites,
         public string $seedbonus,

@@ -8,6 +8,7 @@ use App\Enums\Permission\PermissionEnum;
 use App\Services\PermissionChecker;
 use App\Support\Cache\NexusCache;
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Legacy main-menu helper extracted from `include/functions.php`.
@@ -93,13 +94,13 @@ final class Menu
         };
     }
 
-    private function item(string $selected, string $key, string $href, string $label, bool $subMenu = false): SafeHtml
+    private function item(string $selected, string $key, string $href, string $label, bool $subMenu = false): Htmlable
     {
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.menu-item', [
+        return view('components.support.menu-item', [
             'href' => $href,
             'label' => $label,
             'selected' => $selected === $key,
             'subMenu' => $subMenu,
-        ])->render()));
+        ]);
     }
 }

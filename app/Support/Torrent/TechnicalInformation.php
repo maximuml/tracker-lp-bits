@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support\Torrent;
 
 use App\Support\Format;
-use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\ViewModels\Torrent\AudioTrackViewModel;
 use App\ViewModels\Torrent\TechnicalInfoViewModel;
@@ -208,7 +207,7 @@ class TechnicalInformation
     private function detailsViewModel(): TechnicalInfoViewModel
     {
         $rawMediaInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), htmlspecialchars($this->mediaInfo));
-        $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawMediaInfo, false));
+        $rawSpoiler = Format::formatComment($rawMediaInfo, false);
 
         $general = $this->getGeneralInfo();
         $videos = $this->getVideoInfoDetailed();
@@ -239,7 +238,7 @@ class TechnicalInformation
         }
         $hiddenAudioSpoiler = $hiddenTracksHtml !== ''
             ? view('components.support.nti-more', [
-                'inner' => SafeHtml::fromTrustedHtml(Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)),
+                'inner' => Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false),
             ])
             : null;
 
@@ -270,7 +269,7 @@ class TechnicalInformation
         $bbcode = sprintf('[spoiler=%s]%s[/spoiler]', $title, $body);
 
         return view('components.support.nti-more', [
-            'inner' => SafeHtml::fromTrustedHtml(Format::formatComment($bbcode, false)),
+            'inner' => Format::formatComment($bbcode, false),
         ]);
     }
 

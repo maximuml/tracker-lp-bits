@@ -115,7 +115,7 @@ class InfoController extends BasePageController
             $editedBy = $arr['editedby'] ?? 0;
             if (Validators::isId($editedBy) && ! empty($editorNames[(int) $editedBy])) {
                 $body .= view('userhistory.edited-note', [
-                    'editedByHtml' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $editedBy)),
+                    'editedByHtml' => UserDisplay::username((int) $editedBy),
                     'editdate' => (string) ($arr['editdate'] ?? ''),
                 ])->render();
             }
@@ -288,7 +288,7 @@ class InfoController extends BasePageController
                 'time' => substr($added, (int) strpos($added, ' ') + 1),
                 'width' => $dim['width'],
                 'height' => $dim['height'],
-                'usernameHtml' => SafeHtml::fromTrustedHtml((string) ($userDisplayMap[$owner] ?? UserDisplay::username($owner))),
+                'usernameHtml' => $userDisplayMap[$owner] ?? UserDisplay::username($owner),
             ];
         }
 

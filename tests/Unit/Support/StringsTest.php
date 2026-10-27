@@ -94,7 +94,7 @@ class StringsTest extends TestCase
     {
         $this->assertSame(
             '<<HIT>>',
-            Strings::highlight('HIT', '<HIT>', '<', '>'),
+            Strings::highlight('HIT', '<HIT>', '<', '>')->toHtml(),
         );
     }
 

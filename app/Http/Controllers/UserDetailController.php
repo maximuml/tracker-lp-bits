@@ -411,7 +411,7 @@ JS, 'footer', false);
             'userManageSystemUrl' => $userManageSystemUrl,
             'usernameHtml' => SafeHtml::fromTrustedHtml($usernameHtml),
             'invitedByHtml' => SafeHtml::fromTrustedHtml($invitedByHtml),
-            'avatarHtml' => SafeHtml::fromTrustedHtml($avatarHtml),
+            'avatarHtml' => $avatarHtml,
             'warnedByHtml' => SafeHtml::fromTrustedHtml($warnedByHtml),
             'bonusTableHtml' => SafeHtml::fromTrustedHtml($bonusTableHtml),
             'hrStatusHtml' => SafeHtml::fromTrustedHtml($hrStatusHtml),

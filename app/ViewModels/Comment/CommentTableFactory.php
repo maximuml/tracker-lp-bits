@@ -63,7 +63,7 @@ final class CommentTableFactory
                 author: UserDisplay::username((int) $row['user'], false, true, true, false, false, true),
                 addedTime: SafeHtml::fromTrustedHtml((string) Time::format((string) $row['added'])),
                 showViewOriginal: ! empty($row['editedby']) && $canManage,
-                avatar: SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext($avatar)),
+                avatar: UserDisplay::avatarImageWithContext($avatar),
                 text: $this->renderComment((string) $row['text'], $renderedFmt),
                 editedBy: ! empty($row['editedby']) ? UserDisplay::username((int) $row['editedby']) : null,
                 editedAt: ! empty($row['editedby']) ? SafeHtml::fromTrustedHtml((string) Time::format((string) $row['editdate'], true, false)) : null,

@@ -87,7 +87,7 @@ final class TorrentListViewFactory
         $lastBrowse = min((int) $this->actor->value('last_browse'), TIMENOW);
         $wait = 0;
         if (UserDisplay::currentClass() < UC_VIP && $waitsystem === 'yes') {
-            $ratio = Ratio::forUserId($this->actor->id, false);
+            $ratio = Ratio::forUserIdNumeric($this->actor->id);
             $gigs = $this->actor->value('uploaded') / (1024 * 1024 * 1024);
             if ($gigs > 10) {
                 if ($ratio < 0.4) {
@@ -266,7 +266,7 @@ final class TorrentListViewFactory
                                 'isNew' => $commentIsNew,
                                 'newLabel' => (string) __('functions.text_new_uppercase'),
                                 'byLabel' => (string) __('functions.text_last_commented_by'),
-                                'user' => SafeHtml::fromTrustedHtml(UserDisplay::username($lastcom['user'])->toHtml()),
+                                'user' => UserDisplay::username($lastcom['user']),
                                 'time' => SafeHtml::fromTrustedHtml((string) $lastcomtime),
                             ])->render())
                             .$renderTt((string) $lastcom['text'])

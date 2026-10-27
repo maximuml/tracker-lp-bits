@@ -38,7 +38,7 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
     private const APP_DIR = __DIR__.'/../../app';
 
     /** Baseline: fromTrustedHtml() call sites in app/ PHP code. */
-    private const BASELINE_TRUSTED_HTML_CALLS = 192;
+    private const BASELINE_TRUSTED_HTML_CALLS = 169;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

@@ -171,9 +171,9 @@ class ForumController extends BasePageController
             }
             $row['parentUrl'] = $parentUrl;
             $avatar = $showAvatars ? htmlspecialchars(trim((string) ($row['avatar'] ?? ''))) : '';
-            $row['avatarHtml'] = SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext(Avatar::forUser((int) ($row['user'] ?? 0), $avatar)));
-            $row['usernameHtml'] = SafeHtml::fromTrustedHtml($userDisplayMap[(int) ($row['user'] ?? 0)]
-                ?? UserDisplay::username((int) ($row['user'] ?? 0), false, true, true, false, false, true));
+            $row['avatarHtml'] = UserDisplay::avatarImageWithContext(Avatar::forUser((int) ($row['user'] ?? 0), $avatar));
+            $row['usernameHtml'] = $userDisplayMap[(int) ($row['user'] ?? 0)]
+                ?? UserDisplay::username((int) ($row['user'] ?? 0), false, true, true, false, false, true);
             $row['timeHtml'] = SafeHtml::fromTrustedHtml((string) Time::format((string) ($row['added'] ?? '')));
             $row['commentHtml'] = Format::formatComment((string) ($row['text'] ?? ''));
         }

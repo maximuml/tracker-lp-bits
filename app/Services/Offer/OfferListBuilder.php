@@ -327,7 +327,7 @@ final class OfferListBuilder
                 showAgainstCell: $showAgainstCell,
                 rows: $rows,
                 tooltips: $showlastcom ? $tooltips : [],
-                pagerBottom: SafeHtml::fromTrustedHtml($pagerBottom),
+                pagerBottom: $pagerBottom,
             );
         }
 

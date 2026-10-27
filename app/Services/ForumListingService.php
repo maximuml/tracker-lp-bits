@@ -220,7 +220,7 @@ final class ForumListingService
             $topics[] = new TopicRow(
                 id: $topicid,
                 forumId: $forumid,
-                subject: SafeHtml::fromTrustedHtml(Format::highlight($search, htmlspecialchars((string) ($topicarr['subject'] ?? '')))),
+                subject: Format::highlight($search, htmlspecialchars((string) ($topicarr['subject'] ?? ''))),
                 hlcolor: $hlcolor,
                 sticky: ($topicarr['sticky'] ?? 0) == 1,
                 state: $state,
@@ -335,7 +335,7 @@ final class ForumListingService
                 $results[] = new SearchResultRow(
                     postId: (int) $post['id'],
                     topicId: (int) $post['topicid'],
-                    subject: SafeHtml::fromTrustedHtml(Format::highlight($keywordsEsc, htmlspecialchars((string) $post['subject']))),
+                    subject: Format::highlight($keywordsEsc, htmlspecialchars((string) $post['subject'])),
                     hlcolor: (int) $post['hlcolor'],
                     forumId: (int) $post['forumid'],
                     forumName: (string) $post['forumname'],

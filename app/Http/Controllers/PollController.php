@@ -158,7 +158,7 @@ class PollController extends BasePageController
             $answerRows = array_map(static function ($answerRow) use ($userDisplayMap) {
                 $row = (array) $answerRow;
                 $uid = (int) ($row['userid'] ?? 0);
-                $row['usernameHtml'] = SafeHtml::fromTrustedHtml((string) ($userDisplayMap[$uid] ?? UserDisplay::username($uid)));
+                $row['usernameHtml'] = $userDisplayMap[$uid] ?? UserDisplay::username($uid);
 
                 return $row;
             }, $answers);

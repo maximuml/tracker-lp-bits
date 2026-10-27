@@ -13,7 +13,7 @@ class HtmlTagTest extends TestCase
     {
         $this->assertSame(
             "\n<script type=\"text/javascript\">\n//<![CDATA[\nvar maxpage=1;\nvar currentpage=1;\n//]]>\n</script>\n",
-            Html::keyShortcutScript(),
+            Html::keyShortcutScript()->toHtml(),
         );
     }
 
@@ -24,13 +24,13 @@ class HtmlTagTest extends TestCase
         // `$page` first then `$pages`. `pic/key_shortcut.js` depends
         // on this order — preserved verbatim.
         $expected = "\n<script type=\"text/javascript\">\n//<![CDATA[\nvar maxpage=10;\nvar currentpage=3;\n//]]>\n</script>\n";
-        $this->assertSame($expected, Html::keyShortcutScript(3, 10));
+        $this->assertSame($expected, Html::keyShortcutScript(3, 10)->toHtml());
     }
 
     public function test_key_shortcut_zero_pages(): void
     {
         $expected = "\n<script type=\"text/javascript\">\n//<![CDATA[\nvar maxpage=0;\nvar currentpage=0;\n//]]>\n</script>\n";
-        $this->assertSame($expected, Html::keyShortcutScript(0, 0));
+        $this->assertSame($expected, Html::keyShortcutScript(0, 0)->toHtml());
     }
 
     public function test_promotion_select_options_emits_all_seven_when_hide_is_zero(): void

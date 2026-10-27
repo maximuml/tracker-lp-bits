@@ -23,16 +23,16 @@ final class Tag
      * `pic/key_shortcut.js`. The order is `maxpage` first, then
      * `currentpage` — preserved verbatim.
      */
-    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): string
+    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): SafeHtml
     {
         $currentpage = 'var currentpage='.$page.';';
         $maxpage = 'var maxpage='.$pages.';';
 
-        return "\n".ltrim(view('components.support.tag.key-shortcut', [
+        return SafeHtml::fromTrustedHtml("\n".ltrim(view('components.support.tag.key-shortcut', [
             'nonce' => $nonce,
             'maxpage' => $maxpage,
             'currentpage' => $currentpage,
-        ])->render(), "\n");
+        ])->render(), "\n"));
     }
 
     /**
@@ -232,14 +232,14 @@ final class Tag
      *
      * Mirrors `quickreply()`.
      */
-    public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
+    public static function quickReply(string $formName, string $textareaName, string $submitLabel): SafeHtml
     {
-        return trim(view('components.support.tag.quick-reply', [
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.tag.quick-reply', [
             'name' => $textareaName,
             'label' => (string) (__('functions.row_body')),
             'smileRow' => SafeHtml::fromTrustedHtml(Smilies::quickRow($formName, $textareaName)),
             'submitLabel' => $submitLabel,
-        ])->render());
+        ])->render()));
     }
 
     /**

@@ -64,11 +64,9 @@ final class ForumTopicViewService
         $forumid = (int) ($arr['forumid'] ?? 0);
         $locked = (bool) ($arr['locked'] ?? false);
         $orgsubject = (string) ($arr['subject'] ?? '');
-        $subject = SafeHtml::fromTrustedHtml(
-            $highlight !== ''
-                ? Format::highlight(e($highlight), e($orgsubject))
-                : e($orgsubject),
-        );
+        $subject = $highlight !== ''
+            ? Format::highlight(e($highlight), e($orgsubject))
+            : SafeHtml::fromPlainText($orgsubject);
         $sticky = ($arr['sticky'] ?? 0) == 1;
         $views = (int) ($arr['views'] ?? 0);
 
@@ -206,13 +204,13 @@ final class ForumTopicViewService
                 ? $renderFmt('fmt_post_'.md5((string) ($arr['body'] ?? '')), static fn () => Format::formatComment((string) ($arr['body'] ?? '')))
                 : Format::formatComment((string) (__('forums.text_post_protected')));
             if ($highlight !== '') {
-                $bodyContent = SafeHtml::fromTrustedHtml(Format::highlight(htmlspecialchars($highlight), (string) $bodyContent));
+                $bodyContent = Format::highlight(htmlspecialchars($highlight), (string) $bodyContent);
             }
 
             $editedBy = null;
             $editedAtRaw = null;
             if (Validators::isId($arr['editedby'] ?? null)) {
-                $editedBy = SafeHtml::fromTrustedHtml(UserDisplay::username((int) ($arr['editedby'] ?? 0)));
+                $editedBy = UserDisplay::username((int) ($arr['editedby'] ?? 0));
                 $editedAtRaw = $arr['editdate'] ?? null;
             }
 
@@ -225,20 +223,20 @@ final class ForumTopicViewService
                 isLast: $isLast,
                 anchorUrl: '/forums?action=viewtopic&topicid='.$topicid.'&page=p'.$postid.'#pid'.$postid,
                 addedRaw: (string) ($arr['added'] ?? ''),
-                by: SafeHtml::fromTrustedHtml(UserDisplay::username($posterid, false, true, true, false, false, true)),
+                by: UserDisplay::username($posterid, false, true, true, false, false, true),
                 authorToggleUrl: $authorid
                     ? '/forums?action=viewtopic&topicid='.$topicid
                     : '/forums?action=viewtopic&topicid='.$topicid.'&authorid='.$posterid,
                 authorToggleLabel: (string) ($authorid
                     ? __('forums.text_view_all_posts')
                     : __('forums.text_view_this_author_only')),
-                avatarImage: SafeHtml::fromTrustedHtml(UserDisplay::avatarImageWithContext(htmlspecialchars($avatar))),
+                avatarImage: UserDisplay::avatarImageWithContext(htmlspecialchars($avatar)),
                 classImage: UserClass::imagePath((int) ($arr2['class'] ?? 0)),
                 className: $className,
                 postCount: (int) $forumposts,
                 uploaded: Format::size($arr2['uploaded'] ?? 0),
                 downloaded: Format::size($arr2['downloaded'] ?? 0),
-                ratio: SafeHtml::fromTrustedHtml((string) Ratio::forUserId((int) ($arr2['id'] ?? 0))),
+                ratio: Ratio::forUserId((int) ($arr2['id'] ?? 0)),
                 body: $bodyContent,
                 signature: $signature !== ''
                     ? $renderFmt('fmt_sig2_'.md5($signature), static fn () => Format::formatComment($signature, true, false, false, true, 500, true, false, 1, 200))
@@ -282,12 +280,12 @@ final class ForumTopicViewService
             moveForums: $moveForums,
             highlightColorOptions: $this->index->highlightColorOptions((string) (__('forums.select_color'))),
             quickReply: $maypost
-                ? SafeHtml::fromTrustedHtml(Html::quickReply('compose', 'body', (string) (__('forums.submit_add_reply'))))
+                ? Html::quickReply('compose', 'body', (string) (__('forums.submit_add_reply')))
                 : null,
             deniedNotice: ! $maypost
                 ? view('components.forums.denied-notice', ['locked' => $locked])
                 : null,
-            keyScript: SafeHtml::fromTrustedHtml(Html::keyShortcutScript($page, max(0, $pages - 1), (string) $request->attributes->get('csp_nonce', ''))),
+            keyScript: Html::keyShortcutScript($page, max(0, $pages - 1), (string) $request->attributes->get('csp_nonce', '')),
         );
     }
 }

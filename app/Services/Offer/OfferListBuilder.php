@@ -279,7 +279,7 @@ final class OfferListBuilder
                     ? null
                     : new OfferVoteResults($yeah, $against, '/web/offers?id='.$offerId.'&offer_vote=1');
 
-                $addtime = SafeHtml::fromPlainText((string) Time::format((string) ($arr['added'] ?? 'now'), false, true));
+                $addtime = SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? 'now'), false, true));
                 $dispname = (string) ($arr['name'] ?? '');
                 if (mb_strlen($dispname, 'UTF-8') > 70) {
                     $dispname = mb_substr($dispname, 0, 68, 'UTF-8').'..';

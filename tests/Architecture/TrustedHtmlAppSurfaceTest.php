@@ -48,8 +48,15 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
 {
     private const APP_DIR = __DIR__.'/../../app';
 
-    /** Baseline: fromTrustedHtml() call sites in app/ PHP code. */
-    private const BASELINE_TRUSTED_HTML_CALLS = 116;
+    /**
+     * Baseline: fromTrustedHtml() call sites in app/ PHP code.
+     *
+     * 116 → 115 (2026-10-28): UserDisplay::username() went SafeHtml
+     * end-to-end — the cached value, inline props and the return no
+     * longer re-wrap; the rainbow attribute fragment became a bool
+     * prop in the user-inline component.
+     */
+    private const BASELINE_TRUSTED_HTML_CALLS = 115;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

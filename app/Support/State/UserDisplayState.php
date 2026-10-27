@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\State;
 
+use App\Support\Html\SafeHtml;
 use Illuminate\Container\Attributes\Scoped;
 
 /**
@@ -18,7 +19,7 @@ final class UserDisplayState
     /** @var array<int|string, array<int|string, mixed>|false> */
     public array $rowCache = [];
 
-    /** @var array<int, string> */
+    /** @var array<int, SafeHtml> */
     public array $usernameCache = [];
 
     public static function instance(): self

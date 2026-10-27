@@ -172,6 +172,11 @@ class HtmlTagTest extends TestCase
         $this->assertStringNotContainsString('<br />', $noEscape);
     }
 
+    public function test_tooltip_container_with_empty_input_returns_empty(): void
+    {
+        $this->assertSame('', Html::tooltipContainer([]));
+    }
+
     public function test_tooltip_container_single_child(): void
     {
         $this->assertSame(

@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Repositories\CustomFieldRepository;
 use App\Repositories\SearchBoxRepository;
 use App\Support\Html\SafeHtml;
+use App\Support\Html\Tag;
 
 class CustomField
 {
@@ -224,12 +225,12 @@ class CustomField
         return $isArray ? $result : ($result[$torrentId] ?? []);
     }
 
-    public function renderOnTorrentDetailsPage(int $torrentId, int $searchBoxId): string
+    public function renderOnTorrentDetailsPage(int $torrentId, int $searchBoxId): SafeHtml
     {
         $displayName = SearchBox::valueWithContext($searchBoxId, 'custom_fields_display_name');
         $customFields = $this->listTorrentCustomField($torrentId, $searchBoxId);
         $mixedRowContent = SearchBox::valueWithContext($searchBoxId, 'custom_fields_display');
-        $rowByRowHtml = '';
+        $result = SafeHtml::fromPlainText('');
         $shouldRenderMixRow = false;
         foreach ($customFields as $field) {
             if (empty($field['custom_field_value'])) {
@@ -248,17 +249,16 @@ class CustomField
                     $customFieldDisplay = (string) $field['display'];
                     $customFieldDisplay = str_replace("<%{$field['name']}.label%>", $field['label'], $customFieldDisplay);
                     $customFieldDisplay = str_replace("<%{$field['name']}.value%>", $contentNotFormatted, $customFieldDisplay);
-                    $rowByRowHtml .= Html::tr($field['label'], Format::formatComment($customFieldDisplay), 1, '', true);
+                    $result = $result->append(Tag::settingsRow($field['label'], Format::formatComment($customFieldDisplay)));
                 } else {
                     $contentFormatted = $this->formatCustomFieldValue($field, true);
-                    $rowByRowHtml .= Html::tr($field['label'], $contentFormatted, 1, '', true);
+                    $result = $result->append(Tag::settingsRow($field['label'], $contentFormatted, false));
                 }
             }
         }
 
-        $result = $rowByRowHtml;
         if ($shouldRenderMixRow && $mixedRowContent) {
-            $result .= Html::tr($displayName, Format::formatComment((string) $mixedRowContent), 1, '', true);
+            $result = $result->append(Tag::settingsRow($displayName, Format::formatComment((string) $mixedRowContent)));
         }
 
         return $result;

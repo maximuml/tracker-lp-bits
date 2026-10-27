@@ -104,7 +104,7 @@ class HtmlTagTest extends TestCase
         $this->assertSame(
             '<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">Label</td>'
             .'<td class="align-top px-2.5 py-1.5">a &amp; b<br />'."\n".'c</td></tr>',
-            Html::settingsRow('Label', "a & b\nc"),
+            (string) Html::settingsRow('Label', "a & b\nc"),
         );
     }
 
@@ -116,7 +116,7 @@ class HtmlTagTest extends TestCase
         $this->assertSame(
             '<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">L</td>'
             .'<td class="align-top px-2.5 py-1.5"><input name="x" value="y"/></td></tr>',
-            Html::settingsRow('L', '<input name="x" value="y"/>', escape: false),
+            (string) Html::settingsRow('L', '<input name="x" value="y"/>', escape: false),
         );
     }
 
@@ -128,7 +128,7 @@ class HtmlTagTest extends TestCase
         $this->assertSame(
             '<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">Name<font color="red">*</font></td>'
             .'<td class="align-top px-2.5 py-1.5">value</td></tr>',
-            Html::settingsRow('Name<font color="red">*</font>', 'value', escape: false),
+            (string) Html::settingsRow('Name<font color="red">*</font>', 'value', escape: false),
         );
     }
 
@@ -140,20 +140,20 @@ class HtmlTagTest extends TestCase
         $this->assertSame(
             '<tr relation="mode_1" class="mode_1"><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">L</td>'
             .'<td class="align-top px-2.5 py-1.5">v</td></tr>',
-            Html::settingsRow('L', 'v', relation: 'mode_1'),
+            (string) Html::settingsRow('L', 'v', relation: 'mode_1'),
         );
     }
 
     public function test_settings_row_empty_relation_omits_attribute(): void
     {
-        $this->assertStringStartsWith('<tr><td', Html::settingsRow('L', 'v', relation: ''));
+        $this->assertStringStartsWith('<tr><td', (string) Html::settingsRow('L', 'v', relation: ''));
     }
 
     public function test_settings_row_has_no_trailing_newline(): void
     {
         // Legacy `tr()` produces no trailing newline — call sites
         // concatenate rows directly (`$html .= tr(...)`).
-        $row = Html::settingsRow('L', 'v');
+        $row = (string) Html::settingsRow('L', 'v');
         $this->assertStringEndsWith('</tr>', $row);
         $this->assertStringNotContainsString("</tr>\n", $row);
     }
@@ -163,10 +163,10 @@ class HtmlTagTest extends TestCase
         // Pair test: with $escape=false the `\n` must survive verbatim
         // (the caller is shipping pre-built HTML and presumably means
         // those newlines). With $escape=true newlines become `<br />\n`.
-        $withEscape = Html::settingsRow('L', "a\nb", escape: true);
+        $withEscape = (string) Html::settingsRow('L', "a\nb", escape: true);
         $this->assertStringContainsString('<br />'."\n".'b', $withEscape);
 
-        $noEscape = Html::settingsRow('L', "a\nb", escape: false);
+        $noEscape = (string) Html::settingsRow('L', "a\nb", escape: false);
         $this->assertStringContainsString("a\nb", $noEscape);
         $this->assertStringNotContainsString('<br />', $noEscape);
     }

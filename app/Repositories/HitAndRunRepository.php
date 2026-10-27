@@ -12,8 +12,8 @@ use App\Models\HitAndRun;
 use App\Models\SearchBox;
 use App\Models\User;
 use App\Services\HitAndRunCronjobService;
-use App\Support\Html;
 use App\Support\Html\SafeHtml;
+use App\Support\Html\Tag;
 use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
@@ -289,7 +289,7 @@ class HitAndRunRepository extends BaseRepository
         ) === HitAndRunMode::MANUAL && Permission::canSetTorrentHitAndRun()) {
             $hrRadio = view('components.upload.hr_radios', ['searchBoxId' => $searchBoxId, 'value' => $value])->render();
 
-            return SafeHtml::fromTrustedHtml((string) Html::frow('H&R', $hrRadio, 1, "mode_$searchBoxId", true));
+            return Tag::settingsFrow('H&R', $hrRadio, false, "mode_$searchBoxId");
         }
 
         return SafeHtml::fromPlainText('');

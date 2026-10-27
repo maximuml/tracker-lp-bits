@@ -60,7 +60,7 @@ class InfoController extends BasePageController
         $data = [
             'action' => $action,
             'userid' => $userid,
-            'subject' => SafeHtml::fromTrustedHtml($subject),
+            'subject' => $subject,
             'title' => match ($action) {
                 'viewposts' => (string) (__('userhistory.head_posts_history')),
                 'viewcomments' => (string) (__('userhistory.head_comments_history')),

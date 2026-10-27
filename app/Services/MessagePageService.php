@@ -182,7 +182,7 @@ class MessagePageService
                     $username = UserDisplay::username((int) ($message->receiver ?? 0));
                 }
             } else {
-                $username = (string) __('messages.text_system');
+                $username = SafeHtml::fromPlainText((string) __('messages.text_system'));
             }
 
             $subject = (string) ($message->subject ?? '');
@@ -193,7 +193,7 @@ class MessagePageService
             $rows[] = [
                 'id' => (int) ($message->id ?? 0),
                 'subject' => $subject,
-                'username' => SafeHtml::fromTrustedHtml($username),
+                'username' => $username,
                 'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($message->added?->format('Y-m-d H:i:s') ?? ''), true, false)),
                 'unread' => (bool) ($message->unread ?? false),
             ];
@@ -325,7 +325,7 @@ class MessagePageService
         } else {
             $from = __('messages.text_from');
             if ((int) ($message['sender'] ?? 0) === 0) {
-                $sender = (string) __('messages.text_system');
+                $sender = SafeHtml::fromPlainText((string) __('messages.text_system'));
             } else {
                 $senderId = (int) ($message['sender'] ?? 0);
                 $sender = UserDisplay::username($senderId);
@@ -376,10 +376,10 @@ class MessagePageService
             'pmId' => $pmId,
             'subject' => $subject,
             'from' => $from,
-            'sender' => SafeHtml::fromTrustedHtml($sender),
+            'sender' => $sender,
             'added' => SafeHtml::fromTrustedHtml((string) Time::format($added, true, false)),
             'showUnread' => $showUnread,
-            'body' => SafeHtml::fromTrustedHtml($body),
+            'body' => $body,
             'replyHref' => $replyHref,
             'quickReply' => $quickReply,
             'isSender' => $isSender,
@@ -414,7 +414,7 @@ class MessagePageService
 
         $fromName = UserDisplay::username($from);
         if ($orig === 0) {
-            $origName = (string) __('messages.text_system');
+            $origName = SafeHtml::fromPlainText((string) __('messages.text_system'));
             $origName2 = __('messages.text_system');
         } else {
             $origName = UserDisplay::username($orig);
@@ -426,8 +426,8 @@ class MessagePageService
         return [
             'pmId' => $pmId,
             'subject' => $subject,
-            'fromName' => SafeHtml::fromTrustedHtml($fromName),
-            'origName' => SafeHtml::fromTrustedHtml($origName),
+            'fromName' => $fromName,
+            'origName' => $origName,
             'body' => SafeHtml::fromTrustedHtml($body),
         ];
     }

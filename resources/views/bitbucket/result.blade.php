@@ -8,7 +8,7 @@
         <h1>{{ __('bitbucketupload.std_success') }}</h1>
         @foreach ($results as $result)
             <p>{{ __('bitbucketupload.std_use_following_url') }}<br><b><a href="{{ $result['url'] }}">{{ $result['url'] }}</a></b></p>
-            <p><img src="{{ $result['url'] }}"></p>
+            <p><img src="{{ $result['url'] }}" alt="{{ __('bitbucketupload.std_image') }}"></p>
             <p>{{ __('bitbucketupload.std_image') }} {{ (! ($result['width'] == $result['newwidth'] && $result['height'] == $result['newheight'])) ? __('bitbucketupload.std_rescaled_from') . $result['height'] . ' x ' . $result['width'] . __('bitbucketupload.std_to') . $result['newheight'] . ' x ' . $result['newwidth'] : __('bitbucketupload.std_need_not_rescaling') }}</p>
         @endforeach
         <p>{{ __('bitbucketupload.std_bbcode_for_description') }}<br>

@@ -22,8 +22,7 @@ use Meilisearch\Endpoints\Indexes;
 
 class MeiliSearchRepository extends BaseRepository implements MeiliSearchRepositoryInterface
 {
-    /** @var mixed */
-    private static $client;
+    private ?Client $client = null;
 
     public const INDEX_NAME = 'torrents';
 
@@ -88,14 +87,14 @@ class MeiliSearchRepository extends BaseRepository implements MeiliSearchReposit
 
     public function getClient(): Client
     {
-        if (self::$client === null) {
+        if ($this->client === null) {
             $config = Config::get('nexus.meilisearch', null);
             $url = sprintf('%s://%s:%s', $config['scheme'], $config['host'], $config['port']);
             Logger::writeWithContext((string) ("get client with url: {$url}"), (string) 'info', (bool) false);
-            self::$client = new Client($url, $config['master_key']);
+            $this->client = new Client($url, $config['master_key']);
         }
 
-        return self::$client;
+        return $this->client;
     }
 
     public function isEnabled(): bool

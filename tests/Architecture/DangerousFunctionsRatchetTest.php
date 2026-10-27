@@ -20,8 +20,6 @@ use Tests\Attributes\TestCategory;
  *   - Support/Cache/NexusCache.php — unserialize() wrapper forces
  *     `allowed_classes: false` (Sprint 19 hardening); object injection
  *     is impossible.
- *   - Support/View.php — extract($data, EXTR_SKIP) on the template data
- *     array; EXTR_SKIP cannot clobber $view/$data/$rootPath.
  *   - Support/Environment.php — exec() for `command -v` and the artisan
  *     sub-shell; every argument passes escapeshellarg/escapeshellcmd.
  *   - Services/BackupService.php — exec() for tar/zip/gpg/mysqldump;
@@ -65,7 +63,6 @@ final class DangerousFunctionsRatchetTest extends TestCase
      */
     private const ALLOWED = [
         'Support/Cache/NexusCache.php' => ['unserialize' => 2],
-        'Support/View.php' => ['extract' => 1],
         'Support/Environment.php' => ['exec' => 2],
         'Services/BackupService.php' => ['exec' => 4],
         'Console/Commands/BackupRestoreDrill.php' => ['exec' => 4],

@@ -67,9 +67,10 @@ final class SiteAccess
 
         if ($guestVisitType === 'custom_content') {
             $content = Format::formatComment($guestVisitValue);
-            View::render('resources/templates/guest-visit-custom-content', ['content' => $content], false, ROOT_PATH);
 
-            return;
+            throw new HttpResponseException(
+                new Response(view('guest-visit.custom-content', ['content' => $content])->render())
+            );
         }
 
         if ($guestVisitType === 'redirect') {

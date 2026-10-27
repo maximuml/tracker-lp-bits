@@ -3,6 +3,7 @@
 namespace Tests\Integration\Support;
 
 use App\Support\Html;
+use App\Support\Html\Tag;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -42,12 +43,12 @@ class HtmlTagTest extends TestCase
             .'<option value="5">50% Down</option>'
             .'<option value="6">50% Down 2× Up</option>'
             .'<option value="7">30% Down</option>';
-        $this->assertSame($expected, Html::promotionSelectOptions(0, 0, self::promoLabels())->toHtml());
+        $this->assertSame($expected, Tag::promotionSelectOptions(0, 0, self::promoLabels())->toHtml());
     }
 
     public function test_promotion_select_options_marks_selected(): void
     {
-        $result = Html::promotionSelectOptions(3, 0, self::promoLabels());
+        $result = Tag::promotionSelectOptions(3, 0, self::promoLabels());
         $this->assertStringContainsString('<option value="3" selected="selected">2× Up</option>', $result);
         // Only the requested id gets the selected attribute.
         $this->assertStringContainsString('<option value="1">Normal</option>', $result);
@@ -59,7 +60,7 @@ class HtmlTagTest extends TestCase
         // Legacy contract: `$hide` removes a single option entirely
         // from the emitted list (call sites pass the current torrent
         // promotion type to remove "becomes X again" from the menu).
-        $result = Html::promotionSelectOptions(0, 1, self::promoLabels());
+        $result = Tag::promotionSelectOptions(0, 1, self::promoLabels());
         $this->assertStringNotContainsString('value="1"', $result);
         $this->assertStringContainsString('value="2"', $result);
         $this->assertStringContainsString('value="7"', $result);
@@ -68,7 +69,7 @@ class HtmlTagTest extends TestCase
     public function test_promotion_select_options_hide_zero_keeps_all(): void
     {
         // `$hide = 0` matches no real id, so every option survives.
-        $result = Html::promotionSelectOptions(0, 0, self::promoLabels());
+        $result = Tag::promotionSelectOptions(0, 0, self::promoLabels());
         for ($id = 1; $id <= 7; $id++) {
             $this->assertStringContainsString('value="'.$id.'"', $result);
         }
@@ -76,7 +77,7 @@ class HtmlTagTest extends TestCase
 
     public function test_promotion_select_options_hide_out_of_range_keeps_all(): void
     {
-        $result = Html::promotionSelectOptions(0, 99, self::promoLabels());
+        $result = Tag::promotionSelectOptions(0, 99, self::promoLabels());
         for ($id = 1; $id <= 7; $id++) {
             $this->assertStringContainsString('value="'.$id.'"', $result);
         }
@@ -87,14 +88,14 @@ class HtmlTagTest extends TestCase
         // If a translation is absent the proxy `?? ''` coercion lands
         // an empty string in the helper — we render the `<option>`
         // with no label text rather than crashing.
-        $result = Html::promotionSelectOptions(0, 0, []);
+        $result = Tag::promotionSelectOptions(0, 0, []);
         $this->assertStringContainsString('<option value="1"></option>', $result);
         $this->assertStringContainsString('<option value="7"></option>', $result);
     }
 
     public function test_promotion_select_options_escapes_labels(): void
     {
-        $result = Html::promotionSelectOptions(0, 0, ['normal' => '<b>bold</b>'] + self::promoLabels());
+        $result = Tag::promotionSelectOptions(0, 0, ['normal' => '<b>bold</b>'] + self::promoLabels());
         $this->assertStringContainsString('<option value="1">&lt;b&gt;bold&lt;/b&gt;</option>', $result);
     }
 

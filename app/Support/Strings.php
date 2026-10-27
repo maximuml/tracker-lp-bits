@@ -122,12 +122,12 @@ final class Strings
         string $haystack,
         ?string $open = null,
         ?string $close = null,
-    ): string {
+    ): SafeHtml {
         $open ??= trim(view('components.support.hl-open')->render());
         $close ??= trim(view('components.support.hl-close')->render());
         $needleLength = strlen($needle);
         if ($needleLength === 0) {
-            return $haystack;
+            return SafeHtml::fromTrustedHtml($haystack);
         }
         $cursor = $haystack;
         while (($cursor = stristr($cursor, $needle)) !== false) {
@@ -136,7 +136,7 @@ final class Strings
             $haystack = str_replace($match, $open.$match.$close, $haystack);
         }
 
-        return $haystack;
+        return SafeHtml::fromTrustedHtml($haystack);
     }
 
     /**

@@ -115,7 +115,7 @@ final class ChromeUserBar
 
         return new self(
             usernameHtml: UserDisplay::username($userId),
-            ratio: SafeHtml::fromTrustedHtml((string) Ratio::forUserId($userId)),
+            ratio: Ratio::forUserId($userId),
             uploaded: Format::size((int) ($user['uploaded'] ?? 0)),
             downloaded: Format::size((int) ($user['downloaded'] ?? 0)),
             seedbonus: number_format((float) ($user['seedbonus'] ?? 0), 1),

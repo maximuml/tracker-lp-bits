@@ -268,7 +268,7 @@ final class Format
     /**
      * Highlight occurrences of a needle in a subject. Backs the legacy `highlight()` helper.
      */
-    public static function highlight(string $search, string $subject, ?string $hlstart = null, ?string $hlend = null): string
+    public static function highlight(string $search, string $subject, ?string $hlstart = null, ?string $hlend = null): SafeHtml
     {
         return Strings::highlight($search, $subject, $hlstart, $hlend);
     }

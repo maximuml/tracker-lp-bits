@@ -137,18 +137,18 @@ class ShoutboxController extends BasePageController
             $shoutId = (int) ($arr['id'] ?? 0);
             $uid = (int) ($arr['userid'] ?? 0);
             $username = $uid > 0
-                ? (string) ($userDisplayMap[$uid] ?? '')
-                : (string) (__('shoutbox.text_guest'));
+                ? ($userDisplayMap[$uid] ?? SafeHtml::fromPlainText(''))
+                : SafeHtml::fromPlainText((string) (__('shoutbox.text_guest')));
             $mentionsMe = false;
             $message = Shoutbox::formatMessage((string) ($arr['text'] ?? ''), $currentUserId, $mentionsMe);
             $editedTime = null;
             if (! empty($arr['edited_at']) && (int) $arr['edited_at'] > 0) {
-                $editedTime = SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) $arr['edited_at'], true));
+                $editedTime = Shoutbox::formatTime((int) $arr['edited_at'], true);
             }
             $items[] = [
-                'time' => SafeHtml::fromTrustedHtml(Shoutbox::formatTime((int) ($arr['date'] ?? 0), true)),
+                'time' => Shoutbox::formatTime((int) ($arr['date'] ?? 0), true),
                 'actions' => Shoutbox::actionsData($arr, $currentUserId, $isStaff),
-                'username' => SafeHtml::fromTrustedHtml($username),
+                'username' => $username,
                 'isGuest' => $uid <= 0,
                 'reactions' => Shoutbox::reactionsData(
                     $shoutId,

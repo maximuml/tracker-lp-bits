@@ -92,19 +92,19 @@ class AttendanceController extends BasePageController
         }
 
         if ($data['hasAttendedToday']) {
-            $data['headerLeft'] = view('components.attendance.header-left', [
+            $data['headerLeft'] = SafeHtml::fromTrustedHtml(view('components.attendance.header-left', [
                 'totalDays' => $attendance->total_days,
                 'days' => $attendance->days,
                 'points' => $attendance->points,
                 'cards' => $this->actor->value('attendance_card', 0),
-            ]);
-            $data['headerRight'] = view('components.attendance.header-right', [
+            ])->render());
+            $data['headerRight'] = SafeHtml::fromTrustedHtml(view('components.attendance.header-right', [
                 'myRanking' => (int) $data['myRanking'],
                 'todayCounts' => (int) $data['todayCounts'],
-            ]);
+            ])->render());
         } else {
             if ($captchaEnabled && $data['iv'] === 'yes') {
-                $data['captchaHtml'] = SafeHtml::fromTrustedHtml(Captcha::renderHtml(layout: 'grid'));
+                $data['captchaHtml'] = Captcha::renderHtml(layout: 'grid');
             }
         }
         AssetAppender::js($this->calendarScript($data), 'footer', false);

@@ -51,7 +51,7 @@
 @if ($canViewConfidential || $isOwner)
 <x-settings-row-small :label="__('userdetails.row_ip_address')">{{ \App\Support\Strings::hidden((string) $user['ip'].$locationInfoHtml) }}</x-settings-row-small>
 @endif
-@if ($clientSelectHtml !== '')
+@if ($clientSelectHtml !== null)
 <x-settings-row-small :label="__('userdetails.row_bt_client')">{{ $clientSelectHtml }}</x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('userdetails.row_transfer')"><x-data-table :caption="__('userdetails.row_transfer')" captionHidden>@if ($shareRatio !== null)<tr><td class="nx-embedded"><strong>{{ __('userdetails.row_share_ratio') ?? '' }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($shareRatio) }}">{{ number_format($shareRatio, 3) }}</span>(<strong>{{ __('userdetails.row_real_share_ratio') ?? '' }}</strong>: {{ number_format($trueRatio, 3) }})</td><td class="nx-embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($shareRatio) }}</td></tr>@endif<tr><td class="nx-embedded"><strong>{{ __('userdetails.row_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['uploaded']) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.row_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['downloaded']) }}</td></tr><tr><td class="nx-embedded"><strong>{{ __('userdetails.row_real_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueUpload) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.row_real_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueDownload) }}</td><td class="nx-embedded text-muted">&nbsp;&nbsp;{{ __('userdetails.row_real_ps') ?? '' }}</td></tr></x-data-table></x-settings-row-small>

@@ -9,7 +9,6 @@ use App\DTOs\Auth\ActorContext;
 use App\Models\Comment;
 use App\Repositories\TorrentDetailRepository;
 use App\Services\CommentService;
-use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Smilies;
 use App\ViewModels\Comment\CommentTableFactory;
@@ -113,7 +112,7 @@ final class CommentSection extends Component
             'vm' => $this->factory()->build($rows, $this->type, $this->parentId),
             // Smilie quick-row emits anchors bound to document.forms['comment'].body
             // via SmileIT — same trusted markup path the classic quick reply used.
-            'smileRow' => SafeHtml::fromTrustedHtml(Smilies::quickRow('comment', 'body')),
+            'smileRow' => Smilies::quickRow('comment', 'body'),
         ]);
     }
 

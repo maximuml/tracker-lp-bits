@@ -245,14 +245,12 @@ final class OfferListBuilder
                             $tooltipId = 'lastcom_'.$i;
                             $tooltips[] = new OfferTooltip(
                                 id: $tooltipId,
-                                content: SafeHtml::fromTrustedHtml(
-                                    view('components.offers.lastcom_tooltip', [
-                                        'hasNew' => $hasnewcom,
-                                        'username' => UserDisplay::username((int) ($lastcom['user'] ?? 0)),
-                                        'time' => SafeHtml::fromTrustedHtml($lastcomtime),
-                                        'comment' => $renderTt((string) ($lastcom['text'] ?? '')),
-                                    ])->render()
-                                ),
+                                content: view('components.offers.lastcom_tooltip', [
+                                    'hasNew' => $hasnewcom,
+                                    'username' => UserDisplay::username((int) ($lastcom['user'] ?? 0)),
+                                    'time' => SafeHtml::fromTrustedHtml($lastcomtime),
+                                    'comment' => $renderTt((string) ($lastcom['text'] ?? '')),
+                                ]),
                             );
                         }
                     } else {
@@ -279,7 +277,7 @@ final class OfferListBuilder
                     ? null
                     : new OfferVoteResults($yeah, $against, '/web/offers?id='.$offerId.'&offer_vote=1');
 
-                $addtime = SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? 'now'), false, true));
+                $addtime = Time::formatHtml((string) ($arr['added'] ?? 'now'), false, true);
                 $dispname = (string) ($arr['name'] ?? '');
                 if (mb_strlen($dispname, 'UTF-8') > 70) {
                     $dispname = mb_substr($dispname, 0, 68, 'UTF-8').'..';
@@ -327,7 +325,7 @@ final class OfferListBuilder
                 showAgainstCell: $showAgainstCell,
                 rows: $rows,
                 tooltips: $showlastcom ? $tooltips : [],
-                pagerBottom: SafeHtml::fromTrustedHtml($pagerBottom),
+                pagerBottom: $pagerBottom,
             );
         }
 

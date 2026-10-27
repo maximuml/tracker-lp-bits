@@ -24,7 +24,6 @@ use App\Support\Category;
 use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\CustomField;
-use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\PageResponses;
 use App\Support\Path;
@@ -165,10 +164,10 @@ class TorrentUploadController extends Controller
             'descrContent' => $descrContent,
             'descrInvalid' => $descrInvalid,
             'enableTechnicalInfo' => SiteConfig::current()->main->enableTechnicalInfo(),
-            'taxonomySelectHtml' => SafeHtml::fromTrustedHtml($this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode, $taxonomyValues)),
-            'customFieldsHtml' => SafeHtml::fromTrustedHtml($customField->renderOnUploadPage(0, $browsecatmode, is_array($oldCustomFields) ? $oldCustomFields : [])),
-            'hitAndRunHtml' => SafeHtml::fromTrustedHtml($this->hitAndRunRepository->renderOnUploadPage(is_scalar($oldHr) ? $oldHr : '', $browsecatmode)),
-            'tagsHtml' => SafeHtml::fromTrustedHtml($this->tagRepository->renderCheckbox($browsecatmode, $checkedTags)),
+            'taxonomySelectHtml' => $this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode, $taxonomyValues),
+            'customFieldsHtml' => $customField->renderOnUploadPage(0, $browsecatmode, is_array($oldCustomFields) ? $oldCustomFields : []),
+            'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage(is_scalar($oldHr) ? $oldHr : '', $browsecatmode),
+            'tagsHtml' => $this->tagRepository->renderCheckbox($browsecatmode, $checkedTags),
             'pickEnabled' => Permission::can(PermissionEnum::TORRENT_SET_STICKY),
             'posStates' => Torrent::listPosStates(),
             'posStateOld' => $this->oldScalar($request, 'pos_state', (string) TorrentPosState::NONE->value),

@@ -75,7 +75,7 @@ final class OfferDetailsBuilder
             $allowedNote = __('offers.text_urge_upload_offer_note');
         }
 
-        $description = '';
+        $description = SafeHtml::fromPlainText('');
         if (! empty($offer->descr)) {
             $descrKey = 'fmt_offer_'.md5((string) $offer->descr);
             $cachedDescr = $this->cache->get($descrKey);
@@ -90,8 +90,8 @@ final class OfferDetailsBuilder
         // Comments section
         $commentCount = $this->offerCommentRepository->countComments($id);
 
-        $pagerTop = '';
-        $pagerBottom = '';
+        $pagerTop = SafeHtml::fromPlainText('');
+        $pagerBottom = SafeHtml::fromPlainText('');
         if ($commentCount) {
             [$pagerTop, $pagerBottom] = Pagination::pager(10, $commentCount, "/web/offers?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
         }
@@ -109,10 +109,10 @@ final class OfferDetailsBuilder
             against: $against,
             allowedNote: $allowedNote,
             showEditDelete: $userId === $offerUserid || Permission::can(PermissionEnum::OFFER_MANAGE),
-            description: SafeHtml::fromTrustedHtml($description),
+            description: $description,
             commentCount: $commentCount,
-            pagerTop: SafeHtml::fromTrustedHtml($pagerTop),
-            pagerBottom: SafeHtml::fromTrustedHtml($pagerBottom),
+            pagerTop: $pagerTop,
+            pagerBottom: $pagerBottom,
         );
     }
 }

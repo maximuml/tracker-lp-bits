@@ -32,7 +32,7 @@ class StringsRenderTest extends TestCase
     {
         $this->assertSame(
             'before <b><span class="striking">match</span></b> after',
-            Strings::highlight('match', 'before match after'),
+            (string) Strings::highlight('match', 'before match after'),
         );
     }
 
@@ -40,18 +40,18 @@ class StringsRenderTest extends TestCase
     {
         $this->assertSame(
             'a <b><span class="striking">Foo</span></b> b <b><span class="striking">FOO</span></b> c',
-            Strings::highlight('foo', 'a Foo b FOO c'),
+            (string) Strings::highlight('foo', 'a Foo b FOO c'),
         );
     }
 
     public function test_highlight_empty_needle_returns_subject_unchanged(): void
     {
-        $this->assertSame('unchanged', Strings::highlight('', 'unchanged'));
+        $this->assertSame('unchanged', (string) Strings::highlight('', 'unchanged'));
     }
 
     public function test_highlight_no_match_returns_subject_unchanged(): void
     {
-        $this->assertSame('nothing here', Strings::highlight('xyz', 'nothing here'));
+        $this->assertSame('nothing here', (string) Strings::highlight('xyz', 'nothing here'));
     }
 
     public function test_highlight_double_wraps_repeated_matches_legacy_quirk(): void
@@ -65,7 +65,7 @@ class StringsRenderTest extends TestCase
         $this->assertSame(
             'a<b><span class="striking"><b><span class="striking">x</span></b></span></b>'
                 .'b<b><span class="striking"><b><span class="striking">x</span></b></span></b>c',
-            Strings::highlight('x', 'axbxc'),
+            (string) Strings::highlight('x', 'axbxc'),
         );
     }
 
@@ -75,7 +75,7 @@ class StringsRenderTest extends TestCase
         // metacharacter survives intact.
         $this->assertSame(
             'before <b><span class="striking">a.b</span></b> after',
-            Strings::highlight('a.b', 'before a.b after'),
+            (string) Strings::highlight('a.b', 'before a.b after'),
         );
     }
 }

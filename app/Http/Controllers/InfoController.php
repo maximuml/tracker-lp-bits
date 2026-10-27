@@ -60,7 +60,7 @@ class InfoController extends BasePageController
         $data = [
             'action' => $action,
             'userid' => $userid,
-            'subject' => SafeHtml::fromTrustedHtml($subject),
+            'subject' => $subject,
             'title' => match ($action) {
                 'viewposts' => (string) (__('userhistory.head_posts_history')),
                 'viewcomments' => (string) (__('userhistory.head_comments_history')),
@@ -115,12 +115,12 @@ class InfoController extends BasePageController
             $editedBy = $arr['editedby'] ?? 0;
             if (Validators::isId($editedBy) && ! empty($editorNames[(int) $editedBy])) {
                 $body .= view('userhistory.edited-note', [
-                    'editedByHtml' => SafeHtml::fromTrustedHtml(UserDisplay::username((int) $editedBy)),
+                    'editedByHtml' => UserDisplay::username((int) $editedBy),
                     'editdate' => (string) ($arr['editdate'] ?? ''),
                 ])->render();
             }
             $items[] = [
-                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? ''), true, false, false)),
+                'added' => Time::formatHtml((string) ($arr['added'] ?? ''), true, false, false),
                 'forumid' => (int) ($arr['f_id'] ?? 0),
                 'forumname' => (string) ($arr['name'] ?? ''),
                 'topicid' => (int) ($arr['t_id'] ?? 0),
@@ -153,7 +153,7 @@ class InfoController extends BasePageController
             }
             $commPage = (int) floor(($commentPageMap[$commentId] ?? 0) / 20);
             $items[] = [
-                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? ''), true, false, false)),
+                'added' => Time::formatHtml((string) ($arr['added'] ?? ''), true, false, false),
                 'torrentid' => (int) ($arr['t_id'] ?? 0),
                 'torrentName' => $torrent,
                 'commentid' => $commentId,
@@ -288,7 +288,7 @@ class InfoController extends BasePageController
                 'time' => substr($added, (int) strpos($added, ' ') + 1),
                 'width' => $dim['width'],
                 'height' => $dim['height'],
-                'usernameHtml' => SafeHtml::fromTrustedHtml((string) ($userDisplayMap[$owner] ?? UserDisplay::username($owner))),
+                'usernameHtml' => $userDisplayMap[$owner] ?? UserDisplay::username($owner),
             ];
         }
 

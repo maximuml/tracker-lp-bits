@@ -10,6 +10,7 @@ use App\Services\Captcha\CaptchaManager;
 use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use Illuminate\Container\Container;
 
 /**
@@ -59,14 +60,14 @@ final class Captcha
      * that pass markup into a view rather than printing inline.
      * Defaults mirror `showImageCode()` (iv flag + secret from the query).
      */
-    public static function renderHtml(?string $enabledFlag = null, ?string $secret = null, string $layout = 'tr'): string
+    public static function renderHtml(?string $enabledFlag = null, ?string $secret = null, string $layout = 'tr'): SafeHtml
     {
         $enabledFlag ??= SiteConfig::current()->security->captchaRequired() ? 'yes' : 'no';
         if ($enabledFlag !== 'yes') {
-            return '';
+            return SafeHtml::fromPlainText('');
         }
 
-        return self::markup($secret ?? (string) request()->query('secret', ''), $layout);
+        return SafeHtml::fromTrustedHtml(self::markup($secret ?? (string) request()->query('secret', ''), $layout));
     }
 
     private static function markup(string $secret, string $layout): string

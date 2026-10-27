@@ -266,23 +266,21 @@ final class Ratio
         int|float $downloaded,
         string $tooltip,
         string $infinite,
-    ): string {
+    ): SafeHtml {
         if ($downloaded > 0) {
             $ratio = $uploaded / $downloaded;
-            $color = self::color($ratio);
-            $formatted = number_format($ratio, 3);
-            if ($color !== '') {
-                $formatted = trim(view('components.support.span-class', ['cls' => self::colorClass($ratio), 'text' => $formatted])->render());
+            if (self::color($ratio) !== '') {
+                return SafeHtml::fromTrustedHtml(trim(view('components.support.span-class', ['cls' => self::colorClass($ratio), 'text' => number_format($ratio, 3)])->render()));
             }
 
-            return $formatted;
+            return SafeHtml::fromPlainText(number_format($ratio, 3));
         }
 
         if ($uploaded > 0) {
-            return $infinite;
+            return SafeHtml::fromPlainText($infinite);
         }
 
-        return '---';
+        return SafeHtml::fromPlainText('---');
     }
 
     /**
@@ -330,23 +328,34 @@ final class Ratio
     }
 
     /**
-     * User ratio by id — fetches the user row and renders the numeric
-     * or HTML form. Mirrors `get_ratio()`.
+     * User ratio by id — fetches the user row and renders the HTML
+     * form. Mirrors `get_ratio()`.
      */
-    public static function forUserId(int|string $userId, bool $html = true): string|int|float
+    public static function forUserId(int|string $userId): SafeHtml
     {
         $row = UserDisplay::row($userId);
         if (empty($row)) {
-            return '---';
+            return SafeHtml::fromPlainText('---');
         }
 
-        $uped = (float) ($row['uploaded'] ?? 0);
-        $downed = (float) ($row['downloaded'] ?? 0);
+        return self::userRatioHtml(
+            (float) ($row['uploaded'] ?? 0),
+            (float) ($row['downloaded'] ?? 0),
+            Locale::trans('label.ratio'),
+            Locale::trans('label.infinite'),
+        );
+    }
 
-        if ($html) {
-            return self::userRatioHtml($uped, $downed, Locale::trans('label.ratio'), Locale::trans('label.infinite'));
+    /**
+     * Numeric user ratio by id — mirrors the `get_ratio(false)` path.
+     */
+    public static function forUserIdNumeric(int|string $userId): int|float
+    {
+        $row = UserDisplay::row($userId);
+        if (empty($row)) {
+            return 0.0;
         }
 
-        return self::userRatioNumeric($uped, $downed);
+        return self::userRatioNumeric((float) ($row['uploaded'] ?? 0), (float) ($row['downloaded'] ?? 0));
     }
 }

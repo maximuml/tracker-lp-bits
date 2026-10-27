@@ -255,15 +255,15 @@ final class UserDisplay
         return (string) ($row['username'] ?? '');
     }
 
-    public static function avatarImage(string $url, string $langFolder): string
+    public static function avatarImage(string $url, string $langFolder): SafeHtml
     {
-        return trim(view('components.support.avatar-img', ['url' => $url, 'langFolder' => $langFolder])->render());
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.avatar-img', ['url' => $url, 'langFolder' => $langFolder])->render()));
     }
 
     /**
      * Context-aware wrapper for {@see avatarImage()}.
      */
-    public static function avatarImageWithContext(string $url): string
+    public static function avatarImageWithContext(string $url): SafeHtml
     {
         return self::avatarImage($url, Locale::currentLangDir());
     }

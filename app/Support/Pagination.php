@@ -180,7 +180,7 @@ final class Pagination
         ];
 
         $result = self::render($rpp, $count, $href, $page, $pages, $labels, $pagename, $isPresto);
-        PageState::instance()->setKeyShortcutScript(Html::keyShortcutScript($page, $pages - 1));
+        PageState::instance()->setKeyShortcutScript((string) Html::keyShortcutScript($page, $pages - 1));
 
         return $result;
     }

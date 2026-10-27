@@ -258,8 +258,8 @@ final class UsersearchPageService
         return new UsersearchResultsViewModel(
             rows: $rows,
             showPager: $count > $perpage,
-            pagerTop: SafeHtml::fromTrustedHtml((string) $pagertop),
-            pagerBottom: SafeHtml::fromTrustedHtml((string) $pagerbottom),
+            pagerTop: $pagertop,
+            pagerBottom: $pagerbottom,
             emptyMessage: null,
         );
     }

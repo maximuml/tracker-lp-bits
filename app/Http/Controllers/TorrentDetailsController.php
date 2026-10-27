@@ -210,8 +210,8 @@ class TorrentDetailsController extends Controller
         $details = $this->detailsViewFactory->build(
             $id, $row, $currentUser, $denyLog, $hasBuy, $requestFlags
         );
-        $commentPagerTop = '';
-        $commentPagerBottom = '';
+        $commentPagerTop = SafeHtml::fromPlainText('');
+        $commentPagerBottom = SafeHtml::fromPlainText('');
         $commentCount = 0;
         $commentsEnabled = ! ActorContext::current()->no('showcomment');
         if ($commentsEnabled) {
@@ -228,14 +228,14 @@ class TorrentDetailsController extends Controller
             'tagHtml' => SafeHtml::fromTrustedHtml($tagHtml),
             'downloadUrl' => $downloadUrl,
             'customFieldsHtml' => SafeHtml::fromTrustedHtml($customFieldsHtml),
-            'technicalInfoResult' => SafeHtml::fromTrustedHtml((string) ($technicalInfoResult ?? '')),
+            'technicalInfoResult' => $technicalInfoResult,
             'descrRaw' => $rawDescr,
             'screenshots' => $screenshots,
             'showDescription' => $showDescription,
             'torrentNamePrefix' => SiteConfig::current()->main->torrentNamePrefix(),
             'commentCount' => $commentCount,
-            'commentPagerTop' => $commentPagerTop instanceof SafeHtml ? $commentPagerTop : SafeHtml::fromTrustedHtml($commentPagerTop),
-            'commentPagerBottom' => $commentPagerBottom instanceof SafeHtml ? $commentPagerBottom : SafeHtml::fromTrustedHtml($commentPagerBottom),
+            'commentPagerTop' => $commentPagerTop,
+            'commentPagerBottom' => $commentPagerBottom,
             'commentsEnabled' => $commentsEnabled,
         ];
     }

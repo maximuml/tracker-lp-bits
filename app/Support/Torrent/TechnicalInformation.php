@@ -194,21 +194,21 @@ class TechnicalInformation
         return $this->mediaInfoArr['Video']['Bit depth'] ?? '';
     }
 
-    public function renderOnDetailsPage(): string
+    public function renderOnDetailsPage(): ?SafeHtml
     {
         if (empty($this->mediaInfo)) {
-            return '';
+            return null;
         }
 
         // .nti-* styles live in public/css/nxt.css — an inline <style>
         // block here is blocked by CSP style-src (no nonce available).
-        return view('components.torrent.technical_info', ['vm' => $this->detailsViewModel()])->render();
+        return SafeHtml::fromTrustedHtml(view('components.torrent.technical_info', ['vm' => $this->detailsViewModel()])->render());
     }
 
     private function detailsViewModel(): TechnicalInfoViewModel
     {
         $rawMediaInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_media_info', [], null), htmlspecialchars($this->mediaInfo));
-        $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawMediaInfo, false));
+        $rawSpoiler = Format::formatComment($rawMediaInfo, false);
 
         $general = $this->getGeneralInfo();
         $videos = $this->getVideoInfoDetailed();
@@ -239,7 +239,7 @@ class TechnicalInformation
         }
         $hiddenAudioSpoiler = $hiddenTracksHtml !== ''
             ? view('components.support.nti-more', [
-                'inner' => SafeHtml::fromTrustedHtml(Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false)),
+                'inner' => Format::formatComment(sprintf('[spoiler=%s]%s[/spoiler]', Locale::trans('torrent.collapse_show_more_audio', [], null), $hiddenTracksHtml), false),
             ])
             : null;
 
@@ -270,7 +270,7 @@ class TechnicalInformation
         $bbcode = sprintf('[spoiler=%s]%s[/spoiler]', $title, $body);
 
         return view('components.support.nti-more', [
-            'inner' => SafeHtml::fromTrustedHtml(Format::formatComment($bbcode, false)),
+            'inner' => Format::formatComment($bbcode, false),
         ]);
     }
 

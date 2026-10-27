@@ -9,6 +9,7 @@ use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Models\Tag;
 use App\Models\Torrent;
 use App\Models\TorrentTag;
+use App\Support\Html\SafeHtml;
 use App\Support\Json;
 use App\Support\Logger;
 use App\Support\State\TagRepositoryState;
@@ -93,7 +94,7 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
      * @param  array<int|string, mixed>  $checked
      * @param  mixed  $ignorePermission
      */
-    public function renderCheckbox(int $searchBoxId, array $checked = [], $ignorePermission = false): string
+    public function renderCheckbox(int $searchBoxId, array $checked = [], $ignorePermission = false): SafeHtml
     {
         $results = $this->listAll($searchBoxId);
         if (! $ignorePermission && ! Permission::canSetTorrentSpecialTag()) {
@@ -109,7 +110,7 @@ class TagRepository extends BaseRepository implements TagRepositoryInterface
             ];
         }
 
-        return view('components.tags.checkboxes', ['searchBoxId' => $searchBoxId, 'tags' => $tags])->render();
+        return SafeHtml::fromTrustedHtml(view('components.tags.checkboxes', ['searchBoxId' => $searchBoxId, 'tags' => $tags])->render());
     }
 
     /**

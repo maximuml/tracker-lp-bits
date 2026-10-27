@@ -113,12 +113,12 @@ class RatioTest extends TestCase
     public function test_user_ratio_html_returns_dash_when_both_zero(): void
     {
         // Legacy: no `<span>` wrap, just the literal three-dash sentinel.
-        $this->assertSame('---', Ratio::userRatioHtml(0, 0, 'tip', 'Infinity'));
+        $this->assertSame('---', Ratio::userRatioHtml(0, 0, 'tip', 'Infinity')->toHtml());
     }
 
     public function test_user_ratio_html_returns_infinity_when_only_uploaded(): void
     {
-        $this->assertSame('Infinity', Ratio::userRatioHtml(1024, 0, 'tip', 'Infinity'));
+        $this->assertSame('Infinity', Ratio::userRatioHtml(1024, 0, 'tip', 'Infinity')->toHtml());
     }
 
     public function test_user_ratio_html_three_decimals_no_color_when_healthy(): void
@@ -126,9 +126,9 @@ class RatioTest extends TestCase
         // 1500/1000 = 1.5 → color() returns '' → no color wrap, bare
         // number. Pinned because the legacy branch explicitly skips
         // the wrapping element when color is empty.
-        $this->assertSame('1.500', Ratio::userRatioHtml(1500, 1000, 'tip', 'Infinity'));
+        $this->assertSame('1.500', Ratio::userRatioHtml(1500, 1000, 'tip', 'Infinity')->toHtml());
         // Exactly 1.0 falls into the healthy bucket too.
-        $this->assertSame('1.000', Ratio::userRatioHtml(1000, 1000, 'tip', 'Infinity'));
+        $this->assertSame('1.000', Ratio::userRatioHtml(1000, 1000, 'tip', 'Infinity')->toHtml());
     }
 
     public function test_user_ratio_html_uses_provided_infinity_label(): void
@@ -136,7 +136,7 @@ class RatioTest extends TestCase
         // The proxy passes the i18n'd "label.infinite" string. Verify
         // it ends up inside the span verbatim (no double-escape).
         $result = Ratio::userRatioHtml(1, 0, 'tip', '无穷大');
-        $this->assertSame('无穷大', $result);
+        $this->assertSame('无穷大', $result->toHtml());
     }
 
     public function test_color_class_maps_each_bucket_and_empty_when_healthy(): void

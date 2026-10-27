@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\Models\SearchBox;
+use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use Filament\Forms;
 use Filament\Schemas\Components\Fieldset;
@@ -29,13 +30,13 @@ class SearchBoxSchemaBuilder
      * @param  mixed  $searchBox
      * @param  array<int|string, mixed>  $torrentInfo
      */
-    public function renderTaxonomySelect($searchBox, array $torrentInfo = []): string
+    public function renderTaxonomySelect($searchBox, array $torrentInfo = []): SafeHtml
     {
         if (! $searchBox instanceof SearchBox) {
             $searchBox = SearchBox::get(intval($searchBox));
         }
         if (! $searchBox instanceof SearchBox) {
-            return '';
+            return SafeHtml::fromPlainText('');
         }
         $results = [];
         // Keep the order
@@ -55,7 +56,7 @@ class SearchBoxSchemaBuilder
             }
         }
 
-        return implode('&nbsp;&nbsp;', $results);
+        return SafeHtml::fromTrustedHtml(implode('&nbsp;&nbsp;', $results));
     }
 
     /**

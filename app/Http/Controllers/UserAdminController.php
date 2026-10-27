@@ -115,8 +115,8 @@ class UserAdminController extends BasePageController
             $rows[] = [
                 'id' => (int) $arr['id'],
                 'username_html' => UserDisplay::username((int) $arr['id']),
-                'addedFormatted' => SafeHtml::fromTrustedHtml((string) Time::format($arr['added'], true, false)),
-                'lastAccessFormatted' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_access'], true, false)),
+                'addedFormatted' => Time::formatHtml($arr['added'], true, false),
+                'lastAccessFormatted' => Time::formatHtml($arr['last_access'], true, false),
                 'class_name' => UserClass::name((int) $arr['class'], false, true, true),
                 'country' => (int) $arr['country'],
                 'country_flagpic' => (string) ($arr['country_flagpic'] ?? ''),

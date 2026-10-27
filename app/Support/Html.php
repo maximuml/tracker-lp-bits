@@ -30,7 +30,7 @@ final class Html
 
     // ── Tag ─────────────────────────────────────────────────────────
 
-    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): string
+    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): SafeHtml
     {
         return Tag::keyShortcutScript($page, $pages, $nonce);
     }
@@ -85,7 +85,7 @@ final class Html
         return Tag::tooltipContainer($items, $width);
     }
 
-    public static function quickReply(string $formName, string $textareaName, string $submitLabel): string
+    public static function quickReply(string $formName, string $textareaName, string $submitLabel): SafeHtml
     {
         return Tag::quickReply($formName, $textareaName, $submitLabel);
     }

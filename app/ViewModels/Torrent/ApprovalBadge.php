@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Torrent;
 
-use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Approval-status icon for a torrent row. `icon` is the static SVG from
@@ -15,6 +15,6 @@ final class ApprovalBadge
 {
     public function __construct(
         public readonly string $title,
-        public readonly SafeHtml $icon,
+        public readonly ?Htmlable $icon,
     ) {}
 }

@@ -173,8 +173,8 @@ class UserDetailController extends Controller
             }
         }
         $clientSelectHtml = $clientRows === []
-            ? ''
-            : view('components.userdetails.clients', ['rows' => $clientRows])->render();
+            ? null
+            : SafeHtml::fromTrustedHtml(view('components.userdetails.clients', ['rows' => $clientRows])->render());
 
         $trueTraffic = $this->userDetailRepository->getTrueTraffic($id);
 
@@ -185,15 +185,15 @@ class UserDetailController extends Controller
             2,
             ''
         );
-        $migratedHelp = view('components.userdetails.migrated_help', [
+        $migratedHelp = SafeHtml::fromTrustedHtml(view('components.userdetails.migrated_help', [
             'pre' => $migratedHelpPre,
             'post' => $migratedHelpPost,
             'url' => $userManageSystemUrl,
             'linkLabel' => (string) __('functions.text_management_system'),
-        ])->render();
+        ])->render());
 
         $usernameHtml = UserDisplay::username($user['id'], true, false);
-        $invitedByHtml = $user['invited_by'] > 0 ? UserDisplay::username($user['invited_by']) : '';
+        $invitedByHtml = $user['invited_by'] > 0 ? UserDisplay::username($user['invited_by']) : SafeHtml::fromPlainText('');
         $avatarHtml = $user['avatar'] ? UserDisplay::avatarImageWithContext(htmlspecialchars(trim((string) $user['avatar']))) : '';
 
         $joinWeeks = '';
@@ -253,13 +253,13 @@ document.getElementById('remove-leech-warn').addEventListener('click', function 
 JS, \json_encode(__('userdetails.sure_to_remove_leech_warn'))), 'footer', false);
         }
 
-        $warnedByHtml = '';
+        $warnedByHtml = null;
         if (($user['timeswarned'] ?? 0) > 0 && $user['warnedby'] !== 'System') {
             $arr = $this->userDetailRepository->getWarnedBy((int) $user['warnedby']);
             if ($arr !== null) {
-                $warnedByHtml = view('components.userdetails.warned_by', [
+                $warnedByHtml = SafeHtml::fromTrustedHtml(view('components.userdetails.warned_by', [
                     'userHtml' => UserDisplay::username($arr['id']),
-                ])->render();
+                ])->render());
             }
         }
 
@@ -393,7 +393,7 @@ JS, 'footer', false);
             'countryName' => (string) ($countryRow['name'] ?? ''),
             'locationInfo' => $locationInfo,
             'locationInfoHtml' => $locationInfoHtml,
-            'clientSelectHtml' => SafeHtml::fromTrustedHtml($clientSelectHtml),
+            'clientSelectHtml' => $clientSelectHtml,
             'trueTraffic' => $trueTraffic,
             'trueDownload' => $trueDownload,
             'trueUpload' => $trueUpload,
@@ -407,12 +407,12 @@ JS, 'footer', false);
             'elapsedLastWarn' => $elapsedLastWarn,
             'warnedUntilPretty' => $warnedUntilPretty,
             'leechwarnUntilPretty' => $leechwarnUntilPretty,
-            'migratedHelp' => SafeHtml::fromTrustedHtml($migratedHelp),
+            'migratedHelp' => $migratedHelp,
             'userManageSystemUrl' => $userManageSystemUrl,
-            'usernameHtml' => SafeHtml::fromTrustedHtml($usernameHtml),
-            'invitedByHtml' => SafeHtml::fromTrustedHtml($invitedByHtml),
-            'avatarHtml' => SafeHtml::fromTrustedHtml($avatarHtml),
-            'warnedByHtml' => SafeHtml::fromTrustedHtml($warnedByHtml),
+            'usernameHtml' => $usernameHtml,
+            'invitedByHtml' => $invitedByHtml,
+            'avatarHtml' => $avatarHtml,
+            'warnedByHtml' => $warnedByHtml,
             'bonusTableHtml' => SafeHtml::fromTrustedHtml($bonusTableHtml),
             'hrStatusHtml' => SafeHtml::fromTrustedHtml($hrStatusHtml),
             'ipHistoryCount' => $ipHistoryCount,

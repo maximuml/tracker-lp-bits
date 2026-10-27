@@ -65,7 +65,7 @@ final class TorrentDetailsViewFactory
                 : (string) __('details.text_blank'),
             uploadTime: ($currentUser['timetype'] ?? '') !== 'timealive'
                 ? SafeHtml::fromPlainText((string) $row['added'])
-                : SafeHtml::fromTrustedHtml((string) Time::format((string) $row['added'], true, false)),
+                : Time::formatHtml((string) $row['added'], true, false),
             showOrHideTitle: self::plainTitle('details.title_show_or_hide'),
             downloadAllowed: $downloadAllowed,
             saveAs: (string) $row['save_as'],
@@ -273,7 +273,7 @@ JS, \json_encode($approvalTitle)), 'footer', false);
             hits: $row['hits'],
             timesCompleted: $row['times_completed'],
             torrentId: $id,
-            lastSeeder: SafeHtml::fromTrustedHtml((string) Time::format((string) $row['last_action'])),
+            lastSeeder: Time::formatHtml((string) $row['last_action']),
             lastSeederLabel: self::plainTitle('details.row_last_seeder'),
             snatchesPre: $snatchesPre,
             snatchesPost: $snatchesPost,

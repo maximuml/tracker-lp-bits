@@ -914,15 +914,15 @@ class BdInfoExtra
     /**
      * 在详情页面渲染
      */
-    public function renderOnDetailsPage(): string
+    public function renderOnDetailsPage(): SafeHtml
     {
-        return view('components.torrent.bdinfo', ['vm' => $this->detailsViewModel()])->render();
+        return SafeHtml::fromTrustedHtml(view('components.torrent.bdinfo', ['vm' => $this->detailsViewModel()])->render());
     }
 
     private function detailsViewModel(): BdInfoViewModel
     {
         $rawBdInfo = sprintf('[spoiler=%s]<pre>%s</pre>[/spoiler]', Locale::trans('torrent.show_hide_bd_info', [], null), htmlspecialchars($this->bdInfo));
-        $rawSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($rawBdInfo, false));
+        $rawSpoiler = Format::formatComment($rawBdInfo, false);
 
         $allDiscs = $this->getAllDiscs();
         $hasValidData = false;
@@ -1008,7 +1008,7 @@ class BdInfoExtra
                 : Locale::trans('torrent.collapse_show_more_subtitles', [], null);
 
             $spoiler = sprintf('[spoiler=%s]%s[/spoiler]', $spoilerTitle, $hiddenContent);
-            $hiddenSpoiler = SafeHtml::fromTrustedHtml(Format::formatComment($spoiler, false));
+            $hiddenSpoiler = Format::formatComment($spoiler, false);
         }
 
         return new BdInfoColumnViewModel(visibleRows: $visibleRows, hiddenSpoiler: $hiddenSpoiler);

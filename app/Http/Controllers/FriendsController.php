@@ -107,7 +107,7 @@ class FriendsController extends BasePageController
             'userid' => $userid,
             'friendsList' => $friendsList,
             'blocks' => $blocks,
-            'titleUsername' => SafeHtml::fromTrustedHtml($userDisplayMap[$userid] ?? UserDisplay::username($userid)),
+            'titleUsername' => $userDisplayMap[$userid] ?? UserDisplay::username($userid),
             'title' => (__('friends.head_personal_lists_for'))
                 .(string) ($titleRow['username'] ?? $currentUser['username'] ?? ''),
             'canViewUserList' => Permission::can(PermissionEnum::VIEW_USER_LIST),

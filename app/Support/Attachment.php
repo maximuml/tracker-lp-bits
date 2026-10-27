@@ -82,7 +82,7 @@ final class Attachment
         $href = "/web/getattachment?id=$id&dlkey=$dlkey";
 
         return trim(view('components.support.attach-file', [
-            'icon' => SafeHtml::fromTrustedHtml($icon),
+            'icon' => $icon,
             'href' => $href,
             'id' => $id,
             'filename' => $filename,
@@ -198,7 +198,7 @@ final class Attachment
         }, $text, 20);
     }
 
-    private static function iconForFileType(string $filetype): string
+    private static function iconForFileType(string $filetype): SafeHtml
     {
         [$alt, $icon] = match ($filetype) {
             'application/x-bittorrent' => ['torrent', 'torrent'],
@@ -212,7 +212,7 @@ final class Attachment
             default => ['other', 'common'],
         };
 
-        return trim(view('components.support.attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
+        return SafeHtml::fromTrustedHtml(view('components.support.attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
     }
 
     private static function attachmentRepository(): AttachmentRepositoryInterface

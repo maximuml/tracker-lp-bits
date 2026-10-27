@@ -266,10 +266,10 @@ final class BonusPageService
                 price: $points,
                 pointsShort: $pointsShort,
                 name: $bonusarray['name'] instanceof ViewContract
-                    ? SafeHtml::fromTrustedHtml($bonusarray['name']->render())
+                    ? $bonusarray['name']
                     : SafeHtml::fromUntrustedHtml((string) $bonusarray['name']),
                 description: $bonusarray['description'] instanceof ViewContract
-                    ? SafeHtml::fromTrustedHtml($bonusarray['description']->render())
+                    ? $bonusarray['description']
                     : SafeHtml::fromUntrustedHtml((string) $bonusarray['description']),
                 pointsLabel: $pointsLabel,
                 trade: $trade,

@@ -19,13 +19,24 @@ use Tests\Attributes\TestCategory;
  *
  * Conversions that remove call sites:
  *  - `fromTrustedHtml(view(...)->render())` → return the `View` object
- *    (it is `Htmlable`; `{{ }}` renders it unescaped);
+ *    (it is `Htmlable`; `{{ }}` renders it unescaped) — BUT only when the
+ *    value is NOT placed as a top-level element of another `view()`'s
+ *    data array: `View::gatherData()` eagerly renders `Renderable`
+ *    data values into plain strings, after which `{{ }}`/`@safeHtml`
+ *    escapes them. Use `SafeHtml` for values destined for view data;
+ *    `View` is safe only as an object property or a top-level return.
  *  - `fromTrustedHtml($plainText)` → `SafeHtml::fromPlainText($plainText)`;
  *  - `fromTrustedHtml($untrustedHtml)` → `SafeHtml::fromUntrustedHtml()`.
  *
  * Baseline captured 2026-10-02 after the trusted-HTML squeeze branch:
  *   - 187 call sites across 67 files (SafeHtml.php's own definition is
- *     excluded).
+ *     excluded). Raised to 121 on 2026-10-27: six View-in-view-data
+ *     conversions were reverted after `gatherData` escaping leaks were
+ *     identified (technicalInfoResult, clientSelectHtml, migratedHelp,
+ *     warnedByHtml, attendance headers, attach-icon). Raised to 117 later
+ *     that day: the VERSION constant carries a markup-bearing footer
+ *     string (`Powered by <a href=…>`), so its fromPlainText conversion
+ *     was reverted after NoLeakedMarkupTest caught the escaped link.
  *
  * The baseline may only be lowered, never raised.
  *
@@ -38,7 +49,7 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
     private const APP_DIR = __DIR__.'/../../app';
 
     /** Baseline: fromTrustedHtml() call sites in app/ PHP code. */
-    private const BASELINE_TRUSTED_HTML_CALLS = 192;
+    private const BASELINE_TRUSTED_HTML_CALLS = 117;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

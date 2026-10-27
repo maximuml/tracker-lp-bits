@@ -19,7 +19,6 @@ use App\Support\Api;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
-use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
@@ -245,7 +244,7 @@ JS;
 
         $naText = __('uploaders.text_not_available');
         foreach ($rows as &$row) {
-            $row['usernameHtml'] = SafeHtml::fromTrustedHtml((string) UserDisplay::username($row['userid'], false, true, true, false, false, true));
+            $row['usernameHtml'] = UserDisplay::username($row['userid'], false, true, true, false, false, true);
             $row['sizeFormatted'] = $row['torrent_size'] ? Format::size($row['torrent_size']) : '0';
         }
         unset($row);

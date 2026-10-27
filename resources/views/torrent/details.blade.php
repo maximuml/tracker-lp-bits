@@ -38,7 +38,7 @@
 <x-settings-row :label="__('details.row_action')">@include('components.torrent.details.actions')</x-settings-row>
 <x-settings-row :label="__('details.torrent_dl_url')"><a title="{{ __('details.torrent_dl_url_notice') ?? '' }}" href="{{ $downloadUrl }}">{{ __('details.torrent_dl_url_text') }}</a></x-settings-row>
 {{ $customFieldsHtml }}
-@if (! $technicalInfoResult->isEmpty())
+@if ($technicalInfoResult !== null)
 <x-settings-row :label="__('functions.text_technical_info')">{{ $technicalInfoResult }}</x-settings-row>
 @endif
 @if (count($screenshots ?? []) > 0)

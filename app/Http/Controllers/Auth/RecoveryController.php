@@ -128,7 +128,7 @@ class RecoveryController extends Controller
         bool $isResetLink,
     ): Response {
         $captchaEnabled = $this->authService->isCaptchaEnabled();
-        $captchaMarkup = '';
+        $captchaMarkup = SafeHtml::fromPlainText('');
 
         if ($captchaEnabled && $resetToken === null) {
             $captchaMarkup = Captcha::renderHtml('yes', (string) $request->query('secret', ''), 'grid');
@@ -138,7 +138,7 @@ class RecoveryController extends Controller
             'langFolder' => $langFolder,
             'languages' => Locale::languageList('site_lang', true),
             'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
+            'captchaMarkup' => $captchaMarkup,
             'resetUserId' => $resetUserId,
             'resetToken' => $resetToken,
             'resetError' => $resetError,

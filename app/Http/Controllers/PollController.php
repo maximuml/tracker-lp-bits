@@ -158,7 +158,7 @@ class PollController extends BasePageController
             $answerRows = array_map(static function ($answerRow) use ($userDisplayMap) {
                 $row = (array) $answerRow;
                 $uid = (int) ($row['userid'] ?? 0);
-                $row['usernameHtml'] = SafeHtml::fromTrustedHtml((string) ($userDisplayMap[$uid] ?? UserDisplay::username($uid)));
+                $row['usernameHtml'] = $userDisplayMap[$uid] ?? UserDisplay::username($uid);
 
                 return $row;
             }, $answers);
@@ -174,7 +174,7 @@ class PollController extends BasePageController
             return $this->renderPage($request, 'polloverview', true, [
                 'mode' => 'detail',
                 'poll' => $poll,
-                'pollAdded' => SafeHtml::fromTrustedHtml((string) Time::format($poll['added'] ?? '')),
+                'pollAdded' => Time::formatHtml($poll['added'] ?? ''),
                 'pollOptions' => $pollOptions,
                 'count' => $count,
                 'answers' => $answerRows,
@@ -190,7 +190,7 @@ class PollController extends BasePageController
 
         $pollRows = array_map(static function ($pollRow) {
             $row = (array) $pollRow;
-            $row['addedHtml'] = SafeHtml::fromTrustedHtml((string) Time::format($row['added'] ?? ''));
+            $row['addedHtml'] = Time::formatHtml($row['added'] ?? '');
 
             return $row;
         }, $polls);

@@ -342,7 +342,7 @@ class ModerationController extends BasePageController
 
             $row['type_label'] = $type;
             $row['reporting'] = SafeHtml::fromTrustedHtml($reporting);
-            $row['added_formatted'] = SafeHtml::fromTrustedHtml((string) Time::format($row['added']));
+            $row['added_formatted'] = Time::formatHtml($row['added']);
             $row['reporterHtml'] = UserDisplay::username($row['addedby']);
             $rows[] = $row;
         }

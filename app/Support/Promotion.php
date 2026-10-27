@@ -12,7 +12,6 @@ use App\Models\Torrent;
 use App\Models\TorrentState;
 use App\Repositories\TorrentDetailRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\Html\SafeHtml;
 use App\Support\State\PromotionState;
 use App\ViewModels\Torrent\PromotionBadge;
 use App\ViewModels\Torrent\PromotionDomtt;
@@ -187,16 +186,16 @@ final class Promotion
                     $baseTime = strtotime($added);
                     $futureTime = ($baseTime === false ? 0 : $baseTime) + $expire * 86400;
                 }
-                $timeoutStr = Time::format(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
-                if ($timeoutStr) {
+                $timeoutStr = Time::formatHtml(date('Y-m-d H:i:s', $futureTime), false, false, true, false, true);
+                if (! $timeoutStr->isEmpty()) {
                     $text = (string) __('functions.'.$config['text']);
-                    $timeout = SafeHtml::fromTrustedHtml((string) $timeoutStr);
+                    $timeout = $timeoutStr;
                     $subColor = $config['subColor'];
                     $domtt = new PromotionDomtt(
                         cssClass: (string) $config['class'],
                         text: $text,
                         endIn: (string) __('functions.text_will_end_in'),
-                        timeout: SafeHtml::fromTrustedHtml($timeoutStr),
+                        timeout: $timeoutStr,
                     );
                 } else {
                     $promotion = 1;

@@ -59,7 +59,7 @@ class UserResource extends JsonResource
             'seedtime_text' => Format::prettyTimeWithLocale((int) ($this->seedtime ?? 0)),
             'leechtime' => (int) ($this->leechtime ?? 0),
             'leechtime_text' => Format::prettyTimeWithLocale((int) ($this->leechtime ?? 0)),
-            'share_ratio' => Ratio::forUserId($this->id),
+            'share_ratio' => (string) Ratio::forUserId($this->id),
             'seeding_leeching_data' => $this->whenHas('seeding_leeching_data'),
             'inviter' => new UserResource($this->whenLoaded('inviter')),
         ];

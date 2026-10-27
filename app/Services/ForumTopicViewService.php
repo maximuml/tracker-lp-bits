@@ -236,7 +236,7 @@ final class ForumTopicViewService
                 postCount: (int) $forumposts,
                 uploaded: Format::size($arr2['uploaded'] ?? 0),
                 downloaded: Format::size($arr2['downloaded'] ?? 0),
-                ratio: Ratio::forUserId((int) ($arr2['id'] ?? 0)),
+                ratio: Ratio::forUserId($posterid),
                 body: $bodyContent,
                 signature: $signature !== ''
                     ? $renderFmt('fmt_sig2_'.md5($signature), static fn () => Format::formatComment($signature, true, false, false, true, 500, true, false, 1, 200))
@@ -244,7 +244,7 @@ final class ForumTopicViewService
                 editedBy: $editedBy,
                 editedAtRaw: $editedAtRaw,
                 online: ($arr2['last_access'] ?? '') > $dt,
-                posterId: (int) ($arr2['id'] ?? 0),
+                posterId: $posterid,
                 posterName: (string) ($arr2['username'] ?? ''),
                 canQuote: $maypost && $canViewProtected,
                 canDelete: $isMod,

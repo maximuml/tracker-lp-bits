@@ -225,7 +225,7 @@ final class TagRepositoryTest extends TestCase
     {
         $tag = $this->createTag(['name' => 'Checkbox Tag']);
 
-        $html = $this->repository->renderCheckbox(0, [$tag->id], true);
+        $html = $this->repository->renderCheckbox(0, [$tag->id], true)->toHtml();
 
         $this->assertStringContainsString('<label>', $html);
         $this->assertStringContainsString('Checkbox Tag', $html);
@@ -236,7 +236,7 @@ final class TagRepositoryTest extends TestCase
     {
         $tag = $this->createTag(['name' => 'Plain Tag']);
 
-        $html = $this->repository->renderCheckbox(0, [], true);
+        $html = $this->repository->renderCheckbox(0, [], true)->toHtml();
 
         $this->assertStringContainsString('Plain Tag', $html);
         $this->assertStringNotContainsString(' checked', $html);

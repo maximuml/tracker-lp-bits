@@ -516,7 +516,7 @@ final class ForumTopicViewServiceTest extends TestCase
         }
     }
 
-    private function viewTopicVm(array $curUser = [], array $forumRow = [], array $topicAttrs = [], array $posterAttrs = [], array $query = ['topicid' => 1]): ViewTopicViewModel
+    private function viewTopicVm(array $curUser = [], array $forumRow = [], array $topicAttrs = [], array $posterAttrs = [], array $query = ['topicid' => 1], array $postAttrs = [], int $postCount = 1): ViewTopicViewModel
     {
         $repo = $this->mockForumRepo();
         $this->mockCache();
@@ -545,6 +545,9 @@ final class ForumTopicViewServiceTest extends TestCase
         $post->added = Carbon::parse('2024-01-01 12:00:00');
         $post->body = 'Hello world';
         $post->editedby = 0;
+        foreach ($postAttrs as $key => $value) {
+            $post->setAttribute($key, $value);
+        }
 
         $user = new User;
         $user->id = $userId;
@@ -569,7 +572,7 @@ final class ForumTopicViewServiceTest extends TestCase
             1 => array_merge(['id' => 1, 'name' => 'Test Forum', 'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0], $forumRow),
         ]);
         $this->topicRepo->shouldReceive('incrementTopicViews')->with(1)->andReturn(true);
-        $this->postRepo->shouldReceive('countTopicPosts')->with(1, isset($query['authorid']) ? (int) $query['authorid'] : null)->andReturn(1);
+        $this->postRepo->shouldReceive('countTopicPosts')->with(1, isset($query['authorid']) ? (int) $query['authorid'] : null)->andReturn($postCount);
         $this->postRepo->shouldReceive('getTopicPosts')->withAnyArgs()->andReturn(new EloquentCollection([$post]));
         $repo->shouldReceive('getUsersByIds')->andReturn(new EloquentCollection([$userId => $user]));
         $this->postRepo->shouldReceive('countUserPosts')->andReturn(0);
@@ -927,5 +930,80 @@ final class ForumTopicViewServiceTest extends TestCase
         $this->assertInstanceOf(ViewTopicViewModel::class, $result);
         $this->assertCount(1, $result->posts);
         $this->assertStringContainsString('Hello world', (string) $result->posts[0]->body);
+    }
+
+    public function test_viewtopic_highlight_marks_subject_and_body(): void
+    {
+        $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1, 'highlight' => 'Test'], ['body' => 'Test body here']);
+
+        $this->assertStringContainsString('striking', (string) $vm->subject);
+        $this->assertStringContainsString('striking', (string) $vm->posts[0]->body);
+    }
+
+    public function test_viewtopic_without_highlight_keeps_subject_plain(): void
+    {
+        $vm = $this->viewTopicVm([], [], ['subject' => 'A <b>bold</b> topic']);
+
+        $this->assertStringContainsString('A &lt;b&gt;bold&lt;/b&gt; topic', (string) $vm->subject);
+        $this->assertStringNotContainsString('striking', (string) $vm->subject);
+        $this->assertStringNotContainsString('striking', (string) $vm->posts[0]->body);
+    }
+
+    public function test_viewtopic_editedby_valid_id_sets_editedby(): void
+    {
+        $this->createDbUser(999);
+        $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1], ['editedby' => 999, 'editdate' => '2024-02-01 10:00:00']);
+
+        $this->assertNotNull($vm->posts[0]->editedBy);
+        $this->assertStringContainsString('user999', (string) $vm->posts[0]->editedBy);
+        $this->assertSame('2024-02-01 10:00:00', $vm->posts[0]->editedAtRaw);
+    }
+
+    public function test_viewtopic_editedby_zero_keeps_editedby_null(): void
+    {
+        $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1], ['editedby' => 0]);
+
+        $this->assertNull($vm->posts[0]->editedBy);
+        $this->assertNull($vm->posts[0]->editedAtRaw);
+    }
+
+    public function test_viewtopic_post_byline_flags(): void
+    {
+        $this->createDbUser(999, ['warned' => 1]);
+        $vm = $this->viewTopicVm();
+
+        $by = (string) $vm->posts[0]->by;
+        $this->assertStringContainsString('userdetails?id=999', $by);
+        $this->assertStringContainsString('<b>user999</b>', $by);
+        $this->assertStringContainsString('class="warned"', $by);
+        $this->assertStringNotContainsString('warnedbig', $by);
+        $this->assertStringNotContainsString('target', $by);
+        $this->assertStringNotContainsString('(<a', $by);
+        $this->assertStringContainsString(' (', $by);
+    }
+
+    public function test_viewtopic_ratio_uses_poster_user_row(): void
+    {
+        $this->createDbUser(999, ['uploaded' => 2000, 'downloaded' => 1000]);
+        $vm = $this->viewTopicVm();
+
+        $this->assertStringContainsString('2.000', (string) $vm->posts[0]->ratio);
+    }
+
+    public function test_viewtopic_keyscript_multi_page_bounds(): void
+    {
+        $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1], [], 21);
+
+        $keyScript = (string) $vm->keyScript;
+        $this->assertStringContainsString('var maxpage=2;', $keyScript);
+        $this->assertStringContainsString('var currentpage=0;', $keyScript);
+    }
+
+    public function test_viewtopic_keyscript_single_page_bounds(): void
+    {
+        $vm = $this->viewTopicVm();
+
+        $keyScript = (string) $vm->keyScript;
+        $this->assertStringContainsString('var maxpage=0;', $keyScript);
     }
 }

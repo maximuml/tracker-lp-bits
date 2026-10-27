@@ -7,7 +7,7 @@
 <body>
 <div style="padding: 15px;display: flex;justify-content: center">
     <div style="max-width: 1120px;">
-        <?php echo $content?>
+        {{ $content }}
     </div>
 </div>
 </body>

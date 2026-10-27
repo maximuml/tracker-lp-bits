@@ -368,6 +368,25 @@ final class Time
     }
 
     /**
+     * `SafeHtml` variant of {@see format()} — owns the trust marker at
+     * the producer so callers stop wrapping the `<span title>` markup
+     * with `fromTrustedHtml()`. `null`/`false` results collapse to an
+     * empty `SafeHtml`, matching the legacy `(string) format()` casts.
+     */
+    public static function formatHtml(
+        mixed $time,
+        bool $withago = true,
+        bool $twoline = false,
+        bool $forceago = false,
+        bool $oneunit = false,
+        bool $isfuturetime = false,
+    ): SafeHtml {
+        $result = self::format($time, $withago, $twoline, $forceago, $oneunit, $isfuturetime);
+
+        return SafeHtml::fromTrustedHtml(is_string($result) ? $result : '');
+    }
+
+    /**
      * Display parts of {@see format()} for the semantic `<time>` element
      * rendered by the `x-time` component — the element markup lives in
      * Blade, this only supplies the escaped-attribute-safe raw values.

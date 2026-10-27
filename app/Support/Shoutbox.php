@@ -271,7 +271,7 @@ final class Shoutbox
     {
         $timeString = date('Y-m-d H:i:s', $timestamp);
 
-        return SafeHtml::fromTrustedHtml((string) Time::format($timeString, true, false, true, $oneUnit));
+        return Time::formatHtml($timeString, true, false, true, $oneUnit);
     }
 
     /**

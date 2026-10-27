@@ -12,7 +12,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Services\PermissionChecker;
 use App\Support\Category;
 use App\Support\Format;
-use App\Support\Html\SafeHtml;
 use App\Support\Ratio;
 use App\Support\Strings;
 use App\Support\Time;
@@ -150,8 +149,8 @@ class TorrentAjaxController extends BasePageController
                 'ratioClass' => $ratioClass,
                 'seedtime' => Format::prettyTimeWithLocale((float) $arr['seedtime']),
                 'leechtime' => Format::prettyTimeWithLocale((float) $arr['leechtime']),
-                'completedAt' => SafeHtml::fromTrustedHtml((string) Time::format($arr['completedat'], true, false)),
-                'lastAction' => SafeHtml::fromTrustedHtml((string) Time::format($arr['last_action'], true, false)),
+                'completedAt' => Time::formatHtml($arr['completedat'], true, false),
+                'lastAction' => Time::formatHtml($arr['last_action'], true, false),
                 'reportUserId' => (int) $arr['userid'],
                 'reportLinked' => $privacy != 'strong' || Permission::can(PermissionEnum::VIEW_ANONYMOUS),
             ];

@@ -20,7 +20,6 @@ use App\Services\ForumPageService;
 use App\Services\ForumService;
 use App\Support\Avatar;
 use App\Support\Format;
-use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserDisplay;
@@ -174,7 +173,7 @@ class ForumController extends BasePageController
             $row['avatarHtml'] = UserDisplay::avatarImageWithContext(Avatar::forUser((int) ($row['user'] ?? 0), $avatar));
             $row['usernameHtml'] = $userDisplayMap[(int) ($row['user'] ?? 0)]
                 ?? UserDisplay::username((int) ($row['user'] ?? 0), false, true, true, false, false, true);
-            $row['timeHtml'] = SafeHtml::fromTrustedHtml((string) Time::format((string) ($row['added'] ?? '')));
+            $row['timeHtml'] = Time::formatHtml((string) ($row['added'] ?? ''));
             $row['commentHtml'] = Format::formatComment((string) ($row['text'] ?? ''));
         }
         unset($row);

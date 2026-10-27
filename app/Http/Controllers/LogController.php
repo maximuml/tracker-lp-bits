@@ -134,7 +134,7 @@ class LogController extends BasePageController
                 str_contains($txt, 'was uploaded by') => 'nx-color-green',
                 default => '',
             };
-            $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));
+            $row['dateHtml'] = Time::formatHtml((string) ($row['added'] ?? ''), true, false);
             $uid = (int) ($row['uid'] ?? 0);
             $row['usernameHtml'] = $uid > 0 ? ($userDisplayMap[$uid] ?? UserDisplay::username($uid)) : SafeHtml::fromPlainText('System');
         }
@@ -333,7 +333,7 @@ class LogController extends BasePageController
         $chronicleRows = $this->logRepository->getChronicle($q, (int) $offset, $perpage);
 
         foreach ($chronicleRows as &$row) {
-            $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));
+            $row['dateHtml'] = Time::formatHtml((string) ($row['added'] ?? ''), true, false);
             $row['bodyHtml'] = Format::formatComment((string) ($row['txt'] ?? ''), true, false, true);
         }
         unset($row);
@@ -366,7 +366,7 @@ class LogController extends BasePageController
         $newsRows = $this->logRepository->getNews($filters, (int) $offset, $perpage);
 
         foreach ($newsRows as &$row) {
-            $row['dateHtml'] = SafeHtml::fromTrustedHtml((string) (Time::format((string) ($row['added'] ?? ''), true, false) ?? ''));
+            $row['dateHtml'] = Time::formatHtml((string) ($row['added'] ?? ''), true, false);
             $row['bodyHtml'] = Format::formatComment((string) ($row['body'] ?? ''), false, false, true);
         }
         unset($row);
@@ -441,7 +441,7 @@ class LogController extends BasePageController
 
             $pollData[] = [
                 'poll' => $poll,
-                'added' => SafeHtml::fromTrustedHtml((string) Time::format($poll['added'] ?? '', true, false)),
+                'added' => Time::formatHtml($poll['added'] ?? '', true, false),
                 'totalVotes' => number_format($totalVotes),
                 'options' => $computedOptions,
             ];

@@ -120,7 +120,7 @@ class InfoController extends BasePageController
                 ])->render();
             }
             $items[] = [
-                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? ''), true, false, false)),
+                'added' => Time::formatHtml((string) ($arr['added'] ?? ''), true, false, false),
                 'forumid' => (int) ($arr['f_id'] ?? 0),
                 'forumname' => (string) ($arr['name'] ?? ''),
                 'topicid' => (int) ($arr['t_id'] ?? 0),
@@ -153,7 +153,7 @@ class InfoController extends BasePageController
             }
             $commPage = (int) floor(($commentPageMap[$commentId] ?? 0) / 20);
             $items[] = [
-                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($arr['added'] ?? ''), true, false, false)),
+                'added' => Time::formatHtml((string) ($arr['added'] ?? ''), true, false, false),
                 'torrentid' => (int) ($arr['t_id'] ?? 0),
                 'torrentName' => $torrent,
                 'commentid' => $commentId,

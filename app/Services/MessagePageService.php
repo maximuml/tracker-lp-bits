@@ -194,7 +194,7 @@ class MessagePageService
                 'id' => (int) ($message->id ?? 0),
                 'subject' => $subject,
                 'username' => $username,
-                'added' => SafeHtml::fromTrustedHtml((string) Time::format((string) ($message->added?->format('Y-m-d H:i:s') ?? ''), true, false)),
+                'added' => Time::formatHtml((string) ($message->added?->format('Y-m-d H:i:s') ?? ''), true, false),
                 'unread' => (bool) ($message->unread ?? false),
             ];
         }
@@ -377,7 +377,7 @@ class MessagePageService
             'subject' => $subject,
             'from' => $from,
             'sender' => $sender,
-            'added' => SafeHtml::fromTrustedHtml((string) Time::format($added, true, false)),
+            'added' => Time::formatHtml($added, true, false),
             'showUnread' => $showUnread,
             'body' => $body,
             'replyHref' => $replyHref,

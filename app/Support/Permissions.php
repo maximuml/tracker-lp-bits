@@ -105,13 +105,6 @@ final class Permissions
         throw new InsufficientPermissionException;
     }
 
-    public static function assertHasPermission(bool $permissionCheckResult): void
-    {
-        if (! $permissionCheckResult) {
-            throw new InsufficientPermissionException;
-        }
-    }
-
     public static function abilityLabel(RoutePermissionEnum $permission): string
     {
         return sprintf('ability:%s', $permission->value);

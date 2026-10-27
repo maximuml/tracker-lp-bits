@@ -12,17 +12,6 @@ namespace App\Support\Html;
 final class Escape
 {
     /**
-     * Escape a string for safe output inside an HTML attribute value
-     * (e.g. `value="..."`). Uses ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE
-     * so both single and double quotes are encoded and invalid UTF-8
-     * is replaced rather than passed through.
-     */
-    public static function escapeAttr(string $value): string
-    {
-        return htmlspecialchars($value, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8');
-    }
-
-    /**
      * Remove disallowed direct children (e.g. <br>) from <ul>/<ol> elements
      * to satisfy WCAG 2.1 AA "list" rule.
      */

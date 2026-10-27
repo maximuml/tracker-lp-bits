@@ -34,14 +34,6 @@ final class Html
         return Tag::keyShortcutScript($page, $pages, $nonce);
     }
 
-    /**
-     * @param  array<string, string>  $labels
-     */
-    public static function promotionSelectOptions(int $selected, int $hide, array $labels): SafeHtml
-    {
-        return Tag::promotionSelectOptions($selected, $hide, $labels);
-    }
-
     public static function promotionSelection(int $selected = 0, int $hide = 0): SafeHtml
     {
         return Tag::promotionSelection($selected, $hide);
@@ -97,15 +89,5 @@ final class Html
     public static function formatTextAlign(string $text, string $align): string
     {
         return Tag::formatTextAlign($text, $align);
-    }
-
-    // ── Layout (delegates to PageRenderer) ──────────────────────────
-
-    /**
-     * Render the page footer. Backs the legacy `stdfoot()` helper.
-     */
-    public static function stdfoot(): void
-    {
-        app(PageRenderer::class)->footer();
     }
 }

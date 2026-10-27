@@ -50,31 +50,11 @@ final class Html
 
     public static function settingsRow(
         string $head,
-        string $follow,
+        string|SafeHtml $follow,
         bool $escape = true,
         string $relation = '',
-    ): string {
+    ): SafeHtml {
         return Tag::settingsRow($head, $follow, $escape, $relation);
-    }
-
-    public static function emitSettingsRow(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-        bool $return = false,
-    ): ?string {
-        return Tag::emitSettingsRow($head, $follow, $escape, $relation, $return);
-    }
-
-    public static function emitSettingsFrow(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-        bool $return = false,
-    ): ?string {
-        return Tag::emitSettingsFrow($head, $follow, $escape, $relation, $return);
     }
 
     /**
@@ -135,23 +115,5 @@ final class Html
     public static function stdfoot(): void
     {
         app(PageRenderer::class)->footer();
-    }
-
-    /**
-     * Emit a settings table row. Backs the legacy `tr()` helper.
-     */
-    public static function tr(mixed $x, mixed $y, bool|int $noesc = false, string $relation = '', bool $return = false): ?string
-    {
-        return self::emitSettingsRow((string) $x, (string) $y, ! (bool) $noesc, $relation, $return);
-    }
-
-    /**
-     * Emit a grid-mode settings row (`nx-fhead`/`nx-fcell` divs) for
-     * `.nx-fgrid` hosts. Mirrors {@see tr()}: `$noesc` is inverted
-     * before passing to the escaping helper.
-     */
-    public static function frow(mixed $x, mixed $y, bool|int $noesc = false, string $relation = '', bool $return = false): ?string
-    {
-        return self::emitSettingsFrow((string) $x, (string) $y, ! (bool) $noesc, $relation, $return);
     }
 }

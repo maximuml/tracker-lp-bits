@@ -227,7 +227,7 @@ class TorrentDetailsController extends Controller
             'details' => $details,
             'tagHtml' => SafeHtml::fromTrustedHtml($tagHtml),
             'downloadUrl' => $downloadUrl,
-            'customFieldsHtml' => SafeHtml::fromTrustedHtml($customFieldsHtml),
+            'customFieldsHtml' => $customFieldsHtml,
             'technicalInfoResult' => $technicalInfoResult,
             'descrRaw' => $rawDescr,
             'screenshots' => $screenshots,

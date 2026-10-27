@@ -74,12 +74,13 @@ final class Tag
 
     /**
      * Full-width labelled settings/usercp row. Backs legacy `tr($head,
-     * $follow, $noesc, $relation, $return)`. Returns the HTML string;
-     * the legacy proxy still handles the print-vs-return switch.
+     * $follow, $noesc, $relation)`.
      *
      * Legacy quirks preserved bit-for-bit:
      *  - When `$escape` is true the follow cell is `htmlspecialchars`-
      *    escaped AND `\n` → `<br />\n`-substituted (in that order).
+     *  - A `SafeHtml` `$follow` is emitted verbatim — it is already
+     *    sanitized markup and `$escape` does not apply to it.
      *  - `$head` is NEVER escaped — call sites pass lang strings and
      *    pre-built HTML markup (radio buttons, etc.).
      *  - A non-empty `$relation` is emitted as TWO attributes on the
@@ -88,19 +89,19 @@ final class Tag
      */
     public static function settingsRow(
         string $head,
-        string $follow,
+        string|SafeHtml $follow,
         bool $escape = true,
         string $relation = '',
-    ): string {
-        $cell = $escape
-            ? nl2br(htmlspecialchars($follow))
-            : $follow;
+    ): SafeHtml {
+        $cell = $follow instanceof SafeHtml
+            ? $follow
+            : SafeHtml::fromTrustedHtml($escape ? nl2br(htmlspecialchars($follow)) : $follow);
 
-        return trim(view('components.support.tag.settings-row', [
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.tag.settings-row', [
             'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
-            'cell' => SafeHtml::fromTrustedHtml($cell),
-        ])->render());
+            'cell' => $cell,
+        ])->render()));
     }
 
     /**
@@ -112,59 +113,19 @@ final class Tag
      */
     public static function settingsFrow(
         string $head,
-        string $follow,
+        string|SafeHtml $follow,
         bool $escape = true,
         string $relation = '',
-    ): string {
-        $cell = $escape
-            ? nl2br(htmlspecialchars($follow))
-            : $follow;
+    ): SafeHtml {
+        $cell = $follow instanceof SafeHtml
+            ? $follow
+            : SafeHtml::fromTrustedHtml($escape ? nl2br(htmlspecialchars($follow)) : $follow);
 
-        return trim(view('components.support.tag.settings-frow', [
+        return SafeHtml::fromTrustedHtml(trim(view('components.support.tag.settings-frow', [
             'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
-            'cell' => SafeHtml::fromTrustedHtml($cell),
-        ])->render());
-    }
-
-    /**
-     * Emit a settings row, returning it when `$return` is true or
-     * echoing it otherwise. Backs the legacy `tr()` helper.
-     */
-    public static function emitSettingsRow(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-        bool $return = false,
-    ): ?string {
-        $html = self::settingsRow($head, $follow, $escape, $relation);
-        if ($return) {
-            return $html;
-        }
-        echo $html;
-
-        return null;
-    }
-
-    /**
-     * Emit a grid-mode settings row ({@see settingsFrow()}), returning it
-     * when `$return` is true or echoing it otherwise.
-     */
-    public static function emitSettingsFrow(
-        string $head,
-        string $follow,
-        bool $escape = true,
-        string $relation = '',
-        bool $return = false,
-    ): ?string {
-        $html = self::settingsFrow($head, $follow, $escape, $relation);
-        if ($return) {
-            return $html;
-        }
-        echo $html;
-
-        return null;
+            'cell' => $cell,
+        ])->render()));
     }
 
     /**

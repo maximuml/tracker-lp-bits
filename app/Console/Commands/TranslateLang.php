@@ -44,10 +44,6 @@ class TranslateLang extends Command
     const RUN_ENV_LARAVEL = 'laravel';
 
     /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
-    /** @var array<int|string, mixed> */
     private static array $runEnvToLangPathMaps = [
         self::RUN_ENV_LARAVEL => ROOT_PATH.'resources/lang',
     ];

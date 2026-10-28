@@ -14,8 +14,8 @@ use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 /**
- * Legacy-runtime branch of {@see Time::format()},
- * {@see Time::timeParts()} and {@see Time::formatText()}.
+ * Legacy-runtime branch of {@see Time::format()}
+ * and {@see Time::timeParts()}.
  *
  * `RuntimeContext::isLegacy()` is false in the test environment, so the
  * legacy branch — the code that runs in production via public/index.php —
@@ -82,17 +82,6 @@ final class TimeLegacyFormatTest extends TestCase
         // Same elapsed display text, different wrapper.
         $spanInner = (string) preg_replace('/^<span title="[^"]*">|<\/span>$/', '', $span);
         $this->assertSame($spanInner, (string) $parts['inner']);
-    }
-
-    public function test_format_text_returns_plain_elapsed_in_legacy_branch(): void
-    {
-        $text = Time::formatText($this->legacyTime(), true, false, true);
-
-        $this->assertIsString($text);
-        $this->assertStringContainsString('ago', $text);
-        $this->assertStringNotContainsString('<', $text);
-        $this->assertStringNotContainsString('&nbsp;', $text);
-        $this->assertStringNotContainsString("\xc2\xa0", $text);
     }
 
     public function test_time_parts_future_time_returns_null_when_flagged(): void

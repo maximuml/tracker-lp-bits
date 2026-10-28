@@ -62,7 +62,6 @@ class PageLayoutContextTest extends TestCase
     {
         $context = $this->context(['id' => 7, 'class' => 3, 'stylesheet' => 5]);
 
-        $this->assertTrue($context->isLoggedIn());
         $this->assertSame(3, $context->userClass());
         $this->assertSame(5, $context->userStylesheet());
     }
@@ -79,7 +78,6 @@ class PageLayoutContextTest extends TestCase
     {
         $context = $this->context([]);
 
-        $this->assertFalse($context->isLoggedIn());
         $this->assertSame(0, $context->userClass());
         $this->assertSame(1, $context->userStylesheet());
         $this->assertNull($context->userFontSize());

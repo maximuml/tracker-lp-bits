@@ -109,59 +109,6 @@ final class TorrentRepositoryTest extends TestCase
         $this->assertContains($torrent2->id, $result);
     }
 
-    public function test_find_for_user_value_returns_torrent_array_when_found(): void
-    {
-        $torrent = Torrent::factory()->create();
-
-        $result = $this->statsService->findForUserValue($torrent->id);
-
-        $this->assertNotNull($result);
-        $this->assertSame($torrent->id, $result->id);
-    }
-
-    public function test_find_for_user_value_returns_null_when_not_found(): void
-    {
-        $result = $this->statsService->findForUserValue(999999);
-
-        $this->assertNull($result);
-    }
-
-    public function test_get_last_comment_returns_null_when_no_comments(): void
-    {
-        $torrent = Torrent::factory()->create();
-
-        $result = $this->statsService->getLastComment($torrent->id);
-
-        $this->assertNull($result);
-    }
-
-    public function test_get_last_comment_returns_latest_comment(): void
-    {
-        $torrent = Torrent::factory()->create();
-        $user = User::factory()->create();
-        DB::table('comments')->insert([
-            'torrent' => $torrent->id,
-            'user' => $user->id,
-            'added' => '2025-01-01 10:00:00',
-            'text' => 'First comment',
-            'ori_text' => 'First comment',
-            'anonymous' => 0,
-        ]);
-        DB::table('comments')->insert([
-            'torrent' => $torrent->id,
-            'user' => $user->id,
-            'added' => '2025-01-02 10:00:00',
-            'text' => 'Second comment',
-            'ori_text' => 'Second comment',
-            'anonymous' => 0,
-        ]);
-
-        $result = $this->statsService->getLastComment($torrent->id);
-
-        $this->assertNotNull($result);
-        $this->assertSame('Second comment', $result['text']);
-    }
-
     public function test_get_snatch_info_returns_false_when_no_snatch(): void
     {
         $torrent = Torrent::factory()->create();

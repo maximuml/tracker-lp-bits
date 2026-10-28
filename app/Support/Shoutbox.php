@@ -7,7 +7,6 @@ namespace App\Support;
 use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Support\Html\SafeHtml;
 use App\Support\State\ShoutboxState;
-use Illuminate\Database\Query\Builder;
 
 /**
  * Helpers for the shoutbox / live chat UI: formatting, reactions,
@@ -60,18 +59,6 @@ final class Shoutbox
         }
 
         return $secret;
-    }
-
-    /**
-     * Only regular shoutbox messages are visible. Helpbox has been removed,
-     * so older rows with type 'hb' are always excluded from filters and streams.
-     *
-     * @param  Builder  $query
-     * @param  array<string, mixed>|object|null  $user
-     */
-    public static function applyTypeFilter($query, string $type, $user = null): void
-    {
-        self::shoutboxRepository()->applyTypeFilter($query, $type, $user);
     }
 
     /**

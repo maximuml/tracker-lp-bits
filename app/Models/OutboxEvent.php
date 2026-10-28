@@ -120,13 +120,4 @@ final class OutboxEvent extends Model
     {
         return (int) (5 * (2 ** ($this->attempts - 1)));
     }
-
-    /**
-     * Whether this event is eligible for dispatch.
-     */
-    public function isEligible(): bool
-    {
-        return $this->status === self::STATUS_PENDING
-            && $this->available_at <= now();
-    }
 }

@@ -12,12 +12,11 @@ use Symfony\Component\HttpFoundation\IpUtils;
  * IP helpers extracted from `include/functions.php`.
  *
  * Phase 5 of the legacy migration.
- * The legacy procedural helpers
+ * The legacy procedural helper
  *
- *   - `in_ip_range($long, $targetip, $ip_one, $ip_two = false)`
  *   - `get_ip_location_from_geoip($ip)`
  *
- * collapse into the static methods below. The legacy functions now
+ * collapses into the static methods below. The legacy functions now
  * proxy here.
  */
 final class Network
@@ -218,48 +217,6 @@ final class Network
     public static function isIpv6(?string $ip): bool
     {
         return (bool) filter_var((string) $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
-    }
-
-    /**
-     * Test whether an IPv4 address falls inside an IP range.
-     *
-     * Two calling conventions:
-     *
-     *   1. Single-IP check: `ipInRange($long, $targetIp, $ipOne)` —
-     *      true iff `$targetIp` equals `$ipOne` (the legacy callers
-     *      sometimes pass a one-element \"range\" rather than special-
-     *      casing the lookup).
-     *   2. Two-IP range: `ipInRange($long, $targetIp, $ipOne, $ipTwo)`
-     *      — true iff `$ipOne <= $targetIp <= $ipTwo` (inclusive).
-     *
-     * `$long === true` means the bounds (`$ipOne` / `$ipTwo`) are
-     * already integers from `ip2long()`, while `$targetIp` is still
-     * a dotted-quad string. `$long === false` means everything is
-     * a dotted-quad string and we run `ip2long()` on both sides.
-     *
-     * Matches the legacy `in_ip_range()` body exactly, including the
-     * mixed-type contract (the legacy code calls this from
-     * `get_ip_location()` where the `iplocation` table sometimes
-     * stores ranges as integers and sometimes as dotted strings).
-     */
-    public static function ipInRange(
-        bool $long,
-        string $targetIp,
-        mixed $ipOne,
-        mixed $ipTwo = false,
-    ): bool {
-        if ($ipTwo === false) {
-            return $long
-                ? long2ip((int) $ipOne) === $targetIp
-                : (string) $ipOne === $targetIp;
-        }
-
-        $targetLong = ip2long($targetIp);
-
-        return $long
-            ? ((int) $ipOne <= $targetLong && (int) $ipTwo >= $targetLong)
-            : (ip2long((string) $ipOne) <= $targetLong
-                && ip2long((string) $ipTwo) >= $targetLong);
     }
 
     /**

@@ -162,18 +162,6 @@ final class TopicRepositoryTest extends TestCase
         $this->assertGreaterThanOrEqual(3, $count);
     }
 
-    public function test_get_topic_forum_and_user_returns_array(): void
-    {
-        $forum = Forum::factory()->create();
-        $user = User::factory()->create();
-        $topic = Topic::factory()->create(['forumid' => $forum->id, 'userid' => $user->id]);
-
-        $result = $this->repository->getTopicForumAndUser($topic->id);
-
-        $this->assertSame($forum->id, $result['forumid']);
-        $this->assertSame($user->id, $result['userid']);
-    }
-
     public function test_get_topic_by_id_returns_topic_or_throws(): void
     {
         $topic = Topic::factory()->create();

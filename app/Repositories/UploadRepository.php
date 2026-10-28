@@ -49,14 +49,6 @@ class UploadRepository extends BaseRepository
 
     /**
      * @return array<int|string, mixed>
-     */
-    public function getPosStateInfo(Request $request): array
-    {
-        return $this->metadataService->getPosStateInfo($request);
-    }
-
-    /**
-     * @return array<int|string, mixed>
      *
      * @throws NexusException
      */

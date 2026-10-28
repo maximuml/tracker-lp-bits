@@ -162,18 +162,6 @@ class TorrentStatsService
     }
 
     /**
-     * Get the latest comment for a torrent, or null if none exists.
-     *
-     * @return array<string, mixed>|null
-     */
-    public function getLastComment(int $torrentId): ?array
-    {
-        $lastcom = $this->torrentDetailRepository->getLastComment($torrentId);
-
-        return $lastcom ? array_merge((array) $lastcom, array_values((array) $lastcom)) : null;
-    }
-
-    /**
      * Latest comment per torrent, keyed by torrent id.
      *
      * @param  array<int, int>  $torrentIds
@@ -205,14 +193,6 @@ class TorrentStatsService
     public function getTorrentTagsGrouped(array $torrentIds)
     {
         return $this->torrentDetailRepository->listTagsGroupedByTorrent($torrentIds);
-    }
-
-    /**
-     * Fetch a torrent for the legacy "torrent to user" value calculation.
-     */
-    public function findForUserValue(int $torrentId): ?Torrent
-    {
-        return $this->torrentDetailRepository->findById((int) $torrentId);
     }
 
     /**

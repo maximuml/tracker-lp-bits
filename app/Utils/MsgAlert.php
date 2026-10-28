@@ -86,14 +86,4 @@ final class MsgAlert
 
         return $alerts;
     }
-
-    public function remove(string $name): void
-    {
-        foreach ($this->alerts as $item) {
-            if ($item['name'] == $name) {
-                unset($this->alerts[$name]);
-                RedisGuard::attempt(fn () => Redis::connection()->client()->lRem($this->getListKey(), json_encode($item)));
-            }
-        }
-    }
 }

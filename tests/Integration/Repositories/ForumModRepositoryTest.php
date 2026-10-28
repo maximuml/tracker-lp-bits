@@ -13,7 +13,7 @@ use Tests\TestCase;
 /**
  * Unit tests for ForumModRepository.
  *
- * Covers replaceModerators(), getModeratorArray(), isModeratorOfForum().
+ * Covers getModeratorArray() and isModeratorOfForum().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumModRepositoryTest extends TestCase
@@ -39,42 +39,13 @@ final class ForumModRepositoryTest extends TestCase
         ], $overrides));
     }
 
-    public function test_replace_moderators_sets_new_moderators(): void
-    {
-        $forumId = $this->makeForum();
-
-        $this->repository->replaceModerators($forumId, [1, 2, 3]);
-
-        $mods = DB::table('forummods')->where('forumid', $forumId)->get();
-        $this->assertCount(3, $mods);
-    }
-
-    public function test_replace_moderators_replaces_existing(): void
-    {
-        $forumId = $this->makeForum(['name' => 'Mod Replace']);
-
-        $this->repository->replaceModerators($forumId, [1, 2]);
-        $this->repository->replaceModerators($forumId, [3]);
-
-        $mods = DB::table('forummods')->where('forumid', $forumId)->get();
-        $this->assertCount(1, $mods);
-        $this->assertSame(3, $mods->first()->userid);
-    }
-
-    public function test_replace_moderators_respects_limit(): void
-    {
-        $forumId = $this->makeForum(['name' => 'Mod Limit']);
-
-        $this->repository->replaceModerators($forumId, [1, 2, 3, 4, 5], 2);
-
-        $mods = DB::table('forummods')->where('forumid', $forumId)->get();
-        $this->assertCount(2, $mods);
-    }
-
     public function test_get_moderator_array_groups_by_forum(): void
     {
         $forumId = $this->makeForum(['name' => 'Mod Array']);
-        $this->repository->replaceModerators($forumId, [1, 2]);
+        DB::table('forummods')->insert([
+            ['forumid' => $forumId, 'userid' => 1],
+            ['forumid' => $forumId, 'userid' => 2],
+        ]);
 
         $array = $this->repository->getModeratorArray();
 
@@ -85,7 +56,7 @@ final class ForumModRepositoryTest extends TestCase
     public function test_is_moderator_of_forum_returns_true_for_moderator(): void
     {
         $forumId = $this->makeForum(['name' => 'IsMod Forum']);
-        $this->repository->replaceModerators($forumId, [1]);
+        DB::table('forummods')->insert(['forumid' => $forumId, 'userid' => 1]);
 
         $this->assertTrue($this->repository->isModeratorOfForum($forumId, 1));
     }
@@ -93,7 +64,7 @@ final class ForumModRepositoryTest extends TestCase
     public function test_is_moderator_of_forum_returns_false_for_non_moderator(): void
     {
         $forumId = $this->makeForum(['name' => 'NotMod Forum']);
-        $this->repository->replaceModerators($forumId, [1]);
+        DB::table('forummods')->insert(['forumid' => $forumId, 'userid' => 1]);
 
         $this->assertFalse($this->repository->isModeratorOfForum($forumId, 999));
     }

@@ -14,11 +14,6 @@ use Illuminate\Support\Facades\DB;
 
 class InviteRepository
 {
-    public function getUser(int $id): ?User
-    {
-        return User::query()->find($id);
-    }
-
     public function countPendingInvitees(int $inviterId): int
     {
         return User::query()

@@ -75,32 +75,4 @@ final class Path
 
         return $path;
     }
-
-    /**
-     * Build the relative icon folder for a category, extracted from the
-     * legacy `get_cat_folder()`. The DB lookups (category row, icon row)
-     * and the static per-request cache stay in the legacy proxy; only
-     * the pure string assembly lives here:
-     *
-     *   category/{catMode}/{iconFolder}[/{langDir}]
-     *
-     * Each segment is `trim()`-ed of slashes (legacy `trim($_, '/')`),
-     * so leading/trailing slashes on any input collapse and never
-     * produce empty `//` segments. The language segment is appended
-     * only when the icon set is flagged multilingual — matching the
-     * legacy `$caticonrow['multilang']` boolean gate.
-     */
-    public static function categoryFolder(
-        string $catMode,
-        string $iconFolder,
-        bool $multilang,
-        string $langDir,
-    ): string {
-        $path = sprintf('category/%s/%s', trim($catMode, '/'), trim($iconFolder, '/'));
-        if ($multilang) {
-            $path .= '/'.trim($langDir, '/');
-        }
-
-        return $path;
-    }
 }

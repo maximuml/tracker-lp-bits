@@ -111,11 +111,6 @@ class Permission
         return self::userCan($user, PermissionEnum::CONFIDENTIAL_LOG);
     }
 
-    public static function canViewTorrentHistory(?User $user = null): bool
-    {
-        return self::userCan($user, PermissionEnum::TORRENT_HISTORY);
-    }
-
     private static function user(?User $user = null): ?User
     {
         if ($user instanceof User) {

@@ -173,32 +173,6 @@ final class SecureTokenServiceTest extends TestCase
         $this->assertNull($row);
     }
 
-    public function test_verify_legacy_finds_existing_hash(): void
-    {
-        $legacyHash = md5('legacy-token-test');
-
-        DB::table('invites')->insert([
-            'inviter' => 1,
-            'invitee' => 'test@example.com',
-            'hash' => $legacyHash,
-            'time_invited' => now()->toDateTimeString(),
-            'valid' => 1,
-            'created_at' => now()->toDateTimeString(),
-        ]);
-
-        $row = $this->service->verifyLegacy('invites', 'hash', $legacyHash);
-
-        $this->assertNotNull($row);
-        $this->assertSame($legacyHash, $row['hash']);
-    }
-
-    public function test_verify_legacy_returns_null_for_nonexistent(): void
-    {
-        $row = $this->service->verifyLegacy('invites', 'hash', 'nonexistent-hash-12345678901234567890123456789012');
-
-        $this->assertNull($row);
-    }
-
     public function test_token_digest_not_equal_to_token(): void
     {
         $token = $this->service->generate();

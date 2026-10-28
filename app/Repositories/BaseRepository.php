@@ -11,7 +11,6 @@ use App\Exceptions\InsufficientPermissionException;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Config\SiteConfig;
-use App\Support\Environment;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\Query\SortDirection;
@@ -127,15 +126,5 @@ class BaseRepository
         if ($classRequire === null || $operator->class < $classRequire || $operator->class <= $user->class) {
             throw new InsufficientPermissionException;
         }
-    }
-
-    /**
-     * @param  mixed  $command
-     * @param  mixed  $format
-     * @return string|array<int|string, mixed>
-     */
-    protected function executeCommand($command, $format = 'string'): string|array
-    {
-        return Environment::run($command, $format, (bool) false, (bool) true);
     }
 }

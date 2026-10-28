@@ -95,25 +95,6 @@ final class Validators
     }
 
     /**
-     * Match an IPv4 dotted-quad pattern anywhere in the input
-     * (legacy uses `preg_match` on a non-anchored pattern). Useful
-     * for sniffing whether a free-text field "looks like" an IP —
-     * NOT a strict IP-address parser. Mirrors the legacy contract
-     * exactly: a string like `"prefix 1.2.3.4 suffix"` still
-     * validates because the legacy regex has no `^...$` anchors.
-     */
-    public static function isIpv4Format(string $ip): bool
-    {
-        $ipPattern =
-            '/\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'.
-            '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'.
-            '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'.
-            '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/';
-
-        return preg_match($ipPattern, $ip) === 1;
-    }
-
-    /**
      * Validate an e-mail via `FILTER_VALIDATE_EMAIL`. Identical
      * semantics to the legacy `validemail()` — the legacy function
      * literally is `filter_var(...) !== false`.
@@ -150,66 +131,6 @@ final class Validators
 
         if ($length < 3 || $length > 20) {
             return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate a "safe" file name: lowercase ASCII alphanumeric plus
-     * `_`, `.`, `/`. Empty string → true (mirrors the legacy quirk
-     * where the for-loop simply never executes).
-     *
-     * Note the slash in the allowlist — legacy uses this for
-     * category sub-paths like `audio/lossless/cssfile.css`, which
-     * is why pure `basename`-style validation isn't enough.
-     */
-    public static function isFileName(string $filename): bool
-    {
-        $allowedchars = 'abcdefghijklmnopqrstuvwxyz0123456789_./';
-
-        $total = strlen($filename);
-        for ($i = 0; $i < $total; $i++) {
-            if (strpos($allowedchars, $filename[$i]) === false) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate a "safe" CSS-class identifier: starts with a lowercase
-     * letter, rest is lowercase letters / digits / `_`.
-     *
-     * Legacy quirk preserved: an empty input returns `true`, because
-     * `strpos($allowedfirstchars, ''[0])` evaluates to
-     * `strpos($allowedfirstchars, '') === 0` (in PHP 8+ `strpos`
-     * with an empty needle returns `0`, not `false`). Every call
-     * site already guards with `if ($class_name && !valid_class_name(...))`
-     * so the empty-string case doesn't reach this validator in
-     * practice; pinning the behaviour with a test prevents a future
-     * "fix" from silently rejecting some other previously-OK input.
-     */
-    public static function isClassName(string $filename): bool
-    {
-        $allowedfirstchars = 'abcdefghijklmnopqrstuvwxyz';
-        $allowedchars = 'abcdefghijklmnopqrstuvwxyz0123456789_';
-
-        // Explicit `$filename === ''` branch so the empty-string case
-        // doesn't trip PHP 8's "Undefined array key 0" warning on
-        // `$filename[0]`. The end result still matches legacy: an
-        // empty needle in `strpos` returns 0, which is not `=== false`,
-        // so we fall through and return true.
-        $firstChar = $filename === '' ? '' : $filename[0];
-        if (strpos($allowedfirstchars, $firstChar) === false) {
-            return false;
-        }
-        $total = strlen($filename);
-        for ($i = 1; $i < $total; $i++) {
-            if (strpos($allowedchars, $filename[$i]) === false) {
-                return false;
-            }
         }
 
         return true;

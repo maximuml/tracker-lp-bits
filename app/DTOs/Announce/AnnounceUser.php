@@ -69,9 +69,4 @@ final readonly class AnnounceUser
     {
         return $this->classId >= $class;
     }
-
-    public function isVipOrAbove(): bool
-    {
-        return $this->classAtLeast((int) UserClass::VIP->value);
-    }
 }

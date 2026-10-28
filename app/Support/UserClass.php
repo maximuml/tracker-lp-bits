@@ -167,17 +167,6 @@ final class UserClass
     }
 
     /**
-     * Expose the full image map for callers that need to iterate
-     * (e.g. admin panels listing all class icons).
-     *
-     * @return array<string, string>
-     */
-    public static function allImagePaths(): array
-    {
-        return self::IMAGE_MAP;
-    }
-
-    /**
      * Legacy user-class name formatter.
      *
      * Temporary Phase 5 shim that mirrors `\App\Support\UserClass::name()` from

@@ -66,11 +66,7 @@ class Snatch extends NexusModel
         'completed_at_human' => 'Completed',
     ];
 
-    /**
-     * @return Attribute<mixed, mixed>
-     *
-     * @deprecated Use uploadedText instead
-     */
+    /** @return  Attribute<mixed, mixed> */
     protected function uploadText(): Attribute
     {
         return new Attribute(
@@ -78,28 +74,8 @@ class Snatch extends NexusModel
         );
     }
 
-    /**
-     * @return Attribute<mixed, mixed>
-     *
-     * @deprecated Use downloadedText instead
-     */
+    /** @return  Attribute<mixed, mixed> */
     protected function downloadText(): Attribute
-    {
-        return new Attribute(
-            get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['downloaded']), $this->getDownloadSpeed())
-        );
-    }
-
-    /** @return  Attribute<mixed, mixed> */
-    protected function uploadedText(): Attribute
-    {
-        return new Attribute(
-            get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['uploaded']), $this->getUploadSpeed())
-        );
-    }
-
-    /** @return  Attribute<mixed, mixed> */
-    protected function downloadedText(): Attribute
     {
         return new Attribute(
             get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['downloaded']), $this->getDownloadSpeed())

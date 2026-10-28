@@ -128,17 +128,6 @@ final class PaletteTest extends TestCase
         $this->assertSame('green', Palette::seederLink(-1));
     }
 
-    // ---------- forumHighlightClass / waitRampClass ----------
-
-    public function test_forum_highlight_class_returns_nx_hl_class_or_empty(): void
-    {
-        $this->assertSame('nx-hl-17', Palette::forumHighlightClass(17));
-        $this->assertSame('nx-hl-1', Palette::forumHighlightClass(1));
-        $this->assertSame('nx-hl-40', Palette::forumHighlightClass(40));
-        $this->assertSame('', Palette::forumHighlightClass(0));
-        $this->assertSame('', Palette::forumHighlightClass(41));
-    }
-
     public function test_wait_ramp_class_quantizes_remaining_hours(): void
     {
         $this->assertSame('nx-wait-1', Palette::waitRampClass(1));

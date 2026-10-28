@@ -115,28 +115,6 @@ final class RewardRepositoryTest extends TestCase
         $this->assertSame(200.0, (float) $result->value);
     }
 
-    public function test_get_detail_returns_reward(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create();
-        /** @var User $owner */
-        $owner = User::factory()->create();
-        $torrent = $this->createTorrent($owner->id);
-        $reward = $this->createReward($torrent->id, $user->id, 100.0);
-
-        $result = $this->repository->getDetail($reward->id);
-
-        $this->assertSame($reward->id, $result->id);
-        $this->assertSame(100.0, (float) $result->value);
-    }
-
-    public function test_get_detail_throws_when_not_found(): void
-    {
-        $this->expectException(ModelNotFoundException::class);
-
-        $this->repository->getDetail(99999);
-    }
-
     public function test_delete_removes_reward(): void
     {
         /** @var User $user */

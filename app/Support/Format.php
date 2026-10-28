@@ -48,58 +48,6 @@ final class Format
     }
 
     /**
-     * Format a byte count as `"<number><br />UNIT"` (the legacy
-     * "compact" form used on torrent list pages where the size
-     * column is narrow).
-     */
-    public static function sizeCompact(int|float $bytes): string
-    {
-        return self::bytesWithSeparator($bytes, view('components.support.br-space')->render());
-    }
-
-    /**
-     * Format a byte count as `"<number>&nbsp;UNIT"` (the legacy
-     * "loose" form used in HTML attribute contexts where a literal
-     * space would word-wrap awkwardly).
-     */
-    public static function sizeLoose(int|float $bytes): string
-    {
-        return self::bytesWithSeparator($bytes, '&nbsp;');
-    }
-
-    /**
-     * Format a byte count as a truncated-integer-with-unit string,
-     * with `B` as the smallest unit and a `0` floor on negative
-     * inputs. Used in admin-debug contexts where a fractional
-     * byte count would be noise.
-     *
-     * Note the units: this helper uses `kB` (lowercase k) for the
-     * 1024-byte bucket, mirroring the legacy. The other three
-     * size formatters use `KB`.
-     */
-    public static function sizeInt(int|float $bytes): string
-    {
-        $bytes = max(0, $bytes);
-        if ($bytes < 1000) {
-            return floor($bytes).' B';
-        }
-        if ($bytes < 1000 * 1024) {
-            return floor($bytes / 1024).' kB';
-        }
-        if ($bytes < 1000 * 1048576) {
-            return floor($bytes / 1048576).' MB';
-        }
-        if ($bytes < 1000 * 1073741824) {
-            return floor($bytes / 1073741824).' GB';
-        }
-        if ($bytes < 1000 * 1099511627776) {
-            return floor($bytes / 1099511627776).' TB';
-        }
-
-        return floor($bytes / 1125899906842624).' PB';
-    }
-
-    /**
      * Inverse of the `size*()` helpers: convert an `($amount, $unit)`
      * pair into a byte count. Mirrors the legacy `getsize_int()`
      * exactly — including the float return type (`floor()` returns

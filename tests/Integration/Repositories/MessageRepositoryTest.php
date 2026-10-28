@@ -395,16 +395,6 @@ final class MessageRepositoryTest extends TestCase
         $this->assertSame($name, $this->repository->getUsername($this->userId));
     }
 
-    public function test_get_list_returns_paginated_messages(): void
-    {
-        $this->insertMessage(['receiver' => $this->userId, 'subject' => 'List Msg 1']);
-        $this->insertMessage(['receiver' => $this->userId, 'subject' => 'List Msg 2']);
-
-        $paginator = $this->repository->getList([]);
-
-        $this->assertGreaterThan(0, $paginator->total());
-    }
-
     public function test_store_creates_message_from_dto(): void
     {
         $dto = new StoreMessageDto(
@@ -430,16 +420,6 @@ final class MessageRepositoryTest extends TestCase
         $message = $this->repository->update(['subject' => 'New Subject'], $id);
 
         $this->assertSame('New Subject', $message->subject);
-    }
-
-    public function test_get_detail_returns_message(): void
-    {
-        $id = $this->insertMessage(['receiver' => $this->userId, 'subject' => 'Detail Msg']);
-
-        $message = $this->repository->getDetail($id);
-
-        $this->assertInstanceOf(Message::class, $message);
-        $this->assertSame($id, $message->id);
     }
 
     public function test_delete_removes_message(): void

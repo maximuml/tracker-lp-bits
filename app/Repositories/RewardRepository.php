@@ -48,16 +48,6 @@ class RewardRepository extends BaseRepository
     /**
      * @return mixed
      */
-    public function getDetail(int $id)
-    {
-        $model = Reward::query()->findOrFail($id);
-
-        return $model;
-    }
-
-    /**
-     * @return mixed
-     */
     public function delete(int $id)
     {
         $model = Reward::query()->findOrFail($id);

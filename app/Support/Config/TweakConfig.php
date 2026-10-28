@@ -56,11 +56,6 @@ final class TweakConfig extends Config
         return $this->string('where', $default);
     }
 
-    public function iplog1(int $default = 0): int
-    {
-        return $this->int('iplog1', $default);
-    }
-
     public function bonus(string $default = ''): string
     {
         return $this->string('bonus', $default);

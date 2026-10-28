@@ -50,45 +50,6 @@ class FormatTest extends TestCase
         $this->assertStringEndsWith(' MB', Format::size(1000 * 1024));
     }
 
-    public function test_size_loose_uses_nbsp_separator(): void
-    {
-        $this->assertSame('1.00&nbsp;KB', Format::sizeLoose(1024));
-        $this->assertSame('1.00&nbsp;MB', Format::sizeLoose(1048576));
-    }
-
-    // ---------- sizeInt() ----------
-
-    public function test_size_int_floors_negative_to_zero_bytes(): void
-    {
-        $this->assertSame('0 B', Format::sizeInt(-1));
-        $this->assertSame('0 B', Format::sizeInt(-99999));
-    }
-
-    public function test_size_int_b_bucket(): void
-    {
-        $this->assertSame('0 B', Format::sizeInt(0));
-        $this->assertSame('999 B', Format::sizeInt(999));
-        $this->assertSame('500 B', Format::sizeInt(500.7)); // truncated, not rounded
-    }
-
-    public function test_size_int_uses_lowercase_k_for_kb_bucket(): void
-    {
-        // Pinned legacy quirk: the kB bucket uses lowercase `k`,
-        // while every other formatter (and the other size buckets
-        // here) uses uppercase `K`. A "fix" that aligns to `KB`
-        // would diverge from legacy output across ~200 call sites.
-        $this->assertSame('1 kB', Format::sizeInt(1024));
-        $this->assertSame('999 kB', Format::sizeInt(999 * 1024));
-    }
-
-    public function test_size_int_higher_buckets(): void
-    {
-        $this->assertSame('1 MB', Format::sizeInt(1048576));
-        $this->assertSame('1 GB', Format::sizeInt(1073741824));
-        $this->assertSame('1 TB', Format::sizeInt(1099511627776));
-        $this->assertSame('1 PB', Format::sizeInt(1125899906842624));
-    }
-
     // ---------- prettyTime() ----------
 
     public function test_pretty_time_returns_m_ss_below_one_hour(): void

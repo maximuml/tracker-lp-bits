@@ -121,16 +121,6 @@ class BonusRepository extends BaseRepository
         $this->consumptionRepository->consumeUserBonus($user, $requireBonus, $logBusinessType, $logComment, $userUpdates);
     }
 
-    /**
-     * Consume bonus and atomically increment the user's charity field.
-     *
-     * @param  User|int  $user
-     */
-    public function consumeUserBonusAndIncrementCharity($user, float $requireBonus, int $logBusinessType, string $logComment, float $charityIncrement): void
-    {
-        $this->consumptionRepository->consumeUserBonusAndIncrementCharity($user, $requireBonus, $logBusinessType, $logComment, $charityIncrement);
-    }
-
     public function updateSeedBonus(string $op, float $point, int|string $id): void
     {
         if (! in_array($op, ['+', '-'], true)) {

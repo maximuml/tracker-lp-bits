@@ -74,17 +74,16 @@ final class BBCode
             $text = $url;
         }
 
-        // Escape for HTML attribute and text context.
-        $escapedUrl = htmlspecialchars($safeUrl, ENT_QUOTES, 'UTF-8');
+        // Escape link text for the text context; it arrives
+        // entity-encoded from Comment::format(), so double-encode
+        // must stay off and the value goes through the SafeHtml
+        // boundary. URL and class are plain strings — `{{ }}` escapes.
         $escapedText = htmlspecialchars($text, ENT_QUOTES, 'UTF-8', false);
-        $classAttr = $linkClass !== '' ? ' class="'.htmlspecialchars($linkClass, ENT_QUOTES, 'UTF-8').'"' : '';
-        // rel="noopener noreferrer" prevents tabnabbing when target="_blank".
-        $targetAttr = $newWindow ? ' target="_blank" rel="noopener noreferrer"' : '';
 
         return trim(view('components.support.url-link', [
-            'classAttr' => SafeHtml::fromTrustedHtml($classAttr),
-            'url' => SafeHtml::fromTrustedHtml($escapedUrl),
-            'targetAttr' => SafeHtml::fromTrustedHtml($targetAttr),
+            'linkClass' => $linkClass,
+            'url' => $safeUrl,
+            'newWindow' => $newWindow,
             'text' => SafeHtml::fromTrustedHtml($escapedText),
         ])->render());
     }
@@ -199,17 +198,13 @@ final class BBCode
         if (empty($src)) {
             return '';
         }
-        // Escape src for HTML attribute and JS string contexts.
-        $escapedSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
-
-        $resizerAttrs = $enableResizer
-            ? " data-scale=\"{$maxWidth}x{$maxHeight}\" data-zoomable "
-            : '';
 
         return trim(view('components.support.bbcode-img', [
             'imgId' => $imgId,
-            'escapedSrc' => SafeHtml::fromTrustedHtml($escapedSrc),
-            'resizerAttrs' => SafeHtml::fromTrustedHtml($resizerAttrs),
+            'src' => $src,
+            'enableResizer' => $enableResizer,
+            'maxWidth' => $maxWidth,
+            'maxHeight' => $maxHeight,
         ])->render());
     }
 
@@ -279,10 +274,9 @@ final class BBCode
         // See url() — a tempCode placeholder smuggled into the title would
         // resolve a foreign element inside <summary>.
         $title = str_replace("\x08", '', $title);
-        $contentClass = $defaultCollapsed ? '' : ' open';
 
         return trim(view('components.support.spoiler-details', [
-            'contentClass' => SafeHtml::fromTrustedHtml($contentClass),
+            'openAttr' => $defaultCollapsed ? '' : ' open',
             'title' => SafeHtml::fromTrustedHtml($title),
             'content' => SafeHtml::fromTrustedHtml($content),
         ])->render());

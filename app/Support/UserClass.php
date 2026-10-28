@@ -228,7 +228,7 @@ final class UserClass
         if ($className && $b_colored) {
             $className = trim(view('components.support.class-name-b', [
                 'cls' => str_replace(' ', '', $classNameColor),
-                'inner' => SafeHtml::fromTrustedHtml($className),
+                'inner' => $className,
             ])->render());
         }
 
@@ -272,7 +272,7 @@ final class UserClass
 
         return view('components.support.class-select', [
             'name' => $selectName,
-            'disabledAttr' => SafeHtml::fromTrustedHtml($disabled ? ' disabled = "disabled"' : ''),
+            'disabled' => $disabled,
             'options' => SafeHtml::fromTrustedHtml($options),
         ]);
     }

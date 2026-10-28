@@ -433,7 +433,7 @@ final class Shoutbox
                 'avatarTooltip' => $tooltipAvatar,
                 'avatarSpacer' => $isContinuation,
                 'classBadge' => $classBadge,
-                'username' => SafeHtml::fromTrustedHtml($username),
+                'username' => $username instanceof SafeHtml ? $username : SafeHtml::fromPlainText((string) $username),
                 'isGuest' => $currUserId <= 0,
                 'reactions' => self::reactionsData(
                     $shoutId,

@@ -55,8 +55,14 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
      * end-to-end — the cached value, inline props and the return no
      * longer re-wrap; the rainbow attribute fragment became a bool
      * prop in the user-inline component.
+     * 115 → 100 (2026-10-28): value-level props went back to plain
+     * strings — url-link/bbcode-img/attach-img/js-redirect take raw
+     * values and let `{{ }}` escape; markup-fragment props (openAttr,
+     * disabled) became bools or `{{ $openAttr }}` echoes; class-name-b
+     * `inner` is now plain text; Shoutbox username uses instanceof +
+     * fromPlainText; mysql_stats percent values carry a literal NBSP.
      */
-    private const BASELINE_TRUSTED_HTML_CALLS = 115;
+    private const BASELINE_TRUSTED_HTML_CALLS = 100;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

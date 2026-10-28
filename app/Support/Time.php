@@ -370,8 +370,8 @@ final class Time
     /**
      * `SafeHtml` variant of {@see format()} — owns the trust marker at
      * the producer so callers stop wrapping the `<span title>` markup
-     * with `fromTrustedHtml()`. `null`/`false` results collapse to an
-     * empty `SafeHtml`, matching the legacy `(string) format()` casts.
+     * in a trust wrapper themselves. `null`/`false` results collapse to
+     * an empty `SafeHtml`, matching the legacy `(string) format()` casts.
      */
     public static function formatHtml(
         mixed $time,

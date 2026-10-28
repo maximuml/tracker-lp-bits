@@ -1,2 +1,2 @@
-@props(['name', 'disabledAttr', 'options'])
-<select name="{{ $name }}"{{ $disabledAttr }}>{{ $options }}</select>
+@props(['name', 'disabled' => false, 'options'])
+<select name="{{ $name }}"@if($disabled) disabled="disabled"@endif>{{ $options }}</select>

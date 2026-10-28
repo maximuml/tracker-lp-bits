@@ -1,2 +1,2 @@
-@props(['nonceAttr', 'url'])
-<script type="text/javascript"{{ $nonceAttr }}>window.location.href = '{{ $url }}';</script>
+@props(['nonce', 'url'])
+<script type="text/javascript"@if($nonce !== '') nonce="{{ $nonce }}"@endif>window.location.href = '{{ $url }}';</script>

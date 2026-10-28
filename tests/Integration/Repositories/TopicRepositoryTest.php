@@ -182,6 +182,37 @@ final class TopicRepositoryTest extends TestCase
         $this->assertSame($topic2->id, $result->id);
     }
 
+    public function test_get_last_topics_by_forums_returns_latest_per_forum(): void
+    {
+        $forum1 = Forum::factory()->create();
+        $forum2 = Forum::factory()->create();
+        Topic::factory()->create(['forumid' => $forum1->id, 'lastpost' => 100]);
+        $latest1 = Topic::factory()->create(['forumid' => $forum1->id, 'lastpost' => 200]);
+        $latest2 = Topic::factory()->create(['forumid' => $forum2->id, 'lastpost' => 300]);
+
+        $result = $this->repository->getLastTopicsByForums([$forum1->id, $forum2->id]);
+
+        $this->assertSame($latest1->id, $result[$forum1->id]->id);
+        $this->assertSame($latest2->id, $result[$forum2->id]->id);
+    }
+
+    public function test_get_last_topics_by_forums_skips_forums_without_topics(): void
+    {
+        $forum = Forum::factory()->create();
+        $empty = Forum::factory()->create();
+        Topic::factory()->create(['forumid' => $forum->id, 'lastpost' => 100]);
+
+        $result = $this->repository->getLastTopicsByForums([$forum->id, $empty->id]);
+
+        $this->assertArrayHasKey($forum->id, $result);
+        $this->assertArrayNotHasKey($empty->id, $result);
+    }
+
+    public function test_get_last_topics_by_forums_empty_input_returns_empty(): void
+    {
+        $this->assertSame([], $this->repository->getLastTopicsByForums([]));
+    }
+
     public function test_get_topics_by_forum_returns_count_and_rows(): void
     {
         $forum = Forum::factory()->create();

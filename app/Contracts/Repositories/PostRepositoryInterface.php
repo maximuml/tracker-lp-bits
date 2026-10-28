@@ -58,5 +58,17 @@ interface PostRepositoryInterface
 
     public function getForumTodayPostCount(int $forumid, string $todayDate): int;
 
+    /**
+     * @param  array<int>  $forumids
+     * @return array<int, int> map of forum id to today's post count
+     */
+    public function getForumTodayPostCounts(array $forumids, string $todayDate): array;
+
+    /**
+     * @param  array<int>  $ids
+     * @return array<int, array<string, mixed>> map of post id to row array
+     */
+    public function findPostArraysByIds(array $ids): array;
+
     public function findLastIdAddedBefore(string $before): ?int;
 }

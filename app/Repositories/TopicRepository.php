@@ -174,4 +174,33 @@ class TopicRepository extends BaseRepository
     {
         return Topic::query()->where('forumid', $forumid)->orderByDesc('lastpost')->first();
     }
+
+    /**
+     * Last-replied topic per forum in a single query — the batched
+     * counterpart of {@see getLastTopicByForum()} for the index listing.
+     *
+     * @param  array<int>  $forumids
+     * @return array<int, Topic> map of forum id to its last-replied topic
+     */
+    public function getLastTopicsByForums(array $forumids): array
+    {
+        if ($forumids === []) {
+            return [];
+        }
+
+        $maxLastpost = Topic::query()
+            ->selectRaw('forumid, MAX(lastpost) AS max_lastpost')
+            ->whereIn('forumid', $forumids)
+            ->groupBy('forumid');
+
+        return Topic::query()
+            ->joinSub($maxLastpost, 'm', static function ($join): void {
+                $join->on('topics.forumid', '=', 'm.forumid')
+                    ->on('topics.lastpost', '=', 'm.max_lastpost');
+            })
+            ->select('topics.*')
+            ->get()
+            ->keyBy('forumid')
+            ->all();
+    }
 }

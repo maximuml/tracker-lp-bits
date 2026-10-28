@@ -511,11 +511,8 @@ final class ForumIndexServiceTest extends TestCase
             7 => ['id' => 7, 'name' => 'Other Forum', 'description' => '', 'forid' => 999, 'minclassread' => 0, 'topiccount' => 1, 'postcount' => 2],
             8 => ['id' => 8, 'name' => 'Quiet Forum', 'description' => '', 'forid' => 999, 'minclassread' => 0, 'topiccount' => 0, 'postcount' => 0],
         ]);
-        $this->topicRepo->shouldReceive('getLastTopicByForum')->with(5)->never();
-        $this->topicRepo->shouldReceive('getLastTopicByForum')->with(6)->never();
-        $this->topicRepo->shouldReceive('getLastTopicByForum')->with(7)->never();
-        $this->topicRepo->shouldReceive('getLastTopicByForum')->with(8)->andReturn(null);
-        $this->postRepo->shouldReceive('getForumTodayPostCount')->andReturn(0);
+        $this->topicRepo->shouldReceive('getLastTopicsByForums')->with([8])->once()->andReturn([]);
+        $this->postRepo->shouldReceive('getForumTodayPostCounts')->with([5, 6, 7, 8], date('Y-m-d'))->once()->andReturn([]);
         $repo->shouldReceive('getActiveForumUserCount')->andReturn(3);
         $this->postRepo->shouldReceive('getTotalPostsCount')->andReturn(100);
         $this->topicRepo->shouldReceive('getTotalTopicsCount')->andReturn(50);

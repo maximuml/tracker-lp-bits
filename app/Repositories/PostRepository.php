@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\DB;
  */
 class PostRepository extends BaseRepository implements PostRepositoryInterface
 {
+    public function __construct(private readonly PostLookupRepository $postLookup) {}
+
     public function getTotalPostsCount(): int
     {
         return (int) Post::query()->count();
@@ -206,6 +208,28 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             ->where('posts.added', '>', $todayDate)
             ->where('topics.forumid', $forumid)
             ->count('posts.id');
+    }
+
+    public function getForumTodayPostCounts(array $forumids, string $todayDate): array
+    {
+        if ($forumids === []) {
+            return [];
+        }
+
+        return DB::table('posts')
+            ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
+            ->where('posts.added', '>', $todayDate)
+            ->whereIn('topics.forumid', $forumids)
+            ->groupBy('topics.forumid')
+            ->selectRaw('topics.forumid, COUNT(posts.id) AS cnt')
+            ->get()
+            ->mapWithKeys(static fn ($row): array => [(int) $row->forumid => (int) $row->cnt])
+            ->all();
+    }
+
+    public function findPostArraysByIds(array $ids): array
+    {
+        return $this->postLookup->findPostArraysByIds($ids);
     }
 
     public function findLastIdAddedBefore(string $before): ?int

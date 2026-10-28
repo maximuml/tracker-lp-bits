@@ -1521,3 +1521,31 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 })();
+
+/* ===== nx-ytfacade: click-to-load YouTube embed (CSP/privacy-safe).
+   Renders a facade instead of an iframe; the player (and any Google
+   request) only happens after an explicit user click. ===== */
+(function () {
+    document.addEventListener('click', function (e) {
+        var play = e.target.closest ? e.target.closest('.nx-ytfacade__play') : null;
+        if (!play) { return; }
+        var facade = play.closest('.nx-ytfacade');
+        if (!facade) { return; }
+        var id = facade.getAttribute('data-yt-id') || '';
+        if (!/^[A-Za-z0-9_-]{1,32}$/.test(id)) { return; }
+        var iframe = document.createElement('iframe');
+        iframe.className = 'nx-ytfacade__frame';
+        iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id);
+        iframe.title = 'YouTube video player';
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+        iframe.setAttribute('allowfullscreen', '');
+        var w = parseInt(facade.getAttribute('data-yt-width') || '0', 10);
+        var h = parseInt(facade.getAttribute('data-yt-height') || '0', 10);
+        if (w > 0 && h > 0) {
+            facade.style.width = w + 'px';
+            facade.style.maxWidth = '100%';
+            facade.style.aspectRatio = w + '/' + h;
+        }
+        facade.replaceChildren(iframe);
+    });
+})();

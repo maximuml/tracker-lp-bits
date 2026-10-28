@@ -153,27 +153,30 @@ class BBCodeTest extends TestCase
     public function test_youtube_default_dimensions_are_560_by_315(): void
     {
         $html = BBCode::youtube('https://www.youtube.com/watch?v=ABCdef');
-        $this->assertStringContainsString('width="560"', $html);
-        $this->assertStringContainsString('height="315"', $html);
-        $this->assertStringContainsString('src="https://www.youtube.com/embed/ABCdef"', $html);
+        $this->assertStringContainsString('data-yt-width="560"', $html);
+        $this->assertStringContainsString('data-yt-height="315"', $html);
+        $this->assertStringContainsString('data-yt-id="ABCdef"', $html);
+        // click-to-load facade: no iframe is emitted until the user clicks
+        $this->assertStringNotContainsString('<iframe', $html);
     }
 
     public function test_youtube_extracts_v_parameter_from_querystring(): void
     {
         $html = BBCode::youtube('https://www.youtube.com/watch?ab_channel=Foo&v=XYZ', 100, 200);
-        $this->assertStringContainsString('embed/XYZ', $html);
-        $this->assertStringContainsString('width="100"', $html);
-        $this->assertStringContainsString('height="200"', $html);
+        $this->assertStringContainsString('data-yt-id="XYZ"', $html);
+        $this->assertStringContainsString('data-yt-width="100"', $html);
+        $this->assertStringContainsString('data-yt-height="200"', $html);
     }
 
-    public function test_youtube_with_no_v_parameter_emits_broken_embed_url(): void
+    public function test_youtube_with_no_v_parameter_emits_empty_id_facade(): void
     {
         // Pinned legacy quirk: the helper does NOT validate the
-        // URL; if there's no `v=` query param the iframe src ends
-        // with `embed/` (empty video id). Preserved verbatim
-        // because the BBCode parser rarely lets this through.
+        // URL; if there's no `v=` query param the facade carries an
+        // empty video id (the click handler refuses to build a frame
+        // from it). Preserved verbatim because the BBCode parser
+        // rarely lets this through.
         $html = BBCode::youtube('https://example.com/foo');
-        $this->assertStringContainsString('src="https://www.youtube.com/embed/"', $html);
+        $this->assertStringContainsString('data-yt-id=""', $html);
     }
 
     public function test_youtube_empty_src_returns_empty_string(): void

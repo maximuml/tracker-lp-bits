@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
-use App\Http\Middleware\Locale;
-use App\Support\Config\SiteConfig;
 use App\Support\RequestValues;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
@@ -45,24 +43,6 @@ trait HasSearchBoxAccessors
         if (is_array($value)) {
             $this->attributes['custom_fields'] = implode(',', $value);
         }
-    }
-
-    /** @return mixed */
-    public function getDisplaySectionNameAttribute()
-    {
-        $locale = Locale::getDefault();
-        if (! empty($this->section_name[$locale])) {
-            return $this->section_name[$locale];
-        }
-        $defaultLang = SiteConfig::current()->main->defaultLang();
-        if (! empty($this->section_name[$defaultLang])) {
-            return $this->section_name[$defaultLang];
-        }
-        if ($this->isSectionBrowse()) {
-            return \App\Support\Locale::trans('searchbox.sections.browse', [], null);
-        }
-
-        return $this->name;
     }
 
     /**

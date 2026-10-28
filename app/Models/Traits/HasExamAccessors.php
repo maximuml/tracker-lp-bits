@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
-use App\Enums\ExamFilterUser;
 use App\Enums\ExamStatus;
 use App\Models\Exam;
-use App\Models\User;
 use App\Support\Locale;
-use Carbon\Carbon;
 
 /**
  * Eloquent attribute accessors for the Exam model.
@@ -61,54 +58,6 @@ trait HasExamAccessors
                     Exam::$indexes[$index['index']]['unit'] ?? ''
                 );
             }
-        }
-
-        return implode(view('components.support.br')->render(), $arr);
-    }
-
-    public function getFilterFormattedAttribute(): string
-    {
-        $currentFilters = $this->filters;
-        $arr = [];
-        $filter = ExamFilterUser::USER_CLASS->value;
-        if (! empty($currentFilters[$filter])) {
-            $classes = collect(User::$classes)->only($currentFilters[$filter]);
-            $arr[] = sprintf(
-                '%s: %s',
-                Locale::trans("exam.filters.{$filter}", [], null), $classes->map(fn ($value, $key) => User::getClassText($key))->implode(', ')
-            );
-        }
-
-        $filter = ExamFilterUser::REGISTER_TIME_RANGE->value;
-        if (! empty($currentFilters[$filter])) {
-            $range = $currentFilters[$filter];
-            if (! empty($range[0]) || ! empty($range[1])) {
-                $arr[] = sprintf(
-                    '%s: <br/>%s ~ %s',
-                    Locale::trans("exam.filters.{$filter}", [], null),
-                    $range[0] ? Carbon::parse($range[0])->toDateTimeString() : '--',
-                    $range[1] ? Carbon::parse($range[1])->toDateTimeString() : '--'
-                );
-            }
-        }
-
-        $filter = ExamFilterUser::REGISTER_DAYS_RANGE->value;
-        if (! empty($currentFilters[$filter])) {
-            $range = $currentFilters[$filter];
-            if (! empty($range[0]) || ! empty($range[1])) {
-                $arr[] = sprintf(
-                    '%s: %s ~ %s',
-                    Locale::trans("exam.filters.{$filter}", [], null),
-                    $range[0] ?? '--',
-                    $range[1] ?? '--'
-                );
-            }
-        }
-
-        $filter = ExamFilterUser::DONATE->value;
-        if (! empty($currentFilters[$filter])) {
-            $donateStatus = collect(User::$donateStatus)->only($currentFilters[$filter]);
-            $arr[] = sprintf('%s: %s', Locale::trans("exam.filters.{$filter}", [], null), $donateStatus->pluck('text')->implode(', '));
         }
 
         return implode(view('components.support.br')->render(), $arr);

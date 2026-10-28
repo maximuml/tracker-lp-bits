@@ -176,11 +176,6 @@ class InviteRepository
             ->delete();
     }
 
-    public function markInvalid(int $id): int
-    {
-        return Invite::query()->where('id', $id)->update(['valid' => InviteValid::NO->value]);
-    }
-
     /**
      * @param  array<string, mixed>  $fields
      */

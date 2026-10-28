@@ -23,11 +23,6 @@ enum TorrentHr: int
         };
     }
 
-    public function isHr(): bool
-    {
-        return $this === self::YES;
-    }
-
     public static function fromIntSafe(int $value): self
     {
         return self::tryFrom($value) ?? self::NO;

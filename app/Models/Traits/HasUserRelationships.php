@@ -12,12 +12,10 @@ use App\Models\Comment;
 use App\Models\Country;
 use App\Models\Exam;
 use App\Models\ExamUser;
-use App\Models\HitAndRun;
 use App\Models\Invite;
 use App\Models\Language;
 use App\Models\Message;
 use App\Models\Peer;
-use App\Models\PollAnswer;
 use App\Models\Post;
 use App\Models\Reward;
 use App\Models\Snatch;
@@ -90,12 +88,6 @@ trait HasUserRelationships
     public function send_messages(): HasMany
     {
         return $this->hasMany(Message::class, 'sender');
-    }
-
-    /** @return HasMany<Message, $this> */
-    public function receive_messages(): HasMany
-    {
-        return $this->hasMany(Message::class, 'receiver');
     }
 
     /** @return HasMany<Comment, $this> */
@@ -172,12 +164,6 @@ trait HasUserRelationships
         return $this->snatched_torrents()->where('snatched.finished', SnatchFinished::NO->value);
     }
 
-    /** @return HasMany<HitAndRun, $this> */
-    public function hitAndRuns(): HasMany
-    {
-        return $this->hasMany(HitAndRun::class, 'uid');
-    }
-
     /** @return HasMany<Reward, $this> */
     public function reward_torrent_logs(): HasMany
     {
@@ -188,12 +174,6 @@ trait HasUserRelationships
     public function thank_torrent_logs(): HasMany
     {
         return $this->hasMany(Thank::class, 'userid');
-    }
-
-    /** @return HasMany<PollAnswer, $this> */
-    public function poll_answers(): HasMany
-    {
-        return $this->hasMany(PollAnswer::class, 'userid');
     }
 
     /** @return HasMany<UserMeta, $this> */

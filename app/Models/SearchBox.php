@@ -265,12 +265,6 @@ class SearchBox extends NexusModel
         return SiteConfig::current()->main->browseCat();
     }
 
-    /** @return  mixed */
-    public static function getBrowseSearchBox()
-    {
-        return self::query()->find(self::getBrowseMode());
-    }
-
     public function isSectionBrowse(): bool
     {
         return $this->id == self::getBrowseMode();
@@ -285,29 +279,6 @@ class SearchBox extends NexusModel
         } else {
             return self::SEARCH_MODE_AND;
         }
-    }
-
-    /** @param  mixed  $selectedValue */
-    public static function listSelectModeOptions($selectedValue): string
-    {
-        $options = [];
-        if (! is_numeric($selectedValue)) {
-            // set default
-            $selectedValue = self::getDefaultSearchMode();
-        }
-        foreach (self::listSearchModes() as $key => $text) {
-            $selected = '';
-            if ((string) $key === (string) $selectedValue) {
-                $selected = ' selected';
-            }
-            $options[] = trim(view('components.support.option-bare', [
-                'value' => $key,
-                'selected' => $selected !== '',
-                'label' => $text,
-            ])->render());
-        }
-
-        return implode('', $options);
     }
 
     /**

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
-use App\Support\Locale;
 use App\Support\RedisGuard;
 use App\Support\RequestValues;
 use App\Support\State\SettingState;
@@ -104,20 +103,6 @@ class Setting extends NexusModel
     }
 
     /**
-     * @return array<int|string, mixed>
-     */
-    public static function getByNameLike(string $pattern): array
-    {
-        $result = [];
-        $list = self::query()->where('name', 'like', $pattern)->get();
-        foreach ($list as $value) {
-            Arr::set($result, $value->name, self::normalizeValue($value));
-        }
-
-        return $result;
-    }
-
-    /**
      * @return mixed
      */
     public static function normalizeValue(Setting $setting)
@@ -153,81 +138,6 @@ class Setting extends NexusModel
         return (string) (self::get('main.defaultlang') ?: 'en');
     }
 
-    public static function getIsUseChallengeResponseAuthentication(): bool
-    {
-        return self::get('security.use_challenge_response_authentication') == 'yes';
-    }
-
-    public static function getUploadTorrentMaxSize(): int
-    {
-        return intval(self::get('main.max_torrent_size'));
-    }
-
-    public static function getUploadTorrentMaxPrice(): int
-    {
-        return intval(self::get('torrent.max_price'));
-    }
-
-    public static function getIsPaidTorrentEnabled(): bool
-    {
-        return self::get('torrent.paid_torrent_enabled') == 'yes';
-    }
-
-    public static function getUploadDenyApprovalDenyCount(): int
-    {
-        return intval(self::get('main.upload_deny_approval_deny_count'));
-    }
-
-    public static function getOfferSkipApprovedCount(): int
-    {
-        return intval(self::get('main.offer_skip_approved_count'));
-    }
-
-    public static function getLargeTorrentSize(): int
-    {
-        return intval(self::get('torrent.largesize'));
-    }
-
-    public static function getLargeTorrentSpState(): int
-    {
-        return intval(self::get('torrent.largepro'));
-    }
-
-    public static function getUploadTorrentHalfDownProbability(): int
-    {
-        return intval(self::get('torrent.randomhalfleech'));
-    }
-
-    public static function getUploadTorrentFreeProbability(): int
-    {
-        return intval(self::get('torrent.randomfree'));
-    }
-
-    public static function getUploadTorrentTwoTimesUpProbability(): int
-    {
-        return intval(self::get('torrent.randomtwoup'));
-    }
-
-    public static function getUploadTorrentFreeTwoTimesUpProbability(): int
-    {
-        return intval(self::get('torrent.randomtwoupfree'));
-    }
-
-    public static function getUploadTorrentHalfDownTwoTimesUpProbability(): int
-    {
-        return intval(self::get('torrent.randomtwouphalfdown'));
-    }
-
-    public static function getUploadTorrentOneThirdDownProbability(): int
-    {
-        return intval(self::get('torrent.randomthirtypercentdown'));
-    }
-
-    public static function getUploadTorrentRewardBonus(): int
-    {
-        return intval(self::get('bonus.uploadtorrent'));
-    }
-
     public static function getIsUploadOpenAtWeekend(): bool
     {
         return self::get('main.sptime') == 'yes';
@@ -236,11 +146,6 @@ class Setting extends NexusModel
     public static function getIsComplainEnabled(): bool
     {
         return self::get('main.complain_enabled') == 'yes';
-    }
-
-    public static function getIsAllowUserReceiveEmailNotification(): bool
-    {
-        return self::get('smtp.emailnotify') == 'yes';
     }
 
     public static function getBaseUrl(): string
@@ -258,16 +163,6 @@ class Setting extends NexusModel
         return self::get('basic.SITENAME');
     }
 
-    public static function getTorrentSaveDir(): string
-    {
-        return self::get('main.torrent_dir');
-    }
-
-    public static function getSmtpType(): string
-    {
-        return self::get('smtp.smtptype');
-    }
-
     /** @return  array<int|string, mixed> */
     public static function getPermissionUserTokenAllowed(): array
     {
@@ -277,11 +172,6 @@ class Setting extends NexusModel
     public static function getBackupExportPath(): ?string
     {
         return self::get('backup.export_path');
-    }
-
-    public static function getBackupRetentionCount(): int
-    {
-        return (int) self::get('backup.retention_count');
     }
 
     public static function getIsRequireSeedSectionEnabled(): bool
@@ -299,19 +189,9 @@ class Setting extends NexusModel
         return (int) self::get('require_seed_section.seeder_lte');
     }
 
-    public static function getRequireSeedSectionMenuTitle(): string
-    {
-        return self::get('require_seed_section.menu_title', Locale::trans('torrent.require_seed_section_menu_title', [], null));
-    }
-
     public static function getRequireSeedSectionPromotionState(): int
     {
         return self::get('require_seed_section.promotion_state', Torrent::REQUIRE_SEED_SECTION_DEFAULT_PROMOTION_STATE);
-    }
-
-    public static function getRequireSeedSectionBonusAdditionFactor(): float
-    {
-        return self::get('require_seed_section.bonus_addition_factor', Torrent::REQUIRE_SEED_SECTION_DEFAULT_BONUS_ADDITION_FACTOR);
     }
 
     /** @return  array<int|string, mixed> */
@@ -323,11 +203,6 @@ class Setting extends NexusModel
     public static function getRequireSeedSectionTorrentCountMax(): int
     {
         return self::get('require_seed_section.torrent_count_max', Torrent::REQUIRE_SEED_SECTION_DEFAULT_TORRENT_COUNT_MAX);
-    }
-
-    public static function getBonusMinSize(): int
-    {
-        return (int) self::get('bonus.min_size');
     }
 
     /** @return  array<int|string, mixed> */

@@ -17,24 +17,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Support\Locale;
 use Laravel\Sanctum\PersonalAccessToken as SanctumPersonalAccessToken;
 
-class PersonalAccessToken extends SanctumPersonalAccessToken
-{
-    public function getAbilitiesTextAttribute(): string
-    {
-        $abilities = $this->abilities ?? [];
-        if (in_array('*', $abilities)) {
-            return 'ALL';
-        }
-        $result = [];
-        foreach ($abilities as $ability) {
-            if ($ability != '*') {
-                $result[] = Locale::trans("route-permission.{$ability}.text", [], null);
-            }
-        }
-
-        return implode(', ', $result);
-    }
-}
+class PersonalAccessToken extends SanctumPersonalAccessToken {}

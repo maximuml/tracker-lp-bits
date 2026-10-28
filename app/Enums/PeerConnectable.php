@@ -23,11 +23,6 @@ enum PeerConnectable: int
         };
     }
 
-    public function isConnectable(): bool
-    {
-        return $this === self::YES;
-    }
-
     public static function fromStringSafe(?string $value): self
     {
         return self::tryFrom((string) $value) ?? self::NO;

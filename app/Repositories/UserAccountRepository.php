@@ -7,7 +7,6 @@ namespace App\Repositories;
 use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Collection;
 
 /**
  * Misc users-table access that does not belong to a dedicated domain
@@ -143,17 +142,6 @@ final class UserAccountRepository extends BaseRepository
     public function listByIds(array $ids, array $fields): EloquentCollection
     {
         return User::query()->whereIn('id', $ids)->get($fields);
-    }
-
-    /**
-     * User ids whose username is in $names (MeiliSearch owner filter).
-     *
-     * @param  array<int, string>  $names
-     * @return Collection<int, int>
-     */
-    public function pluckIdsByUsernames(array $names): Collection
-    {
-        return User::query()->whereIn('username', $names)->pluck('id');
     }
 
     /**

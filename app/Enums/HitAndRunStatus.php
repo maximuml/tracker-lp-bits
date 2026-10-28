@@ -27,11 +27,6 @@ enum HitAndRunStatus: int
         };
     }
 
-    public function canPardon(): bool
-    {
-        return in_array($this, [self::INSPECTING, self::UNREACHED], true);
-    }
-
     public static function fromIntSafe(int $value): self
     {
         return self::tryFrom($value) ?? self::INSPECTING;

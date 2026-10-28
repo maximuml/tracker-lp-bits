@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Traits;
 
 use App\Contracts\Repositories\TagRepositoryInterface;
-use App\Enums\PeerSeeder;
 use App\Models\AudioCodec;
 use App\Models\Bookmark;
 use App\Models\Category;
@@ -22,7 +21,6 @@ use App\Models\Tag;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\TorrentExtra;
-use App\Models\TorrentOperationLog;
 use App\Models\TorrentTag;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -78,24 +76,6 @@ trait HasTorrentRelationships
     public function snatches()
     {
         return $this->hasMany(Snatch::class, 'torrentid');
-    }
-
-    /** @return mixed */
-    public function upload_peers()
-    {
-        return $this->peers()->where('seeder', PeerSeeder::YES->value);
-    }
-
-    /** @return mixed */
-    public function download_peers()
-    {
-        return $this->peers()->where('seeder', PeerSeeder::NO->value);
-    }
-
-    /** @return mixed */
-    public function finish_peers()
-    {
-        return $this->peers()->where('finishedat', '>', 0);
     }
 
     /** @return HasMany<File, $this> */
@@ -172,12 +152,6 @@ trait HasTorrentRelationships
     public function reward_logs(): HasMany
     {
         return $this->hasMany(Reward::class, 'torrentid');
-    }
-
-    /** @return HasMany<TorrentOperationLog, $this> */
-    public function operationLogs(): HasMany
-    {
-        return $this->hasMany(TorrentOperationLog::class, 'torrent_id');
     }
 
     /** @return HasOne<TorrentExtra, $this> */

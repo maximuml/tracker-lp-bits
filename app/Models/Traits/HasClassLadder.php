@@ -17,14 +17,6 @@ use App\Support\Locale;
  */
 trait HasClassLadder
 {
-    /**
-     * Convenience accessors to the UserClass enum for type-safe comparisons.
-     */
-    public static function classEnum(int|string $class): UserClassEnum
-    {
-        return UserClassEnum::fromIntSafe($class);
-    }
-
     /** @var array<int|string, array<string, mixed>> */
     public static array $classes = [
         UserClassEnum::PEASANT->value => ['text' => 'Peasant'],

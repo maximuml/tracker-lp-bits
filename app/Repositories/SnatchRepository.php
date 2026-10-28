@@ -26,18 +26,6 @@ final class SnatchRepository extends BaseRepository
         return Snatch::query()->insert($attributes);
     }
 
-    public function findIdByUserTorrentIp(int $userId, int $torrentId, string $ip): ?int
-    {
-        /** @var int|string|null */
-        $id = Snatch::query()
-            ->where('userid', $userId)
-            ->where('torrentid', $torrentId)
-            ->where('ip', $ip)
-            ->value('id');
-
-        return $id === null ? null : (int) $id;
-    }
-
     public function linkHitAndRun(int $snatchId, int $hitAndRunId): int
     {
         return Snatch::query()->where('id', $snatchId)->update(['hit_and_run_id' => $hitAndRunId]);

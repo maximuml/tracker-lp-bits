@@ -23,11 +23,6 @@ enum TorrentStateNotice: int
         };
     }
 
-    public function isUnlimited(): bool
-    {
-        return $this === self::UNLIMITED;
-    }
-
     public static function fromIntSafe(int $value): self
     {
         return self::tryFrom($value) ?? self::NONE;

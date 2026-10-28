@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
-use App\Enums\HitAndRunMode;
-use App\Enums\TorrentHr;
 use App\Enums\TorrentPosState;
 use App\Enums\TorrentPromotion;
-use App\Models\HitAndRun;
 use App\Models\Torrent;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -47,14 +44,6 @@ trait HasTorrentAccessors
     public function getPromotionInfoAttribute()
     {
         return self::$promotionTypes[$this->sp_state_real] ?? null;
-    }
-
-    /** @return mixed */
-    public function getSpStateRealTextAttribute()
-    {
-        $spStateReal = $this->sp_state_real;
-
-        return self::$promotionTypes[$spStateReal]['text'] ?? '';
     }
 
     /**
@@ -123,33 +112,6 @@ trait HasTorrentAccessors
         return new Attribute(
             get: fn ($value, $attributes) => self::$promotionTypes[$this->sp_state]['text'] ?? ''
         );
-    }
-
-    public function getHrRealAttribute(): int
-    {
-        $searchBoxId = $this->basic_category->mode ?? 0;
-        if ($searchBoxId == 0) {
-            Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s, category: %s invalid', $this->id, $this->category), (string) 'error', (bool) false);
-
-            return TorrentHr::NO->value;
-        }
-        $hrMode = HitAndRunMode::fromStringSafe(
-            is_string($mode = HitAndRun::getConfig('mode', $searchBoxId)) ? $mode : null
-        );
-        if ($hrMode === HitAndRunMode::GLOBAL) {
-            return TorrentHr::YES->value;
-        }
-        if ($hrMode === HitAndRunMode::DISABLED) {
-            return TorrentHr::NO->value;
-        }
-
-        return (int) $this->getRawOriginal('hr');
-    }
-
-    /** @return mixed */
-    public function getHrTextAttribute()
-    {
-        return self::$hrStatus[$this->hr] ?? '';
     }
 
     public function getTagsFormattedAttribute(): string

@@ -33,12 +33,6 @@ class UsernameChangeLog extends NexusModel
         UsernameChangeType::ADMIN->value => ['text' => 'Administrator'],
     ];
 
-    /** @return  mixed */
-    public function getChangeTypeTextAttribute()
-    {
-        return Locale::trans('username-change-log.change_type.'.$this->change_type, [], null);
-    }
-
     /** @return  BelongsTo<User, $this> */
     public function user()
     {
@@ -54,5 +48,11 @@ class UsernameChangeLog extends NexusModel
         }
 
         return $result;
+    }
+
+    /** @return  mixed */
+    public function getChangeTypeTextAttribute()
+    {
+        return Locale::trans('username-change-log.change_type.'.$this->change_type, [], null);
     }
 }

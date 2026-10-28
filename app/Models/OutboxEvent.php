@@ -81,17 +81,6 @@ final class OutboxEvent extends Model
     }
 
     /**
-     * Mark as processing (atomic claim).
-     */
-    public function markProcessing(): void
-    {
-        $this->update([
-            'status' => self::STATUS_PROCESSING,
-            'attempts' => $this->attempts + 1,
-        ]);
-    }
-
-    /**
      * Mark as completed.
      */
     public function markCompleted(): void

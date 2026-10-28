@@ -384,21 +384,6 @@ class Torrent extends NexusModel
         return $result;
     }
 
-    /** @return  array<int|string, mixed> */
-    public static function getFieldLabels(): array
-    {
-        $fields = [
-            'comments', 'times_completed', 'peers_count', 'thank_users_count', 'numfiles', 'bookmark_yes', 'bookmark_no',
-            'reward_yes', 'reward_no', 'reward_logs', 'download', 'thanks_yes', 'thanks_no',
-        ];
-        $result = [];
-        foreach ($fields as $field) {
-            $result[$field] = Locale::trans("torrent.show.{$field}_label", [], null);
-        }
-
-        return $result;
-    }
-
     /**
      * @param  array<int|string, mixed>  $fields
      * @return mixed

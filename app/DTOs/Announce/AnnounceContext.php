@@ -326,34 +326,6 @@ final readonly class AnnounceContext
         );
     }
 
-    /** @param  array<string, mixed>  $torrentUpdate */
-    public function withTorrentUpdate(array $torrentUpdate): self
-    {
-        return new self(
-            dto: $this->dto,
-            params: $this->params,
-            ip: $this->ip,
-            agent: $this->agent,
-            dt: $this->dt,
-            seeder: $this->seeder,
-            isDonor: $this->isDonor,
-            isReAnnounce: $this->isReAnnounce,
-            clientFamilyId: $this->clientFamilyId,
-            announceWait: $this->announceWait,
-            autocleanIntervalOne: $this->autocleanIntervalOne,
-            user: $this->user,
-            torrent: $this->torrent,
-            self: $this->self,
-            snatchInfo: $this->snatchInfo,
-            userUpdate: $this->userUpdate,
-            torrentUpdate: $torrentUpdate,
-            uploadedIncrementForUser: $this->uploadedIncrementForUser,
-            downloadedIncrementForUser: $this->downloadedIncrementForUser,
-            responseBuilder: $this->responseBuilder,
-            traffic: $this->traffic,
-        );
-    }
-
     public function withTraffic(TrafficResult $traffic): self
     {
         return new self(

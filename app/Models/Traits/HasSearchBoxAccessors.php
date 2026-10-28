@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
-use App\Http\Middleware\Locale;
 use App\Support\Config\SiteConfig;
+use App\Support\Locale;
 use App\Support\RequestValues;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
@@ -47,31 +47,13 @@ trait HasSearchBoxAccessors
         }
     }
 
-    /** @return mixed */
-    public function getDisplaySectionNameAttribute()
-    {
-        $locale = Locale::getDefault();
-        if (! empty($this->section_name[$locale])) {
-            return $this->section_name[$locale];
-        }
-        $defaultLang = SiteConfig::current()->main->defaultLang();
-        if (! empty($this->section_name[$defaultLang])) {
-            return $this->section_name[$defaultLang];
-        }
-        if ($this->isSectionBrowse()) {
-            return \App\Support\Locale::trans('searchbox.sections.browse', [], null);
-        }
-
-        return $this->name;
-    }
-
     /**
      * @param  mixed  $torrentField
      * @return mixed
      */
     public function getTaxonomyLabel($torrentField)
     {
-        $lang = \App\Support\Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) false);
+        $lang = Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) false);
         foreach ($this->extra[self::EXTRA_TAXONOMY_LABELS] ?? [] as $item) {
             if ($item['torrent_field'] == $torrentField) {
                 if (! empty($item['display_text'][$lang])) {
@@ -80,6 +62,24 @@ trait HasSearchBoxAccessors
             }
         }
 
-        return \App\Support\Locale::trans("searchbox.sub_category_{$torrentField}_label", [], null) ?: ucfirst($torrentField);
+        return Locale::trans("searchbox.sub_category_{$torrentField}_label", [], null) ?: ucfirst($torrentField);
+    }
+
+    /** @return mixed */
+    public function getDisplaySectionNameAttribute()
+    {
+        $locale = \App\Http\Middleware\Locale::getDefault();
+        if (! empty($this->section_name[$locale])) {
+            return $this->section_name[$locale];
+        }
+        $defaultLang = SiteConfig::current()->main->defaultLang();
+        if (! empty($this->section_name[$defaultLang])) {
+            return $this->section_name[$defaultLang];
+        }
+        if ($this->isSectionBrowse()) {
+            return Locale::trans('searchbox.sections.browse', [], null);
+        }
+
+        return $this->name;
     }
 }

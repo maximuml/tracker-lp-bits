@@ -23,11 +23,6 @@ enum SnatchFinished: int
         };
     }
 
-    public function isFinished(): bool
-    {
-        return $this === self::YES;
-    }
-
     public static function fromStringSafe(?string $value): self
     {
         return self::tryFrom((string) $value) ?? self::NO;

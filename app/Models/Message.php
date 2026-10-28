@@ -43,12 +43,6 @@ class Message extends NexusModel
         return $this->belongsTo(User::class, 'sender')->withDefault(['id' => 0, 'username' => 'System']);
     }
 
-    /** @return  BelongsTo<User, $this> */
-    public function receive_user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'receiver');
-    }
-
     /** @param  array<string, mixed>  $data */
     public static function add(array $data): self
     {

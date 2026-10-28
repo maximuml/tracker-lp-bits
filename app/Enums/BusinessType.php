@@ -82,22 +82,6 @@ enum BusinessType: int
     }
 
     /**
-     * Whether this is a deduction-type operation (user spends bonus).
-     */
-    public function isDeduction(): bool
-    {
-        return $this->value < 1000;
-    }
-
-    /**
-     * Whether this is an income-type operation (user receives bonus).
-     */
-    public function isIncome(): bool
-    {
-        return $this->value >= 1000;
-    }
-
-    /**
      * Resolve a business type from an integer, falling back to null for invalid values.
      */
     public static function fromIntSafe(int $value): ?self

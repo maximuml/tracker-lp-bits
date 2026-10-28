@@ -66,12 +66,6 @@ class Comment extends NexusModel
         return $query;
     }
 
-    /** @return  BelongsTo<Torrent, $this> */
-    public function related_torrent()
-    {
-        return $this->belongsTo(Torrent::class, 'torrent');
-    }
-
     /** @return  BelongsTo<User, $this> */
     public function create_user()
     {

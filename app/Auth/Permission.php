@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Auth;
 
 use App\Enums\Permission\PermissionEnum;
-use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Services\PermissionChecker;
@@ -67,13 +66,6 @@ class Permission
         return self::userCan($user, PermissionEnum::TORRENT_MANAGE);
     }
 
-    public static function canPickTorrent(?User $user = null): bool
-    {
-        $user = self::user($user);
-
-        return $user instanceof User && ($user->picker && self::canManageTorrent($user) || $user->class >= UserClassEnum::SYSOP->value);
-    }
-
     public static function canSetTorrentSpecialTag(?User $user = null): bool
     {
         return self::userCan($user, PermissionEnum::TORRENT_SET_SPECIAL_TAG);
@@ -82,11 +74,6 @@ class Permission
     public static function canManageUserBasicInfo(?User $user = null): bool
     {
         return self::userCan($user, PermissionEnum::MANAGE_USER_BASIC_INFO);
-    }
-
-    public static function canManageUserConfidentialInfo(?User $user = null): bool
-    {
-        return self::userCan($user, PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO);
     }
 
     public static function canViewUserConfidentialInfo(?User $user = null): bool
@@ -127,11 +114,6 @@ class Permission
     public static function canViewTorrentHistory(?User $user = null): bool
     {
         return self::userCan($user, PermissionEnum::TORRENT_HISTORY);
-    }
-
-    public static function canViewTorrentStructure(?User $user = null): bool
-    {
-        return self::userCan($user, PermissionEnum::TORRENT_STRUCTURE);
     }
 
     private static function user(?User $user = null): ?User

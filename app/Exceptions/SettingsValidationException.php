@@ -25,11 +25,6 @@ class SettingsValidationException extends \RuntimeException
         );
     }
 
-    public function getPrefix(): string
-    {
-        return $this->prefix;
-    }
-
     /**
      * @return list<string>
      */

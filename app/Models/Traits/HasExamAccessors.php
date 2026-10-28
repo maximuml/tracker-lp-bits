@@ -48,24 +48,6 @@ trait HasExamAccessors
         return '';
     }
 
-    public function getIndexFormattedAttribute(): string
-    {
-        $indexes = $this->indexes;
-        $arr = [];
-        foreach ($indexes as $index) {
-            if (isset($index['checked']) && $index['checked']) {
-                $arr[] = sprintf(
-                    '%s: %s %s',
-                    Locale::trans("exam.index_text_{$index['index']}", [], null),
-                    $index['require_value'],
-                    Exam::$indexes[$index['index']]['unit'] ?? ''
-                );
-            }
-        }
-
-        return implode(view('components.support.br')->render(), $arr);
-    }
-
     public function getFilterFormattedAttribute(): string
     {
         $currentFilters = $this->filters;
@@ -109,6 +91,24 @@ trait HasExamAccessors
         if (! empty($currentFilters[$filter])) {
             $donateStatus = collect(User::$donateStatus)->only($currentFilters[$filter]);
             $arr[] = sprintf('%s: %s', Locale::trans("exam.filters.{$filter}", [], null), $donateStatus->pluck('text')->implode(', '));
+        }
+
+        return implode(view('components.support.br')->render(), $arr);
+    }
+
+    public function getIndexFormattedAttribute(): string
+    {
+        $indexes = $this->indexes;
+        $arr = [];
+        foreach ($indexes as $index) {
+            if (isset($index['checked']) && $index['checked']) {
+                $arr[] = sprintf(
+                    '%s: %s %s',
+                    Locale::trans("exam.index_text_{$index['index']}", [], null),
+                    $index['require_value'],
+                    Exam::$indexes[$index['index']]['unit'] ?? ''
+                );
+            }
         }
 
         return implode(view('components.support.br')->render(), $arr);

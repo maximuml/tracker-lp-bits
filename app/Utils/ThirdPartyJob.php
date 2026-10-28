@@ -47,22 +47,6 @@ final class ThirdPartyJob
         $lock->release();
     }
 
-    public static function addBuyTorrent(int $userId, int $torrentId): void
-    {
-        $key = sprintf('%s:%s_%s', self::$queueKey, $userId, $torrentId);
-        if (Redis::connection()->client()->set($key, now()->toDateTimeString(), ['nx', 'ex' => 3600])) {
-            $value = [
-                'name' => self::JOB_BUY_TORRENT,
-                'user_id' => $userId,
-                'torrent_id' => $torrentId,
-            ];
-            Redis::connection()->client()->rPush(self::$queueKey, json_encode($value));
-            Logger::writeWithContext((string) "success addBuyTorrent: {$key}", (string) 'debug', (bool) false);
-        } else {
-            Logger::writeWithContext((string) "no need to addBuyTorrent: {$key}", (string) 'debug', (bool) false);
-        }
-    }
-
     /**
      * @param  array<string, mixed>  $params
      */

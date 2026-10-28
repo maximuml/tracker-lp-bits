@@ -9,9 +9,7 @@ use App\Models\SearchBox;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use Filament\Forms;
-use Filament\Schemas\Components\Fieldset;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -207,91 +205,5 @@ class SearchBoxSchemaBuilder
                 ->options($items->pluck('name', 'id')->all())
                 ->label($searchBox->getTaxonomyLabel($torrentField));
         }
-    }
-
-    /**
-     * @return array<int|string, mixed>
-     */
-    public function buildCategoryTaxonomyTagSchema(SearchBox $searchBox, bool $multiple, string $namePrefix): array
-    {
-        $schema = [];
-        $mode = $searchBox->id;
-        $namePrefix .= ".section.$mode";
-        if ($multiple) {
-            $schema[] = Forms\Components\CheckboxList::make("$namePrefix.category")
-                ->options($searchBox->categories()->orderBy('sort_index', 'desc')->orderBy('id')->pluck('name', 'id'))
-                ->label(Locale::trans('label.search_box.category', [], null))
-                ->columns(6);
-        } else {
-            $schema[] = Forms\Components\Radio::make("$namePrefix.category")
-                ->options($searchBox->categories()->orderBy('sort_index', 'desc')->orderBy('id')->pluck('name', 'id'))
-                ->label(Locale::trans('label.search_box.category', [], null))
-                ->columns(6);
-        }
-
-        $fieldset = Fieldset::make(Locale::trans('searchbox.sub_categories_label', [], null));
-        $fieldsetSchema = [];
-        // Keep the order
-        if (! empty($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS])) {
-            foreach ($searchBox->extra[SearchBox::EXTRA_TAXONOMY_LABELS] as $taxonomy) {
-                $torrentField = $taxonomy['torrent_field'];
-                $showField = 'show'.$torrentField;
-                if ($searchBox->showsubcat && $searchBox->{$showField} && isset(SearchBox::$taxonomies[$torrentField])) {
-                    if ($multiple) {
-                        $fieldsetSchema[] = Forms\Components\CheckboxList::make("$namePrefix.$torrentField")
-                            ->options($this->listTaxonomies($torrentField, $mode))
-                            ->label($searchBox->getTaxonomyLabel($torrentField))
-                            ->columns(6);
-                    } else {
-                        $fieldsetSchema[] = Forms\Components\Radio::make("$namePrefix.$torrentField")
-                            ->options($this->listTaxonomies($torrentField, $mode))
-                            ->label($searchBox->getTaxonomyLabel($torrentField))
-                            ->columns(6);
-                    }
-                }
-            }
-        } else {
-            foreach (SearchBox::$taxonomies as $torrentField => $taxonomyTableModel) {
-                $showField = 'show'.$torrentField;
-                if ($searchBox->showsubcat && $searchBox->{$showField}) {
-                    $fieldsetSchema[] = Forms\Components\CheckboxList::make("$namePrefix.$torrentField")
-                        ->options($this->listTaxonomies($torrentField, $mode))
-                        ->label($searchBox->getTaxonomyLabel($torrentField))
-                        ->columns(6);
-                }
-            }
-        }
-        $fieldset->schema($fieldsetSchema)->columns(1);
-        $schema[] = $fieldset;
-
-        $tagRep = $this->tagRepository;
-        $tags = $tagRep->listAll($searchBox->id);
-        $schema[] = Forms\Components\CheckboxList::make("$namePrefix.tag")
-            ->options($tags->pluck('name', 'id'))
-            ->label(Locale::trans('label.tag.label', [], null))
-            ->columns(6);
-
-        return $schema;
-    }
-
-    /**
-     * @param  mixed  $torrentField
-     * @param  mixed  $mode
-     * @return Collection<int, mixed>
-     */
-    private function listTaxonomies($torrentField, $mode)
-    {
-        if (! isset(SearchBox::$taxonomies[$torrentField])) {
-            return collect();
-        }
-        $tableName = SearchBox::$taxonomies[$torrentField]['table'];
-
-        return DB::table($tableName)
-            ->where(function (Builder $query) use ($mode) {
-                return $query->where('mode', $mode)->orWhere('mode', 0);
-            })
-            ->orderBy('sort_index', 'desc')
-            ->orderBy('id', 'desc')
-            ->pluck('name', 'id');
     }
 }

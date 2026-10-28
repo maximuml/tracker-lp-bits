@@ -87,25 +87,10 @@ class Peer extends NexusModel
         return $builder->where('seeder', PeerSeeder::YES->value);
     }
 
-    /**
-     * @param  Builder<Peer>  $builder
-     * @return mixed
-     */
-    public function scopeIsNotSeeder(Builder $builder)
-    {
-        return $builder->where('seeder', PeerSeeder::NO->value);
-    }
-
     /** @return  bool */
     public function isSeeder()
     {
         return $this->seeder == PeerSeeder::YES->value;
-    }
-
-    /** @return  bool */
-    public function isNotSeeder()
-    {
-        return $this->seeder == PeerSeeder::NO->value;
     }
 
     /** @return  BelongsTo<User, $this> */

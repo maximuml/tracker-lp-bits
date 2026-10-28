@@ -109,6 +109,18 @@ table.main {
 
 .nx-empty__actions {margin-top:10px}
 
+.nx-ytfacade {position:relative;width:min(560px,100%);aspect-ratio:560/315;background:#000;overflow:hidden;border-radius:4px}
+
+.nx-ytfacade__play {position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#fff}
+
+.nx-ytfacade__badge {width:68px;height:48px;border-radius:12px;background:#c00;display:flex;align-items:center;justify-content:center;transition:transform .15s ease}
+
+.nx-ytfacade__play:hover .nx-ytfacade__badge, .nx-ytfacade__play:focus-visible .nx-ytfacade__badge {transform:scale(1.06);background:#d11}
+
+.nx-ytfacade__label {font-size:12px;opacity:.8}
+
+.nx-ytfacade__frame {position:absolute;inset:0;width:100%;height:100%;border:0}
+
 .nx-embedded {padding:0}
 
 .nx-mainouter {width:1200px;max-width:100%;margin-left:auto;margin-right:auto;border-collapse:separate;border-spacing:0}

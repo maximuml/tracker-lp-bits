@@ -11,6 +11,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Models\Offer;
 use App\Services\Offer\OfferDetailsBuilder;
 use App\Support\Cache\NexusCache;
+use App\Support\RuntimeContext;
 use App\Support\Time;
 use App\ViewModels\Offer\OfferDetailsViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -273,5 +274,50 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->assertSame(30, $s->commentCount);
         $this->assertNotEmpty((string) $s->pagerTop);
         $this->assertStringContainsString('off_details=1', (string) $s->pagerTop);
+    }
+
+    public function test_null_added_renders_prefix_only(): void
+    {
+        $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['allowed' => 1, 'added' => null]));
+        $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
+        $this->commentRepo->shouldReceive('countComments')->andReturn(0);
+
+        $s = $this->builder()->build($this->actor(['id' => 7, 'timetype' => 1]), 7, $this->request());
+
+        $this->assertSame((string) __('offers.text_blank'), (string) $s->offerTime);
+    }
+
+    public function test_offer_time_blank_prefix_when_timetype_key_absent(): void
+    {
+        $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['allowed' => 1]));
+        $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
+        $this->commentRepo->shouldReceive('countComments')->andReturn(0);
+
+        $s = $this->builder()->build($this->actor(['id' => 7]), 7, $this->request());
+
+        $this->assertSame(
+            (string) __('offers.text_blank').Time::format('2024-01-02 03:04:05', true, false),
+            (string) $s->offerTime,
+        );
+    }
+
+    public function test_offer_time_elapsed_format_in_legacy_runtime(): void
+    {
+        app(RuntimeContext::class)->bootEntry(true);
+
+        try {
+            $this->offerRepo->shouldReceive('findOffer')->andReturn($this->offer(['allowed' => 1]));
+            $this->voteRepo->shouldReceive('getVoteCounts')->andReturn(['yeah' => 0, 'against' => 0]);
+            $this->commentRepo->shouldReceive('countComments')->andReturn(0);
+
+            $s = $this->builder()->build($this->actor(['id' => 7, 'timetype' => 1]), 7, $this->request());
+
+            $this->assertSame(
+                (string) __('offers.text_blank').Time::format('2024-01-02 03:04:05', true, false),
+                (string) $s->offerTime,
+            );
+        } finally {
+            app(RuntimeContext::class)->bootEntry(false);
+        }
     }
 }

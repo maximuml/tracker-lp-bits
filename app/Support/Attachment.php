@@ -30,7 +30,7 @@ final class Attachment
         bool $imageResizer,
         string $url,
         string $sizeText,
-        string $timeText,
+        SafeHtml $timeText,
         array $labels,
     ): string {
         $id = (int) ($row['id'] ?? 0);
@@ -49,7 +49,7 @@ final class Attachment
         string $url,
         bool $imageResizer,
         string $sizeText,
-        string $timeText,
+        SafeHtml $timeText,
         string $sizeLabel,
     ): string {
         return trim(view('components.support.attach-img', [
@@ -59,7 +59,7 @@ final class Attachment
             'imageResizer' => $imageResizer,
             'sizeLabel' => $sizeLabel,
             'sizeText' => $sizeText,
-            'timeText' => SafeHtml::fromTrustedHtml($timeText),
+            'timeText' => $timeText,
         ])->render());
     }
 
@@ -72,7 +72,7 @@ final class Attachment
         string $dlkey,
         string $filename,
         string $sizeText,
-        string $timeText,
+        SafeHtml $timeText,
         string $downloadsLabel,
     ): string {
         $icon = self::iconForFileType((string) ($row['filetype'] ?? ''));
@@ -86,7 +86,7 @@ final class Attachment
             'filename' => $filename,
             'downloadsLabel' => $downloadsLabel,
             'downloadCount' => $downloadCount,
-            'timeText' => SafeHtml::fromTrustedHtml($timeText),
+            'timeText' => $timeText,
             'sizeText' => $sizeText,
         ])->render());
     }
@@ -151,7 +151,7 @@ final class Attachment
             $imageResizer,
             $url,
             Format::size($row['filesize']),
-            (string) Time::format($row['added']),
+            Time::formatHtml($row['added']),
             [
                 'size' => Locale::trans('attachment.size'),
                 'downloads' => Locale::trans('attachment.downloads'),

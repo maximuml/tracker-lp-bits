@@ -3,6 +3,7 @@
 namespace Tests\Integration\Support;
 
 use App\Support\Attachment;
+use App\Support\Html\SafeHtml;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -24,7 +25,7 @@ final class AttachmentTest extends TestCase
             true,
             'https://example.com/cover.jpg',
             '1.23 MB',
-            '2026-01-01',
+            SafeHtml::fromPlainText('2026-01-01'),
             ['size' => 'Size', 'downloads' => 'Downloads'],
         );
 
@@ -50,7 +51,7 @@ final class AttachmentTest extends TestCase
             false,
             '/x.png',
             '100 KB',
-            'now',
+            SafeHtml::fromPlainText('now'),
             ['size' => 'Size', 'downloads' => 'Downloads'],
         );
 
@@ -74,7 +75,7 @@ final class AttachmentTest extends TestCase
             true,
             '',
             '5 MB',
-            '2026-01-02',
+            SafeHtml::fromPlainText('2026-01-02'),
             ['size' => 'Size', 'downloads' => 'Downloads'],
         );
 
@@ -101,7 +102,7 @@ final class AttachmentTest extends TestCase
             true,
             '',
             '1 KB',
-            'today',
+            SafeHtml::fromPlainText('today'),
             ['size' => 'Size', 'downloads' => 'Downloads'],
         );
 

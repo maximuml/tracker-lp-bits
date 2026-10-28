@@ -238,9 +238,10 @@ final class OfferListBuilder
                     if ($showlastcom) {
                         if (! empty($lastcom)) {
                             if (($actor->value('timetype', 1)) !== UserTimeType::TIMEALIVE->value) {
-                                $lastcomtime = __('offers.text_at_time').($lastcom['added'] ?? '');
+                                $lastcomtime = SafeHtml::fromPlainText(__('offers.text_at_time').($lastcom['added'] ?? ''));
                             } else {
-                                $lastcomtime = __('offers.text_blank').Time::format((string) ($lastcom['added'] ?? 'now'), true, false, true);
+                                $lastcomtime = SafeHtml::fromPlainText(__('offers.text_blank'))
+                                    ->append(Time::formatHtml((string) ($lastcom['added'] ?? 'now'), true, false, true));
                             }
                             $tooltipId = 'lastcom_'.$i;
                             $tooltips[] = new OfferTooltip(
@@ -248,7 +249,7 @@ final class OfferListBuilder
                                 content: view('components.offers.lastcom_tooltip', [
                                     'hasNew' => $hasnewcom,
                                     'username' => UserDisplay::username((int) ($lastcom['user'] ?? 0)),
-                                    'time' => SafeHtml::fromTrustedHtml($lastcomtime),
+                                    'time' => $lastcomtime,
                                     'comment' => $renderTt((string) ($lastcom['text'] ?? '')),
                                 ]),
                             );

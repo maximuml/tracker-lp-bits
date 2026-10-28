@@ -126,7 +126,7 @@ class TorrentEditController extends Controller
                 posStateUntil: (string) $row['pos_state_until'],
                 specialLabel: (string) (__('edit.row_special_torrent')),
                 positionLabel: html_entity_decode((string) (__('edit.row_torrent_position')), ENT_QUOTES | ENT_HTML401, 'UTF-8'),
-                deadlineLabel: SafeHtml::fromTrustedHtml(Locale::trans('label.deadline', [], null).'&nbsp;'),
+                deadlineLabel: SafeHtml::fromPlainText(Locale::trans('label.deadline', [], null)."\u{00a0}"),
             );
         }
 

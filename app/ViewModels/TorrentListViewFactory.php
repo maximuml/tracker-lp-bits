@@ -256,8 +256,9 @@ final class TorrentListViewFactory
                 if ($lastcom) {
                     $commentIsNew = $lastcom['user'] != $this->actor->id && strtotime($lastcom['added']) >= $lastBrowse;
                     $lastcomtime = $timeAlive
-                        ? __('functions.text_blank').Time::format($lastcom['added'], true, false, true)
-                        : __('functions.text_at_time').$lastcom['added'];
+                        ? SafeHtml::fromPlainText(__('functions.text_blank'))
+                            ->append(Time::formatHtml($lastcom['added'], true, false, true))
+                        : SafeHtml::fromPlainText(__('functions.text_at_time').$lastcom['added']);
                     $tooltipId = 'lastcom_'.$counter;
                     $lastcomTooltip[] = [
                         'id' => $tooltipId,
@@ -267,7 +268,7 @@ final class TorrentListViewFactory
                                 'newLabel' => (string) __('functions.text_new_uppercase'),
                                 'byLabel' => (string) __('functions.text_last_commented_by'),
                                 'user' => UserDisplay::username($lastcom['user']),
-                                'time' => SafeHtml::fromTrustedHtml((string) $lastcomtime),
+                                'time' => $lastcomtime,
                             ])->render())
                             .$renderTt((string) $lastcom['text'])
                         ),

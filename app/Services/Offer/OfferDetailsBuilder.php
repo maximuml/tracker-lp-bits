@@ -49,10 +49,12 @@ final class OfferDetailsBuilder
         $offerState = $offer->allowed ?? OfferAllowed::PENDING;
         $offerUserid = (int) ($offer->userid ?? 0);
 
-        $timeFormat = Time::format($offer->added?->format('Y-m-d H:i:s'), true, false);
-        $offertime = ($actor->value('timetype', 1)) !== UserTimeType::TIMEALIVE->value
-            ? __('offers.text_at').$timeFormat
-            : __('offers.text_blank').$timeFormat;
+        $timeFormat = Time::formatHtml($offer->added?->format('Y-m-d H:i:s'), true, false);
+        $offertime = SafeHtml::fromPlainText(
+            ($actor->value('timetype', 1)) !== UserTimeType::TIMEALIVE->value
+                ? __('offers.text_at')
+                : __('offers.text_blank')
+        )->append($timeFormat);
 
         $status = match ($offerState) {
             OfferAllowed::PENDING => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-red'),
@@ -100,7 +102,7 @@ final class OfferDetailsBuilder
             id: $id,
             name: (string) ($offer->name ?? ''),
             offeredBy: UserDisplay::username($offerUserid),
-            offerTime: SafeHtml::fromTrustedHtml($offertime),
+            offerTime: $offertime,
             status: $status,
             showAllowRow: Permission::can(PermissionEnum::OFFER_MANAGE) && $isPending,
             isPending: $isPending,

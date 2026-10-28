@@ -246,4 +246,25 @@ final class PostRepositoryTest extends TestCase
         $this->assertSame(0, $rows->count());
         $this->assertSame(0, $selectQueries);
     }
+
+    public function test_get_forum_today_post_counts_groups_by_forum(): void
+    {
+        $forum1 = Forum::factory()->create();
+        $forum2 = Forum::factory()->create();
+        $topic1 = Topic::factory()->create(['forumid' => $forum1->id]);
+        $topic2 = Topic::factory()->create(['forumid' => $forum2->id]);
+        Post::factory()->count(2)->create(['topicid' => $topic1->id, 'added' => now()]);
+        Post::factory()->create(['topicid' => $topic2->id, 'added' => now()]);
+        Post::factory()->create(['topicid' => $topic1->id, 'added' => now()->subDays(3)]);
+
+        $result = $this->repository->getForumTodayPostCounts([$forum1->id, $forum2->id], date('Y-m-d'));
+
+        $this->assertSame(2, $result[$forum1->id]);
+        $this->assertSame(1, $result[$forum2->id]);
+    }
+
+    public function test_get_forum_today_post_counts_empty_input_returns_empty(): void
+    {
+        $this->assertSame([], $this->repository->getForumTodayPostCounts([], date('Y-m-d')));
+    }
 }

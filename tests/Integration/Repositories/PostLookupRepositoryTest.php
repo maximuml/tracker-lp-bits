@@ -167,4 +167,21 @@ final class PostLookupRepositoryTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    public function test_find_post_arrays_by_ids_returns_rows_keyed_by_id(): void
+    {
+        $post1 = Post::factory()->create(['body' => 'Batch one']);
+        $post2 = Post::factory()->create(['body' => 'Batch two']);
+
+        $result = $this->repository->findPostArraysByIds([$post1->id, $post2->id, 999999]);
+
+        $this->assertSame('Batch one', $result[$post1->id]['body']);
+        $this->assertSame('Batch two', $result[$post2->id]['body']);
+        $this->assertArrayNotHasKey(999999, $result);
+    }
+
+    public function test_find_post_arrays_by_ids_empty_input_returns_empty(): void
+    {
+        $this->assertSame([], $this->repository->findPostArraysByIds([]));
+    }
 }

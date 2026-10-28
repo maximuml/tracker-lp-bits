@@ -134,4 +134,24 @@ class PostLookupRepository extends BaseRepository
 
         return $post ? $post->toArray() : null;
     }
+
+    /**
+     * Batched counterpart of {@see findPostArrayById()}.
+     *
+     * @param  array<int>  $ids
+     * @return array<int, array<string, mixed>> map of post id to row array
+     */
+    public function findPostArraysByIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return Post::query()
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id')
+            ->map(static fn (Post $post): array => $post->getAttributes())
+            ->all();
+    }
 }

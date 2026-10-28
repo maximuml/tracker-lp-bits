@@ -103,7 +103,7 @@ class CustomField
         $res = $this->customFieldRepository->listFieldsByIdsOrdered($customFieldIds);
         $cspNonce = (string) request()->attributes->get('csp_nonce', '');
         $baseUrl = Url::schemeAndHost(false);
-        $html = '';
+        $fields = [];
         foreach ($res as $row) {
             $row = (array) $row;
             $type = (int) $row['type'];
@@ -163,10 +163,10 @@ class CustomField
                 ];
             }
 
-            $html .= view('components.fields.upload_field', $params)->render();
+            $fields[] = $params;
         }
 
-        return SafeHtml::fromTrustedHtml($html);
+        return SafeHtml::fromTrustedHtml(view('components.fields.upload_fields', ['fields' => $fields])->render());
     }
 
     /**

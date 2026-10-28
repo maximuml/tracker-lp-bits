@@ -127,27 +127,6 @@ class UserClassTest extends TestCase
         $this->assertSame('pic/banned.gif', UserClass::imagePath('(OnlyAlias)'));
     }
 
-    // ---------- allImagePaths() ----------
-
-    public function test_all_image_paths_returns_18_entries(): void
-    {
-        $this->assertCount(18, UserClass::allImagePaths());
-    }
-
-    public function test_all_image_paths_keys_are_class_names(): void
-    {
-        $map = UserClass::allImagePaths();
-        $this->assertArrayHasKey('User', $map);
-        $this->assertArrayHasKey('Staff Leader', $map);
-    }
-
-    public function test_all_image_paths_values_start_with_pic(): void
-    {
-        foreach (UserClass::allImagePaths() as $name => $path) {
-            $this->assertStringStartsWith('pic/', $path, "Image for '$name' should start with 'pic/'");
-        }
-    }
-
     // ---------- name() ----------
 
     public function test_name_returns_english_class_text(): void

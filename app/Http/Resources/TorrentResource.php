@@ -11,11 +11,12 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Format;
 use App\Support\Time;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @mixin Torrent
  */
-class TorrentResource extends BaseResource
+class TorrentResource extends JsonResource
 {
     const NAME = 'torrent';
 
@@ -92,11 +93,6 @@ class TorrentResource extends BaseResource
 
         return $out;
 
-    }
-
-    protected function getResourceName(): string
-    {
-        return self::NAME;
     }
 
     /**

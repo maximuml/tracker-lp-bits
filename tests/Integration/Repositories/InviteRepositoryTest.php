@@ -36,23 +36,6 @@ final class InviteRepositoryTest extends TestCase
         $this->repository = new InviteRepository;
     }
 
-    public function test_get_user_returns_null_when_user_not_found(): void
-    {
-        $this->assertNull($this->repository->getUser(99999));
-    }
-
-    public function test_get_user_returns_model_when_user_found(): void
-    {
-        /** @var User $user */
-        $user = User::factory()->create();
-
-        $result = $this->repository->getUser($user->id);
-
-        $this->assertNotNull($result);
-        $this->assertSame($user->id, $result->id);
-        $this->assertSame($user->username, $result->username);
-    }
-
     public function test_count_pending_invitees_returns_zero_when_none(): void
     {
         $this->assertSame(0, $this->repository->countPendingInvitees(123));

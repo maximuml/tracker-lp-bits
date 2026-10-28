@@ -140,31 +140,6 @@ final class Strings
     }
 
     /**
-     * Collapse a free-text search term down to ASCII alphanumeric
-     * tokens separated by single spaces. Mirrors the legacy
-     * `searchfield()` exactly:
-     *
-     *   - every non-alphanumeric ASCII byte → single space
-     *   - leading whitespace stripped
-     *   - trailing whitespace stripped
-     *   - runs of whitespace collapsed to one
-     *
-     * Used by the legacy torrent / forum / log search boxes to
-     * normalise input before fan-out into `LIKE %word%` predicates.
-     * Note: the regex operates on bytes (modifier `s`), not on
-     * multibyte characters — non-ASCII chars (e.g. Cyrillic) all
-     * become spaces. That's a legacy limitation, pinned by tests.
-     */
-    public static function normalizeSearchTerm(string $s): string
-    {
-        return (string) preg_replace(
-            ['/[^a-z0-9]/si', '/^\s*/s', '/\s*$/s', '/\s+/s'],
-            [' ', '', '', ' '],
-            $s,
-        );
-    }
-
-    /**
      * Return the BitTorrent client portion of a user-agent string —
      * everything up to (but not including) the first `;`. If there
      * is no semicolon, the whole string is returned.

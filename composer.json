@@ -69,7 +69,9 @@
         "nunomaduro/collision": "^8.6",
         "orangehill/iseed": "^3.0",
         "phpstan/phpstan": "^2.2",
-        "phpunit/phpunit": "^13.3"
+        "phpunit/phpunit": "^13.3",
+        "psalm/plugin-laravel": "^3.17",
+        "vimeo/psalm": "^6.20"
     },
     "autoload-dev": {
         "psr-4": {

@@ -140,7 +140,7 @@ final class LegacyLangMarkupTest extends TestCase
     /**
      * `Time::format()` returns an HTML string in the legacy branch
      * (`<span title>` / `<br />`); `{{ }}` escapes it into visible text.
-     * Views must use `<x-time>` (SafeHtml) or `Time::formatText()`.
+     * Views must use `<x-time>` (SafeHtml).
      */
     public function test_no_escaped_time_format_in_views(): void
     {
@@ -160,7 +160,7 @@ final class LegacyLangMarkupTest extends TestCase
         $this->assertSame(
             [],
             $offenders,
-            "HTML-returning Time::format() rendered through {{ }} — use <x-time> or Time::formatText().\n"
+            "HTML-returning Time::format() rendered through {{ }} — use <x-time>.\n"
             .implode("\n", $offenders),
         );
     }

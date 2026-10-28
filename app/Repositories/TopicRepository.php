@@ -116,19 +116,6 @@ class TopicRepository extends BaseRepository
     }
 
     /**
-     * @return array<string, int>|null
-     */
-    public function getTopicForumAndUser(int $topicid): ?array
-    {
-        $topic = Topic::query()->where('id', $topicid)->first(['forumid', 'userid']);
-
-        return $topic ? [
-            'forumid' => (int) $topic->forumid,
-            'userid' => (int) $topic->userid,
-        ] : null;
-    }
-
-    /**
      * @return array{count: int, rows: Collection<int, Topic>}
      */
     public function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array

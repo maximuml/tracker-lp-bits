@@ -5,30 +5,10 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\ForumMod;
-use App\Support\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ForumModRepository extends BaseRepository
 {
-    /**
-     * @param  array<int>  $userIds
-     */
-    public function replaceModerators(int $forumId, array $userIds, int $limit = 3): void
-    {
-        DB::table('forummods')->where('forumid', $forumId)->delete();
-
-        $records = [];
-        $max = min($limit, count($userIds));
-        for ($i = 0; $i < $max; $i++) {
-            $records[] = ['forumid' => $forumId, 'userid' => $userIds[$i]];
-        }
-        if (! empty($records)) {
-            DB::table('forummods')->insert($records);
-        }
-
-        $this->clearModeratorCache();
-    }
-
     /** @return  array<int, array<int>> */
     public function getModeratorArray(): array
     {
@@ -60,10 +40,5 @@ class ForumModRepository extends BaseRepository
         }
 
         return $mods;
-    }
-
-    private function clearModeratorCache(): void
-    {
-        Cache::forgetWithLocales('forum_moderator_array');
     }
 }

@@ -148,11 +148,6 @@ final class PageLayoutContext
         );
     }
 
-    public function isLoggedIn(): bool
-    {
-        return $this->user !== null && ! empty($this->user['id']);
-    }
-
     public function userClass(): int
     {
         return (int) ($this->user['class'] ?? 0);

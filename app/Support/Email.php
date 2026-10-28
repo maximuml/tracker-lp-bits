@@ -116,24 +116,6 @@ final class Email
     }
 
     /**
-     * Convert `$content` from UTF-8 to the legacy charset for
-     * `$langFolder`, using `iconv` with the `//IGNORE` modifier so
-     * un-mappable codepoints are dropped silently rather than
-     * aborting the conversion (mirrors the legacy
-     * `change_email_encode()` contract).
-     *
-     * Returns the converted string, or `false` if `iconv` itself
-     * fails (the legacy behaviour — `iconv` returns `false` and the
-     * caller's `mail()` body becomes the literal `false`. We
-     * preserve that shape so call sites that already null-check
-     * the result keep working unchanged).
-     */
-    public static function convertCharset(string $langFolder, string $content): string|false
-    {
-        return iconv('utf-8', self::charsetFor($langFolder).'//IGNORE', $content);
-    }
-
-    /**
      * Return true if `$email` matches the legacy `check_email()`
      * regex (see {@see WELL_FORMED_PATTERN}).
      *

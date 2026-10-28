@@ -1,2 +1,2 @@
-@props(['imgId', 'escapedSrc', 'resizerAttrs'])
-<img id="{{ $imgId }}" alt="image" src="{{ $escapedSrc }}"{{ $resizerAttrs }} data-img-fallback="{{ $escapedSrc }}" />
+@props(['imgId', 'src', 'enableResizer', 'maxWidth', 'maxHeight'])
+<img id="{{ $imgId }}" alt="image" src="{{ $src }}"@if($enableResizer) data-scale="{{ $maxWidth }}x{{ $maxHeight }}" data-zoomable @endif data-img-fallback="{{ $src }}" />

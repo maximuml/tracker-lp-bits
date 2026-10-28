@@ -66,11 +66,7 @@ class Snatch extends NexusModel
         'completed_at_human' => 'Completed',
     ];
 
-    /**
-     * @return Attribute<mixed, mixed>
-     *
-     * @deprecated Use uploadedText instead
-     */
+    /** @return  Attribute<mixed, mixed> */
     protected function uploadText(): Attribute
     {
         return new Attribute(
@@ -78,11 +74,7 @@ class Snatch extends NexusModel
         );
     }
 
-    /**
-     * @return Attribute<mixed, mixed>
-     *
-     * @deprecated Use downloadedText instead
-     */
+    /** @return  Attribute<mixed, mixed> */
     protected function downloadText(): Attribute
     {
         return new Attribute(

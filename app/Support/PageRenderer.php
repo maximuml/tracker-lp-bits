@@ -59,11 +59,6 @@ final class PageRenderer
         return SafeHtml::fromTrustedHtml($this->renderFooter());
     }
 
-    public function footer(): void
-    {
-        echo $this->renderFooter();
-    }
-
     private function renderHeader(PageLayoutContext $context, string $title, bool $msgalert, string $script, string $place): string
     {
         $chrome = SiteChromeViewModel::load($title, $this->layoutRepository, $this->chromeRepositories, $context, 'boxed', $msgalert);

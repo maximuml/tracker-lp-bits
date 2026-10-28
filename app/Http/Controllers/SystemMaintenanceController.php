@@ -11,7 +11,6 @@ use App\Http\Requests\CleanupRequest;
 use App\Http\Requests\MailTestRequest;
 use App\Support\Config\SiteConfig;
 use App\Support\Email;
-use App\Support\Html\SafeHtml;
 use App\Support\Mail;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
@@ -165,10 +164,10 @@ class SystemMaintenanceController extends BasePageController
             'totalBytesPerHour' => $byteTotal($status['totalBytes'] * 3600 / $uptimeSeconds),
             'abortedConnects' => $num($status['abortedConnects']),
             'abortedConnectsPerHour' => $num($status['abortedConnects'] * 3600 / $uptimeSeconds, 2),
-            'abortedConnectsPct' => SafeHtml::fromTrustedHtml($connections > 0 ? $num($status['abortedConnects'] * 100 / $connections, 2).'&nbsp;%' : '---'),
+            'abortedConnectsPct' => $connections > 0 ? $num($status['abortedConnects'] * 100 / $connections, 2)."\u{00A0}%" : '---',
             'abortedClients' => $num($status['abortedClients']),
             'abortedClientsPerHour' => $num($status['abortedClients'] * 3600 / $uptimeSeconds, 2),
-            'abortedClientsPct' => SafeHtml::fromTrustedHtml($connections > 0 ? $num($status['abortedClients'] * 100 / $connections, 2).'&nbsp;%' : '---'),
+            'abortedClientsPct' => $connections > 0 ? $num($status['abortedClients'] * 100 / $connections, 2)."\u{00A0}%" : '---',
             'connectionsTotal' => $num($connections),
             'connectionsPerHour' => $num($connections * 3600 / $uptimeSeconds, 2),
             'questionsTotal' => $num($questions),

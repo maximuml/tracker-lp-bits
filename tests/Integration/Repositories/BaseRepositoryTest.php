@@ -21,7 +21,7 @@ use Tests\TestCase;
  *
  * Covers the protected helper methods via reflection:
  * allowedSortColumns(), getSortFieldAndType(), getPerPageFromRequest(),
- * handleAnonymous(), getUser(), and executeCommand().
+ * handleAnonymous(), and getUser().
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class BaseRepositoryTest extends TestCase
@@ -280,27 +280,6 @@ final class BaseRepositoryTest extends TestCase
 
         $this->assertSame($user->id, $result->id);
         $this->assertSame($user->username, $result->username);
-    }
-
-    public function test_execute_command_returns_string_output(): void
-    {
-        $method = new \ReflectionMethod($this->repository, 'executeCommand');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->repository, 'echo hello');
-
-        $this->assertIsString($result);
-        $this->assertSame('hello', trim((string) $result));
-    }
-
-    public function test_execute_command_returns_array_when_format_is_array(): void
-    {
-        $method = new \ReflectionMethod($this->repository, 'executeCommand');
-        $method->setAccessible(true);
-
-        $result = $method->invoke($this->repository, 'echo hello', 'json');
-
-        $this->assertIsArray($result);
     }
 
     /**

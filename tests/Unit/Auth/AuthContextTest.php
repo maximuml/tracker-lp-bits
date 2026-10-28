@@ -81,26 +81,4 @@ class AuthContextTest extends TestCase
         $this->assertFalse($context->isModerator());
         $this->assertSame(3, $context->userClass());
     }
-
-    public function test_lang_id_is_zero_when_no_folder(): void
-    {
-        $context = new AuthContext(
-            user: null,
-            cache: null,
-            ip: '127.0.0.1',
-            requestUri: null,
-            requestBody: [],
-            queryParams: [],
-            request: [],
-            cookies: [],
-            maxLoginAttempts: 0,
-            captchaEnabled: false,
-            registration: [],
-            langFolder: null,
-            moderatorClass: 4,
-            script: 'login',
-        );
-
-        $this->assertSame(0, $context->langId());
-    }
 }

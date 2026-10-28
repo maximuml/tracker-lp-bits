@@ -34,6 +34,9 @@ parameters:
         analyse:
             - app/Services/Legacy/partials (?)
             - app/Services/Legacy/*_content.php
+        analyseAndScan:
+            - vendor/psalm/plugin-laravel/bin
+            - vendor/psalm/plugin-laravel/tests (?)
 
     bootstrapFiles:
         - tests/phpstan/bootstrap.php

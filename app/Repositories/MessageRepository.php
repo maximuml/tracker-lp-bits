@@ -159,19 +159,6 @@ class MessageRepository extends BaseRepository
         return User::query()->where('id', $userId)->value('username');
     }
 
-    /**
-     * @param  array<int|string, mixed>  $params
-     * @return mixed
-     */
-    public function getList(array $params)
-    {
-        $query = Message::query();
-        [$sortField, $sortType] = $this->getSortFieldAndType($params);
-        $query->orderBy($sortField, $sortType);
-
-        return $query->paginate();
-    }
-
     public function store(StoreMessageDto $dto): Message
     {
         return Message::query()->create($dto->toArray());
@@ -187,17 +174,6 @@ class MessageRepository extends BaseRepository
         $model = Message::query()->findOrFail((int) $id);
         /** @var array<string, mixed> $params */
         $model->update($params);
-
-        return $model;
-    }
-
-    /**
-     * @param  mixed  $id
-     * @return mixed
-     */
-    public function getDetail($id)
-    {
-        $model = Message::query()->findOrFail((int) $id);
 
         return $model;
     }

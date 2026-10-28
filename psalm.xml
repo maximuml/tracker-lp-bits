@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<psalm
+    totallyTyped="false"
+    errorLevel="8"
+    findUnusedBaselineEntry="false"
+    findUnusedCode="false"
+    findUnusedPsalmSuppress="false"
+    findUnusedVariablesAndParams="false"
+    cacheDirectory="var/cache/psalm"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    autoloader="vendor/autoload.php"
+>
+    <projectFiles>
+        <directory name="app"/>
+        <directory name="routes"/>
+    </projectFiles>
+    <plugins>
+        <pluginClass class="Psalm\LaravelPlugin\Plugin"/>
+    </plugins>
+</psalm>

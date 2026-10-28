@@ -7,7 +7,6 @@ namespace App\Auth;
 use App\DTOs\Auth\ActorContext;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\Locale;
 use App\Support\Network;
 use App\Support\RequestContext;
 use App\Support\RequestValues;
@@ -20,8 +19,6 @@ use App\Support\RequestValues;
  */
 final class AuthContext
 {
-    private ?int $langIdCache = null;
-
     /**
      * @param  array<string, mixed>|null  $user  Current user row.
      * @param  object|null  $cache  Legacy Redis cache wrapper.
@@ -101,24 +98,5 @@ final class AuthContext
     public function isModerator(): bool
     {
         return (int) ($this->user['class'] ?? 0) >= $this->moderatorClass;
-    }
-
-    /**
-     * Resolve the language id from the cookie folder lazily. This avoids
-     * an uncached database query for callers that do not need it.
-     */
-    public function langId(): int
-    {
-        if ($this->langIdCache !== null) {
-            return $this->langIdCache;
-        }
-
-        if ($this->langFolder === null || $this->langFolder === '') {
-            return $this->langIdCache = 0;
-        }
-
-        $folder = Locale::folderFromCookie($this->langFolder);
-
-        return $this->langIdCache = Locale::idFromFolder($folder);
     }
 }

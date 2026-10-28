@@ -9,7 +9,6 @@ use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\TorrentModerationRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\Html\SafeHtml;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -244,9 +243,8 @@ final class PageResponses
         // been emitted (ob_get_level() > 0 with content), use a JS redirect.
         if (ob_get_level() > 0 && (string) ob_get_status()['name'] !== '') {
             $nonce = (string) request()->attributes->get('csp_nonce', '');
-            $nonceAttr = $nonce !== '' ? ' nonce="'.htmlspecialchars($nonce, ENT_QUOTES).'"' : '';
             throw new HttpResponseException(new Response(trim(view('components.support.js-redirect', [
-                'nonceAttr' => SafeHtml::fromTrustedHtml($nonceAttr),
+                'nonce' => $nonce,
                 'url' => $url,
             ])->render())));
         }

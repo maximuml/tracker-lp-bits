@@ -52,13 +52,11 @@ final class Attachment
         string $timeText,
         string $sizeLabel,
     ): string {
-        $onclick = $imageResizer ? ' data-zoomable data-zoom-src="'.htmlspecialchars($url).'"' : '';
-
         return trim(view('components.support.attach-img', [
             'id' => $id,
             'filename' => $filename,
             'url' => $url,
-            'onclick' => SafeHtml::fromTrustedHtml($onclick),
+            'imageResizer' => $imageResizer,
             'sizeLabel' => $sizeLabel,
             'sizeText' => $sizeText,
             'timeText' => SafeHtml::fromTrustedHtml($timeText),

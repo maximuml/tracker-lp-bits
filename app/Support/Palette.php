@@ -79,16 +79,6 @@ final class Palette
     }
 
     /**
-     * CSS utility class (`nx-hl-1`..`nx-hl-40`, declared in
-     * `public/css/modern.css`) for the same palette — the CSP-safe
-     * way to colour a forum-topic highlight; '' when no highlight.
-     */
-    public static function forumHighlightClass(int $color = 0): string
-    {
-        return isset(self::HIGHLIGHT_PALETTE[$color]) ? 'nx-hl-'.$color : '';
-    }
-
-    /**
      * Torrent "wait" countdown colour class. Legacy mapped the
      * remaining wait (in hours) onto a continuous red ramp
      * `dechex(floor(127 * remaining / 48 + 128) * 65536)`; we quantize

@@ -325,37 +325,6 @@ class TimeTest extends TestCase
         $this->assertSame('"><script>alert(1)</script>', $parts['datetime']);
     }
 
-    // ---------- formatText() ----------
-
-    public function test_format_text_returns_plain_text_in_laravel_context(): void
-    {
-        $original = Carbon::getTestNow();
-        try {
-            Carbon::setTestNow('2026-07-22 10:00:00');
-            $this->assertSame('1 hour ago', Time::formatText('2026-07-22 09:00:00'));
-        } finally {
-            Carbon::setTestNow($original);
-        }
-    }
-
-    public function test_format_text_returns_null_for_empty_time(): void
-    {
-        $this->assertNull(Time::formatText(''));
-        $this->assertNull(Time::formatText(0));
-        $this->assertNull(Time::formatText(null));
-    }
-
-    public function test_format_text_strips_markup_and_nbsp(): void
-    {
-        // Synthetic HTML like the legacy branch produces — formatText()
-        // must return display text only.
-        $text = Time::formatText('2026-07-22 09:00:00');
-
-        $this->assertIsString($text);
-        $this->assertStringNotContainsString('<', $text);
-        $this->assertStringNotContainsString("\xc2\xa0", $text);
-    }
-
     // ---------- formatDateTime() / millis() / micro() ----------
 
     public function test_format_date_time_parses_and_formats(): void
@@ -365,9 +334,8 @@ class TimeTest extends TestCase
         $this->assertNull(Time::formatDateTime(0));
     }
 
-    public function test_millis_and_micro_match_expected_patterns(): void
+    public function test_millis_matches_expected_pattern(): void
     {
         $this->assertMatchesRegularExpression('/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}$/', Time::millis());
-        $this->assertMatchesRegularExpression('/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}$/', Time::micro());
     }
 }

@@ -43,24 +43,6 @@ final class TorrentBookmark
      * Mirrors `get_torrent_bookmark_state()`.
      */
     /**
-     * @param  array<string, string>  $labels
-     */
-    public static function stateMarkup(?NexusCache $cache, int|string $userId, int|string $torrentId, bool $text = false, array $labels = []): string
-    {
-        $bookmarked = self::isBookmarked($cache, $userId, $torrentId);
-
-        if (! $bookmarked) {
-            return $text
-                ? ($labels['title_bookmark_torrent'] ?? '')
-                : trim(view('components.support.bookmark-img', ['cls' => 'delbookmark', 'alt' => 'Unbookmarked', 'title' => (string) ($labels['title_bookmark_torrent'] ?? '')])->render());
-        }
-
-        return $text
-            ? ($labels['title_delbookmark_torrent'] ?? '')
-            : trim(view('components.support.bookmark-img', ['cls' => 'bookmark', 'alt' => 'Bookmarked', 'title' => (string) ($labels['title_delbookmark_torrent'] ?? '')])->render());
-    }
-
-    /**
      * Whether the torrent is in the user's bookmark list — typed
      * counterpart of {@see stateMarkup()} for view-model assembly.
      */

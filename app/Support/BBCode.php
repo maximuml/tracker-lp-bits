@@ -74,17 +74,16 @@ final class BBCode
             $text = $url;
         }
 
-        // Escape for HTML attribute and text context.
-        $escapedUrl = htmlspecialchars($safeUrl, ENT_QUOTES, 'UTF-8');
+        // Escape link text for the text context; it arrives
+        // entity-encoded from Comment::format(), so double-encode
+        // must stay off and the value goes through the SafeHtml
+        // boundary. URL and class are plain strings — `{{ }}` escapes.
         $escapedText = htmlspecialchars($text, ENT_QUOTES, 'UTF-8', false);
-        $classAttr = $linkClass !== '' ? ' class="'.htmlspecialchars($linkClass, ENT_QUOTES, 'UTF-8').'"' : '';
-        // rel="noopener noreferrer" prevents tabnabbing when target="_blank".
-        $targetAttr = $newWindow ? ' target="_blank" rel="noopener noreferrer"' : '';
 
         return trim(view('components.support.url-link', [
-            'classAttr' => SafeHtml::fromTrustedHtml($classAttr),
-            'url' => SafeHtml::fromTrustedHtml($escapedUrl),
-            'targetAttr' => SafeHtml::fromTrustedHtml($targetAttr),
+            'linkClass' => $linkClass,
+            'url' => $safeUrl,
+            'newWindow' => $newWindow,
             'text' => SafeHtml::fromTrustedHtml($escapedText),
         ])->render());
     }
@@ -150,20 +149,6 @@ final class BBCode
     }
 
     /**
-     * Render an ad-tracking redirect link. Wraps the destination URL
-     * in `adredir.php?id=…&url=…` (rawurlencoded) and delegates
-     * to {@see url} for the actual anchor.
-     *
-     * BBCode::url() now HTML-escapes the href attribute, so the `&`
-     * separator is encoded to `&amp;` by url(). Callers must pass
-     * raw `&` (not `&amp;`) to avoid double-encoding.
-     */
-    public static function adUrl(int|string $adid, string $url, string $content, bool $newWindow = true): string
-    {
-        return self::url('adredir.php?id='.$adid.'&url='.rawurlencode($url), $newWindow, $content);
-    }
-
-    /**
      * Render a `[code]` block. Used for verbatim quoting of source
      * code in forum posts and torrent descriptions.
      *
@@ -199,17 +184,13 @@ final class BBCode
         if (empty($src)) {
             return '';
         }
-        // Escape src for HTML attribute and JS string contexts.
-        $escapedSrc = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
-
-        $resizerAttrs = $enableResizer
-            ? " data-scale=\"{$maxWidth}x{$maxHeight}\" data-zoomable "
-            : '';
 
         return trim(view('components.support.bbcode-img', [
             'imgId' => $imgId,
-            'escapedSrc' => SafeHtml::fromTrustedHtml($escapedSrc),
-            'resizerAttrs' => SafeHtml::fromTrustedHtml($resizerAttrs),
+            'src' => $src,
+            'enableResizer' => $enableResizer,
+            'maxWidth' => $maxWidth,
+            'maxHeight' => $maxHeight,
         ])->render());
     }
 
@@ -279,10 +260,9 @@ final class BBCode
         // See url() — a tempCode placeholder smuggled into the title would
         // resolve a foreign element inside <summary>.
         $title = str_replace("\x08", '', $title);
-        $contentClass = $defaultCollapsed ? '' : ' open';
 
         return trim(view('components.support.spoiler-details', [
-            'contentClass' => SafeHtml::fromTrustedHtml($contentClass),
+            'openAttr' => $defaultCollapsed ? '' : ' open',
             'title' => SafeHtml::fromTrustedHtml($title),
             'content' => SafeHtml::fromTrustedHtml($content),
         ])->render());
@@ -350,39 +330,5 @@ final class BBCode
         $text = (string) preg_replace('/\[\/quote\]/i', $close, $text);
 
         return $text;
-    }
-
-    /**
-     * Strip BBCode and `[emN]` smilies from `$text`. Parameter-less
-     * tags (`[b]`, `[/url]`, etc.) are removed by literal `str_replace`;
-     * parametered tags (`[url=…]`, `[color=…]`, `[youtube …]`, etc.) by
-     * regex. `[emN]` is resolved via `$emojiMap` (default empty string
-     * for unknown indices, mirroring the legacy `nexus_config('emoji')`
-     * lookup). Finally, `strip_tags()` strips any remaining HTML and
-     * the result is `trim()`'d.
-     */
-    /**
-     * @param  array<int, string>  $emojiMap
-     */
-    public static function stripAll(string $text, array $emojiMap): string
-    {
-        $literalTags = [
-            '[*]', '[b]', '[/b]', '[i]', '[/i]', '[u]', '[/u]', '[s]', '[/s]',
-            '[pre]', '[/pre]', '[quote]', '[/quote]',
-            '[/color]', '[/font]', '[/size]', '[/url]', '[/youtube]', '[/spoiler]',
-        ];
-        $text = str_replace($literalTags, '', $text);
-        $text = (string) preg_replace(
-            '/\[url=.*\]|\[color=.*\]|\[font=.*\]|\[size=.*\]|\[youtube.*\]|\[spoiler.*\]/isU',
-            '',
-            $text,
-        );
-        $text = (string) preg_replace_callback(
-            '/\[em([1-9][0-9]*)\]/isU',
-            fn (array $matches): string => $emojiMap[$matches[1]] ?? '',
-            $text,
-        );
-
-        return trim(strip_tags($text));
     }
 }

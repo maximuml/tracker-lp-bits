@@ -49,23 +49,6 @@ class NexusModel extends Model
     }
 
     /**
-     * Check is valid date string
-     *
-     * @param  mixed  $name
-     * @param  mixed  $format
-     *
-     * @see https://stackoverflow.com/questions/19271381/correctly-determine-if-date-string-is-a-valid-date-in-that-format
-     */
-    public function isValidDate($name, $format = 'Y-m-d H:i:s'): bool
-    {
-        $date = $this->getRawOriginal($name);
-        $d = \DateTime::createFromFormat($format, $date);
-
-        // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
-        return $d && $d->format($format) === $date;
-    }
-
-    /**
      * @param  mixed  $field
      * @return mixed
      */

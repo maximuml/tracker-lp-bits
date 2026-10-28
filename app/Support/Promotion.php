@@ -35,24 +35,6 @@ final class Promotion
     }
 
     /**
-     * CSS background class for a promotion / global-special-state code,
-     * mirroring the duplicated if/elseif chains in get_torrent_bg_color().
-     *
-     * Returns:
-     *   - '' for code 1 (no promotion — caller still treats this as
-     *     "handled", i.e. not null, so sticky background is skipped);
-     *   - the matching '*_bg' class for codes 2..7;
-     *   - null for any other code, so the caller leaves $sphighlight
-     *     untouched (preserving the legacy null-vs-empty distinction).
-     */
-    public static function backgroundClass(int $code): ?string
-    {
-        $token = self::backgroundToken($code);
-
-        return $token === null || $token === '' ? $token : " class='$token'";
-    }
-
-    /**
      * Bare `*_bg` class token for a promotion code ('' for code 1,
      * null for unhandled codes) — the typed counterpart of
      * {@see backgroundClass()}.

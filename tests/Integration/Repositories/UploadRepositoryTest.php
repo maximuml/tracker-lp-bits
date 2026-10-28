@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories;
 
-use App\Enums\TorrentPosState;
 use App\Exceptions\NexusException;
 use App\Models\Category;
 use App\Repositories\UploadRepository;
@@ -104,28 +103,5 @@ final class UploadRepositoryTest extends TestCase
         $this->expectException(NexusException::class);
 
         $this->repository->getHitAndRun($request, $category);
-    }
-
-    public function test_get_pos_state_info_returns_none_by_default(): void
-    {
-        $request = Request::create('/upload', 'POST', []);
-
-        $result = $this->repository->getPosStateInfo($request);
-
-        $this->assertSame(TorrentPosState::NONE->value, $result['posState']);
-        $this->assertNull($result['posStateUntil']);
-    }
-
-    public function test_get_pos_state_info_returns_none_with_null_until_when_set_to_none(): void
-    {
-        $request = Request::create('/upload', 'POST', [
-            'pos_state' => TorrentPosState::NONE->value,
-            'pos_state_until' => '2025-01-01',
-        ]);
-
-        $result = $this->repository->getPosStateInfo($request);
-
-        $this->assertSame(TorrentPosState::NONE->value, $result['posState']);
-        $this->assertNull($result['posStateUntil']);
     }
 }

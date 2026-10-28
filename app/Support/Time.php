@@ -180,18 +180,6 @@ final class Time
         return $time;
     }
 
-    public static function formatElapsedTime(
-        string $elapsed,
-        string $time,
-        bool $withago,
-        bool $twoline,
-        bool $oneunit,
-        string $textSpace,
-        string $textAgo,
-    ): string {
-        return self::spanTitle($time, self::formatElapsedInner($elapsed, $withago, $twoline, $oneunit, $textSpace, $textAgo));
-    }
-
     private static function spanTitle(string $title, string $inner): string
     {
         return trim(view('components.support.span-title', [
@@ -370,8 +358,8 @@ final class Time
     /**
      * `SafeHtml` variant of {@see format()} — owns the trust marker at
      * the producer so callers stop wrapping the `<span title>` markup
-     * with `fromTrustedHtml()`. `null`/`false` results collapse to an
-     * empty `SafeHtml`, matching the legacy `(string) format()` casts.
+     * in a trust wrapper themselves. `null`/`false` results collapse to
+     * an empty `SafeHtml`, matching the legacy `(string) format()` casts.
      */
     public static function formatHtml(
         mixed $time,
@@ -437,31 +425,6 @@ final class Time
     }
 
     /**
-     * Plain-text variant of {@see format()} for `{{ }}` output and
-     * non-HTML data — same display text without the `<span>`/`<br />`
-     * markup or `&nbsp;` entities.
-     */
-    public static function formatText(
-        mixed $time,
-        bool $withago = true,
-        bool $twoline = false,
-        bool $forceago = false,
-        bool $oneunit = false,
-        bool $isfuturetime = false,
-    ): ?string {
-        $html = self::format($time, $withago, $twoline, $forceago, $oneunit, $isfuturetime);
-        if (! is_string($html)) {
-            return null;
-        }
-
-        return str_replace(
-            "\xc2\xa0",
-            ' ',
-            html_entity_decode(strip_tags((string) preg_replace('#<br\s*/?>#i', ' ', $html)), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-        );
-    }
-
-    /**
      * Legacy `format_datetime()` helper. Returns `null` for empty input,
      * otherwise parses with Carbon and formats with the supplied pattern.
      * On parse failure the original value is returned (and logged).
@@ -496,18 +459,6 @@ final class Time
         }
         $dt->setTimezone(new \DateTimeZone(Env::get('TIMEZONE', 'UTC')));
         $format = $withTimeZone ? 'Y-m-d\\TH:i:s.vP' : 'Y-m-d H:i:s.v';
-
-        return $dt->format($format);
-    }
-
-    public static function micro(bool $withTimeZone = false): string
-    {
-        $dt = \DateTime::createFromFormat('U.u', sprintf('%.6f', microtime(true)));
-        if ($dt === false) {
-            $dt = new \DateTime;
-        }
-        $dt->setTimezone(new \DateTimeZone(Env::get('TIMEZONE', 'UTC')));
-        $format = $withTimeZone ? 'Y-m-d\\TH:i:s.uP' : 'Y-m-d H:i:s.u';
 
         return $dt->format($format);
     }

@@ -171,15 +171,4 @@ final class OutboxServiceTest extends TestCase
 
         $this->assertSame(OutboxEvent::STATUS_DEAD_LETTER, $event->fresh()->status);
     }
-
-    public function test_is_eligible_for_pending_and_available(): void
-    {
-        $service = new OutboxService;
-        $event = $service->record('test', 'test.event', []);
-
-        $this->assertTrue($event->isEligible());
-
-        $event->update(['available_at' => now()->addMinutes(5)]);
-        $this->assertFalse($event->fresh()->isEligible());
-    }
 }

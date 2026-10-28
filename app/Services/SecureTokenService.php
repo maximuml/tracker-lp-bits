@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  * - Expiry + consumed_at + revoke tracking
  *
  * Legacy tokens (md5-based, 32-char hex) are still accepted during the
- * compatibility window via {@see verifyLegacy()}.
+ * compatibility window via {@see verifyLegacyEmailChange()}.
  */
 final class SecureTokenService
 {
@@ -160,25 +160,6 @@ final class SecureTokenService
             'revoked' => 0,
             'created_at' => now()->toDateTimeString(),
         ], $extra));
-    }
-
-    /**
-     * Verify a legacy token (md5-based, 32-char hex).
-     *
-     * Legacy tokens are stored directly in the hash column (not as
-     * digests). This method checks the hash column directly for
-     * backward compatibility with existing invite links.
-     *
-     * @param  string  $table  Database table name.
-     * @param  string  $hashColumn  Column name storing the legacy hash.
-     * @param  string  $token  Legacy token (32-char hex).
-     * @return array<string, mixed>|null The token row, or null if not found.
-     */
-    public function verifyLegacy(string $table, string $hashColumn, string $token): ?array
-    {
-        $row = $this->tokens->findByColumn($table, $hashColumn, $token);
-
-        return $row !== null ? (array) $row : null;
     }
 
     /**

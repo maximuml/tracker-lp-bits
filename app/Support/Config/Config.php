@@ -58,15 +58,4 @@ abstract class Config
 
         return is_array($value) ? $value : $default;
     }
-
-    /**
-     * @param  array<int|string, mixed>  $default
-     * @return array<int|string, mixed>|null
-     */
-    protected function nullableArray(string $key, ?array $default = null): ?array
-    {
-        $value = $this->data[$key] ?? $default;
-
-        return is_array($value) ? $value : $default;
-    }
 }

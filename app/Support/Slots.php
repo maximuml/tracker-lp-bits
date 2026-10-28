@@ -70,34 +70,4 @@ final class Slots
 
         return 0;
     }
-
-    /**
-     * Return the legacy `class="color_slots"` HTML fragment for
-     * a user's max-slots line. Mirrors `maxslots()`.
-     *
-     * @param  int  $vipClass  The UC_VIP constant value; injected so the
-     *                         helper does not depend on `uc.php`.
-     */
-    public static function display(
-        int|float $uploaded,
-        int|float $downloaded,
-        string $maxdlsystem,
-        int $userClass,
-        int $vipClass,
-        string $slotsLabel,
-        string $unlimitedLabel,
-    ): string {
-        $unlimited = ['slotsLabel' => $slotsLabel, 'unlimited' => $unlimitedLabel];
-        if ($maxdlsystem != 'yes' || $userClass >= $vipClass) {
-            return trim(view('components.support.slots', $unlimited)->render());
-        }
-
-        $max = self::maxDownloadSlots($uploaded, $downloaded);
-
-        if ($max > 0) {
-            return trim(view('components.support.slots', ['slotsLabel' => $slotsLabel, 'max' => $max])->render());
-        }
-
-        return trim(view('components.support.slots', $unlimited)->render());
-    }
 }

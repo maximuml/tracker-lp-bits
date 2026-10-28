@@ -14,18 +14,6 @@ use Illuminate\Support\Collection;
  */
 final class SnatchRepository extends BaseRepository
 {
-    /** @param  array<string, mixed>  $fields */
-    public function updateById(int $id, array $fields): int
-    {
-        return Snatch::query()->where('id', $id)->update($fields);
-    }
-
-    /** @param  array<string, mixed>  $attributes */
-    public function insert(array $attributes): bool
-    {
-        return Snatch::query()->insert($attributes);
-    }
-
     public function linkHitAndRun(int $snatchId, int $hitAndRunId): int
     {
         return Snatch::query()->where('id', $snatchId)->update(['hit_and_run_id' => $hitAndRunId]);

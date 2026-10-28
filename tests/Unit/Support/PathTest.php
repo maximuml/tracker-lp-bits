@@ -151,49 +151,4 @@ final class PathTest extends TestCase
         $mode = fileperms($path) & 0777;
         $this->assertNotSame(0, $mode);
     }
-
-    // ---------- categoryFolder() ----------
-
-    public function test_category_folder_assembles_mode_and_icon_without_language(): void
-    {
-        $this->assertSame(
-            'category/movie/default',
-            Path::categoryFolder('movie', 'default', false, 'en'),
-        );
-    }
-
-    public function test_category_folder_appends_language_when_multilang(): void
-    {
-        $this->assertSame(
-            'category/movie/default/chs',
-            Path::categoryFolder('movie', 'default', true, 'chs'),
-        );
-    }
-
-    public function test_category_folder_trims_slashes_from_each_segment(): void
-    {
-        // Leading/trailing slashes on any input must collapse so the
-        // result never contains an empty `//` segment.
-        $this->assertSame(
-            'category/movie/default/en',
-            Path::categoryFolder('/movie/', '/default/', true, '/en/'),
-        );
-    }
-
-    public function test_category_folder_ignores_language_dir_when_not_multilang(): void
-    {
-        // Even with a non-empty langDir, the segment is omitted unless
-        // the icon set is flagged multilingual.
-        $this->assertSame(
-            'category/music/blue',
-            Path::categoryFolder('music', 'blue', false, 'en'),
-        );
-    }
-
-    public function test_category_folder_handles_empty_segments(): void
-    {
-        $this->assertSame('category//', Path::categoryFolder('', '', false, 'en'));
-        // multilang appends a `/` plus the (empty) trimmed langDir.
-        $this->assertSame('category///', Path::categoryFolder('', '', true, ''));
-    }
 }

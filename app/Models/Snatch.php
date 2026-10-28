@@ -83,6 +83,22 @@ class Snatch extends NexusModel
     }
 
     /** @return  Attribute<mixed, mixed> */
+    protected function uploadedText(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['uploaded']), $this->getUploadSpeed())
+        );
+    }
+
+    /** @return  Attribute<mixed, mixed> */
+    protected function downloadedText(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value, $attributes) => sprintf('%s@%s', Format::size($attributes['downloaded']), $this->getDownloadSpeed())
+        );
+    }
+
+    /** @return  Attribute<mixed, mixed> */
     protected function shareRatio(): Attribute
     {
         return new Attribute(

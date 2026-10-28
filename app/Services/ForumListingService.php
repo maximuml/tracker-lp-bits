@@ -190,15 +190,18 @@ final class ForumListingService
             $tooltipId = null;
             if ($tooltipsEnabled) {
                 if ($actor->value('timetype', 1) != UserTimeType::TIMEALIVE->value) {
-                    $lastposttime = __('forums.text_at_time').$lpadded;
+                    $lastposttime = SafeHtml::fromPlainText(__('forums.text_at_time').$lpadded);
                 } else {
-                    $lastposttime = __('forums.text_blank').Time::format($lpadded, true, false, true);
+                    $lastposttime = SafeHtml::fromPlainText(__('forums.text_blank'))
+                        ->append(Time::formatHtml($lpadded, true, false, true));
                 }
                 $lptext = $renderTt((string) ($arr['body'] ?? ''));
                 $tooltipId = 'lastpost_'.$counter;
                 $tooltips[] = [
                     'id' => $tooltipId,
-                    'content' => SafeHtml::fromTrustedHtml(__('forums.text_last_posted_by').UserDisplay::username($lpuserid).$lastposttime),
+                    'content' => SafeHtml::fromPlainText(__('forums.text_last_posted_by'))
+                        ->append(UserDisplay::username($lpuserid))
+                        ->append($lastposttime),
                     'contentTail' => SafeHtml::fromTrustedHtml($lptext),
                 ];
             }

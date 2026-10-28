@@ -49,4 +49,10 @@ class UsernameChangeLog extends NexusModel
 
         return $result;
     }
+
+    /** @return  mixed */
+    public function getChangeTypeTextAttribute()
+    {
+        return Locale::trans('username-change-log.change_type.'.$this->change_type, [], null);
+    }
 }

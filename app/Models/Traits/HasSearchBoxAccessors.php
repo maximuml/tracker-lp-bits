@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
+use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\RequestValues;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -62,5 +63,23 @@ trait HasSearchBoxAccessors
         }
 
         return Locale::trans("searchbox.sub_category_{$torrentField}_label", [], null) ?: ucfirst($torrentField);
+    }
+
+    /** @return mixed */
+    public function getDisplaySectionNameAttribute()
+    {
+        $locale = \App\Http\Middleware\Locale::getDefault();
+        if (! empty($this->section_name[$locale])) {
+            return $this->section_name[$locale];
+        }
+        $defaultLang = SiteConfig::current()->main->defaultLang();
+        if (! empty($this->section_name[$defaultLang])) {
+            return $this->section_name[$defaultLang];
+        }
+        if ($this->isSectionBrowse()) {
+            return Locale::trans('searchbox.sections.browse', [], null);
+        }
+
+        return $this->name;
     }
 }

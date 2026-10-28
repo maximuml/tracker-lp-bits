@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services\Usercp;
 
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
@@ -48,6 +49,9 @@ final class UsercpHomeBuilderTest extends TestCase
     /** @var NexusCache&MockInterface */
     private NexusCache $cache;
 
+    /** @var PostRepositoryInterface&MockInterface */
+    private PostRepositoryInterface $postRepo;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -63,6 +67,10 @@ final class UsercpHomeBuilderTest extends TestCase
         /** @var NexusCache&MockInterface $cache */
         $cache = Mockery::mock(NexusCache::class);
         $this->cache = $cache;
+        /** @var PostRepositoryInterface&MockInterface $postRepo */
+        $postRepo = Mockery::mock(PostRepositoryInterface::class);
+        $postRepo->shouldReceive('findPostArraysByIds')->andReturn([])->byDefault();
+        $this->postRepo = $postRepo;
 
         $this->seedTestSettings([
             'enablelocation_tweak' => 'no',
@@ -107,6 +115,7 @@ final class UsercpHomeBuilderTest extends TestCase
             $this->usercpRepo,
             $this->tokenRepo,
             $this->cache,
+            $this->postRepo,
         );
     }
 
@@ -346,6 +355,7 @@ final class UsercpHomeBuilderTest extends TestCase
             $this->usercpRepo,
             $this->tokenRepo,
             null,
+            $this->postRepo,
         );
 
         $this->lookup->shouldReceive('getReadTopics')->with(5)->andReturn([

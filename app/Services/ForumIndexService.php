@@ -120,7 +120,7 @@ final class ForumIndexService
         $postRows = $postIds === [] ? [] : $Cache->getMany(array_map(static fn (int $id): string => 'post_'.$id.'_content', $postIds));
         $missingPostIds = [];
         foreach ($postIds as $id) {
-            if (! is_array($postRows['post_'.$id.'_content'] ?? null)) {
+            if (($postRows['post_'.$id.'_content'] ?? false) === false) {
                 $missingPostIds[] = $id;
             }
         }

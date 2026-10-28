@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Models\User;
 use App\Repositories\TokenRepository;
@@ -86,6 +87,7 @@ final class UsercpPageServiceTest extends TestCase
                 app(UsercpRepository::class),
                 $this->tokenRepository ?? Mockery::mock(TokenRepository::class),
                 new NexusCache,
+                app(PostRepositoryInterface::class),
             ),
             new UsercpPersonalBuilder($lookup),
             new UsercpTrackerBuilder(app(SearchCategoryTableFactory::class)),

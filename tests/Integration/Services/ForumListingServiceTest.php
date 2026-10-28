@@ -19,6 +19,7 @@ use App\Services\ForumIndexService;
 use App\Services\ForumListingService;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
+use App\Support\RuntimeContext;
 use App\Support\Settings;
 use App\Support\Time;
 use App\Support\UserDisplay;
@@ -689,6 +690,28 @@ final class ForumListingServiceTest extends TestCase
             __('forums.text_last_posted_by').UserDisplay::username(5).__('forums.text_blank').Time::format('2024-06-01 00:00:00', true, false, true),
             (string) $vm->tooltips[0]['content'],
         );
+    }
+
+    public function test_build_view_forum_tooltip_elapsed_format_in_legacy_runtime(): void
+    {
+        Settings::saveBatch('tweak', ['enabletooltip' => 'yes']);
+        Settings::resetCache();
+        app(RuntimeContext::class)->bootEntry(true);
+
+        try {
+            $vm = $this->viewForumVm(
+                curUser: ['timetype' => UserTimeType::TIMEALIVE->value],
+                topicAttrs: ['lastpost' => 100],
+                postRows: ['post_100_content' => ['id' => 100, 'userid' => 5, 'added' => '2024-06-01 00:00:00', 'body' => 'lp body']],
+            );
+
+            $this->assertSame(
+                __('forums.text_last_posted_by').UserDisplay::username(5).__('forums.text_blank').Time::format('2024-06-01 00:00:00', true, false, true),
+                (string) $vm->tooltips[0]['content'],
+            );
+        } finally {
+            app(RuntimeContext::class)->bootEntry(false);
+        }
     }
 
     public function test_build_view_forum_tooltips_disabled_when_showlastpost_no(): void

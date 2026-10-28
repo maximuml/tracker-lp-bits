@@ -10,6 +10,7 @@ use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Services\Offer\OfferListBuilder;
 use App\Support\Cache\NexusCache;
+use App\Support\RuntimeContext;
 use App\Support\Time;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -344,6 +345,31 @@ final class OfferListBuilderTest extends TestCase
             (string) __('offers.text_blank').Time::format('2024-06-01 00:00:00', true, false, true),
             (string) $tooltip->content,
         );
+    }
+
+    public function test_lastcom_tooltip_elapsed_format_in_legacy_runtime(): void
+    {
+        app(RuntimeContext::class)->bootEntry(true);
+
+        try {
+            $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
+                $this->row(['id' => 1, 'comments' => 2]),
+            ], 1));
+            $this->cache->shouldReceive('getMany')->andReturn([
+                'offer_1_last_comment_content' => ['user' => 9, 'added' => '2024-06-01 00:00:00', 'text' => 'cached comment'],
+            ]);
+
+            $s = $this->builder()->build($this->curUser(['id' => 7, 'timetype' => 1]), 7, $this->request(), $this->globalData());
+
+            $tooltip = $s->table->tooltips[0] ?? null;
+            $this->assertNotNull($tooltip);
+            $this->assertStringContainsString(
+                (string) __('offers.text_blank').Time::format('2024-06-01 00:00:00', true, false, true),
+                (string) $tooltip->content,
+            );
+        } finally {
+            app(RuntimeContext::class)->bootEntry(false);
+        }
     }
 
     public function test_lastcom_tooltips_batch_fetched_and_cached_under_fmt_tt_keys(): void

@@ -149,20 +149,6 @@ final class BBCode
     }
 
     /**
-     * Render an ad-tracking redirect link. Wraps the destination URL
-     * in `adredir.php?id=…&url=…` (rawurlencoded) and delegates
-     * to {@see url} for the actual anchor.
-     *
-     * BBCode::url() now HTML-escapes the href attribute, so the `&`
-     * separator is encoded to `&amp;` by url(). Callers must pass
-     * raw `&` (not `&amp;`) to avoid double-encoding.
-     */
-    public static function adUrl(int|string $adid, string $url, string $content, bool $newWindow = true): string
-    {
-        return self::url('adredir.php?id='.$adid.'&url='.rawurlencode($url), $newWindow, $content);
-    }
-
-    /**
      * Render a `[code]` block. Used for verbatim quoting of source
      * code in forum posts and torrent descriptions.
      *
@@ -344,39 +330,5 @@ final class BBCode
         $text = (string) preg_replace('/\[\/quote\]/i', $close, $text);
 
         return $text;
-    }
-
-    /**
-     * Strip BBCode and `[emN]` smilies from `$text`. Parameter-less
-     * tags (`[b]`, `[/url]`, etc.) are removed by literal `str_replace`;
-     * parametered tags (`[url=…]`, `[color=…]`, `[youtube …]`, etc.) by
-     * regex. `[emN]` is resolved via `$emojiMap` (default empty string
-     * for unknown indices, mirroring the legacy `nexus_config('emoji')`
-     * lookup). Finally, `strip_tags()` strips any remaining HTML and
-     * the result is `trim()`'d.
-     */
-    /**
-     * @param  array<int, string>  $emojiMap
-     */
-    public static function stripAll(string $text, array $emojiMap): string
-    {
-        $literalTags = [
-            '[*]', '[b]', '[/b]', '[i]', '[/i]', '[u]', '[/u]', '[s]', '[/s]',
-            '[pre]', '[/pre]', '[quote]', '[/quote]',
-            '[/color]', '[/font]', '[/size]', '[/url]', '[/youtube]', '[/spoiler]',
-        ];
-        $text = str_replace($literalTags, '', $text);
-        $text = (string) preg_replace(
-            '/\[url=.*\]|\[color=.*\]|\[font=.*\]|\[size=.*\]|\[youtube.*\]|\[spoiler.*\]/isU',
-            '',
-            $text,
-        );
-        $text = (string) preg_replace_callback(
-            '/\[em([1-9][0-9]*)\]/isU',
-            fn (array $matches): string => $emojiMap[$matches[1]] ?? '',
-            $text,
-        );
-
-        return trim(strip_tags($text));
     }
 }

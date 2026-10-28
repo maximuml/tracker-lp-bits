@@ -66,27 +66,6 @@ class BBCodeTest extends TestCase
         );
     }
 
-    // ---------- adUrl ----------
-
-    public function test_ad_url_wraps_destination_in_adredir(): void
-    {
-        // BBCode::url() now HTML-escapes the href, so `&` becomes `&amp;`.
-        $html = BBCode::adUrl(42, 'https://example.com/foo?x=1', 'Click');
-        $this->assertStringContainsString('adredir.php?id=42&amp;url=https%3A%2F%2Fexample.com%2Ffoo%3Fx%3D1', $html);
-        $this->assertStringContainsString('>Click</a>', $html);
-        // Default $newWindow is TRUE for adUrl (unlike plain url).
-        $this->assertStringContainsString('target="_blank"', $html);
-    }
-
-    public function test_ad_url_passes_through_url_helper(): void
-    {
-        // adUrl is documented as delegating to url() — pin that
-        // the output really does match url() with the same args.
-        // adUrl now uses raw `&` (not `&amp;`) since url() escapes it.
-        $manual = BBCode::url('adredir.php?id=7&url='.rawurlencode('https://x.test'), true, 'go');
-        $this->assertSame($manual, BBCode::adUrl(7, 'https://x.test', 'go'));
-    }
-
     // ---------- code ----------
 
     public function test_code_wraps_text_in_codetop_codemain(): void
@@ -313,69 +292,6 @@ class BBCodeTest extends TestCase
     public function test_quotes_passes_through_text_with_no_quote_tags(): void
     {
         $this->assertSame('plain text', BBCode::quotes('plain text', 'Quote'));
-    }
-
-    // ---------- stripAll ----------
-
-    public function test_strip_all_removes_parameterless_bbcode_tags(): void
-    {
-        $this->assertSame(
-            'bold italic',
-            BBCode::stripAll('[b]bold[/b] [i]italic[/i]', []),
-        );
-    }
-
-    public function test_strip_all_removes_parametered_bbcode_tags_via_regex(): void
-    {
-        $this->assertSame(
-            'link colour size font',
-            BBCode::stripAll('[url=http://x]link[/url] [color=red]colour[/color] [size=12]size[/size] [font=arial]font[/font]', []),
-        );
-    }
-
-    public function test_strip_all_resolves_known_emoji_to_replacement(): void
-    {
-        $this->assertSame(
-            'hello :)',
-            BBCode::stripAll('hello [em1]', [1 => ':)']),
-        );
-    }
-
-    public function test_strip_all_drops_unknown_emoji(): void
-    {
-        $this->assertSame(
-            'hi',
-            BBCode::stripAll('hi[em42]', []),
-        );
-    }
-
-    public function test_strip_all_strips_remaining_html_tags(): void
-    {
-        $this->assertSame(
-            'bold',
-            BBCode::stripAll('<b>bold</b>', []),
-        );
-    }
-
-    public function test_strip_all_trims_surrounding_whitespace(): void
-    {
-        $this->assertSame(
-            'core',
-            BBCode::stripAll("\n\n  [b]core[/b]  \t", []),
-        );
-    }
-
-    public function test_strip_all_removes_youtube_and_spoiler_with_params(): void
-    {
-        $this->assertSame(
-            'video spoiler',
-            BBCode::stripAll('[youtube 100x100]video[/youtube] [spoiler=title]spoiler[/spoiler]', []),
-        );
-    }
-
-    public function test_strip_all_returns_empty_for_pure_bbcode_input(): void
-    {
-        $this->assertSame('', BBCode::stripAll('[b][/b]', []));
     }
 
     // ---------- security: XSS prevention ----------

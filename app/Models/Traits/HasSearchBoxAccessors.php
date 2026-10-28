@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
+use App\Support\Locale;
 use App\Support\RequestValues;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
@@ -51,7 +52,7 @@ trait HasSearchBoxAccessors
      */
     public function getTaxonomyLabel($torrentField)
     {
-        $lang = \App\Support\Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) false);
+        $lang = Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) false);
         foreach ($this->extra[self::EXTRA_TAXONOMY_LABELS] ?? [] as $item) {
             if ($item['torrent_field'] == $torrentField) {
                 if (! empty($item['display_text'][$lang])) {
@@ -60,6 +61,6 @@ trait HasSearchBoxAccessors
             }
         }
 
-        return \App\Support\Locale::trans("searchbox.sub_category_{$torrentField}_label", [], null) ?: ucfirst($torrentField);
+        return Locale::trans("searchbox.sub_category_{$torrentField}_label", [], null) ?: ucfirst($torrentField);
     }
 }

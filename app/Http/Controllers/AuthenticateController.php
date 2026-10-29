@@ -227,7 +227,7 @@ class AuthenticateController extends Controller
             || $security->loginType() !== 'passkey'
             || $deadline === null
             || $deadline <= now()->toDateTimeString()
-            || $request->path() !== ltrim($secret, '/')
+            || ! hash_equals(ltrim($secret, '/'), $request->path())
         ) {
             abort(404);
         }

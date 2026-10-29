@@ -232,7 +232,7 @@ final class BonusPurchaseService
             }
             $increaseBonus = $requireBonus * (1 - $taxFactor);
             $owner = $torrent->user;
-            if ($owner->id) {
+            if ($owner->id && $increaseBonus > 0) {
                 $comment = Locale::trans('bonus.comment_torrent_be_downloaded', ['username' => $user->username, 'uid' => $user->id], $owner->locale);
                 $this->ledger->credit((int) $owner->id, $increaseBonus, BusinessType::TORRENT_BE_DOWNLOADED, $comment);
             }

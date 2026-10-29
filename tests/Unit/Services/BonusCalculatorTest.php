@@ -91,6 +91,7 @@ final class BonusCalculatorTest extends TestCase
         $this->assertEqualsWithDelta($expectedA, $r['A'], 1e-6);
         $this->assertEqualsWithDelta($this->finalBonus($expectedA, 1, $s), $r['seed_bonus'], 1e-6);
         $this->assertSame(['10.0.0.1'], $r['ip_arr']);
+        $this->assertSame('5368709120', (string) $r['size']);
         $this->assertSame('2026-05-01 10:00:00', $r['last_action']);
     }
 
@@ -131,6 +132,7 @@ final class BonusCalculatorTest extends TestCase
         $this->assertSame(1, $r['official_torrent_peer_count']);
         $this->assertSame('3221225472', (string) $r['official_size']); // 3 GiB
         $this->assertGreaterThan(0.0, $r['official_a']);
+        $this->assertGreaterThan(0.0, $r['official_bonus']);
         $this->assertLessThan($r['A'], $r['official_a']);
     }
 
@@ -157,5 +159,44 @@ final class BonusCalculatorTest extends TestCase
 
         $this->assertSame('2026-05-20 12:00:00', $r['last_action']);
         $this->assertSame(['1.1.1.1'], $r['ip_arr']); // deduplicated
+    }
+
+    public function test_empty_ip_is_not_collected(): void
+    {
+        $s = $this->settings();
+        $rows = [
+            ['id' => 1, 'added' => date('Y-m-d H:i:s', time() - 86400), 'size' => 1073741824, 'seeders' => 1, 'last_action' => '', 'ip' => ''],
+            ['id' => 2, 'added' => date('Y-m-d H:i:s', time() - 86400), 'size' => 1073741824, 'seeders' => 1, 'last_action' => '', 'ip' => '2.2.2.2'],
+        ];
+
+        $r = (new BonusCalculator)->aggregateSeedBonus($rows, $s, [], null, null, null, 0);
+
+        $this->assertSame(['2.2.2.2'], $r['ip_arr']);
+    }
+
+    public function test_missing_and_non_numeric_size_count_as_zero(): void
+    {
+        $s = $this->settings();
+        $rows = [
+            ['id' => 1, 'added' => date('Y-m-d H:i:s', time() - 86400), 'size' => 'junk', 'seeders' => 1, 'last_action' => '', 'ip' => ''],
+            ['id' => 2, 'added' => date('Y-m-d H:i:s', time() - 86400), 'seeders' => 1, 'last_action' => '', 'ip' => ''],
+        ];
+
+        $r = (new BonusCalculator)->aggregateSeedBonus($rows, $s, [], null, null, null, 0);
+
+        $this->assertSame('0', (string) $r['size']);
+    }
+
+    public function test_falsy_zero_bonus_tag_does_not_scale(): void
+    {
+        $s = $this->settings();
+        $row = ['id' => 1, 'added' => date('Y-m-d H:i:s', time() - 7 * 86400), 'size' => 4 * 1073741824, 'seeders' => 1, 'last_action' => '', 'ip' => ''];
+
+        $plain = (new BonusCalculator)->aggregateSeedBonus([$row], $s, [], null, null, null, 0);
+        // '0' is a falsy tag id — the zero-tag gate must stay closed even
+        // when a matching tag exists on the torrent.
+        $tagged = (new BonusCalculator)->aggregateSeedBonus([$row], $s, [1 => ['0' => 1]], null, '0', 0.25, 0);
+
+        $this->assertEqualsWithDelta($plain['A'], $tagged['A'], 1e-6);
     }
 }

@@ -140,4 +140,81 @@ final class BonusPurchaseServiceTest extends TestCase
 
         $this->assertSame(2, TorrentBuyLog::query()->where('torrent_id', $torrent->id)->count());
     }
+
+    public function test_consume_to_buy_torrent_moves_money_and_notifies(): void
+    {
+        DB::table('settings')->updateOrInsert(
+            ['name' => 'torrent.tax_factor'],
+            ['value' => '0.2']
+        );
+        Settings::resetCache();
+
+        $owner = User::factory()->create(['seedbonus' => 0]);
+        $torrent = Torrent::factory()->create(['owner' => $owner->id, 'price' => 100]);
+        $buyer = User::factory()->create(['seedbonus' => 1000.0]);
+
+        $buyLog = $this->repository->consumeToBuyTorrent($buyer->id, $torrent->id);
+
+        $this->assertSame(900.0, (float) DB::table('users')->where('id', $buyer->id)->value('seedbonus'));
+        // price * (1 - 0.2) = 80 credited to the owner.
+        $this->assertSame(80.0, (float) DB::table('users')->where('id', $owner->id)->value('seedbonus'));
+        $this->assertSame(100, (int) $buyLog->price);
+        $this->assertSame(1, DB::table('messages')->where('receiver', $buyer->id)->count());
+        $this->assertSame(1, DB::table('outbox_events')
+            ->where('aggregate_type', 'torrent')
+            ->where('event_type', 'purchase.completed')
+            ->where('aggregate_id', $torrent->id)
+            ->count());
+    }
+
+    public function test_consume_to_buy_torrent_tax_factor_zero_credits_full_price(): void
+    {
+        DB::table('settings')->updateOrInsert(
+            ['name' => 'torrent.tax_factor'],
+            ['value' => '0']
+        );
+        Settings::resetCache();
+
+        $owner = User::factory()->create(['seedbonus' => 0]);
+        $torrent = Torrent::factory()->create(['owner' => $owner->id, 'price' => 100]);
+        $buyer = User::factory()->create(['seedbonus' => 1000.0]);
+
+        $this->repository->consumeToBuyTorrent($buyer->id, $torrent->id);
+
+        $this->assertSame(100.0, (float) DB::table('users')->where('id', $owner->id)->value('seedbonus'));
+    }
+
+    public function test_consume_to_buy_torrent_tax_factor_one_credits_nothing(): void
+    {
+        DB::table('settings')->updateOrInsert(
+            ['name' => 'torrent.tax_factor'],
+            ['value' => '1']
+        );
+        Settings::resetCache();
+
+        $owner = User::factory()->create(['seedbonus' => 0]);
+        $torrent = Torrent::factory()->create(['owner' => $owner->id, 'price' => 100]);
+        $buyer = User::factory()->create(['seedbonus' => 1000.0]);
+
+        $this->repository->consumeToBuyTorrent($buyer->id, $torrent->id);
+
+        $this->assertSame(0.0, (float) DB::table('users')->where('id', $owner->id)->value('seedbonus'));
+    }
+
+    public function test_consume_to_cancel_hit_and_run_prepends_comment(): void
+    {
+        $user = User::factory()->create(['seedbonus' => 10000.0]);
+        $hitAndRun = HitAndRun::factory()->create([
+            'uid' => $user->id,
+            'status' => HitAndRunStatus::INSPECTING->value,
+            'comment' => 'previous note',
+        ]);
+
+        $this->repository->consumeToCancelHitAndRun($user->id, $hitAndRun->id);
+
+        $comment = (string) HitAndRun::query()->where('id', $hitAndRun->id)->value('comment');
+        $this->assertStringContainsString('previous note', $comment);
+        $this->assertStringContainsString("\n", $comment);
+        $this->assertTrue(str_ends_with($comment, 'previous note'));
+    }
 }

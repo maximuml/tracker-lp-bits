@@ -4,6 +4,7 @@ namespace Tests\Integration\Services;
 
 use App\Services\AttachmentRenderService;
 use App\Support\Html\SafeHtml;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -107,5 +108,138 @@ final class AttachmentRenderServiceTest extends TestCase
         );
 
         $this->assertStringContainsString('pic/attachicons/common.gif', $html);
+    }
+
+    #[DataProvider('fileIconCases')]
+    public function test_icon_matches_filetype(string $filetype, string $icon): void
+    {
+        $row = [
+            'id' => 5,
+            'isimage' => 0,
+            'filetype' => $filetype,
+            'filename' => 'asset.bin',
+            'downloads' => 2,
+        ];
+
+        $html = $this->app->make(AttachmentRenderService::class)->render(
+            $row,
+            'k',
+            true,
+            true,
+            '',
+            '2 KB',
+            SafeHtml::fromPlainText('then'),
+            ['size' => 'Size', 'downloads' => 'Downloads'],
+        );
+
+        $this->assertStringContainsString("pic/attachicons/$icon.gif", $html);
+    }
+
+    /** @return iterable<string, array{0: string, 1: string}> */
+    public static function fileIconCases(): iterable
+    {
+        yield 'zip' => ['application/zip', 'archive'];
+        yield 'rar' => ['application/rar', 'archive'];
+        yield '7z' => ['application/x-7z-compressed', 'archive'];
+        yield 'gzip' => ['application/x-gzip', 'archive'];
+        yield 'mpeg' => ['audio/mpeg', 'audio'];
+        yield 'ogg' => ['audio/ogg', 'audio'];
+        yield 'flv' => ['video/x-flv', 'flv'];
+    }
+
+    public function test_render_file_shows_downloads_label_and_count(): void
+    {
+        $row = [
+            'id' => 9,
+            'isimage' => 0,
+            'filetype' => 'application/zip',
+            'filename' => 'pack.zip',
+            'downloads' => 1234,
+        ];
+
+        $html = $this->app->make(AttachmentRenderService::class)->render(
+            $row,
+            'key',
+            true,
+            true,
+            '',
+            '9 MB',
+            SafeHtml::fromPlainText('2026-02-02'),
+            ['size' => 'Size', 'downloads' => 'Downloads'],
+        );
+
+        $this->assertStringContainsString('Downloads', $html);
+        $this->assertStringContainsString('1,234', $html);
+    }
+
+    public function test_render_missing_isimage_renders_file_not_image(): void
+    {
+        $row = [
+            'id' => 11,
+            'filetype' => 'text/plain',
+            'filename' => 'noimage.txt',
+            'downloads' => 3,
+        ];
+
+        $html = $this->app->make(AttachmentRenderService::class)->render(
+            $row,
+            'key',
+            true,
+            true,
+            '',
+            '1 KB',
+            SafeHtml::fromPlainText('now'),
+            ['size' => 'Size', 'downloads' => 'Downloads'],
+        );
+
+        $this->assertStringContainsString('/web/getattachment?id=11&amp;dlkey=key', $html);
+        $this->assertStringNotContainsString('data-zoomable', $html);
+    }
+
+    public function test_render_image_flag_off_renders_file(): void
+    {
+        $row = [
+            'id' => 12,
+            'isimage' => 1,
+            'filetype' => 'image/png',
+            'filename' => 'p.png',
+            'downloads' => 4,
+        ];
+
+        $html = $this->app->make(AttachmentRenderService::class)->render(
+            $row,
+            'key',
+            false,
+            true,
+            '/p.png',
+            '50 KB',
+            SafeHtml::fromPlainText('now'),
+            ['size' => 'Size', 'downloads' => 'Downloads'],
+        );
+
+        $this->assertStringContainsString('/web/getattachment?id=12&amp;dlkey=key', $html);
+    }
+
+    public function test_render_missing_id_and_downloads_fall_back_to_zero(): void
+    {
+        $row = [
+            'isimage' => 0,
+            'filetype' => 'text/plain',
+            'filename' => 'empty.txt',
+        ];
+
+        $html = $this->app->make(AttachmentRenderService::class)->render(
+            $row,
+            'key',
+            true,
+            true,
+            '',
+            '0 B',
+            SafeHtml::fromPlainText('now'),
+            ['size' => 'Size', 'downloads' => 'Downloads'],
+        );
+
+        $this->assertStringContainsString('/web/getattachment?id=0&amp;dlkey=key', $html);
+        $this->assertStringNotContainsString('-1', $html);
     }
 }

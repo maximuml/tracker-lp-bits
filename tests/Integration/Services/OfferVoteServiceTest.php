@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\DTOs\Auth\ActorContext;
+use App\Enums\BusinessType;
 use App\Enums\OfferAllowed;
 use App\Enums\OfferVote;
 use App\Enums\Permission\PermissionEnum;
@@ -240,6 +241,24 @@ final class OfferVoteServiceTest extends TestCase
             'offerid' => $offerId,
             'userid' => $voterId,
             'vote' => OfferVote::YEAH->value,
+        ]);
+    }
+
+    public function test_yeah_vote_awards_bonus_to_voter(): void
+    {
+        $ownerId = $this->createUser();
+        $voterId = $this->createUser();
+        $offerId = $this->insertOffer($ownerId);
+        $this->authenticatedUser(['id' => $voterId]);
+        $bonusBefore = (float) DB::table('users')->where('id', $voterId)->value('seedbonus');
+
+        $this->callVote(['id' => $offerId, 'vote' => 'yeah']);
+
+        $bonusAfter = (float) DB::table('users')->where('id', $voterId)->value('seedbonus');
+        $this->assertGreaterThan($bonusBefore, $bonusAfter);
+        $this->assertDatabaseHas('bonus_logs', [
+            'uid' => $voterId,
+            'business_type' => BusinessType::OFFER_VOTE->value,
         ]);
     }
 

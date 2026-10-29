@@ -352,6 +352,7 @@ final class ForumListingServiceTest extends TestCase
         $this->assertSame('', $vm->keywords);
         $this->assertSame(0, $vm->hits);
         $this->assertSame([], $vm->results);
+        $this->assertStringContainsString('pic/forum_pic', $vm->imageUrl);
         $this->assertStringContainsString('search_button.gif', $vm->imageUrl);
     }
 

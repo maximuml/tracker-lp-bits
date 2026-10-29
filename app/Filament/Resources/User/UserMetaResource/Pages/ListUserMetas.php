@@ -18,9 +18,10 @@ class ListUserMetas extends PageList implements HasActions
 
     protected static string $resource = UserMetaResource::class;
 
-    protected function userDisplayKey(): ?string
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
     {
-        return 'uid';
+        return ['uid'];
     }
 
     protected function getHeaderActions(): array

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets\TrackerStatistics;
 
+use App\Filament\PreloadsUserDisplayTrait;
 use App\Models\User;
 use App\Support\Format;
 use App\Support\Ratio;
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TopUsers extends BaseWidget implements HasActions
 {
+    use PreloadsUserDisplayTrait;
+
     protected static ?int $sort = 30;
 
     protected function getTableHeading(): string|Htmlable|null
@@ -58,5 +61,11 @@ class TopUsers extends BaseWidget implements HasActions
                 ->label(__('label.ratio'))
                 ->state(fn (User $record): string => (string) Ratio::share((float) $record->uploaded, (float) $record->downloaded)),
         ];
+    }
+
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
+    {
+        return ['id'];
     }
 }

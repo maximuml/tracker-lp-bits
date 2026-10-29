@@ -15,9 +15,10 @@ class ManageTokens extends PageListSingle
 
     protected static string $resource = TokenResource::class;
 
-    protected function userDisplayKey(): ?string
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
     {
-        return 'tokenable_id';
+        return ['tokenable_id'];
     }
 
     protected function getHeaderActions(): array

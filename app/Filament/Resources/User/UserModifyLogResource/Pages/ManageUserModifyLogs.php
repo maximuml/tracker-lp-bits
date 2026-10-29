@@ -16,9 +16,10 @@ class ManageUserModifyLogs extends PageListSingle implements HasActions
 
     protected static string $resource = UserModifyLogResource::class;
 
-    protected function userDisplayKey(): ?string
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
     {
-        return 'user_id';
+        return ['user_id'];
     }
 
     protected function getHeaderActions(): array

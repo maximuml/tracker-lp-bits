@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Filament\PreloadsUserDisplayTrait;
 use App\Models\Torrent;
 use App\Support\Format;
 use App\Support\TorrentAccess;
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LatestTorrents extends BaseWidget implements HasActions
 {
+    use PreloadsUserDisplayTrait;
+
     protected static ?int $sort = 2;
 
     protected function getTableHeading(): string|Htmlable|null
@@ -46,5 +49,11 @@ class LatestTorrents extends BaseWidget implements HasActions
             TextColumn::make('size')->formatStateUsing(fn ($state) => Format::size($state))->label(__('label.torrent.size')),
             TextColumn::make('added')->dateTime()->label(__('label.added')),
         ];
+    }
+
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
+    {
+        return ['owner'];
     }
 }

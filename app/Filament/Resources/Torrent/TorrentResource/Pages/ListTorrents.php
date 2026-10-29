@@ -15,9 +15,10 @@ class ListTorrents extends PageList
 
     protected static string $resource = TorrentResource::class;
 
-    protected function userDisplayKey(): ?string
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
     {
-        return 'owner';
+        return ['owner'];
     }
 
     protected function getHeaderActions(): array

@@ -17,9 +17,10 @@ class ListInvites extends PageList
 
     protected static string $resource = InviteResource::class;
 
-    protected function userDisplayKey(): ?string
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
     {
-        return 'inviter';
+        return ['inviter'];
     }
 
     protected function getHeaderActions(): array

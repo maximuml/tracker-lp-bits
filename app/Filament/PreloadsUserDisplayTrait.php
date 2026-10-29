@@ -18,18 +18,38 @@ trait PreloadsUserDisplayTrait
     public function getTableRecords(): Collection|Paginator|CursorPaginator
     {
         $records = parent::getTableRecords();
-
-        $key = $this->userDisplayKey();
-        if ($key !== null) {
-            $items = method_exists($records, 'getCollection') ? $records->getCollection() : $records;
-            UserDisplay::preload($items->pluck($key)->all());
-        }
+        $this->preloadUserDisplayRows($records);
 
         return $records;
     }
 
-    protected function userDisplayKey(): ?string
+    /**
+     * Warm the UserDisplay in-request row cache for every user id that a
+     * table column will render via username()/adminUsername() — one batch
+     * WHERE IN pair instead of two queries per row.
+     *
+     * @param  Collection<int, mixed>|Paginator<int, mixed>|CursorPaginator<int, mixed>  $records
+     */
+    protected function preloadUserDisplayRows(Collection|Paginator|CursorPaginator $records): void
     {
-        return null;
+        $ids = [];
+        foreach ($this->userDisplayKeys() as $key) {
+            $items = method_exists($records, 'getCollection') ? $records->getCollection() : $records;
+            $ids = array_merge($ids, $items->pluck($key)->all());
+        }
+        if ($ids !== []) {
+            UserDisplay::preload($ids);
+        }
+    }
+
+    /**
+     * Record attributes holding user ids whose display rows are rendered
+     * via UserDisplay::username()/adminUsername() in the table.
+     *
+     * @return list<string>
+     */
+    protected function userDisplayKeys(): array
+    {
+        return [];
     }
 }

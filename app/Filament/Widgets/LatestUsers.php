@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Filament\PreloadsUserDisplayTrait;
 use App\Models\User;
 use App\Support\UserDisplay;
 use Filament\Actions\Contracts\HasActions;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LatestUsers extends BaseWidget implements HasActions
 {
+    use PreloadsUserDisplayTrait;
+
     protected static ?int $sort = 1;
 
     protected function getTableHeading(): string|Htmlable|null
@@ -43,5 +46,11 @@ class LatestUsers extends BaseWidget implements HasActions
             BadgeColumn::make('status')->colors(['success' => 'confirmed', 'danger' => 'pending'])->label(__('label.status')),
             TextColumn::make('added')->dateTime()->label(__('label.added')),
         ];
+    }
+
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
+    {
+        return ['id'];
     }
 }

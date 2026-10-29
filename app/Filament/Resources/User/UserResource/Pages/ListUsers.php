@@ -17,9 +17,10 @@ class ListUsers extends PageList implements HasActions
 
     protected static string $resource = UserResource::class;
 
-    protected function userDisplayKey(): ?string
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
     {
-        return 'id';
+        return ['id'];
     }
 
     protected function getHeaderActions(): array

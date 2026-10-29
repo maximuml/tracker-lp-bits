@@ -17,9 +17,10 @@ class ListTorrentBuyLogs extends PageList
 
     protected static string $resource = TorrentBuyLogResource::class;
 
-    protected function userDisplayKey(): ?string
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
     {
-        return 'uid';
+        return ['uid'];
     }
 
     protected function getHeaderActions(): array

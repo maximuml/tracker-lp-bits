@@ -15,9 +15,10 @@ class ManageLoginLogs extends PageListSingle
 
     protected static string $resource = LoginLogResource::class;
 
-    protected function userDisplayKey(): ?string
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
     {
-        return 'uid';
+        return ['uid'];
     }
 
     protected function getHeaderActions(): array

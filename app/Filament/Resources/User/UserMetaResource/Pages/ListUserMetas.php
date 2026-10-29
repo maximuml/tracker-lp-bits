@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\User\UserMetaResource\Pages;
 
 use App\Filament\PageList;
+use App\Filament\PreloadsUserDisplayTrait;
 use App\Filament\Resources\User\UserMetaResource;
 use App\Models\UserMeta;
 use Filament\Actions\Contracts\HasActions;
@@ -13,7 +14,15 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ListUserMetas extends PageList implements HasActions
 {
+    use PreloadsUserDisplayTrait;
+
     protected static string $resource = UserMetaResource::class;
+
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
+    {
+        return ['uid'];
+    }
 
     protected function getHeaderActions(): array
     {

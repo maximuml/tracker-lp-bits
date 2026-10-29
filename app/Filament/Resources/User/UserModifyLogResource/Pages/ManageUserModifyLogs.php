@@ -5,13 +5,22 @@ declare(strict_types=1);
 namespace App\Filament\Resources\User\UserModifyLogResource\Pages;
 
 use App\Filament\PageListSingle;
+use App\Filament\PreloadsUserDisplayTrait;
 use App\Filament\Resources\User\UserModifyLogResource;
 use Filament\Actions;
 use Filament\Actions\Contracts\HasActions;
 
 class ManageUserModifyLogs extends PageListSingle implements HasActions
 {
+    use PreloadsUserDisplayTrait;
+
     protected static string $resource = UserModifyLogResource::class;
+
+    /** @return list<string> */
+    protected function userDisplayKeys(): array
+    {
+        return ['user_id'];
+    }
 
     protected function getHeaderActions(): array
     {

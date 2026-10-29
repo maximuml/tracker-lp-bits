@@ -127,6 +127,10 @@ class IpSearch extends Page implements HasTable
                     ->selectRaw('userid, COUNT(distinct ip) AS count')
                     ->groupBy('userid')
                     ->pluck('count', 'userid');
+                UserDisplay::preload([
+                    ...$userIdArr,
+                    ...$records->pluck('invited_by')->toArray(),
+                ]);
                 foreach ($records as $record) {
                     $item = json_decode((string) json_encode($record), true);
                     if (! is_array($item)) {

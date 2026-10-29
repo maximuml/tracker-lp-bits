@@ -78,7 +78,7 @@ final class ForumListingService
         $num = (int) $topicResult['count'];
 
         [, , , $offset, $perpage, $page] = Pagination::pager($topicsperpage, $num, '?action=viewforum&forumid='.$forumid.($search === '' ? '' : '&search='.rawurlencode($search)).'&');
-        $topicResult = $this->topicRepository->getTopicsByForum($forumid, $search, $sortColumn, $sortDirection, (int) $offset, (int) $perpage);
+        $topicResult = $this->topicRepository->getTopicsByForum($forumid, $search, $sortColumn, $sortDirection, (int) $offset, (int) $perpage, $num);
         $topicRows = $topicResult['rows'];
 
         $enabletooltipTweak = SiteConfig::current()->tweak->enableTooltip() ? 'yes' : 'no';

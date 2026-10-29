@@ -18,7 +18,7 @@ final class ForumLookupService
 {
     public function __construct(
         private readonly ForumModRepository $forumModRepository,
-        private readonly NexusCache $cache,
+        private readonly ?NexusCache $cache,
     ) {}
 
     /**
@@ -39,12 +39,14 @@ final class ForumLookupService
     public function moderators(int $forumId, bool $plainText = true): string
     {
         if (ForumState::instance()->moderatorsArray === null) {
-            $cached = $this->cache->get('forum_moderator_array');
+            $cached = $this->cache !== null ? $this->cache->get('forum_moderator_array') : false;
             if ($cached !== false && is_array($cached)) {
                 ForumState::instance()->moderatorsArray = $cached;
             } else {
                 ForumState::instance()->moderatorsArray = $this->forumModRepository->getModeratorArray();
-                $this->cache->put('forum_moderator_array', ForumState::instance()->moderatorsArray, 86200);
+                if ($this->cache !== null) {
+                    $this->cache->put('forum_moderator_array', ForumState::instance()->moderatorsArray, 86200);
+                }
             }
         }
 

@@ -19,7 +19,7 @@ use Tests\TestCase;
  *
  * Covers createPost(), updatePostBody(), deletePost(), countTopicPosts(),
  * getTopicPosts(), countUserPosts(), getTotalPostsCount(), getLastPostId(),
- * updateUserLastPost(), updateLastCatchup(), getForumTodayPostCount().
+ * updateUserLastPost(), updateLastCatchup(), getForumTodayPostCounts(), findPostArraysByIds().
  * Shaped single-post reads are covered in PostLookupRepositoryTest.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]

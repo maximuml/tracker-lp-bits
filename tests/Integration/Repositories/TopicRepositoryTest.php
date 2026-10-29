@@ -18,7 +18,7 @@ use Tests\TestCase;
  *
  * Covers topicExists(), getTopic(), getTopicWithUser(), createTopic(),
  * updateTopicSubject(), getTopicsByForum(),
- * getUnreadTopics(), getTopicById(), getLastTopicByForum(),
+ * getUnreadTopics(), getTopicById(), getLastTopicsByForums(),
  * getTopicForumId(), incrementTopicViews(),
  * getTopicSubject(), getTopicIdByPost(), isModeratorOfTopic(),
  * getTotalTopicsCount(), getTopicForumAndUser().
@@ -169,17 +169,6 @@ final class TopicRepositoryTest extends TestCase
         $result = $this->repository->getTopicById($topic->id);
 
         $this->assertSame($topic->id, $result->id);
-    }
-
-    public function test_get_last_topic_by_forum_returns_latest_topic(): void
-    {
-        $forum = Forum::factory()->create();
-        $topic1 = Topic::factory()->create(['forumid' => $forum->id, 'lastpost' => 100]);
-        $topic2 = Topic::factory()->create(['forumid' => $forum->id, 'lastpost' => 200]);
-
-        $result = $this->repository->getLastTopicByForum($forum->id);
-
-        $this->assertSame($topic2->id, $result->id);
     }
 
     public function test_get_last_topics_by_forums_returns_latest_per_forum(): void

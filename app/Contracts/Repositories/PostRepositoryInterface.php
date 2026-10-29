@@ -56,8 +56,6 @@ interface PostRepositoryInterface
      */
     public function searchForumPosts(string $keywords, int $minClass, int $offset, int $perPage): \Illuminate\Support\Collection;
 
-    public function getForumTodayPostCount(int $forumid, string $todayDate): int;
-
     /**
      * @param  array<int>  $forumids
      * @return array<int, int> map of forum id to today's post count

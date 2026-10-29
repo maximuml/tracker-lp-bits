@@ -170,14 +170,9 @@ class TopicRepository extends BaseRepository
         return $query->get();
     }
 
-    public function getLastTopicByForum(int $forumid): ?Topic
-    {
-        return Topic::query()->where('forumid', $forumid)->orderByDesc('lastpost')->first();
-    }
-
     /**
-     * Last-replied topic per forum in a single query — the batched
-     * counterpart of {@see getLastTopicByForum()} for the index listing.
+     * Last-replied topic per forum in a single query — grouped
+     * MAX(lastpost) join for the index listing.
      *
      * @param  array<int>  $forumids
      * @return array<int, Topic> map of forum id to its last-replied topic

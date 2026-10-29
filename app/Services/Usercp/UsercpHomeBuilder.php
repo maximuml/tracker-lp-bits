@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Usercp;
 
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
@@ -12,7 +13,6 @@ use App\Repositories\TokenRepository;
 use App\Support\AssetAppender;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Network;
@@ -35,7 +35,8 @@ final class UsercpHomeBuilder
         private readonly UsercpLookupRepositoryInterface $usercpLookupRepository,
         private readonly UsercpRepositoryInterface $usercpRepository,
         private readonly TokenRepository $tokenRepository,
-        private readonly ?NexusCache $cache
+        private readonly ?NexusCache $cache,
+        private readonly PostRepositoryInterface $postRepository
     ) {}
 
     public function build(ActorContext $actor, User $userInfo): UsercpHomeSection
@@ -189,9 +190,24 @@ final class UsercpHomeBuilder
                 $lastPostIds[] = (int) $topicArr['lastpost'];
             }
         }
+        $lastPostIds = array_values(array_unique($lastPostIds));
         $lastPostRows = $lastPostIds === []
             ? []
-            : ($cache?->getMany(array_map(fn ($id) => 'post_'.$id.'_content', array_values(array_unique($lastPostIds)))) ?? []);
+            : ($cache?->getMany(array_map(fn ($id) => 'post_'.$id.'_content', $lastPostIds)) ?? []);
+        $missingPostIds = [];
+        foreach ($lastPostIds as $id) {
+            if (($lastPostRows['post_'.$id.'_content'] ?? false) === false) {
+                $missingPostIds[] = $id;
+            }
+        }
+        if ($missingPostIds !== []) {
+            $fetched = $this->postRepository->findPostArraysByIds($missingPostIds);
+            foreach ($missingPostIds as $id) {
+                $row = $fetched[$id] ?? null;
+                $lastPostRows['post_'.$id.'_content'] = $row;
+                $cache?->put('post_'.$id.'_content', $row, 7200);
+            }
+        }
         $items = [];
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];
@@ -199,9 +215,9 @@ final class UsercpHomeBuilder
 
             $posts = $postCounts[$topicId] ?? 0;
 
-            $arr = $lastPostRows['post_'.((int) $topicArr['lastpost']).'_content'] ?? false;
+            $arr = $lastPostRows['post_'.((int) $topicArr['lastpost']).'_content'] ?? null;
             if (! is_array($arr)) {
-                $arr = Forum::postRowWithContext((int) $topicArr['lastpost']) ?? [];
+                $arr = [];
             }
             $userid = (int) ($arr['userid'] ?? 0);
 

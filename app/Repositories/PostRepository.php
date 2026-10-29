@@ -201,15 +201,6 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
             });
     }
 
-    public function getForumTodayPostCount(int $forumid, string $todayDate): int
-    {
-        return (int) DB::table('posts')
-            ->leftJoin('topics', 'posts.topicid', '=', 'topics.id')
-            ->where('posts.added', '>', $todayDate)
-            ->where('topics.forumid', $forumid)
-            ->count('posts.id');
-    }
-
     public function getForumTodayPostCounts(array $forumids, string $todayDate): array
     {
         if ($forumids === []) {

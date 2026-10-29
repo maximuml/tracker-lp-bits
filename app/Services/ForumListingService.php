@@ -117,16 +117,28 @@ final class ForumListingService
                 }
             }
         }
+        $postIds = array_values(array_unique($postIds));
         $postRows = $postIds === []
             ? []
-            : ($this->cache?->getMany(array_map(fn ($id) => 'post_'.$id.'_content', array_values(array_unique($postIds)))) ?? []);
-        $resolvePost = static function (int $postId) use ($postRows): array {
-            $row = $postRows['post_'.$postId.'_content'] ?? false;
-            if (! is_array($row)) {
-                $row = Forum::postRowWithContext($postId) ?? [];
+            : ($this->cache?->getMany(array_map(fn ($id) => 'post_'.$id.'_content', $postIds)) ?? []);
+        $missingPostIds = [];
+        foreach ($postIds as $id) {
+            if (($postRows['post_'.$id.'_content'] ?? false) === false) {
+                $missingPostIds[] = $id;
             }
+        }
+        if ($missingPostIds !== []) {
+            $fetched = $this->postRepository->findPostArraysByIds($missingPostIds);
+            foreach ($missingPostIds as $id) {
+                $row = $fetched[$id] ?? null;
+                $postRows['post_'.$id.'_content'] = $row;
+                $this->cache?->put('post_'.$id.'_content', $row, 7200);
+            }
+        }
+        $resolvePost = static function (int $postId) use ($postRows): array {
+            $row = $postRows['post_'.$postId.'_content'] ?? null;
 
-            return $row;
+            return is_array($row) ? $row : [];
         };
 
         $ttKeys = [];

@@ -9,15 +9,9 @@ use RobThree\Auth\TwoFactorAuth;
 
 class TwoFactorAuthHelper
 {
-    private static ?TwoFactorAuth $tfa = null;
-
     private static function getTfa(): TwoFactorAuth
     {
-        if (self::$tfa === null) {
-            self::$tfa = new TwoFactorAuth(new LocalQrCodeProvider, SiteConfig::current()->basic->siteName());
-        }
-
-        return self::$tfa;
+        return new TwoFactorAuth(new LocalQrCodeProvider, SiteConfig::current()->basic->siteName());
     }
 
     public static function createSecret(int $bits = 80): string

@@ -198,16 +198,6 @@ class User extends Authenticatable implements FilamentUser, HasName
         'appendpromotion' => UserAppendPromotion::class,
     ];
 
-    /** @var array<string, string> */
-    public static array $cardTitles = [
-        'uploaded_human' => 'Uploaded',
-        'downloaded_human' => 'Downloaded',
-        'share_ratio' => 'Ratio',
-        'bonus' => 'Karma Bonus',
-        'seed_points' => 'Seed Points',
-        'invites' => 'Invites',
-    ];
-
     /** @var list<string> */
     public static array $notificationOptions = ['topic_reply', 'hr_reached'];
 

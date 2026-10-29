@@ -56,16 +56,6 @@ class Snatch extends NexusModel
         'finished' => 'boolean',
     ];
 
-    /** @var array<int|string, mixed> */
-    public static $cardTitles = [
-        'upload_text' => 'Uploaded',
-        'download_text' => 'Downloaded',
-        'share_ratio' => 'Ratio',
-        'seed_time' => 'Seed Time',
-        'leech_time' => 'Leech Time',
-        'completed_at_human' => 'Completed',
-    ];
-
     /** @return  Attribute<mixed, mixed> */
     protected function uploadText(): Attribute
     {

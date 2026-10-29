@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Models\SearchBox;
 use App\Models\Torrent;
 use App\Models\User;
@@ -19,8 +18,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class TorrentResource extends JsonResource
 {
     const NAME = 'torrent';
-
-    protected static TorrentRepositoryInterface $torrentRep;
 
     /**
      * Transform the resource into an array.

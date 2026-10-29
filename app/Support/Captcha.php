@@ -11,7 +11,6 @@ use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
-use Illuminate\Container\Container;
 
 /**
  * Legacy captcha helpers extracted from `include/functions.php`.
@@ -20,8 +19,6 @@ use Illuminate\Container\Container;
  */
 final class Captcha
 {
-    private static ?CaptchaManager $manager = null;
-
     /**
      * Return the shared CaptchaManager instance.
      *
@@ -29,11 +26,7 @@ final class Captcha
      */
     public static function manager(): CaptchaManager
     {
-        if (self::$manager === null) {
-            self::$manager = new CaptchaManager(Container::getInstance());
-        }
-
-        return self::$manager;
+        return app(CaptchaManager::class);
     }
 
     /**

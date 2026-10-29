@@ -9,6 +9,7 @@ use App\Events\MessageCreated;
 use App\Models\Message;
 use App\Models\User;
 use App\Support\Cache;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -25,9 +26,9 @@ class MessageRepository extends BaseRepository
     }
 
     /**
-     * @return array{count: int, messages: EloquentCollection<int, Message>}
+     * @return Builder<Message>
      */
-    public function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread, int $offset, int $perPage): array
+    private function mailboxBaseQuery(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread): Builder
     {
         $query = Message::query()->with('send_user');
         if ($keyword !== '') {
@@ -48,30 +49,41 @@ class MessageRepository extends BaseRepository
         if ($unread !== null) {
             $query->where('unread', $unread);
         }
-
         if ($mailbox != -1) { // PM_SENTBOX
-            $countQuery = clone $query;
-            $countQuery->where('receiver', $userId)->where('location', $mailbox);
-            $messages = (clone $query)
-                ->where('receiver', $userId)
-                ->where('location', $mailbox)
-                ->orderByDesc('id')
-                ->offset($offset)
-                ->limit($perPage)
-                ->get();
+            $query->where('receiver', $userId)->where('location', $mailbox);
         } else {
-            $countQuery = clone $query;
-            $countQuery->where('sender', $userId)->where('saved', true);
-            $messages = (clone $query)
-                ->where('sender', $userId)
-                ->where('saved', true)
-                ->orderByDesc('id')
-                ->offset($offset)
-                ->limit($perPage)
-                ->get();
+            $query->where('sender', $userId)->where('saved', true);
         }
 
-        return ['count' => (int) $countQuery->count(), 'messages' => $messages];
+        return $query;
+    }
+
+    public function countMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread): int
+    {
+        return (int) $this->mailboxBaseQuery($userId, $mailbox, $keyword, $place, $unread)->count();
+    }
+
+    /**
+     * @return EloquentCollection<int, Message>
+     */
+    public function listMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread, int $offset, int $perPage): EloquentCollection
+    {
+        return $this->mailboxBaseQuery($userId, $mailbox, $keyword, $place, $unread)
+            ->orderByDesc('id')
+            ->offset($offset)
+            ->limit($perPage)
+            ->get();
+    }
+
+    /**
+     * @return array{count: int, messages: EloquentCollection<int, Message>}
+     */
+    public function getMailboxMessages(int $userId, int $mailbox, string $keyword, string $place, ?bool $unread, int $offset, int $perPage): array
+    {
+        return [
+            'count' => $this->countMailboxMessages($userId, $mailbox, $keyword, $place, $unread),
+            'messages' => $this->listMailboxMessages($userId, $mailbox, $keyword, $place, $unread, $offset, $perPage),
+        ];
     }
 
     public function getMessageForUser(int $messageId, int $userId): ?Message

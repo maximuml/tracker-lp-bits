@@ -79,21 +79,23 @@ class MessagePageService
             'contentWidth' => '737',
         ];
 
+        $mailboxes = $this->mailboxRepository->getUserMailboxes($userId);
+
         switch ($action) {
             case 'viewmessage':
-                $viewmessage = $this->buildViewMessage($actor, $userId, $request);
+                $viewmessage = $this->buildViewMessage($actor, $userId, $request, $mailboxes);
                 $data['viewmessage'] = $viewmessage;
                 $listRequest = $request->duplicate(['box' => $viewmessage['mailbox']]);
-                $data['viewmailbox'] = $this->buildViewMailbox($actor, $userId, $listRequest);
+                $data['viewmailbox'] = $this->buildViewMailbox($actor, $userId, $listRequest, $mailboxes);
                 break;
             case 'forward':
                 $data['forward'] = $this->buildForward($userId, $request);
                 break;
             case 'editmailboxes':
-                $data['editmailboxes'] = $this->buildEditMailboxes($userId);
+                $data['editmailboxes'] = $this->buildEditMailboxes($mailboxes);
                 break;
             default:
-                $data['viewmailbox'] = $this->buildViewMailbox($actor, $userId, $request);
+                $data['viewmailbox'] = $this->buildViewMailbox($actor, $userId, $request, $mailboxes);
                 $data['action'] = 'viewmailbox';
                 break;
         }
@@ -104,7 +106,7 @@ class MessagePageService
             action: $data['action'],
             baseUrl: $data['baseUrl'],
             contentWidth: $data['contentWidth'],
-            mailboxes: $this->mailboxRepository->getUserMailboxes($userId),
+            mailboxes: $mailboxes,
             viewmessage: $data['viewmessage'] ?? null,
             forward: $data['forward'] ?? null,
             editmailboxes: $data['editmailboxes'] ?? null,
@@ -115,9 +117,10 @@ class MessagePageService
     /**
      * Build the mailbox listing section.
      *
+     * @param  Collection<int, \stdClass>  $pmBoxes
      * @return array<string, mixed>
      */
-    private function buildViewMailbox(ActorContext $actor, int $userId, Request $request): array
+    private function buildViewMailbox(ActorContext $actor, int $userId, Request $request, Collection $pmBoxes): array
     {
         $mailbox = (int) ($request->input('box', 0) ?: self::PM_INBOX);
         if ($mailbox === 0) {
@@ -155,8 +158,7 @@ class MessagePageService
         };
         $perpage = (int) ($this->actor->value('pmnum', 0)) ?: 20;
 
-        $countResult = $this->messageRepository->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, 0, 0);
-        $count = $countResult['count'];
+        $count = $this->messageRepository->countMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool);
 
         $pagerHref = '?action=viewmailbox'
             .'&box='.$mailbox
@@ -167,8 +169,7 @@ class MessagePageService
 
         [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $pagerHref);
 
-        $messageResult = $this->messageRepository->getMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
-        $messages = $messageResult['messages'];
+        $messages = $this->messageRepository->listMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
 
         UserDisplay::preload($messages->map(fn ($message) => (int) ($mailbox !== self::PM_SENT_BOX ? $message->sender : $message->receiver))->all());
         // Build message rows
@@ -200,7 +201,6 @@ class MessagePageService
         }
 
         // User mailboxes for the "move to" select
-        $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
         $moveBoxes = [];
         $mailboxTabs = [
             ['id' => self::PM_INBOX, 'label' => __('messages.text_inbox'), 'url' => '/web/messages'],
@@ -247,12 +247,11 @@ class MessagePageService
     /**
      * Build the edit-mailboxes section.
      *
+     * @param  Collection<int, \stdClass>  $pmBoxes
      * @return array<string, mixed>
      */
-    private function buildEditMailboxes(int $userId): array
+    private function buildEditMailboxes(Collection $pmBoxes): array
     {
-        $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
-
         $boxes = [];
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;
@@ -292,9 +291,10 @@ class MessagePageService
     /**
      * Build the single message view section.
      *
+     * @param  Collection<int, \stdClass>  $pmBoxes
      * @return array<string, mixed>
      */
-    private function buildViewMessage(ActorContext $actor, int $userId, Request $request): array
+    private function buildViewMessage(ActorContext $actor, int $userId, Request $request, Collection $pmBoxes): array
     {
         $pmId = (int) $request->input('id', 0);
         if ($pmId <= 0) {
@@ -365,7 +365,6 @@ class MessagePageService
         };
 
         // Move-to boxes
-        $pmBoxes = $this->mailboxRepository->getUserMailboxes($userId);
         $moveBoxes = [];
         foreach ($pmBoxes as $box) {
             $boxArr = (array) $box;

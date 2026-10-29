@@ -411,6 +411,25 @@ final class QueryBudgetTest extends TestCase
     }
 
     /**
+     * Filament /nexusphp/user/users list — the username column renders via
+     * UserDisplay::username() which needs the per-user display row
+     * (users subset + personalized-username meta); PreloadsUserDisplayTrait
+     * batches those into 2 WHERE IN lookups instead of 2-per-row.
+     * Actual ~7 for a 10-row page → budget 14 for seeded-CI headroom
+     * (panel chrome/widgets can add fixed-cost queries).
+     */
+    public function test_admin_user_list_query_budget(): void
+    {
+        $admin = User::factory()->create(['class' => 16]);
+        User::factory()->count(12)->create();
+        $this->actingAs($admin, 'nexus-web');
+
+        $this->assertQueryCountBelow(14, function (): void {
+            $this->get('/nexusphp/user/users');
+        });
+    }
+
+    /**
      * GET /api/v1/torrents — actual ~13 in the E2E job (each visible torrent
      * pulls codec/source/media/… lookup tables) → budget 16.
      */

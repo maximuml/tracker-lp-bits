@@ -48,7 +48,7 @@ interface OfferRepositoryInterface
     /**
      * @return array{count: int, rows: Collection<int, \stdClass>}
      */
-    public function getLegacyList(int $category, int $offerorId, string $search, string $sort, string $direction, int $offset, int $perPage): array;
+    public function getLegacyList(int $category, int $offerorId, string $search, string $sort, string $direction, int $offset, int $perPage, ?int $knownCount = null): array;
 
     /**
      * @return array<string, mixed>

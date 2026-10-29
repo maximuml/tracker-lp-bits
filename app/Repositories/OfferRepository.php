@@ -110,7 +110,7 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
     /**
      * @return array{count: int, rows: Collection<int, \stdClass>}
      */
-    public function getLegacyList(int $category, int $offerorId, string $search, string $sort, string $direction, int $offset, int $perPage): array
+    public function getLegacyList(int $category, int $offerorId, string $search, string $sort, string $direction, int $offset, int $perPage, ?int $knownCount = null): array
     {
         $direction = $direction === 'asc' ? 'asc' : 'desc';
         $query = DB::table('offers')
@@ -130,7 +130,11 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
             $query->where('offers.name', 'like', '%'.$search.'%');
         }
 
-        $count = (int) $query->count('offers.id');
+        $count = $knownCount ?? (int) $query->count('offers.id');
+
+        if ($perPage <= 0) {
+            return ['count' => $count, 'rows' => collect()];
+        }
 
         $selectColumns = [
             'offers.id',

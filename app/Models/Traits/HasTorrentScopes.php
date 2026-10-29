@@ -13,16 +13,6 @@ trait HasTorrentScopes
 {
     /**
      * @param  mixed  $query
-     * @param  mixed  $visible
-     * @return mixed
-     */
-    public function scopeVisible($query, $visible = TorrentVisible::YES->value)
-    {
-        $query->where('visible', $visible);
-    }
-
-    /**
-     * @param  mixed  $query
      * @return mixed
      */
     public function scopeNormal($query)

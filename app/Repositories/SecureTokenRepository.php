@@ -37,13 +37,6 @@ final class SecureTokenRepository
         return $row === null ? null : (object) $row;
     }
 
-    public function findByColumn(string $table, string $column, string $value): ?\stdClass
-    {
-        $row = DB::table($table)->where($column, $value)->first();
-
-        return $row === null ? null : (object) $row;
-    }
-
     /**
      * @param  array<string, mixed>  $update
      */

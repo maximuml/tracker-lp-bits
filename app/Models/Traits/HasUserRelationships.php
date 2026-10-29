@@ -14,7 +14,6 @@ use App\Models\Exam;
 use App\Models\ExamUser;
 use App\Models\Invite;
 use App\Models\Language;
-use App\Models\Message;
 use App\Models\Peer;
 use App\Models\Post;
 use App\Models\Reward;
@@ -27,7 +26,6 @@ use App\Models\UserMeta;
 use App\Models\UserModifyLog;
 use App\Models\UsernameChangeLog;
 use App\Models\UserPreference;
-use App\Models\UserSeedStats;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -82,12 +80,6 @@ trait HasUserRelationships
             ->where('invitee', '')
             ->whereNotNull('expired_at')
             ->where('expired_at', '>=', Carbon::now());
-    }
-
-    /** @return HasMany<Message, $this> */
-    public function send_messages(): HasMany
-    {
-        return $this->hasMany(Message::class, 'sender');
     }
 
     /** @return HasMany<Comment, $this> */
@@ -216,11 +208,5 @@ trait HasUserRelationships
     public function activity(): HasOne
     {
         return $this->hasOne(UserActivity::class, 'user_id');
-    }
-
-    /** @return HasOne<UserSeedStats, $this> */
-    public function seedStats(): HasOne
-    {
-        return $this->hasOne(UserSeedStats::class, 'user_id');
     }
 }

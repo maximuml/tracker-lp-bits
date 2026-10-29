@@ -30,7 +30,6 @@ namespace App\Models;
 
 use App\Enums\PeerConnectable;
 use App\Enums\PeerSeeder;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -76,15 +75,6 @@ class Peer extends NexusModel
     public function getConnectableTextAttribute()
     {
         return self::$connectableText[$this->connectable] ?? '';
-    }
-
-    /**
-     * @param  Builder<Peer>  $builder
-     * @return mixed
-     */
-    public function scopeIsSeeder(Builder $builder)
-    {
-        return $builder->where('seeder', PeerSeeder::YES->value);
     }
 
     /** @return  bool */

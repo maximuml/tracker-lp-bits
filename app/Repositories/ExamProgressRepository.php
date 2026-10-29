@@ -86,6 +86,10 @@ class ExamProgressRepository extends BaseRepository
             throw new \InvalidArgumentException("$logPrefix, exam: {$examUser->id} no end.");
         }
         $progressGrouped = $examUser->progresses->keyBy('index');
+        $globalProgressGrouped = $examUser->progresses
+            ->whereNull('torrent_id')
+            ->sortBy('id')
+            ->keyBy('index');
         $examUserProgressFieldData = [];
         $now = now();
         foreach ($exam->indexes as $index) {
@@ -107,12 +111,9 @@ class ExamProgressRepository extends BaseRepository
             $attributes['updated_at'] = $now;
             $attributes['value'] = $this->getProgressValue($user, $index['index'], $examUser);
             Logger::writeWithContext((string) ('[GET_TOTAL_VALUE]: '.$attributes['value']), (string) 'info', (bool) false);
-            $newVersionProgress = ExamProgress::query()
-                ->where('exam_user_id', $examUser->id)
-                ->whereNull('torrent_id')
-                ->where('index', $index['index'])
-                ->orderBy('id', 'desc')
-                ->first();
+            // Same row the previous per-index query found: latest
+            // torrent-agnostic progress for this exam user + index.
+            $newVersionProgress = $globalProgressGrouped->get($index['index']);
             Logger::writeWithContext((string) ('check newVersionProgress: '.QueryLog::last().', exists: '.json_encode($newVersionProgress)), (string) 'info', (bool) false);
             if ($newVersionProgress) {
                 // just need to do update the value

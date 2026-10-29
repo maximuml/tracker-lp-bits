@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories;
+namespace App\Services;
 
 use App\Enums\BusinessType;
 use App\Enums\HitAndRunStatus;
@@ -14,8 +14,10 @@ use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
 use App\Models\UserMeta;
-use App\Services\BonusLedgerService;
-use App\Services\OutboxService;
+use App\Repositories\BonusConsumptionRepository;
+use App\Repositories\MessageRepository;
+use App\Repositories\ToolRepository;
+use App\Repositories\UserRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -23,13 +25,16 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Bonus purchase operations: invite/card/rainbow-id/torrent
- * purchases, H&R cancellation, and the core consumeUserBonus mutation.
+ * Bonus purchase domain operations: invite/card/rainbow-id/torrent
+ * purchases and H&R cancellation. Each method runs its balance
+ * debit, side-effect writes, localized log comments and outbox
+ * records inside a single transaction.
  *
- * Extracted from BonusRepository to keep both classes under the
- * 400-line ratchet.
+ * Formerly `BonusPurchaseRepository` in the data layer — moved to
+ * services since the class orchestrates transactions and domain
+ * rules rather than encapsulating persistence.
  */
-class BonusPurchaseRepository extends BaseRepository
+final class BonusPurchaseService
 {
     public function __construct(
         private readonly OutboxService $outboxService,

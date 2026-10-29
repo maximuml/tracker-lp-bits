@@ -18,6 +18,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
+use App\Services\ForumAccessService;
 use App\Support\CurrentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,7 @@ class PostController extends Controller
         private readonly PostLookupRepository $postLookupRepository,
         private readonly TopicRepository $topicRepository,
         private readonly CurrentUser $currentUser,
+        private readonly ForumAccessService $forumAccess,
     ) {}
 
     /**
@@ -208,7 +210,7 @@ class PostController extends Controller
             return false;
         }
 
-        return \App\Support\Forum::isModerator((int) $topic->id, 'topic')
+        return $this->forumAccess->isModerator((int) $topic->id, 'topic')
             || Permission::can(PermissionEnum::POST_MANAGE, $user);
     }
 

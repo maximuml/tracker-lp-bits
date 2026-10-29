@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Repositories;
+namespace Tests\Integration\Services;
 
 use App\Enums\HitAndRunMode;
 use App\Enums\HitAndRunStatus;
@@ -11,7 +11,7 @@ use App\Models\HitAndRun;
 use App\Models\Torrent;
 use App\Models\TorrentBuyLog;
 use App\Models\User;
-use App\Repositories\BonusPurchaseRepository;
+use App\Services\BonusPurchaseService;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -26,16 +26,16 @@ use Tests\TestCase;
  * status/duplicate checks now run inside the transaction under locks.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
-final class BonusPurchaseRepositoryTest extends TestCase
+final class BonusPurchaseServiceTest extends TestCase
 {
     use DatabaseTransactions;
 
-    private BonusPurchaseRepository $repository;
+    private BonusPurchaseService $repository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = app(BonusPurchaseRepository::class);
+        $this->repository = app(BonusPurchaseService::class);
         Settings::saveBatch('hr', ['mode' => HitAndRunMode::GLOBAL->value]);
         Settings::resetCache();
     }

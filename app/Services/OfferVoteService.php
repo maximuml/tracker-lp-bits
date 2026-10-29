@@ -7,10 +7,10 @@ namespace App\Services;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\OfferVoteRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
+use App\Enums\BusinessType;
 use App\Enums\OfferAllowed;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\MessageRepository;
-use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Log;
@@ -34,6 +34,7 @@ final class OfferVoteService
         private readonly OfferRepositoryInterface $offerRepository,
         private readonly OfferVoteRepositoryInterface $offerVoteRepository,
         private readonly MessageRepository $messageRepository,
+        private readonly BonusLedgerService $ledger,
     ) {}
 
     public function handleVote(Request $request): ?Response
@@ -129,7 +130,7 @@ final class OfferVoteService
             Log::writeWithContext("System denied offer {$offerVotes->name}", 'normal');
         }
 
-        Bonus::updatePoints('+', $offervoteBonus, $userid);
+        $this->ledger->award($userid, (float) $offervoteBonus, BusinessType::OFFER_VOTE, 'Offer vote');
     }
 
     private function baseUrl(): string

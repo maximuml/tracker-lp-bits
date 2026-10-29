@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Support\Bonus;
+use App\Services\SeedBonusService;
 use App\Support\Logger;
 use App\Support\RequestContext;
 use Illuminate\Console\Command;
@@ -30,10 +30,10 @@ class TrackerCalculateSeedBonus extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(SeedBonusService $seedBonus)
     {
         $uid = $this->argument('uid');
-        $result = Bonus::calculateForUser($uid);
+        $result = $seedBonus->calculateForUser((int) $uid);
         $log = sprintf(
             "[%s], %s, uid: %s, result: \n%s",
             RequestContext::instance()->getRequestId(), __METHOD__, $uid, var_export($result, true)

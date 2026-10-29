@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTOs\Auth\ActorContext;
+use App\Enums\BusinessType;
 use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\TopicModerationRepository;
-use App\Support\Bonus;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
@@ -27,7 +27,7 @@ use Illuminate\Http\Request;
 final class ForumModerationService
 {
     public function __construct(
-        private readonly ForumDataRepositories $data,
+        private readonly ForumCollaborators $data,
         private readonly NexusCache $cache,
         private readonly TopicPolicy $topicPolicy,
         private readonly PostPolicy $postPolicy,
@@ -131,9 +131,7 @@ final class ForumModerationService
         }
 
         $starttopicBonus = SiteConfig::current()->bonus->startTopic();
-        if ($starttopicBonus > 0) {
-            Bonus::updatePoints('-', $starttopicBonus, $targetUserid);
-        }
+        $this->data->ledger->revoke((int) $targetUserid, (float) $starttopicBonus, BusinessType::BONUS_REVERSAL, 'Start topic bonus revoked');
 
         return $this->redirectTo('?action=viewforum&forumid='.$forumid);
     }
@@ -182,9 +180,7 @@ final class ForumModerationService
         $this->data->topics->updateTopicLastPost($topicid);
 
         $makepostBonus = SiteConfig::current()->bonus->makePost();
-        if ($makepostBonus > 0) {
-            Bonus::updatePoints('-', $makepostBonus, $targetUserid);
-        }
+        $this->data->ledger->revoke((int) $targetUserid, (float) $makepostBonus, BusinessType::BONUS_REVERSAL, 'Make post bonus revoked');
 
         return $this->redirectTo('?action=viewtopic&topicid='.$topicid.$redirtopost);
     }

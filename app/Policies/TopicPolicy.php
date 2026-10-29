@@ -9,7 +9,7 @@ use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Topic;
 use App\Models\User;
-use App\Support\Forum;
+use App\Services\ForumAccessService;
 
 /**
  * W1-04: Authorization policy for topic mutations.
@@ -19,6 +19,7 @@ class TopicPolicy extends BasePolicy
 {
     public function __construct(
         private readonly ForumRepositoryInterface $repository,
+        private readonly ForumAccessService $forumAccess,
     ) {}
 
     /**
@@ -65,7 +66,7 @@ class TopicPolicy extends BasePolicy
 
         if ($topic->locked) {
             return Permission::can(PermissionEnum::POST_MANAGE, $user)
-                || Forum::isModerator($topic->id, 'topic');
+                || $this->forumAccess->isModerator($topic->id, 'topic');
         }
 
         return true;
@@ -80,7 +81,7 @@ class TopicPolicy extends BasePolicy
             return true;
         }
 
-        return Forum::isModerator($topic->id, 'topic');
+        return $this->forumAccess->isModerator($topic->id, 'topic');
     }
 
     /**
@@ -92,7 +93,7 @@ class TopicPolicy extends BasePolicy
             return true;
         }
 
-        return Forum::isModerator($topic->id, 'topic');
+        return $this->forumAccess->isModerator($topic->id, 'topic');
     }
 
     /**
@@ -104,7 +105,7 @@ class TopicPolicy extends BasePolicy
             return true;
         }
 
-        return Forum::isModerator($topic->id, 'topic');
+        return $this->forumAccess->isModerator($topic->id, 'topic');
     }
 
     /**
@@ -116,7 +117,7 @@ class TopicPolicy extends BasePolicy
             return true;
         }
 
-        return Forum::isModerator($topic->id, 'topic');
+        return $this->forumAccess->isModerator($topic->id, 'topic');
     }
 
     /**
@@ -128,6 +129,6 @@ class TopicPolicy extends BasePolicy
             return true;
         }
 
-        return Forum::isModerator($topic->id, 'topic');
+        return $this->forumAccess->isModerator($topic->id, 'topic');
     }
 }

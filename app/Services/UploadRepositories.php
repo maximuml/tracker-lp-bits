@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Repositories\TorrentDownloadRepositoryInterface;
-use App\Repositories\BonusRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\TorrentRepository;
 use App\Repositories\TorrentUploadRepository;
@@ -22,6 +21,5 @@ final readonly class UploadRepositories
         public TorrentUploadRepository $torrentUpload,
         public CategoryRepository $category,
         public TorrentRepository $torrent,
-        public BonusRepository $bonus,
     ) {}
 }

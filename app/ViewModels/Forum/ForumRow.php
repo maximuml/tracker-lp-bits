@@ -11,7 +11,7 @@ use App\Support\Html\SafeHtml;
  * last-post reference and moderators (ADR 0021).
  *
  * `moderators` is the comma-joined rich-username markup from
- * `Forum::moderatorsWithContext()`; `null` renders the
+ * `ForumLookupService::moderators()`; `null` renders the
  * "apply now" contactstaff link in the component.
  */
 final class ForumRow

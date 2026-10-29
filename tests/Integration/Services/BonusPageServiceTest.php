@@ -7,6 +7,7 @@ namespace Tests\Integration\Services;
 use App\DTOs\Auth\ActorContext;
 use App\Repositories\BonusCalculationRepository;
 use App\Services\BonusPageService;
+use App\Services\SeedBonusService;
 use App\Support\Strings;
 use App\ViewModels\Bonus\BonusShopItem;
 use App\ViewModels\Bonus\BonusShopViewModel;
@@ -63,7 +64,7 @@ final class BonusPageServiceTest extends TestCase
         $this->actor = $this->actor([]);
         $this->app->instance(ActorContext::class, $this->actor);
 
-        $this->service = new BonusPageService($this->actor, $rep);
+        $this->service = new BonusPageService($this->actor, $rep, $this->app->make(SeedBonusService::class));
     }
 
     protected function tearDown(): void
@@ -89,7 +90,7 @@ final class BonusPageServiceTest extends TestCase
             'username' => 'testuser',
             'seedbonus' => 500.0,
         ], $userData));
-        $this->service = new BonusPageService($this->actor, $this->bonusCalcRep);
+        $this->service = new BonusPageService($this->actor, $this->bonusCalcRep, $this->app->make(SeedBonusService::class));
     }
 
     /** @param  array<string, mixed>  $query */
@@ -102,7 +103,7 @@ final class BonusPageServiceTest extends TestCase
 
     public function test_can_instantiate_service(): void
     {
-        $service = new BonusPageService($this->actor, $this->bonusCalcRep);
+        $service = new BonusPageService($this->actor, $this->bonusCalcRep, $this->app->make(SeedBonusService::class));
 
         $this->assertInstanceOf(BonusPageService::class, $service);
     }

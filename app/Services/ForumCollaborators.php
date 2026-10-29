@@ -10,16 +10,19 @@ use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 
 /**
- * Parameter object bundling the forum data-access dependencies of
- * ForumService — keeps its constructor within the RepositorySizeTest
- * dependency cap.
+ * Parameter object bundling the shared collaborators of the forum
+ * services — data-access repositories plus the bonus ledger used by
+ * topic/post accruals and moderation clawbacks — keeps their
+ * constructors within the RepositorySizeTest dependency cap.
  */
-final readonly class ForumDataRepositories
+final readonly class ForumCollaborators
 {
     public function __construct(
         public ForumRepositoryInterface $forums,
         public TopicRepository $topics,
         public PostRepositoryInterface $posts,
         public PostLookupRepository $postLookup,
+        public BonusLedgerService $ledger,
+        public ForumLookupService $lookup,
     ) {}
 }

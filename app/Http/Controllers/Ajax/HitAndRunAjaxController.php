@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Ajax;
 
 use App\Http\Requests\Ajax\RemoveHitAndRunRequest;
-use App\Repositories\BonusRepository;
+use App\Services\BonusPurchaseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 final class HitAndRunAjaxController extends AjaxController
 {
     public function __construct(
-        private readonly BonusRepository $bonus,
+        private readonly BonusPurchaseService $bonus,
     ) {}
 
     public function remove(RemoveHitAndRunRequest $request): JsonResponse

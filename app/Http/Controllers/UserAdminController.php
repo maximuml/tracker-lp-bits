@@ -14,9 +14,9 @@ use App\Http\Requests\ResetUserRequest;
 use App\Http\Requests\SelfEnableRequest;
 use App\Http\Requests\UncoRequest;
 use App\Models\Setting;
-use App\Repositories\BonusRepository;
 use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\UserListingRepository;
+use App\Services\BonusLedgerService;
 use App\Services\PermissionChecker;
 use App\Support\AssetAppender;
 use App\Support\Html\SafeHtml;
@@ -42,18 +42,18 @@ class UserAdminController extends BasePageController
 
     private UserModerationRepositoryInterface $userModerationRepository;
 
-    private BonusRepository $bonusRepository;
+    private BonusLedgerService $ledger;
 
     public function __construct(private readonly PermissionChecker $permissionChecker, private readonly StaffDirectoryRepository $staffDirectoryRepository,
         UserRepositoryInterface $userRepository,
         UserModerationRepositoryInterface $userModerationRepository,
-        BonusRepository $bonusRepository,
+        BonusLedgerService $ledger,
         private readonly UserListingRepository $userListingRepository,
         private readonly ActorContext $actor,
     ) {
         $this->userRepository = $userRepository;
         $this->userModerationRepository = $userModerationRepository;
-        $this->bonusRepository = $bonusRepository;
+        $this->ledger = $ledger;
     }
 
     public function users(Request $request): View|RedirectResponse|Response
@@ -364,10 +364,9 @@ class UserAdminController extends BasePageController
             }
 
             $userRep = $this->userRepository;
-            $bonusRep = $this->bonusRepository;
             $operator = $this->userRepository->findById($currentUserId);
             if ($operator) {
-                $bonusRep->consumeUserBonus($currentUserId, $total, BusinessType::SELF_ENABLE->value, $title);
+                $this->ledger->debit($currentUserId, $total, BusinessType::SELF_ENABLE, $title);
                 $this->userModerationRepository->enableUser($operator, $currentUserId, $title);
             }
 

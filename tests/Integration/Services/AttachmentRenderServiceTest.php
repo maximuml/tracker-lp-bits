@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Integration\Support;
+namespace Tests\Integration\Services;
 
-use App\Support\Attachment;
+use App\Services\AttachmentRenderService;
 use App\Support\Html\SafeHtml;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
-final class AttachmentTest extends TestCase
+final class AttachmentRenderServiceTest extends TestCase
 {
     public function test_render_image_includes_id_and_filename(): void
     {
@@ -18,7 +18,7 @@ final class AttachmentTest extends TestCase
             'filename' => 'cover.jpg',
         ];
 
-        $html = Attachment::render(
+        $html = $this->app->make(AttachmentRenderService::class)->render(
             $row,
             'dlkey123',
             true,
@@ -44,7 +44,7 @@ final class AttachmentTest extends TestCase
             'filename' => 'x.png',
         ];
 
-        $html = Attachment::render(
+        $html = $this->app->make(AttachmentRenderService::class)->render(
             $row,
             'dlkey',
             true,
@@ -68,7 +68,7 @@ final class AttachmentTest extends TestCase
             'downloads' => 10,
         ];
 
-        $html = Attachment::render(
+        $html = $this->app->make(AttachmentRenderService::class)->render(
             $row,
             'abc',
             true,
@@ -95,7 +95,7 @@ final class AttachmentTest extends TestCase
             'downloads' => 0,
         ];
 
-        $html = Attachment::render(
+        $html = $this->app->make(AttachmentRenderService::class)->render(
             $row,
             'key',
             true,

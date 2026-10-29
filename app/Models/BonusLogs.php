@@ -57,6 +57,7 @@ class BonusLogs extends NexusModel
         BusinessType::CUSTOM_TITLE->value => ['text' => 'Custom title'],
         BusinessType::BUY_VIP->value => ['text' => 'Buy VIP'],
         BusinessType::GIFT_TO_SOMEONE->value => ['text' => 'Gift to someone'],
+        BusinessType::BONUS_REVERSAL->value => ['text' => 'Bonus reversal'],
         BusinessType::GIFT_TO_LOW_SHARE_RATIO->value => ['text' => 'Gift to low share ratio'],
         BusinessType::LUCKY_DRAW->value => ['text' => 'Lucky draw'],
         BusinessType::EXCHANGE_DOWNLOAD->value => ['text' => 'Exchange download'],
@@ -76,6 +77,13 @@ class BonusLogs extends NexusModel
         BusinessType::RECEIVE_GIFT->value => ['text' => 'Receive gift'],
         BusinessType::UPLOAD_TORRENT->value => ['text' => 'Upload torrent'],
         BusinessType::TORRENT_BE_REWARD->value => ['text' => 'Torrent be reward'],
+        BusinessType::SAY_THANKS->value => ['text' => 'Say thanks'],
+        BusinessType::RECEIVE_THANKS->value => ['text' => 'Receive thanks'],
+        BusinessType::OFFER_VOTE->value => ['text' => 'Offer vote'],
+        BusinessType::POLL_VOTE->value => ['text' => 'Poll vote'],
+        BusinessType::FORUM_TOPIC_BONUS->value => ['text' => 'Create forum topic'],
+        BusinessType::FORUM_POST_BONUS->value => ['text' => 'Post forum reply'],
+        BusinessType::COMMENT_BONUS->value => ['text' => 'Post comment'],
     ];
 
     /**

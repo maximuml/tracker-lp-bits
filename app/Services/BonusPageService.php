@@ -11,7 +11,6 @@ use App\Models\BonusLogs;
 use App\Models\HitAndRun;
 use App\Models\User;
 use App\Repositories\BonusCalculationRepository;
-use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
@@ -41,6 +40,7 @@ final class BonusPageService
     public function __construct(
         private readonly ActorContext $actor,
         private readonly BonusCalculationRepository $bonusCalculationRepository,
+        private readonly SeedBonusService $seedBonus,
     ) {}
 
     /**
@@ -396,8 +396,8 @@ final class BonusPageService
         $maxseedingBonus = SiteConfig::current()->bonus->maxSeeding();
         $bzeroBonus = SiteConfig::current()->bonus->bZero();
 
-        $seedBonusResult = Bonus::calculateForUser($actor->id, null);
-        $bonusTableResult = Bonus::buildBonusTableForUser($actor->toLegacyArray(), $seedBonusResult, ['table_style' => 'width: 50%']);
+        $seedBonusResult = $this->seedBonus->calculateForUser($actor->id, null);
+        $bonusTableResult = $this->seedBonus->buildBonusTableForUser($actor->toLegacyArray(), $seedBonusResult, ['table_style' => 'width: 50%']);
 
         $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzeroBonus + $perseedingBonus * $maxseedingBonus);
         $loadpic = $percent <= 30 ? 'loadbarred' : ($percent <= 60 ? 'loadbaryellow' : 'loadbargreen');

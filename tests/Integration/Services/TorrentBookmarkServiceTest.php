@@ -10,6 +10,7 @@ use App\Repositories\SnatchRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
+use App\Services\BonusLedgerService;
 use App\Services\TorrentBookmarkService;
 use App\Support\Torrent\TorrentStatus;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -40,7 +41,7 @@ final class TorrentBookmarkServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new TorrentBookmarkService(new BookmarkRepository, new TorrentRepository(new TorrentDownloadRepository, new TorrentStatus(new PeerRepository, new SnatchRepository)), new TorrentDetailRepository);
+        $this->service = new TorrentBookmarkService(new BookmarkRepository, new TorrentRepository(new TorrentDownloadRepository, new TorrentStatus(new PeerRepository, new SnatchRepository)), new TorrentDetailRepository, $this->app->make(BonusLedgerService::class));
     }
 
     private function insertTorrent(int $id, int $owner = 10): void

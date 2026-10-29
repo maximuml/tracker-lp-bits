@@ -38,6 +38,7 @@ class UploadService
         private CustomField $customField,
         private MessageRepository $messageRepository,
         private ActorContext $actor,
+        private BonusLedgerService $ledger,
     ) {}
 
     /**
@@ -195,13 +196,9 @@ class UploadService
         if (! $user instanceof User) {
             throw new NexusException('Unauthenticated');
         }
-        $seedbonus = $user->seedbonus;
-        $old = is_numeric($seedbonus) ? (float) $seedbonus : 0.0;
         $delta = SiteConfig::current()->bonus->uploadTorrent();
         if ($delta > 0) {
-            $new = $old + $delta;
-            $user->increment('seedbonus', $delta);
-            $this->repositories->bonus->add($user->id, $old, $delta, $new, "Upload torrent: $torrentId", BusinessType::UPLOAD_TORRENT->value);
+            $this->ledger->credit((int) $user->id, (float) $delta, BusinessType::UPLOAD_TORRENT, "Upload torrent: $torrentId");
             Logger::writeWithContext((string) "upload torrent: {$torrentId}, success send reward: {$delta}", (string) 'info', (bool) false);
         } else {
             Logger::writeWithContext((string) "upload torrent: {$torrentId}, no reward", (string) 'info', (bool) false);

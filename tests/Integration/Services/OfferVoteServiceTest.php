@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
+use App\Services\BonusLedgerService;
 use App\Services\OfferVoteService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -60,6 +61,7 @@ final class OfferVoteServiceTest extends TestCase
             new OfferRepository,
             new OfferVoteRepository,
             new MessageRepository,
+            $this->app->make(BonusLedgerService::class),
         );
         $this->seedTestSettings(['BASEURL' => 'example.com']);
     }
@@ -116,6 +118,7 @@ final class OfferVoteServiceTest extends TestCase
             new OfferRepository,
             new OfferVoteRepository,
             new MessageRepository,
+            $this->app->make(BonusLedgerService::class),
         );
     }
 

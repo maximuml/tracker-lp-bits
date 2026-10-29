@@ -8,7 +8,6 @@ use App\Enums\BusinessType;
 use App\Models\BonusLogs;
 use App\Models\User;
 use App\Repositories\BonusConsumptionRepository;
-use App\Repositories\BonusRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -120,17 +119,32 @@ final class BonusConsumptionRepositoryTest extends TestCase
         $this->assertSame(40.0, (float) $user->charity);
     }
 
-    public function test_repository_delegation_still_reaches_consumption(): void
+    public function test_increment_seedbonus_for_low_ratio_receivers_only_hits_eligible_users(): void
     {
-        $user = User::factory()->create(['seedbonus' => 100.0]);
+        $eligible = User::factory()->create([
+            'seedbonus' => 10.0,
+            'enabled' => true,
+            'uploaded' => 5 * 1073741824,
+            'downloaded' => 20 * 1073741824,
+        ]);
+        $highRatio = User::factory()->create([
+            'seedbonus' => 10.0,
+            'enabled' => true,
+            'uploaded' => 20 * 1073741824,
+            'downloaded' => 1073741824,
+        ]);
+        $disabled = User::factory()->create([
+            'seedbonus' => 10.0,
+            'enabled' => false,
+            'uploaded' => 5 * 1073741824,
+            'downloaded' => 20 * 1073741824,
+        ]);
 
-        app(BonusRepository::class)->consumeUserBonus(
-            $user->id,
-            25.0,
-            BusinessType::EXCHANGE_UPLOAD->value,
-            'via repo'
-        );
+        $affected = $this->repository->incrementSeedbonusForLowRatioReceivers(1.0, 50.0);
 
-        $this->assertSame(75.0, (float) User::query()->where('id', $user->id)->value('seedbonus'));
+        $this->assertSame(50.0 + 10.0, (float) User::query()->where('id', $eligible->id)->value('seedbonus'));
+        $this->assertSame(10.0, (float) User::query()->where('id', $highRatio->id)->value('seedbonus'));
+        $this->assertSame(10.0, (float) User::query()->where('id', $disabled->id)->value('seedbonus'));
+        $this->assertGreaterThanOrEqual(1, $affected);
     }
 }

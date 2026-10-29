@@ -16,8 +16,8 @@ use App\Models\UserMeta;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\UserDetailRepository;
 use App\Services\PermissionChecker;
+use App\Services\SeedBonusService;
 use App\Support\AssetAppender;
-use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\Country;
 use App\Support\Env;
@@ -47,6 +47,7 @@ class UserDetailController extends Controller
 
     public function __construct(
         private readonly PermissionChecker $permissionChecker,
+        private readonly SeedBonusService $seedBonus,
         HitAndRunRepository $hitAndRunRepository,
         UserRepositoryInterface $userRepository,
         UserDetailRepository $userDetailRepository,
@@ -265,7 +266,7 @@ JS, \json_encode(__('userdetails.sure_to_remove_leech_warn'))), 'footer', false)
 
         $bonusTableHtml = '';
         if ($canManageBasic && $user['class'] < UserDisplay::currentClass()) {
-            $bonusTable = Bonus::buildBonusTableForUser($user);
+            $bonusTable = $this->seedBonus->buildBonusTableForUser($user);
             $bonusTableHtml = $bonusTable['table'] ?? '';
         }
 

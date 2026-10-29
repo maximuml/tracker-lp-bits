@@ -14,7 +14,7 @@ use App\Support\Html\SafeHtml;
  * their own markup (`text_bonus_formula_*` interleave `</li><li>` and
  * `<img>` tags), so the template wraps them in SafeHtml where needed.
  * `summaryTable` stays trusted markup — it is produced by
- * `Bonus::buildBonusTableForUser()` which is shared with other callers.
+ * `SeedBonusService::buildBonusTableForUser()` which is shared with other callers.
  */
 final readonly class BonusInfoViewModel
 {

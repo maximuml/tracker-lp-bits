@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Services\AttachmentRenderService;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\Support\State\CommentState;
@@ -194,7 +195,7 @@ final class Comment
             $s = (string) preg_replace_callback(
                 '/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is',
                 function (array $m) use ($enableimage, $imageresizer): string {
-                    return Attachment::renderByKey((string) $m[1], (bool) $enableimage, (bool) $imageresizer);
+                    return app(AttachmentRenderService::class)->renderByKey((string) $m[1], (bool) $enableimage, (bool) $imageresizer);
                 },
                 $s,
                 $limit,

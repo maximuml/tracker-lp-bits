@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Torrent\TorrentOperationLogResource\Pages;
 
 use App\Filament\PageListSingle;
+use App\Filament\PreloadsUserDisplayTrait;
 use App\Filament\Resources\Torrent\TorrentOperationLogResource;
 use App\Models\TorrentOperationLog;
 use Filament\Pages\Actions;
@@ -12,7 +13,14 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ManageTorrentOperationLogs extends PageListSingle
 {
+    use PreloadsUserDisplayTrait;
+
     protected static string $resource = TorrentOperationLogResource::class;
+
+    protected function userDisplayKey(): ?string
+    {
+        return 'uid';
+    }
 
     protected function getHeaderActions(): array
     {

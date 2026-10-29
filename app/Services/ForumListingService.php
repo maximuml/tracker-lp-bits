@@ -141,6 +141,11 @@ final class ForumListingService
             return is_array($row) ? $row : [];
         };
 
+        UserDisplay::preload(array_values(array_map(
+            static fn ($row) => (int) ($row['userid'] ?? 0),
+            array_filter($postRows, 'is_array')
+        )));
+
         $ttKeys = [];
         foreach ($postRows as $postRow) {
             if (is_array($postRow)) {
@@ -345,6 +350,9 @@ final class ForumListingService
             $rows = $this->postRepository->searchForumPosts($keywords, (int) UserDisplay::currentClass(), (int) $offset, (int) $perpage);
             $pages = (int) max(1, (int) ceil($hits / max(1, (int) $perpage)));
 
+            UserDisplay::preload($rows->map(
+                static fn ($post) => (int) (((array) $post)['userid'] ?? 0)
+            )->all());
             foreach ($rows as $post) {
                 $post = (array) $post;
                 $results[] = new SearchResultRow(

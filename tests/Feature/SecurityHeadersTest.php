@@ -46,8 +46,9 @@ final class SecurityHeadersTest extends TestCase
         $this->assertStringNotContainsString('https://fonts.googleapis.com', $csp);
         $this->assertStringNotContainsString('https://cdnjs.cloudflare.com', $csp);
         $this->assertStringContainsString('https://www.paypal.com', $csp);
-        // Click-to-load YouTube facade is the only permitted frame source
-        $this->assertStringContainsString('frame-src https://www.youtube-nocookie.com', $csp);
+        // 'self' keeps the same-origin attachment uploader iframe working;
+        // the click-to-load YouTube facade is the only external frame source
+        $this->assertStringContainsString("frame-src 'self' https://www.youtube-nocookie.com", $csp);
         $this->assertStringContainsString('report-uri /csp-report', $csp);
         $this->assertStringContainsString('report-to csp-endpoint', $csp);
         $this->assertSame('csp-endpoint="/csp-report"', $response->headers->get('Reporting-Endpoints'));

@@ -117,7 +117,7 @@ final class OfferListBuilder
             $self.'?'.'category='.((is_string($cat = $request->query('category', '')) ? $cat : '')).'&sort='.((is_string($sortQ = $request->query('sort', '')) ? $sortQ : '')).'&'
         );
 
-        $offerResult = $this->offerRepository->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, (int) $offset, (int) $perpage);
+        $offerResult = $this->offerRepository->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, (int) $offset, (int) $perpage, $count);
         $offerRows = $offerResult['rows'];
         $num = $offerRows->count();
 

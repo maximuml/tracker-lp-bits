@@ -118,7 +118,7 @@ class TopicRepository extends BaseRepository
     /**
      * @return array{count: int, rows: Collection<int, Topic>}
      */
-    public function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage): array
+    public function getTopicsByForum(int $forumid, string $search, string $sortColumn, string $direction, int $offset, int $perPage, ?int $knownCount = null): array
     {
         $allowed = ['firstpost' => 'firstpost', 'lastpost' => 'lastpost'];
         $column = $allowed[$sortColumn] ?? 'lastpost';
@@ -129,7 +129,12 @@ class TopicRepository extends BaseRepository
             $query->where('subject', 'like', '%'.$search.'%');
         }
 
-        $count = (int) $query->count();
+        $count = $knownCount ?? (int) $query->count();
+
+        if ($perPage <= 0) {
+            return ['count' => $count, 'rows' => new Collection];
+        }
+
         $rows = $query->orderBy('sticky', 'desc')->orderBy($column, $direction)->offset($offset)->limit($perPage)
             ->with(['user', 'forum', 'firstPost.user', 'lastPost.user'])
             ->get();

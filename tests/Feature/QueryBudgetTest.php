@@ -187,11 +187,11 @@ final class QueryBudgetTest extends TestCase
     }
 
     /**
-     * /messages.php inbox with 5 messages — actual ~24 → budget 29.
+     * /messages.php inbox — actual ~18 → budget 24.
      *
-     * Known N+1: the listing costs ~2 extra queries per message row
-     * (measured 13 @ 5 messages, 24 @ 10). Budget is pinned to the
-     * fixed dataset; a larger N+1 factor still trips it.
+     * The listing is fixed-cost (count + page + eager senders + one
+     * pmboxes fetch shared across sections); a per-row regression
+     * still trips the budget on larger datasets.
      */
     public function test_messages_query_budget(): void
     {
@@ -199,7 +199,7 @@ final class QueryBudgetTest extends TestCase
         Message::factory()->count(5)->between($user, $user)->create();
         $this->withNexusCookie($user);
 
-        $this->assertQueryCountBelow(29, function (): void {
+        $this->assertQueryCountBelow(24, function (): void {
             $this->get('/web/messages');
         });
     }

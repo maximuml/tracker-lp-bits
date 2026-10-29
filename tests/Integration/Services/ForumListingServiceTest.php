@@ -588,8 +588,12 @@ final class ForumListingServiceTest extends TestCase
             1 => ['id' => 1, 'name' => 'Test Forum', 'forid' => 1, 'minclassread' => 0],
         ]);
         $this->topicRepo->shouldReceive('getTopicsByForum')
-            ->twice()
-            ->with(1, 'abc', 'firstpost', 'asc', Mockery::type('int'), Mockery::type('int'))
+            ->once()
+            ->with(1, 'abc', 'firstpost', 'asc', 0, 0)
+            ->andReturn(['count' => 0, 'rows' => new Collection]);
+        $this->topicRepo->shouldReceive('getTopicsByForum')
+            ->once()
+            ->with(1, 'abc', 'firstpost', 'asc', Mockery::type('int'), Mockery::type('int'), 0)
             ->andReturn(['count' => 0, 'rows' => new Collection]);
 
         $vm = $this->service->buildViewForum($this->actor(['id' => 1, 'username' => 'test', 'class' => 10, 'forumpost' => 'yes']),

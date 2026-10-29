@@ -186,8 +186,12 @@ final class OfferListBuilderTest extends TestCase
     public function test_sort_name_desc_flips_to_asc_order_clause(): void
     {
         $this->offerRepo->shouldReceive('getLegacyList')
-            ->twice()
-            ->with(0, 0, '', ' ORDER BY name asc', 'desc', Mockery::type('int'), Mockery::type('int'))
+            ->once()
+            ->with(0, 0, '', ' ORDER BY name asc', 'desc', 0, 0)
+            ->andReturn($this->listResult([], 0));
+        $this->offerRepo->shouldReceive('getLegacyList')
+            ->once()
+            ->with(0, 0, '', ' ORDER BY name asc', 'desc', Mockery::type('int'), Mockery::type('int'), 0)
             ->andReturn($this->listResult([], 0));
 
         $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(['sort' => 'name', 'type' => 'desc']), $this->globalData());
@@ -201,8 +205,12 @@ final class OfferListBuilderTest extends TestCase
         // Legacy quirk: sort=yeah/against select a whitelist value but build
         // no ORDER BY clause.
         $this->offerRepo->shouldReceive('getLegacyList')
-            ->twice()
-            ->with(0, 0, '', '', 'asc', Mockery::type('int'), Mockery::type('int'))
+            ->once()
+            ->with(0, 0, '', '', 'asc', 0, 0)
+            ->andReturn($this->listResult([], 0));
+        $this->offerRepo->shouldReceive('getLegacyList')
+            ->once()
+            ->with(0, 0, '', '', 'asc', Mockery::type('int'), Mockery::type('int'), 0)
             ->andReturn($this->listResult([], 0));
 
         $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(['sort' => 'yeah', 'type' => 'asc']), $this->globalData());
@@ -212,8 +220,12 @@ final class OfferListBuilderTest extends TestCase
     public function test_category_and_search_filters_forwarded(): void
     {
         $this->offerRepo->shouldReceive('getLegacyList')
-            ->twice()
-            ->with(3, 42, 'needle', '', 'desc', Mockery::type('int'), Mockery::type('int'))
+            ->once()
+            ->with(3, 42, 'needle', '', 'desc', 0, 0)
+            ->andReturn($this->listResult([], 0));
+        $this->offerRepo->shouldReceive('getLegacyList')
+            ->once()
+            ->with(3, 42, 'needle', '', 'desc', Mockery::type('int'), Mockery::type('int'), 0)
             ->andReturn($this->listResult([], 0));
 
         $s = $this->builder()->build(

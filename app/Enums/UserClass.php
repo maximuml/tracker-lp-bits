@@ -122,14 +122,6 @@ enum UserClass: int
     }
 
     /**
-     * Whether this tier is VIP or above (but not staff).
-     */
-    public function isVipOrAbove(): bool
-    {
-        return $this->value >= self::VIP->value && $this->value < self::MODERATOR->value;
-    }
-
-    /**
      * Resolve a user class from an integer or numeric string, falling back to User.
      *
      * Handles values coming from the database (int), legacy string constants

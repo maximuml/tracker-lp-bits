@@ -19,7 +19,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CommentType;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Comment extends NexusModel
@@ -48,23 +47,6 @@ class Comment extends NexusModel
             'target_script' => '/web/offers?id=%s&off_details=1',
         ],
     ];
-
-    /**
-     * @param  Builder<Comment>  $query
-     * @return mixed
-     */
-    public function scopeType(Builder $query, string $type, int $typeValue)
-    {
-        foreach (self::TYPE_MAPS as $key => $value) {
-            if ($type != $key) {
-                $query->where($value['foreign_key'], 0);
-            } else {
-                $query->where($value['foreign_key'], $typeValue);
-            }
-        }
-
-        return $query;
-    }
 
     /** @return  BelongsTo<User, $this> */
     public function create_user()

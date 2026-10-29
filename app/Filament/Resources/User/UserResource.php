@@ -57,8 +57,6 @@ class UserResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    private static ?UserModerationRepositoryInterface $rep = null;
-
     private static function currentUser(): User
     {
         $user = Auth::user();
@@ -71,11 +69,7 @@ class UserResource extends Resource
 
     private static function getRep(): UserModerationRepositoryInterface
     {
-        if (self::$rep === null) {
-            self::$rep = app(UserModerationRepositoryInterface::class);
-        }
-
-        return self::$rep;
+        return app(UserModerationRepositoryInterface::class);
     }
 
     public static function getNavigationLabel(): string

@@ -60,17 +60,6 @@ class Peer extends NexusModel
         PeerConnectable::NO->value => 'No',
     ];
 
-    /** @var array<int|string, mixed> */
-    public static $cardTitles = [
-        'upload_text' => 'Uploaded',
-        'download_text' => 'Downloaded',
-        'share_ratio' => 'Ratio',
-        'agent_human' => 'Client',
-        'connect_time_total' => 'Connected',
-        'download_progress' => 'Progress',
-
-    ];
-
     /** @return  mixed */
     public function getConnectableTextAttribute()
     {

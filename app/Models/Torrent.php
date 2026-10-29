@@ -128,11 +128,6 @@ class Torrent extends NexusModel
     ];
 
     /** @var array<int|string, mixed> */
-    public static $basicRelations = [
-        'basic_category', 'basic_audio_codec', 'basic_codec', 'basic_media',
-        'basic_source', 'basic_standard', ];
-
-    /** @var array<int|string, mixed> */
     public static $posStates = [
         TorrentPosState::NONE->value => ['text' => 'Normal', 'icon_counts' => 0],
         TorrentPosState::STICKY_SECOND->value => ['text' => 'Sticky second', 'icon_counts' => 1],

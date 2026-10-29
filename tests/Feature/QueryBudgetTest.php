@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\UserClass;
+use App\Models\Forum;
 use App\Models\Message;
+use App\Models\Post;
+use App\Models\Topic;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Cache\NexusCache;
 use App\ValueObjects\InfoHash;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
@@ -183,6 +187,102 @@ final class QueryBudgetTest extends TestCase
 
         $this->assertQueryCountBelow(48, function (): void {
             $this->get('/forums.php');
+        });
+    }
+
+    /**
+     * /forums.php?action=viewforum topic listing with 10 topics —
+     * actual ~29 → budget 36.
+     *
+     * Fixed-cost page: count + topic page (with user/firstPost/lastPost
+     * eager loads) + batched post-count/first-last-post lookups + the
+     * shared forum chrome. Per-topic regressions still trip the budget.
+     */
+    public function test_viewforum_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $forum = Forum::factory()->create();
+        for ($i = 0; $i < 10; $i++) {
+            $topic = Topic::factory()->forum($forum)->author($user)->create();
+            $post = Post::factory()->topic($topic)->author($user)->create();
+            $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
+        }
+        app(NexusCache::class)->redis?->flushDB();
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(36, function () use ($forum): void {
+            $this->get('/forums.php?action=viewforum&forumid='.$forum->id);
+        });
+    }
+
+    /**
+     * /forums.php?action=viewtopic with 5 posts — actual ~31 → budget 37.
+     *
+     * Fixed-cost page: topic + view increment + post count + post page +
+     * batched poster info (getUsersByIds / countUserPostsBatch /
+     * UserDisplay::preload) + markPostRead on the last post only.
+     */
+    public function test_viewtopic_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $forum = Forum::factory()->create();
+        $topic = Topic::factory()->forum($forum)->author($user)->create();
+        for ($i = 0; $i < 5; $i++) {
+            $post = Post::factory()->topic($topic)->author($user)->create();
+            if ($i === 0) {
+                $topic->update(['firstpost' => $post->id]);
+            }
+            $topic->update(['lastpost' => $post->id]);
+        }
+        app(NexusCache::class)->redis?->flushDB();
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(37, function () use ($topic): void {
+            $this->get('/forums.php?action=viewtopic&topicid='.$topic->id);
+        });
+    }
+
+    /**
+     * /web/offers empty listing — actual ~21 cold chrome → budget 26.
+     *
+     * Count + page + categories + last_offer update + shared chrome.
+     */
+    public function test_offers_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(26, function (): void {
+            $this->get('/web/offers');
+        });
+    }
+
+    /**
+     * /userdetails.php self-view — actual ~31 cold chrome → budget 37.
+     *
+     * The friends/blocks exists pairs are bidirectional checks (me→target
+     * and target→me), not duplicates.
+     */
+    public function test_userdetails_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(37, function () use ($user): void {
+            $this->get('/userdetails.php?id='.$user->id);
+        });
+    }
+
+    /**
+     * /web/upload form — actual ~16 cold chrome → budget 20.
+     */
+    public function test_upload_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(20, function (): void {
+            $this->get('/web/upload');
         });
     }
 

@@ -274,14 +274,16 @@ final class QueryBudgetTest extends TestCase
     }
 
     /**
-     * /web/upload form — actual ~16 cold chrome → budget 20.
+     * /web/upload form — actual ~25 under the seeded CI dataset
+     * (tracker_urls, per-box searchbox reads, wider staff permission
+     * set) → budget 32.
      */
     public function test_upload_query_budget(): void
     {
         $user = User::factory()->create(['class' => UserClass::USER->value]);
         $this->withNexusCookie($user);
 
-        $this->assertQueryCountBelow(20, function (): void {
+        $this->assertQueryCountBelow(32, function (): void {
             $this->get('/web/upload');
         });
     }

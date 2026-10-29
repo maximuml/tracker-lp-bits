@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\UserClass;
+use App\Models\Comment;
 use App\Models\Forum;
 use App\Models\Message;
 use App\Models\Post;
+use App\Models\Snatch;
 use App\Models\Topic;
 use App\Models\Torrent;
 use App\Models\User;
@@ -285,6 +287,64 @@ final class QueryBudgetTest extends TestCase
 
         $this->assertQueryCountBelow(32, function (): void {
             $this->get('/web/upload');
+        });
+    }
+
+    /**
+     * /web/invite — actual ~17 with the full badge chrome → budget 28.
+     */
+    public function test_invite_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(28, function (): void {
+            $this->get('/web/invite');
+        });
+    }
+
+    /**
+     * /web/mybonus — actual ~9 (light chrome) → budget 22.
+     */
+    public function test_mybonus_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(22, function (): void {
+            $this->get('/web/mybonus');
+        });
+    }
+
+    /**
+     * /web/latestcomments — actual ~9 (count + one joined page)
+     * → budget 22.
+     */
+    public function test_latestcomments_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $torrent = Torrent::factory()->owner($user)->create();
+        Comment::factory()->author($user)->torrent($torrent)->count(3)->create();
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(22, function (): void {
+            $this->get('/web/latestcomments');
+        });
+    }
+
+    /**
+     * /web/viewsnatches?id=N — actual ~10 (name + count + page)
+     * → budget 24.
+     */
+    public function test_viewsnatches_query_budget(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::USER->value]);
+        $torrent = Torrent::factory()->owner($user)->create();
+        Snatch::factory()->forUserAndTorrent($user, $torrent)->create();
+        $this->withNexusCookie($user);
+
+        $this->assertQueryCountBelow(24, function () use ($torrent): void {
+            $this->get('/web/viewsnatches?id='.$torrent->id);
         });
     }
 

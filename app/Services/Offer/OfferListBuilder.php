@@ -192,7 +192,10 @@ final class OfferListBuilder
             foreach ($lastcoms as $lastcom) {
                 $lastcomUserIds[] = (int) ($lastcom['user'] ?? 0);
             }
-            UserDisplay::preload($lastcomUserIds);
+            UserDisplay::preload(array_merge(
+                $lastcomUserIds,
+                $offerRows->map(fn ($r) => (int) (((array) $r)['userid'] ?? 0))->all()
+            ));
 
             $renderedTt = $lastcoms === []
                 ? []

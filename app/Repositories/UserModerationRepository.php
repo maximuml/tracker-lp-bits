@@ -196,18 +196,22 @@ class UserModerationRepository extends BaseRepository implements UserModerationR
 
         $modcomment = date('Y-m-d').' - Warning Removed By '.$operator->username;
 
-        foreach ($userIds as $uid) {
-            $user = User::query()->find($uid, ['id', 'warned', 'class']);
-            // Same ladder rule as warnUser/disableUser: an operator may
-            // only touch accounts strictly below their own class.
-            if ($user === null || ! $user->warned || $operator->class <= $user->class) {
-                continue;
-            }
+        // Same ladder rule as warnUser/disableUser: an operator may
+        // only touch accounts strictly below their own class.
+        $targets = User::query()
+            ->whereIn('id', $userIds)
+            ->get(['id', 'warned', 'class'])
+            ->filter(fn ($user) => $user->warned && $operator->class > $user->class);
+        if ($targets->isEmpty()) {
+            return;
+        }
 
-            DB::table('users')->where('id', $uid)->update([
-                'warned' => 0,
-                'warneduntil' => null,
-            ]);
+        DB::table('users')->whereIn('id', $targets->modelKeys())->update([
+            'warned' => 0,
+            'warneduntil' => null,
+        ]);
+
+        foreach ($targets as $user) {
             $user->modifyLogs()->create(['content' => $modcomment]);
             $user->warned = false;
             $user->warneduntil = null;

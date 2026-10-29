@@ -60,3 +60,4 @@ tests/browser/screenshots/
 
 # local mutation-test artifacts
 infection*.log
+var/

@@ -147,6 +147,7 @@ class PollRepository
     public function userDisplayMap(array $answers): array
     {
         $ids = array_filter(array_unique(array_column($answers, 'userid')));
+        UserDisplay::preload(array_map('intval', $ids));
         $map = [];
         foreach ($ids as $id) {
             $uid = (int) $id;

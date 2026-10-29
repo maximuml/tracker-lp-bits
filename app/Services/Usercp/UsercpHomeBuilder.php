@@ -208,6 +208,10 @@ final class UsercpHomeBuilder
                 $cache?->put('post_'.$id.'_content', $row, 7200);
             }
         }
+        UserDisplay::preload(array_merge(
+            array_map(fn ($t) => (int) (((array) $t)['userid'] ?? 0), $topicRows),
+            array_values(array_map(static fn ($row) => (int) ($row['userid'] ?? 0), array_filter($lastPostRows, 'is_array')))
+        ));
         $items = [];
         foreach ($topicRows as $topicArr) {
             $topicId = (int) $topicArr['id'];

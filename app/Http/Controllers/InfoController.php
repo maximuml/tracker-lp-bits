@@ -106,6 +106,7 @@ class InfoController extends BasePageController
      */
     private function decorateHistoryPosts(array $posts, array $editorNames, int $viewerId, int $userid): array
     {
+        UserDisplay::preload(array_map('intval', array_keys($editorNames)));
         $items = [];
         foreach ($posts as $arr) {
             if (! is_array($arr)) {

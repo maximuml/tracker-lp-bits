@@ -7,6 +7,7 @@ namespace Tests\Integration\Services\Usercp;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\UsercpLookupRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Models\Passkey;
 use App\Models\User;
@@ -15,6 +16,7 @@ use App\Services\Usercp\UsercpHomeBuilder;
 use App\Support\Cache\NexusCache;
 use App\Support\Settings;
 use App\ViewModels\Usercp\UsercpHomeSection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
 use Mockery\MockInterface;
@@ -346,6 +348,39 @@ final class UsercpHomeBuilderTest extends TestCase
 
         $this->assertCount(3, $s->readTopics);
         $this->assertContains(['post_9_content', 'post_10_content'], $getManys);
+    }
+
+    public function test_read_topics_preloads_topic_and_last_poster_ids_in_batch(): void
+    {
+        /** @var UserRepositoryInterface&MockInterface $userRepo */
+        $userRepo = Mockery::mock(UserRepositoryInterface::class);
+        $userRepo->shouldIgnoreMissing();
+        $userRepo->shouldReceive('getByIds')
+            ->once()
+            ->withArgs(static fn (array $ids): bool => collect($ids)->sort()->values()->all() === [5, 44])
+            ->andReturn(new Collection);
+        $this->app->instance(UserRepositoryInterface::class, $userRepo);
+
+        $this->lookup->shouldReceive('getReadTopics')->with(5)->andReturn([
+            ['id' => 7, 'subject' => 'Hello', 'views' => 42, 'lastpost' => 0, 'userid' => 5],
+            ['id' => 8, 'subject' => 'World', 'views' => 1, 'lastpost' => 9, 'userid' => null],
+            ['id' => 9, 'subject' => 'Again', 'views' => 1, 'lastpost' => 10, 'userid' => 5],
+        ]);
+        $this->cache->shouldReceive('getMany')->andReturnUsing(function (array $keys) {
+            if (in_array('post_9_content', $keys, true)) {
+                return [
+                    'post_9_content' => ['id' => 9, 'userid' => 44, 'added' => '2024-03-04 05:06:07'],
+                    'post_10_content' => ['id' => 10, 'added' => '2024-03-05 05:06:07'],
+                ];
+            }
+
+            return [];
+        });
+        $this->lookup->shouldReceive('getTopicPostCounts')->andReturn([]);
+
+        $s = $this->callBuild($this->curUser());
+
+        $this->assertCount(3, $s->readTopics);
     }
 
     public function test_build_runs_with_null_cache(): void

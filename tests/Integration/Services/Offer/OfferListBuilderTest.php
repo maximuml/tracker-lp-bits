@@ -7,6 +7,7 @@ namespace Tests\Integration\Services\Offer;
 use App\Contracts\Repositories\OfferCommentRepositoryInterface;
 use App\Contracts\Repositories\OfferRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Services\Offer\OfferListBuilder;
 use App\Support\Cache\NexusCache;
@@ -478,5 +479,32 @@ final class OfferListBuilderTest extends TestCase
         $this->assertTrue($table->showTimeout);
         $this->assertNotSame('N/A', (string) $table->rows[0]->timeout);
         $this->assertNotSame('N/A', (string) $table->rows[1]->timeout);
+    }
+
+    public function test_build_preloads_offer_and_last_commenter_ids_in_batch(): void
+    {
+        /** @var UserRepositoryInterface&MockInterface $userRepo */
+        $userRepo = Mockery::mock(UserRepositoryInterface::class);
+        $userRepo->shouldIgnoreMissing();
+        $userRepo->shouldReceive('getByIds')
+            ->once()
+            ->withArgs(static fn (array $ids): bool => collect($ids)->sort()->values()->all() === [10, 33])
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection);
+        $this->app->instance(UserRepositoryInterface::class, $userRepo);
+
+        $ownerless = $this->row(['id' => 6, 'comments' => 0]);
+        unset($ownerless['userid']);
+
+        $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
+            $this->row(['id' => 5, 'userid' => 10, 'comments' => 2]),
+            $ownerless,
+        ], 2));
+        $this->commentRepo->shouldReceive('getLastComments')->once()->with([5])->andReturn([
+            5 => ['user' => 33, 'added' => '2024-06-01 00:00:00', 'text' => 'hi'],
+        ]);
+
+        $s = $this->builder()->build($this->curUser(['id' => 7]), 7, $this->request(), $this->globalData());
+
+        $this->assertNotNull($s->table);
     }
 }

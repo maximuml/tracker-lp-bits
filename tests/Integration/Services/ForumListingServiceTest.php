@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\Contracts\Repositories\SiteLogRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
 use App\Enums\UserTimeType;
@@ -21,6 +22,7 @@ use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\RuntimeContext;
 use App\Support\Settings;
+use App\Support\State\UserDisplayState;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use App\ViewModels\Forum\TopicListViewModel;
@@ -384,6 +386,44 @@ final class ForumListingServiceTest extends TestCase
         $this->assertSame('Forum Three', $row->forumName);
         $this->assertSame('2026-09-01 12:00:00', $row->added);
         $this->assertStringContainsString('keywords=test', $vm->pagerHref());
+    }
+
+    public function test_build_search_preloads_poster_ids_in_batch(): void
+    {
+        $this->mockForumRepo();
+        $this->mockCache();
+        $this->setUser();
+        $this->setRequest(['keywords' => 'test']);
+
+        /** @var UserRepositoryInterface&MockInterface $userRepo */
+        $userRepo = Mockery::mock(UserRepositoryInterface::class);
+        $userRepo->shouldIgnoreMissing();
+        $userRepo->shouldReceive('getByIds')
+            ->once()
+            ->withArgs(static fn (array $ids): bool => $ids === [42])
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection);
+        $this->app->instance(UserRepositoryInterface::class, $userRepo);
+
+        $this->postRepo->shouldReceive('countForumSearchPosts')->once()->andReturn(25);
+        $this->postRepo->shouldReceive('searchForumPosts')->once()->andReturn(new Collection([
+            (object) [
+                'id' => 50, 'topicid' => 7, 'subject' => 'A test topic',
+                'hlcolor' => 0, 'forumid' => 3, 'forumname' => 'Forum Three',
+                'added' => '2026-09-01 12:00:00', 'userid' => 42,
+            ],
+            (object) [
+                'id' => 51, 'topicid' => 8, 'subject' => 'No poster topic',
+                'hlcolor' => 0, 'forumid' => 3, 'forumname' => 'Forum Three',
+                'added' => '2026-09-01 12:00:00', 'userid' => null,
+            ],
+        ]));
+
+        $vm = $this->service->buildSearch(20);
+
+        $this->assertCount(2, $vm->results);
+        $this->assertArrayHasKey(42, UserDisplayState::instance()->rowCache);
+        $this->assertArrayNotHasKey(-1, UserDisplayState::instance()->rowCache);
+        $this->assertArrayNotHasKey(1, UserDisplayState::instance()->rowCache);
     }
 
     // --- buildViewForum ---
@@ -897,5 +937,32 @@ final class ForumListingServiceTest extends TestCase
 
         $this->assertInstanceOf(TopicListViewModel::class, $vm);
         $this->assertSame(2, $vm->topics[0]->replies);
+    }
+
+    public function test_build_view_forum_preloads_post_user_ids_in_batch(): void
+    {
+        /** @var UserRepositoryInterface&MockInterface $userRepo */
+        $userRepo = Mockery::mock(UserRepositoryInterface::class);
+        $userRepo->shouldIgnoreMissing();
+        $userRepo->shouldReceive('getByIds')
+            ->once()
+            ->withArgs(static fn (array $ids): bool => collect($ids)->sort()->values()->all() === [5, 99])
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection);
+        $this->app->instance(UserRepositoryInterface::class, $userRepo);
+
+        $vm = $this->viewForumVm(
+            topicAttrs: ['lastpost' => 100],
+            postRows: [
+                'post_100_content' => ['id' => 100, 'userid' => 5, 'added' => '2024-06-01 00:00:00', 'body' => 'lp body'],
+                'post_999_content' => ['id' => 999, 'userid' => 99, 'added' => '2024-06-01 00:00:00', 'body' => 'unrendered'],
+                'post_777_content' => ['id' => 777, 'userid' => null, 'added' => '2024-06-01 00:00:00', 'body' => 'no userid'],
+            ],
+        );
+
+        $this->assertInstanceOf(TopicListViewModel::class, $vm);
+        // post_999 is preloaded but never rendered — only a real preload
+        // warms its rowCache entry; the 0-default (userid missing) stays out.
+        $this->assertArrayHasKey(99, UserDisplayState::instance()->rowCache);
+        $this->assertArrayNotHasKey(-1, UserDisplayState::instance()->rowCache);
     }
 }

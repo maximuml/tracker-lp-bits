@@ -71,7 +71,7 @@ final class BonusCalculator
             $torrentSize = (string) ($torrent['size'] ?? 0);
             $size = bcadd($size, is_numeric($torrentSize) ? $torrentSize : '0');
             $weeks_alive = ($timenow - strtotime((string) $torrent['added'])) / $sectoweek;
-            $gb_size_raw = (float) $torrent['size'] / 1073741824;
+            $gb_size_raw = (float) ($torrent['size'] ?? 0) / 1073741824;
             $gb_size = $gb_size_raw;
             if ($zeroBonusTag && isset($tagGrouped[$torrent['id']][$zeroBonusTag]) && is_numeric($zeroBonusFactor)) {
                 $gb_size = $gb_size * (float) $zeroBonusFactor;

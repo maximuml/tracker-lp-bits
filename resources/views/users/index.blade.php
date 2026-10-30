@@ -46,7 +46,7 @@
     <td>{{ $row['addedFormatted'] }}</td>
     <td>{{ $row['lastAccessFormatted'] }}</td>
     <td>{{ $row['class_name'] }}</td>
-    <td class="text-center">@if ($row['country'] > 0)<img src="pic/flag/{{ $row['country_flagpic'] }}" alt="{{ $row['country_name'] }}">@else---@endif</td>
+    <td class="text-center">@if ($row['country'] > 0)<img width="32" height="24" src="{{ \App\Support\FlagIcon::path($row['country_flagpic'] ?? '') }}" alt="{{ $row['country_name'] }}">@else---@endif</td>
 </tr>
 @endforeach
 </x-data-table>

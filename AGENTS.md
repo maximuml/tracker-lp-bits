@@ -1121,3 +1121,32 @@ by final repository classes or static methods — see W2-01/W2-02).
 - **Consequences:** One web runtime and less CI. Reintroducing a persistent-
   worker server requires a new ADR plus static-cache/cookie hardening and
   smoke/isolation CI.
+
+### ADR 0034: Three client-update mechanisms, layered by capability (Accepted, audit follow-up)
+
+- **Context:** Dynamic updates run through three mechanisms in parallel —
+  Livewire components (`app/Livewire/*`, 15 widgets), JSON Ajax
+  controllers (`app/Http/Controllers/Ajax/*`, behind `/ajax` 308-redirects
+  and `web/*ajax` routes), and plain file JS (`public/js/*`). An audit
+  flagged this as duplication; inspection shows it is a capability
+  partition, not copy-paste: the Ajax controllers and Livewire components
+  delegate to the same domain services (`ShoutboxService` et al.), and
+  each layer covers contexts the others cannot serve.
+- **Decision:** Choose by context, not by taste:
+  - *Livewire* — DOM-updating widgets embedded in server-rendered pages
+    (shoutbox widget, comments, thanks, poll, bookmark, peer/file lists).
+    First choice for anything new that fits the request/response shape.
+  - *Ajax controllers* — thin JSON adapters for legacy JS consumers and
+    full pages that own their update loop (dedicated `/shoutbox` page
+    with SSE stream + polling). Keep them thin: FormRequest validation →
+    domain service → JsonResponse; never new business logic.
+  - *Vanilla JS* (`public/js/*`) — capabilities Livewire cannot host:
+    `EventSource`/SSE streams, WebAuthn/passkey crypto, upload progress,
+    autocomplete debouncing, editor enhancements. Files only — inline
+    handlers and Alpine `x-data` stay banned on legacy-chrome pages by
+    the strict public CSP.
+- **Consequences:** Three mental models remain, but each has an explicit
+  owner layer; new features pick one mechanism by capability instead of
+  adding a fourth. A `wire:*` → `/ajax` → vanilla migration path exists
+  only when a page graduates from widget to standalone (as `/shoutbox`
+  did). Re-audit if a fourth paradigm ever appears.

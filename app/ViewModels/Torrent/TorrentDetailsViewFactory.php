@@ -105,7 +105,7 @@ final class TorrentDetailsViewFactory
             badges: new TorrentBadgeSet(
                 paid: isset($row['price']) && $row['price'] > 0,
                 promotion: $promotion,
-                hitAndRun: TorrentAccess::requiresHrIcon($row, (int) ($row['search_box_id'] ?? 0)),
+                hitAndRun: TorrentAccess::requiresHrIcon($row),
                 approval: $this->moderationRepository->shouldShowApprovalStatusIcon($row['approval_status'] ?? null)
                     ? new ApprovalBadge(
                         title: (string) Locale::trans("torrent.approval.status_text.{$row['approval_status']}", [], null),

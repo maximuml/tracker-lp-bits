@@ -55,25 +55,18 @@ final class HitAndRunLookupRepository
     }
 
     /**
-     * Per-user UNREACHED counts at or above the ban threshold, optionally
-     * scoped to one basic_category mode.
+     * Per-user UNREACHED counts at or above the ban threshold.
      *
      * @return Collection<int, HitAndRun>
      */
-    public function listUnreachedCountsAtLeast(int $minCounts, ?int $searchBoxId): Collection
+    public function listUnreachedCountsAtLeast(int $minCounts): Collection
     {
-        $query = HitAndRun::query()
+        return HitAndRun::query()
             ->selectRaw('count(*) as counts, uid')
             ->where('status', HitAndRunStatus::UNREACHED->value)
             ->groupBy('uid')
-            ->havingRaw('count(*) >= ?', [$minCounts]);
-        if ($searchBoxId !== null) {
-            $query->whereHas('torrent.basic_category', function (Builder $query) use ($searchBoxId) {
-                return $query->where('mode', $searchBoxId);
-            });
-        }
-
-        return $query->get();
+            ->havingRaw('count(*) >= ?', [$minCounts])
+            ->get();
     }
 
     /**

@@ -103,7 +103,7 @@ final class UserTorrentListVmFactory
                 isBanned: YesNo::isYes($arr['banned'] ?? null),
                 badges: new TorrentBadgeSet(
                     promotion: Promotion::badgeWithContext((int) $arr['sp_state'], '', false, '', 0, '', $arr['__ignore_global_sp_state'] ?? false),
-                    hitAndRun: TorrentAccess::requiresHrIcon($arr, $arr['search_box_id'] ?? 0),
+                    hitAndRun: TorrentAccess::requiresHrIcon($arr),
                     approval: $torrentRep->shouldShowApprovalStatusIcon($arr['approval_status'])
                         ? new ApprovalBadge(
                             title: (string) Locale::trans("torrent.approval.status_text.{$arr['approval_status']}", [], null),

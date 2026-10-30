@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories;
 
+use App\DTOs\Auth\ActorContext;
+use App\Enums\UserClass;
+use App\Exceptions\InsufficientPermissionException;
 use App\Models\User;
 use App\Models\UserMeta;
 use App\Models\UserModifyLog;
 use App\Repositories\UserRepository;
+use App\Support\RuntimeContext;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
@@ -182,5 +186,67 @@ final class UserRepositoryTest extends TestCase
         $log = UserModifyLog::query()->where('user_id', $user->id)->first();
         $this->assertNotNull($log);
         $this->assertSame('Test modification', $log->content);
+    }
+
+    /**
+     * M3: the class-escalation guard must apply in legacy context too —
+     * previously `isLegacy()` requests skipped the check entirely.
+     */
+    public function test_store_rejects_class_escalation_in_legacy_context(): void
+    {
+        app(RuntimeContext::class)->bootEntry(true);
+        try {
+            $actor = User::factory()->class(UserClass::USER->value)->create();
+            app()->instance(ActorContext::class, ActorContext::fromAuth($actor));
+
+            $this->expectException(InsufficientPermissionException::class);
+            $this->repository->store([
+                'username' => 'escalated'.substr(uniqid(), -6),
+                'email' => uniqid().'@example.com',
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+                'class' => UserClass::ADMINISTRATOR->value,
+            ]);
+        } finally {
+            app(RuntimeContext::class)->bootEntry(false);
+            app()->forgetInstance(ActorContext::class);
+        }
+    }
+
+    /**
+     * M3: console/installer callers (no authenticated actor) still create
+     * staff accounts — only a present-but-lower-class actor is rejected.
+     */
+    public function test_store_allows_elevated_class_without_actor(): void
+    {
+        app()->forgetInstance(ActorContext::class);
+
+        $user = $this->repository->store([
+            'username' => 'consoleadmin'.substr(uniqid(), -6),
+            'email' => uniqid().'@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'class' => UserClass::ADMINISTRATOR->value,
+        ]);
+
+        $this->assertSame(UserClass::ADMINISTRATOR->value, $user->class);
+    }
+
+    /**
+     * M2: credential-only columns must not leak through generic
+     * serialization (toArray/toJson).
+     */
+    public function test_user_serialization_hides_sensitive_fields(): void
+    {
+        $user = User::factory()->create([
+            'two_step_secret' => 'totp-secret-value',
+            'editsecret' => 'edit-secret-value',
+        ]);
+
+        $arr = $user->toArray();
+        $this->assertArrayNotHasKey('two_step_secret', $arr);
+        $this->assertArrayNotHasKey('editsecret', $arr);
+        // Explicit column reads still work for security repositories.
+        $this->assertSame('totp-secret-value', $user->two_step_secret);
     }
 }

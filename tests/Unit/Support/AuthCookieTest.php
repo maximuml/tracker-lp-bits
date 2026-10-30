@@ -116,4 +116,16 @@ final class AuthCookieTest extends TestCase
     {
         $this->assertSame('c_secure_pass', AuthCookie::COOKIE_NAME);
     }
+
+    // ---------- M1: cookie bearer token must never reach the logs ----------
+
+    public function test_user_from_cookie_never_serializes_cookie_into_log_context(): void
+    {
+        // The c_secure_pass cookie is a replayable bearer credential — the
+        // failure paths inside userFromCookie() must log the decoded uid
+        // only, never the raw cookie array.
+        $source = file_get_contents(app_path('Support/AuthCookie.php'));
+        $this->assertIsString($source);
+        $this->assertStringNotContainsString('json_encode($cookie)', $source);
+    }
 }

@@ -10,13 +10,11 @@ use App\Models\HitAndRun;
 use App\Repositories\HitAndRunLookupRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\UserCleanupRepository;
-use App\Support\Config\SiteConfig;
 use App\Support\Json;
 use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\QueryLog;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class HitAndRunCronjobService
@@ -36,12 +34,8 @@ class HitAndRunCronjobService
      */
     public function cronjobUpdateStatus($uid = null, $torrentId = null, $ignoreTime = false)
     {
-        $diffInSection = HitAndRun::diffInSection();
-        $browseMode = SiteConfig::current()->main->browseCat();
-        $setting = HitAndRun::getConfig('*', $browseMode);
+        $setting = HitAndRun::getConfig('*');
         if (HitAndRunMode::fromStringSafe($setting['mode'] ?? null)->isEnabled()) {
-            $setting['diff_in_section'] = $diffInSection;
-            $setting['search_box_id'] = $browseMode;
             $this->doCronjobUpdateStatus($setting, $uid, $torrentId, $ignoreTime);
             $this->checkAndDisableUser($setting);
         }
@@ -80,12 +74,6 @@ class HitAndRunCronjobService
         if (! $ignoreTime) {
             $query->where('created_at', '<', Carbon::now()->subHours($setting['inspect_time']));
         }
-        if ($setting['diff_in_section']) {
-            $query->whereHas('torrent.basic_category', function (Builder $query) use ($setting) {
-                return $query->where('mode', $setting['search_box_id']);
-            });
-        }
-
         $successCounts = 0;
         $disabledUsers = [];
         $messages = [];
@@ -195,16 +183,13 @@ class HitAndRunCronjobService
     private function checkAndDisableUser(array $setting): void
     {
         $logPrefix = 'setting: '.json_encode($setting);
-        $disableCounts = HitAndRun::getConfig('ban_user_when_counts_reach', $setting['search_box_id']);
+        $disableCounts = HitAndRun::getConfig('ban_user_when_counts_reach');
         if ($disableCounts <= 0) {
             Logger::writeWithContext((string) "{$logPrefix}, disableCounts: {$disableCounts} <= 0, invalid, return", (string) 'error', (bool) false);
 
             return;
         }
-        $result = $this->hitAndRunRepository->listUnreachedCountsAtLeast(
-            (int) $disableCounts,
-            $setting['diff_in_section'] ? (int) $setting['search_box_id'] : null,
-        );
+        $result = $this->hitAndRunRepository->listUnreachedCountsAtLeast((int) $disableCounts);
         if ($result->isEmpty()) {
             Logger::writeWithContext((string) ("{$logPrefix}, No user to disable: ".QueryLog::last()), (string) 'info', (bool) false);
 

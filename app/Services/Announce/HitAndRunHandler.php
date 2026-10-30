@@ -55,7 +55,7 @@ final class HitAndRunHandler
         }
 
         $hrMode = HitAndRunMode::fromStringSafe(
-            is_string($mode = HitAndRun::getConfig('mode', $torrent['mode'])) ? $mode : null
+            is_string($mode = HitAndRun::getConfig('mode')) ? $mode : null
         );
         Logger::writeWithContext((string) "[HR_LOG] user: {$userId}, torrent: {$torrentId}, hrMode: {$hrMode->value}", (string) 'info', (bool) false);
 
@@ -81,7 +81,7 @@ final class HitAndRunHandler
             return $snatchInfo;
         }
 
-        $includeRate = (float) HitAndRun::getConfig('include_rate', $torrent['mode']);
+        $includeRate = (float) HitAndRun::getConfig('include_rate');
         $requiredDownloaded = (int) $torrent['size'] * $includeRate;
 
         Logger::writeWithContext((string) "[HR_LOG] user: {$userId}, torrent: {$torrentId}, includeRate: {$includeRate}, requiredDownloaded: {$requiredDownloaded}, snatchDownloaded: {$snatchInfo['downloaded']}", (string) 'info', (bool) false);

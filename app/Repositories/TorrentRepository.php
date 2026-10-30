@@ -490,4 +490,26 @@ class TorrentRepository extends BaseRepository implements TorrentRepositoryInter
     {
         return Torrent::query()->upsert($rows, ['id'], ['seeders', 'leechers', 'comments']);
     }
+
+    /**
+     * Absolute resync of denormalized peer counters (cleanup maintenance).
+     * Per-row UPDATE only — unlike upsertCounters this can never insert a
+     * phantom torrent row for a peer referencing a deleted torrent.
+     *
+     * @param  array<int, int>  $torrentIds
+     * @param  array<int, array{seeders?: int, leechers?: int}>  $counts  keyed by torrent id
+     */
+    public function resyncPeerCounters(array $torrentIds, array $counts): int
+    {
+        $updated = 0;
+        foreach ($torrentIds as $id) {
+            $id = (int) $id;
+            $updated += Torrent::query()->where('id', $id)->update([
+                'seeders' => (int) ($counts[$id]['seeders'] ?? 0),
+                'leechers' => (int) ($counts[$id]['leechers'] ?? 0),
+            ]);
+        }
+
+        return $updated;
+    }
 }

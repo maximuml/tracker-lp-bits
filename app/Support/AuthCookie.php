@@ -312,9 +312,8 @@ final class AuthCookie
      */
     public static function userFromCookie(array $cookie, bool $isArray = true): array|User|null
     {
-        $log = 'cookie: '.json_encode($cookie);
         if (empty($cookie[self::COOKIE_NAME])) {
-            Logger::writeWithContext("$log, param not enough");
+            Logger::writeWithContext('auth cookie: param not enough');
 
             return null;
         }
@@ -326,7 +325,9 @@ final class AuthCookie
             return null;
         }
 
-        $log .= ", uid = {$payload['user_id']}";
+        // Never log the raw cookie value — c_secure_pass is a replayable
+        // bearer credential until expiry, so only the decoded uid is safe.
+        $log = "auth cookie, uid = {$payload['user_id']}";
         $row = self::fetchUser($payload['user_id'], $isArray, $log);
         if ($row === null) {
             return null;

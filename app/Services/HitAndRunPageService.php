@@ -10,7 +10,6 @@ use App\Models\BonusLogs;
 use App\Models\HitAndRun;
 use App\Models\Snatch;
 use App\Repositories\HitAndRunRepository;
-use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Ratio;
@@ -32,11 +31,10 @@ final class HitAndRunPageService
      */
     public function build(int $userId, int $viewerId, iterable $rows): HitAndRunPageViewModel
     {
-        $browseCat = SiteConfig::current()->main->browseCat();
-        $seedTimeMinimum = $this->numericConfig(HitAndRun::getConfig('seed_time_minimum', $browseCat));
-        $ignoreWhenRatioReach = $this->numericConfig(HitAndRun::getConfig('ignore_when_ratio_reach', $browseCat));
-        $inspectTime = $this->numericConfig(HitAndRun::getConfig('inspect_time', $browseCat));
-        $banUserWhenCountsReach = $this->numericConfig(HitAndRun::getConfig('ban_user_when_counts_reach', $browseCat));
+        $seedTimeMinimum = $this->numericConfig(HitAndRun::getConfig('seed_time_minimum'));
+        $ignoreWhenRatioReach = $this->numericConfig(HitAndRun::getConfig('ignore_when_ratio_reach'));
+        $inspectTime = $this->numericConfig(HitAndRun::getConfig('inspect_time'));
+        $banUserWhenCountsReach = $this->numericConfig(HitAndRun::getConfig('ban_user_when_counts_reach'));
         $price = BonusLogs::getBonusForCancelHitAndRun();
         $balance = $this->actor->seedbonus();
         $viewRows = [];

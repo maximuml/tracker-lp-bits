@@ -330,6 +330,7 @@ class User extends Authenticatable implements FilamentUser, HasName
      */
     protected $hidden = [
         'secret', 'passhash', 'passkey', 'auth_key', 'auth_version',
+        'two_step_secret', 'editsecret', 'modcomment',
     ];
 
     /**

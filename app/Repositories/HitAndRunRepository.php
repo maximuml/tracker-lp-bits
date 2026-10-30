@@ -9,7 +9,6 @@ use App\Enums\HitAndRunMode;
 use App\Enums\HitAndRunStatus;
 use App\Enums\ModelEvent;
 use App\Models\HitAndRun;
-use App\Models\SearchBox;
 use App\Models\User;
 use App\Services\HitAndRunCronjobService;
 use App\Support\Html\SafeHtml;
@@ -89,8 +88,8 @@ class HitAndRunRepository extends BaseRepository
     public function delete(int $id): bool
     {
         $model = HitAndRun::query()->findOrFail($id);
+        // The model's `deleted` hook clears cache + dispatches the event.
         $result = $model->delete();
-        HitAndRun::clearCache($model, ModelEvent::HitAndRunDeleted);
 
         return $result ?? true;
     }
@@ -160,58 +159,26 @@ class HitAndRunRepository extends BaseRepository
      */
     public function getStatusStats($uid, $formatted = true)
     {
-        $diffInSection = HitAndRun::diffInSection();
-        if ($diffInSection) {
-            $query = DB::table('hit_and_runs')
-                ->leftJoin('torrents', 'torrents.id', '=', 'hit_and_runs.torrent_id')
-                ->leftJoin('categories', 'categories.id', '=', 'torrents.category')
-                ->where('hit_and_runs.uid', $uid)
-                ->select('hit_and_runs.status', 'categories.mode', DB::raw('count(*) as counts'))
-                ->groupBy('hit_and_runs.status', 'categories.mode');
-        } else {
-            $query = DB::table('hit_and_runs')
-                ->where('uid', $uid)
-                ->select('status', DB::raw('count(*) as counts'))
-                ->groupBy('status');
-        }
+        $query = DB::table('hit_and_runs')
+            ->where('uid', $uid)
+            ->select('status', DB::raw('count(*) as counts'))
+            ->groupBy('status');
         $results = $query->get()->map(fn ($row) => (array) $row)->all();
         Logger::writeWithContext((string) ("user: {$uid}, sql: ".$query->toSql().', results: '.json_encode($results)), (string) 'info', (bool) false);
         if (! $formatted) {
             return $results;
         }
-        if ($diffInSection) {
-            $grouped = [];
-            foreach ($results as $item) {
-                $grouped[$item['mode']][$item['status']] = $item['counts'];
-            }
-            $out = [];
-            foreach (SearchBox::listSections() as $key => $info) {
-                $out[] = sprintf(
-                    '%s: %s/<span class="nx-color-red">%s</span>/%s',
-                    $info['text'],
-                    $grouped[$info['mode']][HitAndRunStatus::INSPECTING->value] ?? 0,
-                    $grouped[$info['mode']][HitAndRunStatus::UNREACHED->value] ?? 0,
-                    HitAndRun::getConfig('ban_user_when_counts_reach', $info['mode'])
-                );
-            }
-
-            return implode(' ', $out);
-        } else {
-            $grouped = [];
-            foreach ($results as $item) {
-                $grouped[$item['status']] = $item['counts'];
-            }
-            foreach (SearchBox::listSections() as $key => $info) {
-                if ($key == SearchBox::SECTION_BROWSE) {
-                    return sprintf(
-                        '%s/<span class="nx-color-red">%s</span>/%s',
-                        $grouped[HitAndRunStatus::INSPECTING->value] ?? 0,
-                        $grouped[HitAndRunStatus::UNREACHED->value] ?? 0,
-                        HitAndRun::getConfig('ban_user_when_counts_reach', $info['mode'])
-                    );
-                }
-            }
+        $grouped = [];
+        foreach ($results as $item) {
+            $grouped[$item['status']] = $item['counts'];
         }
+
+        return sprintf(
+            '%s/<span class="nx-color-red">%s</span>/%s',
+            $grouped[HitAndRunStatus::INSPECTING->value] ?? 0,
+            $grouped[HitAndRunStatus::UNREACHED->value] ?? 0,
+            HitAndRun::getConfig('ban_user_when_counts_reach')
+        );
     }
 
     /** @return  array<int|string, mixed> */
@@ -285,7 +252,7 @@ class HitAndRunRepository extends BaseRepository
     public function renderOnUploadPage($value, $searchBoxId): SafeHtml
     {
         if (HitAndRunMode::fromStringSafe(
-            is_string($mode = HitAndRun::getConfig('mode', $searchBoxId)) ? $mode : null
+            is_string($mode = HitAndRun::getConfig('mode')) ? $mode : null
         ) === HitAndRunMode::MANUAL && Permission::canSetTorrentHitAndRun()) {
             $hrRadio = view('components.upload.hr_radios', ['searchBoxId' => $searchBoxId, 'value' => $value])->render();
 

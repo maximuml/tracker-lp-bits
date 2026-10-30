@@ -25,13 +25,11 @@ use Illuminate\Support\Facades\Cookie;
  *
  *   1. The **pure token builders** (`buildToken`, `verifyToken`,
  *      `computeExpires`) live here and are testable in isolation.
- *   2. `setLoginCookie()` keeps the legacy side-effects (`setcookie()`,
- *      updating `users.last_login`/`lang`) so call sites can migrate
+ *   2. `setLoginCookie()`/`clear()` queue the cookie through Laravel's
+ *      cookie jar (the `AddQueuedCookiesToResponse` middleware attaches
+ *      it to the outgoing response); the DB side-effects
+ *      (`users.last_login`/`lang`) stay here so call sites can migrate
  *      away from `include/functions.php` directly.
- *
- * `setLoginCookie()` will move to `App\Services\AuthService` in a
- * follow-up Phase 5 PR once the remaining legacy callers are in
- * Laravel-land.
  *
  * Every pure method's contract is pinned by a unit test in
  * `tests/Unit/Support/AuthCookieTest.php`.
@@ -158,15 +156,17 @@ final class AuthCookie
         }
         $token = self::buildToken($userId, null, $expires, $authVersion);
 
-        $secure = Url::isSecure();
-        $options = [
-            'expires' => $expires,
-            'path' => '/',
-            'secure' => $secure,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ];
-        setcookie(self::COOKIE_NAME, $token, $options);
+        Cookie::queue(Cookie::make(
+            self::COOKIE_NAME,
+            $token,
+            (int) max(1, (int) (($expires - time()) / 60)),
+            '/',
+            null,
+            Url::isSecure(),
+            true,
+            false,
+            'Lax',
+        ));
 
         $update = ['last_login' => now()];
         $langId = Locale::idFromCookie((string) '');
@@ -214,18 +214,12 @@ final class AuthCookie
     /**
      * Clear the legacy auth cookie.
      *
-     * Mirrors `logoutcookie()`.
+     * Mirrors `logoutcookie()` — queues an expired cookie via the cookie
+     * jar so `AddQueuedCookiesToResponse` sends it with the response.
      */
     public static function clear(): void
     {
-        $options = [
-            'expires' => time() - 3600,
-            'path' => '/',
-            'secure' => Url::isSecure(),
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ];
-        setcookie(self::COOKIE_NAME, '', $options);
+        Cookie::expire(self::COOKIE_NAME);
     }
 
     /**
@@ -312,9 +306,8 @@ final class AuthCookie
      */
     public static function userFromCookie(array $cookie, bool $isArray = true): array|User|null
     {
-        $log = 'cookie: '.json_encode($cookie);
         if (empty($cookie[self::COOKIE_NAME])) {
-            Logger::writeWithContext("$log, param not enough");
+            Logger::writeWithContext('auth cookie: param not enough');
 
             return null;
         }
@@ -326,7 +319,9 @@ final class AuthCookie
             return null;
         }
 
-        $log .= ", uid = {$payload['user_id']}";
+        // Never log the raw cookie value — c_secure_pass is a replayable
+        // bearer credential until expiry, so only the decoded uid is safe.
+        $log = "auth cookie, uid = {$payload['user_id']}";
         $row = self::fetchUser($payload['user_id'], $isArray, $log);
         if ($row === null) {
             return null;

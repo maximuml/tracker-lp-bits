@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\BusinessType;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\UserAccountRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\Logger;
-use App\Support\QueryLog;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -21,6 +20,7 @@ final class ThankService
 {
     public function __construct(
         private readonly UserAccountRepository $userAccountRepository,
+        private readonly BonusLedgerService $bonusLedger,
     ) {}
 
     /**
@@ -50,18 +50,20 @@ final class ThankService
             $receiveThanksBonus = SiteConfig::current()->bonus->receiveThanks();
 
             if ($sayThanksBonus > 0) {
-                $affectedRows = $this->userAccountRepository->incrementSeedBonusForExpected((int) $user->id, $user->seedbonus, $sayThanksBonus);
-                if ($affectedRows != 1) {
-                    Logger::writeWithContext((string) ('affectedRows: '.$affectedRows.', query: '.QueryLog::last()), (string) 'error', (bool) false);
-                    throw new \RuntimeException('increment user bonus fail.');
-                }
+                $this->bonusLedger->credit(
+                    (int) $user->id,
+                    (float) $sayThanksBonus,
+                    BusinessType::SAY_THANKS,
+                    "torrent #{$torrent->id}"
+                );
             }
             if ($receiveThanksBonus > 0) {
-                $affectedRows = $this->userAccountRepository->incrementSeedBonusForExpected((int) $torrentOwner->id, $torrentOwner->seedbonus, $receiveThanksBonus);
-                if ($affectedRows != 1) {
-                    Logger::writeWithContext((string) ('affectedRows: '.$affectedRows.', query: '.QueryLog::last()), (string) 'error', (bool) false);
-                    throw new \RuntimeException('increment owner bonus fail.');
-                }
+                $this->bonusLedger->credit(
+                    (int) $torrentOwner->id,
+                    (float) $receiveThanksBonus,
+                    BusinessType::RECEIVE_THANKS,
+                    "torrent #{$torrent->id}"
+                );
             }
 
             return $thank;

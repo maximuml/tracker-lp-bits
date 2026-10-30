@@ -330,6 +330,7 @@ class User extends Authenticatable implements FilamentUser, HasName
      */
     protected $hidden = [
         'secret', 'passhash', 'passkey', 'auth_key', 'auth_version',
+        'two_step_secret', 'editsecret', 'modcomment',
     ];
 
     /**
@@ -407,7 +408,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         'uploaded', 'downloaded', 'seedbonus', 'seedtime', 'leechtime',
         'invited_by', 'enabled', 'seed_points', 'last_access', 'invites',
         'lang', 'attendance_card', 'privacy', 'noad', 'downloadpos', 'donoruntil', 'donor',
-        'downloadpos', 'vip_added', 'vip_until', 'title', 'invites', 'attendance_card',
+        'vip_added', 'vip_until', 'title',
         'seed_points_per_hour',
     ];
 

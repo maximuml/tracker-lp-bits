@@ -43,7 +43,11 @@ final class OutboxEvent extends Model
 
     protected $table = 'outbox_events';
 
-    protected $guarded = [];
+    /** @var list<string> */
+    protected $fillable = [
+        'event_id', 'aggregate_type', 'aggregate_id', 'event_type', 'payload',
+        'status', 'attempts', 'available_at', 'completed_at', 'last_error',
+    ];
 
     /**
      * @var array<string, string>

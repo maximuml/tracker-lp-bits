@@ -185,16 +185,28 @@ class MeiliSearchFilterService
             Logger::writeWithContext((string) "times_completed <= {$atomicValue} through times_completed_end: {$atomicValue}", (string) 'info', (bool) false);
         }
 
-        // added
+        // added — an unparseable value produces `added >= ` (strtotime
+        // false → empty) or a Carbon exception; both surface as a Meili
+        // filter error and a silent SQL fallback. Skip the filter instead.
         if (! empty($params['added_begin'])) {
-            $atomicValue = $params['added_begin'];
-            $filters[] = 'added >= '.strtotime($atomicValue);
-            Logger::writeWithContext((string) "added >= {$atomicValue} through added_begin: {$atomicValue}", (string) 'info', (bool) false);
+            $atomicValue = is_scalar($params['added_begin']) ? (string) $params['added_begin'] : '';
+            $addedBegin = $atomicValue === '' ? false : strtotime($atomicValue);
+            if ($addedBegin === false) {
+                Logger::writeWithContext((string) "invalid added_begin ignored: {$atomicValue}", (string) 'warning', (bool) false);
+            } else {
+                $filters[] = 'added >= '.$addedBegin;
+                Logger::writeWithContext((string) "added >= {$addedBegin} through added_begin: {$atomicValue}", (string) 'info', (bool) false);
+            }
         }
         if (! empty($params['added_end'])) {
-            $atomicValue = Carbon::parse($params['added_end'])->endOfDay()->toDateTimeString();
-            $filters[] = 'added <= '.strtotime($atomicValue);
-            Logger::writeWithContext((string) "added <= {$atomicValue} through added_end: {$atomicValue}", (string) 'info', (bool) false);
+            $atomicValue = is_scalar($params['added_end']) ? (string) $params['added_end'] : 'not-a-scalar-value';
+            try {
+                $addedEnd = Carbon::parse($atomicValue)->endOfDay()->getTimestamp();
+                $filters[] = 'added <= '.$addedEnd;
+                Logger::writeWithContext((string) "added <= {$addedEnd} through added_end: {$atomicValue}", (string) 'info', (bool) false);
+            } catch (\Throwable) {
+                Logger::writeWithContext((string) "invalid added_end ignored: {$atomicValue}", (string) 'warning', (bool) false);
+            }
         }
 
         // permission see banned

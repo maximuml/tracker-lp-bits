@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\PeerRepository;
 use App\Repositories\ToolCleanupRepository;
+use App\Repositories\TorrentRepository;
 use App\Support\Database;
 use App\Support\Logger;
 use Illuminate\Support\Facades\Schema;
 
 class ToolCleanupService
 {
-    public function __construct(private readonly ToolCleanupRepository $repository) {}
+    public function __construct(
+        private readonly ToolCleanupRepository $repository,
+        private readonly PeerRepository $peerRepository,
+        private readonly TorrentRepository $torrentRepository,
+    ) {}
 
     /** @return  mixed */
     public function removeDuplicateSnatch()
@@ -75,6 +81,7 @@ class ToolCleanupService
             }
             Logger::writeWithContext((string) ('[DELETE_DUPLICATED_PEERS], count: '.count($results)), (string) 'info', (bool) false);
             $allDeleteIds = [];
+            $affectedTorrentIds = [];
             foreach ($results as $row) {
                 $row = (array) $row;
                 $torrentId = $row['torrent'];
@@ -85,11 +92,31 @@ class ToolCleanupService
                 Logger::writeWithContext((string) ("[DELETE_DUPLICATED_PEERS], torrent: {$torrentId}, user: {$userId}, snatchIdStr: ".implode(',', $idArr)), (string) 'info', (bool) false);
                 if (! empty($idArr)) {
                     $allDeleteIds = array_merge($allDeleteIds, $idArr);
+                    $affectedTorrentIds[] = (int) $torrentId;
                 }
             }
             if (! empty($allDeleteIds)) {
                 $this->repository->deletePeersByIds($allDeleteIds);
+                $this->resyncPeerCounters(array_values(array_unique($affectedTorrentIds)));
             }
         }
+    }
+
+    /**
+     * Recount denormalized torrents.seeders/leechers after peer deletions —
+     * removed duplicates never announce again, so the columns would drift.
+     *
+     * @param  array<int, int>  $torrentIds
+     */
+    private function resyncPeerCounters(array $torrentIds): void
+    {
+        if ($torrentIds === []) {
+            return;
+        }
+        $counts = [];
+        foreach ($this->peerRepository->countByTorrentSeeder($torrentIds) as $row) {
+            $counts[(int) $row['torrent']][(int) $row['seeder'] === 1 ? 'seeders' : 'leechers'] = (int) $row['c'];
+        }
+        $this->torrentRepository->resyncPeerCounters($torrentIds, $counts);
     }
 }

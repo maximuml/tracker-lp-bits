@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace Tests\Integration\Repositories;
 
 use App\Enums\HitAndRunStatus;
+use App\Events\HitAndRunCreated;
+use App\Events\HitAndRunDeleted;
+use App\Events\HitAndRunUpdated;
 use App\Models\HitAndRun;
 use App\Models\Snatch;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\HitAndRunRepository;
+use App\Support\Settings;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -162,5 +168,63 @@ final class HitAndRunRepositoryTest extends TestCase
         $this->expectException(ModelNotFoundException::class);
 
         $this->repository->delete(999999);
+    }
+
+    /**
+     * M4: lifecycle events must map to the real model transition — a create
+     * dispatches HitAndRunCreated (previously everything came out as
+     * HitAndRunUpdated via the `saved` hook).
+     */
+    public function test_store_dispatches_hit_and_run_created_event(): void
+    {
+        Event::fake([HitAndRunCreated::class, HitAndRunUpdated::class, HitAndRunDeleted::class]);
+
+        $model = HitAndRun::factory()->create();
+
+        Event::assertDispatched(HitAndRunCreated::class, fn ($e) => $e->model->id === $model->id);
+        Event::assertNotDispatched(HitAndRunUpdated::class);
+        Event::assertNotDispatched(HitAndRunDeleted::class);
+    }
+
+    public function test_update_dispatches_hit_and_run_updated_event(): void
+    {
+        $model = HitAndRun::factory()->create(['status' => HitAndRunStatus::INSPECTING->value]);
+        Event::fake([HitAndRunCreated::class, HitAndRunUpdated::class, HitAndRunDeleted::class]);
+
+        $this->repository->update(['status' => HitAndRunStatus::REACHED->value], $model->id);
+
+        Event::assertDispatched(HitAndRunUpdated::class);
+        Event::assertNotDispatched(HitAndRunCreated::class);
+        Event::assertNotDispatched(HitAndRunDeleted::class);
+    }
+
+    /**
+     * M4: delete dispatches exactly once — the repository used to fire a
+     * second manual clearCache() on top of the model `deleted` hook.
+     */
+    public function test_delete_dispatches_hit_and_run_deleted_once(): void
+    {
+        $model = HitAndRun::factory()->create();
+        Event::fake([HitAndRunCreated::class, HitAndRunUpdated::class, HitAndRunDeleted::class]);
+
+        $this->repository->delete($model->id);
+
+        Event::assertDispatchedTimes(HitAndRunDeleted::class, 1);
+        Event::assertNotDispatched(HitAndRunUpdated::class);
+    }
+
+    /**
+     * M5: H&R configuration is global — getConfig takes no section argument
+     * and reads the flat `hr.*` settings keys.
+     */
+    public function test_get_config_reads_global_hr_settings(): void
+    {
+        DB::table('settings')->updateOrInsert(
+            ['name' => 'hr.inspect_time'],
+            ['value' => '48', 'autoload' => 1],
+        );
+        Settings::resetCache();
+
+        $this->assertSame('48', HitAndRun::getConfig('inspect_time'));
     }
 }

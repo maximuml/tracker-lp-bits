@@ -51,6 +51,7 @@ enum BusinessType: int
     case FORUM_TOPIC_BONUS = 1010;
     case FORUM_POST_BONUS = 1011;
     case COMMENT_BONUS = 1012;
+    case ATTENDANCE = 1013;
 
     /**
      * Default English display text for each business type.
@@ -94,6 +95,7 @@ enum BusinessType: int
             self::FORUM_TOPIC_BONUS => 'Create forum topic',
             self::FORUM_POST_BONUS => 'Post forum reply',
             self::COMMENT_BONUS => 'Post comment',
+            self::ATTENDANCE => 'Attendance',
         };
     }
 

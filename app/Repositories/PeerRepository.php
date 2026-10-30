@@ -28,6 +28,22 @@ class PeerRepository
     }
 
     /**
+     * Distinct torrent ids that still hold peers older than the deadline —
+     * collected before deletion so cleanup can resync their counters.
+     *
+     * @return array<int, int>
+     */
+    public function listTorrentIdsInactiveBefore(string $deadline): array
+    {
+        return Peer::query()
+            ->where('last_action', '<', $deadline)
+            ->distinct()
+            ->pluck('torrent')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
      * All peer rows of a torrent (deduped by peer_id) with owner and
      * relative-torrent rows — the torrent-details peer list.
      *

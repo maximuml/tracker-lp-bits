@@ -313,6 +313,41 @@ final class TorrentAjaxRepositoryTest extends TestCase
         $this->assertGreaterThan(0, $result['count']);
     }
 
+    /**
+     * M6: peerList is a read path — it must return live counts computed from
+     * the peers table but never write them back to torrents.seeders/leechers
+     * (announce + cleanup own those columns).
+     */
+    public function test_peer_list_returns_live_counts_without_persisting(): void
+    {
+        $ownerId = $this->createUser();
+        $peerUserId = $this->createUser();
+        $torrentId = $this->createTorrent($ownerId, ['seeders' => 9, 'leechers' => 9]);
+        DB::table('peers')->insert([
+            'torrent' => $torrentId,
+            'peer_id' => '-qB0001-'.random_bytes(12),
+            'userid' => $peerUserId,
+            'seeder' => 1,
+            'ip' => '127.0.0.1',
+            'port' => 51413,
+            'uploaded' => 1024,
+            'downloaded' => 0,
+            'to_go' => 0,
+            'started' => now()->toDateTimeString(),
+            'last_action' => now()->toDateTimeString(),
+            'connectable' => 1,
+        ]);
+
+        $result = $this->repository->peerList($torrentId);
+
+        // Response exposes the real live count (1 seeder), not the stale 9.
+        $this->assertSame(1, $result['torrent']['seeders']);
+        $this->assertSame(0, $result['torrent']['leechers']);
+        // The denormalized columns were NOT rewritten by the read path.
+        $this->assertSame(9, (int) DB::table('torrents')->where('id', $torrentId)->value('seeders'));
+        $this->assertSame(9, (int) DB::table('torrents')->where('id', $torrentId)->value('leechers'));
+    }
+
     private function createUser(): int
     {
         /** @var User $user */

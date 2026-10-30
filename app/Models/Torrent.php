@@ -141,65 +141,38 @@ class Torrent extends NexusModel
     ];
 
     /**
-     * @deprecated Use App\Enums\TorrentPromotion enum methods (label(), color(), upMultiplier(), downMultiplier()) instead.
+     * Promotion rows keyed by enum value — the shape the retired
+     * `$promotionTypes` array exposed (`text`/`up_multiplier`/
+     * `down_multiplier`/`color`), sourced from the enum so the two
+     * tables can never drift.
      *
-     * @var array<int|string, mixed>
+     * @return array<int, array{text: string, up_multiplier: int, down_multiplier: float|int, color: string}>
      */
-    public static array $promotionTypes = [
-        TorrentPromotion::NORMAL->value => [
-            'text' => 'Normal',
-            'up_multiplier' => 1,
-            'down_multiplier' => 1,
-            'color' => '',
-        ],
-        TorrentPromotion::FREE->value => [
-            'text' => 'Free',
-            'up_multiplier' => 1,
-            'down_multiplier' => 0,
-            'color' => 'linear-gradient(to right, rgba(0,52,206,0.5), rgba(0,52,206,1), rgba(0,52,206,0.5))',
-        ],
-        TorrentPromotion::TWO_TIMES_UP->value => [
-            'text' => '2X',
-            'up_multiplier' => 2,
-            'down_multiplier' => 1,
-            'color' => 'linear-gradient(to right, rgba(0,153,0,0.5), rgba(0,153,0,1), rgba(0,153,0,0.5))',
-        ],
-        TorrentPromotion::FREE_TWO_TIMES_UP->value => [
-            'text' => '2X Free',
-            'up_multiplier' => 2,
-            'down_multiplier' => 0,
-            'color' => 'linear-gradient(to right, rgba(0,153,0,1), rgba(0,52,206,1)',
-        ],
-        TorrentPromotion::HALF_DOWN->value => [
-            'text' => '50%',
-            'up_multiplier' => 1,
-            'down_multiplier' => 0.5,
-            'color' => 'linear-gradient(to right, rgba(220,0,3,0.5), rgba(220,0,3,1), rgba(220,0,3,0.5))',
-        ],
-        TorrentPromotion::HALF_DOWN_TWO_TIMES_UP->value => [
-            'text' => '2X 50%',
-            'up_multiplier' => 2,
-            'down_multiplier' => 0.5,
-            'color' => 'linear-gradient(to right, rgba(0,153,0,1), rgba(220,0,3,1)',
-        ],
-        TorrentPromotion::ONE_THIRD_DOWN->value => [
-            'text' => '30%',
-            'up_multiplier' => 1,
-            'down_multiplier' => 0.3,
-            'color' => 'linear-gradient(to right, rgba(65,23,73,0.5), rgba(65,23,73,1), rgba(65,23,73,0.5))',
-        ],
-    ];
+    public static function promotionTypes(): array
+    {
+        $result = [];
+        foreach (TorrentPromotion::cases() as $case) {
+            $result[$case->value] = [
+                'text' => $case->label(),
+                'up_multiplier' => $case->upMultiplier(),
+                'down_multiplier' => $case->downMultiplier(),
+                'color' => $case->color(),
+            ];
+        }
 
-    /**
-     * @deprecated Use App\Enums\PromotionTimeType enum methods (label()) instead.
-     *
-     * @var array<int|string, mixed>
-     */
-    public static array $promotionTimeTypes = [
-        PromotionTimeType::GLOBAL->value => ['text' => 'Global'],
-        PromotionTimeType::PERMANENT->value => ['text' => 'Permanent'],
-        PromotionTimeType::DEADLINE->value => ['text' => 'Until'],
-    ];
+        return $result;
+    }
+
+    /** @return array<int, array{text: string}> */
+    public static function promotionTimeTypes(): array
+    {
+        $result = [];
+        foreach (PromotionTimeType::cases() as $case) {
+            $result[$case->value] = ['text' => $case->label()];
+        }
+
+        return $result;
+    }
 
     const BONUS_REWARD_VALUES = [50, 100, 200, 500, 1000];
 
@@ -335,7 +308,7 @@ class Torrent extends NexusModel
      */
     public static function listPromotionTypes($onlyKeyValue = false, $valueField = 'text'): array
     {
-        $result = self::$promotionTypes;
+        $result = self::promotionTypes();
         $keyValue = [];
         foreach ($result as $status => &$info) {
             $text = $info['text'];
@@ -356,7 +329,7 @@ class Torrent extends NexusModel
      */
     public static function listPromotionTimeTypes($onlyKeyValue = false, $valueField = 'text'): array
     {
-        return self::listStaticProps(self::$promotionTimeTypes, 'torrent.promotion_time_types', $onlyKeyValue, $valueField);
+        return self::listStaticProps(self::promotionTimeTypes(), 'torrent.promotion_time_types', $onlyKeyValue, $valueField);
     }
 
     /**

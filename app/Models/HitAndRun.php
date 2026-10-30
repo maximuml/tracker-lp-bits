@@ -24,7 +24,6 @@ use App\Events\HitAndRunCreated;
 use App\Events\HitAndRunDeleted;
 use App\Events\HitAndRunUpdated;
 use App\Support\Cache;
-use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Locale;
 use App\Support\Logger;
@@ -75,7 +74,10 @@ class HitAndRun extends NexusModel
     /** @return  mixed */
     protected static function booted()
     {
-        static::saved(function ($model) {
+        static::created(function ($model) {
+            self::clearCache($model, ModelEvent::HitAndRunCreated);
+        });
+        static::updated(function ($model) {
             self::clearCache($model);
         });
         static::deleted(function ($model) {
@@ -121,14 +123,7 @@ class HitAndRun extends NexusModel
         if ($this->status != HitAndRunStatus::INSPECTING->value) {
             return '---';
         }
-        // change to use create time
-        $searchBoxId = $this->torrent->basic_category->mode ?? 0;
-        if ($searchBoxId == 0) {
-            Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s', $this->torrent_id), (string) 'error', (bool) false);
-
-            return '---';
-        }
-        $inspectTime = HitAndRun::getConfig('inspect_time', $searchBoxId);
+        $inspectTime = HitAndRun::getConfig('inspect_time');
         $diffInSeconds = Carbon::now()->diffInSeconds($this->created_at->addHours(intval($inspectTime)), true);
 
         return Format::prettyTimeWithLocale($diffInSeconds);
@@ -139,18 +134,10 @@ class HitAndRun extends NexusModel
         if ($this->status != HitAndRunStatus::INSPECTING->value) {
             return '---';
         }
-        $searchBoxId = $this->torrent->basic_category->mode ?? 0;
-        if ($searchBoxId == 0) {
-            Logger::writeWithContext((string) sprintf('[INVALID_CATEGORY], Torrent: %s', $this->torrent_id), (string) 'error', (bool) false);
-
-            return '---';
-        }
         if (! $this->snatch) {
-            Logger::writeWithContext((string) "hit and run: {$this->id} no snatch", (string) 'warning', (bool) false);
-
             return '---';
         }
-        $seedTimeMinimum = HitAndRun::getConfig('seed_time_minimum', $searchBoxId);
+        $seedTimeMinimum = HitAndRun::getConfig('seed_time_minimum');
         $seedTimeMinimum = is_numeric($seedTimeMinimum) ? (float) $seedTimeMinimum : 0;
         $diffInSeconds = 3600 * $seedTimeMinimum - $this->snatch->seedtime;
 
@@ -205,33 +192,28 @@ class HitAndRun extends NexusModel
 
     public static function getIsEnabled(): bool
     {
-        $browseMode = self::getConfig('mode', SiteConfig::current()->main->browseCat());
-        $browseEnabled = HitAndRunMode::fromStringSafe(is_string($browseMode) ? $browseMode : null)->isEnabled();
-        Logger::writeWithContext((string) ('H&R browseEnabled: '.($browseEnabled ? 'true' : 'false')), (string) 'info', (bool) false);
+        $browseMode = self::getConfig('mode');
 
-        return $browseEnabled;
+        return HitAndRunMode::fromStringSafe(is_string($browseMode) ? $browseMode : null)->isEnabled();
     }
 
     /**
+     * H&R configuration is global — the legacy per-section layer never had
+     * schema support (`hr.*` keys only), so the former $searchBoxId argument
+     * was removed instead of silently ignored.
+     *
      * @param  mixed  $name
-     * @param  mixed  $searchBoxId
      * @return mixed
      */
-    public static function getConfig($name, $searchBoxId)
+    public static function getConfig($name)
     {
         if ($name == '*') {
             $key = 'hr';
         } else {
             $key = "hr.$name";
         }
-        $default = Settings::get($key);
 
-        return $default;
-    }
-
-    public static function diffInSection(): bool
-    {
-        return false;
+        return Settings::get($key);
     }
 
     /** @return  BelongsTo<Torrent, $this> */

@@ -339,7 +339,7 @@ final class ShoutboxRepositoryTest extends TestCase
         // Insert a non-sb type would require bypassing the enum, but type is
         // constrained to 'sb' only. Verify the filter still applies correctly.
         $query = DB::table('shoutbox');
-        $this->repository->applyTypeFilter($query, 'shoutbox');
+        $this->repository->applyTypeFilter($query);
 
         $this->assertSame(1, $query->count());
     }

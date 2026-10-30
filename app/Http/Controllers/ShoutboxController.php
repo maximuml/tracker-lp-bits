@@ -53,8 +53,8 @@ class ShoutboxController extends BasePageController
         $refresh = (int) ($currentUser['sbrefresh'] ?? 120);
         $limit = (int) ($currentUser['sbnum'] ?? 70);
 
-        $lastId = $this->repository->maxId($where, $currentUser ?: null);
-        $rows = $this->repository->listLatest($where, $currentUser ?: null, $limit);
+        $lastId = $this->repository->maxId();
+        $rows = $this->repository->listLatest($limit);
 
         $shoutIds = array_values($rows->pluck('id')->map(fn ($id) => (int) $id)->all());
         $reactionData = Shoutbox::prefetchReactions($shoutIds, $currentUserId);
@@ -276,7 +276,7 @@ class ShoutboxController extends BasePageController
         // Safety net for hard fatals where finally{} never runs.
         register_shutdown_function($release);
 
-        $callback = function () use ($type, $lastId, $feedCursors, $userId, $maxLoops, $interval, $isNotifications, $release, $owns) {
+        $callback = function () use ($lastId, $feedCursors, $userId, $maxLoops, $interval, $isNotifications, $release, $owns) {
             @ini_set('zlib.output_compression', 'Off');
             if (PHP_SAPI !== 'cli') {
                 // Drop pre-existing output buffers so frames flush in real
@@ -295,7 +295,7 @@ class ShoutboxController extends BasePageController
                 if ($isNotifications) {
                     $this->runNotificationLoop($userId, $feedCursors, $maxLoops, $interval, $owns);
                 } else {
-                    $this->runShoutLoop($type, $lastId, $maxLoops, $interval, $owns);
+                    $this->runShoutLoop($lastId, $maxLoops, $interval, $owns);
                 }
             } finally {
                 $release();
@@ -313,10 +313,10 @@ class ShoutboxController extends BasePageController
     /**
      * @param  callable(): bool  $owns
      */
-    private function runShoutLoop(string $type, int $lastId, int $maxLoops, int $interval, callable $owns): void
+    private function runShoutLoop(int $lastId, int $maxLoops, int $interval, callable $owns): void
     {
-        $buildQuery = fn (string $type, int $lastId) => $this->repository->newAfterIdQuery($type, $lastId, $this->actorContext->toLegacyArray());
-        $query = $buildQuery($type, $lastId);
+        $buildQuery = fn (int $lastId) => $this->repository->newAfterIdQuery($lastId);
+        $query = $buildQuery($lastId);
 
         for ($i = 0; $i < $maxLoops; $i++) {
             if (connection_aborted() || ! $owns()) {
@@ -329,7 +329,7 @@ class ShoutboxController extends BasePageController
                 $this->sseWriter->event('refresh', (string) json_encode(['count' => $rows->count()]), $maxId);
                 $this->sseCount('events', 'shoutbox');
                 $lastId = $maxId;
-                $query = $buildQuery($type, $lastId);
+                $query = $buildQuery($lastId);
             }
 
             $this->sseWriter->ping();

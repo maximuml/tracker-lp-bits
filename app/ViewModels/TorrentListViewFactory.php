@@ -207,7 +207,7 @@ final class TorrentListViewFactory
                     $row['promotion_time_type'], $row['promotion_until'],
                     $row['__ignore_global_sp_state'] ?? false,
                 ),
-                hitAndRun: TorrentAccess::requiresHrIcon($row, $row['search_box_id']),
+                hitAndRun: TorrentAccess::requiresHrIcon($row),
                 approval: $this->moderationRep->shouldShowApprovalStatusIcon($row['approval_status'])
                     ? new ApprovalBadge(
                         title: (string) Locale::trans("torrent.approval.status_text.{$row['approval_status']}", [], null),

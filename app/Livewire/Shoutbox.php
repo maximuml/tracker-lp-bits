@@ -278,7 +278,7 @@ final class Shoutbox extends Component
         $currentUser = $this->actor()->toLegacyArray();
         $currentUserId = $this->actor()->id;
 
-        $rows = $this->repository()->listLatest('shoutbox', $currentUser !== [] ? $currentUser : null, $this->limit);
+        $rows = $this->repository()->listLatest($this->limit);
         $shoutIds = array_values($rows->pluck('id')->map(fn ($id) => (int) $id)->all());
         $reactionData = ShoutboxSupport::prefetchReactions($shoutIds, $currentUserId);
 

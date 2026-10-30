@@ -14,7 +14,6 @@ use App\Services\PermissionChecker;
 use App\Support\Config\SiteConfig;
 use App\Support\Database;
 use App\Support\Html\SafeHtml;
-use App\Support\Logger;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\RequestValues;
@@ -174,14 +173,14 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
         usort($seeders, fn ($a, $b) => $b['uploaded'] <=> $a['uploaded']);
         usort($leechers, fn ($a, $b) => $a['to_go'] <=> $b['to_go']);
 
+        // Read paths never persist peer counters — announce (PeerLifecycle) and
+        // cleanup (PeerCleanupTask resync) own torrents.seeders/leechers. The
+        // live counts are still returned so the panel reflects actual peers
+        // even when the denormalized columns drift between announcements.
         $seedersCount = count($seeders);
         $leechersCount = count($leechers);
-        if (($torrentArr['seeders'] ?? 0) != $seedersCount || ($torrentArr['leechers'] ?? 0) != $leechersCount) {
-            $update = ['seeders' => $seedersCount, 'leechers' => $leechersCount];
-            $torrent->update($update);
-            Logger::writeWithContext("[UPDATE_TORRENT_SEEDERS_LEECHERS], torrent: {$torrentId}, original: ".$torrent->toJson().', update: '.json_encode($update), 'info', false);
-            $torrentArr = array_merge($torrentArr, $update);
-        }
+        $torrentArr['seeders'] = $seedersCount;
+        $torrentArr['leechers'] = $leechersCount;
 
         $allPeers = array_merge($seeders, $leechers);
         $userIds = array_unique(array_filter(array_column($allPeers, 'userid')));

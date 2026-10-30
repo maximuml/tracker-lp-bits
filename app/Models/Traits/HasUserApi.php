@@ -21,9 +21,12 @@ trait HasUserApi
         // Raw column values — legacy $CURUSER was the SELECT * row: no
         // accessor/cast transforms (avatar default, datetime casts) so
         // value('avatar')/value('added')/yes()/no() see faithful data.
+        // two_step_secret stays in the channel for the same reason as
+        // passkey/auth_key: internal views (usercp security page, login
+        // flow) read it off the current-actor array.
         return array_diff_key(
             $this->getAttributes(),
-            array_flip(array_diff($this->getHidden(), ['passkey', 'auth_key'])),
+            array_flip(array_diff($this->getHidden(), ['passkey', 'auth_key', 'two_step_secret'])),
         );
     }
 

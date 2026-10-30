@@ -67,14 +67,14 @@ final class TorrentAccess
 
     /**
      * Whether the H&R marker applies to this torrent — typed counterpart
-     * of {@see hrImage()} for view-model assembly.
+     * of {@see hrImage()} for view-model assembly. H&R config is global.
      *
      * @param  array<int|string, mixed>  $torrent
      */
-    public static function requiresHrIcon(array $torrent, int|string $searchBoxId): bool
+    public static function requiresHrIcon(array $torrent): bool
     {
         $mode = HitAndRunMode::fromStringSafe(
-            is_string($value = HitAndRun::getConfig('mode', $searchBoxId)) ? $value : null
+            is_string($value = HitAndRun::getConfig('mode')) ? $value : null
         );
 
         return $mode === HitAndRunMode::GLOBAL

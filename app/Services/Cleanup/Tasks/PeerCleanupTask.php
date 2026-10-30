@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Cleanup\Tasks;
 
 use App\Repositories\PeerRepository;
+use App\Repositories\TorrentRepository;
 use App\Repositories\UserCleanupRepository;
 use App\Services\Cleanup\Contracts\CleanupTask;
 use App\Support\Config\SiteConfig;
@@ -19,11 +20,15 @@ final class PeerCleanupTask implements CleanupTask
     public function __construct(
         private readonly PeerRepository $peerRepository,
         private readonly UserCleanupRepository $userCleanupRepository,
+        private readonly TorrentRepository $torrentRepository,
     ) {}
 
     /**
      * Priority Class 1: remove peers whose last_action is older than the dead
-     * threshold.
+     * threshold, then resync the denormalized torrents.seeders/leechers
+     * counters for the affected torrents — pruned peers never announce
+     * again, so without this the columns would drift until the next
+     * UpdateTorrentSeedersEtc batch.
      */
     public function prunePeers(): string
     {
@@ -32,9 +37,24 @@ final class PeerCleanupTask implements CleanupTask
             time()
         ));
 
+        $torrentIds = $this->peerRepository->listTorrentIdsInactiveBefore($deadtime);
         $this->peerRepository->deleteInactiveBefore($deadtime);
+        $this->resyncPeerCounters($torrentIds);
 
         return 'update peer status';
+    }
+
+    /** @param array<int, int> $torrentIds */
+    private function resyncPeerCounters(array $torrentIds): void
+    {
+        if ($torrentIds === []) {
+            return;
+        }
+        $counts = [];
+        foreach ($this->peerRepository->countByTorrentSeeder($torrentIds) as $row) {
+            $counts[(int) $row['torrent']][(int) $row['seeder'] === 1 ? 'seeders' : 'leechers'] = (int) $row['c'];
+        }
+        $this->torrentRepository->resyncPeerCounters($torrentIds, $counts);
     }
 
     /**

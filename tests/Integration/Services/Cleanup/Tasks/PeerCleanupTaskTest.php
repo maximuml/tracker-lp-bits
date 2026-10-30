@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services\Cleanup\Tasks;
 
+use App\Models\User;
 use App\Services\Cleanup\Tasks\PeerCleanupTask;
 use Illuminate\Support\Facades\DB;
 use Tests\Attributes\TestCategory;
@@ -18,6 +19,8 @@ final class PeerCleanupTaskTest extends TestCase
 {
     private PeerCleanupTask $task;
 
+    private int $userId;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -28,6 +31,7 @@ final class PeerCleanupTaskTest extends TestCase
         DB::table('torrents')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
+        $this->userId = (int) User::factory()->create()->id;
         $this->task = app(PeerCleanupTask::class);
     }
 
@@ -76,7 +80,7 @@ final class PeerCleanupTaskTest extends TestCase
             'size' => 1024,
             'type' => 0,
             'numfiles' => 1,
-            'owner' => 1,
+            'owner' => $this->userId,
             'info_hash' => random_bytes(20),
             'visible' => 1,
             'banned' => 0,
@@ -91,7 +95,7 @@ final class PeerCleanupTaskTest extends TestCase
         DB::table('peers')->insert([
             'torrent' => $torrentId,
             'peer_id' => '-qB0001-'.random_bytes(12),
-            'userid' => 1,
+            'userid' => $this->userId,
             'seeder' => $seeder,
             'ip' => '127.0.0.1',
             'port' => 51413,

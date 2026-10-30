@@ -13,11 +13,15 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\OverforumRepository;
+use App\Repositories\PostLookupRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
+use App\Services\BonusLedgerService;
+use App\Services\ForumCollaborators;
 use App\Services\ForumIndexService;
 use App\Services\ForumListingService;
+use App\Services\ForumLookupService;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\RuntimeContext;
@@ -70,18 +74,24 @@ final class ForumListingServiceTest extends TestCase
 
         $indexService = new ForumIndexService(
             $this->app->make(ActorContext::class),
-            $this->app->make(ForumRepository::class),
+            new ForumCollaborators(
+                $this->app->make(ForumRepository::class),
+                $this->app->make(TopicRepository::class),
+                $this->app->make(PostRepository::class),
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $this->app->make(NexusCache::class),
-            $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),
-            $this->app->make(PostRepository::class),
         );
         $this->service = new ForumListingService(
             $indexService,
             $this->app->make(NexusCache::class),
             $this->app->make(TopicRepository::class),
             $this->app->make(PostRepository::class),
+            $this->app->make(ForumLookupService::class),
         );
     }
 
@@ -138,18 +148,24 @@ final class ForumListingServiceTest extends TestCase
 
         $indexService = new ForumIndexService(
             $this->app->make(ActorContext::class),
-            $forumRepo,
+            new ForumCollaborators(
+                $forumRepo,
+                $this->app->make(TopicRepository::class),
+                $this->app->make(PostRepository::class),
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $cacheInstance,
-            $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),
-            $this->app->make(PostRepository::class),
         );
         $this->service = new ForumListingService(
             $indexService,
             $cacheInstance,
             $this->app->make(TopicRepository::class),
             $this->app->make(PostRepository::class),
+            $this->app->make(ForumLookupService::class),
         );
     }
 
@@ -336,6 +352,7 @@ final class ForumListingServiceTest extends TestCase
         $this->assertSame('', $vm->keywords);
         $this->assertSame(0, $vm->hits);
         $this->assertSame([], $vm->results);
+        $this->assertStringContainsString('pic/forum_pic', $vm->imageUrl);
         $this->assertStringContainsString('search_button.gif', $vm->imageUrl);
     }
 
@@ -886,18 +903,24 @@ final class ForumListingServiceTest extends TestCase
 
         $indexService = new ForumIndexService(
             $this->app->make(ActorContext::class),
-            $repo,
+            new ForumCollaborators(
+                $repo,
+                $this->app->make(TopicRepository::class),
+                $this->app->make(PostRepository::class),
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $this->app->make(NexusCache::class),
-            $this->app->make(TopicRepository::class),
             $this->app->make(TopicReadStateRepository::class),
-            $this->app->make(PostRepository::class),
         );
         $service = new ForumListingService(
             $indexService,
             null,
             $this->app->make(TopicRepository::class),
             $this->app->make(PostRepository::class),
+            $this->app->make(ForumLookupService::class),
         );
 
         $repo->shouldReceive('getForumsList')->andReturn([

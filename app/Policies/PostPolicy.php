@@ -8,7 +8,7 @@ use App\Auth\Permission;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Post;
 use App\Models\User;
-use App\Support\Forum;
+use App\Services\ForumAccessService;
 
 /**
  * W1-04: Authorization policy for post mutations.
@@ -16,6 +16,10 @@ use App\Support\Forum;
  */
 class PostPolicy extends BasePolicy
 {
+    public function __construct(
+        private readonly ForumAccessService $forumAccess,
+    ) {}
+
     /**
      * Whether the user can edit a post.
      * The post owner, forum moderators, and staff with POST_MANAGE can edit.
@@ -30,7 +34,7 @@ class PostPolicy extends BasePolicy
             return true;
         }
 
-        return Forum::isModerator($post->id, 'post');
+        return $this->forumAccess->isModerator($post->id, 'post');
     }
 
     /**
@@ -43,6 +47,6 @@ class PostPolicy extends BasePolicy
             return true;
         }
 
-        return Forum::isModerator($post->id, 'post');
+        return $this->forumAccess->isModerator($post->id, 'post');
     }
 }

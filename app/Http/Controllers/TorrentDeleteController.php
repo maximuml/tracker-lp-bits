@@ -7,13 +7,14 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
+use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Requests\DeleteTorrentRequest;
 use App\Http\Requests\FastDeleteTorrentRequest;
 use App\Models\Torrent;
 use App\Repositories\MessageRepository;
+use App\Services\BonusLedgerService;
 use App\Services\PermissionChecker;
-use App\Support\Bonus;
 use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
@@ -29,6 +30,7 @@ class TorrentDeleteController extends BasePageController
         private readonly ActorContext $actor,
         private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly UserRepositoryInterface $userRepository,
+        private readonly BonusLedgerService $ledger,
     ) {}
 
     public function fastDeleteTorrent(FastDeleteTorrentRequest $request): Response|RedirectResponse
@@ -76,7 +78,7 @@ class TorrentDeleteController extends BasePageController
         }
 
         $uploadtorrentBonus = (float) SiteConfig::current()->bonus->uploadTorrent();
-        Bonus::updatePoints('-', $uploadtorrentBonus, $ownerId);
+        $this->ledger->revoke($ownerId, $uploadtorrentBonus, BusinessType::BONUS_REVERSAL, 'Upload torrent bonus revoked');
 
         if ($anonymous == 1 && $currentUserId == $ownerId) {
             Log::writeWithContext("Torrent $id ({$name}) was deleted by its anonymous uploader", 'normal');
@@ -182,7 +184,7 @@ class TorrentDeleteController extends BasePageController
         }
 
         $uploadtorrentBonus = (float) SiteConfig::current()->bonus->uploadTorrent();
-        Bonus::updatePoints('-', $uploadtorrentBonus, $ownerId);
+        $this->ledger->revoke($ownerId, $uploadtorrentBonus, BusinessType::BONUS_REVERSAL, 'Upload torrent bonus revoked');
 
         if ($currentUserId != $ownerId && $this->userRepository->existsById($ownerId)) {
             $dt = date('Y-m-d H:i:s');

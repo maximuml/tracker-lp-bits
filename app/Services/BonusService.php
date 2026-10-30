@@ -9,7 +9,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\BonusCalculationRepository;
-use App\Repositories\BonusRepository;
+use App\Repositories\BonusConsumptionRepository;
 use App\Repositories\MessageRepository;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
@@ -33,13 +33,10 @@ final class BonusService
 {
     private const LOCK_SECONDS = 10;
 
-    private BonusRepository $bonusRep;
-
     private BonusCalculationRepository $bonusCalculationRepository;
 
-    public function __construct(BonusRepository $bonusRep, BonusCalculationRepository $bonusCalculationRepository, private readonly MessageRepository $messageRepository, private readonly BonusLedgerService $ledger)
+    public function __construct(private readonly BonusPurchaseService $purchase, BonusCalculationRepository $bonusCalculationRepository, private readonly MessageRepository $messageRepository, private readonly BonusLedgerService $ledger, private readonly BonusConsumptionRepository $consumptionRepository)
     {
-        $this->bonusRep = $bonusRep;
         $this->bonusCalculationRepository = $bonusCalculationRepository;
     }
 
@@ -133,17 +130,17 @@ final class BonusService
             return $this->exchangeCancelHr($request, $userid, $baseUrl);
         }
         if ($art === 'attendance_card') {
-            $this->bonusRep->consumeToBuyAttendanceCard($userid);
+            $this->purchase->consumeToBuyAttendanceCard($userid);
 
             return $this->redirect($baseUrl, 'attendance_card');
         }
         if ($art === 'rainbow_id') {
-            $this->bonusRep->consumeToBuyRainbowId($userid);
+            $this->purchase->consumeToBuyRainbowId($userid);
 
             return $this->redirect($baseUrl, 'rainbow_id');
         }
         if ($art === 'change_username_card') {
-            $this->bonusRep->consumeToBuyChangeUsernameCard($userid);
+            $this->purchase->consumeToBuyChangeUsernameCard($userid);
 
             return $this->redirect($baseUrl, 'change_username_card');
         }
@@ -228,7 +225,7 @@ final class BonusService
         if (! Permission::can(PermissionEnum::BUY_INVITE)) {
             PageResponses::abort(__('mybonus.std_sorry'), UserClass::name($buyinviteClass, false, false, true).(__('mybonus.text_plus_only')), false, false);
         }
-        $this->bonusRep->consumeToBuyTemporaryInvite($actor->id);
+        $this->purchase->consumeToBuyTemporaryInvite($actor->id);
 
         return $this->redirect($baseUrl, 'tmp_invite');
     }
@@ -266,7 +263,7 @@ final class BonusService
             $this->ledger->debit($senderId, (float) $points, BusinessType::GIFT_TO_LOW_SHARE_RATIO, $points.' Points as charity to users with ratio below '.htmlspecialchars(trim((string) $ratiocharity)).'.', [
                 'charity' => DB::raw(DB::getQueryGrammar()->wrap('charity').' + '.(float) $points), // @phpstan-ignore argument.type
             ]);
-            $this->bonusRep->incrementSeedbonusForLowRatioReceivers($ratiocharity, (float) $charityPerUser);
+            $this->consumptionRepository->incrementSeedbonusForLowRatioReceivers($ratiocharity, (float) $charityPerUser);
         });
 
         return $this->redirect($baseUrl, 'charity');
@@ -342,7 +339,7 @@ final class BonusService
         if (empty($hrId)) {
             PageResponses::abort('Error', 'Invalid H&R ID: '.($hrId ?? ''), false, false);
         }
-        $this->bonusRep->consumeToCancelHitAndRun($userid, $hrId);
+        $this->purchase->consumeToCancelHitAndRun($userid, $hrId);
 
         return $this->redirect($baseUrl, 'cancel_hr');
     }

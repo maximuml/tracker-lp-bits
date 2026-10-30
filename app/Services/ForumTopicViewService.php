@@ -16,7 +16,6 @@ use App\Repositories\TopicRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
-use App\Support\Forum;
 use App\Support\Html;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
@@ -42,6 +41,7 @@ final class ForumTopicViewService
         private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
         private readonly PostRepositoryInterface $postRepository,
+        private readonly ForumAccessService $forumAccess,
     ) {}
 
     /**
@@ -72,7 +72,7 @@ final class ForumTopicViewService
 
         $row = $this->index->getForumRow($forumid);
         $forumname = (string) ($row['name'] ?? '');
-        $isForummod = Forum::isModerator($forumid, 'forum');
+        $isForummod = $this->forumAccess->isModerator($forumid, 'forum');
         $isMod = Permission::can(PermissionEnum::POST_MANAGE) || $isForummod;
 
         if (UserDisplay::currentClass() < (int) ($row['minclassread'] ?? 0)) {
@@ -199,7 +199,7 @@ final class ForumTopicViewService
                 $this->cache?->forget('user_'.$actor->id.'_last_read_post_list');
             }
 
-            $canViewProtected = $pn + $offset <= 1 || Forum::canViewPost($userId, $arr);
+            $canViewProtected = $pn + $offset <= 1 || $this->forumAccess->canViewPost($userId, $arr);
             $bodyContent = $canViewProtected
                 ? $renderFmt('fmt_post_'.md5((string) ($arr['body'] ?? '')), static fn () => Format::formatComment((string) ($arr['body'] ?? '')))
                 : Format::formatComment((string) (__('forums.text_post_protected')));

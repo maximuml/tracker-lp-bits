@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Comment;
 use App\Models\User;
 use App\Repositories\CommentRepository;
 use App\Repositories\MessageRepository;
-use App\Support\Bonus;
 use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Locale;
@@ -29,6 +29,7 @@ final class CommentService
         private readonly MessageRepository $messageRepository,
         private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly CommentRepository $commentRepository,
+        private readonly BonusLedgerService $ledger,
     ) {}
 
     public function post(User $user, string $type, int $parentId, string $body): int
@@ -92,8 +93,13 @@ final class CommentService
     public function applyBonus(string $sign, int $userId): void
     {
         $points = SiteConfig::current()->bonus->addComment();
-        if ($points != 0) {
-            Bonus::updatePoints($sign, $points, $userId);
+        if ($points == 0) {
+            return;
+        }
+        if ($sign === '-') {
+            $this->ledger->revoke($userId, (float) $points, BusinessType::BONUS_REVERSAL, 'Comment bonus revoked');
+        } else {
+            $this->ledger->award($userId, (float) $points, BusinessType::COMMENT_BONUS, 'Comment bonus');
         }
     }
 

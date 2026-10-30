@@ -2,28 +2,38 @@
 
 declare(strict_types=1);
 
-namespace App\Support;
+namespace App\Services;
 
 use App\Contracts\Repositories\AttachmentRepositoryInterface;
+use App\Support\AttachmentStorage;
 use App\Support\Config\SiteConfig;
+use App\Support\Format;
 use App\Support\Html\SafeHtml;
+use App\Support\Json;
+use App\Support\Locale;
+use App\Support\Logger;
+use App\Support\Time;
+use App\Support\Url;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Attachment HTML emitter extracted from `include/functions.php`.
- *
- * Backs the legacy `print_attachment()` global. The database/cache lookup
- * and the logging stay in the procedural proxy; this class owns the
- * pure string assembly and icon mapping so it can be unit-tested.
+ * Attachment lookup + HTML emitter drained out of `Support\Attachment`.
+ * Backs the legacy `print_attachment()` / `bbcode_attach_to_img()`
+ * flows; DB access goes through {@see AttachmentRepositoryInterface}
+ * and markup through the components.support.attach-* views.
  */
-final class Attachment
+final class AttachmentRenderService
 {
+    public function __construct(
+        private readonly AttachmentRepositoryInterface $attachmentRepository,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $row  Attachment row from the DB.
      * @param  array<string, string>  $labels  Localised labels:
      *                                         'size', 'downloads'.
      */
-    public static function render(
+    public function render(
         array $row,
         string $dlkey,
         bool $enableImage,
@@ -37,13 +47,13 @@ final class Attachment
         $filename = (string) ($row['filename'] ?? '');
 
         if (($row['isimage'] ?? 0) == 1 && $enableImage) {
-            return self::renderImage($id, $filename, $url, $imageResizer, $sizeText, $timeText, (string) ($labels['size'] ?? ''));
+            return $this->renderImage($id, $filename, $url, $imageResizer, $sizeText, $timeText, (string) ($labels['size'] ?? ''));
         }
 
-        return self::renderFile($row, $id, $dlkey, $filename, $sizeText, $timeText, (string) ($labels['downloads'] ?? ''));
+        return $this->renderFile($row, $id, $dlkey, $filename, $sizeText, $timeText, (string) ($labels['downloads'] ?? ''));
     }
 
-    private static function renderImage(
+    private function renderImage(
         int $id,
         string $filename,
         string $url,
@@ -66,7 +76,7 @@ final class Attachment
     /**
      * @param  array<string, mixed>  $row
      */
-    private static function renderFile(
+    private function renderFile(
         array $row,
         int $id,
         string $dlkey,
@@ -75,7 +85,7 @@ final class Attachment
         SafeHtml $timeText,
         string $downloadsLabel,
     ): string {
-        $icon = self::iconForFileType((string) ($row['filetype'] ?? ''));
+        $icon = $this->iconForFileType((string) ($row['filetype'] ?? ''));
         $downloadCount = number_format((int) ($row['downloads'] ?? 0));
         $href = "/web/getattachment?id=$id&dlkey=$dlkey";
 
@@ -97,13 +107,13 @@ final class Attachment
      *
      * @return array{0: array<string, mixed>|null, 1: string}
      */
-    public static function rowAndUrlByKey(string $dlkey): array
+    public function rowAndUrlByKey(string $dlkey): array
     {
         $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
         $row = Cache::get('attachment_'.$dlkey.'_content');
 
         if (empty($row) && strlen($dlkey) == 32) {
-            $row = self::attachmentRepository()->findByDlkey($dlkey);
+            $row = $this->attachmentRepository->findByDlkey($dlkey);
             Cache::put('attachment_'.$dlkey.'_content', $row, 86400);
         }
 
@@ -132,9 +142,9 @@ final class Attachment
      * URL and render the HTML fragment. Returns a not-found marker when
      * the key is invalid.
      */
-    public static function renderByKey(string $dlkey, bool $enableImage = true, bool $imageResizer = true): string
+    public function renderByKey(string $dlkey, bool $enableImage = true, bool $imageResizer = true): string
     {
-        [$row, $url] = self::rowAndUrlByKey($dlkey);
+        [$row, $url] = $this->rowAndUrlByKey($dlkey);
 
         if (empty($row)) {
             return trim(view('components.support.attach-notfound', [
@@ -144,7 +154,7 @@ final class Attachment
             ])->render());
         }
 
-        return self::render(
+        return $this->render(
             $row,
             $dlkey,
             $enableImage,
@@ -164,7 +174,7 @@ final class Attachment
      *
      * Mirrors `bbcode_attach_to_img()`.
      */
-    public static function bbcodeToImg(string $text): string
+    public function bbcodeToImg(string $text): string
     {
         $pattern = '/\[attach\]([0-9a-zA-z][0-9a-zA-z]*)\[\/attach\]/is';
 
@@ -172,7 +182,7 @@ final class Attachment
             $dlkey = $matches[1];
             $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
             $cached = Cache::get('attachment_'.$dlkey.'_content');
-            $row = is_array($cached) ? $cached : (self::attachmentRepository()->findByDlkey($dlkey) ?? []);
+            $row = is_array($cached) ? $cached : ($this->attachmentRepository->findByDlkey($dlkey) ?? []);
             Cache::put('attachment_'.$dlkey.'_content', $row, 86400);
 
             if (empty($row) || ($row['isimage'] ?? 0) != 1) {
@@ -196,7 +206,7 @@ final class Attachment
         }, $text, 20);
     }
 
-    private static function iconForFileType(string $filetype): SafeHtml
+    private function iconForFileType(string $filetype): SafeHtml
     {
         [$alt, $icon] = match ($filetype) {
             'application/x-bittorrent' => ['torrent', 'torrent'],
@@ -211,10 +221,5 @@ final class Attachment
         };
 
         return SafeHtml::fromTrustedHtml(view('components.support.attach-icon', ['alt' => $alt, 'icon' => $icon])->render());
-    }
-
-    private static function attachmentRepository(): AttachmentRepositoryInterface
-    {
-        return app(AttachmentRepositoryInterface::class);
     }
 }

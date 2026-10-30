@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Chrome;
 
-use App\Support\Forum;
+use App\Services\ForumLookupService;
 use App\Support\PageLayoutContext;
 use App\Support\SearchBox;
 use App\Support\Style;
@@ -73,7 +73,7 @@ final class ChromeHead
      */
     private static function headAssets(PageLayoutContext $context, string $variant, ChromeRepositories $chrome): array
     {
-        $picFolder = Forum::picFolder($context->langDir);
+        $picFolder = app(ForumLookupService::class)->picFolder($context->langDir);
         $cssUpdateDate = $context->cssDateTweak !== '' ? '?'.$context->cssDateTweak : '';
 
         // Icon-pack stylesheets (category sprites) apply to both chrome

@@ -14,7 +14,7 @@ use App\Repositories\MessageRepository;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
-use App\Services\ForumDataRepositories;
+use App\Services\ForumCollaborators;
 use App\Services\ForumModerationService;
 use App\Services\ForumService;
 use App\Support\Cache\NexusCache;
@@ -163,7 +163,7 @@ final class ForumServiceTest extends TestCase
     private function service(): ForumService
     {
         return new ForumService(
-            $this->app->make(ForumDataRepositories::class),
+            $this->app->make(ForumCollaborators::class),
             $this->app->make(ActorContext::class),
             $this->app->make(NexusCache::class),
             $this->app->make(TopicPolicy::class),

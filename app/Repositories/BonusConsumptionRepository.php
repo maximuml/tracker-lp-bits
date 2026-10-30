@@ -102,4 +102,21 @@ class BonusConsumptionRepository extends BaseRepository
             'charity' => DB::raw(DB::getQueryGrammar()->wrap('charity').' + '.(float) $charityIncrement), // @phpstan-ignore argument.type
         ]);
     }
+
+    /**
+     * Bulk seedbonus top-up for all enabled users whose ratio is below
+     * the charity threshold — the receiver side of the low-ratio gift.
+     * No per-user bonus_logs rows (matches the legacy bulk UPDATE);
+     * per-user caches expire on their own TTL.
+     *
+     * @return int number of affected rows
+     */
+    public function incrementSeedbonusForLowRatioReceivers(float $ratioCharity, float $amount): int
+    {
+        return User::query()
+            ->where('enabled', true)
+            ->where('downloaded', '>', 10737418240)
+            ->whereRaw('? > uploaded/downloaded', [$ratioCharity])
+            ->increment('seedbonus', $amount);
+    }
 }

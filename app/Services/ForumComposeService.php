@@ -11,7 +11,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
 use App\ViewModels\Forum\ForumComposeViewModel;
@@ -27,6 +26,7 @@ final class ForumComposeService
         private readonly ForumRepositoryInterface $forumRepository,
         private readonly TopicRepository $topicRepository,
         private readonly PostLookupRepository $postRepository,
+        private readonly ForumAccessService $forumAccess,
     ) {}
 
     /**
@@ -111,7 +111,7 @@ final class ForumComposeService
     {
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post');
-        if (! Forum::canViewPost($actor->id, $postid)) {
+        if (! $this->forumAccess->canViewPost($actor->id, $postid)) {
             PageResponses::permissionDenied();
         }
 
@@ -137,7 +137,7 @@ final class ForumComposeService
         }
 
         $locked = (bool) $post['locked'];
-        $ismod = Forum::isModerator($postid, 'post');
+        $ismod = $this->forumAccess->isModerator($postid, 'post');
         if (($actor->id != $post['userid'] || $locked) && ! Permission::can(PermissionEnum::POST_MANAGE) && ! $ismod) {
             PageResponses::permissionDenied();
         }

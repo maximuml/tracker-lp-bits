@@ -23,6 +23,7 @@ enum BusinessType: int
     case CUSTOM_TITLE = 8;
     case BUY_VIP = 9;
     case GIFT_TO_SOMEONE = 10;
+    case BONUS_REVERSAL = 11;
     case GIFT_TO_LOW_SHARE_RATIO = 12;
     case LUCKY_DRAW = 13;
     case EXCHANGE_DOWNLOAD = 14;
@@ -43,6 +44,13 @@ enum BusinessType: int
     case RECEIVE_GIFT = 1003;
     case UPLOAD_TORRENT = 1004;
     case TORRENT_BE_REWARD = 1005;
+    case SAY_THANKS = 1006;
+    case RECEIVE_THANKS = 1007;
+    case OFFER_VOTE = 1008;
+    case POLL_VOTE = 1009;
+    case FORUM_TOPIC_BONUS = 1010;
+    case FORUM_POST_BONUS = 1011;
+    case COMMENT_BONUS = 1012;
 
     /**
      * Default English display text for each business type.
@@ -60,6 +68,7 @@ enum BusinessType: int
             self::CUSTOM_TITLE => 'Custom title',
             self::BUY_VIP => 'Buy VIP',
             self::GIFT_TO_SOMEONE => 'Gift to someone',
+            self::BONUS_REVERSAL => 'Bonus reversal',
             self::GIFT_TO_LOW_SHARE_RATIO => 'Gift to low share ratio',
             self::LUCKY_DRAW => 'Lucky draw',
             self::EXCHANGE_DOWNLOAD => 'Exchange download',
@@ -78,6 +87,13 @@ enum BusinessType: int
             self::RECEIVE_GIFT => 'Receive gift',
             self::UPLOAD_TORRENT => 'Upload torrent',
             self::TORRENT_BE_REWARD => 'Torrent be reward',
+            self::SAY_THANKS => 'Say thanks',
+            self::RECEIVE_THANKS => 'Receive thanks',
+            self::OFFER_VOTE => 'Offer vote',
+            self::POLL_VOTE => 'Poll vote',
+            self::FORUM_TOPIC_BONUS => 'Create forum topic',
+            self::FORUM_POST_BONUS => 'Post forum reply',
+            self::COMMENT_BONUS => 'Post comment',
         };
     }
 

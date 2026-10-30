@@ -9,10 +9,14 @@ use App\Enums\UserClass;
 use App\Models\User;
 use App\Repositories\ForumRepository;
 use App\Repositories\OverforumRepository;
+use App\Repositories\PostLookupRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\TopicReadStateRepository;
 use App\Repositories\TopicRepository;
+use App\Services\BonusLedgerService;
+use App\Services\ForumCollaborators;
 use App\Services\ForumIndexService;
+use App\Services\ForumLookupService;
 use App\Support\Cache\NexusCache;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -92,12 +96,17 @@ final class ForumIndexServiceTest extends TestCase
 
         $this->service = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $this->cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
     }
 
@@ -121,12 +130,17 @@ final class ForumIndexServiceTest extends TestCase
         $this->actorCtx = $this->actor(array_merge(['id' => 1, 'username' => 'testuser', 'class' => 1], $data));
         $this->service = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $this->cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
     }
 
@@ -245,12 +259,17 @@ final class ForumIndexServiceTest extends TestCase
         $this->actorCtx = $this->actor([]);
         $this->service = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $this->cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
 
         $this->service->catchUp();
@@ -496,12 +515,17 @@ final class ForumIndexServiceTest extends TestCase
 
         $service = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
 
         $repo->shouldReceive('updateUserForumAccess')->andReturn(true);
@@ -582,12 +606,17 @@ final class ForumIndexServiceTest extends TestCase
 
         $service = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
 
         $this->readStateRepo->shouldReceive('getLastReadPosts')->with(0)->once()->andReturn(null);
@@ -600,24 +629,34 @@ final class ForumIndexServiceTest extends TestCase
 
         $service2 = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
         $this->assertSame(0, $service2->getLastReadPostId(7, $this->actor(['username' => 'noid'])));
         $this->assertContains(['user_0_last_read_post_list', [7 => 0], 900], $puts);
 
         $service3 = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
         $this->assertSame(0, $service3->getLastReadPostId(2, $this->actor(['id' => 5])));
         $this->assertContains(['user_5_last_read_post_list', 'no record', 900], $puts);
@@ -654,12 +693,17 @@ final class ForumIndexServiceTest extends TestCase
 
         $service = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
 
         $repo->shouldReceive('updateUserForumAccess')->andReturn(true);
@@ -695,12 +739,17 @@ final class ForumIndexServiceTest extends TestCase
 
         $service = new ForumIndexService(
             $this->actorCtx,
-            $this->forumRepo,
+            new ForumCollaborators(
+                $this->forumRepo,
+                $this->topicRepo,
+                $this->postRepo,
+                $this->app->make(PostLookupRepository::class),
+                $this->app->make(BonusLedgerService::class),
+                $this->app->make(ForumLookupService::class),
+            ),
             new OverforumRepository,
             $cache,
-            $this->topicRepo,
             $this->readStateRepo,
-            $this->postRepo,
         );
 
         $this->readStateRepo->shouldReceive('clearReadPosts')->with(7)->once();

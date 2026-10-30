@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
-use App\Repositories\BonusRepository;
 use App\Repositories\TorrentPurchaseRepository;
+use App\Services\BonusPurchaseService;
 use App\Support\Logger;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -58,7 +58,7 @@ class BuyTorrent implements ShouldBeUnique, ShouldQueue
      *
      * @throws \Throwable
      */
-    public function handle(TorrentPurchaseRepository $purchaseRep, BonusRepository $bonusRep)
+    public function handle(TorrentPurchaseRepository $purchaseRep, BonusPurchaseService $purchaseService)
     {
         $logPrefix = sprintf('user: %s, torrent: %s', $this->userId, $this->torrentId);
         $userId = $this->userId;
@@ -74,7 +74,7 @@ class BuyTorrent implements ShouldBeUnique, ShouldQueue
             return;
         }
         try {
-            $buyLog = $bonusRep->consumeToBuyTorrent($this->userId, $this->torrentId);
+            $buyLog = $purchaseService->consumeToBuyTorrent($this->userId, $this->torrentId);
             // 标记购买成功
             Logger::writeWithContext((string) "{$logPrefix}, buy torrent success", (string) 'info', (bool) false);
             $purchaseRep->addBuySuccessCache($userId, $torrentId, $buyLog->id);

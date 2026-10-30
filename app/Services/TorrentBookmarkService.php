@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\Repositories\TorrentRepositoryInterface;
+use App\Enums\BusinessType;
 use App\Repositories\BookmarkRepository;
 use App\Repositories\TorrentDetailRepository;
-use App\Support\Bonus;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 
@@ -24,6 +24,7 @@ final class TorrentBookmarkService
         private readonly BookmarkRepository $bookmarkRepository,
         private readonly TorrentRepositoryInterface $torrentRepository,
         private readonly TorrentDetailRepository $torrentDetailRepository,
+        private readonly BonusLedgerService $ledger,
         private readonly ?NexusCache $cache = null,
     ) {}
 
@@ -85,8 +86,8 @@ final class TorrentBookmarkService
         $bonusConfig = SiteConfig::current()->bonus;
         $saythanksBonus = $bonusConfig->sayThanks();
         $receivethanksBonus = $bonusConfig->receiveThanks();
-        Bonus::updatePoints('+', $saythanksBonus, $userId);
-        Bonus::updatePoints('+', $receivethanksBonus, $torrentOwner);
+        $this->ledger->award($userId, (float) $saythanksBonus, BusinessType::SAY_THANKS, 'Say thanks');
+        $this->ledger->award($torrentOwner, (float) $receivethanksBonus, BusinessType::RECEIVE_THANKS, 'Receive thanks');
 
         return ['torrentid' => $torrentId, 'owner' => $torrentOwner];
     }

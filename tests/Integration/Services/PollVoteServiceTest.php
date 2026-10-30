@@ -7,6 +7,7 @@ namespace Tests\Integration\Services;
 use App\Models\Poll;
 use App\Models\User;
 use App\Repositories\IndexRepository;
+use App\Services\BonusLedgerService;
 use App\Services\PollVoteService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
@@ -29,7 +30,7 @@ final class PollVoteServiceTest extends TestCase
         DB::table('pollanswers')->delete();
         DB::table('polls')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-        $this->service = new PollVoteService(new IndexRepository);
+        $this->service = new PollVoteService(new IndexRepository, $this->app->make(BonusLedgerService::class));
     }
 
     public function test_vote_rejects_invalid_choice(): void

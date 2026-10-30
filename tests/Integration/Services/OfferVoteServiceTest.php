@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\DTOs\Auth\ActorContext;
+use App\Enums\BusinessType;
 use App\Enums\OfferAllowed;
 use App\Enums\OfferVote;
 use App\Enums\Permission\PermissionEnum;
@@ -13,6 +14,7 @@ use App\Models\User;
 use App\Repositories\MessageRepository;
 use App\Repositories\OfferRepository;
 use App\Repositories\OfferVoteRepository;
+use App\Services\BonusLedgerService;
 use App\Services\OfferVoteService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -60,6 +62,7 @@ final class OfferVoteServiceTest extends TestCase
             new OfferRepository,
             new OfferVoteRepository,
             new MessageRepository,
+            $this->app->make(BonusLedgerService::class),
         );
         $this->seedTestSettings(['BASEURL' => 'example.com']);
     }
@@ -116,6 +119,7 @@ final class OfferVoteServiceTest extends TestCase
             new OfferRepository,
             new OfferVoteRepository,
             new MessageRepository,
+            $this->app->make(BonusLedgerService::class),
         );
     }
 
@@ -237,6 +241,24 @@ final class OfferVoteServiceTest extends TestCase
             'offerid' => $offerId,
             'userid' => $voterId,
             'vote' => OfferVote::YEAH->value,
+        ]);
+    }
+
+    public function test_yeah_vote_awards_bonus_to_voter(): void
+    {
+        $ownerId = $this->createUser();
+        $voterId = $this->createUser();
+        $offerId = $this->insertOffer($ownerId);
+        $this->authenticatedUser(['id' => $voterId]);
+        $bonusBefore = (float) DB::table('users')->where('id', $voterId)->value('seedbonus');
+
+        $this->callVote(['id' => $offerId, 'vote' => 'yeah']);
+
+        $bonusAfter = (float) DB::table('users')->where('id', $voterId)->value('seedbonus');
+        $this->assertGreaterThan($bonusBefore, $bonusAfter);
+        $this->assertDatabaseHas('bonus_logs', [
+            'uid' => $voterId,
+            'business_type' => BusinessType::OFFER_VOTE->value,
         ]);
     }
 

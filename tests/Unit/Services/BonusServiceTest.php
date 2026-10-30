@@ -6,10 +6,11 @@ namespace Tests\Unit\Services;
 
 use App\DTOs\Auth\ActorContext;
 use App\Repositories\BonusCalculationRepository;
-use App\Repositories\BonusRepository;
+use App\Repositories\BonusConsumptionRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\SettingRepository;
 use App\Services\BonusLedgerService;
+use App\Services\BonusPurchaseService;
 use App\Services\BonusService;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
@@ -39,8 +40,8 @@ final class BonusServiceTest extends TestCase
 
     private function service(): BonusService
     {
-        /** @var BonusRepository&Mockery\MockInterface $repo */
-        $repo = Mockery::mock(BonusRepository::class);
+        /** @var BonusPurchaseService&Mockery\MockInterface $purchase */
+        $purchase = $this->app->make(BonusPurchaseService::class);
         /** @var BonusCalculationRepository&Mockery\MockInterface $calcRepo */
         $calcRepo = Mockery::mock(BonusCalculationRepository::class);
         /** @var SettingRepository&Mockery\MockInterface $settingsRepo */
@@ -49,7 +50,7 @@ final class BonusServiceTest extends TestCase
         $this->app->instance(SettingRepository::class, $settingsRepo);
         Settings::resetCache();
 
-        return new BonusService($repo, $calcRepo, $this->app->make(MessageRepository::class), $this->app->make(BonusLedgerService::class));
+        return new BonusService($purchase, $calcRepo, $this->app->make(MessageRepository::class), $this->app->make(BonusLedgerService::class), $this->app->make(BonusConsumptionRepository::class));
     }
 
     /**

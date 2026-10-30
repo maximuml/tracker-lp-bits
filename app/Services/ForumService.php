@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Auth\Permission;
 use App\DTOs\Auth\ActorContext;
+use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Models\Post;
 use App\Models\Topic;
@@ -13,7 +14,6 @@ use App\Models\User;
 use App\Policies\PostPolicy;
 use App\Policies\TopicPolicy;
 use App\Repositories\MessageRepository;
-use App\Support\Bonus;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
@@ -108,7 +108,7 @@ final class ForumService
     }
 
     public function __construct(
-        private readonly ForumDataRepositories $data,
+        private readonly ForumCollaborators $data,
         private readonly ActorContext $actor,
         private readonly NexusCache $cache,
         private readonly TopicPolicy $topicPolicy,
@@ -295,9 +295,7 @@ final class ForumService
 
         if ($type === 'new') {
             $starttopicBonus = SiteConfig::current()->bonus->startTopic();
-            if ($starttopicBonus > 0) {
-                Bonus::updatePoints('+', $starttopicBonus, $userid);
-            }
+            $this->data->ledger->award($userid, (float) $starttopicBonus, BusinessType::FORUM_TOPIC_BONUS, 'Start topic');
 
             $topicid = $this->data->topics->createTopic($userid, $forumid, $subject);
             if ($topicid <= 0) {
@@ -307,9 +305,7 @@ final class ForumService
             $this->data->forums->incrementForumPostCount($forumid);
         } else {
             $makepostBonus = SiteConfig::current()->bonus->makePost();
-            if ($makepostBonus > 0) {
-                Bonus::updatePoints('+', $makepostBonus, $userid);
-            }
+            $this->data->ledger->award($userid, (float) $makepostBonus, BusinessType::FORUM_POST_BONUS, 'Make post');
             $this->data->forums->incrementForumPostCount($forumid);
         }
 

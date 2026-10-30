@@ -9,6 +9,7 @@ use App\Models\BonusLogs;
 use App\Models\User;
 use App\Repositories\BonusConsumptionRepository;
 use App\Support\Cache;
+use App\Support\Config\SiteConfig;
 use App\Support\Logger;
 use App\Support\QueryLog;
 use Illuminate\Support\Facades\DB;
@@ -64,39 +65,38 @@ final class BonusLedgerService
         if ($amount <= 0) {
             throw new \InvalidArgumentException('Credit amount must be positive.');
         }
-        DB::transaction(function () use ($userId, $amount, $type, $comment) {
-            $lockedUser = DB::table('users')
-                ->where('id', $userId)
-                ->lockForUpdate()
-                ->first(['id', 'seedbonus', 'passkey']);
-            if ($lockedUser === null) {
-                throw new \InvalidArgumentException('User not found');
-            }
+        $this->applyDelta($userId, (string) $amount, $type, $comment, strict: true);
+    }
 
-            $oldUserBonus = (float) ($lockedUser->seedbonus ?? 0);
-            $newUserBonus = bcadd((string) $oldUserBonus, (string) $amount);
-            $affectedRows = DB::table('users')
-                ->where('id', $userId)
-                ->where('seedbonus', $oldUserBonus)
-                ->update(['seedbonus' => $newUserBonus]);
-            if ($affectedRows != 1) {
-                Logger::writeWithContext((string) ('credit user seedbonus affected rows: '.$affectedRows.' != 1, query: '.QueryLog::last()), 'error', false);
-                throw new \RuntimeException('Update user seedbonus fail.');
-            }
-            $nowStr = now()->toDateTimeString();
-            $bonusLog = [
-                'business_type' => $type->value,
-                'uid' => $userId,
-                'old_total_value' => $oldUserBonus,
-                'value' => $amount,
-                'new_total_value' => $newUserBonus,
-                'comment' => sprintf('[%s] %s', $type->label(), $comment),
-                'created_at' => $nowStr,
-                'updated_at' => $nowStr,
-            ];
-            BonusLogs::query()->insert($bonusLog);
-            Cache::clearUser($userId, (string) ($lockedUser->passkey ?? ''));
-        });
+    /**
+     * Tolerant accrual for "earn points" flows (thanks, votes, forum
+     * posts, comments): honors the bonus tweak gate like the retired
+     * `Bonus::updatePoints()` did, no-ops on zero/negative amounts and
+     * silently skips deleted users — while still writing the bonus_logs
+     * audit row and clearing the user cache, which the legacy path
+     * never did.
+     */
+    public function award(int $userId, float $amount, BusinessType $type, string $comment = '', ?string $bonusTweak = null): void
+    {
+        if ($amount <= 0 || ! $this->bonusPointsActive($bonusTweak)) {
+            return;
+        }
+        $this->applyDelta($userId, (string) $amount, $type, $comment, strict: false);
+    }
+
+    /**
+     * Tolerant clawback for moderation reversals (deleted post/topic/
+     * comment/torrent): same tweak gate and missing-user tolerance as
+     * {@see award()}, and like the legacy bare `seedbonus - X` update
+     * it does NOT enforce a non-negative balance — a revoked bonus
+     * larger than the current balance leaves the account in debt.
+     */
+    public function revoke(int $userId, float $amount, BusinessType $type, string $comment = '', ?string $bonusTweak = null): void
+    {
+        if ($amount <= 0 || ! $this->bonusPointsActive($bonusTweak)) {
+            return;
+        }
+        $this->applyDelta($userId, (string) (-$amount), $type, $comment, strict: false);
     }
 
     /**
@@ -147,5 +147,67 @@ final class BonusLedgerService
             $this->debit($fromUserId, $debitAmount, $debitType, $debitComment);
             $this->credit($toUserId, $creditAmount, $creditType, $creditComment);
         });
+    }
+
+    /**
+     * Shared locked-delta core for credit()/award()/revoke(): row lock,
+     * CAS update on the observed balance, bonus_logs row, cache clear —
+     * all inside one transaction. `$strict` controls the missing-user
+     * contract: strict callers get InvalidArgumentException, tolerant
+     * callers (legacy accrual semantics) get a silent no-op.
+     *
+     * @param  numeric-string  $delta
+     */
+    private function applyDelta(int $userId, string $delta, BusinessType $type, string $comment, bool $strict): void
+    {
+        DB::transaction(function () use ($userId, $delta, $type, $comment, $strict) {
+            $lockedUser = DB::table('users')
+                ->where('id', $userId)
+                ->lockForUpdate()
+                ->first(['id', 'seedbonus', 'passkey']);
+            if ($lockedUser === null) {
+                if ($strict) {
+                    throw new \InvalidArgumentException('User not found');
+                }
+
+                return;
+            }
+
+            $oldUserBonus = (float) ($lockedUser->seedbonus ?? 0);
+            // Scale 10 keeps fractional deltas (e.g. saythanks 0.5):
+            // with the default bcmath.scale=0 the sum silently
+            // truncated to integer, produced a no-op UPDATE and tripped
+            // the affected-rows check below. The decimal(20,1) target
+            // columns round the result identically on write.
+            $newUserBonus = bcadd((string) $oldUserBonus, $delta, 10);
+            $affectedRows = DB::table('users')
+                ->where('id', $userId)
+                ->where('seedbonus', $oldUserBonus)
+                ->update(['seedbonus' => $newUserBonus]);
+            if ($affectedRows != 1) {
+                Logger::writeWithContext((string) ('applyDelta user seedbonus affected rows: '.$affectedRows.' != 1, query: '.QueryLog::last()), 'error', false);
+                throw new \RuntimeException('Update user seedbonus fail.');
+            }
+            $nowStr = now()->toDateTimeString();
+            $bonusLog = [
+                'business_type' => $type->value,
+                'uid' => $userId,
+                'old_total_value' => $oldUserBonus,
+                'value' => abs((float) $delta),
+                'new_total_value' => $newUserBonus,
+                'comment' => sprintf('[%s] %s', $type->label(), $comment),
+                'created_at' => $nowStr,
+                'updated_at' => $nowStr,
+            ];
+            BonusLogs::query()->insert($bonusLog);
+            Cache::clearUser($userId, (string) ($lockedUser->passkey ?? ''));
+        });
+    }
+
+    private function bonusPointsActive(?string $bonusTweak): bool
+    {
+        $bonusTweak ??= SiteConfig::current()->tweak->bonus();
+
+        return $bonusTweak === 'enable' || $bonusTweak === 'disablesave';
     }
 }

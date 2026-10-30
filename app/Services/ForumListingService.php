@@ -11,7 +11,6 @@ use App\Repositories\TopicRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
-use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\Log;
 use App\Support\PageResponses;
@@ -42,6 +41,7 @@ final class ForumListingService
         private readonly ?NexusCache $cache,
         private readonly TopicRepository $topicRepository,
         private readonly PostRepositoryInterface $postRepository,
+        private readonly ForumLookupService $forumLookup,
     ) {}
 
     /**
@@ -62,7 +62,7 @@ final class ForumListingService
         }
 
         $forumname = (string) ($row['name'] ?? '');
-        $forummoderators = Forum::moderatorsWithContext($forumid, false);
+        $forummoderators = $this->forumLookup->moderators($forumid, false);
         $searchRaw = request()->query('search') ?? '';
         $search = trim(is_scalar($searchRaw) ? (string) $searchRaw : '');
 
@@ -375,7 +375,7 @@ final class ForumListingService
             results: $results,
             page: (int) $page,
             pages: $pages,
-            imageUrl: Forum::picFolderWithContext().'/search_button.gif',
+            imageUrl: $this->forumLookup->picFolder().'/search_button.gif',
         );
     }
 

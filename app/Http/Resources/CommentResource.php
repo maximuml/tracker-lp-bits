@@ -7,7 +7,7 @@ namespace App\Http\Resources;
 use App\Auth\Permission;
 use App\Models\Comment;
 use App\Models\User;
-use App\Support\Attachment;
+use App\Services\AttachmentRenderService;
 use App\Support\Time;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,7 +31,7 @@ class CommentResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'text' => Attachment::bbcodeToImg((string) $this->text),
+            'text' => app(AttachmentRenderService::class)->bbcodeToImg((string) $this->text),
             'updated_at' => Time::formatDateTime($this->editdate),
             'created_at' => Time::formatDateTime($this->added),
             'create_user' => $revealAuthor ? new UserResource($this->whenLoaded('create_user')) : null,

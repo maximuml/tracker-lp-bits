@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\UserAdminController;
-use App\Repositories\BonusRepository;
 use App\Repositories\StaffDirectoryRepository;
 use App\Repositories\UserListingRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
+use App\Services\BonusLedgerService;
 use App\Services\PermissionChecker;
 use Mockery;
 use Tests\Attributes\TestCategory;
@@ -35,15 +35,14 @@ final class UserAdminControllerTest extends TestCase
         /** @var UserModerationRepository&Mockery\MockInterface $userModerationRepository */
         $userModerationRepository = Mockery::mock(UserModerationRepository::class);
 
-        /** @var BonusRepository&Mockery\MockInterface $bonusRepository */
-        $bonusRepository = Mockery::mock(BonusRepository::class);
+        $ledger = $this->app->make(BonusLedgerService::class);
 
         $controller = new UserAdminController(
             Mockery::mock(PermissionChecker::class),
             Mockery::mock(StaffDirectoryRepository::class),
             $userRepository,
             $userModerationRepository,
-            $bonusRepository,
+            $ledger,
             Mockery::mock(UserListingRepository::class),
             $this->actor([]),
         );

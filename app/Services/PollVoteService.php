@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\BusinessType;
 use App\Models\Poll;
 use App\Repositories\IndexRepository;
-use App\Support\Bonus;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 
@@ -18,6 +18,7 @@ final class PollVoteService
 {
     public function __construct(
         private readonly IndexRepository $indexRepository,
+        private readonly BonusLedgerService $ledger,
         private readonly ?NexusCache $cache = null,
     ) {}
 
@@ -57,9 +58,7 @@ final class PollVoteService
         $this->cache?->forget('current_poll_result', true);
 
         $pollvoteBonus = SiteConfig::current()->bonus->pollVote();
-        if ($pollvoteBonus > 0) {
-            Bonus::updatePoints((string) '+', (float) $pollvoteBonus, $user['id']);
-        }
+        $this->ledger->award((int) $user['id'], (float) $pollvoteBonus, BusinessType::POLL_VOTE, 'Poll vote');
 
         return true;
     }

@@ -6,7 +6,7 @@ namespace App\Jobs;
 
 use App\Models\User;
 use App\Repositories\UserStatRepository;
-use App\Support\Bonus;
+use App\Services\SeedBonusService;
 use App\Support\Cache as AppCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Json;
@@ -76,7 +76,7 @@ class SeedBonusJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(UserStatRepository $userStatRepository)
+    public function handle(UserStatRepository $userStatRepository, SeedBonusService $seedBonus)
     {
         $beginTimestamp = time();
         $logPrefix = sprintf(
@@ -117,7 +117,7 @@ class SeedBonusJob implements ShouldQueue
         foreach ($results as $userInfo) {
             $uid = $userInfo['id'];
             $isDonor = UserDisplay::isDonor($userInfo);
-            $seedBonusResult = Bonus::calculateForUser($uid);
+            $seedBonusResult = $seedBonus->calculateForUser($uid);
             $bonusLog = "[CLEANUP_CLI_CALCULATE_SEED_BONUS_HANDLE_USER], user: $uid, seedBonusResult: ".Json::encode($seedBonusResult);
             $all_bonus = $basicBonus = $seedBonusResult['seed_bonus'];
             $oldValue = $userInfo['seedbonus'];
@@ -136,7 +136,7 @@ class SeedBonusJob implements ShouldQueue
                 $oldValue += $officialAddition;
             }
             if ($haremAdditionFactor > 0) {
-                $haremBonus = Bonus::haremAddition($uid);
+                $haremBonus = $seedBonus->haremAddition($uid);
                 $haremAddition = (float) $haremBonus * (float) $haremAdditionFactor;
                 $all_bonus += $haremAddition;
                 $bonusLog .= ", haremAdditionFactor: $haremAdditionFactor, haremBonus: $haremBonus, haremAddition: $haremAddition, all_bonus: $all_bonus";

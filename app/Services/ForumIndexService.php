@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\ForumRepositoryInterface;
-use App\Contracts\Repositories\PostRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Repositories\OverforumRepository;
 use App\Repositories\TopicReadStateRepository;
-use App\Repositories\TopicRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
-use App\Support\Forum;
 use App\Support\Html\SafeHtml;
 use App\Support\UserDisplay;
 use App\ViewModels\Forum\ForumIndexViewModel;
@@ -34,12 +30,10 @@ final class ForumIndexService
 
     public function __construct(
         private readonly ActorContext $actor,
-        private readonly ForumRepositoryInterface $forumRepository,
+        private readonly ForumCollaborators $data,
         private readonly OverforumRepository $overforumRepository,
         private readonly NexusCache $cache,
-        private readonly TopicRepository $topicRepository,
         private readonly TopicReadStateRepository $readStateRepository,
-        private readonly PostRepositoryInterface $postRepository,
     ) {}
 
     /**
@@ -51,7 +45,7 @@ final class ForumIndexService
         $todayDate = date('Y-m-d');
 
         if ($actor->isAuthenticated()) {
-            $this->forumRepository->updateUserForumAccess($actor->id, date('Y-m-d H:i:s'));
+            $this->data->forums->updateUserForumAccess($actor->id, date('Y-m-d H:i:s'));
         }
 
         $SITENAME = SiteConfig::current()->basic->siteName();
@@ -103,7 +97,7 @@ final class ForumIndexService
             }
         }
         if ($missingReplied !== []) {
-            $batched = $this->topicRepository->getLastTopicsByForums($missingReplied);
+            $batched = $this->data->topics->getLastTopicsByForums($missingReplied);
             foreach ($missingReplied as $fid) {
                 $arr = isset($batched[$fid]) ? $batched[$fid]->toArray() : false;
                 $repliedByForum[$fid] = $arr;
@@ -125,7 +119,7 @@ final class ForumIndexService
             }
         }
         if ($missingPostIds !== []) {
-            $fetched = $this->postRepository->findPostArraysByIds($missingPostIds);
+            $fetched = $this->data->posts->findPostArraysByIds($missingPostIds);
             foreach ($missingPostIds as $id) {
                 $row = $fetched[$id] ?? null;
                 $postRows['post_'.$id.'_content'] = $row;
@@ -133,7 +127,7 @@ final class ForumIndexService
             }
         }
         if ($missingCounts !== []) {
-            foreach ($this->postRepository->getForumTodayPostCounts($missingCounts, $todayDate) as $fid => $cnt) {
+            foreach ($this->data->posts->getForumTodayPostCounts($missingCounts, $todayDate) as $fid => $cnt) {
                 $todayCounts[$fid] = $cnt;
             }
             foreach ($missingCounts as $fid) {
@@ -196,7 +190,7 @@ final class ForumIndexService
     {
         $forumid = (int) $forums_arr['id'];
 
-        $forummoderators = Forum::moderatorsWithContext($forumid, false);
+        $forummoderators = $this->data->lookup->moderators($forumid, false);
 
         $arr = $repliedByForum[$forumid] ?? false;
 
@@ -248,19 +242,19 @@ final class ForumIndexService
         $Cache = $this->cache;
 
         if (! $activeforumuser_num = $Cache->get('active_forum_user_count')) {
-            $activeforumuser_num = $this->forumRepository->getActiveForumUserCount();
+            $activeforumuser_num = $this->data->forums->getActiveForumUserCount();
             $Cache->put('active_forum_user_count', $activeforumuser_num, 300);
         }
         if (! $postcount = $Cache->get('total_posts_count')) {
-            $postcount = $this->postRepository->getTotalPostsCount();
+            $postcount = $this->data->posts->getTotalPostsCount();
             $Cache->put('total_posts_count', $postcount, 96400);
         }
         if (! $topiccount = $Cache->get('total_topics_count')) {
-            $topiccount = $this->topicRepository->getTotalTopicsCount();
+            $topiccount = $this->data->topics->getTotalTopicsCount();
             $Cache->put('total_topics_count', $topiccount, 96500);
         }
         if (! $todaypostcount = $Cache->get('today_'.$todayDate.'_posts_count')) {
-            $todaypostcount = $this->postRepository->getTodayPostsCount($todayDate);
+            $todaypostcount = $this->data->posts->getTodayPostsCount($todayDate);
             $Cache->put('today_'.$todayDate.'_posts_count', $todaypostcount, 700);
         }
 
@@ -285,10 +279,10 @@ final class ForumIndexService
         $Cache = $this->cache;
         $this->readStateRepository->clearReadPosts((int) $CURUSER['id']);
         $Cache->forget('user_'.$CURUSER['id'].'_last_read_post_list');
-        $lastpostid = $this->postRepository->getLastPostId();
+        $lastpostid = $this->data->posts->getLastPostId();
         if ($lastpostid) {
             $CURUSER['last_catchup'] = $lastpostid;
-            $this->postRepository->updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
+            $this->data->posts->updateLastCatchup((int) $CURUSER['id'], (int) $lastpostid);
         }
     }
 
@@ -299,7 +293,7 @@ final class ForumIndexService
     {
         $Cache = $this->cache;
         if (! $forums = $Cache->get('forums_list')) {
-            $forums = $this->forumRepository->getForumsList();
+            $forums = $this->data->forums->getForumsList();
             $Cache->put('forums_list', $forums, 86400);
         }
         if (! $forumid) {

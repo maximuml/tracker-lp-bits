@@ -16,8 +16,8 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\TopicModerationRepository;
 use App\Repositories\TopicRepository;
+use App\Services\ForumAccessService;
 use App\Support\CurrentUser;
-use App\Support\Forum as SupportForum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -30,6 +30,7 @@ class TopicController extends Controller
         private readonly TopicRepository $topicRepository,
         private readonly TopicModerationRepository $topicModerationRepository,
         private readonly CurrentUser $currentUser,
+        private readonly ForumAccessService $forumAccess,
     ) {}
 
     /**
@@ -109,7 +110,7 @@ class TopicController extends Controller
 
         $dto = UpdateTopicDto::fromRequest($request);
 
-        $canModerate = SupportForum::isModerator((int) $topic->id, 'topic')
+        $canModerate = $this->forumAccess->isModerator((int) $topic->id, 'topic')
             || Permission::can(PermissionEnum::POST_MANAGE, $user);
 
         if (! $canModerate && ($dto->locked !== null || $dto->sticky !== null || $dto->hlcolor !== null)) {
@@ -152,7 +153,7 @@ class TopicController extends Controller
 
         $this->currentUser->promote($user);
 
-        if (! SupportForum::isModerator((int) $topic->id, 'topic') && ! Permission::can(PermissionEnum::POST_MANAGE, $user)) {
+        if (! $this->forumAccess->isModerator((int) $topic->id, 'topic') && ! Permission::can(PermissionEnum::POST_MANAGE, $user)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 

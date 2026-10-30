@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Enums\BusinessType;
 use App\Repositories\BookmarkRepository;
 use App\Repositories\PeerRepository;
 use App\Repositories\SnatchRepository;
 use App\Repositories\TorrentDetailRepository;
 use App\Repositories\TorrentDownloadRepository;
 use App\Repositories\TorrentRepository;
+use App\Services\BonusLedgerService;
 use App\Services\TorrentBookmarkService;
+use App\Support\Settings;
 use App\Support\Torrent\TorrentStatus;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +43,7 @@ final class TorrentBookmarkServiceTest extends TestCase
         DB::table('users')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        $this->service = new TorrentBookmarkService(new BookmarkRepository, new TorrentRepository(new TorrentDownloadRepository, new TorrentStatus(new PeerRepository, new SnatchRepository)), new TorrentDetailRepository);
+        $this->service = new TorrentBookmarkService(new BookmarkRepository, new TorrentRepository(new TorrentDownloadRepository, new TorrentStatus(new PeerRepository, new SnatchRepository)), new TorrentDetailRepository, $this->app->make(BonusLedgerService::class));
     }
 
     private function insertTorrent(int $id, int $owner = 10): void
@@ -193,6 +196,32 @@ final class TorrentBookmarkServiceTest extends TestCase
         $this->assertNotNull($thanks);
         $this->assertSame(501, (int) $thanks->torrentid);
         $this->assertSame(1, (int) $thanks->userid);
+    }
+
+    public function test_thank_torrent_awards_voter_and_owner(): void
+    {
+        $this->insertTorrent(503);
+        $this->insertUser(1);
+        DB::table('settings')->updateOrInsert(
+            ['name' => 'bonus.receivethanks'],
+            ['value' => '7']
+        );
+        Settings::resetCache();
+
+        $this->service->thankTorrent(['id' => 1], 503);
+
+        // saythanks 0.5 to the voter, seeded receivethanks 7 to the owner.
+        $this->assertSame(0.5, (float) DB::table('users')->where('id', 1)->value('seedbonus'));
+        $this->assertSame(7.0, (float) DB::table('users')->where('id', 10)->value('seedbonus'));
+        $this->assertDatabaseHas('bonus_logs', [
+            'uid' => 1,
+            'business_type' => BusinessType::SAY_THANKS->value,
+        ]);
+        $this->assertDatabaseHas('bonus_logs', [
+            'uid' => 10,
+            'business_type' => BusinessType::RECEIVE_THANKS->value,
+            'value' => 7,
+        ]);
     }
 
     public function test_thank_torrent_with_null_user_uses_zero_id(): void

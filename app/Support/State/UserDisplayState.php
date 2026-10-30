@@ -14,7 +14,7 @@ use Illuminate\Container\Attributes\Scoped;
  * Redis "user_{id}_content" invalidation fires while the ids are known.
  */
 #[Scoped]
-final class UserDisplayState
+final class UserDisplayState implements RequestScopedState
 {
     /** @var array<int|string, array<int|string, mixed>|false> */
     public array $rowCache = [];

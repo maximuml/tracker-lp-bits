@@ -6,6 +6,7 @@ namespace Tests\Integration\Repositories;
 
 use App\Repositories\CleanupMonitorRepository;
 use App\Repositories\CleanupRepository;
+use App\Support\State\CleanupRepositoryState;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
@@ -38,7 +39,7 @@ final class CleanupRepositoryTest extends TestCase
         DB::table('avps')->delete();
         DB::table('failed_jobs')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-        $this->repository = new CleanupRepository(app(CleanupMonitorRepository::class));
+        $this->repository = new CleanupRepository(app(CleanupMonitorRepository::class), new CleanupRepositoryState);
     }
 
     protected function tearDown(): void

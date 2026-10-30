@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class UserClassState
+final class UserClassState implements RequestScopedState
 {
     /** @var array<string, mixed>|null */
     public ?array $settingAccount = null;

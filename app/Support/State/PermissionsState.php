@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class PermissionsState
+final class PermissionsState implements RequestScopedState
 {
     /** @var array<int|string, mixed> */
     public array $userCanCache = [];

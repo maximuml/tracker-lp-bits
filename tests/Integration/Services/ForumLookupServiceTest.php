@@ -35,6 +35,7 @@ final class ForumLookupServiceTest extends TestCase
         $service = new ForumLookupService(
             Mockery::mock(ForumModRepository::class),
             Mockery::mock(NexusCache::class),
+            new ForumState,
         );
 
         $this->assertSame('pic/forum_pic/en', $service->picFolder('en'));
@@ -46,6 +47,7 @@ final class ForumLookupServiceTest extends TestCase
         $service = new ForumLookupService(
             Mockery::mock(ForumModRepository::class),
             Mockery::mock(NexusCache::class),
+            new ForumState,
         );
 
         $this->assertSame('pic/forum_pic/en', $service->picFolder());

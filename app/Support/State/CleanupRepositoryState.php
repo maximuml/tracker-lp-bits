@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class CleanupRepositoryState
+final class CleanupRepositoryState implements RequestScopedState
 {
     public float|int $oneTaskSeconds = 0;
 

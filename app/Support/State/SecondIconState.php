@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class SecondIconState
+final class SecondIconState implements RequestScopedState
 {
     /** @var array<string, Collection<int|string, mixed>> */
     public array $taxonomyList = [];

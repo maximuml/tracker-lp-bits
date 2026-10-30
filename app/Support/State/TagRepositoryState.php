@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class TagRepositoryState
+final class TagRepositoryState implements RequestScopedState
 {
     public ?string $orderByFieldIdString = null;
 

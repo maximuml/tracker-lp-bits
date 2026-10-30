@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class ShoutboxState
+final class ShoutboxState implements RequestScopedState
 {
     /** @var array<int|string, array<string, mixed>|false> */
     public array $mentionUserCache = [];

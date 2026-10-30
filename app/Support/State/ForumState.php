@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class ForumState
+final class ForumState implements RequestScopedState
 {
     /** @var array<int|string, mixed>|null */
     public ?array $moderatorsArray = null;

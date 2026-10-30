@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class StyleState
+final class StyleState implements RequestScopedState
 {
     /** @var array<int, array<string, mixed>>|null */
     public ?array $stylesheetRows = null;

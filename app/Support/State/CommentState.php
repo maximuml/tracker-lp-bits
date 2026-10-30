@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class CommentState
+final class CommentState implements RequestScopedState
 {
     /** @var array<int, string> */
     public array $tempCode = [];

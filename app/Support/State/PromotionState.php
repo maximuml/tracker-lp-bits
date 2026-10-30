@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class PromotionState
+final class PromotionState implements RequestScopedState
 {
     public ?int $globalSpecialState = null;
 

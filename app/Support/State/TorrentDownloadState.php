@@ -13,7 +13,7 @@ use Illuminate\Container\Attributes\Scoped;
  * the memo to the current request/job.
  */
 #[Scoped]
-final class TorrentDownloadState
+final class TorrentDownloadState implements RequestScopedState
 {
     /** @var array<string, string> */
     public array $downHashKeys = [];

@@ -29,6 +29,7 @@ final class ForumAccessService
         private readonly TopicRepository $topicRepository,
         private readonly PostLookupRepository $postLookupRepository,
         private readonly SettingRepository $settingRepository,
+        private readonly ForumState $forumState,
     ) {}
 
     /**
@@ -75,39 +76,39 @@ final class ForumAccessService
         }
 
         $topicId = $post['topicid'];
-        if (! isset(ForumState::instance()->topics[$topicId])) {
-            ForumState::instance()->topics[$topicId] = $this->topicRepository->getTopicById($topicId);
+        if (! isset($this->forumState->topics[$topicId])) {
+            $this->forumState->topics[$topicId] = $this->topicRepository->getTopicById($topicId);
         }
         /** @var Topic $topicInfo */
-        $topicInfo = ForumState::instance()->topics[$topicId];
+        $topicInfo = $this->forumState->topics[$topicId];
         $forumId = $topicInfo->forumid;
 
-        if (ForumState::instance()->protectedForumIds === null) {
+        if ($this->forumState->protectedForumIds === null) {
             $settingRepository = $this->settingRepository;
             $protected = Cache::remember('setting_protected_forum', 600, function () use ($settingRepository) {
                 return $settingRepository->getByName('misc.protected_forum') ?? false;
             });
-            ForumState::instance()->protectedForumIds = $protected ? (preg_split('/[,\s]+/', $protected) ?: []) : [];
+            $this->forumState->protectedForumIds = $protected ? (preg_split('/[,\s]+/', $protected) ?: []) : [];
         }
 
-        if (ForumState::instance()->forumMods === null) {
-            ForumState::instance()->forumMods = $this->forumModRepository->getForumMods();
+        if ($this->forumState->forumMods === null) {
+            $this->forumState->forumMods = $this->forumModRepository->getForumMods();
         }
 
-        $isForumMod = isset(ForumState::instance()->forumMods[$forumId]) && ForumState::instance()->forumMods[$forumId] == $uid;
+        $isForumMod = isset($this->forumState->forumMods[$forumId]) && $this->forumState->forumMods[$forumId] == $uid;
         $log = sprintf(
             'uid: %s, class: %s, post: %s, forumId: %s, protectedForumIdArr: %s, forumMods: %s, isForumMod: %s',
             $uid,
             UserDisplay::currentClass(),
             $post['id'],
             $forumId,
-            json_encode(ForumState::instance()->protectedForumIds),
-            json_encode(ForumState::instance()->forumMods),
+            json_encode($this->forumState->protectedForumIds),
+            json_encode($this->forumState->forumMods),
             $isForumMod
         );
 
         if (
-            in_array($forumId, ForumState::instance()->protectedForumIds)
+            in_array($forumId, $this->forumState->protectedForumIds)
             && UserDisplay::currentClass() < UserClassEnum::ADMINISTRATOR->value
             && $uid != $post['userid']
             && $uid != $topicInfo->userid

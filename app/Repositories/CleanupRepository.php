@@ -52,7 +52,8 @@ class CleanupRepository extends BaseRepository
     }
 
     public function __construct(
-        private readonly CleanupMonitorRepositoryInterface $monitor
+        private readonly CleanupMonitorRepositoryInterface $monitor,
+        private readonly CleanupRepositoryState $cleanupState,
     ) {}
 
     /**
@@ -250,14 +251,14 @@ LUA;
 
     private function getOneTaskSeconds(): float|int
     {
-        if (CleanupRepositoryState::instance()->oneTaskSeconds == 0) {
+        if ($this->cleanupState->oneTaskSeconds == 0) {
             // 最低间隔，要在这个时间内执行掉全部任务
             $totalSeconds = SiteConfig::current()->main->autocleanIntervalOne();
             // 每个任务能分到的秒数，不能到顶，任务数+1计算
-            CleanupRepositoryState::instance()->oneTaskSeconds = floor($totalSeconds / (self::$totalTask + 1));
+            $this->cleanupState->oneTaskSeconds = floor($totalSeconds / (self::$totalTask + 1));
         }
 
-        return CleanupRepositoryState::instance()->oneTaskSeconds;
+        return $this->cleanupState->oneTaskSeconds;
     }
 
     /** @param  mixed  $taskIndex */

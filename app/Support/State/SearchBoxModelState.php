@@ -12,7 +12,7 @@ use Illuminate\Container\Attributes\Scoped;
  * through instance(); reset() covers explicit flushes.
  */
 #[Scoped]
-final class SearchBoxModelState
+final class SearchBoxModelState implements RequestScopedState
 {
     /** @var array<int|string, mixed> */
     public array $instances = [];

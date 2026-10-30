@@ -102,6 +102,7 @@ html[data-theme="light"]:root {
     --nxm-warning: #a87e00;
     --nxm-on-success: #ffffff;
     --nxm-on-warning: #111114;
+    --nxm-on-danger: #ffffff;
 
     /* status tints — override the dark :root defaults above */
     --nxm-info-bg: #eef6fd;
@@ -227,6 +228,7 @@ html[data-theme="light"]:root {
         --nxm-warning: #a87e00;
     --nxm-on-success: #ffffff;
     --nxm-on-warning: #111114;
+    --nxm-on-danger: #ffffff;
         --nxm-info-bg: #eef6fd;
         --nxm-info-border: #b8daff;
         --nxm-success-bg: #effaf2;

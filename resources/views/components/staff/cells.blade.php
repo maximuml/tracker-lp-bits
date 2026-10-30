@@ -1,4 +1,4 @@
         <td class="nx-embedded">{{ $row['username_html'] ?? '' }}</td>
         <td class="nx-embedded"><img width="20" height="15" src="{{ \App\Support\FlagIcon::path($row['flag_pic'] ?? '') }}" title="{{ $row['flag_name'] ?? '' }}" alt="{{ $row['flag_name'] ?? '' }}"></td>
-        <td class="nx-embedded">@if ($row['is_online'] ?? false)<img class="button_online" src="pic/trans.gif" alt="online" title="{{ __('staff.title_online') }}" />@else<img class="button_offline" src="pic/trans.gif" alt="offline" title="{{ __('staff.title_offline') }}" />@endif</td>
-        <td class="nx-embedded"><a href="/web/sendmessage?receiver={{ (int) ($row['id'] ?? 0) }}" title="{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('staff.title_send_pm')) }}"><img class="button_pm" src="pic/trans.gif" alt="pm" /></a></td>
+        <td class="nx-embedded">@if ($row['is_online'] ?? false)<i class="button_online" role="img" aria-label="online" title="{{ __('staff.title_online') }}"></i>@else<i class="button_offline" role="img" aria-label="offline" title="{{ __('staff.title_offline') }}"></i>@endif</td>
+        <td class="nx-embedded"><a href="/web/sendmessage?receiver={{ (int) ($row['id'] ?? 0) }}" title="{{ \App\Support\Html\SafeHtml::fromUntrustedHtml(__('staff.title_send_pm')) }}"><i class="button_pm" role="img" aria-label="pm"></i></a></td>

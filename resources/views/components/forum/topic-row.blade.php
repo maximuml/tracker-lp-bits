@@ -2,14 +2,14 @@
 <tr>
     <td>
         <div class="flex items-start gap-2">
-            <img class="{{ $row->stateIcon()[0] }}" src="pic/trans.gif" alt="{{ $row->stateIcon()[1] }}" title="{{ $row->stateIcon()[2] }}" />
+            <i class="{{ $row->stateIcon()[0] }}" role="img" aria-label="{{ $row->stateIcon()[1] }}" title="{{ $row->stateIcon()[2] }}"></i>
             <div>
                 @if ($row->sticky)
-                    <img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ __('forums.title_sticky') }}" />&nbsp;&nbsp;
+                    <i class="sticky" role="img" aria-label="Sticky" title="{{ __('forums.title_sticky') }}"></i>&nbsp;&nbsp;
                 @endif
                 <a href="{{ request()->getPathInfo() }}?action=viewtopic&amp;forumid={{ $row->forumId }}&amp;topicid={{ $row->id }}"@if ($row->tooltipId !== null) data-domtt-src="{{ $row->tooltipId }}"@endif>@if ($row->hlcolor > 0)<b class="nx-hl-{{ $row->hlcolor }}">{{ $row->subject }}</b>@else{{ $row->subject }}@endif</a>
                 @if ($row->visiblePages !== [])
-                    [<img class="multipage" src="pic/trans.gif" alt="multi-page" />
+                    [<i class="multipage" role="img" aria-label="multi-page"></i>
                     @foreach ($row->visiblePages as $p)
                         @if ($p === '…') … @else <a href="{{ request()->getPathInfo() }}?action=viewtopic&amp;topicid={{ $row->id }}&amp;page={{ $p - 1 }}">{{ $p }}</a>@endif
                     @endforeach

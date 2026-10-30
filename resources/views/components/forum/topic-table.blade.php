@@ -7,12 +7,12 @@
 <div class="my-1 flex items-center justify-between px-1 py-0.5">
     <div>
         @if ($list->moderators !== null)
-            &nbsp;&nbsp;<img class="forum_mod" src="pic/trans.gif" alt="Moderator" title="{{ __('forums.col_moderator') }}" />&nbsp;{{ $list->moderators }}
+            &nbsp;&nbsp;<i class="forum_mod" role="img" aria-label="Moderator" title="{{ __('forums.col_moderator') }}"></i>&nbsp;{{ $list->moderators }}
         @endif
     </div>
     <div class="whitespace-nowrap">
         @if ($list->mayPost)
-            <a href="{{ request()->getPathInfo() }}?action=newtopic&amp;forumid={{ $list->forumId }}"><img class="f_new" src="pic/trans.gif" alt="New Topic" title="{{ __('forums.title_new_topic') }}" /></a>&nbsp;&nbsp;
+            <a href="{{ request()->getPathInfo() }}?action=newtopic&amp;forumid={{ $list->forumId }}"><i class="f_new" role="img" aria-label="New Topic" title="{{ __('forums.title_new_topic') }}"></i></a>&nbsp;&nbsp;
         @endif
     </div>
 </div>

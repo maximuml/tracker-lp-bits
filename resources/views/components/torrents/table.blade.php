@@ -5,7 +5,7 @@
     @foreach ($listVm->columns as $col)
     <th class="nx-colhead @if (($col['thClass'] ?? '') !== ''){{ $col['thClass'] }}@endif" scope="col" @if (($col['ariaSort'] ?? null) !== null) aria-sort="{{ $col['ariaSort'] }}" @endif>
         @if ($col['sortUrl'])<a href="{{ $col['sortUrl'] }}">@endif
-            @if ($col['iconClass'])<img class="{{ $col['iconClass'] }}" src="pic/trans.gif" alt="{{ (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '') ? '' : $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}" />@endif
+            @if ($col['iconClass'])<i class="{{ $col['iconClass'] }}" role="img" aria-label="{{ (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '') ? '' : $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}"></i>@endif
             @if (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '')<span class="nxm-th__label">{{ ($col['shortLabel'] ?? '') !== '' ? $col['shortLabel'] : $col['label'] }}</span>@endif
         @if ($col['sortUrl'])</a>@endif
     </th>
@@ -21,9 +21,9 @@
             @if ($row->coverSrc !== null)
             <div class="nx-embedded nxm-cover"><img src="pic/misc/cover.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-cover__img" alt="" /></div>
             @endif
-            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<img class="sticky" src="pic/trans.gif" alt="Sticky" title="{{ $row->stickyTitle }}" />&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<span class="new">{{ __('functions.text_new_uppercase') }}</span>)</b>@endif @if ($row->isBanned) <b>(<span class="striking">{{ __('functions.text_banned') }}</span>)</b>@endif<x-torrent.badges :set="$row->badges" />@if ($row->tags !== [])<br /><x-torrent.tags :tags="$row->tags" />@endif<x-torrent.progress :progress="$row->progress" /></div>
+            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<i class="sticky" role="img" aria-label="Sticky" title="{{ $row->stickyTitle }}"></i>&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<span class="new">{{ __('functions.text_new_uppercase') }}</span>)</b>@endif @if ($row->isBanned) <b>(<span class="striking">{{ __('functions.text_banned') }}</span>)</b>@endif<x-torrent.badges :set="$row->badges" />@if ($row->tags !== [])<br /><x-torrent.tags :tags="$row->tags" />@endif<x-torrent.progress :progress="$row->progress" /></div>
             <div class="nx-embedded nxm-rowactions">
-                @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><img class="download" src="pic/trans.gif" alt="download" title="{{ __('functions.title_download_torrent') }}" /></a>@endif
+                @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><i class="download" role="img" aria-label="download" title="{{ __('functions.title_download_torrent') }}"></i></a>@endif
                 @if ($row->showDownload && $row->showBookmark)<br />@endif
                 @if ($row->showBookmark)<livewire:bookmark-icon :torrent-id="$row->id" />@endif
             </div>

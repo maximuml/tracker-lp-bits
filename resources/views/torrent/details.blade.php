@@ -19,7 +19,7 @@
 @endif
 @endif
 
-<h1 class="text-center" id="top">{{ $details->title->name }}@if ($details->title->banned) <b>(<span class="striking">{{ __('functions.text_banned') }}</span>)</b>@endif@if ($details->title->badges->paid)<x-torrent.paid-icon :size="20" />@endif@if ($details->title->badges->promotion !== null)&nbsp;&nbsp;&nbsp;<x-torrent.promotion :badge="$details->title->badges->promotion" />@endif@if ($details->title->badges->hitAndRun)<img class="hitandrun" src="pic/trans.gif" alt="H&R" title="H&R" />@endif@if ($details->title->badges->approval !== null)<span title="{{ $details->title->badges->approval->title }}">{{ $details->title->badges->approval->icon }}</span>@endif</h1>
+<h1 class="text-center" id="top">{{ $details->title->name }}@if ($details->title->banned) <b>(<span class="striking">{{ __('functions.text_banned') }}</span>)</b>@endif@if ($details->title->badges->paid)<x-torrent.paid-icon :size="20" />@endif@if ($details->title->badges->promotion !== null)&nbsp;&nbsp;&nbsp;<x-torrent.promotion :badge="$details->title->badges->promotion" />@endif@if ($details->title->badges->hitAndRun)<i class="hitandrun" role="img" aria-label="H&R" title="H&R"></i>@endif@if ($details->title->badges->approval !== null)<span title="{{ $details->title->badges->approval->title }}">{{ $details->title->badges->approval->icon }}</span>@endif</h1>
 
 @if ($details->denyBanner !== null)
 @include('components.torrent.details.deny_banner', ['banner' => $details->denyBanner])

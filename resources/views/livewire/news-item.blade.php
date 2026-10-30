@@ -1,5 +1,5 @@
 <div class="contents">
-    <a href="#" wire:click.prevent="toggle">@if($leadingBreak)<br />@endif<img class="{{ $open ? 'minus' : 'plus' }}" src="pic/trans.gif" alt="Show/Hide" title="{{ $showHideTitle }}" />&nbsp;{{ date('Y.m.d', strtotime($added)) }} - <b>{{ $title }}</b></a>
+    <a href="#" wire:click.prevent="toggle">@if($leadingBreak)<br />@endif<i class="{{ $open ? 'minus' : 'plus' }}" role="img" aria-label="Show/Hide" title="{{ $showHideTitle }}"></i>&nbsp;{{ date('Y.m.d', strtotime($added)) }} - <b>{{ $title }}</b></a>
     <div @if(!$open) class="nx-hidden" @endif> {{ \App\Support\Format::formatComment($body, 0) }} </div>
     @if($canManage)
     &nbsp; [<a class="faqlink" href="/web/news?action=edit&amp;newsid={{ $itemId }}"><b>{{ $editLabel }}</b></a>]

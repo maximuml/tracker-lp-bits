@@ -19,8 +19,8 @@ const SCREENSHOT_DIR = process.env.UI_STATES_SCREENSHOT_DIR;
 const SCREENSHOT_PHASE = process.env.UI_STATES_SCREENSHOT_PHASE;
 
 async function gotoPage(page: Page, url: string): Promise<void> {
-  await page.goto(url, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1500);
+  await page.goto(url, { waitUntil: 'load' });
+  await page.waitForTimeout(400);
 }
 
 function trackerForm(page: Page) {
@@ -44,8 +44,8 @@ async function saveTrackerSettings(
   );
   await form.locator('[type=submit]').click();
   expect((await saved).status(), 'tracker settings save').toBeLessThan(400);
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(1500);
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(400);
 }
 
 async function forEachPackScheme(
@@ -110,8 +110,8 @@ async function captureHeaderFocus(
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoPage(page, '/web/torrents');
   await page.evaluate((theme) => localStorage.setItem('nxm-theme', theme), scheme);
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(1500);
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(400);
   await setScheme(page, scheme);
   await focusWithTab(page, '.nxm-nav__list > li > a');
   await page.screenshot({

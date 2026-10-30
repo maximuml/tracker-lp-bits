@@ -39,7 +39,7 @@
 
     @foreach ($faqCategories as $id => $temp)
         @if ($faqCategories[$id]['flag'] == "1")
-            <x-frame :center="false"><x-slot:caption>{{ $faqCategories[$id]['title'] }} - <a href="#top"><img class="top" src="pic/trans.gif" alt="Top" title="Top" /></a></x-slot>
+            <x-frame :center="false"><x-slot:caption>{{ $faqCategories[$id]['title'] }} - <a href="#top"><i class="top" role="img" aria-label="Top" title="Top"></i></a></x-slot>
             <div class="nx-faq" id="id{{ $faqCategories[$id]['link_id'] }}">
             @if (isset($faqCategories[$id]['items']))
                 @foreach ($faqCategories[$id]['items'] as $id2 => $tempItem)

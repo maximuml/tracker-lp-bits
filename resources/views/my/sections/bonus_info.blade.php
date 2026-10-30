@@ -21,7 +21,7 @@
         @endif
         </ul>
         <div class="text-center">{{ __('mybonus.text_you_are_currently_getting') }}{{ $info->currentSeedBonus }}{{ __('mybonus.text_point') }}{{ \App\Support\Strings::addS((float) $info->currentSeedBonus) }}{{ __('mybonus.text_per_hour') }} (A = {{ $info->aFactor }})</div>
-        <div class="mx-auto w-[400px]"><span class="block h-[15px] rounded-[3px] bg-nxm-surface-alt"><img class="{{ $info->loadbarClass }}" src="pic/trans.gif" alt="{{ $info->percentLabel }}%" /></span></div>
+        <div class="mx-auto w-[400px]"><progress class="nx-progress {{ $info->loadbarClass }}" value="{{ $info->percentLabel }}" max="100">{{ $info->percentLabel }}%</progress></div>
         @if ($info->officialAdditionFactor !== null)
         <h3>{{ __('mybonus.text_get_by_seeding_official') }}</h3>
         <ul>

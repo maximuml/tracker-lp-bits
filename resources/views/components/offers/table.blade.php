@@ -5,8 +5,8 @@
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCatUrl }}">{{ __('offers.col_type') }}</a></th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortNameUrl }}">{{ __('offers.col_title') }}</a></th>
     <th colspan="3" class="bg-nxm-surface-alt font-semibold" scope="colgroup"><a href="{{ $table->sortVResUrl }}">{{ __('offers.col_vote_results') }}</a></th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCommentsUrl }}"><img class="comments" src="pic/trans.gif" alt="comments" title="{{ __('offers.title_comment') }}" /></a></th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortAddedUrl }}"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('offers.title_time_added') }}" /></a></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCommentsUrl }}"><i class="comments" role="img" aria-label="comments" title="{{ __('offers.title_comment') }}"></i></a></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortAddedUrl }}"><i class="time" role="img" aria-label="time" title="{{ __('offers.title_time_added') }}"></i></a></th>
     @if ($table->showTimeout)
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('offers.col_timeout') }}</th>
     @endif
@@ -50,7 +50,7 @@
     @endif
     <td class="align-top px-2.5 py-1.5">{{ $row->offeredBy }}</td>
     @if ($table->canManage)
-    <td class="align-top px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nxm-linkbtn" title="{{ __('offers.title_delete') }}"><img class="staff_delete" src="pic/trans.gif" alt="D" title="{{ __('offers.title_delete') }}" /></button></form><br /><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><img class="staff_edit" src="pic/trans.gif" alt="E" title="{{ __('offers.title_edit') }}" /></a></td>
+    <td class="align-top px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nxm-linkbtn" title="{{ __('offers.title_delete') }}"><i class="staff_delete" role="img" aria-label="D" title="{{ __('offers.title_delete') }}"></i></button></form><br /><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><i class="staff_edit" role="img" aria-label="E" title="{{ __('offers.title_edit') }}"></i></a></td>
     @endif
 </tr>
 @endforeach

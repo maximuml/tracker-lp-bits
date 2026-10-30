@@ -3,9 +3,9 @@
 <x-data-table :caption="__('getusertorrentlistajax.col_name')" captionHidden>
 <x-slot:head>
 <thead>
-<tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_type') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_name') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_added') }}</th>@if ($userTorrentListVm->showSize)<th class="bg-nxm-surface-alt font-semibold" scope="col"><img class="size" src="pic/trans.gif" alt="size" title="{{ __('getusertorrentlistajax.title_size') }}" /></th>@endif
-@if ($userTorrentListVm->showSeeders)<th class="bg-nxm-surface-alt font-semibold" scope="col"><img class="seeders" src="pic/trans.gif" alt="seeders" title="{{ __('getusertorrentlistajax.title_seeders') }}" /></th>@endif
-@if ($userTorrentListVm->showLeechers)<th class="bg-nxm-surface-alt font-semibold" scope="col"><img class="leechers" src="pic/trans.gif" alt="leechers" title="{{ __('getusertorrentlistajax.title_leechers') }}" /></th>@endif
+<tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_type') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_name') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_added') }}</th>@if ($userTorrentListVm->showSize)<th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="size" role="img" aria-label="size" title="{{ __('getusertorrentlistajax.title_size') }}"></i></th>@endif
+@if ($userTorrentListVm->showSeeders)<th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="seeders" role="img" aria-label="seeders" title="{{ __('getusertorrentlistajax.title_seeders') }}"></i></th>@endif
+@if ($userTorrentListVm->showLeechers)<th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="leechers" role="img" aria-label="leechers" title="{{ __('getusertorrentlistajax.title_leechers') }}"></i></th>@endif
 @if ($userTorrentListVm->showUploaded)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_uploaded') }}</th>@endif
 @if ($userTorrentListVm->showDownloaded)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_downloaded') }}</th>@endif
 @if ($userTorrentListVm->showRatio)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('getusertorrentlistajax.col_ratio') }}</th>@endif

@@ -1,6 +1,6 @@
 <section class="nx-idx-card">
 <h2>
-    <a href="#" wire:click.prevent="toggle" aria-expanded="{{ $open ? 'true' : 'false' }}" aria-controls="kshoutbox"><img class="{{ $open ? 'minus' : 'plus' }}" src="pic/trans.gif" alt="Show/Hide" title="{{ $showHideTitle }}" /></a>
+    <a href="#" wire:click.prevent="toggle" aria-expanded="{{ $open ? 'true' : 'false' }}" aria-controls="kshoutbox"><i class="{{ $open ? 'minus' : 'plus' }}" role="img" aria-label="Show/Hide" title="{{ $showHideTitle }}"></i></a>
     {{ $cardTitle }} - <span class="small">{{ $autoRefreshLabel }}</span>
     <span class="striking" id="countdown" wire:ignore>{{ $refreshSeconds }}</span><span class="small">{{ $secondsLabel }}</span>
     - <a href="/web/shoutbox_history" class="small">{{ $historyLabel }}</a>

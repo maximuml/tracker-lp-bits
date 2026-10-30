@@ -1,53 +1,62 @@
-img.f_reply
+i.f_reply
 {
+display:inline-block;
 width:87px;
 height:25px;
 background:url(forum.gif) 0 0;
 }
-img.f_new
+i.f_new
 {
+display:inline-block;
 width:87px;
 height:25px;
 background:url(forum.gif) -87px 0;
 }
-img.f_delete
+i.f_delete
 {
+display:inline-block;
 width:69px;
 height:25px;
 background:url(forum.gif) 0 -25px;
 }
-img.f_edit
+i.f_edit
 {
+display:inline-block;
 width:62px;
 height:25px;
 background:url(forum.gif) -69px -25px;
 }
-img.f_pm
+i.f_pm
 {
+display:inline-block;
 width:30px;
 height:25px;
 background:url(forum.gif) -131px -25px;
 }
-img.f_offline
+i.f_offline
 {
+display:inline-block;
 width:35px;
 height:25px;
 background:url(forum.gif) -161px -25px;
 }
-img.f_quote
+i.f_quote
 {
+display:inline-block;
 width:69px;
 height:25px;
 background:url(forum.gif) 0 -50px;
 }
-img.f_report
+i.f_report
 {
+display:inline-block;
 width:69px;
 height:25px;
 background:url(forum.gif) -69px -50px;
 }
-img.f_online
+i.f_online
 {
+display:inline-block;
 width:30px;
 height:25px;
 background:url(forum.gif) -138px -50px;

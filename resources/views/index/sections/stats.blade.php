@@ -8,7 +8,7 @@
 <section class="nx-idx-card">
 <div class="nx-stats">
 <details class="nx-stats__details">
-<summary><img class="plus nx-stats__sign" src="pic/trans.gif" alt="" /><span class="nx-stats__title">{{ $stats->title }}</span></summary>
+<summary><i class="plus nx-stats__sign" aria-hidden="true"></i><span class="nx-stats__title">{{ $stats->title }}</span></summary>
 <div class="p-[10pt] text-center">
 <x-data-table :caption="$stats->title" captionHidden class="nx-main mx-auto">
 <tr>
@@ -21,11 +21,11 @@
 </tr>
 <tr>
 <td>{{ $stats->userStats['vipLabel'] }}</td><td>{{ $stats->userStats['vip'] }}</td>
-<td>{{ $stats->userStats['donorsLabel'] }} <img class="star" src="pic/trans.gif" alt="Donor" /></td><td>{{ $stats->userStats['donors'] }}</td>
+<td>{{ $stats->userStats['donorsLabel'] }} <i class="star" role="img" aria-label="Donor"></i></td><td>{{ $stats->userStats['donors'] }}</td>
 </tr>
 <tr>
-<td>{{ $stats->userStats['warnedLabel'] }} <img class="warned" src="pic/trans.gif" alt="warned" /></td><td>{{ $stats->userStats['warned'] }}</td>
-<td>{{ $stats->userStats['bannedLabel'] }} <img class="disabled" src="pic/trans.gif" alt="disabled" /></td><td>{{ $stats->userStats['banned'] }}</td>
+<td>{{ $stats->userStats['warnedLabel'] }} <i class="warned" role="img" aria-label="warned"></i></td><td>{{ $stats->userStats['warned'] }}</td>
+<td>{{ $stats->userStats['bannedLabel'] }} <i class="disabled" role="img" aria-label="disabled"></i></td><td>{{ $stats->userStats['banned'] }}</td>
 </tr>
 <tr>
 <td>{{ $stats->userStats['maleLabel'] }}</td><td>{{ $stats->userStats['male'] }}</td>
@@ -59,7 +59,7 @@
 <tr><td colspan="4" class="bg-nxm-surface-alt">&nbsp;</td></tr>
 @foreach (array_chunk($stats->classStats, 2) as $pair)
 <tr>
-<td>{{ $pair[0]->label }}@if($pair[0]->icon !== null) <img class="{{ $pair[0]->icon }}" src="pic/trans.gif" alt="{{ $pair[0]->icon }}" />@endif</td><td>{{ $pair[0]->value }}</td>
+<td>{{ $pair[0]->label }}@if($pair[0]->icon !== null) <i class="{{ $pair[0]->icon }}" role="img" aria-label="{{ $pair[0]->icon }}"></i>@endif</td><td>{{ $pair[0]->value }}</td>
 @if(isset($pair[1]))
 <td>{{ $pair[1]->label }}</td><td>{{ $pair[1]->value }}</td>
 @else

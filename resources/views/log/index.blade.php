@@ -28,7 +28,7 @@
     @if (empty($logRows))
         <b>{{ __('log.text_log_empty') }}</b><br />
     @else
-        <x-data-table :caption="__('log.text_daily_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><img class="time" src="pic/trans.gif" alt="time" title="{{ __('log.title_time_added')}}" /></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>
+        <x-data-table :caption="__('log.text_daily_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="time" role="img" aria-label="time" title="{{ __('log.title_time_added')}}"></i></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>
         @if ($canConfidentialLog)
             <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_user')}}</th>
         @endif
@@ -118,7 +118,7 @@
         <p class="text-center"><b>{{ $item['poll']['question'] ?? '' }}</b></p>
         <div class="nx-main">
         @foreach ($item['options'] ?? [] as $opt)
-            <div class="flex items-start"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow"><img class="bar_end" src="pic/trans.gif" alt="" /><img class="unsltbar" src="pic/trans.gif" /><img class="bar_end" src="pic/trans.gif" alt="" /> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
+            <div class="flex items-start"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow"><i class="bar_end" aria-hidden="true"></i><i class="unsltbar" aria-hidden="true"></i><i class="bar_end" aria-hidden="true"></i> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
         @endforeach
         </div>
         <p class="text-center">{{ __('log.text_votes')}}{{ $item['totalVotes'] ?? '0' }}</p>

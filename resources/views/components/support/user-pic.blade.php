@@ -1,2 +1,2 @@
 @props(['cls', 'alt'])
-<img class="{{ $cls }}" src="/pic/trans.gif" alt="{{ $alt }}" />
+<i class="{{ $cls }}" role="img" aria-label="{{ $alt }}"></i>

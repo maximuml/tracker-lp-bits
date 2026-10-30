@@ -142,7 +142,7 @@
             <div class="nx-setrow" role="group" aria-labelledby="ucp-g-special-torrents">
                 <div class="nx-setrow__label" id="ucp-g-special-torrents">{{ __('usercp.text_append_words_to_torrents') }}</div>
                 <div class="nx-setrow__control">
-                    <label><input type="checkbox" name="appendsticky" id="usercp-appendsticky" value="yes"@if ($tracker->appendsticky) checked @endif> {{ __('usercp.text_append_sticky') }}<img class="sticky" src="pic/trans.gif" alt="sticky"> {{ __('usercp.text_append_sticky_tail') }}</label>
+                    <label><input type="checkbox" name="appendsticky" id="usercp-appendsticky" value="yes"@if ($tracker->appendsticky) checked @endif> {{ __('usercp.text_append_sticky') }}<i class="sticky" role="img" aria-label="sticky"></i> {{ __('usercp.text_append_sticky_tail') }}</label>
                     <label><input type="checkbox" name="appendnew" id="usercp-appendnew" value="yes"@if ($tracker->appendnew) checked @endif> {{ __('usercp.text_append_new') }}</label>
                     <label><input type="checkbox" name="appendpicked" id="usercp-appendpicked" value="yes"@if ($tracker->appendpicked) checked @endif> {{ __('usercp.text_append_picked') }}</label>
                 </div>
@@ -175,8 +175,8 @@
             <div class="nx-setrow" role="group" aria-labelledby="ucp-g-action-icons">
                 <div class="nx-setrow__label" id="ucp-g-action-icons">{{ __('usercp.text_show_action_icons') }}</div>
                 <div class="nx-setrow__control">
-                    <label><input type="checkbox" name="dlicon" id="usercp-dlicon" value="yes"@if ($tracker->dlicon) checked @endif> {{ __('usercp.text_show_download_icon') }} <img class="download" src="pic/trans.gif" alt="Download"></label>
-                    <label><input type="checkbox" name="bmicon" id="usercp-bmicon" value="yes"@if ($tracker->bmicon) checked @endif> {{ __('usercp.text_show_bookmark_icon') }} <img class="bookmark" src="pic/trans.gif" alt="Bookmark"></label>
+                    <label><input type="checkbox" name="dlicon" id="usercp-dlicon" value="yes"@if ($tracker->dlicon) checked @endif> {{ __('usercp.text_show_download_icon') }} <i class="download" role="img" aria-label="Download"></i></label>
+                    <label><input type="checkbox" name="bmicon" id="usercp-bmicon" value="yes"@if ($tracker->bmicon) checked @endif> {{ __('usercp.text_show_bookmark_icon') }} <i class="bookmark" role="img" aria-label="Bookmark"></i></label>
                 </div>
             </div>
             <div class="nx-setrow" role="group" aria-labelledby="ucp-g-comments-reviews">

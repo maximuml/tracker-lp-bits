@@ -7,7 +7,7 @@
         <thead>
             <tr>
                 <th scope="col">{{ __('viewfilelist.col_path') }}</th>
-                <th scope="col"><img class="size" src="pic/trans.gif" alt="size" /></th>
+                <th scope="col"><i class="size" role="img" aria-label="size"></i></th>
             </tr>
         </thead>
     </x-slot:head>

@@ -2,9 +2,7 @@
 <tr>
     <td>
         <div class="flex items-start gap-2">
-            <img class="{{ $row->hasUnread ? 'unlockednew' : 'unlocked' }}" src="pic/trans.gif"
-                 alt="{{ $row->hasUnread ? 'unread' : 'read' }}"
-                 title="{{ $row->hasUnread ? __('forums.title_unread') : __('forums.title_read') }}" />
+            <i class="{{ $row->hasUnread ? 'unlockednew' : 'unlocked' }}" role="img" aria-label="{{ $row->hasUnread ? 'unread' : 'read' }}" title="{{ $row->hasUnread ? __('forums.title_unread') : __('forums.title_read') }}"></i>
             <div>
                 <a href="{{ request()->getPathInfo() }}?action=viewforum&amp;forumid={{ $row->id }}"><b class="big">{{ $row->name }}</b></a>
                 @if ($row->postsToday > 0)

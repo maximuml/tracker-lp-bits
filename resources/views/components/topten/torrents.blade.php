@@ -3,10 +3,10 @@
 <tr>
 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('topten.col_rank')}}</th>
 <th class="bg-nxm-surface-alt text-left font-semibold" scope="col">{{ __('topten.col_name')}}</th>
-<th class="bg-nxm-surface-alt text-right font-semibold" scope="col"><img class="snatched" src="pic/trans.gif" alt="snatched" title="{{ __('topten.title_sna')}}" /></th>
+<th class="bg-nxm-surface-alt text-right font-semibold" scope="col"><i class="snatched" role="img" aria-label="snatched" title="{{ __('topten.title_sna')}}"></i></th>
 <th class="bg-nxm-surface-alt text-right font-semibold" scope="col">{{ __('topten.col_data')}}</th>
-<th class="bg-nxm-surface-alt text-right font-semibold" scope="col"><img class="seeders" src="pic/trans.gif" alt="seeders" title="{{ __('topten.title_se')}}" /></th>
-<th class="bg-nxm-surface-alt text-right font-semibold" scope="col"><img class="leechers" src="pic/trans.gif" alt="leechers" title="{{ __('topten.col_le')}}" /></th>
+<th class="bg-nxm-surface-alt text-right font-semibold" scope="col"><i class="seeders" role="img" aria-label="seeders" title="{{ __('topten.title_se')}}"></i></th>
+<th class="bg-nxm-surface-alt text-right font-semibold" scope="col"><i class="leechers" role="img" aria-label="leechers" title="{{ __('topten.col_le')}}"></i></th>
 <th class="bg-nxm-surface-alt text-right font-semibold" scope="col">{{ __('topten.col_to')}}</th>
 <th class="bg-nxm-surface-alt text-right font-semibold" scope="col">{{ __('topten.col_ratio')}}</th>
 </tr>

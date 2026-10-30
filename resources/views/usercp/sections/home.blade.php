@@ -43,7 +43,7 @@
 				<td>{{ $token['name'] }}</td>
 				<td>{{ $token['abilities'] }}</td>
 				<td>{{ $token['createdAt'] }}</td>
-				<td><img class="staff_delete token-del" src="pic/trans.gif" alt="D" title="{{ $home->tokens->deleteLabel }}" data-id="{{ $token['id'] }}"></td>
+				<td><i class="staff_delete token-del" role="img" aria-label="D" title="{{ $home->tokens->deleteLabel }}"></i></td>
 			</tr>
 			@endforeach
 		</x-data-table>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
+use App\Enums\BusinessType;
 use App\Exceptions\NexusException;
 use App\Models\Torrent;
 use App\Models\User;
@@ -186,5 +187,39 @@ final class ThankServiceTest extends TestCase
         // Owner bonus should remain unchanged (receivethanks = 0)
         $ownerBonus = (float) DB::table('users')->where('id', $owner->id)->value('seedbonus');
         $this->assertSame(50.0, $ownerBonus);
+    }
+
+    public function test_thank_writes_bonus_ledger_rows(): void
+    {
+        $user = $this->createUser(['seedbonus' => 100.0]);
+        $owner = $this->createUser(['seedbonus' => 50.0]);
+        $torrent = $this->createTorrent($owner->id);
+
+        $sayThanks = (float) SiteConfig::current()->bonus->sayThanks(0.0);
+        $receiveThanks = (float) SiteConfig::current()->bonus->receiveThanks(0.0);
+
+        $this->service->thankTorrent($user, $torrent);
+
+        if ($sayThanks > 0) {
+            $this->assertDatabaseHas('bonus_logs', [
+                'uid' => $user->id,
+                'business_type' => BusinessType::SAY_THANKS->value,
+                'old_total_value' => 100.0,
+                'value' => $sayThanks,
+                'new_total_value' => 100.0 + $sayThanks,
+            ]);
+        }
+        if ($receiveThanks > 0) {
+            $this->assertDatabaseHas('bonus_logs', [
+                'uid' => $owner->id,
+                'business_type' => BusinessType::RECEIVE_THANKS->value,
+                'old_total_value' => 50.0,
+                'value' => $receiveThanks,
+                'new_total_value' => 50.0 + $receiveThanks,
+            ]);
+        }
+        // At least one of the two must be non-zero for this regression to
+        // mean anything — fail loudly if both are disabled in config.
+        $this->assertTrue($sayThanks > 0 || $receiveThanks > 0);
     }
 }

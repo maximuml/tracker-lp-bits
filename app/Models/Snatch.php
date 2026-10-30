@@ -98,7 +98,7 @@ class Snatch extends NexusModel
 
     public function getUploadSpeed(): string
     {
-        if ($this->seedtime <= 0) {
+        if ($this->seedtime + $this->leechtime <= 0) {
             $speed = Format::size(0);
         } else {
             $speed = Format::size($this->uploaded / ($this->seedtime + $this->leechtime));

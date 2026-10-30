@@ -326,7 +326,10 @@ final class BBCode
         ])->render());
         $close = trim(view('components.support.quote-close')->render());
         $text = (string) preg_replace('/\[quote\]/i', $open, $text);
-        $text = (string) preg_replace('/\[quote=(.+?)\]/i', $cite, $text);
+        // The capture is echoed into markup via the \\1 backreference — the
+        // excluded chars keep the tag inert even if a caller ever feeds
+        // unescaped text through here.
+        $text = (string) preg_replace('/\[quote=([^\[\]<>]+?)\]/i', $cite, $text);
         $text = (string) preg_replace('/\[\/quote\]/i', $close, $text);
 
         return $text;

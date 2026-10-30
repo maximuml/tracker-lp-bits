@@ -265,7 +265,10 @@ final class Network
      */
     public static function geoIpInfo(string $ip): array|false
     {
-        $locationInfo = Cache::remember("locations_{$ip}", 864000, function () use ($ip) {
+        // `memo` layers a per-request array cache over the Redis store —
+        // listing pages repeat the same IP many times without paying a
+        // Redis roundtrip per row.
+        $locationInfo = Cache::memo()->remember("locations_{$ip}", 864000, function () use ($ip) {
             $lang = Locale::folderFromCookie(RequestValues::cookieValue('c_lang_folder', ''), (bool) false);
             $langMap = [
                 'chs' => 'zh-CN',

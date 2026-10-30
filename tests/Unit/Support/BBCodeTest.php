@@ -289,6 +289,24 @@ class BBCodeTest extends TestCase
         );
     }
 
+    public function test_quotes_author_capture_rejects_markup_chars(): void
+    {
+        // The \\1 capture lands inside the rendered cite markup — authors
+        // containing <, >, ", ', or brackets must not rewrite, so the tag
+        // can never break out of <legend> into live markup.
+        $output = BBCode::quotes('[quote=<script>alert(1)</script>]hi[/quote]', 'Quote');
+        $this->assertStringNotContainsString('<fieldset><legend>', $output);
+
+        $output = BBCode::quotes('[quote="><img src=x onerror=alert(1)>]hi[/quote]', 'Quote');
+        $this->assertStringNotContainsString('<fieldset><legend>', $output);
+
+        // A plain author still rewrites normally.
+        $this->assertSame(
+            '<fieldset><legend> Quote: alice </legend><br />hi</fieldset><br />',
+            BBCode::quotes('[quote=alice]hi[/quote]', 'Quote'),
+        );
+    }
+
     public function test_quotes_passes_through_text_with_no_quote_tags(): void
     {
         $this->assertSame('plain text', BBCode::quotes('plain text', 'Quote'));

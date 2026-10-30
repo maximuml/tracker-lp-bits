@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\BusinessType;
 use App\Models\Attendance;
 use App\Models\AttendanceLog;
 use App\Models\User;
+use App\Services\BonusLedgerService;
 use App\Support\Config\SiteConfig;
 use App\Support\Json;
 use App\Support\Locale;
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 class AttendanceRepository extends BaseRepository
 {
     public function __construct(
+        private readonly BonusLedgerService $bonusLedger,
         private readonly AttendanceMigrationRepository $migrationRepository = new AttendanceMigrationRepository,
     ) {}
 
@@ -90,7 +93,14 @@ class AttendanceRepository extends BaseRepository
                 } else {
                     $attendance->update($update);
                 }
-                User::query()->where('id', $uid)->increment('seedbonus', $update['points']);
+                if ($update['points'] > 0) {
+                    $this->bonusLedger->credit(
+                        (int) $uid,
+                        (float) $update['points'],
+                        BusinessType::ATTENDANCE,
+                        "attendance {$now->format('Y-m-d')}"
+                    );
+                }
 
                 return true;
             });

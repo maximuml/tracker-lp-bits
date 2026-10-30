@@ -43,14 +43,14 @@ trait HasTorrentAccessors
     /** @return mixed */
     public function getPromotionInfoAttribute()
     {
-        return self::$promotionTypes[$this->sp_state_real] ?? null;
+        return Torrent::promotionTypes()[$this->sp_state_real] ?? null;
     }
 
     /**
      * Effective promotion state, considering global special state and validity.
      *
      * Uses TorrentPromotion enum for validation while still returning the legacy
-     * integer code so callers can keep indexing $promotionTypes.
+     * integer code so callers can keep indexing the promotion table.
      */
     public function getSpStateRealAttribute(): int
     {
@@ -70,9 +70,10 @@ trait HasTorrentAccessors
             $log .= sprintf(', global != %s, set sp_state to global: %s', TorrentPromotion::NORMAL->value, $global);
         }
 
-        // fromIntSafe guarantees a valid enum, but keep the $promotionTypes guard
-        // for backwards compatibility with any code that still inspects that array.
-        if (! isset(self::$promotionTypes[$spState])) {
+        // fromIntSafe guarantees a valid enum, but keep the guard for
+        // backwards compatibility with any code that still inspects
+        // the promotion table shape.
+        if (! isset(Torrent::promotionTypes()[$spState])) {
             $log .= ", but now sp_state: $spState, is invalid, reset to: ".TorrentPromotion::NORMAL->value;
             $spState = TorrentPromotion::NORMAL->value;
         }
@@ -110,7 +111,7 @@ trait HasTorrentAccessors
     protected function spStateText(): Attribute
     {
         return new Attribute(
-            get: fn ($value, $attributes) => self::$promotionTypes[$this->sp_state]['text'] ?? ''
+            get: fn ($value, $attributes) => Torrent::promotionTypes()[$this->sp_state]['text'] ?? ''
         );
     }
 

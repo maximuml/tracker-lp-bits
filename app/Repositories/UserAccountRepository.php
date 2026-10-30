@@ -123,18 +123,6 @@ final class UserAccountRepository extends BaseRepository
     }
 
     /**
-     * Compare-and-swap seedbonus increment: only applies while the stored
-     * value still equals $expectedBonus (guards against concurrent updates).
-     */
-    public function incrementSeedBonusForExpected(int $id, int|float|string|null $expectedBonus, int|float $amount): int
-    {
-        return User::query()
-            ->where('id', $id)
-            ->where('seedbonus', $expectedBonus)
-            ->increment('seedbonus', $amount);
-    }
-
-    /**
      * @param  array<int, int|string>  $ids
      * @param  array<int, string>  $fields
      * @return EloquentCollection<int, User>

@@ -71,7 +71,7 @@ class BonusHistoryController extends BasePageController
         }
 
         $businessType = (int) ($request->input('business_type') ?? 0);
-        $businessTypeOptions = BonusLogs::listBusinessTypeOptions($defaultCategory);
+        $businessTypeOptions = BonusLogs::listBusinessTypeOptions();
         if ($businessType && ! isset($businessTypeOptions[$businessType])) {
             return $this->abortResponse('Error', "Invalid business_type: {$businessType}");
         }

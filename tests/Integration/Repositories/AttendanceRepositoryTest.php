@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Repositories;
 
+use App\Enums\BusinessType;
 use App\Models\Attendance;
 use App\Models\AttendanceLog;
 use App\Models\User;
@@ -35,7 +36,7 @@ final class AttendanceRepositoryTest extends TestCase
         DB::table('attendance_logs')->delete();
         DB::table('attendance')->delete();
         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
-        $this->repository = new AttendanceRepository;
+        $this->repository = app(AttendanceRepository::class);
     }
 
     public function test_get_attendance_returns_null_when_not_found(): void
@@ -106,6 +107,23 @@ final class AttendanceRepositoryTest extends TestCase
 
         $user->refresh();
         $this->assertGreaterThan(100.0, (float) $user->seedbonus);
+    }
+
+    public function test_attend_writes_bonus_ledger_row(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['seedbonus' => 100.0]);
+
+        $this->repository->attend($user->id);
+
+        $log = DB::table('bonus_logs')
+            ->where('uid', $user->id)
+            ->where('business_type', BusinessType::ATTENDANCE->value)
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($log);
+        $this->assertSame(100.0, (float) $log->old_total_value);
+        $this->assertGreaterThan((float) $log->old_total_value, (float) $log->new_total_value);
     }
 
     public function test_attend_creates_attendance_log(): void

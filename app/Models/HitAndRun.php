@@ -135,8 +135,6 @@ class HitAndRun extends NexusModel
             return '---';
         }
         if (! $this->snatch) {
-            Logger::writeWithContext((string) "hit and run: {$this->id} no snatch", (string) 'warning', (bool) false);
-
             return '---';
         }
         $seedTimeMinimum = HitAndRun::getConfig('seed_time_minimum');
@@ -195,10 +193,8 @@ class HitAndRun extends NexusModel
     public static function getIsEnabled(): bool
     {
         $browseMode = self::getConfig('mode');
-        $browseEnabled = HitAndRunMode::fromStringSafe(is_string($browseMode) ? $browseMode : null)->isEnabled();
-        Logger::writeWithContext((string) ('H&R browseEnabled: '.($browseEnabled ? 'true' : 'false')), (string) 'info', (bool) false);
 
-        return $browseEnabled;
+        return HitAndRunMode::fromStringSafe(is_string($browseMode) ? $browseMode : null)->isEnabled();
     }
 
     /**

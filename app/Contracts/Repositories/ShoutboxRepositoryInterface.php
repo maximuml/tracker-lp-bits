@@ -46,26 +46,24 @@ interface ShoutboxRepositoryInterface
     public function torrentExists(int $id): bool;
 
     /**
+     * Restrict a shoutbox query to the SB row type — the only type the
+     * `shoutbox` table carries.
+     *
      * @param  Builder  $query
-     * @param  array<string, mixed>|object|null  $user
      */
-    public function applyTypeFilter($query, string $type, $user = null): void;
+    public function applyTypeFilter($query): void;
+
+    public function maxId(): int;
 
     /**
-     * @param  array<string, mixed>|null  $user
-     */
-    public function maxId(string $type, ?array $user): int;
-
-    /**
-     * @param  array<string, mixed>|null  $user
      * @return Collection<int, \stdClass>
      */
-    public function listLatest(string $type, ?array $user, int $limit): Collection;
+    public function listLatest(int $limit): Collection;
 
     /**
-     * @param  array<string, mixed>|null  $user
+     * Prepared query for shouts after $lastId — re-executed by the SSE loop.
      */
-    public function newAfterIdQuery(string $type, int $lastId, ?array $user): Builder;
+    public function newAfterIdQuery(int $lastId): Builder;
 
     /**
      * @param  array<string, mixed>  $data

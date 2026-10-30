@@ -152,34 +152,48 @@ class UploadService
             'nfo' => $this->fileService->getNfoContent($request),
             'created_at' => $nowStr,
         ];
-        $newTorrent = DB::transaction(function () use ($request, $category, $torrentInsert, $extraInsert, $fileListInfo, $subCategoriesAngTags, $dict, $torrentSavePath) {
-            $newTorrent = $this->repositories->torrentUpload->createTorrent($torrentInsert);
-            $id = $newTorrent->id;
-            $torrentFilePath = "$torrentSavePath/$id.torrent";
-            $saveResult = Bencode::dump($torrentFilePath, $dict);
-            if ($saveResult === false) {
-                Logger::writeWithContext((string) "save torrent failed: {$torrentFilePath}", (string) 'error', (bool) false);
-                throw new UploadValidationException(Locale::trans('upload.save_torrent_file_failed', [], null), 'file');
-            }
-            $extraInsert['torrent_id'] = $id;
-            $this->repositories->torrentUpload->insertExtra($extraInsert);
-            $fileInsert = [];
-            foreach ($fileListInfo['fileList'] as $fileItem) {
-                $fileInsert[] = [
-                    'torrent' => $id,
-                    'filename' => $fileItem[0],
-                    'size' => $fileItem[1],
-                ];
-            }
-            $this->repositories->torrentUpload->insertFiles($fileInsert);
-            if (! empty($subCategoriesAngTags['tags'])) {
-                TorrentTags::insert($id, $subCategoriesAngTags['tags'], (bool) false);
-            }
-            $this->saveCustomFields($request, $category, $id);
-            $this->sendReward($id);
+        $writtenTorrentFile = null;
+        try {
+            $newTorrent = DB::transaction(function () use ($request, $category, $torrentInsert, $extraInsert, $fileListInfo, $subCategoriesAngTags, $dict, $torrentSavePath, &$writtenTorrentFile) {
+                $newTorrent = $this->repositories->torrentUpload->createTorrent($torrentInsert);
+                $id = $newTorrent->id;
+                $torrentFilePath = "$torrentSavePath/$id.torrent";
+                $saveResult = Bencode::dump($torrentFilePath, $dict);
+                // The file was written before commit — if it is a partial
+                // dump or a later statement rolls the transaction back the
+                // row disappears but the file would stay; the catch below
+                // removes that orphan.
+                $writtenTorrentFile = $torrentFilePath;
+                if ($saveResult === false) {
+                    Logger::writeWithContext((string) "save torrent failed: {$torrentFilePath}", (string) 'error', (bool) false);
+                    throw new UploadValidationException(Locale::trans('upload.save_torrent_file_failed', [], null), 'file');
+                }
+                $extraInsert['torrent_id'] = $id;
+                $this->repositories->torrentUpload->insertExtra($extraInsert);
+                $fileInsert = [];
+                foreach ($fileListInfo['fileList'] as $fileItem) {
+                    $fileInsert[] = [
+                        'torrent' => $id,
+                        'filename' => $fileItem[0],
+                        'size' => $fileItem[1],
+                    ];
+                }
+                $this->repositories->torrentUpload->insertFiles($fileInsert);
+                if (! empty($subCategoriesAngTags['tags'])) {
+                    TorrentTags::insert($id, $subCategoriesAngTags['tags'], (bool) false);
+                }
+                $this->saveCustomFields($request, $category, $id);
+                $this->sendReward($id);
 
-            return $newTorrent;
-        });
+                return $newTorrent;
+            });
+        } catch (\Throwable $e) {
+            if ($writtenTorrentFile !== null && is_file($writtenTorrentFile)) {
+                @unlink($writtenTorrentFile);
+            }
+
+            throw $e;
+        }
         $id = $newTorrent->id;
         $this->repositories->torrentDownload->addPiecesHashCache($id, $newTorrent->pieces_hash);
         $this->handleOffer($request, $newTorrent, $user);

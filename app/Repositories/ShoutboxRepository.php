@@ -248,7 +248,7 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
                 $query->where('shoutbox.id', '<', $boundary);
             }
 
-            $this->applyTypeFilter($query, 'shoutbox', null);
+            $this->applyTypeFilter($query);
             $rows = $query->get();
             if ($rows->isEmpty()) {
                 return;
@@ -290,48 +290,44 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
     }
 
     /**
+     * Restrict a shoutbox query to the SB row type — the only type the
+     * `shoutbox` table carries.
+     *
      * @param  Builder  $query
-     * @param  array<string, mixed>|object|null  $user
      */
-    public function applyTypeFilter($query, string $type, $user = null): void
+    public function applyTypeFilter($query): void
     {
         $query->where('type', ShoutboxType::SB->value);
     }
 
-    /**
-     * @param  array<string, mixed>|null  $user
-     */
-    public function maxId(string $type, ?array $user): int
+    public function maxId(): int
     {
         $query = DB::table('shoutbox');
-        $this->applyTypeFilter($query, $type, $user);
+        $this->applyTypeFilter($query);
 
         return (int) $query->max('id');
     }
 
     /**
-     * @param  array<string, mixed>|null  $user
      * @return Collection<int, \stdClass>
      */
-    public function listLatest(string $type, ?array $user, int $limit): Collection
+    public function listLatest(int $limit): Collection
     {
         $query = DB::table('shoutbox')->orderByDesc('date')->limit($limit);
-        $this->applyTypeFilter($query, $type, $user);
+        $this->applyTypeFilter($query);
 
         return $query->get();
     }
 
     /**
      * Prepared query for shouts after $lastId — re-executed by the SSE loop.
-     *
-     * @param  array<string, mixed>|null  $user
      */
-    public function newAfterIdQuery(string $type, int $lastId, ?array $user): Builder
+    public function newAfterIdQuery(int $lastId): Builder
     {
         $query = DB::table('shoutbox')
             ->orderBy('id')
             ->where('id', '>', $lastId);
-        $this->applyTypeFilter($query, $type, $user);
+        $this->applyTypeFilter($query);
 
         return $query;
     }

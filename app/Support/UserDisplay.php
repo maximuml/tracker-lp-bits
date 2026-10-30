@@ -87,7 +87,7 @@ final class UserDisplay
         if ($id === null) {
             PageResponses::abort(
                 (string) (__('functions.std_error')),
-                (string) (__('functions.std_no_user_named'))."'".$username."'",
+                (string) (__('functions.std_no_user_named'))."'".e($username)."'",
             );
         }
 

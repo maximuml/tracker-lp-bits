@@ -84,20 +84,15 @@ class BonusLogs extends NexusModel
         BusinessType::FORUM_TOPIC_BONUS->value => ['text' => 'Create forum topic'],
         BusinessType::FORUM_POST_BONUS->value => ['text' => 'Post forum reply'],
         BusinessType::COMMENT_BONUS->value => ['text' => 'Post comment'],
+        BusinessType::ATTENDANCE->value => ['text' => 'Attendance'],
     ];
 
     /**
-     * @param  mixed  $category
      * @return array<int|string, mixed>
      */
-    public static function listBusinessTypeOptions($category = ''): array
+    public static function listBusinessTypeOptions(): array
     {
-        $source = BonusLogs::$businessTypes;
-        if ($category == self::CATEGORY_COMMON) {
-            $source = BonusLogs::$businessTypes;
-        }
-
-        return self::listStaticProps($source, 'bonus-log.business_types', true);
+        return self::listStaticProps(BonusLogs::$businessTypes, 'bonus-log.business_types', true);
     }
 
     /**

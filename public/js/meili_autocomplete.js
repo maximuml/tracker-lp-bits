@@ -14,6 +14,11 @@ function meiliAutoInit()
         return;
     }
 
+    meiliAutoInput.setAttribute('role', 'combobox');
+    meiliAutoInput.setAttribute('aria-expanded', 'false');
+    meiliAutoInput.setAttribute('aria-autocomplete', 'list');
+    meiliAutoInput.setAttribute('aria-controls', 'meili-autocomplete-listbox');
+
     meiliAutoInput.addEventListener('input', function () {
         meiliSuggestInput(this.value);
     });
@@ -30,6 +35,8 @@ function meiliAutoInit()
     meiliAutoContainer.style.width = meiliAutoInput.offsetWidth + 'px';
 
     meiliAutoList = document.createElement('div');
+    meiliAutoList.id = 'meili-autocomplete-listbox';
+    meiliAutoList.setAttribute('role', 'listbox');
     meiliAutoContainer.appendChild(meiliAutoList);
     meiliAutoInput.parentNode.appendChild(meiliAutoContainer);
 
@@ -134,6 +141,9 @@ function meiliAutoRender(torrents)
     for (var i = 0; i < torrents.length; i++) {
         var item = document.createElement('div');
         item.className = 'nx-autocomplete-item';
+        item.id = 'meili-autocomplete-option-' + i;
+        item.setAttribute('role', 'option');
+        item.setAttribute('aria-selected', 'false');
         item.innerText = torrents[i].name;
         item.setAttribute('data-index', i);
         item.onmousedown = function (e) {
@@ -150,6 +160,7 @@ function meiliAutoRender(torrents)
 
     meiliAutoContainer.style.display = 'block';
     meiliAutoContainer.style.width = meiliAutoInput.offsetWidth + 'px';
+    meiliAutoInput.setAttribute('aria-expanded', 'true');
     meiliAutoUpdateHighlight();
 }
 
@@ -173,7 +184,14 @@ function meiliAutoUpdateHighlight()
 {
     var items = meiliAutoList.children;
     for (var i = 0; i < items.length; i++) {
-        items[i].classList.toggle('nx-autocomplete-item--active', i === meiliAutoSelected);
+        var active = i === meiliAutoSelected;
+        items[i].classList.toggle('nx-autocomplete-item--active', active);
+        items[i].setAttribute('aria-selected', active ? 'true' : 'false');
+    }
+    if (meiliAutoSelected >= 0 && items[meiliAutoSelected]) {
+        meiliAutoInput.setAttribute('aria-activedescendant', items[meiliAutoSelected].id);
+    } else {
+        meiliAutoInput.removeAttribute('aria-activedescendant');
     }
 }
 
@@ -192,6 +210,10 @@ function meiliAutoClose()
 {
     if (meiliAutoContainer) {
         meiliAutoContainer.style.display = 'none';
+    }
+    if (meiliAutoInput) {
+        meiliAutoInput.setAttribute('aria-expanded', 'false');
+        meiliAutoInput.removeAttribute('aria-activedescendant');
     }
     meiliAutoResults = [];
     meiliAutoSelected = -1;

@@ -71,7 +71,7 @@
                                         <div class="nx-bshop__fields">
                                             <div class="nx-bshop__field">
                                                 <label for="giftusername">{{ __('mybonus.text_username') }}</label>
-                                                <input id="giftusername" type="text" name="username" maxlength="24">
+                                                <input id="giftusername" type="text" name="username" maxlength="24" autocomplete="off">
                                             </div>
                                             <div class="nx-bshop__field">
                                                 <label for="giftcustom">{{ __('mybonus.text_to_be_given') }}</label>

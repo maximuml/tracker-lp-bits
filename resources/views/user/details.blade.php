@@ -3,7 +3,7 @@
 @section('title', (__('userdetails.head_details_for')).$user['username'])
 
 @section('content')
-<h1>{{ $usernameHtml }}@if (($countryFlagPic ?? '') !== '')<img width="32" height="24" src="{{ \App\Support\FlagIcon::path($countryFlagPic) }}" alt="{{ $countryName }}" />@endif</h1>
+<h1>{{ $usernameHtml }}@if (($countryFlagPic ?? '') !== '')<img width="32" height="24" src="{{ \App\Support\FlagIcon::path($countryFlagPic) }}" alt="{{ $countryName }}"  loading="lazy" decoding="async" />@endif</h1>
 @if (! \App\Support\YesNo::isYes($user['enabled'] ?? null))
 <p><b>{{ __('userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)
@@ -63,7 +63,7 @@
 @if (! empty($user['avatar']))
 <x-settings-row-small :label="__('userdetails.row_avatar')">{{ $avatarHtml }}</x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('userdetails.row_class')"><img class="nx-class-badge" alt="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($user['class']) }}" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ __('userdetails.row_vip_until') ?? '' }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_class')"><img class="nx-class-badge" alt="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($user['class']) }}"  loading="lazy" decoding="async" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ __('userdetails.row_vip_until') ?? '' }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
 @if ($userProps !== [])
 <x-settings-row-small :label="__('userdetails.row_user_props')"><div>@foreach ($userProps as $prop){{ $prop }}@unless ($loop->last)&nbsp;|&nbsp;@endunless @endforeach</div></x-settings-row-small>
 @endif

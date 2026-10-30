@@ -30,7 +30,7 @@
                 <div class="nx-setrow">
                     <label class="nx-setrow__label" for="usercp-oldpassword">{{ __('usercp.row_security_check') }}</label>
                     <div class="nx-setrow__control">
-                        <input type="password" class="oldpassword" id="usercp-oldpassword">
+                        <input type="password" class="oldpassword" id="usercp-oldpassword" autocomplete="current-password">
                         <p class="nx-setrow__hint">{{ __('usercp.text_note') }} {{ __('usercp.text_security_check_note') }}</p>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                     <div class="nx-setrow">
                         <label class="nx-setrow__label" for="usercp-email">{{ __('usercp.row_email_address') }}</label>
                         <div class="nx-setrow__control">
-                            <input type="text" name="email" id="usercp-email" value="{{ $security->email }}">
+                            <input type="email" name="email" id="usercp-email" value="{{ $security->email }}" autocomplete="email">
                             <p class="nx-setrow__hint">{{ __('usercp.text_note') }} {{ __('usercp.text_email_address_note') }}</p>
                         </div>
                     </div>
@@ -55,13 +55,13 @@
                 <div class="nx-setrow">
                     <label class="nx-setrow__label" for="usercp-password">@safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.row_change_password')))</label>
                     <div class="nx-setrow__control">
-                        <input type="password" class="password" id="usercp-password">
+                        <input type="password" class="password" id="usercp-password" autocomplete="new-password">
                     </div>
                 </div>
                 <div class="nx-setrow">
                     <label class="nx-setrow__label" for="usercp-passagain">@safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.row_type_password_again')))</label>
                     <div class="nx-setrow__control">
-                        <input type="password" class="passagain" id="usercp-passagain">
+                        <input type="password" class="passagain" id="usercp-passagain" autocomplete="new-password">
                     </div>
                 </div>
             </section>
@@ -83,7 +83,7 @@
                     <div class="nx-setrow">
                         <label class="nx-setrow__label" for="usercp-two-step-code">{{ __('usercp.row_two_step_secret') }}</label>
                         <div class="nx-setrow__control">
-                            <input type="text" name="two_step_code" id="usercp-two-step-code">
+                            <input type="text" name="two_step_code" id="usercp-two-step-code" inputmode="numeric" autocomplete="one-time-code">
                             <p class="nx-setrow__hint">{{ __('usercp.text_two_step_secret_unbind_note') }}</p>
                         </div>
                     </div>
@@ -97,7 +97,7 @@
                             <li>
                                 {{ __('usercp.text_two_step_secret_bind_complete_note') }}
                                 <input type="hidden" name="two_step_secret" value="{{ $security->twoStep->secret }}">
-                                <input type="text" name="two_step_code" id="usercp-two-step-code" aria-label="{{ __('usercp.text_two_step_secret_bind_complete_note') }}" readonly>
+                                <input type="text" name="two_step_code" id="usercp-two-step-code" aria-label="{{ __('usercp.text_two_step_secret_bind_complete_note') }}" inputmode="numeric" autocomplete="one-time-code" readonly>
                             </li>
                         </ol>
                     </div>

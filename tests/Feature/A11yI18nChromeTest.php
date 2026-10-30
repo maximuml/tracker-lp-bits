@@ -89,4 +89,62 @@ final class A11yI18nChromeTest extends TestCase
         $this->assertStringContainsString('dlg.showModal()', $js);
         $this->assertStringContainsString("addEventListener('cancel'", $js);
     }
+
+    public function test_autocomplete_js_exposes_combobox_semantics(): void
+    {
+        $js = file_get_contents(base_path('public/js/meili_autocomplete.js'));
+        $this->assertIsString($js);
+        $this->assertStringContainsString("'role', 'combobox'", $js);
+        $this->assertStringContainsString("'aria-autocomplete', 'list'", $js);
+        $this->assertStringContainsString("'aria-expanded'", $js);
+        $this->assertStringContainsString("'aria-controls', 'meili-autocomplete-listbox'", $js);
+        $this->assertStringContainsString("'role', 'listbox'", $js);
+        $this->assertStringContainsString("'role', 'option'", $js);
+        $this->assertStringContainsString("'aria-activedescendant'", $js);
+        $this->assertStringContainsString("'aria-selected'", $js);
+    }
+
+    public function test_repeated_and_below_fold_images_lazy_load(): void
+    {
+        foreach ([
+            'resources/views/components/shoutbox/avatar.blade.php',
+            'resources/views/components/support/smiley-img.blade.php',
+            'resources/views/components/support/bbcode-img.blade.php',
+            'resources/views/bitbucketlog/index.blade.php',
+            'resources/views/users/index.blade.php',
+        ] as $viewPath) {
+            $view = file_get_contents(base_path($viewPath));
+            $this->assertIsString($view);
+            $this->assertMatchesRegularExpression(
+                '/<img\b[^>]*loading="lazy"/',
+                $view,
+                $viewPath.' must lazy-load repeated/below-fold images',
+            );
+        }
+
+        // Above-the-fold chrome must stay eager.
+        $header = file_get_contents(base_path('resources/views/layouts/partials/header.blade.php'));
+        $this->assertIsString($header);
+        $this->assertStringNotContainsString('nxm-logo" href="/web/index"><img src="{{ $chrome->logoMain }}" alt="{{ $chrome->siteName }}" loading="lazy"', $header);
+    }
+
+    public function test_security_and_reset_forms_expose_autocomplete_hints(): void
+    {
+        $security = file_get_contents(base_path('resources/views/usercp/sections/security.blade.php'));
+        $this->assertIsString($security);
+        $this->assertStringContainsString('autocomplete="current-password"', $security);
+        $this->assertStringContainsString('autocomplete="new-password"', $security);
+        $this->assertStringContainsString('autocomplete="one-time-code"', $security);
+        $this->assertStringContainsString('autocomplete="email"', $security);
+
+        $reset = file_get_contents(base_path('resources/views/reset/index.blade.php'));
+        $this->assertIsString($reset);
+        $this->assertStringContainsString('autocomplete="username"', $reset);
+        $this->assertStringContainsString('autocomplete="new-password"', $reset);
+
+        $invite = file_get_contents(base_path('resources/views/invite/index.blade.php'));
+        $this->assertIsString($invite);
+        $this->assertStringContainsString('type="email"', $invite);
+        $this->assertStringContainsString('autocomplete="email"', $invite);
+    }
 }

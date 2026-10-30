@@ -20,7 +20,7 @@
                                     <label><input type="radio" name="type" value="{{ $name }}">{{ $text }}@if ($name == 'uploaded')&nbsp;(GB)@endif</label>
                                     @endforeach
                                 </div>
-                            <div class="nx-fhead">{{ __('incrementbulk.labels')['amount'] }} </div><div class="nx-fcell"><input type=text name=amount size=10></div>
+                            <div class="nx-fhead">{{ __('incrementbulk.labels')['amount'] }} </div><div class="nx-fcell"><input type=text name=amount size=10 inputmode="decimal"></div>
                             <div class="nx-fhead">{{ __('incrementbulk.labels')['duration'] }}</div><div class="nx-fcell"><input type=number min="1" name=duration size=10> {{ __('incrementbulk.labels')['duration_help'] }}</div>
                                 <div class="nx-fhead">{{ __('incrementbulk.labels')['user_class'] }}</div><div class="nx-fcell">
                                         @foreach ($classes as $chunk)

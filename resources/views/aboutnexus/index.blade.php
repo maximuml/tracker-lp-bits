@@ -37,7 +37,7 @@
     </tr></thead></x-slot:head>
     @foreach ($languages as $row)
         <tr>
-            <td class="align-top px-2.5 py-1.5"><img width="20" height="15" src="{{ \App\Support\FlagIcon::path($row['flagpic'] ?? '') }}" alt="{{ $row['lang_name'] }}" title="{{ $row['lang_name'] }}" /></td>
+            <td class="align-top px-2.5 py-1.5"><img width="20" height="15" src="{{ \App\Support\FlagIcon::path($row['flagpic'] ?? '') }}" alt="{{ $row['lang_name'] }}" title="{{ $row['lang_name'] }}"  loading="lazy" decoding="async" /></td>
             <td class="align-top px-2.5 py-1.5">{{ $row['lang_name'] }}</td>
             <td class="align-top px-2.5 py-1.5">{{ $row['trans_state'] }}</td>
         </tr>

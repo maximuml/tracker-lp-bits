@@ -80,7 +80,7 @@
 <tr>
 <td class="align-top px-2.5 py-1.5 text-center"><strong>{{ (int) $row['id'] }}</strong></td>
 <td class="align-top px-2.5 py-1.5"><strong>{{ $row['name'] }}</strong></td>
-<td class="align-top px-2.5 py-1.5 text-center">@if ($row['flagpic_url'] ?? '')<img src="{{ $row['flagpic_url'] }}" alt="{{ $row['name'] }}"  loading="lazy" decoding="async" />@else-@endif</td>
+<td class="align-top px-2.5 py-1.5 text-center">@if ($row['flagpic_url'] ?? '')<img src="{{ $row['flagpic_url'] }}" alt="{{ $row['name'] }}" loading="lazy" decoding="async" />@else-@endif</td>
 <td class="align-top px-2.5 py-1.5">{{ $row['location_main'] }}</td>
 <td class="align-top px-2.5 py-1.5">{{ $row['location_sub'] }}</td>
 <td class="align-top px-2.5 py-1.5">{{ $row['start_ip'] }}</td>

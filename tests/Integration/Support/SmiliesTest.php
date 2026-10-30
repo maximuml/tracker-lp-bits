@@ -22,7 +22,7 @@ final class SmiliesTest extends TestCase
             .' data-smile-form="myform"'
             .' data-smile-text="myta"'
             .' data-domtt-content>'
-            .'<img class="nx-smiley" src="pic/smilies/4.gif" alt="[em4]" />'
+            .'<img class="nx-smiley" src="pic/smilies/4.gif" alt="[em4]" loading="lazy" decoding="async" />'
             .'<template class="nx-tt"><img src="pic/smilies/4.gif" alt="" /></template></a>';
         $this->assertSame($expected, rtrim((string) Smilies::link('myform', 'myta', 4)));
     }

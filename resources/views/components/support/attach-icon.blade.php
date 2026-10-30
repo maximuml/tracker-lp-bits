@@ -1,2 +1,2 @@
 @props(['alt', 'icon'])
-<img alt="{{ $alt }}" src="pic/attachicons/{{ $icon }}.gif"  loading="lazy" decoding="async" />
+<img alt="{{ $alt }}" src="pic/attachicons/{{ $icon }}.gif" loading="lazy" decoding="async" />

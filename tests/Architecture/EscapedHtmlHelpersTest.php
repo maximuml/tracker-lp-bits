@@ -55,6 +55,7 @@ final class EscapedHtmlHelpersTest extends TestCase
         'Ratio::colorClass' => true,
         'Ratio::seedLeechColorClass' => true,
         'UserClass::imagePath' => true,
+        'FlagIcon::path' => true,
         'UserDisplay::plainUsername' => true,
         'Style::cssUriWithContext' => true,
         'Url::schemeAndHost' => true,

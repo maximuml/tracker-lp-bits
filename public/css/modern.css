@@ -2985,3 +2985,12 @@ html[data-theme="dark"] .nxm-main .nx-hr .nx-hr__table thead th { background: va
     .nxm-main .nx-hr .nx-hr__action input[type="button"].remove-hr { width: 100%; }
     .nx-hr__need { margin-top: 0.45rem; }
 }
+
+/* Pixel-art class badges (pic/*.gif): keep nearest-neighbor scaling on
+   HiDPI/Retina instead of bilinear blur — the artwork is intentionally
+   pixelated, so crisp blocks are the faithful rendering. */
+.nx-class-badge {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}

@@ -481,6 +481,31 @@ final class OfferListBuilderTest extends TestCase
         $this->assertNotSame('N/A', (string) $table->rows[1]->timeout);
     }
 
+    public function test_timeout_renders_span_markup_in_legacy_runtime(): void
+    {
+        app(RuntimeContext::class)->bootEntry(true);
+
+        try {
+            $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
+                $this->row(['id' => 1, 'allowed' => 0, 'allowedtime' => date('Y-m-d H:i:s', (defined('TIMENOW') ? TIMENOW : time()) + 90000)]),
+            ], 1));
+
+            $s = $this->builder()->build(
+                $this->curUser(['id' => 7]),
+                7,
+                $this->request(),
+                $this->globalData(['offervotetimeoutMain' => 3600, 'offeruptimeoutMain' => 7200]),
+            );
+
+            $timeout = (string) $s->table->rows[0]->timeout;
+            $this->assertStringContainsString('<span title="', $timeout);
+            $this->assertStringContainsString('<br', $timeout);
+            $this->assertStringNotContainsString('&lt;', $timeout);
+        } finally {
+            app(RuntimeContext::class)->bootEntry(false);
+        }
+    }
+
     public function test_build_preloads_offer_and_last_commenter_ids_in_batch(): void
     {
         /** @var UserRepositoryInterface&MockInterface $userRepo */

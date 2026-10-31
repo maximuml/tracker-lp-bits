@@ -2,13 +2,11 @@
 
 return [
     'sidebar' => [
-        'exam_users' => 'Exam Users',
         'hit_and_runs' => 'Hit And Runs',
         'users_list' => 'Users',
         'tags_list' => 'Tags',
         'agent_allows' => 'Agent Allows',
         'agent_denies' => 'Agent Denies',
-        'exams_list' => 'Exams & Tasks',
         'settings' => 'Settings',
         'claims' => 'User claims',
         'torrent_list' => 'Torrents',
@@ -72,11 +70,6 @@ return [
                 'reset_password_btn' => 'Reset password',
                 'reset_password_label' => 'New password',
                 'reset_password_confirmation_label' => 'Confirm new password',
-                'assign_exam_btn' => 'Assign exam',
-                'assign_exam_exam_label' => 'Select exam',
-                'assign_exam_begin_label' => 'Begin time',
-                'assign_exam_end_label' => 'End time',
-                'assign_exam_end_help' => 'If you do not specify a begin/end time, the time range set by the exam itself will be used',
                 'confirm_btn' => 'Confirm',
                 'confirm_send_email' => 'Send confirmation email',
                 'confirm_send_email_help' => 'Send an email notification to the user after confirming their account.',
@@ -107,18 +100,6 @@ return [
                 'change_bonus_etc_duration_help' => 'Required when adding temporary invitation, in days',
                 'change_class_btn' => 'Change class',
             ],
-        ],
-        'exam_user' => [
-            'bulk_action_avoid_label' => 'Bulk avoid',
-            'bulk_action_update_end_label' => 'Bulk modify end time',
-            'action_avoid' => 'Avoid',
-            'action_update_end' => 'Modify end time',
-            'result_passed' => 'Passed!',
-            'result_not_passed' => 'Not passed!',
-        ],
-        'exam' => [
-            'index_duplicate' => 'Index：:index duplicate !',
-            'index_seed_time_average_require_value_invalid' => 'The required average seeding time :index_seed_time_average_require_value is greater than the total exam duration :duration. Please modify it!',
         ],
         'hit_and_run' => [
             'bulk_action_pardon' => 'Bulk pardon',

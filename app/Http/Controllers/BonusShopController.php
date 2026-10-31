@@ -4,117 +4,20 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Contracts\Repositories\ExamRepositoryInterface;
-use App\DTOs\Auth\ActorContext;
-use App\Enums\ExamType;
 use App\Http\Requests\FreeleechRequest;
-use App\Models\User;
-use App\Repositories\UserDetailRepository;
-use App\Support\AssetAppender;
 use App\Support\Cache\NexusCache;
-use App\Support\Html\SafeHtml;
-use App\Support\Locale;
-use App\Support\Pagination;
 use App\Support\Promotion;
 use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Js;
 use Illuminate\View\View;
 
 class BonusShopController extends BasePageController
 {
-    public function __construct(private readonly UserDetailRepository $userDetailRepository, private readonly ExamRepositoryInterface $examRepository,
-        private readonly ActorContext $actor,
+    public function __construct(
         private readonly ?NexusCache $cache,
     ) {}
-
-    public function task(Request $request): View|RedirectResponse|Response
-    {
-        $actor = $this->actor->toLegacyArray();
-        $currentUserId = (int) ($this->actor->id);
-
-        $total = $this->examRepository->countEnabledTasks();
-        $perPage = 20;
-        [$pagertop, $pagerbottom, , $offset, $pageSize] = Pagination::pager($perPage, $total, '?');
-
-        $examRows = $this->examRepository->listEnabledTasks($offset, $pageSize);
-
-        $userInfo = $this->userDetailRepository->findOrFailById($currentUserId, User::$commonFields);
-        $userTasks = $userInfo->onGoingExamAndTasks()
-            ->where('type', ExamType::TASK->value)
-            ->orderBy('id', 'desc')
-            ->get()
-            ->keyBy('id');
-
-        $claimBtnText = Locale::trans('exam.action_claim_task', [], null);
-        $claimedText = Locale::trans('exam.claimed_already', [], null);
-        $infiniteText = Locale::trans('label.infinite', [], null);
-
-        $rows = [];
-        foreach ($examRows as $row) {
-            $isClaimed = $userTasks->has($row->id);
-            $btnText = $isClaimed ? $claimedText : $claimBtnText;
-            $rows[] = [
-                'id' => $row->id,
-                'name' => $row->name,
-                'indexFormatted' => $row->indexFormatted,
-                'beginForUser' => $row->getBeginForUser(),
-                'endForUser' => $row->getEndForUser(),
-                'filterFormatted' => $row->filterFormatted,
-                'rewardFormatted' => number_format((float) $row->success_reward_bonus),
-                'deductFormatted' => number_format((float) $row->fail_deduct_bonus),
-                'claimedCount' => ($row->on_going_users_count ?? 0).'/'.($row->max_user_count ?: $infiniteText),
-                'description' => SafeHtml::fromUntrustedHtml((string) ($row->description ?? '')),
-                'claimable' => ! $isClaimed,
-                'claimText' => $btnText,
-            ];
-        }
-
-        $title = Locale::trans('exam.type_task', [], null);
-        $confirmBuyJs = Js::from(Locale::trans('exam.confirm_to_claim', [], null));
-
-        $js = <<<JS
-document.querySelectorAll('.claim').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-        var id = this.getAttribute('data-id')
-        layer.confirm({$confirmBuyJs}, function (index) {
-            layer.close(index)
-            var params = {exam_id: id}
-            console.log(params)
-            nativePost('/web/tasks/claim', params, function(response) {
-                console.log(response)
-                if (response.ret != 0) {
-                    layer.alert(response.msg)
-                    return
-                }
-                window.location.reload()
-            })
-        })
-    })
-})
-JS;
-        AssetAppender::js($js, 'footer', false);
-
-        return $this->renderPage($request, 'task', true, [
-            'title' => $title,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'rows' => $rows,
-            'columnNameLabel' => Locale::trans('label.name', [], null),
-            'columnIndexLabel' => Locale::trans('exam.index', [], null),
-            'columnBeginTimeLabel' => Locale::trans('label.begin', [], null),
-            'columnEndTimeLabel' => Locale::trans('label.end', [], null),
-            'columnTargetUserLabel' => Locale::trans('label.exam.filter_formatted', [], null),
-            'columnSuccessRewardLabel' => Locale::trans('exam.success_reward_bonus', [], null),
-            'columnFailDeductLabel' => Locale::trans('exam.fail_deduct_bonus', [], null),
-            'columnClaimedUserCountLabel' => Locale::trans('exam.claimed_user_count', [], null),
-            'columnDescLabel' => Locale::trans('label.description', [], null),
-            'columnClaimLabel' => Locale::trans('exam.action_claim_task', [], null),
-        ]);
-
-    }
 
     public function freeleech(Request $request): View|RedirectResponse|Response
     {

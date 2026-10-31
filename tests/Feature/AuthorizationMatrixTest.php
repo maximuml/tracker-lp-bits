@@ -146,17 +146,6 @@ class AuthorizationMatrixTest extends TestCase
             'users.show' => ['/api/v1/users/1',        'GET',    RoutePermissionEnum::USER_VIEW->value],
             'users.store' => ['/api/v1/users',          'POST',   RoutePermissionEnum::USER_STORE->value],
 
-            // Exams
-            'exams.index' => ['/api/v1/exams',          'GET',    RoutePermissionEnum::EXAM_LIST->value],
-            'exams.show' => ['/api/v1/exams/1',        'GET',    RoutePermissionEnum::EXAM_LIST->value],
-            'exams.store' => ['/api/v1/exams',          'POST',   RoutePermissionEnum::EXAM_MANAGE->value],
-            'exams.update' => ['/api/v1/exams/1',        'PUT',    RoutePermissionEnum::EXAM_MANAGE->value],
-            'exams.destroy' => ['/api/v1/exams/1',       'DELETE', RoutePermissionEnum::EXAM_MANAGE->value],
-
-            'exam-users.index' => ['/api/v1/exam-users',     'GET',    RoutePermissionEnum::EXAM_USER_LIST->value],
-            'exam-users.store' => ['/api/v1/exam-users',     'POST',   RoutePermissionEnum::EXAM_USER_MANAGE->value],
-            'exam-users.destroy' => ['/api/v1/exam-users/1', 'DELETE', RoutePermissionEnum::EXAM_USER_MANAGE->value],
-
             // Settings
             'settings.index' => ['/api/v1/settings',      'GET',    RoutePermissionEnum::SETTING_LIST->value],
             'settings.store' => ['/api/v1/settings',      'POST',   RoutePermissionEnum::SETTING_MANAGE->value],

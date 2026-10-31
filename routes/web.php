@@ -9,7 +9,6 @@ use App\Http\Controllers\Ajax\NotificationAjaxController as AjaxNotificationCont
 use App\Http\Controllers\Ajax\OfferAjaxController as AjaxOfferController;
 use App\Http\Controllers\Ajax\PasskeyAjaxController as AjaxPasskeyController;
 use App\Http\Controllers\Ajax\ShoutboxAjaxController as AjaxShoutboxController;
-use App\Http\Controllers\Ajax\TaskAjaxController as AjaxTaskController;
 use App\Http\Controllers\Ajax\TorrentApprovalAjaxController as AjaxTorrentApprovalController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AttendanceController;
@@ -271,7 +270,6 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
         Route::post('torrents/approval-modal', [AjaxTorrentApprovalController::class, 'modal']);
         Route::post('hit-and-runs/remove', [AjaxHitAndRunController::class, 'remove']);
         Route::post('benefits/consume', [AjaxBenefitController::class, 'consume']);
-        Route::post('tasks/claim', [AjaxTaskController::class, 'claim']);
         Route::post('notifications/feed', [AjaxNotificationController::class, 'feed']);
         Route::post('shoutbox/clear', [AjaxShoutboxController::class, 'clear']);
         Route::post('shoutbox/post', [AjaxShoutboxController::class, 'post']);
@@ -316,7 +314,6 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::get('notifications', [NotificationController::class, 'index'])->middleware('throttle:notifications')->name('notifications.legacy');
     Route::get('latestcomments', [ForumController::class, 'latestcomments'])->name('latestcomments.legacy');
     Route::get('bonus-log', [BonusHistoryController::class, 'bonusLog'])->name('bonus-log.legacy');
-    Route::get('task', [BonusShopController::class, 'task'])->name('task.legacy');
     Route::get('uploaders', [BonusHistoryController::class, 'uploaders'])->name('uploaders.legacy');
     Route::get('settings', [SettingsController::class, 'settings'])->name('settings.legacy');
     Route::get('freeleech', [BonusShopController::class, 'freeleech'])->name('freeleech.legacy');

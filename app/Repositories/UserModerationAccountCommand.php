@@ -104,8 +104,6 @@ final class UserModerationAccountCommand
         $tables = [
             'users' => 'id',
             'hit_and_runs' => 'uid',
-            'exam_users' => 'uid',
-            'exam_progress' => 'uid',
             'user_metas' => 'uid',
             'attendance' => 'uid',
             'attendance_logs' => 'uid',

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Http\Controllers;
 
-use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Contracts\Repositories\MysqlStatsRepositoryInterface;
@@ -19,7 +18,6 @@ use App\Contracts\Repositories\TorrentRepositoryInterface;
 use App\Contracts\Repositories\UsercpRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
-use App\Http\Controllers\ExamController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\OfferController;
@@ -60,7 +58,6 @@ final class RepositoryInterfaceInjectionTest extends TestCase
      */
     public static function controllerInterfaceProvider(): iterable
     {
-        yield 'ExamController + ExamRepositoryInterface' => [ExamController::class, ExamRepositoryInterface::class];
         yield 'UserController + UserRepositoryInterface' => [UserController::class, UserRepositoryInterface::class];
         yield 'UserController + UserModerationRepositoryInterface' => [UserController::class, UserModerationRepositoryInterface::class];
         yield 'UserAdminController + UserModerationRepositoryInterface' => [UserAdminController::class, UserModerationRepositoryInterface::class];

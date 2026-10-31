@@ -158,7 +158,6 @@ $get301('/notifications', '/web/notifications');
 Route::post('/notifications', [CompatRedirectController::class, 'post'])->middleware('throttle:notifications')->name('notifications.read.legacy');
 $get301('/latestcomments', '/web/latestcomments');
 $get301('/bonus-log', '/web/bonus-log');
-$get301('/task', '/web/task');
 $get301('/uploaders', '/web/uploaders');
 $get301('/settings', '/web/settings');
 Route::post('/settings', [CompatRedirectController::class, 'post'])->middleware('reject.get.mutations');

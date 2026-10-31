@@ -24,7 +24,6 @@ final class AjaxRedirects
         'approval' => '/web/torrent-approval',
         'removeHitAndRun' => '/web/hit-and-runs/remove',
         'consumeBenefit' => '/web/benefits/consume',
-        'claimTask' => '/web/tasks/claim',
         'addToken' => '/web/token/add',
         'removeToken' => '/web/token/del',
         'getToastNotifications' => '/web/notifications/feed',

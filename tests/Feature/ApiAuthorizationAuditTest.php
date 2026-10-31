@@ -62,19 +62,7 @@ final class ApiAuthorizationAuditTest extends TestCase
             'users.store' => ['POST', '/api/v1/users'],
             'user-classes' => ['GET', '/api/v1/user-classes'],
             'user-invite-info' => ['GET', '/api/v1/user-invite-info'],
-            'user-match-exams' => ['GET', '/api/v1/user-match-exams'],
             'user-mod-comment' => ['GET', '/api/v1/user-mod-comment'],
-
-            // Exams admin
-            'exams.index' => ['GET', '/api/v1/exams'],
-            'exams-all' => ['GET', '/api/v1/exams-all'],
-            'exam-indexes' => ['GET', '/api/v1/exam-indexes'],
-            'exam-users.index' => ['GET', '/api/v1/exam-users'],
-            'exam-users.store' => ['POST', '/api/v1/exam-users'],
-            'exam-users-avoid' => ['PUT', '/api/v1/exam-users-avoid'],
-            'exam-users-recover' => ['PUT', '/api/v1/exam-users-recover'],
-            'exam-users-avoid-bulk' => ['PUT', '/api/v1/exam-users-avoid-bulk'],
-            'exam-users-delete-bulk' => ['PUT', '/api/v1/exam-users-delete-bulk'],
 
             // Hit & run admin
             'hr.index' => ['GET', '/api/v1/hr'],

@@ -110,7 +110,7 @@ final class HttpContractTest extends TestCase
         'takelogin', 'takelang', 'takestaffmessage', 'taketopten', 'takefaq',
         'takerules', 'takeaboutnexus', 'takepoll', 'takeforummanage',
         'takedonate', 'confirmemail', 'confirm_resend', 'takemodtask',
-        'takeexam', 'takeagentallow', 'takeagentdeny', 'takeshoutbox',
+        'takeagentallow', 'takeagentdeny', 'takeshoutbox',
         'takesub', 'takecomment', 'takeoffer', 'takevote', 'takeviewnfo',
     ];
 

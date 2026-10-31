@@ -54,7 +54,6 @@ final class AjaxRestEndpointsTest extends TestCase
             'approval' => ['approval', '/web/torrent-approval'],
             'removeHitAndRun' => ['removeHitAndRun', '/web/hit-and-runs/remove'],
             'consumeBenefit' => ['consumeBenefit', '/web/benefits/consume'],
-            'claimTask' => ['claimTask', '/web/tasks/claim'],
             'addToken' => ['addToken', '/web/token/add'],
             'removeToken' => ['removeToken', '/web/token/del'],
             'getToastNotifications' => ['getToastNotifications', '/web/notifications/feed'],

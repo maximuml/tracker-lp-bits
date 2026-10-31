@@ -107,7 +107,6 @@
 <x-settings-row :label="__('userdetails.row_title')"><input type="text" size="60" name="title" value="{{ trim((string) $user['title']) }}" /></x-settings-row>
 <x-settings-row :label="__('userdetails.row_privacy_level')"><input type="radio" name="privacy" value="low"@if (($user['privacy'] ?? '') === 'low') checked="checked"@endif />{{ __('userdetails.radio_low') ?? '' }}<input type="radio" name="privacy" value="normal"@if (($user['privacy'] ?? '') === 'normal') checked="checked"@endif />{{ __('userdetails.radio_normal') ?? '' }}<input type="radio" name="privacy" value="strong"@if (($user['privacy'] ?? '') === 'strong') checked="checked"@endif />{{ __('userdetails.radio_strong') ?? '' }}</x-settings-row>
 <x-settings-row :label="__('userdetails.row_avatar_url')"><input type="text" size="60" name="avatar" value="{{ trim((string) $user['avatar']) }}" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_signature')"><textarea cols="60" rows="6" name="signature">{{ trim((string) $user['signature']) }}</textarea></x-settings-row>
 @if ($currentClass === UC_STAFFLEADER)
 <x-settings-row :label="__('userdetails.row_donor_status')"><x-user.radio-yesno name="donor" :yes="\App\Support\YesNo::isYes($user['donor'] ?? null)" :no="\App\Support\YesNo::isNo($user['donor'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('userdetails.row_donated')">USD: <input type="text" size="5" name="donated" value="{{ $user['donated'] }}" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type="text" size="5" name="donated_cny" value="{{ $user['donated_cny'] }}" />{{ __('userdetails.text_transaction_memo') ?? '' }}<input type="text" size="50" name="donation_memo" /></x-settings-row>
@@ -118,8 +117,6 @@
 <x-settings-row :label="__('userdetails.row_support_language')"><input type="text" name="supportlang" value="{{ $user['supportlang'] }}" /></x-settings-row>
 <x-settings-row :label="__('userdetails.row_support')"><x-user.radio-yesno name="support" :yes="\App\Support\YesNo::isYes($user['support'] ?? null)" :no="\App\Support\YesNo::isNo($user['support'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('userdetails.row_support_for')"><textarea cols="60" rows="6" name="supportfor">{{ $user['supportfor'] }}</textarea></x-settings-row>
-<x-settings-row :label="__('userdetails.row_movie_picker')"><x-user.radio-yesno name="moviepicker" :yes="\App\Support\YesNo::isYes($user['picker'] ?? null)" :no="! \App\Support\YesNo::isYes($user['picker'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_pick_for')"><textarea cols="60" rows="6" name="pickfor">{{ $user['pickfor'] }}</textarea></x-settings-row>
 @if ($canManageConfidential)
 <x-settings-row :label="__('userdetails.row_comment')"><textarea cols="60" rows="6" name="modcomment" placeholder="{{ $modcomment }}"></textarea></x-settings-row>
 <x-settings-row :label="__('userdetails.row_seeding_karma')"><textarea cols="60" rows="6" name="bonuscomment" readonly="readonly">{{ $bonuscomment }}</textarea></x-settings-row>

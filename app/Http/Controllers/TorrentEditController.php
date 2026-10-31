@@ -91,20 +91,14 @@ class TorrentEditController extends Controller
         $showAnonymousCheck = Permission::can(PermissionEnum::BE_ANONYMOUS) || $showVisibleCheck;
 
         $pick = null;
-        if (
-            Permission::can(PermissionEnum::TORRENT_SET_STICKY)
-            || (Permission::can(PermissionEnum::TORRENT_MANAGE) && $this->actor->yes('picker'))
-        ) {
+        if (Permission::can(PermissionEnum::TORRENT_SET_STICKY)) {
             $promotionOptions = Permission::can(PermissionEnum::TORRENT_ON_PROMOTION)
                 ? Html::promotionSelection((int) $row['sp_state'], 0)
                 : null;
 
-            $posStates = null;
-            if (Permission::can(PermissionEnum::TORRENT_SET_STICKY)) {
-                $posStates = [];
-                foreach (Torrent::listPosStates() as $key => $value) {
-                    $posStates[] = ['key' => (string) $key, 'text' => $value['text']];
-                }
+            $posStates = [];
+            foreach (Torrent::listPosStates() as $key => $value) {
+                $posStates[] = ['key' => (string) $key, 'text' => $value['text']];
             }
 
             $addedTimeStamp = strtotime((string) $row['added']);

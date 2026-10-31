@@ -58,7 +58,6 @@ use Illuminate\Support\Facades\Config;
  * @property int $support
  * @property string $stafffor
  * @property string $supportfor
- * @property string $pickfor
  * @property string $supportlang
  * @property string|null $page
  * @property string $signature
@@ -93,7 +92,7 @@ class UserPreference extends Model
         'showimdb', 'showlastcom', 'showlastpost', 'shownfo', 'showsmalldescr',
         'signatures', 'acceptpms', 'notifs', 'lang', 'sbnum', 'sbrefresh',
         'showdlnotice', 'clientselect', 'info', 'support', 'stafffor',
-        'supportfor', 'pickfor', 'supportlang', 'page', 'signature',
+        'supportfor', 'supportlang', 'page', 'signature',
     ];
 
     public function getConnectionName(): string

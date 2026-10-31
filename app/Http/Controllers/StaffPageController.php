@@ -52,13 +52,10 @@ class StaffPageController extends BasePageController
 
         $supportRows = $this->staffDirectoryRepository->listSupportStaff();
 
-        $pickerRows = $this->staffDirectoryRepository->listPickers();
-
         $forumMods = $this->staffDirectoryRepository->listForumModerators();
 
         // Preload user display rows to avoid N+1 in buildUserRow
         $allUserIds = $supportRows->pluck('id')
-            ->merge($pickerRows->pluck('id'))
             ->merge($forumMods->pluck('userid'))
             ->map(fn ($id) => (int) $id)
             ->filter(fn ($id) => $id > 0)
@@ -68,7 +65,6 @@ class StaffPageController extends BasePageController
         UserDisplay::preload($allUserIds);
 
         $supportRows = $supportRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'supportlang', 'supportfor'))->all();
-        $pickerRows = $pickerRows->map(fn ($r) => $buildUserRow((array) $r->getAttributes(), 'pickfor'))->all();
 
         $modUserIds = $forumMods->map(fn ($m) => (int) ((array) $m)['userid'])->all();
         $modForums = $modUserIds === []
@@ -109,7 +105,6 @@ class StaffPageController extends BasePageController
 
         return $this->renderPage($request, 'staff', true, [
             'supportRows' => $supportRows,
-            'pickerRows' => $pickerRows,
             'forumModRows' => $forumModRows,
             'staffRows' => $staffRows,
             'vipRows' => $vipRows,

@@ -96,10 +96,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $deletepms
  * @property bool $savepms
  * @property bool $support
- * @property bool $picker
  * @property string|null $stafffor
  * @property string|null $supportfor
- * @property string|null $pickfor
  * @property string|null $supportlang
  * @property string|null $passkey
  * @property bool $uploadpos
@@ -255,7 +253,6 @@ class User extends Authenticatable implements FilamentUser, HasName
         'support' => 'user_preferences',
         'stafffor' => 'user_preferences',
         'supportfor' => 'user_preferences',
-        'pickfor' => 'user_preferences',
         'supportlang' => 'user_preferences',
         'page' => 'user_preferences',
         'signature' => 'user_preferences',
@@ -384,7 +381,6 @@ class User extends Authenticatable implements FilamentUser, HasName
         'leechwarn' => 'boolean',
         'noad' => 'boolean',
         'parked' => 'boolean',
-        'picker' => 'boolean',
         'savepms' => 'boolean',
         'showclienterror' => 'boolean',
         'showcomment' => 'boolean',

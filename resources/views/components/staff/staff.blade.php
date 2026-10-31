@@ -22,28 +22,6 @@
 </x-frame>
 
 <x-frame :center="false">
-<x-slot:caption>{{ __('staff.text_movie_critics') }}<span class="small"> - [<a class="altlink" href="/web/contactstaff"><b>{{ __('staff.text_apply_for_it') }}</b></a>]</span></x-slot>
-{{ __('staff.text_movie_critics_note') }}
-<br /><br />
-<x-data-table :caption="__('staff.text_movie_critics')" captionHidden>
-    <tr>
-        <td class="nx-embedded"><b>{{ __('staff.text_username')}}</b></td>
-        <td class="nx-embedded text-center"><b>{{ __('staff.text_country')}}</b></td>
-        <td class="nx-embedded text-center"><b>{{ __('staff.text_online_or_offline')}}</b></td>
-        <td class="nx-embedded text-center"><b>{{ __('staff.text_contact')}}</b></td>
-        <td class="nx-embedded"><b>{{ __('staff.text_responsible_for')}}</b></td>
-    </tr>
-    <tr><td class="nx-embedded" colspan="5"><hr class="border-nxm-accent"></td></tr>
-    @foreach ($pickerRows as $row)
-    <tr>
-@include('components.staff.cells')
-        @foreach ($row['extras'] ?? [] as $e)<td class="nx-embedded">{{ $e }}</td>@endforeach
-    </tr>
-    @endforeach
-</x-data-table>
-</x-frame>
-
-<x-frame :center="false">
 <x-slot:caption>{{ __('staff.text_forum_moderators') }}<span class="small"> - [<a class="altlink" href="/web/contactstaff"><b>{{ __('staff.text_apply_for_it') }}</b></a>]</span></x-slot>
 {{ __('staff.text_forum_moderators_note') }}
 <br /><br />

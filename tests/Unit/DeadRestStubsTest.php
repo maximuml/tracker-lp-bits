@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use App\Http\Controllers\ExamUserController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\OverForumController;
 use App\Http\Controllers\PeerController;
@@ -170,19 +169,6 @@ final class DeadRestStubsTest extends TestCase
         $this->assertFalse($reflection->hasMethod('show'), 'show stub should be removed');
         $this->assertFalse($reflection->hasMethod('update'), 'update stub should be removed');
         $this->assertFalse($reflection->hasMethod('destroy'), 'destroy stub should be removed');
-    }
-
-    /**
-     * Stub methods removed from ExamUserController (show, update), store/destroy kept.
-     */
-    public function test_exam_user_controller_stubs_removed(): void
-    {
-        $reflection = new \ReflectionClass(ExamUserController::class);
-        $this->assertTrue($reflection->hasMethod('index'), 'index should remain');
-        $this->assertTrue($reflection->hasMethod('store'), 'store should remain (real method)');
-        $this->assertFalse($reflection->hasMethod('show'), 'show stub should be removed');
-        $this->assertFalse($reflection->hasMethod('update'), 'update stub should be removed');
-        $this->assertTrue($reflection->hasMethod('destroy'), 'destroy should remain (real method)');
     }
 
     /**

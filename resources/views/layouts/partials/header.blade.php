@@ -101,7 +101,6 @@
                         @else
                         <a href="/web/attendance" class="faqlink">{{ __('functions.text_attendance') }}</a>
                         @endif
-                        <a href="/web/task">{{ $chrome->userBar->taskLabel }}</a>
                         <a href="/web/invite?id={{ (int) $chrome->user['id'] }}">{{ __('functions.text_invite') }}<span class="nxm-usermenu__count">{{ $chrome->userBar->invites }}@if($chrome->userBar->pendingInvites > 0) ({{ $chrome->userBar->pendingInvites }})@endif</span></a>
                         @if($chrome->userBar->managementHref !== '')<a href="{{ $chrome->userBar->managementHref }}" target="_blank" rel="noopener">{{ __('functions.text_management_system') }}</a>@endif
                     </div>

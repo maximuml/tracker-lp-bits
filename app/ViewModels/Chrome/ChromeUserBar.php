@@ -13,7 +13,6 @@ use App\Support\Cache\NexusCache;
 use App\Support\Env;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
-use App\Support\Locale;
 use App\Support\PageLayoutContext;
 use App\Support\Ratio;
 use App\Support\Slots;
@@ -45,7 +44,6 @@ final class ChromeUserBar
         public readonly bool $attendanceDone,
         public readonly int $attendancePoints,
         public readonly int $attendanceCard,
-        public readonly string $taskLabel,
         public readonly string $managementHref,
         public readonly ?bool $connectable,
         public readonly int $maxSlots,
@@ -131,7 +129,6 @@ final class ChromeUserBar
             attendanceDone: $attendance !== null,
             attendancePoints: $attendance ? (int) $attendance->points : 0,
             attendanceCard: $attendance ? (int) ($user['attendance_card'] ?? 0) : 0,
-            taskLabel: Locale::trans('exam.type_task'),
             managementHref: $managementHref,
             connectable: $connectable,
             maxSlots: $maxSlots,
@@ -164,7 +161,6 @@ final class ChromeUserBar
             attendanceDone: false,
             attendancePoints: 0,
             attendanceCard: 0,
-            taskLabel: '',
             managementHref: '',
             connectable: null,
             maxSlots: 0,

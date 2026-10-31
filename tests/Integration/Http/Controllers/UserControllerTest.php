@@ -11,7 +11,6 @@ use App\Http\Requests\UserDisableRequest;
 use App\Http\Requests\UserIncrementDecrementRequest;
 use App\Http\Requests\UserIndexRequest;
 use App\Models\User;
-use App\Repositories\ExamRepository;
 use App\Repositories\UserDetailRepository;
 use App\Repositories\UserModerationRepository;
 use App\Repositories\UserRepository;
@@ -43,13 +42,10 @@ final class UserControllerTest extends TestCase
             ->with([])
             ->andReturn($paginator);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = UserIndexRequest::create('/api/v1/users', 'GET', []);
         $request->setContainer(app());
         $request->validateResolved();
@@ -65,13 +61,10 @@ final class UserControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
 
         $result = $controller->classes();
 
@@ -100,16 +93,13 @@ final class UserControllerTest extends TestCase
             ->with(5)
             ->andReturn($user);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
 
         Auth::shouldReceive('id')->once()->andReturn(5);
         Gate::shouldReceive('allows')->andReturn(false);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
 
         $result = $controller->base();
 
@@ -126,15 +116,12 @@ final class UserControllerTest extends TestCase
         $repository = Mockery::mock(UserRepository::class);
         $repository->shouldNotReceive('getDetail');
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
 
         Auth::shouldReceive('user')->once()->andReturn(null);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
 
         $controller->show(null);
     }
@@ -147,16 +134,13 @@ final class UserControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
         $moderationRepository->shouldNotReceive('disableUser');
 
         Auth::shouldReceive('user')->once()->andReturn(null);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = UserDisableRequest::create('/api/v1/users/disable', 'POST', ['uid' => 10, 'reason' => 'Test']);
 
         $controller->disable($request);
@@ -170,16 +154,13 @@ final class UserControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
         $moderationRepository->shouldNotReceive('enableUser');
 
         Auth::shouldReceive('user')->once()->andReturn(null);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = UidRequest::create('/api/v1/users/enable', 'POST', ['uid' => 10]);
 
         $controller->enable($request);
@@ -193,15 +174,12 @@ final class UserControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
 
         Auth::shouldReceive('user')->once()->andReturn(null);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = Request::create('/api/v1/users/me', 'GET', []);
 
         $controller->me();
@@ -215,15 +193,12 @@ final class UserControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
 
         Auth::shouldReceive('user')->once()->andReturn(null);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = Request::create('/api/v1/users/publish-torrent', 'GET', []);
 
         $controller->publishTorrent($request);
@@ -234,9 +209,6 @@ final class UserControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
         $moderationRepository->shouldReceive('getModComment')
@@ -244,7 +216,7 @@ final class UserControllerTest extends TestCase
             ->with(10)
             ->andReturn('Test mod comment');
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = UidRequest::create('/api/v1/users/mod-comment', 'POST', ['uid' => 10]);
 
         $result = $controller->modComment($request);
@@ -262,13 +234,10 @@ final class UserControllerTest extends TestCase
             ->with(10)
             ->andReturn(null);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = UidRequest::create('/api/v1/users/invite-info', 'POST', ['uid' => 10]);
 
         $result = $controller->inviteInfo($request);
@@ -284,16 +253,13 @@ final class UserControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
         $moderationRepository->shouldNotReceive('incrementDecrement');
 
         Auth::shouldReceive('user')->once()->andReturn(null);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = UserIncrementDecrementRequest::create('/api/v1/users/increment-decrement', 'POST', [
             'uid' => 10,
             'action' => 'increment',
@@ -310,9 +276,6 @@ final class UserControllerTest extends TestCase
         /** @var UserRepository&Mockery\MockInterface $repository */
         $repository = Mockery::mock(UserRepository::class);
 
-        /** @var ExamRepository&Mockery\MockInterface $examRepository */
-        $examRepository = Mockery::mock(ExamRepository::class);
-
         /** @var UserModerationRepository&Mockery\MockInterface $moderationRepository */
         $moderationRepository = Mockery::mock(UserModerationRepository::class);
         $moderationRepository->shouldReceive('removeTwoStepAuthentication')
@@ -324,7 +287,7 @@ final class UserControllerTest extends TestCase
         $user->id = 5;
         Auth::shouldReceive('user')->once()->andReturn($user);
 
-        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository, $examRepository);
+        $controller = new UserController(Mockery::mock(UserDetailRepository::class), $repository, $moderationRepository);
         $request = UidRequest::create('/api/v1/users/remove-two-step', 'POST', ['uid' => 10]);
 
         $result = $controller->removeTwoStepAuthentication($request);

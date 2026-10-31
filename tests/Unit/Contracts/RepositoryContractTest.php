@@ -9,8 +9,6 @@ use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\CategoryRepositoryInterface;
 use App\Contracts\Repositories\CleanupMonitorRepositoryInterface;
 use App\Contracts\Repositories\CountryRepositoryInterface;
-use App\Contracts\Repositories\ExamProgressCalculatorInterface;
-use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\ForumRepositoryInterface;
 use App\Contracts\Repositories\InfoRepositoryInterface;
 use App\Contracts\Repositories\MeiliSearchRepositoryInterface;
@@ -41,8 +39,6 @@ use App\Repositories\AuthRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\CleanupMonitorRepository;
 use App\Repositories\CountryRepository;
-use App\Repositories\ExamProgressCalculator;
-use App\Repositories\ExamRepository;
 use App\Repositories\ForumRepository;
 use App\Repositories\InfoRepository;
 use App\Repositories\MeiliSearchRepository;
@@ -81,14 +77,6 @@ final class RepositoryContractTest extends TestCase
         $mock = Mockery::mock(AuthRepositoryInterface::class);
         $this->app->instance(AuthRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(AuthRepositoryInterface::class));
-    }
-
-    public function test_exam_repository_interface_binding(): void
-    {
-        $this->assertInstanceOf(ExamRepository::class, $this->app->make(ExamRepositoryInterface::class));
-        $mock = Mockery::mock(ExamRepositoryInterface::class);
-        $this->app->instance(ExamRepositoryInterface::class, $mock);
-        $this->assertSame($mock, $this->app->make(ExamRepositoryInterface::class));
     }
 
     public function test_forum_repository_interface_binding(): void
@@ -257,14 +245,6 @@ final class RepositoryContractTest extends TestCase
         $mock = Mockery::mock(CleanupMonitorRepositoryInterface::class);
         $this->app->instance(CleanupMonitorRepositoryInterface::class, $mock);
         $this->assertSame($mock, $this->app->make(CleanupMonitorRepositoryInterface::class));
-    }
-
-    public function test_exam_progress_calculator_interface_binding(): void
-    {
-        $this->assertInstanceOf(ExamProgressCalculator::class, $this->app->make(ExamProgressCalculatorInterface::class));
-        $mock = Mockery::mock(ExamProgressCalculatorInterface::class);
-        $this->app->instance(ExamProgressCalculatorInterface::class, $mock);
-        $this->assertSame($mock, $this->app->make(ExamProgressCalculatorInterface::class));
     }
 
     public function test_notification_feed_repository_interface_binding(): void

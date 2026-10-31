@@ -8,8 +8,6 @@ use App\Http\Controllers\AuthenticateController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ExamController;
-use App\Http\Controllers\ExamUserController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\HitAndRunController;
@@ -209,8 +207,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_CLASSES));
         Route::get('user-invite-info', [UserController::class, 'inviteInfo'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_INVITE_INFO));
-        Route::get('user-match-exams', [UserController::class, 'matchExams'])
-            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_MATCH_EXAMS));
         Route::get('user-mod-comment', [UserController::class, 'modComment'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_MOD_COMMENT));
         Route::post('user-disable', [UserController::class, 'disable'])
@@ -223,26 +219,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_INCREMENT_DECREMENT));
         Route::put('user-remove-two-step', [UserController::class, 'removeTwoStepAuthentication'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::USER_REMOVE_TWO_STEP));
-
-        Route::apiResource('exams', ExamController::class)->only(['index', 'show'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_LIST));
-        Route::apiResource('exams', ExamController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_MANAGE));
-        Route::put('exams/{exam}', [ExamController::class, 'update'])->name('exams.update')->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_MANAGE));
-        Route::patch('exams/{exam}', [ExamController::class, 'update'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_MANAGE));
-        Route::get('exams-all', [ExamController::class, 'all'])
-            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_ALL));
-        Route::get('exam-indexes', [ExamController::class, 'indexes'])
-            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_INDEXES));
-
-        Route::apiResource('exam-users', ExamUserController::class)->only(['index'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_LIST));
-        Route::apiResource('exam-users', ExamUserController::class)->only(['store', 'destroy'])->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_MANAGE));
-        Route::put('exam-users-avoid', [ExamUserController::class, 'avoid'])
-            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_AVOID));
-        Route::put('exam-users-recover', [ExamUserController::class, 'recover'])
-            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_RECOVER));
-        Route::put('exam-users-avoid-bulk', [ExamUserController::class, 'bulkAvoid'])
-            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_AVOID_BULK));
-        Route::put('exam-users-delete-bulk', [ExamUserController::class, 'bulkDelete'])
-            ->middleware(Permissions::abilityLabel(RoutePermissionEnum::EXAM_USER_DELETE_BULK));
 
         Route::get('dashboard/system-info', [DashboardController::class, 'systemInfo'])
             ->middleware(Permissions::abilityLabel(RoutePermissionEnum::DASHBOARD_VIEW));

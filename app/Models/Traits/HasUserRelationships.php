@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models\Traits;
 
-use App\Enums\ExamUserStatus;
 use App\Enums\PeerSeeder;
 use App\Enums\SnatchFinished;
 use App\Models\Bookmark;
 use App\Models\Comment;
 use App\Models\Country;
-use App\Models\Exam;
-use App\Models\ExamUser;
 use App\Models\Invite;
 use App\Models\Language;
 use App\Models\Peer;
@@ -28,7 +25,6 @@ use App\Models\UsernameChangeLog;
 use App\Models\UserPreference;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -39,14 +35,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 trait HasUserRelationships
 {
-    /**
-     * @return HasMany<ExamUser, $this>
-     */
-    public function exams(): HasMany
-    {
-        return $this->hasMany(ExamUser::class, 'uid');
-    }
-
     /**
      * @return BelongsTo<Language, $this>
      */
@@ -178,18 +166,6 @@ trait HasUserRelationships
     public function usernameChangeLogs(): HasMany
     {
         return $this->hasMany(UsernameChangeLog::class, 'uid');
-    }
-
-    /** @return BelongsToMany<Exam, $this> */
-    public function examAndTasks(): BelongsToMany
-    {
-        return $this->belongsToMany(Exam::class, 'exam_users', 'uid', 'exam_id');
-    }
-
-    /** @return BelongsToMany<Exam, $this> */
-    public function onGoingExamAndTasks(): BelongsToMany
-    {
-        return $this->examAndTasks()->wherePivot('status', ExamUserStatus::NORMAL->value);
     }
 
     /** @return HasMany<UserModifyLog, $this> */

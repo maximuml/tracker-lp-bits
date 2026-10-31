@@ -30,7 +30,6 @@ enum RoutePermissionEnum: string
     case USER_CLASSES = 'user:classes';
     case USER_BASE = 'user:base';
     case USER_INVITE_INFO = 'user:invite_info';
-    case USER_MATCH_EXAMS = 'user:match_exams';
     case USER_MOD_COMMENT = 'user:mod_comment';
     case USER_DISABLE = 'user:disable';
     case USER_ENABLE = 'user:enable';
@@ -119,18 +118,6 @@ enum RoutePermissionEnum: string
     case AGENT_DENY_LIST = 'agent_deny:list';
     case AGENT_DENY_MANAGE = 'agent_deny:manage';
 
-    /* Exams */
-    case EXAM_LIST = 'exam:list';
-    case EXAM_MANAGE = 'exam:manage';
-    case EXAM_ALL = 'exam:all';
-    case EXAM_INDEXES = 'exam:indexes';
-    case EXAM_USER_LIST = 'exam_user:list';
-    case EXAM_USER_MANAGE = 'exam_user:manage';
-    case EXAM_USER_AVOID = 'exam_user:avoid';
-    case EXAM_USER_RECOVER = 'exam_user:recover';
-    case EXAM_USER_AVOID_BULK = 'exam_user:avoid_bulk';
-    case EXAM_USER_DELETE_BULK = 'exam_user:delete_bulk';
-
     /* Dashboard */
     case DASHBOARD_VIEW = 'dashboard:view';
 
@@ -175,7 +162,6 @@ enum RoutePermissionEnum: string
             self::USER_VIEW => PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO,
             self::USER_CLASSES => PermissionEnum::VIEW_USER_LIST,
             self::USER_INVITE_INFO => PermissionEnum::VIEW_INVITE,
-            self::USER_MATCH_EXAMS => PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO,
             self::USER_MOD_COMMENT,
             self::USER_DISABLE,
             self::USER_ENABLE,
@@ -201,16 +187,6 @@ enum RoutePermissionEnum: string
             self::PEER_MANAGE,
             self::FILE_MANAGE,
             self::SNATCH_MANAGE,
-            self::EXAM_LIST,
-            self::EXAM_MANAGE,
-            self::EXAM_ALL,
-            self::EXAM_INDEXES,
-            self::EXAM_USER_LIST,
-            self::EXAM_USER_MANAGE,
-            self::EXAM_USER_AVOID,
-            self::EXAM_USER_RECOVER,
-            self::EXAM_USER_AVOID_BULK,
-            self::EXAM_USER_DELETE_BULK,
             self::DASHBOARD_VIEW,
             self::SETTING_LIST,
             self::SETTING_MANAGE,

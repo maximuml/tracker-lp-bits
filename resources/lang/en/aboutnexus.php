@@ -37,7 +37,4 @@ return [
     'text_contact_note' => 'Wanna join us? Get suggestions or find bugs? Talk about business? Contact us in any of the following ways.',
     'text_web_site' => 'Web Site',
     'text_email' => 'Email',
-    'text_msn' => 'MSN',
-    'text_qq' => 'QQ',
-    'text_telephone' => 'Tele.',
 ];

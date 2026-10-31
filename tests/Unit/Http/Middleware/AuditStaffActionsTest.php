@@ -91,7 +91,7 @@ final class AuditStaffActionsTest extends TestCase
         }
         // Mutations that were audited via /ajax stay audited under /web/*.
         foreach (['web/torrent-approval', 'web/token/add', 'web/token/del',
-            'web/users/leech-warn/remove', 'web/hit-and-runs/remove', 'web/tasks/claim',
+            'web/users/leech-warn/remove', 'web/hit-and-runs/remove',
             'web/shoutbox/clear', 'web/shoutbox/edit', 'web/shoutbox/delete',
             'web/news/add', 'web/news/edit', 'web/news/delete'] as $path) {
             $this->assertTrue(AuditStaffActions::isAuditablePath($path), $path);

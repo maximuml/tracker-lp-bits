@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\ViewModels\Chrome;
 
 use App\Contracts\Repositories\PageLayoutRepositoryInterface;
-use App\Enums\ExamType;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\TorrentPromotion;
 use App\Models\TorrentState;
-use App\Support\Exam;
 use App\Support\Html\SafeHtml;
 use App\Support\PageLayoutContext;
 use App\Support\Settings;
@@ -20,7 +18,7 @@ use App\Utils\MsgAlert;
 /**
  * Header message alerts for the shared chrome (ADR 0018): promotion,
  * ratio/inactivity warnings, unread news/staff messages, staff queue
- * counters and the current exam banner — collected as plain records; the
+ * counters — collected as plain records; the
  * partial renders each one as an `.nxm-alert` banner for both chrome
  * variants. Mirrors the promotion/warning/staff alert block that used to
  * live in PageRenderer::renderHeader().
@@ -193,15 +191,6 @@ final class ChromeAlerts
             }
         }
 
-        $currentExam = (new Exam)->getCurrent($userId);
-        if (! empty($currentExam['html']) && $currentExam['exam'] !== null) {
-            $alerts[] = [
-                'url' => $currentExam['exam']->type == ExamType::TASK->value ? '/web/task' : '/web/messages',
-                'text' => $currentExam['html'],
-                'color' => $currentExam['exam']->background_color ?? 'blue',
-            ];
-        }
-
         return array_map(
             static fn (array $alert): array => [
                 'url' => (string) ($alert['url'] ?? ''),
@@ -214,8 +203,8 @@ final class ChromeAlerts
 
     /**
      * Banner colour whitelist — mirrors the legacy `msg-alert-*` classes;
-     * unknown colours (e.g. a free-form exam `background_color`) fall back
-     * to red just as the removed `msgalert()` helper did.
+     * unknown colours fall back to red just as the removed `msgalert()`
+     * helper did.
      */
     private static function alertColor(string $color): string
     {

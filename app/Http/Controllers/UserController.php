@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\PeerSeeder;
@@ -16,7 +15,6 @@ use App\Http\Requests\UserIncrementDecrementRequest;
 use App\Http\Requests\UserIndexRequest;
 use App\Http\Requests\UserResetPasswordRequest;
 use App\Http\Requests\UserStoreRequest;
-use App\Http\Resources\ExamResource;
 use App\Http\Resources\InviteResource;
 use App\Http\Resources\TorrentResource;
 use App\Http\Resources\UserResource;
@@ -31,13 +29,10 @@ class UserController extends Controller
 
     private UserModerationRepositoryInterface $moderationRepository;
 
-    private ExamRepositoryInterface $examRepository;
-
-    public function __construct(private readonly UserDetailRepository $userDetailRepository, UserRepositoryInterface $repository, UserModerationRepositoryInterface $moderationRepository, ExamRepositoryInterface $examRepository)
+    public function __construct(private readonly UserDetailRepository $userDetailRepository, UserRepositoryInterface $repository, UserModerationRepositoryInterface $moderationRepository)
     {
         $this->repository = $repository;
         $this->moderationRepository = $moderationRepository;
-        $this->examRepository = $examRepository;
     }
 
     /**
@@ -118,18 +113,6 @@ class UserController extends Controller
         $id = (int) Auth::id();
         $result = $this->repository->getBase($id);
         $resource = new UserResource($result);
-
-        return $this->success($resource);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function matchExams(UidRequest $request): array
-    {
-        $examRepository = $this->examRepository;
-        $result = $examRepository->listMatchExam((int) $request->uid);
-        $resource = ExamResource::collection($result);
 
         return $this->success($resource);
     }

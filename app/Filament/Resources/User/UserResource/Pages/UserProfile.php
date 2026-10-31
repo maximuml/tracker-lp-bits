@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\User\UserResource\Pages;
 
 use App\Auth\Permission;
-use App\Contracts\Repositories\ExamRepositoryInterface;
 use App\Contracts\Repositories\UserModerationRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\Permission\PermissionEnum;
@@ -17,7 +16,6 @@ use App\Filament\Resources\User\UserResource;
 use App\Models\Invite;
 use App\Models\User;
 use App\Models\UserMeta;
-use App\Repositories\ExamUserRepository;
 use App\Support\Admin;
 use App\Support\Config\SiteConfig;
 use App\Support\Mail;
@@ -50,20 +48,12 @@ class UserProfile extends ViewRecord implements HasActions
 
     private UserModerationRepositoryInterface $moderationRep;
 
-    private ExamRepositoryInterface $examRepository;
-
-    private ExamUserRepository $examUserRepository;
-
     public function boot(
         UserRepositoryInterface $rep,
         UserModerationRepositoryInterface $moderationRep,
-        ExamRepositoryInterface $examRepository,
-        ExamUserRepository $examUserRepository,
     ): void {
         $this->rep = $rep;
         $this->moderationRep = $moderationRep;
-        $this->examRepository = $examRepository;
-        $this->examUserRepository = $examUserRepository;
     }
 
     protected static string $resource = UserResource::class;
@@ -99,7 +89,6 @@ class UserProfile extends ViewRecord implements HasActions
             }
             $actions[] = $this->buildWarnAction();
             $actions[] = $this->buildGrantPropsAction();
-            $actions[] = $this->buildAssignExamAction();
             $actions[] = $this->buildChangeBonusEtcAction();
             $actions[] = $this->buildResetPasswordAction();
             $actions[] = $this->buildEnableDisableAction();
@@ -220,30 +209,6 @@ class UserProfile extends ViewRecord implements HasActions
                 $userRep = $this->rep;
                 try {
                     $userRep->resetPassword($this->getUserRecord()->id, $data['password'], $data['password_confirmation']);
-                    $this->sendSuccessNotification();
-                } catch (Exception $exception) {
-                    $this->sendFailNotification($exception->getMessage());
-                }
-            });
-    }
-
-    private function buildAssignExamAction(): Action
-    {
-        return Action::make(__('admin.resources.user.actions.assign_exam_btn'))
-            ->modalHeading(__('admin.resources.user.actions.assign_exam_btn'))
-            ->schema([
-                Select::make('exam_id')
-                    ->options($this->examRepository->listMatchExam($this->getUserRecord()->id)->pluck('name', 'id'))
-                    ->label(__('admin.resources.user.actions.assign_exam_exam_label'))->required(),
-                DateTimePicker::make('begin')->label(__('admin.resources.user.actions.assign_exam_begin_label')),
-                DateTimePicker::make('end')->label(__('admin.resources.user.actions.assign_exam_end_label'))
-                    ->helperText(__('admin.resources.user.actions.assign_exam_end_help')),
-
-            ])
-            ->action(function ($data) {
-                $examRep = $this->examUserRepository;
-                try {
-                    $examRep->assignToUser($this->getUserRecord()->id, $data['exam_id'], $data['begin'], $data['end']);
                     $this->sendSuccessNotification();
                 } catch (Exception $exception) {
                     $this->sendFailNotification($exception->getMessage());

@@ -6,7 +6,6 @@ namespace Tests\Unit;
 
 use App\Console\Commands\BackupCronjob;
 use App\Console\Commands\BackupRestoreDrill;
-use App\Console\Commands\ExamCheckoutCronjob;
 use App\Console\Commands\HitAndRunUpdateStatus;
 use App\Console\Commands\TrackerCalculateSeedBonus;
 use Illuminate\Support\Facades\Artisan;
@@ -37,11 +36,8 @@ final class ConsoleCommandsTest extends TestCase
             'attendance:cleanup' => ['attendance:cleanup'],
             'hr:update_status' => ['hr:update_status'],
             'tracker:calculate_seed_bonus' => ['tracker:calculate_seed_bonus'],
-            'exam:assign_cronjob' => ['exam:assign_cronjob'],
-            'exam:checkout_cronjob' => ['exam:checkout_cronjob'],
             'cleanup:run' => ['cleanup:run'],
             'cleanup:tasks' => ['cleanup:tasks'],
-            'exam:update_progress' => ['exam:update_progress'],
             'invite:tmp' => ['invite:tmp'],
             'torrent:load_bought_user' => ['torrent:load_bought_user'],
             'torrent:load_pieces_hash' => ['torrent:load_pieces_hash'],
@@ -117,17 +113,6 @@ final class ConsoleCommandsTest extends TestCase
         $this->assertStringContainsString('--file=', $signature);
         $this->assertStringContainsString('--test-db=', $signature);
         $this->assertStringContainsString('--compare', $signature);
-    }
-
-    /**
-     * exam:checkout_cronjob has --ignore-time-range option.
-     */
-    public function test_exam_checkout_cronjob_has_ignore_time_range(): void
-    {
-        $reflection = new \ReflectionClass(ExamCheckoutCronjob::class);
-        $signature = (string) ($reflection->getDefaultProperties()['signature'] ?? '');
-        $this->assertStringContainsString('exam:checkout_cronjob', $signature);
-        $this->assertStringContainsString('--ignore-time-range', $signature);
     }
 
     /**

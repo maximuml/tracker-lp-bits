@@ -47,10 +47,6 @@ BODY,
         'subject' => 'Successful torrent purchase reminder',
         'body' => 'You spent :bonus bonus to successfully buy the torrent:[url=:url]:torrent_name[/url]',
     ],
-    'exam_user_end_time_updated' => [
-        'subject' => 'Exam :exam_name end time changed',
-        'body' => 'The end time of your in-progress exam :exam_name has changed from :old_end_time to :new_end_time. admin: :operator, reason: :reason.',
-    ],
 
     'mail_dear' => 'Dear ',
     'mail_you_received_a_pm' => 'You have received a PM.',

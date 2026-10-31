@@ -20,7 +20,7 @@
         <div>
         <div class="nx-fcard nx-main">
         <div class="text-center">
-        <div><img width="75" src="{{ $friend['avatarSrc'] }}" alt=""></div>
+        <div><img width="75" src="{{ $friend['avatarSrc'] }}" alt="" loading="lazy" decoding="async"></div>
         </div><div class="grow">
         <div class="flex items-start nx-main">
         <div class="nx-embedded w-[80%]">{{ $friend['usernameHtml'] }} ({{ $friend['titleHtml'] }})<br /><br />{{ __('friends.text_last_seen_on') }}<x-time :value="$friend['lastSeen']" /></div>

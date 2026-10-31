@@ -8,7 +8,7 @@
 	<x-settings-row-small layout="grid" :label="__('usercp.row_email_address')">{{ $home->email }}</x-settings-row-small>
 	<x-settings-row-small layout="grid" :label="__('usercp.row_ip_location')">{{ $home->ipLocation }}</x-settings-row-small>
 	@if ($home->showAvatar)
-	<x-settings-row-small layout="grid" :label="__('usercp.row_avatar')"><img src="{{ $home->avatarUrl }}" alt=""></x-settings-row-small>
+	<x-settings-row-small layout="grid" :label="__('usercp.row_avatar')"><img src="{{ $home->avatarUrl }}" alt="" loading="lazy" decoding="async"></x-settings-row-small>
 	@endif
 	<x-settings-row-small layout="grid" :label="__('usercp.row_invitations')">{{ $home->invites }} [<a href="/web/invite?id={{ $home->userId }}" title="{{ $home->invitesLinkTitle }}">{{ __('usercp.text_send') }}</a>]</x-settings-row-small>
 	<x-settings-row-small layout="grid" :label="__('usercp.row_karma_points')">{{ $home->seedbonus }} [<a href="/web/mybonus" title="{{ $home->karmaLinkTitle }}">{{ __('usercp.text_use') }}</a>]</x-settings-row-small>

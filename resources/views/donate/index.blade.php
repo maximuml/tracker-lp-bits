@@ -59,7 +59,7 @@
                         {{ __('donate.text_donate_crypto_note') }}<br /><br />
                         @foreach ($crypto as $wallet)
                             <p>
-                                <img src="{{ $wallet['qr'] }}" width="160" height="160" alt="{{ $wallet['coin'] }}"><br />
+                                <img src="{{ $wallet['qr'] }}" width="160" height="160" alt="{{ $wallet['coin'] }}" loading="lazy" decoding="async"><br />
                                 <b>{{ $wallet['coin'] }}:</b>&nbsp;<code>{{ $wallet['address'] }}</code>
                             </p>
                         @endforeach

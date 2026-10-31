@@ -14,9 +14,9 @@
     <form method="post" action="/web/invites/send?id={{ (string) $id }}">@csrf
     <div class="nx-fgrid">
     <div class="nx-ffull text-center"><b>{{ __('invite.text_invite_someone')}}{{ $SITENAME }} ({{ $inv['invites'] ?? 0 }}{{ __('invite.text_invitation')}}{{ $_s }}{{ __('invite.text_left')}} + {{ sprintf(__('invite.text_temporary_left'), count($temporaryInvites)) }})</b></div>
-    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_email_address')}}</div><div class="nx-fcell"><input type="text" size="40" name="email"><br /><span class="small">{{ __('invite.text_email_address_note') }}</span></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_email_address')}}</div><div class="nx-fcell"><input type="email" size="40" name="email" autocomplete="email"><br /><span class="small">{{ __('invite.text_email_address_note') }}</span></div>
     @if ($showPreUsername)
-    <div class="nx-fhead whitespace-nowrap">{{ $preUsernameLabel }}</div><div class="nx-fcell"><input type="text" size="40" name="pre_register_username"><br /><span class="small">{{ $preUsernameHelp }}</span></div>
+    <div class="nx-fhead whitespace-nowrap">{{ $preUsernameLabel }}</div><div class="nx-fcell"><input type="text" size="40" name="pre_register_username" autocomplete="off"><br /><span class="small">{{ $preUsernameHelp }}</span></div>
     @endif
     <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
     <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_message')}}</div><div class="nx-fcell"><textarea name="body" rows="10">{{ $invitation_body }}</textarea></div>

@@ -5,8 +5,6 @@ return [
     'text_staff' => 'Staff',
     'text_firstline_support' => 'Firstline Support',
     'text_firstline_support_note' => 'General support questions should preferably be directed to these users. Note that they are volunteers, giving away their time and effort to help you. Treat them accordingly.',
-    'text_movie_critics' => 'Critics',
-    'text_movie_critics_note' => "Critics are responsible for picking good stuff, writing reviews, reward users' comments on films, music, etc, in general creating a better atmosphere for discussing.",
     'text_general_staff' => 'General Staff',
     'text_general_staff_note' => 'All software support questions and those already answered in the',
     'text_faq' => 'FAQ',

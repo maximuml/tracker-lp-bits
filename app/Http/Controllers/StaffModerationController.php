@@ -105,7 +105,6 @@ class StaffModerationController extends BasePageController
         $warnPm = (string) ($request->post('warnpm') ?? '');
         $title = (string) ($request->post('title') ?? '');
         $avatar = (string) ($request->post('avatar') ?? '');
-        $signature = (string) ($request->post('signature') ?? '');
         $uploadpos = $request->post('uploadpos') === 'yes';
         $downloadpos = $request->post('downloadpos') === 'yes';
         $privacy = (string) ($request->post('privacy') ?? 'normal');
@@ -113,8 +112,6 @@ class StaffModerationController extends BasePageController
         $supportlang = (string) ($request->post('supportlang') ?? '');
         $support = $request->post('support') === 'yes';
         $supportfor = (string) ($request->post('supportfor') ?? '');
-        $moviepicker = $request->post('moviepicker') === 'yes';
-        $pickfor = (string) ($request->post('pickfor') ?? '');
         $stafffor = (string) ($request->post('staffduties') ?? '');
 
         if (! Validators::isId($userId) || ! SupportUser::isValidUserClass($class)) {
@@ -142,13 +139,10 @@ class StaffModerationController extends BasePageController
 
         $updateset = [
             'stafffor' => $stafffor,
-            'pickfor' => $pickfor,
-            'picker' => $moviepicker,
             'uploadpos' => $uploadpos,
             'downloadpos' => $downloadpos,
             'forumpost' => $forumpost,
             'avatar' => $avatar,
-            'signature' => $signature,
             'title' => $title,
             'support' => $support,
             'supportfor' => $supportfor,

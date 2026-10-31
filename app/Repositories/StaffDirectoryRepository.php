@@ -26,18 +26,6 @@ class StaffDirectoryRepository extends BaseRepository
     /**
      * @return Collection<int, User>
      */
-    public function listPickers(): Collection
-    {
-        return User::query()
-            ->where('picker', true)
-            ->where('status', UserStatus::CONFIRMED->value)
-            ->orderBy('username')
-            ->get(['id', 'country', 'last_access', 'pickfor']);
-    }
-
-    /**
-     * @return Collection<int, User>
-     */
     public function listStaffAbove(int $class): Collection
     {
         return User::query()

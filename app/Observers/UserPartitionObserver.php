@@ -31,7 +31,7 @@ class UserPartitionObserver
             'showimdb', 'showlastcom', 'showlastpost', 'shownfo', 'showsmalldescr',
             'signatures', 'acceptpms', 'notifs', 'lang', 'sbnum', 'sbrefresh',
             'showdlnotice', 'clientselect', 'info', 'support', 'stafffor',
-            'supportfor', 'pickfor', 'supportlang', 'page', 'signature',
+            'supportfor', 'supportlang', 'page', 'signature',
         ],
         'user_activity' => [
             'last_login', 'last_access', 'last_home', 'last_offer', 'forum_access',

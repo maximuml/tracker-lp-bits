@@ -289,15 +289,15 @@ final class OfferListBuilder
 
                 $timeout = SafeHtml::fromPlainText('N/A');
                 if ($showTimeout) {
-                    $timeoutStr = '';
+                    $futuretime = null;
                     if ((int) ($arr['allowed'] ?? 1) === OfferAllowed::ALLOWED->value) {
                         $futuretime = strtotime((string) ($arr['allowedtime'] ?? 'now')) + $globalData['offeruptimeoutMain'];
-                        $timeoutStr = (string) Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
                     } elseif ((int) ($arr['allowed'] ?? 1) === OfferAllowed::PENDING->value) {
                         $futuretime = strtotime((string) ($arr['added'] ?? 'now')) + $globalData['offervotetimeoutMain'];
-                        $timeoutStr = (string) Time::format(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
                     }
-                    $timeout = SafeHtml::fromPlainText($timeoutStr !== '' ? $timeoutStr : 'N/A');
+                    if ($futuretime !== null) {
+                        $timeout = Time::formatHtml(date('Y-m-d H:i:s', $futuretime), false, true, true, false, true);
+                    }
                 }
 
                 $catIconData = Category::iconData((int) ($arr['cat_id'] ?? 0));

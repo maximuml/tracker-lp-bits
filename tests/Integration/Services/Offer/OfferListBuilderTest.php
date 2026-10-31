@@ -481,6 +481,39 @@ final class OfferListBuilderTest extends TestCase
         $this->assertNotSame('N/A', (string) $table->rows[1]->timeout);
     }
 
+    public function test_timeout_renders_span_markup_in_legacy_runtime(): void
+    {
+        app(RuntimeContext::class)->bootEntry(true);
+
+        try {
+            $timenow = defined('TIMENOW') ? TIMENOW : time();
+            $this->offerRepo->shouldReceive('getLegacyList')->andReturn($this->listResult([
+                $this->row(['id' => 1, 'allowed' => 0, 'allowedtime' => date('Y-m-d H:i:s', $timenow + 90000)]),
+                $this->row(['id' => 2, 'allowed' => 0, 'allowedtime' => date('Y-m-d H:i:s', $timenow - 90000)]),
+            ], 2));
+
+            $actor = $this->curUser(['id' => 7, 'timetype' => 0]);
+            app()->instance(ActorContext::class, $actor);
+
+            $s = $this->builder()->build(
+                $actor,
+                7,
+                $this->request(),
+                $this->globalData(['offervotetimeoutMain' => 3600, 'offeruptimeoutMain' => 7200]),
+            );
+
+            $timeout = (string) $s->table->rows[0]->timeout;
+            $this->assertMatchesRegularExpression(
+                '#^<span title="[^"]*">\d+ days?<br /> \d+ hours?</span>$#',
+                $timeout,
+            );
+            $this->assertStringNotContainsString('&lt;', $timeout);
+            $this->assertSame('', (string) $s->table->rows[1]->timeout);
+        } finally {
+            app(RuntimeContext::class)->bootEntry(false);
+        }
+    }
+
     public function test_build_preloads_offer_and_last_commenter_ids_in_batch(): void
     {
         /** @var UserRepositoryInterface&MockInterface $userRepo */

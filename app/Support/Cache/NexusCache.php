@@ -84,7 +84,7 @@ class NexusCache
         }
         $Value = $this->serialize($Value);
         $redis = $this->redis;
-        RedisGuard::attempt(fn () => $redis->set($Key, $Value, $Duration));
+        RedisGuard::attempt(fn () => $redis->set($Key, $Value, ['EX' => $Duration]));
         $this->writeCount++;
         $this->keyHits['write'][$Key] = ! isset($this->keyHits['write'][$Key]) ? 1 : $this->keyHits['write'][$Key] + 1;
     }

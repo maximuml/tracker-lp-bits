@@ -27,9 +27,12 @@
         </select>
     </form>
 
-    <h1>{{ __('confirm_resend.text_resend_confirmation_mail_note') }} </h1><p>{{ __('confirm_resend.text_resend_confirmation_mail_note_two') }}</p><p>{{ __('confirm_resend.text_resend_confirmation_mail_note_three') }}<br />{{ __('confirm_resend.text_resend_confirmation_mail_note_four') }}</p><p><b>{{ __('confirm_resend.text_note') }}</b> {{ sprintf(__('confirm_resend.text_resend_confirmation_mail_attempts'), $maxAttempts) }}</p>
+    <h1>{{ __('confirm_resend.text_resend_confirmation_mail_note') }} </h1><p>{{ __('confirm_resend.text_resend_confirmation_mail_note_two') }}</p><p>{{ __('confirm_resend.text_resend_confirmation_mail_note_three') }}<br />{{ __('confirm_resend.text_resend_confirmation_mail_note_four') }}</p>
 
-    <p>{{ __('confirm_resend.text_you_have')}} <b>{{ $remaining }}</b> {{ __('confirm_resend.text_remaining_tries')}}</p>
+    <div class="nx-auth__info">
+        <p><b>{{ __('confirm_resend.text_note') }}</b> {{ sprintf(__('confirm_resend.text_resend_confirmation_mail_attempts'), $maxAttempts) }}</p>
+        <p>{{ __('confirm_resend.text_you_have')}} <b>{{ $remaining }}</b> {{ __('confirm_resend.text_remaining_tries')}}</p>
+    </div>
 
     <form method="post" action="/confirm_resend">
         @csrf
@@ -44,4 +47,8 @@
             <x-button type="submit" variant="primary">{{ __('confirm_resend.submit_send_it')}}</x-button>
         </div>
     </form>
+
+    <div class="nx-auth__links">
+        <ul><li><a href="/login">{{ __('recover.text_back_to_login') }}</a></li></ul>
+    </div>
 @endsection

@@ -3,6 +3,7 @@
 return [
     'passkey_title' => 'Passkey',
     'passkey' => 'Passkey',
+    'passkey_login' => 'Log in with a passkey',
     'passkey_desc' => 'Passkey are a secure and convenient way to authenticate without the need for passwords. They can be used across multiple devices.',
     'passkey_create' => 'Create Passkey',
     'passkey_empty' => 'No passkey found.',

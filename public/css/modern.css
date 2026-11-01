@@ -1665,9 +1665,10 @@ div.niceTitle {
     border-radius: var(--nxm-radius);
     box-shadow: var(--nxm-shadow);
 }
-.nx-auth h1 { margin: 0.25rem 0 0.75rem; font-size: 1.3rem; text-align: center; }
+.nx-auth h1 { margin: 0 0 0.15rem; font-size: 1.35rem; }
 .nx-auth p { margin: 0.5rem 0; }
 .nx-auth a { color: var(--nxm-accent-text, var(--nxm-accent)); }
+.nx-auth__sub { margin: 0 0 1rem; color: var(--nxm-text-dim); font-size: 0.9rem; }
 .nx-auth__lang { text-align: right; margin-bottom: 0.75rem; font-size: 0.85rem; }
 .nx-auth__lang select { width: auto; min-width: 8rem; }
 .nx-auth__error,
@@ -1679,10 +1680,108 @@ div.niceTitle {
 }
 .nx-auth__error { color: var(--nxm-danger); border: 1px solid var(--nxm-danger); }
 .nx-auth__success { color: var(--nxm-success); border: 1px solid var(--nxm-success); }
+.nx-auth__info {
+    margin: 0.75rem 0 1rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--nxm-info-border);
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-info-bg);
+    font-size: 0.9rem;
+}
+.nx-auth__info p { margin: 0.15rem 0; }
 .nx-auth__note { text-align: center; color: var(--nxm-text-dim); }
 .nx-auth__required { color: var(--nxm-danger); font-weight: 600; text-align: center; }
 .nx-auth__checkline { display: block; margin: 0.25rem 0; }
 .nx-auth__actions { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; }
+.nx-auth__actions > :first-child { flex: 1; }
+.nx-auth__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0 0.75rem;
+    color: var(--nxm-text-dim);
+    font-size: 0.8rem;
+}
+.nx-auth__divider::before,
+.nx-auth__divider::after { content: ""; flex: 1; border-top: 1px solid var(--nxm-border); }
+.nx-auth__links { margin-top: 1.25rem; padding-top: 0.9rem; border-top: 1px solid var(--nxm-border); font-size: 0.9rem; }
+.nx-auth__links-title {
+    margin: 0 0 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--nxm-text-dim);
+}
+.nx-auth__links ul { margin: 0; padding-left: 1.2rem; }
+.nx-auth__links li { margin: 0.2rem 0; }
+.nx-auth__group {
+    margin: 1.25rem 0 0.75rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--nxm-border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--nxm-text-dim);
+}
+.nx-auth__group--first { margin-top: 0; padding-top: 0; border-top: none; }
+.nx-auth__radios { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+
+/* Password visibility toggle (auth.js flips input type on click). */
+.nx-pw { position: relative; }
+.nx-pw input { padding-right: 2.25rem; }
+.nx-pw__toggle {
+    position: absolute;
+    right: 0.35rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--nxm-radius);
+    background: transparent;
+    color: var(--nxm-text-dim);
+    cursor: pointer;
+}
+.nx-pw__toggle:hover { color: var(--nxm-text); background: var(--nxm-surface-alt); }
+.nx-pw__toggle:focus-visible { outline: var(--nxm-focus-outline); outline-offset: -2px; }
+.nx-pw__toggle[aria-pressed="true"]::after {
+    content: "";
+    position: absolute;
+    width: 1.1rem;
+    height: 2px;
+    border-radius: 1px;
+    background: currentColor;
+    transform: rotate(-45deg);
+}
+
+/* Passkey entry on the login page — labelled secondary action. */
+#passkey_box { margin: 0; }
+#passkey_login {
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-surface-alt);
+    color: var(--nxm-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+}
+#passkey_login:hover { background: var(--nxm-surface); }
+#passkey_login:focus-visible { outline: var(--nxm-focus-outline); outline-offset: 2px; }
+#passkey_login img { width: 20px; height: 20px; }
+#passkey_login br { display: none; }
 
 /* Form components (components/form-field, components/button). Tokenised
    here so they follow the active colour scheme; nxt.css carries

@@ -36,13 +36,13 @@
 
     @if ($resetToken !== null)
         <h1>{{ __('recover.text_reset_password') }}</h1>
-        <p>{{ __('recover.text_choose_new_password') }}</p>
+        <p class="nx-auth__sub">{{ __('recover.text_choose_new_password') }}</p>
 
         <form method="post" action="{{ route('recover.reset') }}">
             @csrf
             <input type="hidden" name="id" value="{{ $resetUserId }}" />
             <input type="hidden" name="secret" value="{{ $resetToken }}" />
-            <x-form-field :label="__('recover.row_new_password')" name="password" type="password" autocomplete="new-password" />
+            <x-form-field :label="__('recover.row_new_password')" name="password" type="password" autocomplete="new-password" :password-toggle="true" />
             <x-form-field :label="__('recover.row_confirm_password')" name="password_confirmation" type="password" autocomplete="new-password" />
 
             <div class="nx-auth__actions">
@@ -51,10 +51,12 @@
         </form>
     @else
         <h1>{{ __('recover.text_recover_user')}}</h1>
-        <p>{{ __('recover.text_use_form_below')}}</p>
-        <p>{{ __('recover.text_reply_to_confirmation_email')}}</p>
-        <p><b>{{ __('recover.text_note')}}</b> {{ $maxAttempts }} {{ __('recover.text_ban_ip')}}</p>
-        <p>{{ __('recover.text_you_have')}} <b>{{ $remaining }}</b> {{ __('recover.text_remaining_tries')}}</p>
+        <p class="nx-auth__sub">{{ __('recover.text_use_form_below')}} {{ __('recover.text_reply_to_confirmation_email')}}</p>
+
+        <div class="nx-auth__info">
+            <p><b>{{ __('recover.text_note')}}</b> {{ $maxAttempts }} {{ __('recover.text_ban_ip')}}</p>
+            <p>{{ __('recover.text_you_have')}} <b>{{ $remaining }}</b> {{ __('recover.text_remaining_tries')}}</p>
+        </div>
 
         <form method="post" action="/recover">
             @csrf
@@ -68,5 +70,9 @@
                 <x-button type="submit" variant="primary">{{ __('recover.submit_recover_it')}}</x-button>
             </div>
         </form>
+
+        <div class="nx-auth__links">
+            <ul><li><a href="/login">{{ __('recover.text_back_to_login') }}</a></li></ul>
+        </div>
     @endif
 @endsection

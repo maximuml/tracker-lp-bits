@@ -353,6 +353,8 @@ return [
     'text_copied' => 'Copied',
     'text_show' => 'Show',
     'text_hide' => 'Hide',
+    'show_password' => 'Show password',
+    'hide_password' => 'Hide password',
     'select_at_least_one_record' => 'Select at least one record!',
     'approval_deny_reach_upper_limit' => 'The number of torrents whose current approval was denied: %s reached the upper limit and is not allowed to be upload.',
     'text_skip_to_main_content' => 'Skip to main content',

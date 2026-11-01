@@ -24,6 +24,7 @@ return [
     'submit_recover_it' => 'Recover It!',
     'text_you_have' => 'You have ',
     'text_remaining_tries' => ' remaining tries.',
+    'text_back_to_login' => 'Back to log in',
 
     'mail_this_link' => 'THIS LINK',
     'mail_here' => 'HERE',

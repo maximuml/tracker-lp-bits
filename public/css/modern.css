@@ -2181,25 +2181,42 @@ html[data-theme="dark"] .nxm-main .nx-compose__help a {
     .nx-compose__foot > #qr { width: 100%; }
 }
 
+/* Upload page: section cards (reuses .nx-ucard/.nx-setrow), paired label+control
+   sub-fields and a sticky submit bar. */
+.nx-upload { margin-bottom: 1rem; }
+.nx-up__pair {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+}
+.nx-up__pair-field { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.nx-up__pair-field > label { font-size: 0.85em; }
+.nx-up__pair-field input[type="text"] { min-width: 0; }
+.nx-upload #technical_info { width: 100%; box-sizing: border-box; font-family: var(--nxm-mono, monospace); }
+
 /* Submit row at the end of the upload form — pinned to the viewport bottom
    while the form scrolls so the primary action stays reachable. */
 .nx-upload__submit {
-    grid-column: 1 / -1;
     position: sticky;
     bottom: 0;
     z-index: 20;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 0.55rem;
-    margin: 0 -5px -5px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
     background: var(--nxm-surface);
-    border-top: 1px solid var(--nxm-border);
 }
-#technical_info { width: calc(100% - 131px); box-sizing: border-box; font-family: var(--nxm-mono, monospace); }
 
 .nx-upload__submit span { font-weight: 600; font-size: 0.9em; color: var(--nxm-text-dim); }
+@media (max-width: 40rem) {
+    .nx-up__pair { flex-direction: column; align-items: stretch; }
+    .nx-upload__submit { flex-direction: column; align-items: stretch; }
+    .nx-upload__submit #qr { width: 100%; }
+}
 
 /* Mobile: stack label/value form grids into a single column (E-plan rule:
    no side-by-side label tables on narrow screens). */

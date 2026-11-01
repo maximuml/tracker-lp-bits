@@ -280,6 +280,27 @@ final class TorrentUploadFormTest extends TestCase
         return $category;
     }
 
+    public function test_upload_page_renders_section_cards_with_visible_heading(): void
+    {
+        $user = User::factory()->admin()->create();
+
+        $page = $this->withNexusCookie($user)->get('/web/upload');
+
+        $page->assertOk();
+        $page->assertSee('nx-setcards nx-upload', false);
+        $page->assertSee('upl-sec-file', false);
+        $page->assertSee('upl-sec-descr', false);
+        $page->assertSee('upl-sec-media', false);
+        $page->assertSee('upl-sec-publish', false);
+        $page->assertSee('nx-upload__submit', false);
+        // The page heading is visible now — the old markup hid it with nx-sr-only.
+        $page->assertDontSee('<h1 class="nx-sr-only"', false);
+        // Field/id contract used by upload.js and the takeupload handler.
+        foreach (['id="compose"', 'id="torrent"', 'id="browsecat"', 'id="browsecat_section"', 'id="qr"'] as $marker) {
+            $page->assertSee($marker, false);
+        }
+    }
+
     private function torrentUpload(string $name = 'UX01 Test Release'): UploadedFile
     {
         $data = [

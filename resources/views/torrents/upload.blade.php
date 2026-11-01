@@ -3,6 +3,7 @@
 @section('title', $pageTitle)
 
 @section('content')
-    <h1 class="nx-sr-only">{{ $pageTitle }}</h1>
+    <h1>{{ $pageTitle }}</h1>
+    <p class="nx-upload__note">{{ __('upload.text_red_star_required') }}<span class="text-nxm-danger">*</span>{{ __('upload.text_red_star_required_end') }}</p>
     @include('components.torrents.upload')
 @endsection

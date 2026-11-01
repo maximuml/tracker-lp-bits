@@ -230,6 +230,7 @@ class CustomField
         $displayName = SearchBox::valueWithContext($searchBoxId, 'custom_fields_display_name');
         $customFields = $this->listTorrentCustomField($torrentId, $searchBoxId);
         $mixedRowContent = SearchBox::valueWithContext($searchBoxId, 'custom_fields_display');
+        $mixedRowContent = is_string($mixedRowContent) ? $mixedRowContent : '';
         $result = SafeHtml::fromPlainText('');
         $shouldRenderMixRow = false;
         foreach ($customFields as $field) {

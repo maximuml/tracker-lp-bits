@@ -60,8 +60,9 @@ class BBCodeTest extends TestCase
         // anyone ever rewrites this helper. The legacy contract is:
         //   <a CLASS href=URL TARGET>TEXT</a>
         // target="_blank" now includes rel="noopener noreferrer".
+        // Scheme-less hrefs are anchored to the site root (u → /u).
         $this->assertSame(
-            '<a class="cls" href="u" target="_blank" rel="noopener noreferrer">t</a>',
+            '<a class="cls" href="/u" target="_blank" rel="noopener noreferrer">t</a>',
             BBCode::url('u', true, 't', 'cls'),
         );
     }

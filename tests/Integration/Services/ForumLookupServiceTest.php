@@ -38,8 +38,8 @@ final class ForumLookupServiceTest extends TestCase
             new ForumState,
         );
 
-        $this->assertSame('pic/forum_pic/en', $service->picFolder('en'));
-        $this->assertSame('pic/forum_pic/zh_CN', $service->picFolder('zh_CN'));
+        $this->assertSame('/pic/forum_pic/en', $service->picFolder('en'));
+        $this->assertSame('/pic/forum_pic/zh_CN', $service->picFolder('zh_CN'));
     }
 
     public function test_pic_folder_defaults_to_current_lang_dir(): void
@@ -50,7 +50,7 @@ final class ForumLookupServiceTest extends TestCase
             new ForumState,
         );
 
-        $this->assertSame('pic/forum_pic/en', $service->picFolder());
+        $this->assertSame('/pic/forum_pic/en', $service->picFolder());
     }
 
     public function test_moderators_returns_plain_names(): void

@@ -18,7 +18,7 @@
 <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
 @endforeach
 </select>
-<input type="submit" value="{{ __('users.submit_okay')}}">
+<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('users.submit_okay')}}">
 </form>
 
 <p>

@@ -20,7 +20,7 @@
     @endif
     <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
     <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_message')}}</div><div class="nx-fcell"><textarea name="body" rows="10">{{ $invitation_body }}</textarea></div>
-    <div class="nx-ffull text-center"><input type="submit" value='{{ __('invite.submit_invite')}}'></div>
+    <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value='{{ __('invite.submit_invite')}}'></div>
     </form></div></div>
 
 @else
@@ -30,7 +30,7 @@
     <li{{ $menuSelected == 'sent' ? ' class="selected"' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=sent">{{ __('invite.text_sent_invites_status')}}</a></li>
     <li{{ $menuSelected == 'tmp' ? ' class="selected"' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=tmp">{{ __('invite.text_tmp_status')}}</a></li>
     @if (($CURUSER['id'] ?? 0) == $id)
-        </ul><form method="post" action="/web/invites/submit?id={{ (string) $id }}&type=new">@csrf<input type="submit"{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
+        </ul><form method="post" action="/web/invites/submit?id={{ (string) $id }}&type=new">@csrf<input type="submit" class="nx-btn nx-btn--primary"{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
     @else
         </ul></div>
     @endif
@@ -52,8 +52,8 @@
                     @foreach ($inviteeStatusOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
                 </select>
                 &nbsp;&nbsp;
-                <input type="submit" value="{{ $submitText }}">
-                <input type="button" id="reset" value="{{ $resetText }}">
+                <input type="submit" class="nx-btn nx-btn--primary" value="{{ $submitText }}">
+                <input type="button" id="reset" class="nx-btn" value="{{ $resetText }}">
             </form>
         </div>
         <x-data-table :caption="__('invite.text_invite_status')" captionHidden>
@@ -112,7 +112,7 @@
 
         @if ($canConfirm)
             @if ($pendingCount)
-                <tr><td colspan="{{ $inviteeColSpan }}" class="text-right"><input type="submit" value='{{ __('invite.submit_confirm_users')}}'></td></tr>
+                <tr><td colspan="{{ $inviteeColSpan }}" class="text-right"><input type="submit" class="nx-btn nx-btn--primary" value='{{ __('invite.submit_confirm_users')}}'></td></tr>
             @endif
             </form>
         @endif

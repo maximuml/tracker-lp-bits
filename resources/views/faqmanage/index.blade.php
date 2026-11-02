@@ -43,7 +43,7 @@
 <div class="nx-box nx-box--tight w-[97%] mx-auto text-center">
     <a href="/web/faqactions?action=addsection">Add new section</a>
 </div>
-<p class="text-center"><input type="submit" name="reorder" value="Reorder"></p>
+<p class="text-center"><input type="submit" name="reorder" class="nx-btn nx-btn--primary" value="Reorder"></p>
 </form>
 <p>When the position numbers don't reflect the position in the table, it means the order id is bigger than the total number of sections/items and you should check all the order id's in the table and click "reorder"</p>
 @endsection

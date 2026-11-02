@@ -25,7 +25,7 @@
     ] as $act => [$row, $btn, $note])
     <div class="nx-fhead whitespace-nowrap">{{ __('settings.'.$row) }}</div><div class="nx-fcell">
         <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="{{ $act }}">@csrf
-        <input type="submit" value="{{ __('settings.'.$btn) }}"> {{ __('settings.'.$note) }}
+        <input type="submit" class="nx-btn nx-btn--primary" value="{{ __('settings.'.$btn) }}"> {{ __('settings.'.$note) }}
         </form>
     </div>
     @endforeach

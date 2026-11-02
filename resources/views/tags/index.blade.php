@@ -8,7 +8,7 @@
 
 <form method="post" action="?">@csrf
 <textarea name="test" cols="60" rows="3">{{ $test ?? '' }}</textarea>
-<input type="submit" value="{{ __('tags.submit_test_this_code')}}">
+<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('tags.submit_test_this_code')}}">
 </form>
 
 @if (($test ?? '') !== '')

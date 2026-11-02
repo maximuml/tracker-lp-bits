@@ -21,19 +21,19 @@
                         <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                         <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
                         <input type="hidden" name="sticky" value="{{ $topic->sticky ? 'no' : 'yes' }}" />
-                        <input type="submit" class="medium" value="{{ $topic->sticky ? __('forums.submit_unsticky') : __('forums.submit_sticky') }}" />
+                        <input type="submit" class="nx-btn" value="{{ $topic->sticky ? __('forums.submit_unsticky') : __('forums.submit_sticky') }}" />
                     </form>
                     <form method="post" action="/web/forums/setlocked">@csrf
                         <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                         <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
                         <input type="hidden" name="locked" value="{{ $topic->locked ? 0 : 1 }}" />
-                        <input type="submit" class="medium" value="{{ $topic->locked ? __('forums.submit_unlock') : __('forums.submit_lock') }}" />
+                        <input type="submit" class="nx-btn" value="{{ $topic->locked ? __('forums.submit_unlock') : __('forums.submit_lock') }}" />
                     </form>
                     <form method="post" action="/web/forums/deletetopic">
                         @csrf
                         <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                         <input type="hidden" name="forumid" value="{{ $topic->forumid }}" />
-                        <input type="submit" class="medium" value="{{ __('forums.submit_delete_topic') }}" />
+                        <input type="submit" class="nx-btn" value="{{ __('forums.submit_delete_topic') }}" />
                     </form>
                     <form method="post" action="/web/forums/movetopic?topicid={{ $topic->topicid }}">@csrf
                         {{ __('forums.text_move_thread_to') }}
@@ -42,14 +42,14 @@
                                 <option value="{{ $forum['id'] }}">{{ $forum['name'] }}</option>
                             @endforeach
                         </select>
-                        <input type="submit" class="medium" value="{{ __('forums.submit_move') }}" />
+                        <input type="submit" class="nx-btn" value="{{ __('forums.submit_move') }}" />
                     </form>
                     <form method="post" action="/web/forums/hltopic?topicid={{ $topic->topicid }}">@csrf
                         {{ __('forums.text_highlight_topic') }}
                         <select class="med" name="color">@foreach ($topic->highlightColorOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['label'] }}</option>
 @endforeach</select>
                         <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
-                        <input type="submit" class="medium" value="{{ __('forums.submit_change') }}" />
+                        <input type="submit" class="nx-btn" value="{{ __('forums.submit_change') }}" />
                     </form>
                 </span>
             </details>

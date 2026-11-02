@@ -1,4 +1,4 @@
-<form id="compose" method="post" action="{{ $formAction }}">
+<form id="compose" name="compose" class="nx-compose" method="post" action="{{ $formAction }}">
 	@csrf
 	@if (! empty($parentId))
 		<input type="hidden" name="pid" value="{{ $parentId }}" />

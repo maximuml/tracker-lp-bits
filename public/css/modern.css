@@ -27,7 +27,9 @@
     --nxm-border: #d8dce3;
     --nxm-accent: #1f6fd0;
     --nxm-accent-hover: #1758a8;
-    --nxm-accent-text: var(--nxm-accent);
+    /* slightly darker than --nxm-accent: links must hold 4.5:1 on
+       --nxm-surface-alt (#eef1f5) where the raw accent only reaches 4.37 */
+    --nxm-accent-text: #1b63c4;
     --nxm-accent-text-hover: var(--nxm-accent-hover);
     --nxm-on-accent: #ffffff;
     --nxm-success: #1e7a1e;
@@ -122,6 +124,8 @@
         --nxm-border: #37414f;
         --nxm-accent: #6ea8e8;
         --nxm-accent-hover: #93c1f2;
+        --nxm-accent-text: var(--nxm-accent);
+        --nxm-accent-text-hover: var(--nxm-accent-hover);
         --nxm-on-accent: #10151b;
         --nxm-success: #5ec07a;
         --nxm-danger: #e07b6d;
@@ -189,6 +193,8 @@ html[data-theme="dark"] {
     --nxm-border: #37414f;
     --nxm-accent: #6ea8e8;
     --nxm-accent-hover: #93c1f2;
+    --nxm-accent-text: var(--nxm-accent);
+    --nxm-accent-text-hover: var(--nxm-accent-hover);
     --nxm-on-accent: #10151b;
     --nxm-success: #5ec07a;
     --nxm-danger: #e07b6d;
@@ -1410,8 +1416,8 @@ table[data-nx="data"] tr:last-child td { border-bottom: none; }
 a { color: var(--nxm-accent-text, var(--nxm-accent)); }
 a:hover { color: var(--nxm-accent-text-hover, var(--nxm-accent-hover)); }
 
-input[type="submit"],
-input[type="button"] {
+input[type="submit"]:not([class]),
+input[type="button"]:not([class]) {
     background: var(--nxm-accent);
     color: var(--nxm-on-accent);
     border: none;
@@ -1420,8 +1426,8 @@ input[type="button"] {
     cursor: pointer;
     font: inherit;
 }
-input[type="submit"]:hover { background: var(--nxm-accent-hover); }
-input[type="submit"]:disabled { background: var(--nxm-accent); opacity: var(--nxm-disabled-opacity); cursor: default; }
+input[type="submit"]:not([class]):hover { background: var(--nxm-accent-hover); }
+input[type="submit"]:not([class]):disabled { background: var(--nxm-accent); opacity: var(--nxm-disabled-opacity); cursor: default; }
 button:disabled, .nx-btn:disabled, .nx-btn[disabled],
 input[type="button"]:disabled, input[type="reset"]:disabled {
     opacity: var(--nxm-disabled-opacity);
@@ -3297,11 +3303,6 @@ html[data-theme="dark"] .nxm-main .nx-hr .nx-hr__table thead th { background: va
 .nx-off .nx-savebar { display: flex; align-items: center; gap: 1rem; }
 .nx-off .nx-savebar > input[type="submit"],
 .nx-off .nx-savebar > button { margin-left: auto; }
-
-/* accent links on the surface-alt table header fall below the 4.5:1
-   contrast floor at 14px — keep header sort links in the text color. */
-.nx-offtable thead th a { color: var(--nxm-text); }
-.nx-offtable thead th a:hover { color: var(--nxm-accent-text, var(--nxm-accent)); }
 
 /* offers table becomes stacked cards on narrow screens */
 @media (max-width: 720px) {

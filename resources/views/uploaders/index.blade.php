@@ -14,7 +14,7 @@
 &nbsp;&nbsp;
 <select name="month">@foreach ($monthOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
 &nbsp;&nbsp;
-<input type="submit" value="{{ __('uploaders.submit_go')}}" />
+<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('uploaders.submit_go')}}" />
 </span>
 </form>
 </div>

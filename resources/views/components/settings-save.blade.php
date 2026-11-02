@@ -6,7 +6,7 @@
 <tr>
     <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ $label }}</td>
     <td class="align-top px-2.5 py-1.5">
-@endif<input type="submit" name="save" value="{{ $text }}">@if ($layout === 'grid')
+@endif<input type="submit" name="save" class="nx-btn nx-btn--primary" value="{{ $text }}">@if ($layout === 'grid')
 </div>
 @else
 </td>

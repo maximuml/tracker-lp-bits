@@ -2,7 +2,7 @@
      legacy JS hooks: form id/name, hidden postid/id/type inputs; preview
      lives in the livewire:bbcode-editor component. --}}
 @props(['vm'])
-<form id="compose" method="post" name="compose" action="/web/forums/post">
+<form id="compose" method="post" name="compose" action="/web/forums/post">@csrf
     @if ($vm->postid !== null)
     <input type="hidden" name="postid" value="{{ $vm->postid }}" />
     @endif

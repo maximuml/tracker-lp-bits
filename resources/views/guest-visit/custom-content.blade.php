@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
-    <style>
+    <title>{{ $siteName }}</title>
+    <style nonce="{{ $cspNonce ?? '' }}">
         .guest-wrap { padding: 15px; display: flex; justify-content: center; }
         .guest-inner { max-width: 1120px; }
     </style>

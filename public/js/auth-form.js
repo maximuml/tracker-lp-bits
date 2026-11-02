@@ -14,17 +14,21 @@
 // rowsHtml emits stray table markup that makes the HTML parser foster-
 // parent inputs outside the <form> element while keeping them
 // form-associated. form.elements sees them; descendant selectors don't.
-// The same applies to the click binding — the Save button is associated
-// with the form but not inside it, so handlers attach per-button.
+// Submission is intercepted on the form's submit event: a submit button
+// associated via form="" dispatches it even when it lives outside the
+// <form> element, and Enter inside an input hits the same path instead
+// of bypassing the validate/fill-hidden-fields pipeline.
 //
 // Validation failures use alert() — the previous layer.alert dependency
 // is gone, which lets the auth layout stop loading layer.js.
 (function () {
     var forms = document.querySelectorAll('form[data-auth-form]');
     Array.prototype.forEach.call(forms, function (theForm) {
-        Array.prototype.forEach.call(theForm.elements, function (el) {
-            if (!el || el.type !== 'button' || el.hasAttribute('data-pw-toggle')) return;
-            el.addEventListener('click', function () { handle(theForm); });
+        theForm.addEventListener('submit', function (event) {
+            // handle() finishes with theForm.submit(), which does not
+            // re-fire this event, so there is no loop.
+            event.preventDefault();
+            handle(theForm);
         });
     });
 

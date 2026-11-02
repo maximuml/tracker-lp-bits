@@ -5,7 +5,7 @@
         <a href="/web/rules">{{ __('functions.text_rules') }}</a>
         <a href="/web/faq">{{ __('faq.head_faq') }}</a>
         <a href="/web/staff">{{ __('functions.text_staff') }}</a>
-        <a href="/web/donate">{{ 'Donate' }}</a>
+        @if($chrome->enableDonation)<a href="/web/donate">{{ __('donate.text_donate') }}</a>@endif
     </nav>
     <span class="nxm-footer__copy">(c) <a href="{{ $chrome->baseUrl }}">{{ $chrome->siteName }}</a>
         {{ $chrome->footer->icpLicense !== '' ? $chrome->footer->icpLicense.' ' : '' }}{{ $chrome->footer->yearFounded != date('Y') ? $chrome->footer->yearFounded.'-' : '' }}{{ date('Y') }} {{ $chrome->footer->versionHtml }}</span>

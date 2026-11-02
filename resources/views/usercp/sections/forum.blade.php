@@ -4,7 +4,7 @@
     <x-alert type="success">{{ __('usercp.text_settings_saved') }}</x-alert>
 @endif
 
-<form method=post action="/web/usercp/forum" id="{{ $forum->formId }}">
+<form method="post" action="/web/usercp/forum" id="{{ $forum->formId }}">@csrf
     <div class="nx-setcards">
         <section class="nx-ucard nx-setcard" aria-labelledby="ucp-sec-forum-pages">
             <h2 class="nx-setcard__title" id="ucp-sec-forum-pages">{{ __('usercp.section_forum_pages') }}</h2>

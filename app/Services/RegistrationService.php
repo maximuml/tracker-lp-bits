@@ -18,7 +18,6 @@ use App\Support\Email;
 use App\Support\Locale;
 use App\Support\Network;
 use App\Support\Token;
-use App\Support\Url;
 use App\Support\Validators;
 use Illuminate\Support\Facades\DB;
 
@@ -259,7 +258,6 @@ class RegistrationService
 
     private function resolveSignupRedirect(int $userId, string $confirmToken, User $user, string $verification, string $email, string $langFolder): string
     {
-        $baseUrl = Url::siteBase();
         $type = $user->invited_by ? 'invite' : 'normal';
 
         if ($verification === 'admin') {
@@ -269,7 +267,7 @@ class RegistrationService
         }
 
         if ($verification === 'automatic' || SiteConfig::current()->smtp->type('none') === 'none') {
-            return $baseUrl.'/confirm?id='.$userId.'&secret='.$confirmToken;
+            return '/confirm?id='.$userId.'&secret='.$confirmToken;
         }
 
         $this->emailConfirmation->sendConfirmationEmail((string) $user->username, $email, $userId, $confirmToken, Network::clientIp(), $langFolder);

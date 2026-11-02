@@ -1,6 +1,6 @@
 @extends('layouts.app', ['chromeVariant' => 'auth'])
 
-@section('title', __('confirm_resend.resend_confirmation_email_failed'))
+@section('title', __('confirm_resend.text_resend_confirmation_mail_note'))
 
 @section('content')
     @if ($error)

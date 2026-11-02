@@ -67,6 +67,7 @@ View more detailed information and download it (you may need to log in), please 
     'head_upload' => 'Upload',
     'std_sorry' => 'Sorry...',
     'std_unauthorized_to_upload' => 'You are not authorized to upload torrents. Read ',
+    'text_unauthorized_to_upload' => 'You are not authorized to upload torrents.',
     'text_inbox' => 'Inbox',
     'std_please_offer' => 'You are not authorized to upload torrents.  (See ',
     'text_uploading' => 'Uploading',

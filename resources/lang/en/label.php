@@ -80,6 +80,7 @@ return [
             'tab_header' => 'H&R',
             'mode' => 'Mode',
             'inspect_time' => 'Inspect time',
+            'inspect_time_help' => 'The number of hours a download is inspected for H&R compliance',
             'seed_time_minimum' => 'Seed time minimum',
             'seed_time_minimum_help' => 'The shortest time to do the seeds to meet the standard, in hours, must be less than the length of the expedition',
             'leech_time_minimum' => 'Leech time minimum(no seeder)',

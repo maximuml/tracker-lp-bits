@@ -21,7 +21,7 @@
 @foreach ($editmailboxes['boxes'] as $box)
 <input type="text" name="edit{{ $box['id'] }}" value="{{ $box['name'] }}" size="40" maxlength="14"><br />
 @endforeach
-<input type="submit" value={{ __('messages.submit_edit') }}>
+<input type="submit" value="{{ __('messages.submit_edit') }}">
 @endif
 </form></div>
 </div>

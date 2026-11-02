@@ -4,7 +4,7 @@
     <x-alert type="success">{{ __('usercp.text_settings_saved') }}</x-alert>
 @endif
 
-<form method=post action="/web/usercp/personal" id="{{ $personal->formId }}">
+<form method="post" action="/web/usercp/personal" id="{{ $personal->formId }}">@csrf
     <div class="nx-setcards">
         <section class="nx-ucard nx-setcard" aria-labelledby="ucp-sec-account">
             <h2 class="nx-setcard__title" id="ucp-sec-account">{{ __('usercp.section_account') }}</h2>

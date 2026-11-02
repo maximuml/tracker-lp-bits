@@ -17,25 +17,25 @@
             <details class="nx-modtools">
                 <summary title="{{ __('forums.text_mod_tools') }}">⋯</summary>
                 <span class="nx-modtools__panel">
-                    <form method="post" action="/web/forums/setsticky">
+                    <form method="post" action="/web/forums/setsticky">@csrf
                         <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                         <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
                         <input type="hidden" name="sticky" value="{{ $topic->sticky ? 'no' : 'yes' }}" />
                         <input type="submit" class="medium" value="{{ $topic->sticky ? __('forums.submit_unsticky') : __('forums.submit_sticky') }}" />
                     </form>
-                    <form method="post" action="/web/forums/setlocked">
+                    <form method="post" action="/web/forums/setlocked">@csrf
                         <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                         <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
                         <input type="hidden" name="locked" value="{{ $topic->locked ? 0 : 1 }}" />
                         <input type="submit" class="medium" value="{{ $topic->locked ? __('forums.submit_unlock') : __('forums.submit_lock') }}" />
                     </form>
-                    <form method="get" action="{{ request()->getPathInfo() }}">
-                        <input type="hidden" name="action" value="deletetopic" />
+                    <form method="post" action="/web/forums/deletetopic">
+                        @csrf
                         <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                         <input type="hidden" name="forumid" value="{{ $topic->forumid }}" />
                         <input type="submit" class="medium" value="{{ __('forums.submit_delete_topic') }}" />
                     </form>
-                    <form method="post" action="/web/forums/movetopic?topicid={{ $topic->topicid }}">
+                    <form method="post" action="/web/forums/movetopic?topicid={{ $topic->topicid }}">@csrf
                         {{ __('forums.text_move_thread_to') }}
                         <select class="med" name="forumid">
                             @foreach ($topic->moveForums as $forum)
@@ -44,7 +44,7 @@
                         </select>
                         <input type="submit" class="medium" value="{{ __('forums.submit_move') }}" />
                     </form>
-                    <form method="post" action="/web/forums/hltopic?topicid={{ $topic->topicid }}">
+                    <form method="post" action="/web/forums/hltopic?topicid={{ $topic->topicid }}">@csrf
                         {{ __('forums.text_highlight_topic') }}
                         <select class="med" name="color">@foreach ($topic->highlightColorOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['label'] }}</option>
 @endforeach</select>
@@ -71,7 +71,7 @@
 @if ($topic->mayPost)
     <div class="nx-quickreply">
         <b>{{ __('forums.text_quick_reply') }}</b>
-        <form id="compose" name="compose" method="post" action="/web/forums/post">
+        <form id="compose" name="compose" method="post" action="/web/forums/post">@csrf
             <input type="hidden" name="id" value="{{ $topic->topicid }}" />
             <input type="hidden" name="type" value="reply" />
             {{ $topic->quickReply }}

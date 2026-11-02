@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -215,5 +215,6 @@
         <a href="#" class="btn btn-secondary js-history-back">Go back</a>
     </div>
 </div>
+<script nonce="{{ $cspNonce ?? '' }}">document.querySelector('.js-history-back').addEventListener('click',function(e){e.preventDefault();if(window.history.length>1){window.history.back();}else{window.location.href='/';}});</script>
 </body>
 </html>

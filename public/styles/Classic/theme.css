@@ -384,8 +384,7 @@ html[data-theme]:root a.altlink:link,
 html[data-theme]:root a.altlink:visited
 {
 	font-weight: bold;
-	color: var(--classic-altlink-red);
-	text-decoration: none
+	color: var(--classic-altlink-red)
 }
 a.altlink:hover
 {
@@ -395,8 +394,7 @@ html[data-theme]:root a.altlink_blue:link,
 html[data-theme]:root a.altlink_blue:visited
 {
 	font-weight: bold;
-	color: var(--nxm-accent-text);
-	text-decoration: none
+	color: var(--nxm-accent-text)
 }
 a.altlink_blue:hover
 {
@@ -406,8 +404,7 @@ html[data-theme]:root a.altlink_green:link,
 html[data-theme]:root a.altlink_green:visited
 {
 	font-weight: bold;
-	color: var(--classic-altlink-green);
-	text-decoration: none
+	color: var(--classic-altlink-green)
 }
 a.altlink_green:hover
 {

@@ -27,10 +27,12 @@
     --nxm-border: #d8dce3;
     --nxm-accent: #1f6fd0;
     --nxm-accent-hover: #1758a8;
-    /* slightly darker than --nxm-accent: links must hold 4.5:1 on
-       --nxm-surface-alt (#eef1f5) where the raw accent only reaches 4.37 */
-    --nxm-accent-text: #1b63c4;
+    --nxm-accent-text: var(--nxm-accent);
     --nxm-accent-text-hover: var(--nxm-accent-hover);
+    /* links on tinted surfaces (--nxm-surface-alt #eef1f5, table headers,
+       tabs): the bright accent reaches only 4.37 there, so those contexts
+       use this deeper variant which holds 4.5:1+ */
+    --nxm-accent-deep: #1b63c4;
     --nxm-on-accent: #ffffff;
     --nxm-success: #1e7a1e;
     --nxm-danger: #c0392b;
@@ -126,6 +128,7 @@
         --nxm-accent-hover: #93c1f2;
         --nxm-accent-text: var(--nxm-accent);
         --nxm-accent-text-hover: var(--nxm-accent-hover);
+        --nxm-accent-deep: var(--nxm-accent);
         --nxm-on-accent: #10151b;
         --nxm-success: #5ec07a;
         --nxm-danger: #e07b6d;
@@ -195,6 +198,7 @@ html[data-theme="dark"] {
     --nxm-accent-hover: #93c1f2;
     --nxm-accent-text: var(--nxm-accent);
     --nxm-accent-text-hover: var(--nxm-accent-hover);
+    --nxm-accent-deep: var(--nxm-accent);
     --nxm-on-accent: #10151b;
     --nxm-success: #5ec07a;
     --nxm-danger: #e07b6d;
@@ -1268,7 +1272,7 @@ td.embedded, .nx-embedded { background-color: var(--nxm-surface); color: var(--n
 :is(.colhead, .nx-colhead) :is(a:link, a:visited) { color: inherit; text-decoration: none; }
 :is(.colhead, .nx-colhead) :is(a:hover, a:focus-visible) { color: var(--nxm-accent-text); text-decoration: underline; }
 th.nxm-th--sorted { box-shadow: inset 0 -2px 0 var(--nxm-accent); }
-th.nxm-th--sorted :is(a:link, a:visited) { color: var(--nxm-accent-text); }
+th.nxm-th--sorted :is(a:link, a:visited) { color: var(--nxm-accent-deep, var(--nxm-accent-text)); }
 
 /* Data tables read dense enough without every link underlined; keep
    underlines as the hover/focus affordance only. */
@@ -3308,6 +3312,10 @@ meter.nx-off__bar::-moz-meter-bar { background: var(--nxm-success, #2e7d32); bor
 .nx-off .nx-savebar { display: flex; align-items: center; gap: 1rem; }
 .nx-off .nx-savebar > input[type="submit"],
 .nx-off .nx-savebar > button { margin-left: auto; }
+
+/* header sort links sit on surface-alt — the deep accent keeps 4.5:1 */
+.nx-offtable thead th a { color: var(--nxm-accent-deep, var(--nxm-accent-text)); }
+.nx-offtable thead th a:hover { color: var(--nxm-accent-text-hover, var(--nxm-accent-hover)); }
 
 /* offers table becomes stacked cards on narrow screens */
 @media (max-width: 720px) {

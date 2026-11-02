@@ -14,7 +14,7 @@
 
 <form method="post" action="/web/polls/create">@csrf
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">
-input.mp { width: 450px; }
+input.mp { width: 450px; max-width: 100%; box-sizing: border-box; }
 </style>
 <div class="nx-fgrid">
 <div class="nx-fhead">{{ __('makepoll.text_question')}} <span class="text-nxm-danger">*</span></div><div class="nx-fcell"><input name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></div>

@@ -5,7 +5,7 @@
 @endif
 
 <div class="nx-setcards">
-    <form method=post action="{{ $security->isConfirm ? '/web/usercp/security/confirm' : '/web/usercp/security' }}" id="security"
+    <form method="post" action="{{ $security->isConfirm ? '/web/usercp/security/confirm' : '/web/usercp/security' }}" id="security"
           data-auth-form="{{ $security->isConfirm ? 'challenge' : 'hash' }}"
           data-username-name="username"
           data-password-class="{{ $security->isConfirm ? 'oldpassword' : 'password' }}"
@@ -14,8 +14,9 @@
           data-tip-long="{{ \App\Support\Locale::trans('signup.password_too_long', [], null) }}"
           data-tip-equal-username="{{ \App\Support\Locale::trans('signup.password_equals_username', [], null) }}"
           data-tip-unmatched="{{ \App\Support\Locale::trans('signup.passwords_unmatched', [], null) }}" class="nx-setcards__form">
-        <input type=hidden name=action value=security>
-        <input type=hidden name=type value={{ $security->isConfirm ? 'confirm' : 'save' }}>
+        @csrf
+        <input type="hidden" name="action" value="security">
+        <input type="hidden" name="type" value="{{ $security->isConfirm ? 'confirm' : 'save' }}">
         @if ($security->isConfirm)
             @if (($security->confirmHidden['resetpasskey'] ?? '') === '1')<input type="hidden" name="resetpasskey" value="1">@endif
             @if (($security->confirmHidden['resetauthkey'] ?? '') === '1')<input type="hidden" name="resetauthkey" value="1">@endif
@@ -35,8 +36,8 @@
                     </div>
                 </div>
             </section>
-            <input type=hidden name=username value="{{ (string) ($curUser['username'] ?? '') }}">
-            <input type=hidden name=response>
+            <input type="hidden" name="username" value="{{ (string) ($curUser['username'] ?? '') }}">
+            <input type="hidden" name="response">
             {{ $security->confirmHtml }}
         @else
             <input type="hidden" name="chpassword">
@@ -134,7 +135,7 @@
 </div>
 
 <div class="nx-savebar">
-    <button type="button" form="security" class="nx-btn nx-btn--primary">{{ $security->isConfirm ? __('usercp.submit_confirm_save') : __('usercp.submit_save') }}</button>
+    <button type="submit" form="security" class="nx-btn nx-btn--primary">{{ $security->isConfirm ? __('usercp.submit_confirm_save') : __('usercp.submit_save') }}</button>
     @unless ($security->isConfirm)
         <span class="nx-savebar__hint">{{ __('usercp.text_security_confirm_hint') }}</span>
     @endunless

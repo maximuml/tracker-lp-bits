@@ -69,7 +69,10 @@ final class SiteAccess
             $content = Format::formatComment($guestVisitValue);
 
             throw new HttpResponseException(
-                new Response(view('guest-visit.custom-content', ['content' => $content])->render())
+                new Response(view('guest-visit.custom-content', [
+                    'content' => $content,
+                    'siteName' => SiteConfig::current()->basic->siteName(),
+                ])->render())
             );
         }
 

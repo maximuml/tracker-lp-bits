@@ -84,6 +84,9 @@
     /* legacy panel (mybonus "What is karma") */
     --nxm-panel-bg: #f5f4ea;
 
+    /* typography */
+    --nxm-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
     /* metrics */
     --nxm-radius: 6px;
     --nxm-gap: 0.75rem;
@@ -2001,7 +2004,7 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
     min-width: 0;
     overflow-wrap: break-word;
 }
-.nx-crumbs__locked { color: var(--nxm-bad); }
+.nx-crumbs__locked { color: var(--nxm-danger); }
 
 .nx-postbar { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.3rem 0.4rem; }
 .nx-postbar__actions { display: inline-flex; gap: 0.4rem; align-items: center; }
@@ -2061,7 +2064,7 @@ input.nx-postbtn {
 .nx-postbtn:hover,
 .nx-postbtn:focus-visible { color: var(--nxm-text); border-color: var(--nxm-text-dim); text-decoration: none; }
 .nx-postbtn--danger:hover,
-.nx-postbtn--danger:focus-visible { color: var(--nxm-bad); border-color: var(--nxm-bad); }
+.nx-postbtn--danger:focus-visible { color: var(--nxm-danger); border-color: var(--nxm-danger); }
 .nx-postbtn:disabled { opacity: var(--nxm-disabled-opacity); cursor: default; }
 .nx-det-actions { display: inline-flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
 .nx-cmt-tools { display: inline-flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; }
@@ -2193,7 +2196,7 @@ ul.magic li:hover { background: url("../styles/boli.png") no-repeat; }
 .nx-copyfield { display: flex; align-items: center; gap: 0.5rem; max-width: 36rem; }
 .nx-copyfield__input {
     flex: 1 1 auto;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--nxm-mono);
     font-size: 0.85rem;
     color: var(--nxm-text-dim);
 }
@@ -2291,7 +2294,7 @@ html[data-theme="dark"] .nxm-main .nx-compose__help a {
 .nx-up__pair-field { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
 .nx-up__pair-field > label { font-size: 0.85em; }
 .nx-up__pair-field input[type="text"] { min-width: 0; }
-.nx-upload #technical_info { width: 100%; box-sizing: border-box; font-family: var(--nxm-mono, monospace); }
+.nx-upload #technical_info { width: 100%; box-sizing: border-box; font-family: var(--nxm-mono); }
 
 /* Submit row at the end of the upload form — pinned to the viewport bottom
    while the form scrolls so the primary action stays reachable. */
@@ -2620,7 +2623,7 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
     background: var(--nxm-surface, #fff); color: var(--nxm-text, #1d2733); font-size: 0.92rem;
 }
 .nx-faq__search-input:focus { outline: var(--nxm-focus-outline); outline-offset: 1px; }
-.nx-faq__search-count { font-size: 0.82rem; color: var(--nxm-dim, #6b7280); }
+.nx-faq__search-count { font-size: 0.82rem; color: var(--nxm-text-dim); }
 .nx-faq__item { border-bottom: 1px solid var(--nxm-border, rgba(127,127,127,.25)); }
 .nx-faq__item:first-of-type { border-top: 1px solid var(--nxm-border, rgba(127,127,127,.25)); }
 .nx-faq__item > summary {
@@ -2631,7 +2634,7 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
 .nx-faq__item > summary::-webkit-details-marker { display: none; }
 .nx-faq__item > summary::before {
     content: '\25B8'; flex: 0 0 1em;
-    color: var(--nxm-dim, #6b7280); transition: transform .15s;
+    color: var(--nxm-text-dim); transition: transform .15s;
 }
 .nx-faq__item[open] > summary::before { transform: rotate(90deg); }
 .nx-faq__item > summary:hover { background: var(--nxm-surface-alt, rgba(127,127,127,.08)); }
@@ -2787,11 +2790,42 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
     border-radius: var(--nxm-radius);
     background: var(--nxm-accent);
 }
+.nx-bshop__progress--low::-webkit-progress-value { background: var(--nxm-danger); }
+.nx-bshop__progress--low::-moz-progress-bar { background: var(--nxm-danger); }
+.nx-bshop__progress--mid::-webkit-progress-value { background: var(--nxm-warning); }
+.nx-bshop__progress--mid::-moz-progress-bar { background: var(--nxm-warning); }
+.nx-bshop__progress--high::-webkit-progress-value { background: var(--nxm-success); }
+.nx-bshop__progress--high::-moz-progress-bar { background: var(--nxm-success); }
 .nx-bshop__need {
     margin: 0.35rem 0 0;
     color: var(--nxm-text-dim);
     font-size: 0.88rem;
 }
+
+/* Poll result bars — semantic <progress> replacement for the legacy
+   sltbar/unsltbar sprites (zero-width since the inline width styles
+   were removed). Selected option keeps the accent fill. */
+.nx-pollbar {
+    height: 10px;
+    min-width: 0;
+    appearance: none;
+    border: 0;
+    vertical-align: middle;
+}
+.nx-pollbar::-webkit-progress-bar {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-surface-alt);
+}
+.nx-pollbar::-webkit-progress-value {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-muted);
+}
+.nx-pollbar::-moz-progress-bar {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-muted);
+}
+.nx-pollbar--sel::-webkit-progress-value { background: var(--nxm-accent); }
+.nx-pollbar--sel::-moz-progress-bar { background: var(--nxm-accent); }
 .nx-bshop__buy {
     display: flex;
     align-items: center;

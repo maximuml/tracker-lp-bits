@@ -99,4 +99,28 @@ class UrlNormalizeTest extends TestCase
         $this->assertSame('https://example.com', Url::absolute('https://example.com', false));
         $this->assertSame('http://example.com', Url::absolute('http://example.com', true));
     }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function rootRelativeProvider(): array
+    {
+        return [
+            'bare asset path' => ['pic/x.gif', '/pic/x.gif'],
+            'nested path' => ['styles/Classic/theme.css', '/styles/Classic/theme.css'],
+            'query-only gets anchored' => ['?id=5', '/?id=5'],
+            'already rooted' => ['/pic/x.gif', '/pic/x.gif'],
+            'protocol-relative' => ['//cdn.example.com/x.js', '//cdn.example.com/x.js'],
+            'http scheme' => ['https://example.com/x', 'https://example.com/x'],
+            'data uri' => ['data:image/png;base64,AA==', 'data:image/png;base64,AA=='],
+            'fragment stays document-relative' => ['#top', '#top'],
+            'empty' => ['', ''],
+        ];
+    }
+
+    #[DataProvider('rootRelativeProvider')]
+    public function test_root_relative_anchors_bare_paths(string $in, string $expected): void
+    {
+        $this->assertSame($expected, Url::rootRelative($in));
+    }
 }

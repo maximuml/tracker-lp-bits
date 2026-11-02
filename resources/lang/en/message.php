@@ -31,6 +31,22 @@ return [
         'subject' => 'Download permission restored',
         'body' => 'Your download privileges restored, you can now download torrents. By: :operator',
     ],
+    'upload_disable' => [
+        'subject' => 'Upload permission canceled',
+        'body' => 'Your upload privileges have been revoked by :operator.',
+    ],
+    'upload_enable' => [
+        'subject' => 'Upload permission restored',
+        'body' => 'Your upload privileges have been restored by :operator.',
+    ],
+    'forumpost_disable' => [
+        'subject' => 'Forum posting permission canceled',
+        'body' => 'Your forum posting privileges have been revoked by :operator.',
+    ],
+    'forumpost_enable' => [
+        'subject' => 'Forum posting permission restored',
+        'body' => 'Your forum posting privileges have been restored by :operator.',
+    ],
     'temporary_invite_change' => [
         'subject' => 'Temporary invite :change_type',
         'body' => 'Your temporary invite count had :change_type :count by :operator, reason: :reason.',

@@ -190,7 +190,7 @@ final class ForumTopicViewService
             $signature = $actor->yes('signatures') ? (string) ($arr2['signature'] ?? '') : '';
             $avatar = $actor->yes('avatars') ? (string) ($arr2['avatar'] ?? '') : '';
             if ($avatar === '') {
-                $avatar = 'pic/default_avatar.png';
+                $avatar = '/pic/default_avatar.png';
             }
 
             $isLast = $pn === $pc;

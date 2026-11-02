@@ -57,19 +57,25 @@ final class AssetAppender
      * Append a ?v=<filemtime> cache-buster to a local asset path so a
      * deploy picks up changed JS/CSS instead of serving heuristic-cached
      * copies. External URLs and files that do not exist pass through
-     * untouched.
+     * untouched. Bare relative paths are anchored to the site root —
+     * pages at nested /web/* URLs would otherwise resolve them under
+     * /web/ and 404.
      */
     public static function versionedSrc(string $src): string
     {
-        if (str_contains($src, '://') || str_contains($src, '?')) {
+        if (preg_match('#^[a-zA-Z][a-zA-Z0-9+.\-]*:#', $src) === 1) {
             return $src;
         }
-        $path = public_path(ltrim($src, '/'));
+        $rooted = str_starts_with($src, '/') ? $src : '/'.$src;
+        if (str_contains($src, '?')) {
+            return $rooted;
+        }
+        $path = public_path(ltrim($rooted, '/'));
         if (! is_file($path)) {
-            return $src;
+            return $rooted;
         }
 
-        return $src.'?v='.filemtime($path);
+        return $rooted.'?v='.filemtime($path);
     }
 
     /**

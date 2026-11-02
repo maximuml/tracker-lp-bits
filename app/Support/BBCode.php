@@ -70,6 +70,10 @@ final class BBCode
             return htmlspecialchars($displayText, ENT_QUOTES, 'UTF-8', false);
         }
 
+        // Relative URLs (details.php?id=5, pic/x.gif) previously resolved
+        // against <base href>; anchor them to the site root explicitly.
+        $safeUrl = Url::rootRelative($safeUrl);
+
         if (! $text) {
             $text = $url;
         }

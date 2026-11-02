@@ -120,7 +120,6 @@ class UserDetailController extends Controller
         $canViewHistory = Permission::can(PermissionEnum::VIEW_USER_HISTORY);
         $canManageBasic = Permission::can(PermissionEnum::MANAGE_USER_BASIC_INFO);
         $canManageConfidential = Permission::can(PermissionEnum::MANAGE_USER_CONFIDENTIAL_INFO);
-        $canDeleteUser = Permission::can(PermissionEnum::USER_DELETE);
         $canViewTorrentHistory = Permission::can(PermissionEnum::TORRENT_HISTORY);
         $canViewInvite = Permission::can(PermissionEnum::VIEW_INVITE);
         $staffMember = Permission::can(PermissionEnum::STAFF_MEMBER);
@@ -381,7 +380,6 @@ JS, 'footer', false);
             'canViewHistory' => $canViewHistory,
             'canManageBasic' => $canManageBasic,
             'canManageConfidential' => $canManageConfidential,
-            'canDeleteUser' => $canDeleteUser,
             'canViewTorrentHistory' => $canViewTorrentHistory,
             'canViewInvite' => $canViewInvite,
             'currentClass' => $currentClass,

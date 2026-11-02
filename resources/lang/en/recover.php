@@ -11,6 +11,7 @@ return [
     'std_invalid_reset_link' => 'This password reset link is invalid, expired, or already used. Request a new one below.',
     'text_recover_user' => 'Recover lost user name or password.',
     'text_use_form_below' => 'Use the form below to receive a password reset link by email.',
+    'text_reset_link_sent' => 'If an account with that email exists, a reset link has been sent.',
     'text_reply_to_confirmation_email' => '(The link lets you choose a new password.)',
     'text_reset_password' => 'Choose a new password',
     'text_choose_new_password' => 'Enter and confirm a new password for this account.',

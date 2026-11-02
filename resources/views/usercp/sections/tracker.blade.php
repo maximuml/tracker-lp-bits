@@ -4,7 +4,7 @@
 <x-alert type="success">{{ __('usercp.text_settings_saved') }}</x-alert>
 @endif
 
-<form method=post action="/web/usercp/tracker" id="{{ $tracker->formId }}">
+<form method="post" action="/web/usercp/tracker" id="{{ $tracker->formId }}">@csrf
     <div class="nx-setcards">
         <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="ucp-sec-catalog">
             <h2 class="nx-setcard__title" id="ucp-sec-catalog">{{ __('usercp.section_catalog_defaults') }}</h2>

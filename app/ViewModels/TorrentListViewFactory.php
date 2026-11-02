@@ -25,6 +25,7 @@ use App\Support\SearchBox;
 use App\Support\Time;
 use App\Support\Torrent\TorrentStatus;
 use App\Support\TorrentAccess;
+use App\Support\Url;
 use App\Support\UserDisplay;
 use App\ViewModels\Torrent\ApprovalBadge;
 use App\ViewModels\Torrent\CategoryIcon;
@@ -305,7 +306,7 @@ final class TorrentListViewFactory
                 rowClass: $rowClass,
                 categoryIcon: $categoryIcon,
                 secondIcon: $secondIcon,
-                coverSrc: $showCover ? (string) ($row['cover'] ?? '') : null,
+                coverSrc: $showCover ? Url::rootRelative((string) ($row['cover'] ?? '')) : null,
                 stickyCount: $stickyCount,
                 stickyTitle: $stickyTitle,
                 nameUrl: '/web/details/'.$id.'?hit=1',

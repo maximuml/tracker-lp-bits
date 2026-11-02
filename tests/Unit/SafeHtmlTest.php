@@ -273,7 +273,7 @@ final class SafeHtmlTest extends TestCase
     public function test_sanitizer_keeps_safe_unquoted_attributes(): void
     {
         $result = HtmlSanitizer::sanitize('<img src=x onerror=alert(1)>');
-        $this->assertStringContainsString('src="x"', $result);
+        $this->assertStringContainsString('src="/x"', $result);
         $this->assertStringNotContainsStringIgnoringCase('onerror', $result);
     }
 

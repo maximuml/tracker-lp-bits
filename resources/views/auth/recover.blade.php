@@ -16,7 +16,7 @@
     @endif
 
     @if ($status === 'requested')
-        <div class="nx-auth__success">If an account with that email exists, a reset link has been sent.</div>
+        <div class="nx-auth__success">{{ __('recover.text_reset_link_sent') }}</div>
     @endif
 
     <form method="get" action="/recover" class="nx-auth__lang">

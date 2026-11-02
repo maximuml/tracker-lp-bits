@@ -2,12 +2,6 @@
 <html lang="{{ $chrome->head->locale }}" data-theme="{{ $chrome->head->theme }}" data-fontsize="{{ $chrome->head->fontSize }}">
 <head>
 <meta charset="utf-8" />
-@if(request()->is('web/*'))
-{{-- Pages rendered inline at nested /web/* URLs (aborts, confirm forms on
-     POST endpoints) would resolve relative asset/link URLs under /web/…
-     and 404 — pin resolution to the site root. --}}
-<base href="{{ url('/') }}/" />
-@endif
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="csrf-token" content="{{ csrf_token() }}" />
 @if($chrome->head->metaKeywords !== '')
@@ -18,7 +12,7 @@
 @endif
 <meta name="generator" content="{{ PROJECTNAME }}" />
 <title>{{ $chrome->head->title }}</title>
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 <link rel="search" type="application/opensearchdescription+xml" title="{{ $chrome->siteName }} Torrents" href="/web/opensearch" />
 <link rel="alternate" type="application/rss+xml" title="Latest Torrents" href="/web/torrentrss" />
 @foreach($chrome->head->headStyles as $href)

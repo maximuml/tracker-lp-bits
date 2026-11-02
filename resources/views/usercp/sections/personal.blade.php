@@ -4,7 +4,7 @@
     <x-alert type="success">{{ __('usercp.text_settings_saved') }}</x-alert>
 @endif
 
-<form method=post action="/web/usercp/personal" id="{{ $personal->formId }}">
+<form method="post" action="/web/usercp/personal" id="{{ $personal->formId }}">@csrf
     <div class="nx-setcards">
         <section class="nx-ucard nx-setcard" aria-labelledby="ucp-sec-account">
             <h2 class="nx-setcard__title" id="ucp-sec-account">{{ __('usercp.section_account') }}</h2>
@@ -74,7 +74,7 @@
             <div class="nx-setrow">
                 <label class="nx-setrow__label" for="usercp-savatar">{{ __('usercp.select_choose_avatar') }}</label>
                 <div class="nx-setrow__control">
-                    <img id="avatarimg" name="avatarimg" src="{{ $personal->avatar !== '' ? $personal->avatar : $personal->defaultAvatarUrl }}" alt="{{ __('usercp.section_avatar') }}" class="nx-usercp-avatar">
+                    <img id="avatarimg" name="avatarimg" src="{{ \App\Support\Url::rootRelative($personal->avatar !== '' ? $personal->avatar : $personal->defaultAvatarUrl) }}" alt="{{ __('usercp.section_avatar') }}" class="nx-usercp-avatar">
                     <select name="savatar" id="usercp-savatar">
                         <option value="{{ $personal->avatar }}">{{ __('usercp.select_choose_avatar') }}</option>
                         <option value="{{ $personal->defaultAvatarUrl }}">{{ __('usercp.select_nothing') }}</option>

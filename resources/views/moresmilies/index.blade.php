@@ -2,7 +2,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="color-scheme" content="light dark">
 <title>{{ __('moresmilies.head_more_smilies') }}</title>
-<base href="{{ url('/') }}/" />
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">
 img {border: none;}
 body {color: CanvasText; background-color: Canvas}
@@ -35,7 +34,7 @@ document.addEventListener('click', function (e) {
 
 <div class="smilegrid">
 @for ($i = 1; $i < 192; $i++)
-    <div><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form ?? '' }}" data-smile-text="{{ $text ?? '' }}"><img src="pic/smilies/{{ $i }}.gif" alt="[em{{ $i }}]" loading="lazy" decoding="async"></a></div>
+    <div><a href="#" data-smile="[em{{ $i }}]" data-smile-form="{{ $form ?? '' }}" data-smile-text="{{ $text ?? '' }}"><img src="/pic/smilies/{{ $i }}.gif" alt="[em{{ $i }}]" loading="lazy" decoding="async"></a></div>
 @endfor
 </div>
 <div class="text-center">

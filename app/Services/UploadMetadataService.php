@@ -177,7 +177,7 @@ class UploadMetadataService
             throw new NexusException('Unauthenticated');
         }
         if (! $user->uploadpos) {
-            throw new UploadValidationException(Locale::trans('upload.unauthorized_to_upload', [], null));
+            throw new UploadValidationException(Locale::trans('upload.text_unauthorized_to_upload', [], null));
         }
 
         $uploadDenyApprovalDenyCount = SiteConfig::current()->main->uploadDenyApprovalDenyCount();

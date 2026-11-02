@@ -1,5 +1,5 @@
 <h1>{{ __('bitbucketupload.text_avatar_upload') }}</h1>
-<form method="post" action="/bitbucket-upload" enctype="multipart/form-data">
+<form method="post" action="/bitbucket-upload" enctype="multipart/form-data">@csrf
 <div class="nx-fgrid">
     @if (! $bucketWritable)
         <div class="nx-ffull">{{ __('bitbucketupload.text_upload_directory_unwritable') }}</div>

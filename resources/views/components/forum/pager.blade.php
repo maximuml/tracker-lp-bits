@@ -1,8 +1,8 @@
 @props(['page', 'pages', 'href', 'items', 'label' => 'Pagination'])
 {{-- Forum listings keep the legacy 0-based `page=` query param; `items`
      is the 1-based display window precomputed by the view model.
-     `?`-only href bases are anchored to the current path because
-     <base href="/"> would resolve them to the home page. --}}
+     `?`-only href bases are anchored to the current path so the
+     rendered links are canonical regardless of the document URL. --}}
 @if ($pages > 1)
 <nav class="nx-pagination" aria-label="{{ $label }}">
     <ul class="nx-pagination__list">

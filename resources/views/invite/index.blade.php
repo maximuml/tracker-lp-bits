@@ -57,7 +57,7 @@
             </form>
         </div>
         <x-data-table :caption="__('invite.text_invite_status')" captionHidden>
-        <form method="post" action="/takeconfirm?id={{ (string) $id }}">
+        <form method="post" action="/takeconfirm?id={{ (string) $id }}">@csrf
 
         @if (! $inviteeCount)
             <tr><td colspan="7" class="text-center">{{ __('invite.text_no_invites')}}</tr>

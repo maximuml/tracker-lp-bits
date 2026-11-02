@@ -124,9 +124,9 @@ final class AttachmentRenderService
         $driver = $row['driver'] ?? 'local';
         if ($driver == 'local') {
             if (($row['thumb'] ?? 0) == 1) {
-                $url = $httpdirectory.'/'.$row['location'].'.thumb.jpg';
+                $url = Url::rootRelative($httpdirectory.'/'.$row['location'].'.thumb.jpg');
             } else {
-                $url = $httpdirectory.'/'.$row['location'];
+                $url = Url::rootRelative($httpdirectory.'/'.$row['location']);
             }
         } else {
             $url = AttachmentStorage::driver($driver)->getImageUrl($row['location']);

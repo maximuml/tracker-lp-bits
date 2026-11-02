@@ -7,7 +7,7 @@
 <h1 class="text-center">{{ __('edit.text_cannot_edit_torrent') ?? '' }}</h1>
 <p>{{ __('edit.text_cannot_edit_torrent_note') }} <a href="/login?returnto={{ $requestUri }}&nowarn=1">{{ __('edit.text_logged_in') }}</a> {{ __('edit.text_cannot_edit_torrent_note_end') }}</p>
 @else
-<form method="post" id="compose" name="edittorrent" action="/takeedit" enctype="multipart/form-data">
+<form method="post" id="compose" name="edittorrent" action="/takeedit" enctype="multipart/form-data">@csrf
 <input type="hidden" name="id" value="{{ $torrentId }}" />
 @if ($returnto !== '')
 <input type="hidden" name="returnto" value="{{ $returnto }}" />

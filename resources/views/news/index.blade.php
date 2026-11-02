@@ -6,7 +6,7 @@
 <form id="compose" name="compose" method="post" action="{{ $actionUrl ?? '/web/news/add' }}">
 @csrf
 <x-compose :title="$composeTitle ?? $title ?? ''" :type="($mode ?? 'add') === 'edit' ? 'edit' : 'new'" :body="$body ?? ''" :has-subject="true" :subject="$subject ?? ''">
-<tr><td class="toolbox text-center" colspan="2"><input type="checkbox" name="notify" value="yes"{{ $checked ?? '' }} />{{ __('news.text_notify_users_of_this')}}</td></tr>
+<div class="text-center"><label><input type="checkbox" name="notify" value="yes"{{ $checked ?? '' }} /> {{ __('news.text_notify_users_of_this')}}</label></div>
 </x-compose>
 @if (($mode ?? '') === 'edit')
     <input type="hidden" name="returnto" value="{{ $returnto ?? '' }}" />

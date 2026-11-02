@@ -93,7 +93,7 @@
     @endif
 
     @if ($isAdmin)
-        <form action="{{ ! empty($complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post">@csrf<input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button>{{ ! empty($complain['answered']) ? (__('complains.text_unanswer_it')) : (__('complains.text_answer_it')) }}</button></form>
+        <form action="{{ ! empty($complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post">@csrf<input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button type="submit" class="nx-btn">{{ ! empty($complain['answered']) ? (__('complains.text_unanswer_it')) : (__('complains.text_answer_it')) }}</button></form>
     @endif
 
 @else

@@ -117,6 +117,7 @@ html[data-theme="dark"]:root {
     --nxm-surface-alt: #38392e;
     --nxm-text: #e6e3d4;
     --nxm-text-dim: #a3a193;
+    --nxm-muted: #a3a193;
     --nxm-border: #585947;
     --nxm-accent: #4d92d4;
     --nxm-accent-hover: #6aa9de;
@@ -206,6 +207,7 @@ html[data-theme="dark"]:root {
         --nxm-surface-alt: #38392e;
         --nxm-text: #e6e3d4;
         --nxm-text-dim: #a3a193;
+        --nxm-muted: #a3a193;
         --nxm-border: #585947;
         --nxm-accent: #4d92d4;
         --nxm-accent-hover: #6aa9de;

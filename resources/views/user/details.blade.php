@@ -168,12 +168,5 @@
 </x-data-table>
 </form>
 </x-frame>
-@if ($canDeleteUser)
-<x-frame :caption="__('userdetails.text_delete_user')">
-<form method="post" action="delacctadmin.php" name="deluser">
-<input name="userid" size="10" type="hidden" value="{{ $user['id'] }}" />
-<input name="delenable" type="checkbox" data-del-msg="{{ __('userdetails.js_delete_user_note') ?? '' }}" /><input name="submit" type="submit" value="{{ __('userdetails.submit_delete') ?? '' }}" disabled="disabled" /></form>
-</x-frame>
-@endif
 @endif
 @endsection

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Html;
 
+use App\Support\Url;
 use Dom\CDATASection;
 use Dom\Comment;
 use Dom\Element;
@@ -232,10 +233,16 @@ final class HtmlSanitizer
                 continue;
             }
 
-            if (($lower === 'href' || $lower === 'src') && ! self::isSafeUrl($value)) {
-                $element->removeAttribute($name);
+            if ($lower === 'href' || $lower === 'src') {
+                if (! self::isSafeUrl($value)) {
+                    $element->removeAttribute($name);
 
-                continue;
+                    continue;
+                }
+                $rooted = Url::rootRelative($value);
+                if ($rooted !== $value) {
+                    $element->setAttribute($name, $rooted);
+                }
             }
 
             if ($lower === 'style') {

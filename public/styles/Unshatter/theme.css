@@ -172,6 +172,15 @@ html[data-theme="light"]:root {
     --nxm-on-success: #111114;
     --nxm-on-warning: #111114;
         --nxm-on-danger: #111114;
+        --nxm-info-bg: #16283a;
+        --nxm-info-border: #2c4a66;
+        --nxm-success-bg: #16301f;
+        --nxm-success-border: #2c5c3c;
+        --nxm-warning-bg: #332a16;
+        --nxm-warning-border: #665223;
+        --nxm-danger-bg: #35191c;
+        --nxm-danger-border: #6b3237;
+        --nxm-panel-bg: var(--nxm-surface-alt);
         --nxm-header-bg: #0d0d10;
         --nxm-header-text: #f2f2f4;
         --nxm-header-dim: #8a8d97;
@@ -210,6 +219,7 @@ html[data-theme="light"]:root {
 }
 
 @media (prefers-color-scheme: light) {
+    html:not([data-theme]):root,
     html[data-theme="auto"]:root {
         --nxm-bg: #f4f3ee;
         --nxm-surface: #ffffff;

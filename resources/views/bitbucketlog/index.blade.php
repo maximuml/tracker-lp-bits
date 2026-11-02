@@ -17,7 +17,7 @@ Total Images Stored: {{ $count ?? 0 }}
         Uploaded by: {{ $item['usernameHtml'] }}<br />
         (#{{ $item['id'] }}) Filename: {{ $item['name'] }} ({{ $item['width'] }}&nbsp;x&nbsp;{{ $item['height'] }})
         @if ($isModerator ?? false)
-            <b><a href="{{ request()->getPathInfo() }}?delete={{ $item['id'] }}">[Delete]</a></b><br />
+            <b><form method="post" action="/web/admin/bitbucket-log" class="nx-inline">@csrf<input type="hidden" name="delete" value="{{ $item['id'] }}" /><button type="submit" class="nxm-linkbtn font-bold">[Delete]</button></form></b><br />
         @endif
         Added: {{ $item['date'] }} {{ $item['time'] }}</td>
         </tr>

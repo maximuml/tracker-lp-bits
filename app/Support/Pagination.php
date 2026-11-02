@@ -187,7 +187,7 @@ final class Pagination
 
     /**
      * Anchor a query-only `?foo=bar` base to the current request path —
-     * `<base href="/">` would otherwise resolve it against the home page.
+     * canonicalises the link instead of relying on URL resolution.
      */
     public static function resolveHref(string $href): string
     {

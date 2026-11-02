@@ -18,6 +18,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Ratio;
 use App\Support\Shoutbox;
+use App\Support\Url;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\ViewModels\Index\IndexBrowserNoteSection;
@@ -310,7 +311,7 @@ final class IndexPageService
                 uploaded: Format::size((float) $row['uploaded']),
                 downloaded: Format::size((float) $row['downloaded']),
                 lastSeen: Carbon::parse($row['last_access'])->format('H:i'),
-                avatar: (string) ($row['avatar'] ?? ''),
+                avatar: Url::rootRelative((string) ($row['avatar'] ?? '')),
             );
         }
         $maxusers = SiteConfig::current()->main->maxUsers();

@@ -6,9 +6,9 @@
 <x-frame :caption="__('tags.text_tags')" :center="false">
 <p>{{ __('tags.text_bb_tags_note') }} <b>{{ $siteName }}</b> {{ __('tags.text_bb_tags_note_two') }} <i>{{ __('tags.text_bb_tags') }}</i> {{ __('tags.text_bb_tags_note_end') }}</p>
 
-<form method=post action=?>
-<textarea name=test cols=60 rows=3>{{ $test ?? '' }}</textarea>
-<input type=submit value="{{ __('tags.submit_test_this_code')}}">
+<form method="post" action="?">@csrf
+<textarea name="test" cols="60" rows="3">{{ $test ?? '' }}</textarea>
+<input type="submit" value="{{ __('tags.submit_test_this_code')}}">
 </form>
 
 @if (($test ?? '') !== '')

@@ -205,7 +205,7 @@ class FaqTableSeeder extends Seeder
                 'question' => 'So, what\'s MY ratio?',
                 'answer' => 'It\'s on the left-top of pages.<br />
             <br />
-            <img src="pic/ratio.png" alt="ratio" />
+            <img src="/pic/ratio.png" alt="ratio" />
             <br />
             <br />
             It\'s important to distinguish between your overall ratio and the individual ratio on each torrent you may be seeding or leeching. The overall ratio takes into account the total uploaded and downloaded from your account since you joined the site. The individual ratio takes into account those values for each torrent.
@@ -305,7 +305,7 @@ class FaqTableSeeder extends Seeder
             <td class="embedded">Get 10 invitations.</td>
             </tr>
             <tr>
-            <td class="embedded" valign="top">&nbsp; <img class="star" src="pic/trans.gif" alt="Star" /></td>
+            <td class="embedded" valign="top">&nbsp; <img class="star" src="/pic/trans.gif" alt="Star" /></td>
             <td class="embedded">&nbsp;</td>
             <td class="embedded">Has donated money to this tracker.</td>
             </tr>
@@ -1159,9 +1159,9 @@ class FaqTableSeeder extends Seeder
             In a language file is an array of strings. These strings contain all the static words that a user can see on web pages. When we need to say some words on a php code file, we call for a string in the array. And the output of the php code file, that is what users see on the web pages, would show the value of the string.<br />
             Sounds dizzying? Well, you need not care about all these. All you gotta do is translate the values of the strings in the language files into another language. <b>Let\'s see an example</b>:<br /><br />
             The following is the content of the English language file \'lang_users.php\', which works for the php code file \'users.php\'. <br /><br />
-            <img src="pic/langfileeng.png" alt="langfileeng" /><br />
+            <img src="/pic/langfileeng.png" alt="langfileeng" /><br />
             If you wanna translate it into Simplified Chinese, all you need is edit the file into this:<br />
-            <img src="pic/langfilechs.png" alt="langfilechs" /><br />
+            <img src="/pic/langfilechs.png" alt="langfilechs" /><br />
             See, in every line, the left part, that is before <i>=&gt;</i>, is the name of a string, which you shouldn\'t touch. All you need to is translate the right part, after <i>=&gt;</i>, which is the value of the string, into another language.<br />
             Sometimes you need to look at the corresponding web pages to get the context meaning of some words.<br /></li>
             <li>Sounds easy? See what do you need to do.<br />

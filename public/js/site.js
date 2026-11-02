@@ -499,16 +499,6 @@ noext = noext.replace(/2_1/g,"2.1");
 document.getElementById("name").value=noext;
 }
 
-// in userdetails.php
-function enabledel(msg){
-document.deluser.submit.disabled=document.deluser.submit.checked;
-alert (msg);
-}
-
-function disabledel(){
-document.deluser.submit.disabled=!document.deluser.submit.checked;
-}
-
 // settings.php
 function NewRow(anchor,up){
 	var thisRow = anchor.parentNode.parentNode;
@@ -693,15 +683,6 @@ document.addEventListener('change', function (e) {
         return;
     }
 
-    if (el.name === 'delenable') {
-        if (el.checked && typeof enabledel === 'function') {
-            enabledel(el.getAttribute('data-del-msg') || '');
-        } else if (!el.checked && typeof disabledel === 'function') {
-            disabledel();
-        }
-        return;
-    }
-
     if (el.name === 'promotion_time_type') {
         var note = document.getElementById('promotion_until_note');
         if (note) { note.classList.toggle('nx-hidden', el.value !== '2'); }
@@ -780,7 +761,7 @@ function check_avatar(image, langfolder) {
     var tempheight = tempimage.height;
     if (tempwidth > 250 || tempheight > 250 || displayheight > 250) {
         var folder = /^[a-z_]+$/i.test(langfolder) ? langfolder : 'en';
-        image.src = 'pic/forum_pic/' + folder + '/avatartoobig.png';
+        image.src = '/pic/forum_pic/' + folder + '/avatartoobig.png';
     }
 }
 
@@ -1269,7 +1250,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // lazy load
     if ("IntersectionObserver" in window) {
-        const fallbackImage = 'pic/misc/cover.svg';
+        const fallbackImage = '/pic/misc/cover.svg';
         const domainList = ['img1.doubanio.com', 'img2.doubanio.com', 'img3.doubanio.com', 'img9.doubanio.com'];
         const imgList = [...document.querySelectorAll('.nexus-lazy-load')];
         const loadedImages = {};

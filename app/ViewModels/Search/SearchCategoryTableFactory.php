@@ -88,16 +88,16 @@ final class SearchCategoryTableFactory
                         // Sprite icon sets draw through the c_* CSS class on
                         // a transparent pixel — pointing <img> at the sheet
                         // itself shows the whole sprite scaled into the cell.
-                        $iconImagePath = 'pic/cattrans.gif';
+                        $iconImagePath = '/pic/cattrans.gif';
                     } elseif ($icon) {
                         $iconFolder = trim($icon->folder, '/');
                         $langAndFile = sprintf('%s%s', $icon->multilang ? "$lang/" : '', $item->image);
                         $fullDir = Path::resolve("pic/category/$iconFolder/$langAndFile", public_path());
                         $iconImagePath = file_exists($fullDir)
-                            ? "pic/category/$iconFolder/$langAndFile"
-                            : "pic/category/{$searchBox->name}/$iconFolder/$langAndFile";
+                            ? "/pic/category/$iconFolder/$langAndFile"
+                            : "/pic/category/{$searchBox->name}/$iconFolder/$langAndFile";
                     } else {
-                        $iconImagePath = 'pic/cattrans.gif';
+                        $iconImagePath = '/pic/cattrans.gif';
                     }
 
                     $cells[] = SearchCategoryCell::category(

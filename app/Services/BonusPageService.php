@@ -400,7 +400,7 @@ final class BonusPageService
         $bonusTableResult = $this->seedBonus->buildBonusTableForUser($actor->toLegacyArray(), $seedBonusResult, ['table_style' => 'width: 50%']);
 
         $percent = $seedBonusResult['seed_bonus'] * 100 / ($bzeroBonus + $perseedingBonus * $maxseedingBonus);
-        $loadpic = $percent <= 30 ? 'loadbarred' : ($percent <= 60 ? 'loadbaryellow' : 'loadbargreen');
+        $loadpic = self::progressClass($percent);
 
         $minSize = SiteConfig::current()->bonus->minSize();
 
@@ -416,7 +416,7 @@ final class BonusPageService
             donortimesBonus: SiteConfig::current()->bonus->donorTimes(),
             currentSeedBonus: (string) round((float) $seedBonusResult['seed_bonus'], 3),
             aFactor: (string) round((float) $seedBonusResult['A'], 1),
-            percentLabel: (string) $percent,
+            percentLabel: self::percentLabel($percent),
             loadbarClass: $loadpic,
             userId: $actor->id,
             officialAdditionFactor: $bonusTableResult['has_official_addition'] ? (string) $bonusTableResult['official_addition_factor'] : null,
@@ -433,5 +433,15 @@ final class BonusPageService
             ratiolimitBonus: SiteConfig::current()->bonus->ratioLimit(),
             dlamountlimitBonus: SiteConfig::current()->bonus->dlAmountLimit(),
         );
+    }
+
+    public static function progressClass(float $percent): string
+    {
+        return $percent <= 30 ? 'nx-bshop__progress--low' : ($percent <= 60 ? 'nx-bshop__progress--mid' : 'nx-bshop__progress--high');
+    }
+
+    public static function percentLabel(float $percent): string
+    {
+        return (string) round($percent, 1);
     }
 }

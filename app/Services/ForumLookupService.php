@@ -29,7 +29,7 @@ final class ForumLookupService
      */
     public function picFolder(?string $langFolder = null): string
     {
-        return 'pic/forum_pic/'.($langFolder ?? Locale::currentLangDir());
+        return '/pic/forum_pic/'.($langFolder ?? Locale::currentLangDir());
     }
 
     /**

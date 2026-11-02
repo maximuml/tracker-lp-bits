@@ -41,7 +41,7 @@ final class UsercpSecurityLayoutTest extends TestCase
         $emailResponse = $this->withNexusCookie($emailUser)->get('/usercp?action=security');
         $emailResponse->assertOk();
         $this->assertSame(
-            ['action', 'chpassword', 'email', 'privacy', 'privacy', 'privacy', 'resetpasskey', 'two_step_code', 'two_step_secret', 'type'],
+            ['_token', 'action', 'chpassword', 'email', 'privacy', 'privacy', 'privacy', 'resetpasskey', 'two_step_code', 'two_step_secret', 'type'],
             $this->securityFormNames($this->responseHtml($emailResponse)),
             'Security field names for a user without 2FA and with email changes enabled',
         );
@@ -50,7 +50,7 @@ final class UsercpSecurityLayoutTest extends TestCase
         $twoStepResponse = $this->withNexusCookie($twoStepUser)->get('/usercp?action=security');
         $twoStepResponse->assertOk();
         $this->assertSame(
-            ['action', 'chpassword', 'email', 'privacy', 'privacy', 'privacy', 'resetpasskey', 'two_step_code', 'type'],
+            ['_token', 'action', 'chpassword', 'email', 'privacy', 'privacy', 'privacy', 'resetpasskey', 'two_step_code', 'type'],
             $this->securityFormNames($this->responseHtml($twoStepResponse)),
             'Security field names for a user with 2FA enabled',
         );
@@ -64,7 +64,7 @@ final class UsercpSecurityLayoutTest extends TestCase
         ]);
         $this->assertSame(200, $confirmResponse->getStatusCode(), 'Security confirm mode must render for the baseline');
         $this->assertSame(
-            ['action', 'chpassword', 'email', 'privacy', 'response', 'two_step_code', 'two_step_secret', 'type', 'username'],
+            ['_token', 'action', 'chpassword', 'email', 'privacy', 'response', 'two_step_code', 'two_step_secret', 'type', 'username'],
             $this->securityFormNames($this->responseHtml($confirmResponse)),
             'Security field names for confirm mode',
         );

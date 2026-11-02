@@ -370,7 +370,7 @@ final class Shoutbox
                 $editedTime = self::formatTime((int) $arr['edited_at'], true);
             }
 
-            $avatarUrl = 'pic/default_avatar.png';
+            $avatarUrl = '/pic/default_avatar.png';
             $nickReplyName = '';
             if ($currUserId > 0) {
                 $username = UserDisplay::username($currUserId, false, true, true, true, false, false, '', true);
@@ -381,7 +381,7 @@ final class Shoutbox
                 if ($showAvatars) {
                     $rawAvatar = trim((string) ($userRow['avatar'] ?? ''));
                     if ($rawAvatar !== '') {
-                        $avatarUrl = $rawAvatar;
+                        $avatarUrl = Url::rootRelative($rawAvatar);
                     }
                 }
                 if ($nickReplyName !== '' && $currentUserId > 0) {

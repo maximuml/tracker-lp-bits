@@ -185,7 +185,7 @@ final class OfferService
         }
 
         if ($sure === 0) {
-            $this->abort(__('offers.std_delete_offer'), __('offers.std_delete_offer_note').view('offers.delete-confirm-form', ['url' => "/web/offers/delete?id={$offerId}&sure=1"])->render(), false);
+            $this->abort(__('offers.std_delete_offer'), __('offers.std_delete_offer_note').view('offers.delete-confirm-form', ['url' => '/web/offers/delete', 'id' => $offerId])->render(), false);
         }
 
         $reason = (string) $request->input('reason');

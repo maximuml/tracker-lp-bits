@@ -1,9 +1,8 @@
 <html data-theme="{{ $theme }}" data-fontsize="{{ $fontSize }}">
 <head>
-<base href="{{ url('/') }}/" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="{{ $css_uri.'theme.css' }}" type="text/css">
-<link rel="stylesheet" href="css/modern.css" type="text/css">
+<link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc($css_uri.'theme.css') }}" type="text/css">
+<link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/modern.css') }}" type="text/css">
 </head>
 <body class="inframe">
 <div>

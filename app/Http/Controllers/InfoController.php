@@ -284,7 +284,7 @@ class InfoController extends BasePageController
             $items[] = [
                 'id' => $id,
                 'name' => $name,
-                'url' => str_replace(' ', '%20', htmlspecialchars("bitbucket/$name")),
+                'url' => str_replace(' ', '%20', htmlspecialchars("/bitbucket/$name")),
                 'date' => substr($added, 0, (int) strpos($added, ' ')),
                 'time' => substr($added, (int) strpos($added, ' ') + 1),
                 'width' => $dim['width'],
@@ -320,7 +320,7 @@ class InfoController extends BasePageController
                 return $this->abortResponse('Warning', 'Unable to unlink file: '.htmlspecialchars($name).'. You should contact an administrator about this error.', false);
             }
 
-            return redirect($request->url());
+            return redirect('/web/bitbucketlog');
         }
 
         return $this->bitbucketlog($request);

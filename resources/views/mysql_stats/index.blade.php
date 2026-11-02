@@ -17,7 +17,7 @@
         <b>Server traffic:</b> These tables show the network traffic statistics of this MySQL server since its startup
         <br />
         <div class="flex items-start">
-                    <x-data-table caption="Traffic" captionHidden id="torrenttable"><x-slot:head><thead><tr>
+                    <x-data-table caption="Traffic" captionHidden><x-slot:head><thead><tr>
                             <th colspan="2" scope="colgroup">&nbsp;Traffic&nbsp;</th>
                             <th scope="col">&nbsp;&nbsp;Per Hour&nbsp;</th>
                         </tr></thead></x-slot:head>
@@ -37,7 +37,7 @@
                             <td class="text-right">&nbsp;{{ $totalBytesPerHour }}&nbsp;</td>
                         </tr>
                     </x-data-table>
-                    <x-data-table caption="Connections" captionHidden id="torrenttable"><x-slot:head><thead><tr>
+                    <x-data-table caption="Connections" captionHidden><x-slot:head><thead><tr>
                             <th colspan="2" scope="colgroup">&nbsp;Connections&nbsp;</th>
                             <th scope="col">&nbsp;&oslash;&nbsp;Per Hour&nbsp;</th>
                             <th scope="col">&nbsp;%&nbsp;</th>
@@ -68,7 +68,7 @@
         <b>Query Statistics:</b> Since it's start up, {{ $questionsTotal }} queries have been sent to the server.
         <div>
                     <br />
-                    <x-data-table caption="Query Statistics" captionHidden id="torrenttable"><x-slot:head><thead><tr>
+                    <x-data-table caption="Query Statistics" captionHidden><x-slot:head><thead><tr>
                             <th scope="col">&nbsp;Total&nbsp;</th>
                             <th scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
                             <th scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Minute&nbsp;</th>
@@ -83,7 +83,7 @@
                     </x-data-table>
             <div class="flex items-start">
 @foreach ($queryStatColumns as $column)
-                    <x-data-table caption="Query Type" captionHidden id="torrenttable"><x-slot:head><thead><tr>
+                    <x-data-table caption="Query Type" captionHidden><x-slot:head><thead><tr>
                             <th colspan="2" scope="colgroup">&nbsp;Query&nbsp;Type&nbsp;</th>
                             <th scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
                             <th scope="col">&nbsp;%&nbsp;</th>
@@ -107,7 +107,7 @@
         <b>More status variables</b><br />
         <div class="flex items-start">
 @foreach ($statusColumns as $column)
-                    <x-data-table caption="More status variables" captionHidden id="torrenttable"><x-slot:head><thead><tr>
+                    <x-data-table caption="More status variables" captionHidden><x-slot:head><thead><tr>
                             <th scope="col">&nbsp;Variable&nbsp;</th>
                             <th scope="col">&nbsp;Value&nbsp;</th>
                         </tr></thead></x-slot:head>

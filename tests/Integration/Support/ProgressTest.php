@@ -66,9 +66,9 @@ final class ProgressTest extends TestCase
     {
         $html = Progress::percentImage(-10);
 
-        $this->assertSame('<img class="bar_left" src="pic/trans.gif" alt="" /><img class="bar_right" src="pic/trans.gif" alt="" />', $html);
+        $this->assertSame('<img class="bar_left" src="/pic/trans.gif" alt="" /><img class="bar_right" src="/pic/trans.gif" alt="" />', $html);
 
         $html = Progress::percentImage(200);
-        $this->assertSame('<img class="bar_left" src="pic/trans.gif" alt="" /><img class="bar_right" src="pic/trans.gif" alt="" />', $html);
+        $this->assertSame('<img class="bar_left" src="/pic/trans.gif" alt="" /><img class="bar_right" src="/pic/trans.gif" alt="" />', $html);
     }
 }

@@ -71,7 +71,7 @@
     @else
         <x-data-table :caption="__('log.text_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_date')}}</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>@if ($canManage)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_modify')}}</th>@endif</tr></thead></x-slot:head>
         @foreach ($chronicleRows as $arr)
-            <tr><td class="align-top px-2.5 py-1.5 text-center"><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td class="text-center whitespace-nowrap"><b><a href="{{ request()->getPathInfo() }}?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="/web/log/chronicle/delete" class="nx-inline"><input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link">{{ __('log.text_delete')}}</button></form></b></td>@endif</tr>
+            <tr><td class="align-top px-2.5 py-1.5 text-center"><nobr>{{ $arr['dateHtml'] ?? '' }}</nobr></td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td class="text-center whitespace-nowrap"><b><a href="{{ request()->getPathInfo() }}?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="/web/log/chronicle/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-btn-link">{{ __('log.text_delete')}}</button></form></b></td>@endif</tr>
         @endforeach
         </x-data-table>
         {{ $pagerbottom ?? '' }}
@@ -118,7 +118,7 @@
         <p class="text-center"><b>{{ $item['poll']['question'] ?? '' }}</b></p>
         <div class="nx-main">
         @foreach ($item['options'] ?? [] as $opt)
-            <div class="flex items-start"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow"><i class="bar_end" aria-hidden="true"></i><i class="unsltbar" aria-hidden="true"></i><i class="bar_end" aria-hidden="true"></i> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
+            <div class="flex items-start"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow flex items-center gap-1"><progress class="nx-pollbar grow" value="{{ (int) ($opt['percent'] ?? 0) }}" max="100"></progress><span>{{ (int) ($opt['percent'] ?? 0) }}%</span></div></div>
         @endforeach
         </div>
         <p class="text-center">{{ __('log.text_votes')}}{{ $item['totalVotes'] ?? '0' }}</p>

@@ -131,6 +131,7 @@ return [
     'msg_you_can_download' => ".\nYou can Download the Torrent",
     'msg_here' => ' [b]here[/b]',
     'msg_offer' => 'Offer ',
+    'msg_was_just_uploaded' => ' was just uploaded',
     'msg_blank' => '.',
     'require_seed_section_menu_title' => 'Require Seed',
 ];

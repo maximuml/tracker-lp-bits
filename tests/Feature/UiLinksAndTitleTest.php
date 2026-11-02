@@ -17,8 +17,8 @@ use Tests\TestCase;
  *  - `<title>` must not contain double-escaped entities (the
  *    two-argument @section stores e($val); the composer decodes it
  *    so the single {{ }} escape renders correctly).
- *  - Query-only hrefs (`?action=...`) must not hit the
- *    `<base href="/">` trap and resolve to the home page.
+ *  - Query-only hrefs (`?action=...`) are anchored to the current
+ *    request path instead of resolving against the document URL.
  *  - `userhistory` comment links must use `?` as the query
  *    separator (was `&tocomm=1` — a 404).
  */

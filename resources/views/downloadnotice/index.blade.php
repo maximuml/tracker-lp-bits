@@ -14,7 +14,7 @@
 <p>{{ __('downloadnotice.text_private_tracker_note_one') }} <b>{{ __('downloadnotice.text_exclusive') }}</b> {{ __('downloadnotice.text_private_tracker_note_one_end') }}<i>({{ __('downloadnotice.text_learn_more')}}<a class="faqlink" href="{{ NEXUSWIKIURL ?? '' }}/Private Tracker" target="_blank">{{ __('downloadnotice.text_nexuswiki')}}</a>)</i></p>
 <p>{{ __('downloadnotice.text_private_tracker_note_two') }} <b>{{ __('downloadnotice.text_must') }}</b> {{ __('downloadnotice.text_private_tracker_note_two_two') }} <b>{{ __('downloadnotice.text_ratio') }}</b>{{ __('downloadnotice.text_private_tracker_note_two_three') }} <span class='striking'>{{ __('downloadnotice.text_lose_membership') }}</span> {{ __('downloadnotice.text_private_tracker_note_two_end') }}<i>({{ __('downloadnotice.text_see_ratio')}}<a class="faqlink" href="/web/faq#id23" target="_blank">{{ __('downloadnotice.text_faq')}}</a>)</i></p>
 <p>{{ __('downloadnotice.text_private_tracker_note_three')}}</p>
-<img src="pic/ratio.png" alt="ratio" />
+<img src="/pic/ratio.png" alt="ratio" />
 <p><b>{{ __('downloadnotice.text_private_tracker_note_four') }}</b><br /> {{ __('downloadnotice.text_private_tracker_note_four_two') }} <b>{{ __('downloadnotice.text_keep_seeding') }}</b> {{ __('downloadnotice.text_private_tracker_note_four_end') }}</p>
 </div>
 @endif
@@ -25,10 +25,10 @@
 <p>{{ __('downloadnotice.text_allowed_clients_note_two')}}<a class='faqlink' href='/web/faq#id29' target='_blank'>{{ __('downloadnotice.text_faq')}}</a>{{ __('downloadnotice.text_allowed_clients_note_three')}}</p>
 <div class="flex items-start">
 <div class="grow text-center">
-<a href="https://www.qbittorrent.org/download" target="_blank" title="{{ __('downloadnotice.title_download')}}qBittorrent"><img src="pic/qbittorrent.png" alt="qBittorrent"  width="128" height="128" /></a>
+<a href="https://www.qbittorrent.org/download" target="_blank" title="{{ __('downloadnotice.title_download')}}qBittorrent"><img src="/pic/qbittorrent.png" alt="qBittorrent"  width="128" height="128" /></a>
 </div>
 <div class="grow text-center">
-<a href="https://transmissionbt.com/download/" target="_blank" title="{{ __('downloadnotice.title_download')}}Transmission"><img src="pic/transmission.png" alt="Transmission"  width="128" height="128" /></a>
+<a href="https://transmissionbt.com/download/" target="_blank" title="{{ __('downloadnotice.title_download')}}Transmission"><img src="/pic/transmission.png" alt="Transmission"  width="128" height="128" /></a>
 </div>
 </div>
 <div class="flex items-start">

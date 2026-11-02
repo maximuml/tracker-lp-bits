@@ -93,6 +93,27 @@ table.main {
 
 .nx-table-wrap {overflow-x:auto}
 
+/* <x-data-table> cell chrome. Kept inside nx-legacy (which ranks below
+   the unlayered utilities) so per-cell utilities like text-center /
+   text-right / p-0 still win — the previous [&_td]:* arbitrary variants
+   compiled unlayered at (0,1,1) and beat both. :where() keeps the
+   selector at (0,1,0) so .nx-embedded below takes padding back off. */
+.nx-data-table :where(td, th) {
+    border: 1px solid var(--nxm-border, #d8dce3);
+    padding: 0.375rem 0.5rem;
+    text-align: left;
+}
+
+.nx-data-table :where(thead th) {
+    background: var(--nxm-surface-alt, #eef1f5);
+    color: var(--nxm-text, #1d2733);
+}
+
+.nx-data-table td.nx-embedded {
+    border: 0;
+    padding: 0;
+}
+
 .nx-modal__box {position:relative;max-width:520px;margin:10vh auto;background:var(--nxm-surface,#fff);color:var(--nxm-text,#222);border-radius:4px;padding:16px}
 
 .nx-modal__header {display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}

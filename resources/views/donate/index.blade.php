@@ -47,7 +47,7 @@
                             <input type="hidden" name="return" value="{{ $baseUrl }}/web/donate?do=thanks">
                             <input type="hidden" name="cancel_return" value="{{ $baseUrl }}/web/donate">
                             <p class="text-center">
-                                <input type="image" src="pic/paypalbutton.gif" name="I1" alt="Make payments with PayPal">
+                                <input type="image" src="/pic/paypalbutton.gif" name="I1" alt="Make payments with PayPal">
                                 <br /><br />
                             </p>
                         </form>

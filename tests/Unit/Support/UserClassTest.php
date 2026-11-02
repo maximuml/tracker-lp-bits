@@ -72,24 +72,24 @@ class UserClassTest extends TestCase
     public function test_image_path_returns_correct_gif_for_each_class(): void
     {
         $expected = [
-            'Staff Leader' => 'pic/staffleader.gif',
-            'SysOp' => 'pic/sysop.gif',
-            'Administrator' => 'pic/administrator.gif',
-            'Moderator' => 'pic/moderator.gif',
-            'Forum Moderator' => 'pic/forummoderator.gif',
-            'Uploader' => 'pic/uploader.gif',
-            'Retiree' => 'pic/retiree.gif',
-            'VIP' => 'pic/vip.gif',
-            'Nexus Master' => 'pic/nexus.gif',
-            'Ultimate User' => 'pic/ultimate.gif',
-            'Extreme User' => 'pic/extreme.gif',
-            'Veteran User' => 'pic/veteran.gif',
-            'Insane User' => 'pic/insane.gif',
-            'Crazy User' => 'pic/crazy.gif',
-            'Elite User' => 'pic/elite.gif',
-            'Power User' => 'pic/power.gif',
-            'User' => 'pic/user.gif',
-            'Peasant' => 'pic/peasant.gif',
+            'Staff Leader' => '/pic/staffleader.gif',
+            'SysOp' => '/pic/sysop.gif',
+            'Administrator' => '/pic/administrator.gif',
+            'Moderator' => '/pic/moderator.gif',
+            'Forum Moderator' => '/pic/forummoderator.gif',
+            'Uploader' => '/pic/uploader.gif',
+            'Retiree' => '/pic/retiree.gif',
+            'VIP' => '/pic/vip.gif',
+            'Nexus Master' => '/pic/nexus.gif',
+            'Ultimate User' => '/pic/ultimate.gif',
+            'Extreme User' => '/pic/extreme.gif',
+            'Veteran User' => '/pic/veteran.gif',
+            'Insane User' => '/pic/insane.gif',
+            'Crazy User' => '/pic/crazy.gif',
+            'Elite User' => '/pic/elite.gif',
+            'Power User' => '/pic/power.gif',
+            'User' => '/pic/user.gif',
+            'Peasant' => '/pic/peasant.gif',
         ];
 
         foreach ($expected as $className => $path) {
@@ -99,17 +99,17 @@ class UserClassTest extends TestCase
 
     public function test_image_path_null_returns_banned(): void
     {
-        $this->assertSame('pic/banned.gif', UserClass::imagePath(null));
+        $this->assertSame('/pic/banned.gif', UserClass::imagePath(null));
     }
 
     public function test_image_path_empty_string_returns_banned(): void
     {
-        $this->assertSame('pic/banned.gif', UserClass::imagePath(''));
+        $this->assertSame('/pic/banned.gif', UserClass::imagePath(''));
     }
 
     public function test_image_path_unknown_class_returns_banned(): void
     {
-        $this->assertSame('pic/banned.gif', UserClass::imagePath('NonExistent'));
+        $this->assertSame('/pic/banned.gif', UserClass::imagePath('NonExistent'));
     }
 
     public function test_image_path_strips_alias_suffix(): void
@@ -117,14 +117,14 @@ class UserClassTest extends TestCase
         // Legacy `get_user_class_name` can return "Power User(Custom Alias)"
         // when $options['with_alias'] is set. The parenthesized suffix
         // must be stripped before image lookup.
-        $this->assertSame('pic/power.gif', UserClass::imagePath('Power User(Pro)'));
-        $this->assertSame('pic/vip.gif', UserClass::imagePath('VIP(Lifetime)'));
+        $this->assertSame('/pic/power.gif', UserClass::imagePath('Power User(Pro)'));
+        $this->assertSame('/pic/vip.gif', UserClass::imagePath('VIP(Lifetime)'));
     }
 
     public function test_image_path_alias_only_parenthesis_returns_banned(): void
     {
         // Edge case: string starts with "(" → strstr returns "" → banned
-        $this->assertSame('pic/banned.gif', UserClass::imagePath('(OnlyAlias)'));
+        $this->assertSame('/pic/banned.gif', UserClass::imagePath('(OnlyAlias)'));
     }
 
     // ---------- name() ----------

@@ -20,7 +20,7 @@
 @if($polls->hasVoted)
     <div class="nx-main">
     @foreach($polls->bars as $bar)
-        <div class="flex items-start"><div class="nx-embedded whitespace-nowrap">{{ $bar->option }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow"><i class="bar_end" aria-hidden="true"></i><i class="{{ $bar->selected ? 'sltbar' : 'unsltbar' }}" aria-hidden="true"></i><i class="bar_end" aria-hidden="true"></i> {{ $bar->percent }}%</div></div>
+        <div class="flex items-start"><div class="nx-embedded whitespace-nowrap">{{ $bar->option }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow flex items-center gap-1"><progress class="nx-pollbar grow{{ $bar->selected ? ' nx-pollbar--sel' : '' }}" value="{{ $bar->percent }}" max="100"></progress><span>{{ $bar->percent }}%</span></div></div>
     @endforeach
     </div>
     <p class="text-center">{{ $polls->votesLabel }} {{ $polls->totalVotes }}</p>

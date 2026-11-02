@@ -1,6 +1,5 @@
 @if (! $isAjax)
 <html data-theme="{{ $theme }}" data-fontsize="{{ $fontSize }}"><head>
-<base href="{{ url('/') }}/" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc(\App\Support\Style::cssUriWithContext().'theme.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/nxt.css') }}" type="text/css">

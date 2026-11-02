@@ -112,7 +112,7 @@ final class PageLayoutContext
             langDir: Locale::currentLangDir(),
             siteName: $basic->siteName(),
             slogan: $main->slogan(),
-            logoMain: $main->logo(),
+            logoMain: Url::rootRelative($main->logo()),
             baseUrl: $basic->baseUrl(),
             siteOnline: $main->siteOnline(true) ? 'yes' : 'no',
             enableDonation: $main->donation(false) ? 'yes' : 'no',

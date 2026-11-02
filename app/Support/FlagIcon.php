@@ -17,9 +17,9 @@ namespace App\Support;
  */
 final class FlagIcon
 {
-    private const SVG_DIR = 'pic/flags/';
+    private const SVG_DIR = '/pic/flags/';
 
-    private const GIF_DIR = 'pic/flag/';
+    private const GIF_DIR = '/pic/flag/';
 
     /** @var array<string, string> flagpic basename (no ext) → ISO 3166-1 alpha-2 */
     private const FLAGPIC_TO_ISO = [

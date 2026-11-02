@@ -6,7 +6,7 @@ defined('IN_TRACKER') || define('IN_TRACKER', false);
 defined('PROJECTNAME') || define('PROJECTNAME', 'NexusPHP');
 defined('NEXUSPHPURL') || define('NEXUSPHPURL', 'https://nexusphp.org');
 defined('NEXUSWIKIURL') || define('NEXUSWIKIURL', 'https://doc.nexusphp.org');
-defined('VERSION') || define('VERSION', 'Powered by <a href="aboutnexus.php">'.PROJECTNAME.'</a>');
+defined('VERSION') || define('VERSION', 'Powered by <a href="/aboutnexus.php">'.PROJECTNAME.'</a>');
 defined('THISTRACKER') || define('THISTRACKER', 'General');
 defined('CONTENT_WIDTH') || define('CONTENT_WIDTH', 1200);
 defined('ROOT_PATH') || define('ROOT_PATH', dirname(__DIR__).'/');

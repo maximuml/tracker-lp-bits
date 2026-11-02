@@ -92,6 +92,26 @@ final class Url
     }
 
     /**
+     * Anchor a scheme-less relative URL to the site root (`pic/x.gif` →
+     * `/pic/x.gif`). Absolute URLs, protocol-relative URLs, already-rooted
+     * paths and bare `#fragment` references pass through unchanged —
+     * fragments must stay document-relative so `#top`/`#id…` links keep
+     * working on nested pages now that <base href> is gone.
+     */
+    public static function rootRelative(string $url): string
+    {
+        if ($url === '' || str_starts_with($url, '/') || str_starts_with($url, '#')) {
+            return $url;
+        }
+
+        if (preg_match('#^[a-zA-Z][a-zA-Z0-9+.\-]*:#', $url) === 1) {
+            return $url;
+        }
+
+        return '/'.$url;
+    }
+
+    /**
      * Public site root from configuration (`basic.BASEURL`), always with a
      * scheme. Config-only on purpose: unlike `Setting::getBaseUrl()` this
      * never falls back to the request Host header, so email links cannot be

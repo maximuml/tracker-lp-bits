@@ -118,7 +118,7 @@
         <p class="text-center"><b>{{ $item['poll']['question'] ?? '' }}</b></p>
         <div class="nx-main">
         @foreach ($item['options'] ?? [] as $opt)
-            <div class="flex items-start"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow"><i class="bar_end" aria-hidden="true"></i><i class="unsltbar" aria-hidden="true"></i><i class="bar_end" aria-hidden="true"></i> {{ (int) ($opt['percent'] ?? 0) }}%</div></div>
+            <div class="flex items-start"><div class="nx-embedded">{{ $opt['text'] ?? '' }}&nbsp;&nbsp;</div><div class="nx-embedded whitespace-nowrap grow flex items-center gap-1"><progress class="nx-pollbar grow" value="{{ (int) ($opt['percent'] ?? 0) }}" max="100"></progress><span>{{ (int) ($opt['percent'] ?? 0) }}%</span></div></div>
         @endforeach
         </div>
         <p class="text-center">{{ __('log.text_votes')}}{{ $item['totalVotes'] ?? '0' }}</p>

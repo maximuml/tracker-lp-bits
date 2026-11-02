@@ -61,6 +61,7 @@ final class EscapedHtmlHelpersTest extends TestCase
         'Url::schemeAndHost' => true,
         'Url::absolute' => true,
         'Url::siteBase' => true,
+        'Url::rootRelative' => true,
         'Http::protocolPrefix' => true,
         'Strings::addS' => true,
         'Locale::trans' => true,

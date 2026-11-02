@@ -2787,11 +2787,42 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
     border-radius: var(--nxm-radius);
     background: var(--nxm-accent);
 }
+.nx-bshop__progress--low::-webkit-progress-value { background: var(--nxm-danger); }
+.nx-bshop__progress--low::-moz-progress-bar { background: var(--nxm-danger); }
+.nx-bshop__progress--mid::-webkit-progress-value { background: var(--nxm-warning); }
+.nx-bshop__progress--mid::-moz-progress-bar { background: var(--nxm-warning); }
+.nx-bshop__progress--high::-webkit-progress-value { background: var(--nxm-success); }
+.nx-bshop__progress--high::-moz-progress-bar { background: var(--nxm-success); }
 .nx-bshop__need {
     margin: 0.35rem 0 0;
     color: var(--nxm-text-dim);
     font-size: 0.88rem;
 }
+
+/* Poll result bars — semantic <progress> replacement for the legacy
+   sltbar/unsltbar sprites (zero-width since the inline width styles
+   were removed). Selected option keeps the accent fill. */
+.nx-pollbar {
+    height: 10px;
+    min-width: 0;
+    appearance: none;
+    border: 0;
+    vertical-align: middle;
+}
+.nx-pollbar::-webkit-progress-bar {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-surface-alt);
+}
+.nx-pollbar::-webkit-progress-value {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-muted);
+}
+.nx-pollbar::-moz-progress-bar {
+    border-radius: var(--nxm-radius);
+    background: var(--nxm-muted);
+}
+.nx-pollbar--sel::-webkit-progress-value { background: var(--nxm-accent); }
+.nx-pollbar--sel::-moz-progress-bar { background: var(--nxm-accent); }
 .nx-bshop__buy {
     display: flex;
     align-items: center;

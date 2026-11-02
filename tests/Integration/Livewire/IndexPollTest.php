@@ -56,8 +56,8 @@ final class IndexPollTest extends TestCase
             ->test(IndexPoll::class)
             ->set('choice', 1)
             ->call('vote')
-            ->assertSee('unsltbar')
-            ->assertSee('sltbar');
+            ->assertSee('nx-pollbar')
+            ->assertSee('nx-pollbar--sel');
 
         $this->assertSame(1, (int) DB::table('pollanswers')->where('pollid', $poll->id)->where('userid', $user->id)->value('selection'));
     }

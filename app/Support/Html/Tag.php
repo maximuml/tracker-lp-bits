@@ -8,6 +8,7 @@ use App\Support\BBCode;
 use App\Support\Comment;
 use App\Support\Security;
 use App\Support\Smilies;
+use App\Support\Url;
 
 /**
  * HTML tag builders extracted from the legacy Html facade.
@@ -222,7 +223,7 @@ final class Tag
     {
         // See BBCode::url() — tempCode placeholders (\x08…\x08) must not
         // reach the src attribute.
-        $src = Security::filterSrc(str_replace("\x08", '', $src));
+        $src = Url::rootRelative(Security::filterSrc(str_replace("\x08", '', $src)));
         if (empty($src)) {
             return '';
         }
@@ -239,7 +240,7 @@ final class Tag
     {
         // See BBCode::url() — tempCode placeholders (\x08…\x08) must not
         // reach the src attribute.
-        $src = Security::filterSrc(str_replace("\x08", '', $src));
+        $src = Url::rootRelative(Security::filterSrc(str_replace("\x08", '', $src)));
         if (empty($src)) {
             return '';
         }

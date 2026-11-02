@@ -135,7 +135,7 @@ final class UsercpHomeBuilder
             email: (string) $actor->value('email', ''),
             ipLocation: $ipLocation,
             showAvatar: ! empty($actor->value('avatar')),
-            avatarUrl: (string) $actor->value('avatar', ''),
+            avatarUrl: Url::rootRelative((string) $actor->value('avatar', '')),
             passkey: Strings::hidden(e($actor->passkey ?? '')),
             passkeyLogin: $passkeyLogin,
             invites: (int) $actor->value('invites', 0),

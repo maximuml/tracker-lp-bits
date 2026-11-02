@@ -23,9 +23,9 @@ final class Avatar
     public static function forUser(int|string $id, string $avatar): string
     {
         if ($avatar !== '' && ! str_ends_with($avatar, self::BUILTIN_DEFAULT)) {
-            return $avatar;
+            return Url::rootRelative($avatar);
         }
 
-        return 'pic/avatars/a'.((abs((int) $id) % self::VARIANTS) + 1).'.png';
+        return '/pic/avatars/a'.((abs((int) $id) % self::VARIANTS) + 1).'.png';
     }
 }

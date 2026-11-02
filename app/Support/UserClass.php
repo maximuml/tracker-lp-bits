@@ -98,34 +98,34 @@ final class UserClass
     /**
      * Map of English class names → image paths. Matches the legacy
      * `$UC` array in `get_user_class_image()` exactly, including the
-     * `"pic/"` prefix convention — these paths are relative to the
-     * web root (`public/`).
+     * `"pic/"` prefix convention — paths anchored at the web root so
+     * nested /web/* pages resolve them without <base href>.
      *
      * @var array<string, string>
      */
     private const IMAGE_MAP = [
-        'Staff Leader' => 'pic/staffleader.gif',
-        'SysOp' => 'pic/sysop.gif',
-        'Administrator' => 'pic/administrator.gif',
-        'Moderator' => 'pic/moderator.gif',
-        'Forum Moderator' => 'pic/forummoderator.gif',
-        'Uploader' => 'pic/uploader.gif',
-        'Retiree' => 'pic/retiree.gif',
-        'VIP' => 'pic/vip.gif',
-        'Nexus Master' => 'pic/nexus.gif',
-        'Ultimate User' => 'pic/ultimate.gif',
-        'Extreme User' => 'pic/extreme.gif',
-        'Veteran User' => 'pic/veteran.gif',
-        'Insane User' => 'pic/insane.gif',
-        'Crazy User' => 'pic/crazy.gif',
-        'Elite User' => 'pic/elite.gif',
-        'Power User' => 'pic/power.gif',
-        'User' => 'pic/user.gif',
-        'Peasant' => 'pic/peasant.gif',
+        'Staff Leader' => '/pic/staffleader.gif',
+        'SysOp' => '/pic/sysop.gif',
+        'Administrator' => '/pic/administrator.gif',
+        'Moderator' => '/pic/moderator.gif',
+        'Forum Moderator' => '/pic/forummoderator.gif',
+        'Uploader' => '/pic/uploader.gif',
+        'Retiree' => '/pic/retiree.gif',
+        'VIP' => '/pic/vip.gif',
+        'Nexus Master' => '/pic/nexus.gif',
+        'Ultimate User' => '/pic/ultimate.gif',
+        'Extreme User' => '/pic/extreme.gif',
+        'Veteran User' => '/pic/veteran.gif',
+        'Insane User' => '/pic/insane.gif',
+        'Crazy User' => '/pic/crazy.gif',
+        'Elite User' => '/pic/elite.gif',
+        'Power User' => '/pic/power.gif',
+        'User' => '/pic/user.gif',
+        'Peasant' => '/pic/peasant.gif',
     ];
 
     /** Image path for unrecognised / null class values. */
-    private const BANNED_IMAGE = 'pic/banned.gif';
+    private const BANNED_IMAGE = '/pic/banned.gif';
 
     /**
      * Resolve the class-icon image path for a given user class.

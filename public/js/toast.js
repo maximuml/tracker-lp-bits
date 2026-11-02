@@ -277,13 +277,12 @@
         }
 
         var formData = new FormData();
-        formData.append('action', 'getToastNotifications');
         for (var key in params) {
             if (params.hasOwnProperty(key)) {
-                formData.append('params[' + key + ']', params[key]);
+                formData.append(key, params[key]);
             }
         }
-        return fetch('/ajax', {
+        return fetch('/web/notifications/feed', {
             method: 'POST',
             body: formData,
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -401,7 +400,7 @@
     function openPanel(panel) {
         panel.classList.remove('nx-hidden');
         renderLoading(panel);
-        fetch('notifications', {
+        fetch('/web/notifications', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {
@@ -422,7 +421,7 @@
     function loadMore(panel, wrap) {
         var btn = wrap.querySelector('button');
         if (btn) { btn.disabled = true; }
-        fetch('notifications?offset=' + encodeURIComponent(panelFetched), {
+        fetch('/web/notifications?offset=' + encodeURIComponent(panelFetched), {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {
@@ -597,7 +596,7 @@
     function refreshBadge() {
         var els = bellElements();
         if (!els.badge) { return; }
-        fetch('notifications', {
+        fetch('/web/notifications', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin'
         }).then(function (res) { return res.json(); }).then(function (response) {

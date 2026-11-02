@@ -367,8 +367,17 @@ final class OfferServiceTest extends TestCase
             'sure' => 0,
         ]);
 
-        // sure=0 triggers abort with confirmation form (die=false → echo + throw)
-        $this->assertServiceThrows($request);
+        // sure=0 triggers abort with confirmation form (htmlstrip=false keeps the form HTML)
+        try {
+            $this->callService($request);
+            $this->fail('Expected abort');
+        } catch (HttpResponseException $e) {
+            $html = (string) $e->getResponse()->getContent();
+            $this->assertStringContainsString((string) __('offers.std_delete_offer'), $html);
+            $this->assertStringContainsString((string) __('offers.std_delete_offer_note'), $html);
+            $this->assertStringContainsString('<form', $html);
+            $this->assertStringContainsString('/web/offers/delete', $html);
+        }
     }
 
     // --- handleDelete: owner can delete with sure=1 ---

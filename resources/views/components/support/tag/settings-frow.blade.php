@@ -1,2 +1,2 @@
 @props(['relation', 'head', 'cell'])
-@if($relation !== '')<div class="nx-grouprow {{ $relation }}" relation="{{ $relation }}">@endif<div class="nx-fhead whitespace-nowrap">{{ $head }}</div><div class="nx-fcell">{{ $cell }}</div>@if($relation !== '')</div>@endif
+<div class="nx-setrow nx-grouprow {{ $relation }}"@if($relation !== '') relation="{{ $relation }}"@endif><span class="nx-setrow__label">{{ $head }}</span><div class="nx-setrow__control">{{ $cell }}</div></div>

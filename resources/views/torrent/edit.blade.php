@@ -12,53 +12,88 @@
 @if ($returnto !== '')
 <input type="hidden" name="returnto" value="{{ $returnto }}" />
 @endif
-<div class="nx-fgrid">
-<div class="nx-ffull nx-colhead text-center">{{ $torrentRow['name'] }}</div>
-<div class="nx-fhead whitespace-nowrap">{{ __('edit.row_torrent_name') }}<span class="text-nxm-danger">*</span></div><div class="nx-fcell"><input type="text" name="name" value="{{ $torrentRow['name'] }}" /></div>
-@if ($priceRow !== null)
-<x-settings-row layout="grid" :label="\App\Support\Locale::trans('label.torrent.price', [], null)"><input type="number" min="0" name="price" value="{{ $priceRow['value'] }}" placeholder="{{ $priceRow['placeholder'] }}" />&nbsp;&nbsp;{{ $priceRow['help'] }}</x-settings-row>
-@endif
-<div class="nx-fhead">{{ __('edit.row_description') }}<span class="text-nxm-danger">*</span></div><div class="nx-fcell"><livewire:bbcode-editor form="edittorrent" text="descr" :content="$descrContent ?? ''" /></div>
-@if ($technicalInfoEnabled)
-<x-settings-row layout="grid" :label="__('functions.text_technical_info')"><textarea name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</x-settings-row>
-@endif
-<div class="nx-fhead whitespace-nowrap">{{ __('edit.row_type') }}<span class="text-nxm-danger">*</span></div><div class="nx-fcell"><select name="type" data-mode='{{ $sectionMode }}'>
+<div class="nx-setcards nx-upload">
+    <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="edit-sec-torrent">
+        <h2 class="nx-setcard__title" id="edit-sec-torrent">{{ $torrentRow['name'] }}</h2>
+        <div class="nx-setrow">
+            <label class="nx-setrow__label" for="name">{{ __('edit.row_torrent_name') }}<span class="text-nxm-danger">*</span></label>
+            <div class="nx-setrow__control"><input type="text" id="name" name="name" value="{{ $torrentRow['name'] }}" /></div>
+        </div>
+        @if ($priceRow !== null)
+        <x-settings-row layout="setrow" :label="\App\Support\Locale::trans('label.torrent.price', [], null)"><input type="number" min="0" name="price" value="{{ $priceRow['value'] }}" placeholder="{{ $priceRow['placeholder'] }}" />&nbsp;&nbsp;{{ $priceRow['help'] }}</x-settings-row>
+        @endif
+        <div class="nx-setrow">
+            <span class="nx-setrow__label" id="edit-descr-label">{{ __('edit.row_description') }}<span class="text-nxm-danger">*</span></span>
+            <div class="nx-setrow__control" aria-labelledby="edit-descr-label"><livewire:bbcode-editor form="edittorrent" text="descr" :content="$descrContent ?? ''" /></div>
+        </div>
+        @if ($technicalInfoEnabled)
+        <x-settings-row layout="setrow" :label="__('functions.text_technical_info')"><textarea name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</x-settings-row>
+        @endif
+        <div class="nx-setrow">
+            <label class="nx-setrow__label" for="type">{{ __('edit.row_type') }}<span class="text-nxm-danger">*</span></label>
+            <div class="nx-setrow__control"><select id="type" name="type" data-mode='{{ $sectionMode }}'>
 @foreach ($cats as $subrow)
 <option value="{{ $subrow['id'] }}"@if ($subrow['id'] == $torrentRow['category']) selected="selected"@endif>{{ $subrow['name'] }}</option>
 @endforeach
-</select></div>
-<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead whitespace-nowrap">{{ __('edit.row_quality') }}</div><div class="nx-fcell">{{ $taxonomySelect }}</div></div>
-{{ $customFieldsHtml }}
-{{ $hitAndRunHtml }}
-<div class="nx-grouprow {{ $modeClass }}" relation="{{ $modeClass }}"><div class="nx-fhead whitespace-nowrap">{{ __('functions.text_tags') }}</div><div class="nx-fcell">{{ $tagCheckbox }}</div></div>
-@if ($showVisibleCheck || $showAnonymousCheck)
-<x-settings-row layout="grid" :label="__('edit.row_check')">@if ($showVisibleCheck)<input type="hidden" name="visible" value="0" /><label><input id="visible" type="checkbox" name="visible"@if ($visibleChecked) checked="checked"@endif value="1" />{{ __('edit.checkbox_visible') }}</label>@endif
+            </select></div>
+        </div>
+        <div class="nx-grouprow nx-setrows" id="editcat_section" data-mode="{{ $sectionMode }}">
+            <div class="nx-setrow nx-grouprow" relation="{{ $modeClass }}">
+                <span class="nx-setrow__label" id="edit-quality-label">{{ __('edit.row_quality') }}</span>
+                <div class="nx-setrow__control" aria-labelledby="edit-quality-label">{{ $taxonomySelect }}</div>
+            </div>
+            {{ $customFieldsHtml }}
+            {{ $hitAndRunHtml }}
+            <div class="nx-setrow nx-grouprow" relation="{{ $modeClass }}">
+                <span class="nx-setrow__label" id="edit-tags-label">{{ __('functions.text_tags') }}</span>
+                <div class="nx-setrow__control" aria-labelledby="edit-tags-label">{{ $tagCheckbox }}</div>
+            </div>
+        </div>
+        @if ($showVisibleCheck || $showAnonymousCheck)
+        <x-settings-row layout="setrow" :label="__('edit.row_check')">@if ($showVisibleCheck)<input type="hidden" name="visible" value="0" /><label><input id="visible" type="checkbox" name="visible"@if ($visibleChecked) checked="checked"@endif value="1" />{{ __('edit.checkbox_visible') }}</label>@endif
 @if ($showVisibleCheck && $showAnonymousCheck)&nbsp;&nbsp;@endif
 @if ($showAnonymousCheck)<input type="hidden" name="anonymous" value="0" /><label><input type="checkbox" name="anonymous"@if ($anonymousChecked) checked="checked"@endif value="1" />{{ __('edit.checkbox_anonymous_note') }}</label>@endif</x-settings-row>
-@endif
-@if ($pick !== null && ($pick->promotionOptions !== null || $pick->posStates !== null))
-<x-settings-row layout="grid" :label="__('edit.row_pick')">@include('components.torrent.edit.pick', ['pick' => $pick])</x-settings-row>
-@endif
-<div class="nx-ffull text-center"><input id="qr" type="submit" value="{{ __('edit.submit_edit_it') ?? '' }}" /> <input type="reset" value="{{ __('edit.submit_revert_changes') ?? '' }}" /></div>
+        @endif
+        @if ($pick !== null && ($pick->promotionOptions !== null || $pick->posStates !== null))
+        <x-settings-row layout="setrow" :label="__('edit.row_pick')">@include('components.torrent.edit.pick', ['pick' => $pick])</x-settings-row>
+        @endif
+    </section>
 </div>
+<div class="nx-upload__submit"><input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('edit.submit_edit_it') ?? '' }}" /> <input type="reset" class="nx-btn" value="{{ __('edit.submit_revert_changes') ?? '' }}" /></div>
 </form>
 @if ($showDeleteForm)
-<br /><br />
 <form method="post" action="/web/torrents/delete">
 @csrf
 <input type="hidden" name="id" value="{{ $torrentId }}" />
 @if ($returnto !== '')
 <input type="hidden" name="returnto" value="{{ $returnto }}" />
 @endif
-<div class="nx-fgrid">
-<div class="nx-ffull nx-colhead"><b>{{ __('edit.text_delete_torrent') }}</b> {{ __('edit.text_reason') }}</div>
-<div class="nx-fhead whitespace-nowrap"><input name="reasontype" type="radio" value="1" />&nbsp;{{ __('edit.radio_dead') }}</div><div class="nx-fcell">{{ __('edit.text_dead_note') }}</div>
-<div class="nx-fhead whitespace-nowrap"><input name="reasontype" type="radio" value="2" />&nbsp;{{ __('edit.radio_dupe') }}</div><div class="nx-fcell"><input type="text" name="reason[]" /></div>
-<div class="nx-fhead whitespace-nowrap"><input name="reasontype" type="radio" value="3" />&nbsp;{{ __('edit.radio_nuked') }}</div><div class="nx-fcell"><input type="text" name="reason[]" /></div>
-<div class="nx-fhead whitespace-nowrap"><input name="reasontype" type="radio" value="4" />&nbsp;{{ __('edit.radio_rules') }}</div><div class="nx-fcell"><input type="text" name="reason[]" />{{ __('edit.text_req') }}</div>
-<div class="nx-fhead whitespace-nowrap"><input name="reasontype" type="radio" value="5" checked="checked" />&nbsp;{{ __('edit.radio_other') }}</div><div class="nx-fcell"><input type="text" name="reason[]" />{{ __('edit.text_req') }}</div>
-<div class="nx-ffull text-center"><input type="submit" value="{{ __('edit.submit_delete_it') ?? '' }}" /></div>
+<div class="nx-setcards nx-upload">
+    <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="edit-sec-delete">
+        <h2 class="nx-setcard__title" id="edit-sec-delete">{{ __('edit.text_delete_torrent') }} {{ __('edit.text_reason') }}</h2>
+        <div class="nx-setrow">
+            <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="1" /> {{ __('edit.radio_dead') }}</label></span>
+            <div class="nx-setrow__control">{{ __('edit.text_dead_note') }}</div>
+        </div>
+        <div class="nx-setrow">
+            <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="2" /> {{ __('edit.radio_dupe') }}</label></span>
+            <div class="nx-setrow__control"><input type="text" name="reason[]" /></div>
+        </div>
+        <div class="nx-setrow">
+            <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="3" /> {{ __('edit.radio_nuked') }}</label></span>
+            <div class="nx-setrow__control"><input type="text" name="reason[]" /></div>
+        </div>
+        <div class="nx-setrow">
+            <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="4" /> {{ __('edit.radio_rules') }}</label></span>
+            <div class="nx-setrow__control"><input type="text" name="reason[]" />{{ __('edit.text_req') }}</div>
+        </div>
+        <div class="nx-setrow">
+            <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="5" checked="checked" /> {{ __('edit.radio_other') }}</label></span>
+            <div class="nx-setrow__control"><input type="text" name="reason[]" />{{ __('edit.text_req') }}</div>
+        </div>
+    </section>
 </div>
+<div class="nx-upload__submit"><input type="submit" class="nx-btn nx-btn--danger" value="{{ __('edit.submit_delete_it') ?? '' }}" /></div>
 </form>
 @endif
 @endif

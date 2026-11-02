@@ -13,5 +13,6 @@ final class OfferAllowedBadge
     public function __construct(
         public readonly string $label,
         public readonly string $cssClass,
+        public readonly string $variant,
     ) {}
 }

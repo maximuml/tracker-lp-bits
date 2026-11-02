@@ -141,4 +141,10 @@ return [
     'text_rule_four_two' => ' hours after being approved.',
     'text_rule_skip_offer_pre' => 'When the number of offers passed by the user is greater than or equal to ',
     'text_rule_skip_offer_post' => ', user can upload torrents directly without going through offers section.',
+    'sub_offers' => 'Request an upload — vote for offers you want to see.',
+    'text_by' => 'by',
+    'text_back_to_offers' => 'Back to offers',
+    'text_comments' => 'Comments',
+    'more_to_approve' => ':count more to approve',
+    'approved_at' => 'Approved at +:count',
 ];

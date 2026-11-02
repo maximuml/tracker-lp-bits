@@ -17,6 +17,7 @@ final class UsercpTrackerLayoutTest extends TestCase
     use DatabaseTransactions;
 
     private const TRACKER_FIELD_NAMES = [
+        '_token',
         'appendnew',
         'appendpicked',
         'appendpromotion',

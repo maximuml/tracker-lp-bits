@@ -43,6 +43,7 @@ final class UsercpPersonalForumLayoutTest extends TestCase
         $form = $this->personalForm($this->personalUser());
 
         $this->assertSame([
+            '_token',
             'acceptpms',
             'avatar',
             'avatarimg',
@@ -75,6 +76,7 @@ final class UsercpPersonalForumLayoutTest extends TestCase
         $form = $this->forumForm($this->forumUser());
 
         $this->assertSame([
+            '_token',
             'avatars',
             'clicktopic',
             'postsperpage',
@@ -98,6 +100,7 @@ final class UsercpPersonalForumLayoutTest extends TestCase
         $form = $this->forumForm($this->forumUser());
 
         $this->assertSame([
+            '_token',
             'avatars',
             'clicktopic',
             'postsperpage',

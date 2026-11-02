@@ -50,7 +50,6 @@ return [
     'text_pending' => 'Pending',
     'text_allowed' => 'Allowed',
     'text_denied' => 'Denied',
-    'text_edit_offer' => 'Edit Offer',
     'text_delete_offer' => 'Delete Offer',
     'report_offer' => 'Report Offer',
     'row_allow' => 'Allow',

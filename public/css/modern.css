@@ -3298,6 +3298,11 @@ html[data-theme="dark"] .nxm-main .nx-hr .nx-hr__table thead th { background: va
 .nx-off .nx-savebar > input[type="submit"],
 .nx-off .nx-savebar > button { margin-left: auto; }
 
+/* accent links on the surface-alt table header fall below the 4.5:1
+   contrast floor at 14px — keep header sort links in the text color. */
+.nx-offtable thead th a { color: var(--nxm-text); }
+.nx-offtable thead th a:hover { color: var(--nxm-accent-text, var(--nxm-accent)); }
+
 /* offers table becomes stacked cards on narrow screens */
 @media (max-width: 720px) {
     .nx-off__top { flex-direction: column; align-items: stretch; }

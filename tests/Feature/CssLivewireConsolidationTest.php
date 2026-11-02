@@ -50,14 +50,18 @@ final class CssLivewireConsolidationTest extends TestCase
             'Unshatter light must override the dark :root status tints',
         );
 
+        // Classic no longer overrides --nxm-* — the shared palette lives
+        // in modern.css so boxed pages match modern pages per scheme.
         $classic = (string) file_get_contents(base_path('public/styles/Classic/theme.css'));
+        $this->assertStringNotContainsString('--nxm-info-bg', $classic);
+        $modern = (string) file_get_contents(base_path('public/css/modern.css'));
         $this->assertMatchesRegularExpression(
-            '/html\[data-theme="dark"\]:root\s*\{[^}]*--nxm-info-bg:\s*'.preg_quote(self::DARK_INFO_BG, '/').'/s',
-            $classic,
+            '/html\[data-theme="dark"\]\s*\{[^}]*--nxm-info-bg:\s*'.preg_quote(self::DARK_INFO_BG, '/').'/s',
+            $modern,
         );
         $this->assertMatchesRegularExpression(
             '/^:root\s*\{[^}]*--nxm-info-bg:\s*'.preg_quote(self::LIGHT_INFO_BG, '/').'/ms',
-            $classic,
+            $modern,
         );
     }
 

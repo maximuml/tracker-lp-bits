@@ -57,9 +57,9 @@ final class OfferDetailsBuilder
         )->append($timeFormat);
 
         $status = match ($offerState) {
-            OfferAllowed::PENDING => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-red'),
-            OfferAllowed::ALLOWED => new OfferAllowedBadge(__('offers.text_allowed'), 'nx-color-green'),
-            default => new OfferAllowedBadge(__('offers.text_denied'), 'nx-color-red'),
+            OfferAllowed::PENDING => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-red', 'pending'),
+            OfferAllowed::ALLOWED => new OfferAllowedBadge(__('offers.text_allowed'), 'nx-color-green', 'allowed'),
+            default => new OfferAllowedBadge(__('offers.text_denied'), 'nx-color-red', 'denied'),
         };
 
         $voteCounts = $this->offerVoteRepository->getVoteCounts($id);

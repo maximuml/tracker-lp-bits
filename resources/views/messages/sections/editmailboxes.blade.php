@@ -8,7 +8,7 @@
 <input type="text" name="new1" size="40" maxlength="14"><br />
 <input type="text" name="new2" size="40" maxlength="14"><br />
 <input type="text" name="new3" size="40" maxlength="14"><br />
-<input type="submit" value="{{ __('messages.submit_add') }}">
+<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('messages.submit_add') }}">
 </form></div>
 <div class="nx-colhead">{{ __('messages.text_edit_mailboxes') }}</div>
 <div>{{ __('messages.text_edit_mailboxes_note') }}<br />{{ __('messages.text_edit_mailboxes_note_two') }}
@@ -21,7 +21,7 @@
 @foreach ($editmailboxes['boxes'] as $box)
 <input type="text" name="edit{{ $box['id'] }}" value="{{ $box['name'] }}" size="40" maxlength="14"><br />
 @endforeach
-<input type="submit" value="{{ __('messages.submit_edit') }}">
+<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('messages.submit_edit') }}">
 @endif
 </form></div>
 </div>

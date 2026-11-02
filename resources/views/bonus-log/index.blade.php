@@ -23,8 +23,8 @@
             @endforeach
         </select>
         &nbsp;&nbsp;
-        <input type="submit" value="{{ $submitText }}">
-        <input type="button" id="reset" value="{{ $resetText }}">
+        <input type="submit" class="nx-btn nx-btn--primary" value="{{ $submitText }}">
+        <input type="button" id="reset" class="nx-btn" value="{{ $resetText }}">
     </form>
 </div>
 

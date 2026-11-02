@@ -45,7 +45,7 @@
 @endforeach
 </select></div>
 <div class="nx-ffull text-center">
-<input type="submit" value="{{ __('getrss.submit_generatte_rss_link') }}" />
+<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('getrss.submit_generatte_rss_link') }}" />
 </div>
 </div>
 </form>

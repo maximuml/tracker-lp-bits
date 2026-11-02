@@ -26,7 +26,7 @@
     <p>{{ $t['deductTotal'] ?? '' }}</p>
     @if ($isUserBonusEnough)
         <p>{{ $t['enableDesc'] ?? '' }}</p>
-        <form method="post">@csrf<input type="hidden" name="submit" value="1"><input type="submit" value="{{ $t['enableButton'] ?? '' }}"></form>
+        <form method="post">@csrf<input type="hidden" name="submit" value="1"><input type="submit" class="nx-btn nx-btn--primary" value="{{ $t['enableButton'] ?? '' }}"></form>
     @else
         <p>{{ $insufficientMessage }}</p>
     @endif

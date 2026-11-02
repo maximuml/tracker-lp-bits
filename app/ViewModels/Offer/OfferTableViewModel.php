@@ -26,6 +26,7 @@ final class OfferTableViewModel
         public readonly bool $canManage,
         public readonly bool $canAgainst,
         public readonly bool $showAgainstCell,
+        public readonly int $minVotes,
         public readonly array $rows,
         public readonly array $tooltips,
         public readonly SafeHtml $pagerBottom,

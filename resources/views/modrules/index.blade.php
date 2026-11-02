@@ -18,7 +18,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type="submit" value="Add"></div>
+        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="Add"></div>
     </div>
 </form>
 @elseif ($mode === 'edit')
@@ -36,7 +36,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($rule['id'] ?? 0) }}" name="id"><input type="submit" value="Save"></div>
+        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($rule['id'] ?? 0) }}" name="id"><input type="submit" class="nx-btn nx-btn--primary" value="Save"></div>
     </div>
 </form>
 @else

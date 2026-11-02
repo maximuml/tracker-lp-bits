@@ -107,10 +107,11 @@ final class Tag
 
     /**
      * Grid-mode counterpart of {@see settingsRow()}: emits the label and
-     * value as `nx-fhead`/`nx-fcell` divs for `.nx-fgrid` hosts. When
-     * `$relation` is set the pair is wrapped in `.nx-grouprow` carrying
-     * the `relation` + class attributes so upload.js mode toggles keep
-     * working. Same `$escape` semantics (\n → <br /> on escaped output).
+     * value as a `.nx-setrow` pair (`.nx-setrow__label` +
+     * `.nx-setrow__control`) for `.nx-setcard` hosts. When `$relation`
+     * is set the row carries `.nx-grouprow` + the `relation` attribute
+     * so upload.js mode toggles keep working. Same `$escape` semantics
+     * (\n → <br /> on escaped output).
      */
     public static function settingsFrow(
         string $head,

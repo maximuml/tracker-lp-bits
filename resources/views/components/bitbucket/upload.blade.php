@@ -9,7 +9,7 @@
         <div class="nx-fcell"><input type="file" name="file[]" size="60" multiple><br>{{ __('bitbucketupload.text_select_multiple') }}</div>
         <div class="nx-ffull nx-toolbox">
             <input class="checkbox" type="checkbox" name="public" value="yes"> {{ __('bitbucketupload.checkbox_avatar_shared') }}
-            <input type="submit" value="{{ __('bitbucketupload.submit_upload') }}">
+            <input type="submit" class="nx-btn nx-btn--primary" value="{{ __('bitbucketupload.submit_upload') }}">
         </div>
 </div>
 </form>

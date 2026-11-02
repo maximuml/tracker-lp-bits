@@ -37,7 +37,7 @@
                                         <label><input name="sender" type="radio" value="self" checked>{{ $CURUSER['username'] ?? '' }}</label>
                                         &nbsp; <label><input name="sender" type="radio" value="system">System</label>
                                     </div></div>
-                            <div class="nx-ffull text-center"><input type="submit" value="{{ $submitLabel }}" class="btn"></div>
+                            <div class="nx-ffull text-center"><input type="submit" value="{{ $submitLabel }}" class="nx-btn nx-btn--primary"></div>
                         </div>
                         <input type="hidden" name="receiver" value="{{ $receiver }}">
                     </form>

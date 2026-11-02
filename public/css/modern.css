@@ -3273,17 +3273,22 @@ html[data-theme="dark"] .nxm-main .nx-hr .nx-hr__table thead th { background: va
 .nx-off__chip--denied { background: var(--nxm-danger-bg, #fbe3e3); color: var(--nxm-danger, #b02a2a); }
 .nx-off__meta { margin-top: 0.15rem; color: var(--nxm-text-dim); font-size: 0.8rem; }
 .nx-off__score { white-space: nowrap; }
-.nx-off__bar {
+meter.nx-off__bar {
+    display: block;
     width: 5.5rem;
     max-width: 100%;
-    height: 0.35rem;
+    height: 0.6rem;
     margin: 0.3rem 0 0.15rem;
+}
+meter.nx-off__bar::-webkit-meter-bar {
+    background: var(--nxm-surface-alt, rgba(127,127,127,.12));
     border: 1px solid var(--nxm-border);
     border-radius: 3px;
-    background: var(--nxm-surface-alt, rgba(127,127,127,.12));
-    overflow: hidden;
 }
-.nx-off__bar > i { display: block; height: 100%; background: var(--nxm-success, #2e7d32); }
+meter.nx-off__bar::-webkit-meter-optimum-value,
+meter.nx-off__bar::-webkit-meter-suboptimum-value,
+meter.nx-off__bar::-webkit-meter-even-less-good-value { background: var(--nxm-success, #2e7d32); border-radius: 3px; }
+meter.nx-off__bar::-moz-meter-bar { background: var(--nxm-success, #2e7d32); border-radius: 3px; }
 .nx-off__voting { margin-top: 0.3rem; font-size: 0.85rem; }
 .nx-off__dhead { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 .nx-off__dhead .nx-off__chip { margin-left: 0; }

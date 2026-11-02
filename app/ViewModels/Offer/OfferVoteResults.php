@@ -10,9 +10,17 @@ namespace App\ViewModels\Offer;
  */
 final class OfferVoteResults
 {
+    public readonly int $score;
+
+    public readonly int $yeahPercent;
+
     public function __construct(
         public readonly int $yeah,
         public readonly int $against,
         public readonly string $href,
-    ) {}
+    ) {
+        $this->score = $yeah - $against;
+        $total = $yeah + $against;
+        $this->yeahPercent = $total > 0 ? (int) round($yeah / $total * 100) : 0;
+    }
 }

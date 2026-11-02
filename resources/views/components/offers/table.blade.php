@@ -30,12 +30,10 @@
         @if ($row->voteResults === null)
         <span class="nx-off__score">0</span>
         @else
-        @php($score = $row->voteResults->yeah - $row->voteResults->against)
-        @php($total = $row->voteResults->yeah + $row->voteResults->against)
-        <div class="nx-off__scoreline"><a class="nx-off__score" href="{{ $row->voteResults->href }}" title="{{ __('offers.title_show_vote_details') }}"><span class="text-nxm-success">{{ $row->voteResults->yeah }}</span>/<span class="text-nxm-danger">{{ $row->voteResults->against }}</span> <b>{{ $score >= 0 ? '+'.$score : $score }}</b></a></div>
-        <div class="nx-off__bar"><i style="width: {{ $total > 0 ? (int) round($row->voteResults->yeah / $total * 100) : 0 }}%"></i></div>
-        @if ($score < $table->minVotes)
-        <div class="nx-off__meta">{{ __('offers.more_to_approve', ['count' => $table->minVotes - $score]) }}</div>
+        <div class="nx-off__scoreline"><a class="nx-off__score" href="{{ $row->voteResults->href }}" title="{{ __('offers.title_show_vote_details') }}"><span class="text-nxm-success">{{ $row->voteResults->yeah }}</span>/<span class="text-nxm-danger">{{ $row->voteResults->against }}</span> <b>{{ $row->voteResults->score >= 0 ? '+'.$row->voteResults->score : $row->voteResults->score }}</b></a></div>
+        <meter class="nx-off__bar" min="0" max="100" value="{{ $row->voteResults->yeahPercent }}" title="{{ $row->voteResults->yeahPercent }}%">{{ $row->voteResults->yeahPercent }}%</meter>
+        @if ($row->voteResults->score < $table->minVotes)
+        <div class="nx-off__meta">{{ __('offers.more_to_approve', ['count' => $table->minVotes - $row->voteResults->score]) }}</div>
         @else
         <div class="nx-off__meta">{{ __('offers.approved_at', ['count' => $table->minVotes]) }}</div>
         @endif

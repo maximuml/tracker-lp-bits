@@ -31,6 +31,9 @@
         </select>
     </form>
 
+    <h1>{{ $headTitle }}</h1>
+    <p class="nx-auth__sub"><b>{{ __('signup.text_note') }}</b>: {{ __('signup.text_cookies_note') }}</p>
+
     <form method="post" action="/signup" id="signup-form"
           data-auth-form="hash" data-username-name="wantusername"
           data-password-class="wantpassword" data-password-hash-name="wantpassword"
@@ -46,7 +49,7 @@
             <input type="hidden" name="hash" value="{{ $code }}" />
         @endif
 
-        <p class="nx-auth__note"><b>{{ __('signup.text_note') }}</b>: {{ __('signup.text_cookies_note') }}</p>
+        <p class="nx-auth__group nx-auth__group--first">{{ __('signup.group_account') }}</p>
 
         <div class="nx-field">
             <label class="nx-field__label" for="wantusername">{{ __('signup.row_desired_username')}}</label>
@@ -55,7 +58,15 @@
         </div>
         <div class="nx-field">
             <label class="nx-field__label" for="signup-password">{{ __('signup.row_pick_a_password') }}</label>
-            <input type="password" id="signup-password" class="nx-field__input wantpassword" autocomplete="new-password" />
+            <div class="nx-pw">
+                <input type="password" id="signup-password" class="nx-field__input wantpassword" autocomplete="new-password" />
+                <button type="button" class="nx-pw__toggle" data-pw-toggle
+                        data-label-show="{{ __('functions.show_password') }}"
+                        data-label-hide="{{ __('functions.hide_password') }}"
+                        aria-label="{{ __('functions.show_password') }}" aria-pressed="false">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+            </div>
             <p class="nx-field__help">{{ __('signup.text_minimum_six_characters')}}</p>
         </div>
         <div class="nx-field">
@@ -72,6 +83,8 @@
             <input type="email" class="nx-field__input" id="email" name="email" aria-label="{{ __('signup.row_email_address') }}" value="{{ $emailValue }}"@if($emailReadonly) readonly @endif autocomplete="email" />
         </div>
 
+        <p class="nx-auth__group">{{ __('signup.group_about') }}</p>
+
         <div class="nx-field">
             <label class="nx-field__label" for="country">{{ __('signup.row_country')}}</label>
             <select id="country" name="country" class="nx-field__input">
@@ -84,8 +97,10 @@
 
         <div class="nx-field">
             <span class="nx-field__label">{{ __('signup.row_gender')}}</span>
-            <label class="nx-auth__checkline"><input type="radio" name="gender" value="Male" @checked(old('gender') === 'Male') />{{ __('signup.radio_male')}}</label>
-            <label class="nx-auth__checkline"><input type="radio" name="gender" value="Female" @checked(old('gender') === 'Female') />{{ __('signup.radio_female')}}</label>
+            <div class="nx-auth__radios">
+                <label class="nx-auth__checkline"><input type="radio" name="gender" value="Male" @checked(old('gender') === 'Male') />{{ __('signup.radio_male')}}</label>
+                <label class="nx-auth__checkline"><input type="radio" name="gender" value="Female" @checked(old('gender') === 'Female') />{{ __('signup.radio_female')}}</label>
+            </div>
         </div>
 
         <div class="nx-field">

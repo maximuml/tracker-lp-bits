@@ -23,7 +23,7 @@
     var forms = document.querySelectorAll('form[data-auth-form]');
     Array.prototype.forEach.call(forms, function (theForm) {
         Array.prototype.forEach.call(theForm.elements, function (el) {
-            if (!el || el.type !== 'button') return;
+            if (!el || el.type !== 'button' || el.hasAttribute('data-pw-toggle')) return;
             el.addEventListener('click', function () { handle(theForm); });
         });
     });

@@ -17,6 +17,8 @@ return [
     'row_enter_password_again' => 'Enter password again',
     'row_question' => 'Question',
     'row_enter_hint_answer' => 'Enter hint answer',
+    'group_account' => 'Account',
+    'group_about' => 'About you & verification',
     'row_email_address' => 'Email address',
     'row_country' => 'Country',
     'row_gender' => 'Gender',

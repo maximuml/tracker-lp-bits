@@ -34,6 +34,7 @@ final class FormField extends Component
         public readonly bool $required = false,
         public readonly ?string $error = null,
         public readonly ?string $help = null,
+        public readonly bool $passwordToggle = false,
     ) {
         $this->fieldId = $id ?? $name;
         $this->hasError = $error !== null && $error !== '';

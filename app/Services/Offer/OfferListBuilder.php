@@ -270,9 +270,9 @@ final class OfferListBuilder
                 }
 
                 $allowed = match ((int) ($arr['allowed'] ?? 1)) {
-                    OfferAllowed::ALLOWED->value => new OfferAllowedBadge(__('offers.text_allowed'), 'nx-color-green'),
-                    OfferAllowed::DENIED->value => new OfferAllowedBadge(__('offers.text_denied'), 'nx-color-red'),
-                    default => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-orange'),
+                    OfferAllowed::ALLOWED->value => new OfferAllowedBadge(__('offers.text_allowed'), 'nx-color-green', 'allowed'),
+                    OfferAllowed::DENIED->value => new OfferAllowedBadge(__('offers.text_denied'), 'nx-color-red', 'denied'),
+                    default => new OfferAllowedBadge(__('offers.text_pending'), 'nx-color-orange', 'pending'),
                 };
 
                 $yeah = (int) ($arr['yeah'] ?? 0);
@@ -327,6 +327,7 @@ final class OfferListBuilder
                 canManage: $canManage,
                 canAgainst: $canAgainst,
                 showAgainstCell: $showAgainstCell,
+                minVotes: (int) $globalData['minoffervotes'],
                 rows: $rows,
                 tooltips: $showlastcom ? $tooltips : [],
                 pagerBottom: $pagerBottom,

@@ -16,8 +16,7 @@ use App\Support\State\PermissionsState;
 /**
  * Legacy permission helpers extracted from `include/globalfunctions.php`.
  *
- * Backs `user_can()`, `assert_has_permission()`, `ability()` and
- * `has_role_work_seeding()`.
+ * Backs `user_can()`, `assert_has_permission()` and `ability()`.
  */
 final class Permissions
 {
@@ -108,12 +107,5 @@ final class Permissions
     public static function abilityLabel(RoutePermissionEnum $permission): string
     {
         return sprintf('ability:%s', $permission->value);
-    }
-
-    public static function hasRoleWorkSeeding(int $uid): bool
-    {
-        Logger::writeWithContext("uid: $uid, result: false");
-
-        return false;
     }
 }

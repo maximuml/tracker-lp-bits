@@ -15,7 +15,6 @@ use App\Models\User;
 use App\Models\UserMeta;
 use App\Repositories\HitAndRunRepository;
 use App\Repositories\UserDetailRepository;
-use App\Services\PermissionChecker;
 use App\Services\SeedBonusService;
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
@@ -46,7 +45,6 @@ class UserDetailController extends Controller
     private ActorContext $actor;
 
     public function __construct(
-        private readonly PermissionChecker $permissionChecker,
         private readonly SeedBonusService $seedBonus,
         HitAndRunRepository $hitAndRunRepository,
         UserRepositoryInterface $userRepository,
@@ -276,25 +274,6 @@ JS, \json_encode(__('userdetails.sure_to_remove_leech_warn'))), 'footer', false)
 
         $ipHistoryCount = $canViewConfidential ? $this->userDetailRepository->getIplogCount($id) : 0;
 
-        $claimAllSeedingConfirmation = Locale::trans('claim.claim_all_seeding_confirmation', [], null);
-        $claimJs = '';
-        if ($userModel instanceof User && $userModel->id === $currentUserId && $this->permissionChecker->hasRoleWorkSeeding($userModel->id)) {
-            $claimJs = <<<JS
-document.body.addEventListener("click", function (e) {
-    if (!e.target || e.target.id !== "claim-all-seeding") return;
-    layer.confirm("$claimAllSeedingConfirmation", {}, function () {
-        nativePost('/plugin/claim_all_seeding', {"action": "claimAllSeeding"}, function (response) {
-            if (response.ret == 0) {
-                window.location.reload()
-            } else {
-                layer.alert(response.msg)
-            }
-        })
-    })
-})
-JS;
-        }
-
         AssetAppender::js(<<<JS
 document.body.addEventListener("click", function (e) {
     if (!e.target || !e.target.matches || !e.target.matches(".nexus-pagination a")) return;
@@ -307,7 +286,6 @@ document.body.addEventListener("click", function (e) {
         box.innerHTML = result
     })
 })
-$claimJs
 JS, 'footer', false);
 
         $metas = $this->userRepository->listMetas($id);

@@ -272,7 +272,6 @@ final class UsercpRepository extends BaseRepository implements UsercpRepositoryI
             'appendsticky' => $dto->appendsticky,
             'appendnew' => $dto->appendnew,
             'appendpromotion' => $dto->appendpromotion,
-            'appendpicked' => $dto->appendpicked,
             'dlicon' => $dto->dlicon,
             'bmicon' => $dto->bmicon,
             'showcomnum' => $dto->showcomnum,

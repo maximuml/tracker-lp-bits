@@ -51,7 +51,6 @@ final readonly class UsercpTrackerSection
         public bool $appendsticky,
         public bool $appendnew,
         public string $appendpromotion,
-        public bool $appendpicked,
         public bool $dlicon,
         public bool $bmicon,
         public bool $showcomnum,

@@ -64,7 +64,6 @@ final class UsercpTrackerBuilderTest extends TestCase
             'appendsticky' => 'yes',
             'appendnew' => 'no',
             'appendpromotion' => 1,
-            'appendpicked' => 'yes',
             'dlicon' => 'yes',
             'bmicon' => 'no',
             'showcomnum' => 'yes',
@@ -117,7 +116,6 @@ final class UsercpTrackerBuilderTest extends TestCase
         $this->assertFalse($s->showcomment);
         $this->assertTrue($s->appendsticky);
         $this->assertFalse($s->appendnew);
-        $this->assertTrue($s->appendpicked);
         $this->assertTrue($s->dlicon);
         $this->assertFalse($s->bmicon);
         $this->assertTrue($s->showcomnum);

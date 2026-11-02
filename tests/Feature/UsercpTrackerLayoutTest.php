@@ -19,7 +19,6 @@ final class UsercpTrackerLayoutTest extends TestCase
     private const TRACKER_FIELD_NAMES = [
         '_token',
         'appendnew',
-        'appendpicked',
         'appendpromotion',
         'appendsticky',
         'bmicon',
@@ -126,7 +125,6 @@ final class UsercpTrackerLayoutTest extends TestCase
         $this->assertSame($expectedFieldNames, $actualFieldNames);
 
         $expectedCheckedNames = [
-            'appendpicked',
             'appendpromotion',
             'appendsticky',
             'cat'.$this->categoryId,
@@ -189,7 +187,6 @@ final class UsercpTrackerLayoutTest extends TestCase
             'appendsticky' => 1,
             'appendnew' => 0,
             'appendpromotion' => 1,
-            'appendpicked' => 1,
             'dlicon' => 1,
             'bmicon' => 0,
             'showcomnum' => 1,

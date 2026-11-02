@@ -1463,6 +1463,89 @@ textarea { resize: vertical; max-width: 100%; box-sizing: border-box; }
 /* [code]/media-info blocks must scroll inside the column, not widen the page. */
 pre { max-width: 100%; overflow-x: auto; }
 
+/* ---------- Legacy markup compat ----------
+ * Classes still emitted by legacy markup on every chrome variant:
+ * .codetop/.codemain ([code] BBCode blocks), .btn2 (toolbar buttons),
+ * ul.menu (tab rows), .dropmenu (order popups). They live here instead
+ * of pack theme.css so modern pages style them and boxed pages share
+ * the same look. input.btn2 sits after input[type="button"] so the
+ * secondary style wins the equal-specificity tie. */
+
+input.btn2, button.btn2 {
+    background: var(--nxm-surface);
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    color: var(--nxm-text);
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0.25rem 0.7rem;
+}
+input.btn2:hover, button.btn2:hover { background: var(--nxm-surface-alt); }
+input.btn2:focus-visible, button.btn2:focus-visible {
+    outline: var(--nxm-focus-outline);
+    outline-offset: 2px;
+}
+
+.codetop {
+    background: var(--nxm-surface-alt);
+    border: 1px solid var(--nxm-border);
+    border-bottom: none;
+    border-radius: var(--nxm-radius) var(--nxm-radius) 0 0;
+    color: var(--nxm-text);
+    font-weight: bold;
+    margin: 0 auto;
+    padding: 3px;
+}
+.codemain {
+    background: var(--nxm-surface);
+    border: 1px solid var(--nxm-border);
+    border-radius: 0 0 var(--nxm-radius) var(--nxm-radius);
+    color: var(--nxm-text);
+    margin: 0 auto;
+    padding: 3px;
+}
+
+ul.menu {
+    list-style: none;
+    margin: 1px 0 0;
+    padding: 3px 0;
+    text-align: center;
+    white-space: nowrap;
+}
+ul.menu li { display: inline; margin: 0; }
+ul.menu li a {
+    background: var(--nxm-surface);
+    border: 1px solid var(--nxm-border);
+    border-bottom: none;
+    color: var(--nxm-text);
+    display: inline-block;
+    font-weight: bold;
+    margin-right: 3px;
+    padding: 3px 7px;
+    text-align: center;
+    text-decoration: none;
+}
+ul.menu li a:hover { color: var(--nxm-text); text-decoration: underline; }
+ul.menu li.selected a {
+    background: var(--nxm-surface-alt);
+    border-bottom-color: var(--nxm-surface-alt);
+    position: relative;
+    top: 1px;
+}
+ul.menu li.selected a:hover { text-decoration: none; }
+
+.dropmenu {
+    background: var(--nxm-surface);
+    border: 1px solid var(--nxm-border);
+    border-radius: var(--nxm-radius);
+    box-shadow: var(--nxm-shadow);
+    margin-top: 3px;
+    position: absolute;
+    text-align: left;
+}
+.dropmenu ul { list-style: none; padding: 6px; white-space: nowrap; }
+.dropmenu ul li { margin: 0; }
+
 /* ---------- Footer ---------- */
 
 .nxm-footer {

@@ -1,80 +1,17 @@
-/* Classic pack — legacy-variant palette + legacy component rules.
+/* Classic pack — legacy component rules on the modern token palette.
  * Loads AFTER css/modern.css on legacy pages (the packThemeUrl slot in
- * head-assets), so its --nxm-* overrides set the palette and its rules
- * win the cascade. On modern pages no pack link is emitted — the
- * Classic token layer IS css/modern.css :root there.
+ * head-assets). The palette (--nxm-*) intentionally comes from modern.css
+ * so boxed pages match the modern-variant pages; this file only carries
+ * the Classic chrome (tables, code blocks, menus, legacy buttons) plus
+ * pack-specific --classic-* accent colours per scheme.
  *
- * Classic is light-default: :root carries the original beige palette.
- * Dark values live under html[data-theme="dark"] and, for auto/unset,
- * prefers-color-scheme. Pack-specific colours that have no --nxm-*
- * semantic use --classic-* vars defined per scheme below.
- * Layer ownership: see the header block in css/modern.css. */
+ * Dark/auto values live under html[data-theme="dark"] and
+ * prefers-color-scheme. Layer ownership: see css/modern.css header. */
 
 /* ---------- Light variant (default) ---------- */
 
 :root {
-    /* semantic — Classic's original beige palette */
-    --nxm-bg: #cfcfcc;
-    --nxm-surface: #ece9d8;
-    --nxm-surface-alt: #f5f4ea;
-    --nxm-text: #000000;
-    --nxm-text-dim: #504d45;
-    --nxm-muted: #504d45;
-    --nxm-border: #000000;
-    --nxm-accent: #0055a4;
-    --nxm-accent-hover: #003f7d;
-    --nxm-accent-text: #004e98;
-    --nxm-accent-text-hover: #003f7d;
-    --nxm-on-accent: #ffffff;
-
-    /* status tints (alert / error-summary / status surfaces) */
-    --nxm-info-bg: #eef6fd;
-    --nxm-info-border: #b8daff;
-    --nxm-success-bg: #effaf2;
-    --nxm-success-border: #b7e4c7;
-    --nxm-warning-bg: #fff8e5;
-    --nxm-warning-border: #ffe3a3;
-    --nxm-danger-bg: #fdf0f0;
-    --nxm-danger-border: #f5c2c7;
-    --nxm-panel-bg: var(--nxm-surface-alt);
-
-    --nxm-name-crazyuser: #005977;
-    --nxm-name-eliteuser: #005858;
-    --nxm-name-extremeuser: #7d4400;
-    --nxm-name-forummoderator: #0d5b62;
-    --nxm-name-moderator: #375283;
-    --nxm-name-nexusmaster: #1c5778;
-    --nxm-name-peasant: #485562;
-    --nxm-name-poweruser: #684e0f;
-    --nxm-name-retiree: #0d5b62;
-    --nxm-name-sysop: #804224;
-    --nxm-name-ultimateuser: #005a00;
-    --nxm-name-uploader: #a50f2d;
-    --nxm-name-vip: #006100;
-
     /* pack-specific */
-    --classic-link: #000000;
-    --classic-link-hover: #ff0000;
-    --classic-colhead-bg: #0055a4;
-    --classic-colhead-text: #ffffff;
-    --classic-code-head-bg: #f1b000;
-    --classic-code-head-image: url(./code.gif);
-    --classic-code-head-text: #000000;
-    --classic-code-body-bg: #ffffff;
-    --classic-code-body-text: #000000;
-    --classic-menu-bg: #cfe0df;
-    --classic-menu-bg-image: url(./shade.gif);
-    --classic-menu-text: #2d2b2b;
-    --classic-menu-border: #778899;
-    --classic-menu-selected-bg: #ffffff;
-    --classic-menu-selected-image: url(./shadeactive.gif);
-    --classic-dropmenu-bg: #f2f9fd;
-    --classic-dropmenu-border: #a6c9d7;
-    --classic-btn-bg-image: url(./btnbg.gif);
-    --classic-btn-border: #cccccc;
-    --classic-btn-text: #545454;
-    --classic-gobutton-bg: #476ba2;
-    --classic-gobutton-text: #ffffff;
     --classic-info-bg: #cccccc;
     --classic-info-hover-bg: #ffff00;
     --classic-tooltip-bg: #ccffff;
@@ -112,58 +49,6 @@
 /* ---------- Dark variant ---------- */
 
 html[data-theme="dark"]:root {
-    --nxm-bg: #23241e;
-    --nxm-surface: #2d2e25;
-    --nxm-surface-alt: #38392e;
-    --nxm-text: #e6e3d4;
-    --nxm-text-dim: #a3a193;
-    --nxm-muted: #a3a193;
-    --nxm-border: #585947;
-    --nxm-accent: #4d92d4;
-    --nxm-accent-hover: #6aa9de;
-    --nxm-accent-text: #7fb2e8;
-    --nxm-accent-text-hover: #a5cdf0;
-    --nxm-on-accent: #10151b;
-
-    /* status tints — keep alerts readable on the dark surface */
-    --nxm-info-bg: #16283a;
-    --nxm-info-border: #2c4a66;
-    --nxm-success-bg: #16301f;
-    --nxm-success-border: #2c5c3c;
-    --nxm-warning-bg: #332a16;
-    --nxm-warning-border: #665223;
-    --nxm-danger-bg: #35191c;
-    --nxm-danger-border: #6b3237;
-    --nxm-panel-bg: var(--nxm-surface-alt);
-
-    --nxm-name-insaneuser: #e793e8;
-    --nxm-name-staffleader: #f59595;
-    --nxm-name-sysop: #e2a683;
-    --nxm-name-uploader: #f897ab;
-    --nxm-name-veteranuser: #b7abe8;
-
-    --classic-link: var(--nxm-accent-text);
-    --classic-link-hover: #ff7070;
-    --classic-colhead-bg: #1d4d7d;
-    --classic-colhead-text: #eef2f8;
-    --classic-code-head-bg: #7a5e00;
-    --classic-code-head-image: url(./code.gif);
-    --classic-code-head-text: #f0ead6;
-    --classic-code-body-bg: #26271f;
-    --classic-code-body-text: #e6e3d4;
-    --classic-menu-bg: #2c3a44;
-    --classic-menu-bg-image: none;
-    --classic-menu-text: #d8d5c6;
-    --classic-menu-border: #4a5660;
-    --classic-menu-selected-bg: #3d4c58;
-    --classic-menu-selected-image: none;
-    --classic-dropmenu-bg: #1f2c36;
-    --classic-dropmenu-border: #3d5a6b;
-    --classic-btn-bg-image: none;
-    --classic-btn-border: #4a4c3e;
-    --classic-btn-text: #c9c6b6;
-    --classic-gobutton-bg: #33527c;
-    --classic-gobutton-text: #f0efe6;
     --classic-info-bg: #3d3f33;
     --classic-info-hover-bg: #565838;
     --classic-tooltip-bg: #1c3a44;
@@ -202,57 +87,6 @@ html[data-theme="dark"]:root {
 @media (prefers-color-scheme: dark) {
     html:not([data-theme]):root,
     html[data-theme="auto"]:root {
-        --nxm-bg: #23241e;
-        --nxm-surface: #2d2e25;
-        --nxm-surface-alt: #38392e;
-        --nxm-text: #e6e3d4;
-        --nxm-text-dim: #a3a193;
-        --nxm-muted: #a3a193;
-        --nxm-border: #585947;
-        --nxm-accent: #4d92d4;
-        --nxm-accent-hover: #6aa9de;
-        --nxm-accent-text: #7fb2e8;
-        --nxm-accent-text-hover: #a5cdf0;
-        --nxm-on-accent: #10151b;
-
-        --nxm-info-bg: #16283a;
-        --nxm-info-border: #2c4a66;
-        --nxm-success-bg: #16301f;
-        --nxm-success-border: #2c5c3c;
-        --nxm-warning-bg: #332a16;
-        --nxm-warning-border: #665223;
-        --nxm-danger-bg: #35191c;
-        --nxm-danger-border: #6b3237;
-        --nxm-panel-bg: var(--nxm-surface-alt);
-
-        --nxm-name-insaneuser: #e793e8;
-        --nxm-name-staffleader: #f59595;
-        --nxm-name-sysop: #e2a683;
-        --nxm-name-uploader: #f897ab;
-        --nxm-name-veteranuser: #b7abe8;
-
-        --classic-link: var(--nxm-accent-text);
-        --classic-link-hover: #ff7070;
-        --classic-colhead-bg: #1d4d7d;
-        --classic-colhead-text: #eef2f8;
-        --classic-code-head-bg: #7a5e00;
-        --classic-code-head-image: url(./code.gif);
-        --classic-code-head-text: #f0ead6;
-        --classic-code-body-bg: #26271f;
-        --classic-code-body-text: #e6e3d4;
-        --classic-menu-bg: #2c3a44;
-        --classic-menu-bg-image: none;
-        --classic-menu-text: #d8d5c6;
-        --classic-menu-border: #4a5660;
-        --classic-menu-selected-bg: #3d4c58;
-        --classic-menu-selected-image: none;
-        --classic-dropmenu-bg: #1f2c36;
-        --classic-dropmenu-border: #3d5a6b;
-        --classic-btn-bg-image: none;
-        --classic-btn-border: #4a4c3e;
-        --classic-btn-text: #c9c6b6;
-        --classic-gobutton-bg: #33527c;
-        --classic-gobutton-text: #f0efe6;
         --classic-info-bg: #3d3f33;
         --classic-info-hover-bg: #565838;
         --classic-tooltip-bg: #1c3a44;
@@ -295,19 +129,6 @@ html[data-theme="dark"]:root {
 
 /* ---------- Legacy component rules (colours read the palette vars) ---------- */
 
-body
-{
-	margin-top: 0px;
-	margin-bottom: 0px;
-	color: var(--nxm-text);
-	font-family: tahoma, arial, helvetica, sans-serif;
-	background-color: var(--nxm-bg);
-}
-body.inframe
-{
-	background-image: none;
-	background-color: var(--nxm-surface);
-}
 table
 {
 	border-right: medium none;
@@ -469,13 +290,6 @@ td.comment
 	padding-top: 10pt;
 	text-align: left
 }
-.colhead, .nx-colhead
-{
-	white-space:nowrap;
-	font-weight: bold;
-	color: var(--classic-colhead-text);
-	background-color: var(--classic-colhead-bg)
-}
 .nowrap
 {
 	white-space:nowrap;
@@ -556,20 +370,6 @@ form
 {
 	color: var(--nxm-text-dim);
 }
-a:link
-{
-	color: var(--classic-link);
-	text-decoration: underline
-}
-a:visited
-{
-	color: var(--classic-link);
-	text-decoration: underline
-}
-a:hover
-{
-	color: var(--classic-link-hover)
-}
 a.index
 {
 	font-weight: bold
@@ -629,29 +429,11 @@ a.altlink_green:hover
 {
 	color: var(--nxm-text)
 }
-.btn2
-{
-	border: var(--classic-btn-border) 1px outset;
-	padding-right: 2px;
-	padding-left: 2px;
-	font-weight: bold;
-	background: var(--classic-btn-bg-image) repeat-x left top;
-	padding-bottom: 1px;
-	cursor: pointer;
-	color: var(--classic-btn-text);
-	padding-top: 1px
-}
 .small
 {
 }
 .big
 {
-}
-li
-{
-	margin-top: 6pt;
-	margin-bottom: 6pt;
-	margin-left: 16pt;
 }
 ul
 {
@@ -665,119 +447,6 @@ img
 img.border
 {
 	border: var(--nxm-border) 1px solid
-}
-.gobutton
-{
-	background: var(--classic-gobutton-bg);
-	color: var(--classic-gobutton-text)
-}
-.codetop
-{
-	padding-right: 3px;
-	padding-left: 3px;
-	font-weight: bold;
-	background: var(--classic-code-head-bg) var(--classic-code-head-image) no-repeat right 50%;
-	padding-bottom: 3px;
-	margin: 0px auto;
-	color: var(--classic-code-head-text);
-	padding-top: 3px
-}
-.codemain
-{
-	border: var(--nxm-border) 1px solid;
-	padding-right: 3px;
-	padding-left: 3px;
-	background: var(--classic-code-body-bg);
-	padding-bottom: 3px;
-	margin: 0px auto;
-	color: var(--classic-code-body-text);
-	padding-top: 3px
-}
-.dropmenu
-{
-	background: var(--classic-dropmenu-bg) none repeat scroll 0 0;
-	border: 3px solid var(--classic-dropmenu-border);
-	margin-top:3px;
-	opacity:0.9;
-	position:absolute;
-	text-align:left;
-}
-.dropmenu ul
-{
-	list-style-type: none;
-	white-space: nowrap;
-	padding:10px;
-}
-.dropmenu ul li
-{
-	margin-left: 0px;
-	margin-right: 0px;
-}
-ul.menu
-{
-	list-style-image: none;
-	list-style-type: none;
-	white-space: nowrap;
-	text-align: center;
-	margin-bottom: 0px;
-	margin-top: 1px;
-	margin-left: 0px;
-	padding-top: 3px;
-	padding-bottom: 3px;
-}
-ul.menu li
-{
-	display: inline;
-	margin-left: 0px;
-	margin-right: 0px;
-}
-ul.menu li a
-{
-	border: var(--classic-menu-border) 1px solid;
-	border-bottom: none;
-	padding-right: 7px;
-	padding-left: 7px;
-	background: var(--classic-menu-bg) var(--classic-menu-bg-image) repeat-x left top;
-	padding-bottom: 3px;
-	color: var(--classic-menu-text);
-	margin-right: 3px;
-	padding-top: 3px;
-	text-decoration: none;
-	font-style: normal;
-	font-weight: bold;
-	font-family: verdana;
-	font-variant: normal;
-	text-align: center;
-	display: inline-block;
-}
-ul.menu li a:link
-{
-	color: var(--classic-menu-text);
-}
-ul.menu li a:visited
-{
-	color: var(--classic-menu-text);
-}
-ul.menu li a:hover
-{
-	color: var(--classic-menu-text);
-	text-decoration: underline;
-}
-ul.menu li a:active
-{
-	color: var(--classic-menu-text);
-}
-ul.menu li.selected a
-{
-	background: var(--classic-menu-selected-bg) var(--classic-menu-selected-image);
-	border-bottom-color: var(--classic-menu-selected-bg);
-	font: bold 11px verdana;
-	position: relative;
-	top: 1px;
-}
-ul.menu li.selected a:hover
-{
-	text-decoration: none;
 }
 .listitem
 {

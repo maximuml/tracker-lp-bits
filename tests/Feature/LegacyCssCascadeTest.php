@@ -71,31 +71,48 @@ final class LegacyCssCascadeTest extends TestCase
         $this->assertLessThan($theme, $modern, 'Classic theme.css must load AFTER modern.css on legacy chrome');
     }
 
-    public function test_classic_theme_css_is_token_driven_with_dark_variant(): void
+    public function test_classic_theme_css_shares_the_modern_palette(): void
     {
         $css = file_get_contents(public_path('styles/Classic/theme.css'));
         $this->assertNotFalse($css);
 
-        // Classic's light palette lives in --nxm-* overrides so the
-        // modern.css token rules render the classic beige look.
-        $this->assertStringContainsString('--nxm-surface: #ece9d8', $css);
-        $this->assertStringContainsString('--nxm-bg: #cfcfcc', $css);
-
-        // Dark variant: explicit data-theme plus auto via prefers-color-scheme.
-        $this->assertMatchesRegularExpression(
-            '/html\[data-theme="dark"\]:root\s*\{[^}]*--nxm-surface:/s',
+        // Classic no longer owns the palette: modern.css --nxm-* tokens
+        // set the scheme so boxed pages match modern pages. The pack
+        // file only carries --classic-* accents and color-scheme hints.
+        $this->assertDoesNotMatchRegularExpression(
+            '/^\s*--nxm-[a-z-]+\s*:/m',
             $css,
-            'Classic must override --nxm-* tokens under data-theme="dark"',
+            'Classic must not override --nxm-* palette tokens',
         );
         $this->assertMatchesRegularExpression(
-            '/@media \(prefers-color-scheme: dark\)[^}]*html\[data-theme="auto"\]:root\s*\{[^}]*--nxm-surface:/s',
+            '/html\[data-theme="dark"\]:root\s*\{[^}]*--classic-/s',
             $css,
-            'Classic must override --nxm-* tokens for auto + prefers-color-scheme: dark',
+            'Classic must keep pack accents under data-theme="dark"',
+        );
+        $this->assertMatchesRegularExpression(
+            '/@media \(prefers-color-scheme: dark\)[^}]*html\[data-theme="auto"\]:root\s*\{[^}]*color-scheme: dark/s',
+            $css,
+            'Classic must keep the auto + prefers-color-scheme dark block',
         );
 
-        // Component rules must read vars, not the old hardcoded light palette.
-        $this->assertStringNotContainsString('background-color: #ece9d8', $css);
-        $this->assertStringNotContainsString('color: #000000;', $css);
+        // Global element/type styling must not fight the modern cascade:
+        // body, bare a:link, li and the palette .colhead all come from
+        // modern.css so typography is identical on every chrome variant.
+        $this->assertDoesNotMatchRegularExpression('/^body[\s{]/m', $css);
+        $this->assertDoesNotMatchRegularExpression('/^a:link/m', $css);
+        $this->assertDoesNotMatchRegularExpression('/^li[\s{]/m', $css);
+        $this->assertStringNotContainsString('.colhead, .nx-colhead', $css);
+
+        // Shared legacy classes moved to modern.css so modern-variant
+        // pages style them too and boxed pages share the same look.
+        $modern = file_get_contents(public_path('css/modern.css'));
+        $this->assertNotFalse($modern);
+        foreach (['.codetop', '.codemain', 'ul.menu', 'input.btn2', '.dropmenu'] as $needle) {
+            $this->assertStringContainsString($needle, $modern, sprintf('%s missing from modern.css', $needle));
+            $this->assertStringNotContainsString($needle, $css, sprintf('%s must not be re-overridden in Classic', $needle));
+        }
+
+        // Remaining component rules still read vars, not hardcoded colors.
         $this->assertStringContainsString('border: var(--nxm-border) 1px solid', $css);
     }
 

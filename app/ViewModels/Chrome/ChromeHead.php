@@ -98,11 +98,12 @@ final class ChromeHead
         ], $iconStyles);
 
         // Boxed chrome shares the modern cascade order: theme.css rides in
-        // the packThemeUrl slot AFTER css/modern.css so the pack palette
-        // overrides the base instead of being stomped by it, and nxt.css
-        // loads once via head-assets.blade.php (Tailwind utilities layer
-        // stays last). Unlike modern pages, boxed markup still needs
-        // Classic's theme.css — the pack file carries table.colhead styles.
+        // the packThemeUrl slot AFTER css/modern.css so pack-specific
+        // component rules layer on top of the shared --nxm-* palette, and
+        // nxt.css loads once via head-assets.blade.php (Tailwind utilities
+        // layer stays last). Unlike modern pages, boxed markup still needs
+        // Classic's theme.css — the pack file carries the legacy table and
+        // chrome component rules.
         $packThemeUrl = $variant === 'boxed' || $cssUri !== 'styles/Classic/'
             ? $cssUri.'theme.css'.$cssUpdateDate
             : null;

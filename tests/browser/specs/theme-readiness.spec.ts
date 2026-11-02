@@ -123,14 +123,14 @@ test('stylesheet × scheme sweep screenshots all combinations', async ({ page })
         // Classic is the base cascade and emits no pack link.
         await expect(page.locator('link[href*="styles/Unshatter"]')).toHaveCount(ss.packLink ? 1 : 0);
 
-        // Classic legacy chrome must follow the scheme via --nxm-*:
-        // its theme.css (loaded on legacy pages only) carries the dark
-        // palette, so a legacy page's body bg switches off the beige.
+        // Classic boxed chrome shares the modern.css palette: its
+        // theme.css (legacy component rules only) no longer overrides
+        // --nxm-*, so a boxed page's body bg matches the modern scheme.
         if (ss.name === 'Classic') {
           await page.goto('/faq.php', { waitUntil: 'networkidle' });
           const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-          const expected = scheme === 'dark' ? 'rgb(35, 36, 30)' : 'rgb(207, 207, 204)';
-          expect(bg, `Classic/${scheme} body bg — theme.css not token-driven?`).toBe(expected);
+          const expected = scheme === 'dark' ? 'rgb(21, 26, 32)' : 'rgb(244, 245, 247)';
+          expect(bg, `Classic/${scheme} body bg — boxed page must use the modern palette`).toBe(expected);
           await expect(page.locator('link[href*="styles/Classic/theme.css"]')).toHaveCount(1);
           await page.goto('/index.php', { waitUntil: 'networkidle' });
         }

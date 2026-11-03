@@ -1220,11 +1220,12 @@ a.nxm-alert__action:visited {
     background: none;
     border: none;
     padding: 0;
-    color: var(--nxm-userbar-link);
+    color: var(--nxm-accent-text, var(--nxm-accent));
     cursor: pointer;
     font: inherit;
+    text-decoration: underline;
 }
-.nxm-linkbtn:hover { text-decoration: underline; }
+.nxm-linkbtn:hover { color: var(--nxm-accent-text-hover, var(--nxm-accent-hover)); }
 
 /* ---------- Content ---------- */
 

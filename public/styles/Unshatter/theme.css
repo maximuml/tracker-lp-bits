@@ -96,6 +96,10 @@ html[data-theme="light"]:root {
     --nxm-accent-hover: #a87e00;
     --nxm-accent-text: #7f6100;
     --nxm-accent-text-hover: #6f5600;
+    /* links on tinted surfaces (tabs, pagers, table headers): gold family,
+       #7f6100 holds 4.86:1 on --nxm-surface-alt — the fixed blue default
+       from modern.css would leak Classic-blue into the gold palette */
+    --nxm-accent-deep: var(--nxm-accent-text);
     --nxm-on-accent: #111114;
     --nxm-success: #1a7f37;
     --nxm-danger: #c9232e;
@@ -232,6 +236,10 @@ html[data-theme="light"]:root {
         --nxm-accent-hover: #a87e00;
         --nxm-accent-text: #7f6100;
         --nxm-accent-text-hover: #6f5600;
+        /* links on tinted surfaces (tabs, pagers, table headers): gold family,
+           #7f6100 holds 4.86:1 on --nxm-surface-alt — the fixed blue default
+           from modern.css would leak Classic-blue into the gold palette */
+        --nxm-accent-deep: var(--nxm-accent-text);
         --nxm-on-accent: #111114;
         --nxm-success: #1a7f37;
         --nxm-danger: #c9232e;

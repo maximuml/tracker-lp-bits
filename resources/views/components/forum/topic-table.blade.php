@@ -33,7 +33,7 @@
         @endforeach
         <tr>
             <td>
-                <form method="get" action="/forums" class="flex items-center gap-1.5"><input type="hidden" name="action" value="viewforum" /><input type="hidden" name="forumid" value="{{ $list->forumId }}" /><label><b>{{ __('forums.text_fast_search') }}</b><input type="text" class="w-[11.25rem]" name="search" /></label>&nbsp;<x-button type="submit">{{ __('forums.text_go') }}</x-button></form>
+                <form method="get" action="/forums" class="flex items-center gap-1.5"><input type="hidden" name="action" value="viewforum" /><input type="hidden" name="forumid" value="{{ $list->forumId }}" /><label><b>{{ __('forums.text_fast_search') }}</b><input type="text" class="w-[11.25rem]" name="search" /></label>&nbsp;<x-button type="submit" size="sm">{{ __('forums.text_go') }}</x-button></form>
             </td>
             <td colspan="3">
                 <span id="order"><span><b>{{ __('forums.text_order') }}</b></span>

@@ -141,6 +141,36 @@ test.describe('mobile viewport', () => {
   });
 });
 
+test.describe('mobile staff forms', () => {
+  test.use({
+    viewport: { width: 390, height: 844 },
+    storageState: AUTH_STATE,
+  });
+
+  // #main-content is overflow-x:auto, so inner overflow never reaches
+  // document.scrollWidth — measure the container itself plus the
+  // geometry of its controls instead.
+  for (const path of ['/web/usersearch', '/web/modrules']) {
+    test(`${path} form controls stay inside main-content`, async ({ page }) => {
+      await page.goto(path, { waitUntil: 'networkidle' });
+      const main = page.locator('#main-content');
+      const overflow = await main.evaluate((el) => el.scrollWidth - el.clientWidth);
+      expect(overflow, `${path}: inner horizontal overflow ${overflow}px`).toBeLessThanOrEqual(1);
+
+      const outside = await main.evaluate((root) => {
+        const box = root.getBoundingClientRect();
+        return [...root.querySelectorAll('input:not([type=hidden]), select, textarea, button, a')]
+          .filter((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && r.height > 0 && (r.left < box.left - 1 || r.right > box.right + 1);
+          })
+          .map((el) => `${el.tagName.toLowerCase()}[${el.getAttribute('name') ?? el.getAttribute('href') ?? ''}]`);
+      });
+      expect(outside, `controls outside main-content: ${outside.join(', ')}`).toEqual([]);
+    });
+  }
+});
+
 test.describe('320px search filters', () => {
   test.use({
     viewport: { width: 320, height: 800 },

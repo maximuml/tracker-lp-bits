@@ -1031,6 +1031,10 @@ button.nx-shoutbox-mentions {border:1px solid var(--nxm-danger-border,#c0392b);b
 
 .nx-fgrid--6 {grid-template-columns:repeat(3,max-content 1fr);align-items:center}
 
+@media (max-width: 768px) {
+.nx-fgrid--6 {grid-template-columns:1fr}
+}
+
 .nx-hl {background:var(--nxm-warning-border,#BBAF9B)}
 
 .nx-grouprow:not(.nx-setrow) {display:contents}

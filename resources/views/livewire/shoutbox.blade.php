@@ -24,7 +24,7 @@
     @endif
     <form wire:submit="send" name="shbox" method="post" action="#">
         <div wire:ignore>{{ $toolbar }}</div>
-        <div class="nx-flex">
+        <div class="nx-flex nx-shbox-row">
             <label for="shbox_text">{{ __('index.text_message') }}</label>
             <input type="text" name="shbox_text" id="shbox_text" wire:model="text" class="grow" maxlength="1000" autocomplete="off" />
             <button type="submit" id="hbsubmit" class="nx-btn nx-btn--primary">{{ __('index.sumbit_shout') }}</button>

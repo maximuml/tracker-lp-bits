@@ -571,11 +571,11 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
 
 img.nx-smiley { max-width: 25px; }
 
-.nx-color-red { color: #ff0000; }
+.nx-color-red { color: var(--nxm-danger, #ff0000); }
 
-.nx-color-green { color: #008000; }
+.nx-color-green { color: var(--nxm-success, #008000); }
 
-.nx-color-blue { color: #0000ff; }
+.nx-color-blue { color: var(--nxm-accent-text, #0000ff); }
 
 .nx-color-gray { color: gray; }
 
@@ -587,7 +587,7 @@ img.nx-smiley { max-width: 25px; }
 
 .nx-color-ca0226 { color: #ca0226; }
 
-.nx-color-darkred { color: darkred; }
+.nx-color-darkred { color: var(--nxm-danger, darkred); }
 
 .nx-color-purple { color: purple; }
 

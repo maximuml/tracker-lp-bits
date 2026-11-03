@@ -29,84 +29,84 @@
 <form method=get action="{{ $requestUri }}">
 <div class="nx-fgrid nx-fgrid--6">
 <div class="nx-grouprow">
-<div class="nx-fhead">Name:</div>
-<div class="nx-fcell {{ $form['n_hl'] ?? '' }}"><input name="n" type="text" value="{{ $form['n'] }}" size=35></div>
-<div class="nx-fhead">Ratio:</div>
-<div class="nx-fcell {{ $form['r_hl'] ?? '' }}"><select name="rt">
+<label class="nx-fhead" for="us-n">Name:</label>
+<div class="nx-fcell {{ $form['n_hl'] ?? '' }}"><input id="us-n" name="n" type="text" value="{{ $form['n'] }}" size=35></div>
+<label class="nx-fhead" for="us-rt">Ratio:</label>
+<div class="nx-fcell {{ $form['r_hl'] ?? '' }}"><select id="us-rt" name="rt">
 @include('components.usersearch.options', ['options' => $form['rt_options'] ?? []])
     </select>
-    <input name="r" type="text" value="{{ $form['r'] }}" size="5" maxlength="4">
-    <input name="r2" type="text" value="{{ $form['r2'] }}" size="5" maxlength="4"></div>
-<div class="nx-fhead">Member status:</div>
-<div class="nx-fcell {{ $form['st_hl'] ?? '' }}"><select name="st">
+    <input id="us-r" name="r" type="text" value="{{ $form['r'] }}" size="5" maxlength="4" aria-label="Ratio value">
+    <input id="us-r2" name="r2" type="text" value="{{ $form['r2'] }}" size="5" maxlength="4" aria-label="Ratio second value"></div>
+<label class="nx-fhead" for="us-st">Member status:</label>
+<div class="nx-fcell {{ $form['st_hl'] ?? '' }}"><select id="us-st" name="st">
 @include('components.usersearch.options', ['options' => $form['st_options'] ?? []])
     </select></div>
 </div>
 <div class="nx-grouprow">
-<div class="nx-fhead">Email:</div>
-<div class="nx-fcell {{ $form['em_hl'] ?? '' }}"><input name="em" type="text" value="{{ $form['em'] }}" size="35"></div>
-<div class="nx-fhead">IP:</div>
-<div class="nx-fcell {{ $form['ip_hl'] ?? '' }}"><input name="ip" type="text" value="{{ $form['ip'] }}" maxlength="64"></div>
-<div class="nx-fhead">Account status:</div>
-<div class="nx-fcell {{ $form['as_hl'] ?? '' }}"><select name="as">
+<label class="nx-fhead" for="us-em">Email:</label>
+<div class="nx-fcell {{ $form['em_hl'] ?? '' }}"><input id="us-em" name="em" type="text" value="{{ $form['em'] }}" size="35"></div>
+<label class="nx-fhead" for="us-ip">IP:</label>
+<div class="nx-fcell {{ $form['ip_hl'] ?? '' }}"><input id="us-ip" name="ip" type="text" value="{{ $form['ip'] }}" maxlength="64"></div>
+<label class="nx-fhead" for="us-as">Account status:</label>
+<div class="nx-fcell {{ $form['as_hl'] ?? '' }}"><select id="us-as" name="as">
 @include('components.usersearch.options', ['options' => $form['as_options'] ?? []])
     </select></div>
 </div>
 <div class="nx-grouprow">
-<div class="nx-fhead">Comment:</div>
-<div class="nx-fcell {{ $form['co_hl'] ?? '' }}"><input name="co" type="text" value="{{ $form['co'] }}" size="35"></div>
-<div class="nx-fhead">Mask:</div>
-<div class="nx-fcell {{ $form['ma_hl'] ?? '' }}"><input name="ma" type="text" value="{{ $form['ma'] }}" maxlength="17"></div>
-<div class="nx-fhead">Class:</div>
-<div class="nx-fcell {{ $form['c_hl'] ?? '' }}"><select name="c">@include('components.usersearch.options', ['options' => $form['c_options'] ?? []])
+<label class="nx-fhead" for="us-co">Comment:</label>
+<div class="nx-fcell {{ $form['co_hl'] ?? '' }}"><input id="us-co" name="co" type="text" value="{{ $form['co'] }}" size="35"></div>
+<label class="nx-fhead" for="us-ma">Mask:</label>
+<div class="nx-fcell {{ $form['ma_hl'] ?? '' }}"><input id="us-ma" name="ma" type="text" value="{{ $form['ma'] }}" maxlength="17"></div>
+<label class="nx-fhead" for="us-c">Class:</label>
+<div class="nx-fcell {{ $form['c_hl'] ?? '' }}"><select id="us-c" name="c">@include('components.usersearch.options', ['options' => $form['c_options'] ?? []])
     </select></div>
 </div>
 <div class="nx-grouprow">
-<div class="nx-fhead">Joined:</div>
-<div class="nx-fcell {{ $form['d_hl'] ?? '' }}"><select name="dt">
+<label class="nx-fhead" for="us-dt">Joined:</label>
+<div class="nx-fcell {{ $form['d_hl'] ?? '' }}"><select id="us-dt" name="dt">
 @include('components.usersearch.options', ['options' => $form['dt_options'] ?? []])
     </select>
-    <input name="d" type="text" value="{{ $form['d'] }}" size="12" maxlength="10">
-    <input name="d2" type="text" value="{{ $form['d2'] }}" size="12" maxlength="10"></div>
-<div class="nx-fhead">Uploaded:</div>
+    <input name="d" type="text" value="{{ $form['d'] }}" size="12" maxlength="10" aria-label="Joined date">
+    <input name="d2" type="text" value="{{ $form['d2'] }}" size="12" maxlength="10" aria-label="Joined second date"></div>
+<label class="nx-fhead" for="ult">Uploaded:</label>
 <div class="nx-fcell {{ $form['ul_hl'] ?? '' }}"><select name="ult" id="ult">
 @include('components.usersearch.options', ['options' => $form['ult_options'] ?? []])
     </select>
-    <input name="ul" type="text" id="ul" size="8" maxlength="7" value="{{ $form['ul'] }}">
-    <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="{{ $form['ul2'] }}"></div>
-<div class="nx-fhead">Donor:</div>
-<div class="nx-fcell {{ $form['do_hl'] ?? '' }}"><select name="do">
+    <input name="ul" type="text" id="ul" size="8" maxlength="7" value="{{ $form['ul'] }}" aria-label="Uploaded GB">
+    <input name="ul2" type="text" id="ul2" size="8" maxlength="7" value="{{ $form['ul2'] }}" aria-label="Uploaded GB second value"></div>
+<label class="nx-fhead" for="us-do">Donor:</label>
+<div class="nx-fcell {{ $form['do_hl'] ?? '' }}"><select id="us-do" name="do">
 @include('components.usersearch.options', ['options' => $form['do_options'] ?? []])
 	</select></div>
 </div>
 <div class="nx-grouprow">
-<div class="nx-fhead">Last seen:</div>
-<div class="nx-fcell {{ $form['ls_hl'] ?? '' }}"><select name="lst">
+<label class="nx-fhead" for="us-lst">Last seen:</label>
+<div class="nx-fcell {{ $form['ls_hl'] ?? '' }}"><select id="us-lst" name="lst">
 @include('components.usersearch.options', ['options' => $form['lst_options'] ?? []])
   </select>
-  <input name="ls" type="text" value="{{ $form['ls'] }}" size="12" maxlength="10">
-  <input name="ls2" type="text" value="{{ $form['ls2'] }}" size="12" maxlength="10"></div>
-<div class="nx-fhead">Downloaded:</div>
+  <input name="ls" type="text" value="{{ $form['ls'] }}" size="12" maxlength="10" aria-label="Last seen date">
+  <input name="ls2" type="text" value="{{ $form['ls2'] }}" size="12" maxlength="10" aria-label="Last seen second date"></div>
+<label class="nx-fhead" for="dlt">Downloaded:</label>
 <div class="nx-fcell {{ $form['dl_hl'] ?? '' }}"><select name="dlt" id="dlt">
 @include('components.usersearch.options', ['options' => $form['dlt_options'] ?? []])
     </select>
-    <input name="dl" type="text" id="dl" size="8" maxlength="7" value="{{ $form['dl'] }}">
-    <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="{{ $form['dl2'] }}"></div>
-<div class="nx-fhead">Warned:</div>
-<div class="nx-fcell {{ $form['w_hl'] ?? '' }}"><select name="w">
+    <input name="dl" type="text" id="dl" size="8" maxlength="7" value="{{ $form['dl'] }}" aria-label="Downloaded GB">
+    <input name="dl2" type="text" id="dl2" size="8" maxlength="7" value="{{ $form['dl2'] }}" aria-label="Downloaded GB second value"></div>
+<label class="nx-fhead" for="us-w">Warned:</label>
+<div class="nx-fcell {{ $form['w_hl'] ?? '' }}"><select id="us-w" name="w">
 @include('components.usersearch.options', ['options' => $form['w_options'] ?? []])
 	</select></div>
 </div>
 <div class="nx-grouprow">
 <div class="nx-fhead"></div>
 <div class="nx-fcell"></div>
-<div class="nx-fhead">Active only:</div>
-<div class="nx-fcell {{ $form['ac_hl'] ?? '' }}"><input name="ac" type="checkbox" value="1" {{ $form['ac'] ? 'checked' : '' }}></div>
-<div class="nx-fhead">Disabled IP: </div>
-<div class="nx-fcell {{ $form['dip_hl'] ?? '' }}"><input name="dip" type="checkbox" value="1" {{ $form['dip'] ? 'checked' : '' }}></div>
+<label class="nx-fhead" for="us-ac">Active only:</label>
+<div class="nx-fcell {{ $form['ac_hl'] ?? '' }}"><input id="us-ac" name="ac" type="checkbox" value="1" {{ $form['ac'] ? 'checked' : '' }}></div>
+<label class="nx-fhead" for="us-dip">Disabled IP: </label>
+<div class="nx-fcell {{ $form['dip_hl'] ?? '' }}"><input id="us-dip" name="dip" type="checkbox" value="1" {{ $form['dip'] ? 'checked' : '' }}></div>
 </div>
 <div class="nx-grouprow">
-<div class="nx-ffull text-center"><input name="submit" type=submit class=btn></div>
+<div class="nx-ffull text-center"><input name="submit" type="submit" class="nx-btn nx-btn--primary"></div>
 </div>
 </div>
 <br /><br />

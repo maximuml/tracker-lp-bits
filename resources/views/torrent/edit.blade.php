@@ -27,7 +27,7 @@
             <div class="nx-setrow__control" aria-labelledby="edit-descr-label"><livewire:bbcode-editor form="edittorrent" text="descr" :content="$descrContent ?? ''" /></div>
         </div>
         @if ($technicalInfoEnabled)
-        <x-settings-row layout="setrow" :label="__('functions.text_technical_info')"><textarea name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</x-settings-row>
+        <x-settings-row layout="setrow" :label="__('functions.text_technical_info')" for="technical_info"><textarea id="technical_info" name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</x-settings-row>
         @endif
         <div class="nx-setrow">
             <label class="nx-setrow__label" for="type">{{ __('edit.row_type') }}<span class="text-nxm-danger">*</span></label>
@@ -40,13 +40,13 @@
         <div class="nx-grouprow nx-setrows" id="editcat_section" data-mode="{{ $sectionMode }}">
             <div class="nx-setrow nx-grouprow" relation="{{ $modeClass }}">
                 <span class="nx-setrow__label" id="edit-quality-label">{{ __('edit.row_quality') }}</span>
-                <div class="nx-setrow__control" aria-labelledby="edit-quality-label">{{ $taxonomySelect }}</div>
+                <div class="nx-setrow__control" role="group" aria-labelledby="edit-quality-label">{{ $taxonomySelect }}</div>
             </div>
             {{ $customFieldsHtml }}
             {{ $hitAndRunHtml }}
             <div class="nx-setrow nx-grouprow" relation="{{ $modeClass }}">
                 <span class="nx-setrow__label" id="edit-tags-label">{{ __('functions.text_tags') }}</span>
-                <div class="nx-setrow__control" aria-labelledby="edit-tags-label">{{ $tagCheckbox }}</div>
+                <div class="nx-setrow__control" role="group" aria-labelledby="edit-tags-label">{{ $tagCheckbox }}</div>
             </div>
         </div>
         @if ($showVisibleCheck || $showAnonymousCheck)
@@ -77,19 +77,19 @@
         </div>
         <div class="nx-setrow">
             <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="2" /> {{ __('edit.radio_dupe') }}</label></span>
-            <div class="nx-setrow__control"><input type="text" name="reason[]" /></div>
+            <div class="nx-setrow__control"><input type="text" name="reason[]" aria-label="{{ __('edit.radio_dupe') }} {{ __('edit.text_reason') }}" /></div>
         </div>
         <div class="nx-setrow">
             <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="3" /> {{ __('edit.radio_nuked') }}</label></span>
-            <div class="nx-setrow__control"><input type="text" name="reason[]" /></div>
+            <div class="nx-setrow__control"><input type="text" name="reason[]" aria-label="{{ __('edit.radio_nuked') }} {{ __('edit.text_reason') }}" /></div>
         </div>
         <div class="nx-setrow">
             <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="4" /> {{ __('edit.radio_rules') }}</label></span>
-            <div class="nx-setrow__control"><input type="text" name="reason[]" />{{ __('edit.text_req') }}</div>
+            <div class="nx-setrow__control"><input type="text" name="reason[]" aria-label="{{ __('edit.radio_rules') }} {{ __('edit.text_reason') }}" />{{ __('edit.text_req') }}</div>
         </div>
         <div class="nx-setrow">
             <span class="nx-setrow__label"><label><input name="reasontype" type="radio" value="5" checked="checked" /> {{ __('edit.radio_other') }}</label></span>
-            <div class="nx-setrow__control"><input type="text" name="reason[]" />{{ __('edit.text_req') }}</div>
+            <div class="nx-setrow__control"><input type="text" name="reason[]" aria-label="{{ __('edit.radio_other') }} {{ __('edit.text_reason') }}" />{{ __('edit.text_req') }}</div>
         </div>
     </section>
 </div>

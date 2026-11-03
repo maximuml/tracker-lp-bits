@@ -240,6 +240,7 @@ final class UserClass
         bool $includeNoClass = false,
         bool $disabled = false,
         array $labels = [],
+        ?string $ariaLabel = null,
     ): Htmlable {
         $options = '';
 
@@ -263,6 +264,7 @@ final class UserClass
             'name' => $selectName,
             'disabled' => $disabled,
             'options' => SafeHtml::fromTrustedHtml($options),
+            'ariaLabel' => $ariaLabel,
         ]);
     }
 
@@ -278,6 +280,7 @@ final class UserClass
         int $minClass = 0,
         bool $includeNoClass = false,
         bool $disabled = false,
+        ?string $ariaLabel = null,
     ): Htmlable {
 
         return self::classSelect(
@@ -288,6 +291,7 @@ final class UserClass
             $includeNoClass,
             $disabled,
             ['select_an_user_class' => __('functions.select_an_user_class')],
+            $ariaLabel,
         );
     }
 }

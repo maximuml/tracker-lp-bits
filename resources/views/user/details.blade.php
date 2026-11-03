@@ -104,24 +104,24 @@
 <input type="hidden" name="userid" value="{{ $id }}" />
 <input type="hidden" name="returnto" value="/userdetails?id={{ $id }}" />
 <x-data-table :caption="__('userdetails.text_edit_user')" captionHidden class="nx-main">
-<x-settings-row :label="__('userdetails.row_title')"><input type="text" size="60" name="title" value="{{ trim((string) $user['title']) }}" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_privacy_level')"><input type="radio" name="privacy" value="low"@if (($user['privacy'] ?? '') === 'low') checked="checked"@endif />{{ __('userdetails.radio_low') ?? '' }}<input type="radio" name="privacy" value="normal"@if (($user['privacy'] ?? '') === 'normal') checked="checked"@endif />{{ __('userdetails.radio_normal') ?? '' }}<input type="radio" name="privacy" value="strong"@if (($user['privacy'] ?? '') === 'strong') checked="checked"@endif />{{ __('userdetails.radio_strong') ?? '' }}</x-settings-row>
-<x-settings-row :label="__('userdetails.row_avatar_url')"><input type="text" size="60" name="avatar" value="{{ trim((string) $user['avatar']) }}" /></x-settings-row>
+<x-settings-row :label="__('userdetails.row_title')" for="mod-title"><input type="text" size="60" id="mod-title" name="title" value="{{ trim((string) $user['title']) }}" /></x-settings-row>
+<x-settings-row :label="__('userdetails.row_privacy_level')"><label><input type="radio" name="privacy" value="low"@if (($user['privacy'] ?? '') === 'low') checked="checked"@endif />{{ __('userdetails.radio_low') ?? '' }}</label><label><input type="radio" name="privacy" value="normal"@if (($user['privacy'] ?? '') === 'normal') checked="checked"@endif />{{ __('userdetails.radio_normal') ?? '' }}</label><label><input type="radio" name="privacy" value="strong"@if (($user['privacy'] ?? '') === 'strong') checked="checked"@endif />{{ __('userdetails.radio_strong') ?? '' }}</label></x-settings-row>
+<x-settings-row :label="__('userdetails.row_avatar_url')" for="mod-avatar"><input type="text" size="60" id="mod-avatar" name="avatar" value="{{ trim((string) $user['avatar']) }}" /></x-settings-row>
 @if ($currentClass === UC_STAFFLEADER)
 <x-settings-row :label="__('userdetails.row_donor_status')"><x-user.radio-yesno name="donor" :yes="\App\Support\YesNo::isYes($user['donor'] ?? null)" :no="\App\Support\YesNo::isNo($user['donor'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_donated')">USD: <input type="text" size="5" name="donated" value="{{ $user['donated'] }}" />&nbsp;&nbsp;&nbsp;&nbsp;CNY: <input type="text" size="5" name="donated_cny" value="{{ $user['donated_cny'] }}" />{{ __('userdetails.text_transaction_memo') ?? '' }}<input type="text" size="50" name="donation_memo" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_donoruntil')"><input type="text" name="donoruntil" value="{{ $user['donoruntil'] }}" /> {{ __('userdetails.text_donoruntil_note') ?? '' }}</x-settings-row>
+<x-settings-row :label="__('userdetails.row_donated')"><label>USD: <input type="text" size="5" name="donated" value="{{ $user['donated'] }}" /></label>&nbsp;&nbsp;&nbsp;&nbsp;<label>CNY: <input type="text" size="5" name="donated_cny" value="{{ $user['donated_cny'] }}" /></label><label>{{ __('userdetails.text_transaction_memo') ?? '' }}<input type="text" size="50" name="donation_memo" /></label></x-settings-row>
+<x-settings-row :label="__('userdetails.row_donoruntil')" for="donoruntil"><input type="text" id="donoruntil" name="donoruntil" value="{{ $user['donoruntil'] }}" /> {{ __('userdetails.text_donoruntil_note') ?? '' }}</x-settings-row>
 @endif
 <x-settings-row :label="__('functions.text_management_system')">{{ $migratedHelp }}</x-settings-row>
-<x-settings-row :label="__('userdetails.row_staff_duties')"><textarea cols="60" rows="6" name="staffduties">{{ $user['stafffor'] }}</textarea></x-settings-row>
-<x-settings-row :label="__('userdetails.row_support_language')"><input type="text" name="supportlang" value="{{ $user['supportlang'] }}" /></x-settings-row>
+<x-settings-row :label="__('userdetails.row_staff_duties')" for="staffduties"><textarea cols="60" rows="6" id="staffduties" name="staffduties">{{ $user['stafffor'] }}</textarea></x-settings-row>
+<x-settings-row :label="__('userdetails.row_support_language')" for="supportlang"><input type="text" id="supportlang" name="supportlang" value="{{ $user['supportlang'] }}" /></x-settings-row>
 <x-settings-row :label="__('userdetails.row_support')"><x-user.radio-yesno name="support" :yes="\App\Support\YesNo::isYes($user['support'] ?? null)" :no="\App\Support\YesNo::isNo($user['support'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_support_for')"><textarea cols="60" rows="6" name="supportfor">{{ $user['supportfor'] }}</textarea></x-settings-row>
+<x-settings-row :label="__('userdetails.row_support_for')" for="supportfor"><textarea cols="60" rows="6" id="supportfor" name="supportfor">{{ $user['supportfor'] }}</textarea></x-settings-row>
 @if ($canManageConfidential)
-<x-settings-row :label="__('userdetails.row_comment')"><textarea cols="60" rows="6" name="modcomment" placeholder="{{ $modcomment }}"></textarea></x-settings-row>
-<x-settings-row :label="__('userdetails.row_seeding_karma')"><textarea cols="60" rows="6" name="bonuscomment" readonly="readonly">{{ $bonuscomment }}</textarea></x-settings-row>
+<x-settings-row :label="__('userdetails.row_comment')" for="modcomment"><textarea cols="60" rows="6" id="modcomment" name="modcomment" placeholder="{{ $modcomment }}"></textarea></x-settings-row>
+<x-settings-row :label="__('userdetails.row_seeding_karma')" for="bonuscomment"><textarea cols="60" rows="6" id="bonuscomment" name="bonuscomment" readonly="readonly">{{ $bonuscomment }}</textarea></x-settings-row>
 @endif
-<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('userdetails.row_warning_system') }}<br /><br />{{ __('userdetails.row_warning_system_note') }}</td><td class="align-top px-2.5 py-1.5"><x-data-table :caption="__('userdetails.row_warning_system')" captionHidden class="nx-main"><tr><td class="align-top px-2.5 py-1.5">@if ($warned)<input name="warned" value="yes" type="radio" checked="checked" />{{ __('userdetails.radio_yes') ?? '' }}<input name="warned" value="no" type="radio" />{{ __('userdetails.radio_no') ?? '' }}@else{{ __('userdetails.text_not_warned') ?? '' }}@endif</td>
+<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('userdetails.row_warning_system') }}<br /><br />{{ __('userdetails.row_warning_system_note') }}</td><td class="align-top px-2.5 py-1.5"><x-data-table :caption="__('userdetails.row_warning_system')" captionHidden class="nx-main"><tr><td class="align-top px-2.5 py-1.5">@if ($warned)<label><input name="warned" value="yes" type="radio" checked="checked" />{{ __('userdetails.radio_yes') ?? '' }}</label><label><input name="warned" value="no" type="radio" />{{ __('userdetails.radio_no') ?? '' }}</label>@else{{ __('userdetails.text_not_warned') ?? '' }}@endif</td>
 @if ($warned)
 @if ($warnedUntilPretty === null)
 <td class="align-top px-2.5 py-1.5 text-center">{{ __('userdetails.text_arbitrary_duration') ?? '' }}</td>
@@ -130,15 +130,15 @@
 @endif
 </tr>
 @else
-<td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_warn_for') ?? '' }}<select name="warnlength">
+<td class="align-top px-2.5 py-1.5"><label>{{ __('userdetails.text_warn_for') ?? '' }}<select name="warnlength">
 <option value="0">------</option>
 <option value="1">1 {{ __('userdetails.text_week') ?? '' }}</option>
 <option value="2">2 {{ __('userdetails.text_weeks') ?? '' }}</option>
 <option value="4">4 {{ __('userdetails.text_weeks') ?? '' }}</option>
 <option value="8">8 {{ __('userdetails.text_weeks') ?? '' }}</option>
 <option value="255">{{ __('userdetails.text_unlimited') ?? '' }}</option>
-</select></td></tr>
-<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_reason_of_warning') ?? '' }}</td><td class="align-top px-2.5 py-1.5"><input type="text" size="60" name="warnpm" /></td></tr>
+</select></label></td></tr>
+<tr><td class="align-top px-2.5 py-1.5"><label for="warnpm">{{ __('userdetails.text_reason_of_warning') ?? '' }}</label></td><td class="align-top px-2.5 py-1.5"><input type="text" size="60" id="warnpm" name="warnpm" /></td></tr>
 @endif
 <tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_times_warned') ?? '' }}</td><td class="align-top px-2.5 py-1.5">{{ $user['timeswarned'] }}</td></tr>
 @if ((int) $user['timeswarned'] === 0)
@@ -160,10 +160,10 @@
 <x-settings-row :label="__('userdetails.row_upload_possible')"><x-user.radio-yesno name="uploadpos" :yes="\App\Support\YesNo::isYes($user['uploadpos'] ?? null)" :no="\App\Support\YesNo::isNo($user['uploadpos'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
 <x-settings-row :label="__('userdetails.row_download_possible')"><x-user.radio-yesno name="downloadpos" :yes="\App\Support\YesNo::isYes($user['downloadpos'] ?? null)" :no="\App\Support\YesNo::isNo($user['downloadpos'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
 @if ($canManageConfidential)
-<x-settings-row :label="__('userdetails.row_change_username')"><input type="text" size="25" name="username" value="{{ $user['username'] }}" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_change_email')"><input type="text" size="80" name="email" value="{{ $user['email'] }}" /></x-settings-row>
+<x-settings-row :label="__('userdetails.row_change_username')" for="mod-username"><input type="text" size="25" id="mod-username" name="username" value="{{ $user['username'] }}" /></x-settings-row>
+<x-settings-row :label="__('userdetails.row_change_email')" for="mod-email"><input type="text" size="80" id="mod-email" name="email" value="{{ $user['email'] }}" /></x-settings-row>
 @endif
-<x-settings-row :label="__('userdetails.row_passkey')"><input name="resetkey" value="yes" type="checkbox" />{{ __('userdetails.checkbox_reset_passkey') ?? '' }}</x-settings-row>
+<x-settings-row :label="__('userdetails.row_passkey')"><label><input name="resetkey" value="yes" type="checkbox" />{{ __('userdetails.checkbox_reset_passkey') ?? '' }}</label></x-settings-row>
 <tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') ?? '' }}" /></td></tr>
 </x-data-table>
 </form>

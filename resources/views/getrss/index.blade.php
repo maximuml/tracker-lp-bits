@@ -37,9 +37,9 @@
 <div class="nx-fhead">{{ __('getrss.row_item_title_type') }}
 </div>
 <div class="nx-fcell">
-<input type="checkbox" name="itemcategory" value="1" />{{ __('getrss.text_item_category') }}&nbsp;<input type="checkbox" name="itemtitle" checked="checked" disabled="disabled" />{{ __('getrss.text_item_title') }}&nbsp;<input type="checkbox" name="itemsize" value="1" />{{ __('getrss.text_item_size') }}&nbsp;<input type="checkbox" name="itemuploader" value="1" />{{ __('getrss.text_item_uploader') }}
+<label><input type="checkbox" name="itemcategory" value="1" />{{ __('getrss.text_item_category') }}</label>&nbsp;<label><input type="checkbox" name="itemtitle" checked="checked" disabled="disabled" />{{ __('getrss.text_item_title') }}</label>&nbsp;<label><input type="checkbox" name="itemsize" value="1" />{{ __('getrss.text_item_size') }}</label>&nbsp;<label><input type="checkbox" name="itemuploader" value="1" />{{ __('getrss.text_item_uploader') }}</label>
 </div>
-<div class="nx-fhead">{{ __('getrss.row_rows_per_page') }}</div><div class="nx-fcell"><select name="showrows">
+<label class="nx-fhead" for="showrows">{{ __('getrss.row_rows_per_page') }}</label><div class="nx-fcell"><select name="showrows" id="showrows">
 @foreach ($allowed_showrows as $showrow)
 <option value="{{ $showrow }}">{{ $showrow }}</option>
 @endforeach

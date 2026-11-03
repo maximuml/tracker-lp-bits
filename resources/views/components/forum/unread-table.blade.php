@@ -25,9 +25,9 @@
         @endforeach
     </x-data-table>
     <div class="mt-2 flex gap-2">
-        <form method="get" action="{{ request()->getPathInfo() }}"><input type="hidden" name="catchup" value="1" /><x-button type="submit">{{ __('forums.text_catch_up') }}</x-button></form>
+        <form method="get" action="{{ request()->getPathInfo() }}"><input type="hidden" name="catchup" value="1" /><x-button type="submit" size="sm">{{ __('forums.text_catch_up') }}</x-button></form>
         @if ($list->moreBeforePostId !== null)
-            <form method="get" action="{{ request()->getPathInfo() }}"><input type="hidden" name="action" value="viewunread" /><input type="hidden" name="beforepostid" value="{{ $list->moreBeforePostId }}" /><x-button type="submit">{{ __('forums.submit_show_more') }}</x-button></form>
+            <form method="get" action="{{ request()->getPathInfo() }}"><input type="hidden" name="action" value="viewunread" /><input type="hidden" name="beforepostid" value="{{ $list->moreBeforePostId }}" /><x-button type="submit" size="sm">{{ __('forums.submit_show_more') }}</x-button></form>
         @endif
     </div>
 @else

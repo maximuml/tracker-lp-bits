@@ -1921,6 +1921,9 @@ select.nx-field__input {
 .nx-btn--primary { border-color: var(--nxm-accent); background: var(--nxm-accent); color: var(--nxm-on-accent); }
 .nx-btn--primary:hover { background: var(--nxm-accent-hover); }
 .nx-btn--danger { border-color: var(--nxm-danger); background: var(--nxm-danger); color: var(--nxm-on-danger); }
+/* compact variant for dense actions (forum fast-search, inline row tools) —
+   same contract, smaller footprint */
+.nx-btn--sm { font-size: 0.78rem; padding: 0.2rem 0.6rem; }
 .nx-btn:focus-visible { outline: var(--nxm-focus-outline); outline-offset: 2px; }
 
 /* Shared footer preview image (was an inline style — CSP-blocked). */

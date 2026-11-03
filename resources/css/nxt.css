@@ -81,15 +81,9 @@ table.main {
 
 .nx-field__help {margin:4px 0 0;color:var(--nxm-text-dim,#666);font-size:12px}
 
-.nx-btn {display:inline-block;padding:4px 14px;border:1px solid var(--nxm-border,#999);border-radius:3px;background:var(--nxm-surface-alt,#f0f0f0);color:var(--nxm-text,#222);cursor:pointer;text-decoration:none;font-size:12px}
-
-.nx-btn:hover {background:var(--nxm-border,#e4e4e4)}
-
-.nx-btn--primary {border-color:var(--nxm-accent,#0062AE);background:var(--nxm-accent,#0062AE);color:var(--nxm-on-accent,#fff)}
-
-.nx-btn--danger {border-color:var(--nxm-danger,#c00);background:var(--nxm-danger,#c00);color:#fff}
-
-.nx-btn:focus-visible {outline:2px solid var(--nxm-accent,#0062AE);outline-offset:2px}
+/* .nx-btn lives in modern.css (unlayered always wins over this layer) —
+   the duplicate contract recipe was removed to stop the drift flagged
+   in the UI-07 audit. */
 
 .nx-table-wrap {overflow-x:auto}
 

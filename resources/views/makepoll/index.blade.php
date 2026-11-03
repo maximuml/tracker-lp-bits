@@ -17,9 +17,9 @@
 input.mp { width: 450px; max-width: 100%; box-sizing: border-box; }
 </style>
 <div class="nx-fgrid">
-<div class="nx-fhead">{{ __('makepoll.text_question')}} <span class="text-nxm-danger">*</span></div><div class="nx-fcell"><input name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></div>
+<label class="nx-fhead" for="poll-question">{{ __('makepoll.text_question')}} <span class="text-nxm-danger">*</span></label><div class="nx-fcell"><input id="poll-question" name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></div>
 @for ($i = 0; $i <= 19; $i++)
-<div class="nx-fhead">{{ (__('makepoll.text_option')).($i + 1) }}@if ($i < 2) <span class="text-nxm-danger">*</span>@endif</div><div class="nx-fcell"><input name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></div>
+<label class="nx-fhead" for="poll-option{{ $i }}">{{ (__('makepoll.text_option')).($i + 1) }}@if ($i < 2) <span class="text-nxm-danger">*</span>@endif</label><div class="nx-fcell"><input id="poll-option{{ $i }}" name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></div>
 @endfor
 <div class="nx-ffull text-center"><input type=submit value="{{ $pollid ? (__('makepoll.submit_edit_poll')) : (__('makepoll.submit_create_poll')) }}"></div>
 </div>

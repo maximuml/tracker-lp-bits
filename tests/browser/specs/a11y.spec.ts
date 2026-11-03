@@ -247,3 +247,73 @@ test.describe('tracker settings form', () => {
     expect(violationCounts).toEqual([]);
   });
 });
+
+test.describe('staff form accessible names', () => {
+  test.use({ storageState: AUTH_STATE });
+
+  const LABEL_RULES = [
+    'label',
+    'select-name',
+    'form-field-multiple-labels',
+    'aria-input-field-name',
+  ];
+
+  const FORM_PAGES = [
+    `/edit?id=${BROWSER_TID}`,
+    '/forums?action=viewforum&forumid=1',
+    '/web/getrss',
+    '/web/modrules?act=newsect',
+    '/web/makepoll',
+    '/web/faqactions?action=addsection',
+    '/web/adduser',
+    '/userdetails?id=10001',
+    '/web/clearcache',
+    '/web/settings?action=basicsettings',
+    '/web/settings?action=mainsettings',
+    '/web/settings?action=smtpsettings',
+    '/web/settings?action=securitysettings',
+    '/web/settings?action=authoritysettings',
+    '/web/settings?action=tweaksettings',
+    '/web/settings?action=bonussettings',
+    '/web/settings?action=accountsettings',
+    '/web/settings?action=torrentsettings',
+    '/web/settings?action=attachmentsettings',
+    '/web/settings?action=miscsettings',
+  ] as const;
+
+  for (const path of FORM_PAGES) {
+    test(`${path} controls have accessible names`, async ({ page }) => {
+      await page.goto(path, { waitUntil: 'networkidle' });
+
+      const results = await new AxeBuilder({ page })
+        .withRules(LABEL_RULES)
+        .analyze();
+      const violationCounts = results.violations.map(
+        ({ id, nodes }) => `${id}: ${nodes.length}`,
+      );
+      expect(violationCounts).toEqual([]);
+    });
+  }
+
+  test('upload taxonomy controls stay labelled after category pick', async ({
+    page,
+  }) => {
+    await page.goto('/web/upload', { waitUntil: 'networkidle' });
+
+    const category = page.locator('select[name="type"]');
+    await expect(category).toBeVisible();
+    // Selecting a category reveals the taxonomy selects (medium/codec/…)
+    // and tag checkboxes — the filled state that used to hide unnamed
+    // controls. scan after the pick, not just the empty form.
+    await category.selectOption({ index: 2 });
+    await page.waitForTimeout(500);
+
+    const results = await new AxeBuilder({ page })
+      .withRules(LABEL_RULES)
+      .analyze();
+    const violationCounts = results.violations.map(
+      ({ id, nodes }) => `${id}: ${nodes.length}`,
+    );
+    expect(violationCounts).toEqual([]);
+  });
+});

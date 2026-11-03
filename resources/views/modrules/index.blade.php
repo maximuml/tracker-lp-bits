@@ -8,11 +8,11 @@
 <form method="post" class="nx-inline" action="/web/staff/modrules?act=addsect">
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
-        <div class="nx-fcell">Title:</div><div class="nx-fcell"><input type="text" name="title"/></div>
-        <div class="nx-fcell">Rules:</div><div class="nx-fcell"><textarea cols="90" rows="20" name="text"></textarea></div>
-            <div class="nx-fcell">Language:</div>
+        <label class="nx-fcell" for="rule-title">Title:</label><div class="nx-fcell"><input type="text" id="rule-title" name="title"/></div>
+        <label class="nx-fcell" for="rule-text">Rules:</label><div class="nx-fcell"><textarea cols="90" rows="20" id="rule-text" name="text"></textarea></div>
+            <label class="nx-fcell" for="rule-language">Language:</label>
             <div class="nx-fcell text-center">
-                <select name="language">
+                <select name="language" id="rule-language">
                     @foreach ($langs as $row)
                     <option value="{{ (int) $row['id'] }}"@if (($row['site_lang_folder'] ?? '') == $deflang) selected @endif>{{ $row['lang_name'] }}</option>
                     @endforeach
@@ -26,11 +26,11 @@
 <form method="post" class="nx-inline" action="/web/staff/modrules?act=edited">
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
-        <div class="nx-fcell">Title:</div><div class="nx-fcell"><input type="text" name="title" value="{{ $rule['title'] ?? '' }}" /></div>
-        <div class="nx-fcell">Rules:</div><div class="nx-fcell"><textarea cols="90" rows="20" name="text">{{ $rule['text'] ?? '' }}</textarea></div>
-            <div class="nx-fcell">Language:</div>
+        <label class="nx-fcell" for="rule-title">Title:</label><div class="nx-fcell"><input type="text" id="rule-title" name="title" value="{{ $rule['title'] ?? '' }}" /></div>
+        <label class="nx-fcell" for="rule-text">Rules:</label><div class="nx-fcell"><textarea cols="90" rows="20" id="rule-text" name="text">{{ $rule['text'] ?? '' }}</textarea></div>
+            <label class="nx-fcell" for="rule-language">Language:</label>
             <div class="nx-fcell text-center">
-                <select name="language">
+                <select name="language" id="rule-language">
                     @foreach ($langs as $row)
                     <option value="{{ (int) $row['id'] }}"@if (($row['id'] ?? 0) == ($rule['lang_id'] ?? 0)) selected @endif>{{ $row['lang_name'] }}</option>
                     @endforeach

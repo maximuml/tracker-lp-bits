@@ -27,7 +27,10 @@
     --nxm-border: #d8dce3;
     --nxm-accent: #1f6fd0;
     --nxm-accent-hover: #1758a8;
-    --nxm-accent-text: var(--nxm-accent);
+    /* accent-text must also hold on --nxm-surface-alt (#eef1f5) where plain
+       content links land, so it tracks the deeper variant rather than the
+       bright accent (4.37:1 there is below AA) */
+    --nxm-accent-text: var(--nxm-accent-deep);
     --nxm-accent-text-hover: var(--nxm-accent-hover);
     /* links on tinted surfaces (--nxm-surface-alt #eef1f5, table headers,
        tabs): the bright accent reaches only 4.37 there, so those contexts
@@ -67,22 +70,22 @@
 
     /* rank name colours (Classic palette) */
     --nxm-name-administrator: #4b0082;
-    --nxm-name-crazyuser: #007faa;
+    --nxm-name-crazyuser: #00769e;
     --nxm-name-eliteuser: #007575;
-    --nxm-name-extremeuser: #b26100;
-    --nxm-name-forummoderator: #12828c;
+    --nxm-name-extremeuser: #a65b00;
+    --nxm-name-forummoderator: #117982;
     --nxm-name-insaneuser: #8b008b;
-    --nxm-name-moderator: #4e75bb;
-    --nxm-name-nexusmaster: #287dac;
+    --nxm-name-moderator: #496daf;
+    --nxm-name-nexusmaster: #2574a0;
     --nxm-name-peasant: #5a6a7a;
-    --nxm-name-poweruser: #947015;
-    --nxm-name-retiree: #12828c;
+    --nxm-name-poweruser: #8a6914;
+    --nxm-name-retiree: #117982;
     --nxm-name-staffleader: #8b0000;
     --nxm-name-sysop: #a0522d;
     --nxm-name-ultimateuser: #006400;
-    --nxm-name-uploader: #dc143c;
+    --nxm-name-uploader: #d5133a;
     --nxm-name-user: #000000;
-    --nxm-name-vip: #008a00;
+    --nxm-name-vip: #008000;
     --nxm-name-veteranuser: #483d8b;
 
     /* legacy panel (mybonus "What is karma") */
@@ -2106,9 +2109,9 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 .nx-post { border: 1px solid var(--nxm-border); border-radius: var(--nxm-radius); margin-bottom: 0.6rem; overflow: hidden; }
 .nx-post__head { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--nxm-border); background: var(--nxm-surface-alt); font-size: 0.85rem; }
 .nx-post__meta { min-width: 0; }
-.nx-post__meta :is(a:link, a:visited) { color: var(--nxm-accent-hover); }
+.nx-post__meta :is(a:link, a:visited) { color: var(--nxm-accent-deep, var(--nxm-accent-text, var(--nxm-accent))); }
 .nx-post__num { white-space: nowrap; }
-.nx-post__top { text-decoration: none; margin-left: 0.3rem; }
+.nx-post__top { margin-left: 0.3rem; }
 .nx-post__grid { display: grid; grid-template-columns: 6.5rem 1fr; }
 .nx-post__user { padding: 0.6rem 0.5rem; border-right: 1px solid var(--nxm-border); text-align: center; }
 .nx-post__avatar img { display: block; width: 64px; height: 64px; margin: 0 auto; border-radius: 10px; object-fit: cover; }

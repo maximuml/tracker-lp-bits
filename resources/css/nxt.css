@@ -741,7 +741,7 @@ button.nx-btn-link {
 
 .nti-track .nti-badge { display: inline-block; font-size: 10px; padding: 0 4px; margin-left: 4px; border-radius: 3px; background: rgba(0,150,80,.20); color: inherit; vertical-align: 1px; }
 
-.nti-more { margin-top: 6px; font-size: 11px; opacity: .9; }
+.nti-more { margin-top: 6px; font-size: 11px; }
 
 .nti-raw { margin-top: 8px; }
 

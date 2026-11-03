@@ -31,7 +31,7 @@
     @endforeach
 
 @elseif ($action === 'basicsettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_basic">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_basic">@csrf
     <x-settings-row layout="grid" :label="__('settings.row_site_name')" for="SITENAME">
         <input type="text" id="SITENAME" name="SITENAME" value="{{ (string)($config['SITENAME'] ?? 'Nexus') }}"> {{ __('settings.text_site_name_note') ?? '' }}
     </x-settings-row>
@@ -42,7 +42,7 @@
     </form>
 
 @elseif ($action === 'mainsettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_main">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_main">@csrf
     <x-settings-yesno layout="grid" :label="__('settings.row_site_online')" name="site_online" :value="$config['site_online'] ?? 'yes'" :note="__('settings.text_site_online_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_invite_system')" name="invitesystem" :value="$config['invitesystem'] ?? 'yes'" :note="__('settings.text_invite_system_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-text layout="grid" :label="__('settings.row_initial_uploading_amount')" name="iniupload" :value="$config['iniupload'] ?? 0" :note="__('settings.text_initial_uploading_amount_note')" />
@@ -141,7 +141,7 @@
     </form>
 
 @elseif ($action === 'smtpsettings')
-    <form method="post" action="/web/settings/submit" name="smtpsettings_form"><input type="hidden" name="action" value="savesettings_smtp">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit" name="smtpsettings_form"><input type="hidden" name="action" value="savesettings_smtp">@csrf
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_email_notification')" name="emailnotify" :value="$config['emailnotify'] ?? 'no'" :note="__('settings.text_email_notification_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-radios layout="grid"         :label="__('settings.row_mail_function_type')"
         name="smtptype"
@@ -169,7 +169,7 @@
     </form>
 
 @elseif ($action === 'securitysettings')
-    <form method="post" action="/web/settings/submit" name="securitysettings_form"><input type="hidden" name="action" value="savesettings_security">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit" name="securitysettings_form"><input type="hidden" name="action" value="savesettings_security">@csrf
     <x-settings-radios layout="grid"         :label="__('settings.row_enable_ssl')"
         name="securelogin"
         :options="['yes' => __('settings.text_yes'), 'no' => __('settings.text_no'), 'op' => __('settings.text_optional')]"
@@ -227,7 +227,7 @@
     </form>
 
 @elseif ($action === 'authoritysettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_authority">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_authority">@csrf
     @foreach ([
         ['defaultclass', 'row_default_class', \App\Enums\UserClass::USER, 'text_default_class_note'],
         ['staffmem', 'row_staff_member', \App\Enums\UserClass::MODERATOR, 'text_staff_member_note'],
@@ -286,7 +286,7 @@
     </form>
 
 @elseif ($action === 'tweaksettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_tweak">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_tweak">@csrf
     <x-settings-yesno layout="grid" :label="__('settings.row_save_user_location')" name="where" :value="$config['where'] ?? 'no'" :note="__('settings.text_save_user_location_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-row layout="grid" :label="__('settings.row_kps_enabled')">
         @foreach (['enable' => 'text_enabled', 'disablesave' => 'text_disabled_but_save', 'disable' => 'text_disabled_no_save'] as $val => $labelKey)
@@ -307,7 +307,7 @@
     </form>
 
 @elseif ($action === 'bonussettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_bonus">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_bonus">@csrf
     <div class="nx-ffull text-center"><b>{{ __('settings.text_bonus_by_seeding') ?? 'Bonus by seeding' }}</b></div>
     <x-settings-text layout="grid" :label="__('settings.row_min_size')" name="min_size" :value="$config['min_size'] ?? 0" :note="__('settings.text_bonus_mini_size').' '.(__('settings.text_bonus_mini_size_help'))" />
     <x-settings-text layout="grid" :label="__('settings.row_donor_gets_double')" name="donortimes" :value="$config['donortimes'] ?? 2" :note="__('settings.text_donor_gets').' '.(__('settings.text_times_as_many'))" />
@@ -379,7 +379,7 @@
     </form>
 
 @elseif ($action === 'accountsettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_account">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_account">@csrf
     <div class="nx-ffull text-center"><b>{{ __('settings.text_delete_inactive_accounts') ?? 'Delete inactive' }}</b></div>
     <x-settings-row layout="grid" :label="__('settings.row_never_delete')">
         {{ \App\Support\UserClass::classSelectWithContext('neverdelete', \App\Enums\UserClass::VIP->value, $config['neverdelete'] ?? 0, 0, false, false, __('settings.row_never_delete')) }}{{ __('settings.text_never_delete') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::VETERAN_USER->value, false, true, true) }}
@@ -417,7 +417,7 @@
     </form>
 
 @elseif ($action === 'torrentsettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_torrent">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_torrent">@csrf
     <x-settings-text layout="grid" :label="__('settings.row_sticky_first_level_background_color')" name="sticky_first_level_background_color" :value="$config['sticky_first_level_background_color'] ?? ''" :note="__('settings.text_sticky_first_level_background_color_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_sticky_second_level_background_color')" name="sticky_second_level_background_color" :value="$config['sticky_second_level_background_color'] ?? ''" :note="__('settings.text_sticky_second_level_background_color_note')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_download_support_passkey')" name="download_support_passkey" :value="$config['download_support_passkey'] ?? 'yes'" :note="__('settings.text_download_support_passkey_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
@@ -476,7 +476,7 @@
     </form>
 
 @elseif ($action === 'attachmentsettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_attachment">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_attachment">@csrf
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_attachment')" name="enableattach" :value="$config['enableattach'] ?? 'no'" :note="__('settings.text_enable_attachment_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-row layout="grid" :label="__('settings.row_attachment_authority')">
         <ul>
@@ -513,7 +513,7 @@
     </form>
 
 @elseif ($action === 'codesettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_code">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_code">@csrf
     <x-settings-text layout="grid" :label="__('settings.row_main_version')" name="mainversion" :value="$config['mainversion'] ?? 'NexusPHP'" :note="__('settings.text_main_version_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_sub_version')" name="subversion" :value="$config['subversion'] ?? '1.0'" :note="__('settings.text_sub_version_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_release_date')" name="releasedate" :value="$config['releasedate'] ?? '2008-12-10'" :note="__('settings.text_release_date_note')" />
@@ -522,7 +522,7 @@
     </form>
 
 @elseif ($action === 'miscsettings')
-    <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_misc">@csrf
+    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_misc">@csrf
     <label class="nx-fhead whitespace-nowrap" for="donation_custom">{{ __('settings.row_misc_donation_custom') ?? 'Donation custom' }}</label><div class="nx-fcell"><textarea cols="100" rows="10" id="donation_custom" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('settings.text_donation_custom_note') }}&nbsp;<b><a href="/web/tags" target="_blank">{{ __('settings.text_bbcode_tag') }}</a></b></div>
     <x-settings-text layout="grid" :label="__('settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('settings.text_protected_forum')" />
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />

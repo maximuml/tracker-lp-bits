@@ -3352,3 +3352,13 @@ html[data-theme="dark"] .nx-off__chip--allowed { color: var(--nxm-success); }
 html[data-theme="dark"] .nx-off__chip--pending { color: var(--nxm-warning); }
 html[data-theme="dark"] .nx-off__chip--denied { color: var(--nxm-danger); }
 html[data-theme="dark"] .nx-off a.nx-btn:not(.nx-btn--primary) { color: var(--nxm-text); }
+
+/* Narrow-viewport form rows: keep controls inside the container instead of
+   clipping them outside the horizontal scroller. */
+@media (max-width: 640px) {
+    .nx-shbox-row { flex-wrap: wrap; }
+    .nx-shbox-row input[name="shbox_text"] { min-width: 0; flex-basis: 100%; }
+    .nx-pollrow { flex-wrap: wrap; }
+    .nx-pollrow__bar { min-width: 0; white-space: normal; }
+    .nx-pollrow__bar .nx-pollbar { min-width: 0; flex: 1 1 80px; }
+}

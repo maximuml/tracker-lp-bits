@@ -13,16 +13,16 @@
     <x-data-table :caption="__('log.text_search_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.text_search_log')}}</th></tr></thead></x-slot:head>
         <tr><td class="toolbox">
             <form method="get" action="">
-                <input type="text" name="query" value="{{ $q }}">
+                <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
                 @if ($canConfidentialLog)
-                    {{ __('log.text_in')}}<select name="search">
+                    {{ __('log.text_in')}}<select name="search" aria-label="{{ __('log.text_in') }}{{ __('log.text_search_log') }}">
                     @foreach (['all' => (__('log.text_all')), 'normal' => (__('log.text_normal')), 'mod' => (__('log.text_mod'))] as $value => $text)
                         <option value='{{ $value }}'{{ $value === $search ? ' selected' : '' }}>{{ $text }}</option>
                     @endforeach
                     </select>
                 @endif
                 <input type="hidden" name="action" value="dailylog">
-                &nbsp;&nbsp;<input type=submit value="{{ __('log.submit_search')}}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}}"></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($logRows))
@@ -49,9 +49,9 @@
     <x-data-table :caption="__('log.text_search_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.text_search_chronicle')}}</th></tr></thead></x-slot:head>
         <tr><td class="toolbox">
             <form method="get" action="">
-                <input type="text" name="query" value="{{ $q }}">
+                <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
                 <input type="hidden" name="action" value="chronicle">
-                &nbsp;&nbsp;<input type=submit value="{{ __('log.submit_search')}}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}}"></form>
         </td></tr>
     </x-data-table><br />
     @if ($canManage)
@@ -62,7 +62,7 @@
                     @if (! empty($editItem))
                         <input type="hidden" name="id" value="{{ (int) ($editItem['id'] ?? 0) }}">
                     @endif
-                    <input type=submit value="{{ __('log.submit_add')}}"></form>
+                    <input type="submit" class="nx-btn" value="{{ __('log.submit_add')}}"></form>
             </td></tr>
         </x-data-table><br />
     @endif
@@ -82,14 +82,14 @@
     <x-data-table :caption="__('log.text_search_news')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.text_search_news')}}</th></tr></thead></x-slot:head>
         <tr><td class="toolbox">
             <form method="get" action="">
-                <input type="text" name="query" value="{{ $q }}">
-                {{ __('log.text_in')}}<select name="search">
+                <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
+                {{ __('log.text_in')}}<select name="search" aria-label="{{ __('log.text_in') }}{{ __('log.text_search_log') }}">
                 @foreach (['title' => (__('log.text_title')), 'body' => (__('log.text_body')), 'both' => (__('log.text_both'))] as $value => $text)
                     <option value='{{ $value }}'{{ $value === $search ? ' selected' : '' }}>{{ $text }}</option>
                 @endforeach
                 </select>
                 <input type="hidden" name="action" value="news">
-                &nbsp;&nbsp;<input type=submit value="{{ __('log.submit_search')}}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}}"></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($newsRows))

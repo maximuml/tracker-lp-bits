@@ -3,6 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<title>{{ __('torrent.approval.modal_title') }}</title>
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/modern.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc(\App\Support\Style::cssUriWithContext().'theme.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/nxt.css') }}" type="text/css">

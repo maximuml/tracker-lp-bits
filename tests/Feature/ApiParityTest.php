@@ -109,7 +109,6 @@ class ApiParityTest extends TestCase
             'appendsticky' => 'yes',
             'appendnew' => 'yes',
             'appendpromotion' => 2,
-            'appendpicked' => 'yes',
             'dlicon' => 'yes',
             'bmicon' => 'yes',
             'showcomnum' => 'yes',

@@ -144,7 +144,6 @@
                 <div class="nx-setrow__control">
                     <label><input type="checkbox" name="appendsticky" id="usercp-appendsticky" value="yes"@if ($tracker->appendsticky) checked @endif> {{ __('usercp.text_append_sticky') }}<i class="sticky" role="img" aria-label="sticky"></i> {{ __('usercp.text_append_sticky_tail') }}</label>
                     <label><input type="checkbox" name="appendnew" id="usercp-appendnew" value="yes"@if ($tracker->appendnew) checked @endif> {{ __('usercp.text_append_new') }}</label>
-                    <label><input type="checkbox" name="appendpicked" id="usercp-appendpicked" value="yes"@if ($tracker->appendpicked) checked @endif> {{ __('usercp.text_append_picked') }}</label>
                 </div>
             </div>
             <div class="nx-setrow" role="group" aria-labelledby="ucp-g-promotion">

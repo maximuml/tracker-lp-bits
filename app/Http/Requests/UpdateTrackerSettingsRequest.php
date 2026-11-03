@@ -35,7 +35,6 @@ class UpdateTrackerSettingsRequest extends FormRequest
             'appendsticky' => 'sometimes|in:yes',
             'appendnew' => 'sometimes|in:yes',
             'appendpromotion' => 'sometimes|in:highlight,word,icon,off,0,1,2,3',
-            'appendpicked' => 'sometimes|in:yes',
             'dlicon' => 'sometimes|in:yes',
             'bmicon' => 'sometimes|in:yes',
             'showcomnum' => 'sometimes|in:yes',

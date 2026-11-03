@@ -104,7 +104,6 @@ final class UsercpTrackerBuilder
             appendsticky: $actor->yes('appendsticky'),
             appendnew: $actor->yes('appendnew'),
             appendpromotion: UserAppendPromotion::tryFrom((int) $actor->value('appendpromotion', 2))?->stringValue() ?? 'icon',
-            appendpicked: $actor->yes('appendpicked'),
             dlicon: $actor->yes('dlicon'),
             bmicon: $actor->yes('bmicon'),
             showcomnum: $actor->yes('showcomnum'),

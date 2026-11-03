@@ -92,7 +92,6 @@ final class UsercpControllerTest extends TestCase
             'appendsticky' => 'yes',
             'appendnew' => 'yes',
             'appendpromotion' => 1,
-            'appendpicked' => 'yes',
             'dlicon' => 'yes',
             'bmicon' => 'yes',
             'showcomnum' => 'yes',

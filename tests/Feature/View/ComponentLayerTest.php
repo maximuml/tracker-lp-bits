@@ -111,11 +111,15 @@ final class ComponentLayerTest extends TestCase
         $html = $this->render('<x-button type="submit" variant="primary">Save</x-button>');
         $this->assertStringContainsString('<button', $html);
         $this->assertStringContainsString('type="submit"', $html);
-        $this->assertStringContainsString('bg-nxm-accent', $html);
+        $this->assertStringContainsString('nx-btn nx-btn--primary', $html);
 
         $html = $this->render('<x-button href="/next">Go</x-button>');
         $this->assertStringContainsString('<a', $html);
         $this->assertStringContainsString('href="/next"', $html);
+        $this->assertStringContainsString('nx-btn', $html);
+
+        $html = $this->render('<x-button size="sm">Go</x-button>');
+        $this->assertStringContainsString('nx-btn nx-btn--sm', $html);
     }
 
     // --- x-data-table ----------------------------------------------------

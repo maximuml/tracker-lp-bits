@@ -1,6 +1,9 @@
-<html data-theme="{{ $theme }}" data-fontsize="{{ $fontSize }}">
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $theme }}" data-fontsize="{{ $fontSize }}">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ __('attachment.head_attachment') }}</title>
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc($css_uri.'theme.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/modern.css') }}" type="text/css">
 </head>

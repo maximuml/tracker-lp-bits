@@ -1,5 +1,7 @@
-<html><head>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>{{ __('moresmilies.head_more_smilies') }}</title>
 <style type="text/css" nonce="{{ $cspNonce ?? '' }}">

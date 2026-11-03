@@ -1,6 +1,9 @@
 @if (! $isAjax)
-<html data-theme="{{ $theme }}" data-fontsize="{{ $fontSize }}"><head>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $theme }}" data-fontsize="{{ $fontSize }}"><head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ __('index.text_shoutbox') }}</title>
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc(\App\Support\Style::cssUriWithContext().'theme.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ \App\Support\AssetAppender::versionedSrc('css/nxt.css') }}" type="text/css">
 <script nonce="{{ $cspNonce ?? '' }}">var SHOUT_CSRF = '{{ $shoutCsrf }}';window.SHOUT_LANG = {{ Illuminate\Support\Js::from([

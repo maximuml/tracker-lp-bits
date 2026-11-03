@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'head_attachment' => 'Attachment',
     'text_key' => 'Attachment for key ',
     'not_found' => ' not found',
     'size' => 'Size',

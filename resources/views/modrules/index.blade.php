@@ -41,7 +41,7 @@
 </form>
 @else
 <h1 class="text-center">Rules Management</h1>
-<br /><div class="text-center p-[5px] w-[940px]"><a href="/web/modrules?act=newsect">Add Section</a></div>
+<br /><div class="text-center p-[5px]"><a href="/web/modrules?act=newsect">Add Section</a></div>
 @foreach ($rows as $arr)
 <br /><x-data-table caption="Rules Management" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $arr['title'] }} - {{ $arr['lang_name'] }}</th></tr></thead></x-slot:head>
     <tr><td>{{ $arr['textHtml'] }}</td></tr>

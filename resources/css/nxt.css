@@ -1033,7 +1033,7 @@ button.nx-shoutbox-mentions {border:1px solid var(--nxm-danger-border,#c0392b);b
 
 .nx-hl {background:var(--nxm-warning-border,#BBAF9B)}
 
-.nx-grouprow {display:contents}
+.nx-grouprow:not(.nx-setrow) {display:contents}
 
 .nx-fcell {padding:5px;vertical-align:top;text-align:left}
 

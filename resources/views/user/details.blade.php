@@ -8,15 +8,15 @@
 <p><b>{{ __('userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)
 @if ($isFriend)
-<p>(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_friends') ?? '' }}</button></form>)</p>
+<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_friends') ?? '' }}</button></form>)</div>
 @elseif ($currentUserBlockedTarget)
-<p>(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</p>
+<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</div>
 @else
-<p>(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_blocks') ?? '' }}</button></form>)</p>
+<div class="my-2">(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_blocks') ?? '' }}</button></form>)</div>
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
-<h2>{{ __('userdetails.text_flush_ghost_torrents') ?? '' }}<form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('userdetails.text_here') ?? '' }}</button></form></h2>
+<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') ?? '' }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('userdetails.text_here') ?? '' }}</button></form></div>
 @endif
 <x-data-table :caption="__('userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)

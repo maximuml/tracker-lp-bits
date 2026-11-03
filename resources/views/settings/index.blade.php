@@ -7,7 +7,7 @@
 <div class="nx-fgrid nx-fgrid--pad10">
 <div class="nx-ffull nx-fbanner">
 <span class="text-white">{{ __('settings.text_configuration_file_saving_note') ?? 'Settings are stored in the database.' }}</span>
-</td></tr>
+</div>
 
 @if ($action === 'showmenu')
     @foreach ([

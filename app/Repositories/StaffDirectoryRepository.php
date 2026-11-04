@@ -93,29 +93,33 @@ class StaffDirectoryRepository extends BaseRepository
     /** @return list<array<string, mixed>> */
     public function listSysopPanels(): array
     {
-        return array_values(DB::table('sysoppanel')->get()->map(fn ($r): array => (array) $r)->all());
+        return $this->normalizePanelRows(DB::table('sysoppanel')->get()->map(fn ($r): array => (array) $r)->all());
     }
 
     /** @return list<array<string, mixed>> */
     public function listAdminPanels(): array
     {
-        return array_values(DB::table('adminpanel')->get()->map(fn ($r): array => (array) $r)->all());
+        return $this->normalizePanelRows(DB::table('adminpanel')->get()->map(fn ($r): array => (array) $r)->all());
     }
 
     /** @return list<array<string, mixed>> */
     public function listModPanels(): array
     {
-        return array_values(DB::table('modpanel')->get()->map(fn ($r): array => (array) $r)->all());
+        return $this->normalizePanelRows(DB::table('modpanel')->get()->map(fn ($r): array => (array) $r)->all());
     }
 
     public function panelMenuExists(string $table, string $url): bool
     {
-        return DB::table($table)->where('url', $url)->exists();
+        return DB::table($table)->whereIn('url', $this->panelUrlVariants($url))->exists();
     }
 
     /** @param  array<string, mixed>  $menu */
     public function insertPanelMenu(string $table, array $menu): int
     {
+        if (isset($menu['url'])) {
+            $menu['url'] = $this->canonicalPanelUrl((string) $menu['url']);
+        }
+
         return (int) DB::table($table)->insertGetId($menu);
     }
 
@@ -125,11 +129,57 @@ class StaffDirectoryRepository extends BaseRepository
      */
     public function deletePanelMenusByUrls(array $urls, array $tables): int
     {
+        $candidates = [];
+        foreach ($urls as $url) {
+            array_push($candidates, ...$this->panelUrlVariants($url));
+        }
+
         $deleted = 0;
         foreach ($tables as $table) {
-            $deleted += DB::table($table)->whereIn('url', $urls)->delete();
+            $deleted += DB::table($table)->whereIn('url', array_values(array_unique($candidates)))->delete();
         }
 
         return $deleted;
+    }
+
+    /**
+     * Legacy seed data stores bare script names ("forummanage.php") that the
+     * browser resolves under the current path (/web/…) and 404s. Panel URLs
+     * must be root-relative; absolute and fragment URLs pass through.
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    private function normalizePanelRows(array $rows): array
+    {
+        foreach ($rows as $i => $row) {
+            if (isset($row['url'])) {
+                $rows[$i]['url'] = $this->canonicalPanelUrl((string) $row['url']);
+            }
+        }
+
+        return array_values($rows);
+    }
+
+    private function canonicalPanelUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '' || str_starts_with($url, '/') || str_starts_with($url, '#')
+            || preg_match('#^[a-z][a-z0-9+.-]*:#i', $url) === 1) {
+            return $url;
+        }
+
+        return '/'.$url;
+    }
+
+    /** @return list<string> */
+    private function panelUrlVariants(string $url): array
+    {
+        $variants = [trim($url), $this->canonicalPanelUrl($url)];
+        if (str_starts_with($variants[0], '/')) {
+            $variants[] = substr($variants[0], 1);
+        }
+
+        return array_values(array_unique($variants));
     }
 }

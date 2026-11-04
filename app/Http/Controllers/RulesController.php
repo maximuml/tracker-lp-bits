@@ -31,7 +31,28 @@ class RulesController extends BasePageController
             return $this->infoRepository->rules($langId);
         });
 
-        return response(view('rules.index', ['rules' => $rules])->render());
+        return response(view('rules.index', ['rules' => array_map($this->ruleView(...), $rules)])->render());
+    }
+
+    /**
+     * Rule titles are stored as legacy HTML ("Title - <tag class=striking>Warning</tag>");
+     * split them into plain-text heading and emphasis instead of printing the markup.
+     *
+     * @param  array<string, mixed>  $rule
+     * @return array{heading: string, emphasis: string, text: string}
+     */
+    private function ruleView(array $rule): array
+    {
+        $title = (string) ($rule['title'] ?? '');
+        $plain = static fn (string $html): string => trim(html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $heading = $plain($title);
+        $emphasis = '';
+        if (preg_match('~^([^<]*)<([a-z]+)\b[^>]*>(.*?)</\2>~is', $title, $m) === 1 && trim($m[1]) !== '') {
+            $heading = rtrim($plain($m[1]), " \t-–—:");
+            $emphasis = $plain($m[3]);
+        }
+
+        return ['heading' => $heading, 'emphasis' => $emphasis, 'text' => (string) ($rule['text'] ?? '')];
     }
 
     public function userAgreement(Request $request): View|RedirectResponse|Response

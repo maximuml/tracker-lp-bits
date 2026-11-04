@@ -3,6 +3,7 @@
 @section('title', $title ?? (__('log.head_site_log')))
 
 @section('content')
+<h1 class="nx-sr-only">{{ $title ?? __('log.head_site_log') }}</h1>
 <div id="lognav"><ul id="logmenu" class="menu">
 @foreach (['dailylog' => (__('log.text_daily_log')), 'chronicle' => (__('log.text_chronicle')), 'news' => (__('log.text_news')), 'poll' => (__('log.text_poll'))] as $a => $label)
     <li{{ $mode === $a ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?action={{ $a }}">{{ $label }}</a></li>

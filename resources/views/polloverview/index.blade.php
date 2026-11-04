@@ -12,14 +12,14 @@
     <tr><td class="text-center"><a href="/web/polloverview?id={{ (int) ($poll['id'] ?? 0) }}">{{ (int) ($poll['id'] ?? 0) }}</a></td><td>{{ $pollAdded ?? '' }}</td><td><a href="/web/polloverview?id={{ (int) ($poll['id'] ?? 0) }}">{{ $poll['question'] ?? '' }}</a></td></tr>
     </x-data-table>
 
-    <h1 class="text-center">{{ __('polloverview.text_poll_question')}}</h1><br />
+    <h2 class="text-center">{{ __('polloverview.text_poll_question')}}</h2><br />
     <x-data-table :caption="__('polloverview.text_poll_question')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('polloverview.col_option_no')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('polloverview.col_options')}}</th></tr></thead></x-slot:head>
     @foreach ($pollOptions as $pollOption)
         <tr><td>{{ $pollOption['index'] }}</td><td>{{ $pollOption['text'] }}</td></tr>
     @endforeach
     </x-data-table>
 
-    <h1 class="text-center">{{ __('polloverview.text_polls_user_overview')}}</h1>
+    <h2 class="text-center">{{ __('polloverview.text_polls_user_overview')}}</h2>
 
     @if ($count == 0)
         <p class="text-center">{{ __('polloverview.text_no_users_voted')}}</p>

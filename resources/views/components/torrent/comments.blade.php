@@ -1,6 +1,6 @@
 @if ($commentCount)
     <br /><br />
-    <h1 class="text-center" id="startcomments">{{ __('details.h1_user_comments') }}</h1>
+    <h2 class="text-center" id="startcomments">{{ __('details.h1_user_comments') }}</h2>
 
     {{ $commentPagerTop }}
 @endif

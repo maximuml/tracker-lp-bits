@@ -3,8 +3,9 @@
 @section('title', $headTitle)
 
 @section('content')
+<h1 class="nx-sr-only">{{ $headTitle }}</h1>
 @if (! $canEdit)
-<h1 class="text-center">{{ __('edit.text_cannot_edit_torrent') ?? '' }}</h1>
+<h2 class="text-center">{{ __('edit.text_cannot_edit_torrent') ?? '' }}</h2>
 <p>{{ __('edit.text_cannot_edit_torrent_note') }} <a href="/login?returnto={{ $requestUri }}&nowarn=1">{{ __('edit.text_logged_in') }}</a> {{ __('edit.text_cannot_edit_torrent_note_end') }}</p>
 @else
 <form method="post" id="compose" name="edittorrent" action="/takeedit" enctype="multipart/form-data">@csrf

@@ -3,6 +3,7 @@
 @section('title', PROJECTNAME)
 
 @section('content')
+<h1 class="nx-sr-only">{{ PROJECTNAME }}</h1>
 <x-frame :center="false">
 <x-slot:caption><span id="version">{{ $captions['version'] }}</span></x-slot>
 {{ $notes['version'] }}

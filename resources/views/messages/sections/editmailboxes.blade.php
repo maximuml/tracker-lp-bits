@@ -1,4 +1,4 @@
-<h1>{{ __('messages.text_editing_mailboxes') }}</h1>
+<h2>{{ __('messages.text_editing_mailboxes') }}</h2>
 <div>
 <div class="nx-colhead">{{ __('messages.text_add_mailboxes') }}</div>
 <div>{{ __('messages.text_extra_mailboxes_note') }}<br />

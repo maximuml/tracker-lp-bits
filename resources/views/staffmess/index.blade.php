@@ -35,7 +35,7 @@
 &nbsp; System
 <input name="sender" type="radio" value="system">
 </div></div>
-<div class="nx-ffull text-center"><input type=submit value="Send!" class=btn></div>
+<div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="Send!"></div>
 </div>
 <input type=hidden name=receiver value={{ (int) $receiver }}>
 </form>

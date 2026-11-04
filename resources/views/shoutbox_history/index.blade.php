@@ -20,11 +20,11 @@
 <section class="nx-idx-card">
 <h2>{{ __('shoutbox.text_history_title')}}</h2>
 <form action="/web/shoutbox_history" method="get">
-<div class="flex items-start">
+<div class="flex items-start flex-wrap">
 <div class="p-[5px]">{{ __('shoutbox.text_username')}}</div><div class="p-[5px]"><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" /></div>
 <div class="p-[5px]">{{ __('shoutbox.text_from')}}</div><div class="p-[5px]"><input type="date" name="from" value="{{ $filters['from'] ?? '' }}" /></div>
 <div class="p-[5px]">{{ __('shoutbox.text_to')}}</div><div class="p-[5px]"><input type="date" name="to" value="{{ $filters['to'] ?? '' }}" /></div></div>
-<div class="flex items-start">
+<div class="flex items-start flex-wrap">
 <div class="p-[5px]">{{ __('shoutbox.text_search')}}</div><div class="p-[5px]"><input type="text" name="search" value="{{ $filters['search'] ?? '' }}" /></div>
 <div class="p-[5px]"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('shoutbox.text_filter')}}" /></div></div>
 </form>

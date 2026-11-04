@@ -60,7 +60,7 @@
                         @foreach ($crypto as $wallet)
                             <p>
                                 <img src="{{ $wallet['qr'] }}" width="160" height="160" alt="{{ $wallet['coin'] }}" loading="lazy" decoding="async"><br />
-                                <b>{{ $wallet['coin'] }}:</b>&nbsp;<code>{{ $wallet['address'] }}</code>
+                                <b>{{ $wallet['coin'] }}:</b>&nbsp;<code class="nx-addr">{{ $wallet['address'] }}</code>
                             </p>
                         @endforeach
                     </div>

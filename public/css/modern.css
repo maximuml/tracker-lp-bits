@@ -3362,3 +3362,15 @@ html[data-theme="dark"] .nx-off a.nx-btn:not(.nx-btn--primary) { color: var(--nx
     .nx-pollrow__bar { min-width: 0; white-space: normal; }
     .nx-pollrow__bar .nx-pollbar { min-width: 0; flex: 1 1 80px; }
 }
+
+/* Narrow-viewport: invite tabs, forum search form, crypto addresses,
+   date-range filter inputs. */
+@media (max-width: 640px) {
+    .nx-addr { overflow-wrap: anywhere; word-break: break-all; }
+    ul.menu { white-space: normal; }
+    #invitenav form { margin-top: 0.5rem; }
+    .search { width: 100%; max-width: 100%; }
+    .nx-search-form { margin-left: 0; }
+    .nx-search-form__input { width: 100%; min-width: 0; flex: 1 1 0; }
+    input[type="date"] { min-width: 0; }
+}

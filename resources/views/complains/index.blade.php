@@ -3,6 +3,7 @@
 @section('title', $title)
 
 @section('content')
+<h1 class="nx-sr-only">{{ $title }}</h1>
 @if ($mode === 'list')
     @if ($page === null)
         <x-frame :caption="__('complains.pending_complaints')" :center="false">

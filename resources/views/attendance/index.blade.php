@@ -3,6 +3,7 @@
 @section('title', __('attendance.title'))
 
 @section('content')
+<h1 class="nx-sr-only">{{ __('attendance.title') }}</h1>
 @if ($hasAttendedToday)
     <x-frame :caption="__('attendance.success')" :center="false">
     <p>{{ $headerLeft ?? '' }}<span>{{ $headerRight ?? '' }}</span></p>

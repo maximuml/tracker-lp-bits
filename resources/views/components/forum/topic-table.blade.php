@@ -1,5 +1,5 @@
 @props(['list'])
-<h1 class="text-center"><a class="faqlink" href="/forums">{{ $list->siteName }}&nbsp;{{ __('forums.text_forums') }}</a>--&gt;<a class="faqlink" href="/forums?action=viewforum&amp;forumid={{ $list->forumId }}">{{ $list->forumName }}</a></h1>
+<h2 class="text-center"><a class="faqlink" href="/forums">{{ $list->siteName }}&nbsp;{{ __('forums.text_forums') }}</a>--&gt;<a class="faqlink" href="/forums?action=viewforum&amp;forumid={{ $list->forumId }}">{{ $list->forumName }}</a></h2>
 <br />
 @if (! $list->mayPost)
     <p><i>{{ __('forums.text_unpermitted_starting_new_topics') }}</i></p>

@@ -1,5 +1,5 @@
 @if ($forums !== null)
-<h1 class="text-center">{{ $forums->siteName }}&nbsp;{{ __('forums.text_forums') }}</h1>
+<h2 class="text-center">{{ $forums->siteName }}&nbsp;{{ __('forums.text_forums') }}</h2>
 <p class="text-center">
     <a href="{{ request()->getPathInfo() }}?action=search"><b>{{ __('forums.text_search') }}</b></a> |
     <a href="{{ request()->getPathInfo() }}?action=viewunread"><b>{{ __('forums.text_view_unread') }}</b></a> |

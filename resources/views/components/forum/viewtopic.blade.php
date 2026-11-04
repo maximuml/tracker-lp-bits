@@ -8,7 +8,7 @@
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
     <span class="nx-crumbs__current" id="top">{{ $topic->subject }}@if ($topic->locked)&nbsp;<span class="nx-crumbs__locked">[{{ __('forums.text_locked') }}]</span>@endif</span>
 </nav>
-<h1 class="nx-sr-only">{{ $topic->subject }}</h1>
+<h2 class="nx-sr-only">{{ $topic->subject }}</h2>
 <x-forum.pager :page="$topic->page" :pages="$topic->pages" :href="$topic->pagerHref()" :items="$topic->pagerItems()" label="Pagination top" />
 <div class="nx-postbar">
     <span>{{ __('forums.there_is') }}<b>{{ $topic->views }}</b>{{ __('forums.hits_on_this_topic') }}</span>

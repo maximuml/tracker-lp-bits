@@ -5,15 +5,15 @@
 @section('content')
 @if (empty($requestFlags['cmtpage']))
 @if (! empty($requestFlags['uploaded']))
-<h1 class="text-center">{{ __('details.text_successfully_uploaded') ?? '' }}</h1>
+<h2 class="text-center">{{ __('details.text_successfully_uploaded') ?? '' }}</h2>
 <p>{{ __('details.text_you_should') }}<b>{{ __('details.text_redownload') }}</b>{{ __('details.text_redownload_torrent_note') }}</p>
 @elseif (! empty($requestFlags['edited']))
-<h1 class="text-center">{{ __('details.text_successfully_edited') ?? '' }}</h1>
+<h2 class="text-center">{{ __('details.text_successfully_edited') ?? '' }}</h2>
 @if (! empty($requestFlags['returnto']))
 <p><b>{{ __('details.text_go_back') ?? '' }}<a href="{{ $requestFlags['returnto'] }}">{{ __('details.text_whence_you_came') ?? '' }}</a></b></p>
 @endif
 @elseif (! empty($requestFlags['existed']))
-<h1 class="text-center">{{ __('details.torrent_existed') ?? '' }}</h1>
+<h2 class="text-center">{{ __('details.torrent_existed') ?? '' }}</h2>
 @if (! empty($requestFlags['returnto']))
 <p><b>{{ __('details.text_go_back') ?? '' }}<a href="{{ $requestFlags['returnto'] }}">{{ __('details.text_whence_you_came') ?? '' }}</a></b></p>
 @endif
@@ -60,7 +60,7 @@
 <x-settings-row :label="__('details.row_thanks_by')"><livewire:thanks-section :torrent-id="$torrentId" /></x-settings-row>
 </x-data-table>
 @else
-<h1 id="top">{{ __('details.text_comments_for') ?? '' }}<a href="/web/details/{{ $torrentId }}">{{ $torrentRow['name'] }}</a></h1>
+<h2 id="top">{{ __('details.text_comments_for') ?? '' }}<a href="/web/details/{{ $torrentId }}">{{ $torrentRow['name'] }}</a></h2>
 @endif
 
 @include('components.torrent.comments')

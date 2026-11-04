@@ -3,6 +3,7 @@
 @section('title', __('tags.head_tags'))
 
 @section('content')
+<h1 class="nx-sr-only">{{ __('tags.head_tags') }}</h1>
 <x-frame :caption="__('tags.text_tags')" :center="false">
 <p>{{ __('tags.text_bb_tags_note') }} <b>{{ $siteName }}</b> {{ __('tags.text_bb_tags_note_two') }} <i>{{ __('tags.text_bb_tags') }}</i> {{ __('tags.text_bb_tags_note_end') }}</p>
 

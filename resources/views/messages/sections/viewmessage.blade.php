@@ -1,7 +1,7 @@
 <div class="nx-msgview">
 	<a class="nx-msgview__back" href="{{ $viewmessage['backHref'] }}">‹ {{ $viewmailbox['mailboxName'] ?? __('messages.text_inbox') }}</a>
 	<header class="nx-msgview__head">
-		<h1 class="nx-msgview__subject">{{ $viewmessage['subject'] }}</h1>
+		<h2 class="nx-msgview__subject">{{ $viewmessage['subject'] }}</h2>
 		<div class="nx-msgview__meta">{{ $viewmessage['from'] }} <b>{{ $viewmessage['sender'] ?? '' }}</b> &middot; {{ $viewmessage['added'] ?? '' }}@if ($viewmessage['showUnread'] ?? false) <b>{{ __('messages.text_new') }}</b>@endif</div>
 		<div class="nx-msgview__actions">
 			@if ($viewmessage['replyHref'] ?? null)

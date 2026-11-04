@@ -16,7 +16,7 @@
     <li>
         <b>Server traffic:</b> These tables show the network traffic statistics of this MySQL server since its startup
         <br />
-        <div class="flex items-start">
+        <div class="flex items-start overflow-x-auto" tabindex="0">
                     <x-data-table caption="Traffic" captionHidden><x-slot:head><thead><tr>
                             <th colspan="2" scope="colgroup">&nbsp;Traffic&nbsp;</th>
                             <th scope="col">&nbsp;&nbsp;Per Hour&nbsp;</th>
@@ -62,8 +62,8 @@
                         </tr>
                     </x-data-table>
         </div>
+        <br />
     </li>
-    <br />
     <li>
         <b>Query Statistics:</b> Since it's start up, {{ $questionsTotal }} queries have been sent to the server.
         <div>
@@ -102,8 +102,8 @@
         </div>
     </li>
 @if ($hasServerStatus)
-    <br />
     <li>
+    <br />
         <b>More status variables</b><br />
         <div class="flex items-start">
 @foreach ($statusColumns as $column)

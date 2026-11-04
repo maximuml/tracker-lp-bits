@@ -9,14 +9,14 @@
     @foreach ($temp2 as $id => $temp)
 <br />
 <x-data-table :caption="$temp['title'] ?? 'FAQ section'" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" colspan="2" scope="colgroup">Position</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">Section/Item Title</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Language</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Status</th><th class="bg-nxm-surface-alt font-semibold" scope="col">Actions</th></tr></thead></x-slot:head>
-<tr><td class="text-center w-[40px]"><select name="order[{{ (int) $id }}]">
+<tr><td class="text-center w-[40px]"><select name="order[{{ (int) $id }}]" aria-label="Order {{ (int) $id }}">
     @for ($n = 1; $n <= count($temp2); $n++)
         <option value="{{ $n }}"@if ($n == ($temp['order'] ?? 0)) selected="selected"@endif>{{ $n }}</option>
     @endfor
     </select></td><td class="text-center w-[40px]">&nbsp;</td><td><b>{{ $temp['title'] ?? '' }}</b></td><td class="text-center w-[60px]">{{ $temp['lang_name'] ?? '' }}</td><td class="text-center w-[60px]">@if (($temp['flag'] ?? '') == "0")<span class="text-nxm-danger">Hidden</span>@else Normal @endif</td><td class="text-center w-[60px]"><a href="/web/faqactions?action=edit&id={{ (int) ($temp['id'] ?? 0) }}">Edit</a> <a href="/web/faqactions?action=delete&id={{ (int) ($temp['id'] ?? 0) }}">Delete</a></td></tr>
     @if (isset($temp['items']) && is_array($temp['items']))
         @foreach ($temp['items'] as $id2 => $tempItem)
-<tr><td class="text-center w-[40px]">&nbsp;</td><td class="text-center w-[40px]"><select name="order[{{ (int) $id2 }}]">
+<tr><td class="text-center w-[40px]">&nbsp;</td><td class="text-center w-[40px]"><select name="order[{{ (int) $id2 }}]" aria-label="Order {{ (int) $id2 }}">
             @for ($n = 1; $n <= count($temp['items']); $n++)
                 <option value="{{ $n }}"@if ($n == ($tempItem['order'] ?? 0)) selected="selected"@endif>{{ $n }}</option>
             @endfor

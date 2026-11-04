@@ -140,7 +140,12 @@ table.main {
 
 .nx-mainouter {width:1200px;max-width:100%;margin-left:auto;margin-right:auto;border-collapse:separate;border-spacing:0}
 
-.nx-fgrid {display:grid;grid-template-columns:max-content 1fr;border:1px solid var(--nxm-border,rgba(127,127,127,.35))}
+.nx-fgrid {display:grid;grid-template-columns:11rem minmax(0,1fr);border:1px solid var(--nxm-border,rgba(127,127,127,.35));border-radius:var(--nxm-radius,6px);padding:0 .8rem}
+
+/* setrow contract: rows separated by a top border (pairs are siblings) */
+.nx-fgrid > :is(.nx-fhead,.nx-fcell,.nx-ffull):nth-child(n+3) {border-top:1px solid var(--nxm-border,rgba(127,127,127,.35))}
+.nx-fgrid > .nx-fhead {text-align:left;font-weight:600;padding:.6rem 1rem .6rem 0}
+.nx-fgrid > .nx-fcell, .nx-fgrid > .nx-ffull {padding:.6rem 0}
 
 .nx-panel {width:65%;margin-left:auto;margin-right:auto;background:var(--nxm-panel-bg,#F5F4EA)}
 

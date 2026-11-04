@@ -61,6 +61,7 @@ class InfoController extends BasePageController
             'action' => $action,
             'userid' => $userid,
             'subject' => $subject,
+            'subjectName' => (string) (UserDisplay::row($userid)['username'] ?? ''),
             'title' => match ($action) {
                 'viewposts' => (string) (__('userhistory.head_posts_history')),
                 'viewcomments' => (string) (__('userhistory.head_comments_history')),

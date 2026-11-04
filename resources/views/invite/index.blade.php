@@ -18,7 +18,7 @@
     @if ($showPreUsername)
     <div class="nx-fhead whitespace-nowrap">{{ $preUsernameLabel }}</div><div class="nx-fcell"><input type="text" size="40" name="pre_register_username" autocomplete="off"><br /><span class="small">{{ $preUsernameHelp }}</span></div>
     @endif
-    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash'>@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash' aria-label="{{ __('invite.text_consume_invite') }}">@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
     <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_message')}}</div><div class="nx-fcell"><textarea name="body" rows="10">{{ $invitation_body }}</textarea></div>
     <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value='{{ __('invite.submit_invite')}}'></div>
     </form></div></div>
@@ -41,13 +41,13 @@
                 <input type="hidden" name="menu" value="invitee" />
                 <input type="hidden" name="id" value="{{ $id }}" />
                 <span>{{ __('invite.text_enabled')}}:</span>
-                <select name="enabled">
+                <select name="enabled" aria-label="Enabled">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
                     @foreach ($inviteeEnabledOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
                 </select>
                 &nbsp;&nbsp;
                 <span>{{ __('invite.text_status')}}:</span>
-                <select name="status">
+                <select name="status" aria-label="Status">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
                     @foreach ($inviteeStatusOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
                 </select>

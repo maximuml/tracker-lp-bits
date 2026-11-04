@@ -102,7 +102,7 @@
     <form action="/web/complains/new" method="post">
         @csrf
         <div class="nx-fgrid nx-fgrid--flat">
-            <div class="nx-fhead">{{ __('complains.text_new_email') ?? 'Email' }}</div><div class="nx-fcell"><input type="email" name="email" autocomplete="email" /></div>
+            <label class="nx-fhead" for="complain-email">{{ __('complains.text_new_email') ?? 'Email' }}</label><div class="nx-fcell"><input id="complain-email" type="email" name="email" autocomplete="email" /></div>
             <div class="nx-fhead">{{ __('complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('complains.text_new_body_placeholder') ?? '' }}"></textarea></div>
             {{ $captchaHtml }}
             <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') ?? 'Submit' }}" class="nx-btn nx-btn--primary" /></div>

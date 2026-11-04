@@ -9,14 +9,14 @@
     <form id="filterForm" action="{{ $requestUri }}" method="get">
         <input type="hidden" name="uid" value="{{ (int) $uid }}" />
         <span>{{ $categoryText }}:</span>
-        <select name="category">
+        <select name="category" aria-label="{{ $categoryText }}">
             @foreach ($categoryOptionList as $o)
                 <option value="{{ $o['value'] }}" @if ($o['selected']) selected @endif>{{ $o['label'] }}</option>
             @endforeach
         </select>
         &nbsp;&nbsp;
         <span>{{ $businessTypeText }}:</span>
-        <select name="business_type">
+        <select name="business_type" aria-label="{{ $businessTypeText }}">
             <option value="0">-{{ $textSelectOnePlease }}-</option>
             @foreach ($businessTypeOptionList as $o)
                 <option value="{{ $o['value'] }}" @if ($o['selected']) selected @endif>{{ $o['label'] }}</option>

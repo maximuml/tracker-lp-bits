@@ -8,7 +8,7 @@
     <form id="filterForm" action="{{ $serverRequestUri }}" method="get">
         <input id="q" type="text" name="q" value="{{ $q }}" placeholder="username">
         <input type="submit" class="nx-btn nx-btn--primary">
-        <input type="reset" class="js-filter-reset">
+        <input type="reset" class="nx-btn js-filter-reset">
     </form>
 </div>
 

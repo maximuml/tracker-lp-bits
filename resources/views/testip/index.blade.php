@@ -3,6 +3,7 @@
 @section('title', '')
 
 @section('content')
+<h1 class="nx-sr-only">{{ 'Test IP' }}</h1>
 <h1>{{ ('Test IP address')}}</h1>
 @if (! empty($hasResult))
 <div class="nx-embedded">The IP address <b>{{ $ip }}</b> is {{ $isBanned ? '' : 'not ' }}banned{{ $isBanned ? ':' : '.' }}</div>

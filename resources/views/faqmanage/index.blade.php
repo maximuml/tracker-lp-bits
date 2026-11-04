@@ -3,6 +3,7 @@
 @section('title', 'FAQ Management')
 
 @section('content')
+<h1 class="nx-sr-only">{{ 'FAQ Management' }}</h1>
 <h1 class="text-center">FAQ Management</h1>
 <form method="post" action="/web/faq/actions?action=reorder">@csrf
 @foreach (($faqCateg ?? []) as $lang => $temp2)

@@ -3,6 +3,7 @@
 @section('title', __('incrementbulk.page_title'))
 
 @section('content')
+<h1 class="nx-sr-only">{{ __('incrementbulk.page_title') }}</h1>
     <div class="nx-main nx-embedded nx-box--737">
                 <div class="text-center">
                     <h1>{{ __('incrementbulk.page_title') }}</h1>

@@ -3,6 +3,7 @@
 @section('title', __('uploaders.text_uploaders'))
 
 @section('content')
+<h1 class="nx-sr-only">{{ __('uploaders.text_uploaders') }}</h1>
 <div>
 <h1 class="text-center">{{ __('uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
 

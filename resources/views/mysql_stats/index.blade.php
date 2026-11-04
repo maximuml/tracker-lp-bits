@@ -3,6 +3,7 @@
 @section('title', 'Mysql Server Status')
 
 @section('content')
+<h1 class="nx-sr-only">{{ 'Mysql Server Status' }}</h1>
 <section class="nx-idx-card">
 <h1 class="text-center">
     Mysql Server Status

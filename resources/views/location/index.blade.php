@@ -3,6 +3,7 @@
 @section('title', 'Manage Locations')
 
 @section('content')
+<h1 class="nx-sr-only">{{ 'Manage Locations' }}</h1>
 <x-frame caption="Manage Locations" caption-align="center">
 @if ($error ?? '')
     <p><strong>{{ $error }}</strong></p>

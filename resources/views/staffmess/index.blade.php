@@ -3,6 +3,7 @@
 @section('title', "Mass PM")
 
 @section('content')
+<h1 class="nx-sr-only">{{ 'Mass PM' }}</h1>
 <div class="nx-main nx-embedded nx-box--737">
 <div class="text-center">
 <h1>Mass PM to all Staff members and users:</h1>

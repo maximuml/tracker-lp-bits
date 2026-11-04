@@ -14,7 +14,7 @@
             <input type="hidden" name="action" value="search" />
             <div>{{ __('forums.text_by_keyword') }}</div>
             <div class="nx-search-form__row">
-                <input name="keywords" type="text" value="{{ $search->keywords }}" class="nx-search-form__input" />
+                <input name="keywords" type="text" value="{{ $search->keywords }}" class="nx-search-form__input" aria-label="{{ __('forums.text_keywords') ?? 'Keywords' }}" />
                 <input name="image" type="image" class="nx-search-form__submit" src="{{ $search->imageUrl }}" alt="Search" />
             </div>
         </form>

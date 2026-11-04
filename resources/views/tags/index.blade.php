@@ -7,7 +7,7 @@
 <p>{{ __('tags.text_bb_tags_note') }} <b>{{ $siteName }}</b> {{ __('tags.text_bb_tags_note_two') }} <i>{{ __('tags.text_bb_tags') }}</i> {{ __('tags.text_bb_tags_note_end') }}</p>
 
 <form method="post" action="?">@csrf
-<textarea name="test" cols="60" rows="3">{{ $test ?? '' }}</textarea>
+<textarea name="test" cols="60" rows="3" aria-label="{{ __('tags.submit_test_this_code') }}">{{ $test ?? '' }}</textarea>
 <input type="submit" class="nx-btn nx-btn--primary" value="{{ __('tags.submit_test_this_code')}}">
 </form>
 

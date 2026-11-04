@@ -150,7 +150,14 @@ test.describe('mobile staff forms', () => {
   // #main-content is overflow-x:auto, so inner overflow never reaches
   // document.scrollWidth — measure the container itself plus the
   // geometry of its controls instead.
-  for (const path of ['/web/usersearch', '/web/modrules']) {
+  for (const path of [
+    '/web/usersearch',
+    '/web/modrules',
+    '/web/invite?id=1',
+    '/web/shoutbox_history',
+    '/forums?action=search',
+    '/web/donate',
+  ]) {
     test(`${path} form controls stay inside main-content`, async ({ page }) => {
       await page.goto(path, { waitUntil: 'networkidle' });
       const main = page.locator('#main-content');

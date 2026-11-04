@@ -3,6 +3,7 @@
 @section('title', "Mass PM")
 
 @section('content')
+<h1 class="nx-sr-only">{{ 'Mass PM' }}</h1>
 <div class="nx-main nx-embedded nx-box--737">
 <div class="text-center">
 <h1>Mass PM to all Staff members and users:</h1>
@@ -26,14 +27,14 @@
             @endforeach
     </div>
     <div class="nx-fhead">Subject</div>
-    <div class="nx-fcell"><input type=text name=subject size=75></div>
+    <div class="nx-fcell"><input type=text name=subject size=75 aria-label="Subject"></div>
     <div class="nx-fhead">Message</div>
-    <div class="nx-fcell"><textarea name=msg cols=80 rows=15>{{ $body }}</textarea></div>
+    <div class="nx-fcell"><textarea name=msg cols=80 rows=15 aria-label="Message">{{ $body }}</textarea></div>
 <div class="nx-ffull"><div class="text-center"><b>Sender:&nbsp;&nbsp;</b>
 {{ $username }}
-<input name="sender" type="radio" value="self" checked>
+<input name="sender" type="radio" value="self" checked aria-label="{{ $username }}">
 &nbsp; System
-<input name="sender" type="radio" value="system">
+<input name="sender" type="radio" value="system" aria-label="System">
 </div></div>
 <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="Send!"></div>
 </div>

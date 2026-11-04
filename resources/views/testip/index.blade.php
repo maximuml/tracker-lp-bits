@@ -3,6 +3,7 @@
 @section('title', '')
 
 @section('content')
+<h1 class="nx-sr-only">{{ 'Test IP' }}</h1>
 <h1>{{ ('Test IP address')}}</h1>
 @if (! empty($hasResult))
 <div class="nx-embedded">The IP address <b>{{ $ip }}</b> is {{ $isBanned ? '' : 'not ' }}banned{{ $isBanned ? ':' : '.' }}</div>
@@ -17,7 +18,7 @@
 @endif
 <form method=post action="/web/system/test-ip">@csrf
 <div class="nx-fgrid">
-<div class="nx-fhead">{{ ('IP address')}}</div><div class="nx-fcell"><input type=text name=ip value="{{ $ip ?? '' }}"></div>
+<label class="nx-fhead" for="testip-ip">{{ ('IP address')}}</label><div class="nx-fcell"><input id="testip-ip" type=text name=ip value="{{ $ip ?? '' }}"></div>
 <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="OK"></div>
 </div>
 </form>

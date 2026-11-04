@@ -3,6 +3,7 @@
 @section('title', __('uploaders.text_uploaders'))
 
 @section('content')
+<h1 class="nx-sr-only">{{ __('uploaders.text_uploaders') }}</h1>
 <div>
 <h1 class="text-center">{{ __('uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
 
@@ -10,9 +11,9 @@
 <form method="get" action="{{ request()->getPathInfo() }}">
 <span>
 {{ __('uploaders.text_select_month')}}
-<select name="year">@foreach ($yearOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
+<select name="year" aria-label="Year">@foreach ($yearOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
 &nbsp;&nbsp;
-<select name="month">@foreach ($monthOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
+<select name="month" aria-label="Month">@foreach ($monthOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
 &nbsp;&nbsp;
 <input type="submit" class="nx-btn nx-btn--primary" value="{{ __('uploaders.submit_go')}}" />
 </span>

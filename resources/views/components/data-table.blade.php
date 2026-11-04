@@ -1,5 +1,5 @@
 @props(['caption' => null, 'captionHidden' => false, 'headers' => []])
-<div class="overflow-x-auto">
+<div class="overflow-x-auto" tabindex="0">
     <table {{ $attributes->merge(['class' => 'w-full border-collapse nx-data-table']) }}>
         @if ($caption !== null && $caption !== '')
             <caption class="{{ $captionHidden ? 'sr-only' : 'pb-1 text-left font-bold' }}">{{ $caption }}</caption>

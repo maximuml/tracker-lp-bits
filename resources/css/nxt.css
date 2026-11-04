@@ -649,6 +649,88 @@ img.nx-smiley { max-width: 25px; }
 
 .nx-sl-15 { color: #110000; }
 
+/* Dark/auto-dark variants of the ratio/seed-leech ramps above: the hardcoded
+   dark-reds fail WCAG contrast on dark surfaces — same worsening gradation
+   remapped to a lighter band (>=4.5:1 on both theme backgrounds). */
+:where(html[data-theme="dark"]) .nx-ratio-1 { color: #ffdada; }
+:where(html[data-theme="dark"]) .nx-ratio-2 { color: #fccece; }
+:where(html[data-theme="dark"]) .nx-ratio-3 { color: #f8c1c1; }
+:where(html[data-theme="dark"]) .nx-ratio-4 { color: #f5b5b5; }
+:where(html[data-theme="dark"]) .nx-ratio-5 { color: #f1a8a8; }
+:where(html[data-theme="dark"]) .nx-ratio-6 { color: #ee9c9c; }
+:where(html[data-theme="dark"]) .nx-ratio-7 { color: #ea8f8f; }
+:where(html[data-theme="dark"]) .nx-ratio-8 { color: #e78383; }
+:where(html[data-theme="dark"]) .nx-ratio-9 { color: #e37676; }
+:where(html[data-theme="dark"]) .nx-ratio-10 { color: #e06a6a; }
+:where(html[data-theme="dark"]) .nx-sl-1 { color: #ffdada; }
+:where(html[data-theme="dark"]) .nx-sl-2 { color: #fdd2d2; }
+:where(html[data-theme="dark"]) .nx-sl-3 { color: #fbcaca; }
+:where(html[data-theme="dark"]) .nx-sl-4 { color: #f8c2c2; }
+:where(html[data-theme="dark"]) .nx-sl-5 { color: #f6baba; }
+:where(html[data-theme="dark"]) .nx-sl-6 { color: #f4b2b2; }
+:where(html[data-theme="dark"]) .nx-sl-7 { color: #f2aaaa; }
+:where(html[data-theme="dark"]) .nx-sl-8 { color: #f0a2a2; }
+:where(html[data-theme="dark"]) .nx-sl-9 { color: #ed9a9a; }
+:where(html[data-theme="dark"]) .nx-sl-10 { color: #eb9292; }
+:where(html[data-theme="dark"]) .nx-sl-11 { color: #e98a8a; }
+:where(html[data-theme="dark"]) .nx-sl-12 { color: #e78282; }
+:where(html[data-theme="dark"]) .nx-sl-13 { color: #e47a7a; }
+:where(html[data-theme="dark"]) .nx-sl-14 { color: #e27272; }
+:where(html[data-theme="dark"]) .nx-sl-15 { color: #e06a6a; }
+@media (prefers-color-scheme: dark) {
+    :where(html:not([data-theme])) .nx-ratio-1 { color: #ffdada; }
+    :where(html:not([data-theme])) .nx-ratio-2 { color: #fccece; }
+    :where(html:not([data-theme])) .nx-ratio-3 { color: #f8c1c1; }
+    :where(html:not([data-theme])) .nx-ratio-4 { color: #f5b5b5; }
+    :where(html:not([data-theme])) .nx-ratio-5 { color: #f1a8a8; }
+    :where(html:not([data-theme])) .nx-ratio-6 { color: #ee9c9c; }
+    :where(html:not([data-theme])) .nx-ratio-7 { color: #ea8f8f; }
+    :where(html:not([data-theme])) .nx-ratio-8 { color: #e78383; }
+    :where(html:not([data-theme])) .nx-ratio-9 { color: #e37676; }
+    :where(html:not([data-theme])) .nx-ratio-10 { color: #e06a6a; }
+    :where(html:not([data-theme])) .nx-sl-1 { color: #ffdada; }
+    :where(html:not([data-theme])) .nx-sl-2 { color: #fdd2d2; }
+    :where(html:not([data-theme])) .nx-sl-3 { color: #fbcaca; }
+    :where(html:not([data-theme])) .nx-sl-4 { color: #f8c2c2; }
+    :where(html:not([data-theme])) .nx-sl-5 { color: #f6baba; }
+    :where(html:not([data-theme])) .nx-sl-6 { color: #f4b2b2; }
+    :where(html:not([data-theme])) .nx-sl-7 { color: #f2aaaa; }
+    :where(html:not([data-theme])) .nx-sl-8 { color: #f0a2a2; }
+    :where(html:not([data-theme])) .nx-sl-9 { color: #ed9a9a; }
+    :where(html:not([data-theme])) .nx-sl-10 { color: #eb9292; }
+    :where(html:not([data-theme])) .nx-sl-11 { color: #e98a8a; }
+    :where(html:not([data-theme])) .nx-sl-12 { color: #e78282; }
+    :where(html:not([data-theme])) .nx-sl-13 { color: #e47a7a; }
+    :where(html:not([data-theme])) .nx-sl-14 { color: #e27272; }
+    :where(html:not([data-theme])) .nx-sl-15 { color: #e06a6a; }
+    :where(html[data-theme="auto"]) .nx-ratio-1 { color: #ffdada; }
+    :where(html[data-theme="auto"]) .nx-ratio-2 { color: #fccece; }
+    :where(html[data-theme="auto"]) .nx-ratio-3 { color: #f8c1c1; }
+    :where(html[data-theme="auto"]) .nx-ratio-4 { color: #f5b5b5; }
+    :where(html[data-theme="auto"]) .nx-ratio-5 { color: #f1a8a8; }
+    :where(html[data-theme="auto"]) .nx-ratio-6 { color: #ee9c9c; }
+    :where(html[data-theme="auto"]) .nx-ratio-7 { color: #ea8f8f; }
+    :where(html[data-theme="auto"]) .nx-ratio-8 { color: #e78383; }
+    :where(html[data-theme="auto"]) .nx-ratio-9 { color: #e37676; }
+    :where(html[data-theme="auto"]) .nx-ratio-10 { color: #e06a6a; }
+    :where(html[data-theme="auto"]) .nx-sl-1 { color: #ffdada; }
+    :where(html[data-theme="auto"]) .nx-sl-2 { color: #fdd2d2; }
+    :where(html[data-theme="auto"]) .nx-sl-3 { color: #fbcaca; }
+    :where(html[data-theme="auto"]) .nx-sl-4 { color: #f8c2c2; }
+    :where(html[data-theme="auto"]) .nx-sl-5 { color: #f6baba; }
+    :where(html[data-theme="auto"]) .nx-sl-6 { color: #f4b2b2; }
+    :where(html[data-theme="auto"]) .nx-sl-7 { color: #f2aaaa; }
+    :where(html[data-theme="auto"]) .nx-sl-8 { color: #f0a2a2; }
+    :where(html[data-theme="auto"]) .nx-sl-9 { color: #ed9a9a; }
+    :where(html[data-theme="auto"]) .nx-sl-10 { color: #eb9292; }
+    :where(html[data-theme="auto"]) .nx-sl-11 { color: #e98a8a; }
+    :where(html[data-theme="auto"]) .nx-sl-12 { color: #e78282; }
+    :where(html[data-theme="auto"]) .nx-sl-13 { color: #e47a7a; }
+    :where(html[data-theme="auto"]) .nx-sl-14 { color: #e27272; }
+    :where(html[data-theme="auto"]) .nx-sl-15 { color: #e06a6a; }
+}
+
+
 .nx-wait-1 { color: #8c0000; }
 
 .nx-wait-2 { color: #990000; }

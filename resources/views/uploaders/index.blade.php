@@ -3,27 +3,21 @@
 @section('title', __('uploaders.text_uploaders'))
 
 @section('content')
-<h1 class="nx-sr-only">{{ __('uploaders.text_uploaders') }}</h1>
-<div>
-<h1 class="text-center">{{ __('uploaders.text_uploaders')}} - {{ date('Y-m', $timeStart) }}</h1>
-
-<div>
-<form method="get" action="{{ request()->getPathInfo() }}">
-<span>
-{{ __('uploaders.text_select_month')}}
-<select name="year" aria-label="Year">@foreach ($yearOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
-&nbsp;&nbsp;
-<select name="month" aria-label="Month">@foreach ($monthOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
-&nbsp;&nbsp;
-<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('uploaders.submit_go')}}" />
-</span>
+<x-page :title="__('uploaders.text_uploaders')" :subtitle="date('Y-m', $timeStart)" width="list">
+<form method="get" action="{{ request()->getPathInfo() }}" class="nx-box mb-3 flex flex-wrap items-end gap-3 text-left">
+    <div class="flex flex-col gap-1">
+        <span class="mb-1 block font-bold">{{ __('uploaders.text_select_month') }}</span>
+        <div class="flex items-center gap-2">
+            <select name="year" aria-label="Year">@foreach ($yearOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
+            <select name="month" aria-label="Month">@foreach ($monthOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
+            <button class="nx-btn nx-btn--primary" type="submit">{{ __('uploaders.submit_go') }}</button>
+        </div>
+    </div>
 </form>
-</div>
 
 @if (empty($rows))
-<p class="text-center">{{ __('uploaders.text_no_uploaders_yet')}}</p>
+<x-empty-state :title="__('uploaders.text_no_uploaders_yet')" />
 @else
-<div>
 <x-data-table :caption="__('uploaders.text_uploaders')" captionHidden class="w-[97%] mx-auto"><x-slot:head><thead><tr>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('uploaders.col_username')}}</th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('uploaders.col_torrents_size')}}</th>
@@ -41,8 +35,7 @@
 </tr>
 @endforeach
 </x-data-table>
-</div>
-<div>
+<div class="mt-3">
 <span id="order"><span class="big"><b>{{ __('uploaders.text_order_by')}}</b></span>
 <span id="orderlist" class="dropmenu nx-hidden"><ul>
 <li><a href="{{ request()->getPathInfo() }}?year={{ (int) $year }}&amp;month={{ (int) $month }}&amp;order=username">{{ __('uploaders.text_username')}}</a></li>
@@ -53,5 +46,5 @@
 </span>
 </div>
 @endif
-</div>
+</x-page>
 @endsection

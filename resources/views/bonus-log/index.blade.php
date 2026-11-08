@@ -3,30 +3,30 @@
 @section('title', $title)
 
 @section('content')
-<h1 class="text-center">{{ $title }}<a href="/userdetails?id={{ (int) $uid }}"><b>&nbsp;{{ $username }}</b></a></h1>
-
-<div>
-    <form id="filterForm" action="{{ $requestUri }}" method="get">
-        <input type="hidden" name="uid" value="{{ (int) $uid }}" />
-        <span>{{ $categoryText }}:</span>
-        <select name="category" aria-label="{{ $categoryText }}">
+<x-page :title="$title" :subtitle="$username" width="list">
+<x-slot:actions><a class="nx-btn nx-btn--secondary" href="/userdetails?id={{ (int) $uid }}">{{ __('functions.text_profile') }}</a></x-slot:actions>
+<form id="filterForm" action="{{ $requestUri }}" method="get" class="nx-box mb-3 flex flex-wrap items-end gap-3 text-left">
+    <input type="hidden" name="uid" value="{{ (int) $uid }}" />
+    <div class="flex flex-col gap-1">
+        <label for="nx-bonuslog-category">{{ $categoryText }}</label>
+        <select id="nx-bonuslog-category" name="category">
             @foreach ($categoryOptionList as $o)
                 <option value="{{ $o['value'] }}" @if ($o['selected']) selected @endif>{{ $o['label'] }}</option>
             @endforeach
         </select>
-        &nbsp;&nbsp;
-        <span>{{ $businessTypeText }}:</span>
-        <select name="business_type" aria-label="{{ $businessTypeText }}">
+    </div>
+    <div class="flex flex-col gap-1">
+        <label for="nx-bonuslog-biztype">{{ $businessTypeText }}</label>
+        <select id="nx-bonuslog-biztype" name="business_type">
             <option value="0">-{{ $textSelectOnePlease }}-</option>
             @foreach ($businessTypeOptionList as $o)
                 <option value="{{ $o['value'] }}" @if ($o['selected']) selected @endif>{{ $o['label'] }}</option>
             @endforeach
         </select>
-        &nbsp;&nbsp;
-        <input type="submit" class="nx-btn nx-btn--primary" value="{{ $submitText }}">
-        <input type="button" id="reset" class="nx-btn" value="{{ $resetText }}">
-    </form>
-</div>
+    </div>
+    <button class="nx-btn nx-btn--primary" type="submit">{{ $submitText }}</button>
+    <button class="nx-btn" type="button" id="reset">{{ $resetText }}</button>
+</form>
 
 <x-data-table :caption="$title" captionHidden id='bonus-log-table'>
 <x-slot:head>
@@ -54,4 +54,5 @@
 @endforeach
 </x-data-table>
 {{ $pagerbottom ?? '' }}
+</x-page>
 @endsection

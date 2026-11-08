@@ -3,7 +3,7 @@
 @section('title', (__('userdetails.head_details_for')).$user['username'])
 
 @section('content')
-<h1>{{ $usernameHtml }}@if (($countryFlagPic ?? '') !== '')<img width="32" height="24" src="{{ \App\Support\FlagIcon::path($countryFlagPic) }}" alt="{{ $countryName }}" loading="lazy" decoding="async" />@endif</h1>
+<x-page :title="$usernameHtml" :subtitle="$countryName" width="list">
 @if (! \App\Support\YesNo::isYes($user['enabled'] ?? null))
 <p><b>{{ __('userdetails.text_account_disabled_note') ?? '' }}</b></p>
 @elseif (! $isOwner)
@@ -169,4 +169,5 @@
 </form>
 </x-frame>
 @endif
+</x-page>
 @endsection

@@ -3,7 +3,7 @@
 @section('title', PROJECTNAME)
 
 @section('content')
-<h1 class="nx-sr-only">{{ PROJECTNAME }}</h1>
+<x-page :title="PROJECTNAME" width="list">
 <x-frame :center="false">
 <x-slot:caption><span id="version">{{ $captions['version'] }}</span></x-slot>
 {{ $notes['version'] }}
@@ -76,4 +76,5 @@
 </x-data-table>
 <br /><br />
 </x-frame>
+</x-page>
 @endsection

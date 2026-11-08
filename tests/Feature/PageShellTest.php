@@ -76,4 +76,117 @@ final class PageShellTest extends TestCase
         $this->assertStringContainsString('class="nx-tabs"', $html);
         $this->assertStringContainsString('/web/topten?type=3', $html);
     }
+
+    public function test_shoutbox_history_page_has_visible_heading_and_filter_fields(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/shoutbox_history');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Shoutbox history<\/h1>/', $html);
+        $this->assertStringContainsString('name="user"', $html);
+        $this->assertStringContainsString('name="from"', $html);
+        $this->assertStringContainsString('name="to"', $html);
+        $this->assertStringContainsString('name="search"', $html);
+    }
+
+    public function test_latestcomments_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/latestcomments');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Latest Comments<\/h1>/', $html);
+    }
+
+    public function test_complains_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/complains');
+
+        $response->assertOk();
+        $this->assertStringContainsString('nx-page__title', (string) $response->getContent());
+    }
+
+    public function test_donated_page_has_localized_heading_and_labelled_form(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/donated');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Update users donated amounts<\/h1>/', $html);
+        $this->assertStringContainsString('for="donated-username"', $html);
+        $this->assertStringContainsString('name="username"', $html);
+        $this->assertStringContainsString('name="donated"', $html);
+    }
+
+    public function test_rules_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/rules');
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Rules<\/h1>/', (string) $response->getContent());
+    }
+
+    public function test_faq_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/faq');
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">FAQ<\/h1>/', (string) $response->getContent());
+    }
+
+    public function test_useragreement_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/useragreement');
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">User Agreement<\/h1>/', (string) $response->getContent());
+    }
+
+    public function test_aboutnexus_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/aboutnexus');
+
+        $response->assertOk();
+        $this->assertStringContainsString('nx-page__title', (string) $response->getContent());
+    }
+
+    public function test_getrss_page_has_visible_heading_and_form_fields(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/getrss');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">RSS Feeds<\/h1>/', $html);
+        $this->assertStringContainsString('action="/web/rss/generate"', $html);
+        $this->assertStringContainsString('name="inclbookmarked"', $html);
+        $this->assertStringContainsString('name="showrows"', $html);
+    }
 }

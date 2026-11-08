@@ -3,7 +3,7 @@
 @section('title', __('getrss.head_rss_feeds'))
 
 @section('content')
-<h1 class="text-center">{{ __('getrss.text_rss_feeds') }}</h1>
+<x-page :title="__('getrss.text_rss_feeds')" width="form">
 <form method="post" action="/web/rss/generate">
 @csrf
 <div class="nx-fgrid nx-fgrid--flat w-[97%]">
@@ -49,4 +49,5 @@
 </div>
 </div>
 </form>
+</x-page>
 @endsection

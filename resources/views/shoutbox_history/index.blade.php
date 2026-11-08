@@ -17,8 +17,8 @@
 ]) }};</script>
 <script src="{{ \App\Support\AssetAppender::versionedSrc('js/shoutbox.js') }}" type="text/javascript"></script>
 
+<x-page :title="__('shoutbox.text_history_title')" width="list">
 <section class="nx-idx-card">
-<h1>{{ __('shoutbox.text_history_title')}}</h1>
 <form action="/web/shoutbox_history" method="get">
 <div class="flex items-start flex-wrap">
 <div class="p-[5px]">{{ __('shoutbox.text_username')}}</div><div class="p-[5px]"><input type="text" name="user" value="{{ $filters['user'] ?? '' }}" aria-label="{{ __('shoutbox.text_username') }}" /></div>
@@ -52,4 +52,5 @@
     @endfor
     </div>
 @endif
+</x-page>
 @endsection

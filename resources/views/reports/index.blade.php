@@ -3,7 +3,7 @@
 @section('title', __('reports.text_reports'))
 
 @section('content')
-<h1 class="text-center">{{ __('reports.text_reports')}}</h1>
+<x-page :title="__('reports.text_reports')" width="list">
 <x-data-table :caption="__('reports.text_reports')" captionHidden class="mx-auto">
 <form method=post action="/web/system/update">@csrf
 <tr>
@@ -35,4 +35,5 @@
 </form>
 </x-data-table>
 {{ $pagerbottom ?? '' }}
+</x-page>
 @endsection

@@ -3,11 +3,11 @@
 @section('title', $title ?? (__('functions.text_latest_comments')))
 
 @section('content')
+<x-page :title="__('functions.text_latest_comments')" width="list">
 @if ($count == 0)
-    <x-std-message heading="Sorry" :text="__('functions.text_no_comments')" :htmlstrip="false" />
+    <x-empty-state :title="__('functions.text_no_comments')" />
 @else
     {{ $pagertop }}
-    <h1 class="text-center">{{ __('functions.text_latest_comments')}}</h1>
     @foreach ($rows as $row)
         <div>
             <div id="cid{{ $row['id'] }}" class="nx-embedded">
@@ -31,4 +31,5 @@
     @endforeach
     {{ $pagerbottom }}
 @endif
+</x-page>
 @endsection

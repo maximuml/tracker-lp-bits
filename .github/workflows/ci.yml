@@ -530,7 +530,9 @@ jobs:
 
   semgrep-blocking:
     name: Semgrep blocking rules
-    runs-on: ubuntu-latest
+    # semgrep 1.89's protobuf upb extension crashes on the ubuntu-26.04
+    # runner (Python 3.14); 24.04 ships Python 3.12.
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       security-events: write
@@ -559,7 +561,8 @@ jobs:
 
   semgrep-informational:
     name: Semgrep informational rules
-    runs-on: ubuntu-latest
+    # Same Python 3.14/semgrep pin as semgrep-blocking.
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       security-events: write

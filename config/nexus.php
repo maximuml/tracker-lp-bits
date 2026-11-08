@@ -4,7 +4,7 @@ use App\Support\Env;
 
 return [
 
-    'timezone' => Env::get('TIMEZONE', 'PRC'),
+    'timezone' => Env::get('TIMEZONE', 'Asia/Shanghai'),
 
     'log_file' => Env::get('LOG_FILE', '/tmp/nexus.log'),
 

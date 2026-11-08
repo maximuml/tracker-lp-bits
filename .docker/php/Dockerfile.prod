@@ -7,7 +7,7 @@
 
 # ── Stage 1: Build PHP extensions ──────────────────────────────────────────
 # T-13: Digest-pinned for reproducible builds. Update via Renovate.
-FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS ext-builder
+FROM php:8.5-fpm-alpine@sha256:64535609509e0fd5c8529359e6b599a68ce42089defd565f7881efdae7687cea AS ext-builder
 
 RUN apk add --no-cache \
     $PHPIZE_DEPS \
@@ -81,7 +81,7 @@ RUN composer dump-autoload \
     --no-scripts
 
 # ── Stage 2b: Tailwind CSS (standalone CLI — no Node toolchain) ────────────
-FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS css-builder
+FROM php:8.5-fpm-alpine@sha256:64535609509e0fd5c8529359e6b599a68ce42089defd565f7881efdae7687cea AS css-builder
 
 # curl~=8 satisfies check-supply-chain-pins.sh; the downloaded CLI binary is
 # sha256-verified by build-css.sh regardless of the curl build used to fetch it.
@@ -96,7 +96,7 @@ COPY scripts/build-css.sh /build/scripts/build-css.sh
 RUN ./scripts/build-css.sh
 
 # ── Stage 3: Production runtime ────────────────────────────────────────────
-FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS production
+FROM php:8.5-fpm-alpine@sha256:64535609509e0fd5c8529359e6b599a68ce42089defd565f7881efdae7687cea AS production
 
 # Copy compiled extensions from ext-builder
 COPY --from=ext-builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions

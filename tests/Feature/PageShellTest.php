@@ -29,6 +29,10 @@ final class PageShellTest extends TestCase
         $this->assertStringContainsString('nx-tabs__link--active', $html);
         $this->assertStringContainsString('?action=chronicle', $html);
         $this->assertStringNotContainsString('id="logmenu"', $html);
+        // Regression: a missing brace in the Blade echo used to leak raw
+        // `{{ __('log.submit_search') }}` into the button value.
+        $this->assertStringContainsString('value="Search"', $html);
+        $this->assertStringNotContainsString("{{ __('log.submit_search')}", $html);
     }
 
     public function test_log_empty_state_is_a_card_not_bare_text(): void

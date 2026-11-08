@@ -19,7 +19,7 @@
                     </select>
                 @endif
                 <input type="hidden" name="action" value="dailylog">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}"></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($logRows))
@@ -48,7 +48,7 @@
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
                 <input type="hidden" name="action" value="chronicle">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}"></form>
         </td></tr>
     </x-data-table><br />
     @if ($canManage)
@@ -59,7 +59,7 @@
                     @if (! empty($editItem))
                         <input type="hidden" name="id" value="{{ (int) ($editItem['id'] ?? 0) }}">
                     @endif
-                    <input type="submit" class="nx-btn" value="{{ __('log.submit_add')}"></form>
+                    <input type="submit" class="nx-btn" value="{{ __('log.submit_add') }}"></form>
             </td></tr>
         </x-data-table><br />
     @endif
@@ -86,7 +86,7 @@
                 @endforeach
                 </select>
                 <input type="hidden" name="action" value="news">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}"></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($newsRows))

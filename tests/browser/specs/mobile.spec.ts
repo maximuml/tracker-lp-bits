@@ -157,6 +157,12 @@ test.describe('mobile staff forms', () => {
     '/web/shoutbox_history',
     '/forums?action=search',
     '/web/donate',
+    '/web/users',
+    '/web/uploaders',
+    '/web/bonus-log?uid=1',
+    '/web/tags',
+    '/web/staff',
+    `/web/viewsnatches?id=${BROWSER_TID}`,
   ]) {
     test(`${path} form controls stay inside main-content`, async ({ page }) => {
       await page.goto(path, { waitUntil: 'networkidle' });

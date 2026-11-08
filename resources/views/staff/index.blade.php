@@ -3,6 +3,7 @@
 @section('title', __('staff.head_staff'))
 
 @section('content')
-<h1 class="nx-sr-only">{{ __('staff.head_staff') }}</h1>
+<x-page :title="__('staff.head_staff')" width="list">
 @include('components.staff.staff')
+</x-page>
 @endsection

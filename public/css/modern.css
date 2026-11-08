@@ -3364,7 +3364,7 @@ html[data-theme="dark"] .nx-off a.nx-btn:not(.nx-btn--primary) { color: var(--nx
 @media (max-width: 720px) {
     .nx-page__head { flex-direction: column; }
     .nx-page__actions { width: 100%; }
-    .nx-page__actions .nx-btn { width: 100%; justify-content: center; }
+    .nx-page__actions .nx-btn { width: 100%; box-sizing: border-box; justify-content: center; }
 }
 
 /* Narrow-viewport form rows: keep controls inside the container instead of

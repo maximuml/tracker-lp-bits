@@ -3,12 +3,12 @@
 @section('title', __('tags.head_tags'))
 
 @section('content')
-<h1 class="nx-sr-only">{{ __('tags.head_tags') }}</h1>
-<x-frame :caption="__('tags.text_tags')" :center="false">
+<x-page :title="__('tags.head_tags')" width="list">
 <p>{{ __('tags.text_bb_tags_note') }} <b>{{ $siteName }}</b> {{ __('tags.text_bb_tags_note_two') }} <i>{{ __('tags.text_bb_tags') }}</i> {{ __('tags.text_bb_tags_note_end') }}</p>
 
 <form method="post" action="?">@csrf
-<textarea name="test" cols="60" rows="3" aria-label="{{ __('tags.submit_test_this_code') }}">{{ $test ?? '' }}</textarea>
+<label for="nx-tag-test" class="mb-1 block font-bold">{{ __('tags.submit_test_this_code') }}</label>
+<textarea id="nx-tag-test" name="test" cols="60" rows="3" class="box-border w-full">{{ $test ?? '' }}</textarea>
 <input type="submit" class="nx-btn nx-btn--primary" value="{{ __('tags.submit_test_this_code')}}">
 </form>
 
@@ -28,5 +28,5 @@
     @endif
     </x-data-table>
 @endforeach
-</x-frame>
+</x-page>
 @endsection

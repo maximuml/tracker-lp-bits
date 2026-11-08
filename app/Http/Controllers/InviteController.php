@@ -65,11 +65,15 @@ class InviteController extends BasePageController
         $SITENAME = Setting::getSiteName();
         $invitesystem = SiteConfig::current()->main->inviteSystem() ? 'yes' : 'no';
 
+        $userData = $user->toArray();
+
         $data = [
             'id' => $id,
             'type' => $type,
             'menuSelected' => $menuSelected,
-            'user' => $user->toArray(),
+            'user' => $userData,
+            'inviteTitle' => (($userData['username'] ?? '').__('invite.text_invite_system')),
+            'inviteTabs' => $this->inviteTabs($request, $id),
             'CURUSER' => $currentUser,
             'SITENAME' => $SITENAME,
             'invitesystem' => $invitesystem,
@@ -143,6 +147,20 @@ class InviteController extends BasePageController
         }
 
         return $this->renderPage($request, 'invite', true, $data);
+    }
+
+    /**
+     * @return list<array{id: string, label: string, url: string}>
+     */
+    private function inviteTabs(Request $request, int $id): array
+    {
+        $path = $request->getPathInfo();
+        $tabs = [];
+        foreach (['invitee' => __('invite.text_invite_status'), 'sent' => __('invite.text_sent_invites_status'), 'tmp' => __('invite.text_tmp_status')] as $menu => $label) {
+            $tabs[] = ['id' => $menu, 'label' => $label, 'url' => $path.'?id='.$id.'&menu='.$menu];
+        }
+
+        return $tabs;
     }
 
     /**

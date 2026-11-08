@@ -166,10 +166,20 @@ test.describe('mobile staff forms', () => {
 
       const outside = await main.evaluate((root) => {
         const box = root.getBoundingClientRect();
+        // Controls inside an intentionally horizontally scrollable region
+        // (e.g. the single-row x-tabs list on narrow screens) are clipped by
+        // that region, not by the page — they must not count as overflow.
+        const inScroller = (el: Element): boolean => {
+          for (let p = el.parentElement; p !== null && p !== root; p = p.parentElement) {
+            const ox = getComputedStyle(p).overflowX;
+            if ((ox === 'auto' || ox === 'scroll') && p.scrollWidth > p.clientWidth) return true;
+          }
+          return false;
+        };
         return [...root.querySelectorAll('input:not([type=hidden]), select, textarea, button, a')]
           .filter((el) => {
             const r = el.getBoundingClientRect();
-            return r.width > 0 && r.height > 0 && (r.left < box.left - 1 || r.right > box.right + 1);
+            return r.width > 0 && r.height > 0 && (r.left < box.left - 1 || r.right > box.right + 1) && !inScroller(el);
           })
           .map((el) => `${el.tagName.toLowerCase()}[${el.getAttribute('name') ?? el.getAttribute('href') ?? ''}]`);
       });

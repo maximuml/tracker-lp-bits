@@ -3353,6 +3353,20 @@ html[data-theme="dark"] .nx-off__chip--pending { color: var(--nxm-warning); }
 html[data-theme="dark"] .nx-off__chip--denied { color: var(--nxm-danger); }
 html[data-theme="dark"] .nx-off a.nx-btn:not(.nx-btn--primary) { color: var(--nxm-text); }
 
+/* Shared page shell (x-page): one heading, two content widths. */
+.nx-page { max-width: 1000px; margin-inline: auto; }
+.nx-page--form { max-width: 720px; }
+.nx-page__head { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem; }
+.nx-page__headtext { flex: 1; min-width: 0; }
+.nx-page__title { margin: 0; font-size: 1.375rem; line-height: 1.25; }
+.nx-page__sub { margin: 0.15rem 0 0; color: var(--nxm-text-dim); font-size: 0.92rem; }
+.nx-page__actions { flex: 0 0 auto; }
+@media (max-width: 720px) {
+    .nx-page__head { flex-direction: column; }
+    .nx-page__actions { width: 100%; }
+    .nx-page__actions .nx-btn { width: 100%; justify-content: center; }
+}
+
 /* Narrow-viewport form rows: keep controls inside the container instead of
    clipping them outside the horizontal scroller. */
 @media (max-width: 640px) {

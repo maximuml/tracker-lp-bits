@@ -48,6 +48,21 @@ class ToptenController extends Controller
             return $page;
         });
 
+        $page['toptenTabs'] = $this->toptenTabs();
+
         return response(view('topten.index', $page)->render());
+    }
+
+    /**
+     * @return list<array{id: string, label: string, url: string}>
+     */
+    private function toptenTabs(): array
+    {
+        $tabs = [];
+        foreach ([1 => __('topten.text_users'), 2 => __('topten.text_torrents'), 3 => __('topten.text_countries'), 5 => __('topten.text_community'), 6 => __('topten.text_other')] as $navType => $label) {
+            $tabs[] = ['id' => (string) $navType, 'label' => $label, 'url' => '/web/topten?type='.$navType];
+        }
+
+        return $tabs;
     }
 }

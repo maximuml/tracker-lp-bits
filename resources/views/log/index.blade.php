@@ -3,12 +3,8 @@
 @section('title', $title ?? (__('log.head_site_log')))
 
 @section('content')
-<h1 class="nx-sr-only">{{ $title ?? __('log.head_site_log') }}</h1>
-<div id="lognav"><ul id="logmenu" class="menu">
-@foreach (['dailylog' => (__('log.text_daily_log')), 'chronicle' => (__('log.text_chronicle')), 'news' => (__('log.text_news')), 'poll' => (__('log.text_poll'))] as $a => $label)
-    <li{{ $mode === $a ? ' class=selected' : '' }}><a href="{{ request()->getPathInfo() }}?action={{ $a }}">{{ $label }}</a></li>
-@endforeach
-</ul></div>
+<x-page :title="$title ?? (__('log.head_site_log'))" width="list">
+<x-slot:tabs><x-tabs :tabs="$logTabs" :active="$mode" :label="__('log.head_site_log')" /></x-slot:tabs>
 
 @if ($mode === 'dailylog')
     <x-data-table :caption="__('log.text_search_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.text_search_log')}}</th></tr></thead></x-slot:head>
@@ -23,11 +19,11 @@
                     </select>
                 @endif
                 <input type="hidden" name="action" value="dailylog">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}"></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($logRows))
-        <b>{{ __('log.text_log_empty') }}</b><br />
+        <x-empty-state :title="__('log.text_log_empty')" />
     @else
         <x-data-table :caption="__('log.text_daily_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="time" role="img" aria-label="time" title="{{ __('log.title_time_added')}}"></i></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>
         @if ($canConfidentialLog)
@@ -52,7 +48,7 @@
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
                 <input type="hidden" name="action" value="chronicle">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}"></form>
         </td></tr>
     </x-data-table><br />
     @if ($canManage)
@@ -63,12 +59,12 @@
                     @if (! empty($editItem))
                         <input type="hidden" name="id" value="{{ (int) ($editItem['id'] ?? 0) }}">
                     @endif
-                    <input type="submit" class="nx-btn" value="{{ __('log.submit_add')}}"></form>
+                    <input type="submit" class="nx-btn" value="{{ __('log.submit_add')}"></form>
             </td></tr>
         </x-data-table><br />
     @endif
     @if (empty($chronicleRows))
-        <b>{{ __('log.text_chronicle_empty') }}</b><br />
+        <x-empty-state :title="__('log.text_chronicle_empty')" />
     @else
         <x-data-table :caption="__('log.text_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_date')}}</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>@if ($canManage)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_modify')}}</th>@endif</tr></thead></x-slot:head>
         @foreach ($chronicleRows as $arr)
@@ -90,11 +86,11 @@
                 @endforeach
                 </select>
                 <input type="hidden" name="action" value="news">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search')}"></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($newsRows))
-        <b>{{ __('log.text_news_empty') }}</b><br />
+        <x-empty-state :title="__('log.text_news_empty')" />
     @else
         @foreach ($newsRows as $arr)
             <x-data-table :caption="__('log.text_news')" captionHidden>
@@ -129,4 +125,5 @@
     </x-data-table>
     <p>{{ __('log.time_zone_note') }}</p>
 @endif
+</x-page>
 @endsection

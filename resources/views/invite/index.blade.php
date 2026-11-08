@@ -3,9 +3,13 @@
 @section('title', __('invite.head_invites'))
 
 @section('content')
-<div class="nx-main nx-embedded">
-
-<h1 class="text-center"><a href="/web/invite?id={{ $id }}">{{ $user['username'] ?? '' }}{{ __('invite.text_invite_system')}}</a></h1>
+<x-page :title="$inviteTitle" :width="$type === 'new' ? 'form' : 'list'">
+@if ($type !== 'new')
+    @if (($CURUSER['id'] ?? 0) == $id)
+        <x-slot:actions><form method="post" action="/web/invites/submit?id={{ (string) $id }}&type=new">@csrf<input type="submit" class="nx-btn nx-btn--primary"{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></x-slot:actions>
+    @endif
+    <x-slot:tabs><x-tabs :tabs="$inviteTabs" :active="$menuSelected" :label="__('invite.head_invites')" /></x-slot:tabs>
+@endif
 @if ($sent == 1)
     <p class="text-center"><span class="text-nxm-danger">{{ __('invite.text_invite_code_sent') }}<br /></span></p>
 @endif
@@ -21,20 +25,9 @@
     <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_consume_invite')}}</div><div class="nx-fcell"><select name='hash' aria-label="{{ __('invite.text_consume_invite') }}">@foreach ($inviteOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>@endforeach</select></div>
     <div class="nx-fhead whitespace-nowrap">{{ __('invite.text_message')}}</div><div class="nx-fcell"><textarea name="body" rows="10">{{ $invitation_body }}</textarea></div>
     <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value='{{ __('invite.submit_invite')}}'></div>
-    </form></div></div>
+    </form></div>
 
 @else
-    {{-- Invite menu nav --}}
-    <div id="invitenav"><ul id="invitemenu" class="menu">
-    <li{{ $menuSelected == 'invitee' ? ' class="selected"' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=invitee">{{ __('invite.text_invite_status')}}</a></li>
-    <li{{ $menuSelected == 'sent' ? ' class="selected"' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=sent">{{ __('invite.text_sent_invites_status')}}</a></li>
-    <li{{ $menuSelected == 'tmp' ? ' class="selected"' : '' }}><a href="{{ request()->getPathInfo() }}?id={{ $id }}&menu=tmp">{{ __('invite.text_tmp_status')}}</a></li>
-    @if (($CURUSER['id'] ?? 0) == $id)
-        </ul><form method="post" action="/web/invites/submit?id={{ (string) $id }}&type=new">@csrf<input type="submit" class="nx-btn nx-btn--primary"{{ $sendBtnDisabled }} value='{{ $sendBtnText }}'></form></div>
-    @else
-        </ul></div>
-    @endif
-
     @if ($menuSelected == 'invitee')
         <div>
             <form id="filterForm" action="{{ $__server_REQUEST_URI }}" method="get">
@@ -56,12 +49,11 @@
                 <input type="button" id="reset" class="nx-btn" value="{{ $resetText }}">
             </form>
         </div>
+        @if (! $inviteeCount)
+            <x-empty-state :title="__('invite.text_no_invites')" />
+        @else
         <x-data-table :caption="__('invite.text_invite_status')" captionHidden>
         <form method="post" action="/takeconfirm?id={{ (string) $id }}">@csrf
-
-        @if (! $inviteeCount)
-            <tr><td colspan="7" class="text-center">{{ __('invite.text_no_invites')}}</tr>
-        @else
             <tr>
             <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_username')}}</b></th>
             <th class="bg-nxm-surface-alt font-semibold" scope="col"><b>{{ __('invite.text_email')}}</b></th>
@@ -108,22 +100,22 @@
                     @endif
                 </tr>
             @endforeach
-        @endif
 
-        @if ($canConfirm)
-            @if ($pendingCount)
-                <tr><td colspan="{{ $inviteeColSpan }}" class="text-right"><input type="submit" class="nx-btn nx-btn--primary" value='{{ __('invite.submit_confirm_users')}}'></td></tr>
+            @if ($canConfirm)
+                @if ($pendingCount)
+                    <tr><td colspan="{{ $inviteeColSpan }}" class="text-right"><input type="submit" class="nx-btn nx-btn--primary" value='{{ __('invite.submit_confirm_users')}}'></td></tr>
+                @endif
+                </form>
             @endif
-            </form>
-        @endif
         </x-data-table>
-        </div>{{ $inviteePagertop }}
+        @endif
+        {{ $inviteePagertop }}
 
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
-        <x-data-table :caption="$menuSelected == 'sent' ? __('invite.text_sent_invites_status') : __('invite.text_tmp_status')" captionHidden>
         @if (! $sentTmpCount)
-            <tr class="text-center"><td colspan="6">{{ __('functions.text_none')}}</tr>
+            <x-empty-state :title="__('functions.text_none')" />
         @else
+        <x-data-table :caption="$menuSelected == 'sent' ? __('invite.text_sent_invites_status') : __('invite.text_tmp_status')" captionHidden>
             <tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_email')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_hash')}}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_send_date')}}</th>
             @if ($menuSelected == 'sent')
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('invite.text_hash_status')}}</th>
@@ -149,10 +141,10 @@
                 @endif
                 </tr>
             @endforeach
-        @endif
         </x-data-table>
-        </div>{{ $sentTmpPagertop }}
+        @endif
+        {{ $sentTmpPagertop }}
     @endif
-
 @endif
+</x-page>
 @endsection

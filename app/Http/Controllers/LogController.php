@@ -141,6 +141,7 @@ class LogController extends BasePageController
         unset($row);
 
         return $this->renderPage($request, 'log', true, [
+            'logTabs' => $this->logTabs($request),
             'mode' => 'dailylog',
             'q' => $q,
             'search' => $search,
@@ -339,6 +340,7 @@ class LogController extends BasePageController
         unset($row);
 
         return $this->renderPage($request, 'log', true, [
+            'logTabs' => $this->logTabs($request),
             'mode' => 'chronicle',
             'q' => $q,
             'chronicleRows' => $chronicleRows,
@@ -372,6 +374,7 @@ class LogController extends BasePageController
         unset($row);
 
         return $this->renderPage($request, 'log', true, [
+            'logTabs' => $this->logTabs($request),
             'mode' => 'news',
             'q' => $q,
             'search' => $search,
@@ -448,11 +451,26 @@ class LogController extends BasePageController
         }
 
         return $this->renderPage($request, 'log', true, [
+            'logTabs' => $this->logTabs($request),
             'mode' => 'poll',
             'pollData' => $pollData,
             'canPollManage' => Permission::can(PermissionEnum::POLL_MANAGE),
             'title' => __('log.head_previous_polls'),
         ]);
+    }
+
+    /**
+     * @return list<array{id: string, label: string, url: string}>
+     */
+    private function logTabs(Request $request): array
+    {
+        $path = $request->getPathInfo();
+        $tabs = [];
+        foreach (['dailylog' => __('log.text_daily_log'), 'chronicle' => __('log.text_chronicle'), 'news' => __('log.text_news'), 'poll' => __('log.text_poll')] as $action => $label) {
+            $tabs[] = ['id' => $action, 'label' => $label, 'url' => $path.'?action='.$action];
+        }
+
+        return $tabs;
     }
 
     private function pollLogPost(Request $request): RedirectResponse|Response

@@ -25,6 +25,10 @@ RUN apk upgrade --no-cache tiff
 # the pinned digest moves past it.
 RUN apk upgrade --no-cache brotli-libs
 
+# CVE-2026-107891: musl regcomp integer overflow → arbitrary code
+# execution; upgrade to 1.2.6-r3 until the pinned digest moves past it.
+RUN apk upgrade --no-cache musl musl-utils
+
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY .docker/openresty/render-config.sh /usr/local/bin/render-config.sh

@@ -1,6 +1,6 @@
 # 👷‍♀️ 第一阶段：构建阶段，包含所有开发依赖
 # T-13: Digest-pinned for reproducible builds. Update via Renovate.
-FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7 AS builder
+FROM php:8.5-fpm-alpine@sha256:64535609509e0fd5c8529359e6b599a68ce42089defd565f7881efdae7687cea AS builder
 
 RUN apk add --no-cache \
     $PHPIZE_DEPS \
@@ -43,7 +43,7 @@ RUN pecl channel-update pecl.php.net \
     && docker-php-ext-enable redis
 
 # 👨‍🍳 第二阶段：运行阶段，仅包含必要运行环境
-FROM php:8.5-fpm-alpine@sha256:fa01fb1645cd0fc566a5f146b099adace33b906571f972f71f2182a7c12d1cd7
+FROM php:8.5-fpm-alpine@sha256:64535609509e0fd5c8529359e6b599a68ce42089defd565f7881efdae7687cea
 
 # 复制已构建的扩展
 COPY --from=builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions

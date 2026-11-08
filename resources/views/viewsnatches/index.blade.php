@@ -3,9 +3,10 @@
 @section('title', __('viewsnatches.head_snatch_detail'))
 
 @section('content')
-<h1 class="text-center">{{ __('viewsnatches.text_snatch_detail_for') }}<a href=/web/details/{{ (int) $id }}><b>{{ $torrentName }}</b></a></h1>
+<x-page :title="__('viewsnatches.head_snatch_detail')" :subtitle="$torrentName" width="list">
+<x-slot:actions><a class="nx-btn nx-btn--secondary" href="/web/details/{{ (int) $id }}">{{ __('functions.text_view') }}</a></x-slot:actions>
 @if ($count)
-<p class="text-center">{{ __('viewsnatches.text_users_top_finished_recently') }}</p>
+<p>{{ __('viewsnatches.text_users_top_finished_recently') }}</p>
 <x-data-table :caption="__('viewsnatches.text_snatch_detail_for').' '.$torrentName" :caption-hidden="true">
     <x-slot:head>
         <thead>
@@ -19,6 +20,7 @@
 </x-data-table>
 {{ $pagerbottom ?? '' }}
 @else
-<x-std-message :heading="__('viewsnatches.std_sorry')" :text="__('viewsnatches.std_no_snatched_users')" :htmlstrip="false" />
+<x-empty-state :title="__('viewsnatches.std_sorry')" :description="__('viewsnatches.std_no_snatched_users')" />
 @endif
+</x-page>
 @endsection

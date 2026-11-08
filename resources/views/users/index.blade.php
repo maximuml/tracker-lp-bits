@@ -3,22 +3,30 @@
 @section('title', __('users.text_users'))
 
 @section('content')
-<h1>{{ __('users.text_users') }}</h1>
-
-<form method="get" action="/web/users">
-{{ __('users.text_search')}} <input type="text" name="search" value="{{ $search }}">
-<select name="class">
-<option value="-">{{ __('users.select_any_class')}}</option>
-@foreach ($classOptions as $opt)
-<option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
-@endforeach
-</select>
-<select name="country">
-@foreach ($countryOptions as $opt)
-<option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
-@endforeach
-</select>
-<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('users.submit_okay')}}">
+<x-page :title="__('users.text_users')" width="list">
+<form class="nx-box mb-3 flex flex-wrap items-end gap-3 text-left" method="get" action="/web/users" role="search">
+    <div class="flex flex-col gap-1 grow min-w-[12rem]">
+        <label for="nx-users-search">{{ __('users.text_search') }}</label>
+        <input id="nx-users-search" type="search" name="search" value="{{ $search }}">
+    </div>
+    <div class="flex flex-col gap-1">
+        <label for="nx-users-class">{{ __('users.col_class') }}</label>
+        <select id="nx-users-class" name="class">
+        <option value="-">{{ __('users.select_any_class')}}</option>
+        @foreach ($classOptions as $opt)
+        <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
+        @endforeach
+        </select>
+    </div>
+    <div class="flex flex-col gap-1">
+        <label for="nx-users-country">{{ __('users.col_country') }}</label>
+        <select id="nx-users-country" name="country">
+        @foreach ($countryOptions as $opt)
+        <option value="{{ (int) $opt['value'] }}"@if ($opt['selected']) selected @endif>{{ $opt['label'] }}</option>
+        @endforeach
+        </select>
+    </div>
+    <button class="nx-btn nx-btn--primary" type="submit">{{ __('users.submit_okay')}}</button>
 </form>
 
 <p>
@@ -52,4 +60,5 @@
 </x-data-table>
 
 {{ $pagerbottom ?? '' }}
+</x-page>
 @endsection

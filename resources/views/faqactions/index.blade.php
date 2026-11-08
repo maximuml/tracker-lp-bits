@@ -3,8 +3,8 @@
 @section('title', "FAQ Management")
 
 @section('content')
+<x-page :title="($mode ?? '') === 'edit' ? 'Edit Section or Item' : (($mode ?? '') === 'confirm_delete' ? 'Confirmation required' : (($mode ?? '') === 'additem' ? 'Add Item' : (($mode ?? '') === 'addsection' ? 'Add Section' : 'FAQ Management')))" width="form">
 @if (($mode ?? '') === 'edit')
-    <h1 class="text-center">Edit Section or Item</h1>
     @if (empty($arr))
         <p>Invalid id</p>
     @elseif (($arr['type'] ?? '') === 'item')
@@ -50,12 +50,10 @@
         </form>
     @endif
 @elseif (($mode ?? '') === 'confirm_delete')
-    <h1 class="text-center">Confirmation required</h1>
     <div class="nx-box w-[97%] mx-auto text-center">
     Please click <form method="post" action="/web/faq/actions?action=delete&id={{ (int) ($id ?? 0) }}" class="nx-inline">@csrf<input type="hidden" name="confirm" value="yes"><button type="submit" class="nx-btn-link">here</button></form> to confirm.
     </div>
 @elseif (($mode ?? '') === 'additem')
-    <h1 class="text-center">Add Item</h1>
     <form method="post" action="/web/faq/actions?action=addnewitem">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
@@ -75,7 +73,6 @@
         </div>
     </form>
 @elseif (($mode ?? '') === 'addsection')
-    <h1 class="text-center">Add Section</h1>
     <form method="post" action="/web/faq/actions?action=addnewsect">
         @csrf
         <div class="nx-fgrid nx-fgrid--auto nx-fgrid--pad10">
@@ -97,4 +94,5 @@
         </div>
     </form>
 @endif
+</x-page>
 @endsection

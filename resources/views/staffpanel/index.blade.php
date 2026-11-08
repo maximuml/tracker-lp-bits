@@ -3,7 +3,7 @@
 @section('title', ('Administration'))
 
 @section('content')
-<h1 class="text-center">{{ ('Administration')}}</h1>
+<x-page :title="'Administration'" width="list">
 
 @if (! empty($sysopPanels))
 <h2 class="text-center">..:: {{ 'For SysOp Only' }} ::..</h2>
@@ -46,4 +46,5 @@
 </x-data-table>
 <br /><br />
 @endif
+</x-page>
 @endsection

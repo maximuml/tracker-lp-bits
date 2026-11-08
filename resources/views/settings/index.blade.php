@@ -3,7 +3,7 @@
 @section('title', __('settings.head_website_settings'))
 
 @section('content')
-<h1 class="text-center"><a class="faqlink" href="{{ $scriptName }}">{{ __('settings.text_website_settings') ?? 'Website Settings' }}</a></h1>
+<x-page :title="__('settings.text_website_settings') ?? 'Website Settings'" width="form">
 <div class="nx-fgrid nx-fgrid--pad10">
 <div class="nx-ffull nx-fbanner">
 <span class="text-white">{{ __('settings.text_configuration_file_saving_note') ?? 'Settings are stored in the database.' }}</span>
@@ -531,4 +531,5 @@
 @endif
 
 </div>
+</x-page>
 @endsection

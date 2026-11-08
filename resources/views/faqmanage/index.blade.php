@@ -3,8 +3,7 @@
 @section('title', 'FAQ Management')
 
 @section('content')
-<h1 class="nx-sr-only">{{ 'FAQ Management' }}</h1>
-<h1 class="text-center">FAQ Management</h1>
+<x-page :title="'FAQ Management'" width="list">
 <form method="post" action="/web/faq/actions?action=reorder">@csrf
 @foreach (($faqCateg ?? []) as $lang => $temp2)
     @foreach ($temp2 as $id => $temp)
@@ -47,4 +46,5 @@
 <p class="text-center"><input type="submit" name="reorder" class="nx-btn nx-btn--primary" value="Reorder"></p>
 </form>
 <p>When the position numbers don't reflect the position in the table, it means the order id is bigger than the total number of sections/items and you should check all the order id's in the table and click "reorder"</p>
+</x-page>
 @endsection

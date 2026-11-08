@@ -1,4 +1,4 @@
-<h1>Administrative User Search</h1>
+<x-page :title="$title ?? 'Administrative User Search'" width="list">
 
 @if ($showHelp)
 <div class="nx-panel nx-embedded"><div>
@@ -123,3 +123,4 @@
 @endif
 
 <p>{{ $pagemenu }}<br />{{ $browsemenu }}</p>
+</x-page>

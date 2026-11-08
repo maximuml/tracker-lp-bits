@@ -163,6 +163,19 @@ test.describe('mobile staff forms', () => {
     '/web/tags',
     '/web/staff',
     `/web/viewsnatches?id=${BROWSER_TID}`,
+    '/web/staffmess',
+    '/web/staffpanel',
+    '/web/settings',
+    '/web/faqmanage',
+    '/web/faqactions?action=addsection',
+    '/web/location',
+    '/web/testip',
+    '/web/clearcache',
+    '/web/adduser',
+    '/web/increment-bulk',
+    '/web/user-ban-log',
+    '/web/unco',
+    '/web/mysql_stats',
   ]) {
     test(`${path} form controls stay inside main-content`, async ({ page }) => {
       await page.goto(path, { waitUntil: 'networkidle' });

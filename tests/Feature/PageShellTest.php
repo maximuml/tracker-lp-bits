@@ -182,4 +182,190 @@ final class PageShellTest extends TestCase
         $this->assertStringContainsString('nx-page__title', $html);
         $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
     }
+
+    public function test_staffmess_page_has_visible_heading_and_send_form(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/staffmess');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Mass PM<\/h1>/', $html);
+        $this->assertStringContainsString('action="/web/staffmess/send"', $html);
+        $this->assertStringContainsString('name=subject', $html);
+        $this->assertStringContainsString('name=msg', $html);
+        $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
+    }
+
+    public function test_staffpanel_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/staffpanel');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Administration<\/h1>/', $html);
+    }
+
+    public function test_settings_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/settings');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">/', $html);
+        $this->assertStringNotContainsString('<h1 class="text-center">', $html);
+    }
+
+    public function test_clearcache_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/clearcache');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Clear cache<\/h1>/', $html);
+    }
+
+    public function test_testip_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/testip');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Test IP address<\/h1>/', $html);
+    }
+
+    public function test_adduser_page_has_visible_heading_and_add_form(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/adduser');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Add user<\/h1>/', $html);
+        $this->assertStringContainsString('action="/web/admin/users/add"', $html);
+    }
+
+    public function test_modrules_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/modrules');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Rules Management<\/h1>/', $html);
+        $this->assertSame(1, substr_count($html, '<h1'));
+    }
+
+    public function test_increment_bulk_page_has_visible_heading_and_type_choices(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/increment-bulk');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">/', $html);
+        $this->assertStringContainsString('name="type"', $html);
+        $this->assertStringContainsString('name="amount"', $html);
+        $this->assertStringContainsString('name="classes[]"', $html);
+        $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
+    }
+
+    public function test_faqmanage_page_has_single_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/faqmanage');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">FAQ Management<\/h1>/', $html);
+        $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
+    }
+
+    public function test_faqactions_addsection_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/faqactions?action=addsection');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Add Section<\/h1>/', $html);
+        $this->assertStringContainsString('action="/web/faq/actions?action=addnewsect"', $html);
+    }
+
+    public function test_location_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/location');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Manage Locations<\/h1>/', $html);
+        $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
+    }
+
+    public function test_user_ban_log_page_has_visible_heading_and_filter(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/user-ban-log');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">User ban log<\/h1>/', $html);
+        $this->assertStringContainsString('name="q"', $html);
+    }
+
+    public function test_usersearch_page_has_visible_heading_and_search_fields(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/usersearch');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Administrative User Search<\/h1>/', $html);
+        $this->assertStringContainsString('name="n"', $html);
+        $this->assertStringContainsString('name="em"', $html);
+    }
+
+    public function test_mysql_stats_page_has_visible_heading(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/mysql_stats');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Mysql Server Status<\/h1>/', $html);
+        $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
+    }
 }

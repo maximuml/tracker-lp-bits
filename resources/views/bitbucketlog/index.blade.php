@@ -3,12 +3,12 @@
 @section('title', 'BitBucket Log')
 
 @section('content')
-<h1>BitBucket Log</h1>
+<x-page :title="'BitBucket Log'" width="list">
 Total Images Stored: {{ $count ?? 0 }}
 {{ $pagertop ?? '' }}
 
 @if (empty($items ?? []))
-    <b>BitBucket Log is empty</b>
+    <x-empty-state title="BitBucket Log is empty" />
 @else
     <x-data-table caption="BitBucket Log" captionHidden>
     @foreach ($items as $item)
@@ -25,4 +25,5 @@ Total Images Stored: {{ $count ?? 0 }}
     </x-data-table>
 @endif
 {{ $pagerbottom ?? '' }}
+</x-page>
 @endsection

@@ -4,7 +4,7 @@
 
 @section('content')
 @if ($action === 'viewposts')
-    <h1>{{ __('userhistory.text_posts_history_for')}}{{ $subject }}</h1>
+<x-page :title="__('userhistory.text_posts_history_for')" :subtitle="$subject" width="list">
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
@@ -29,8 +29,9 @@
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagerbottom ?? '' }}
     @endif
+</x-page>
 @elseif ($action === 'viewcomments')
-    <h1>{{ __('userhistory.text_comments_history_for')}}{{ $subject }}</h1>
+<x-page :title="__('userhistory.text_comments_history_for')" :subtitle="$subject" width="list">
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagertop ?? '' }}
     @endif
@@ -55,5 +56,6 @@
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagerbottom ?? '' }}
     @endif
+</x-page>
 @endif
 @endsection

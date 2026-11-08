@@ -10,8 +10,7 @@
 @elseif (! $showAny)
     <x-std-message :heading="__('donate.std_error')" :text="__('donate.std_no_donation_account_available')" :htmlstrip="false" />
 @else
-    <section class="nx-idx-card">
-    <h1>{{ __('donate.text_donate') }}</h1>
+    <x-page :title="__('donate.text_donate')" width="list">
     <div>
         <div class="p-[10pt]">{{ __('donate.text_donation_note') }}</div>
         @if ($showCustom)
@@ -73,6 +72,6 @@
             {{ __('donate.text_after_donation_note_two') }} <b>{{ __('donate.text_transaction_information') }}</b>{{ __('donate.text_after_donation_note_two_end') }}
         </div>
     </div>
-</section>
+</x-page>
 @endif
 @endsection

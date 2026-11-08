@@ -3,7 +3,7 @@
 @section('title', __('faq.head_faq'))
 
 @section('content')
-<h1 class="nx-sr-only">{{ __('faq.head_faq') }}</h1>
+<x-page :title="__('faq.head_faq')" width="list">
 @if (! empty($faqCategories))
     <x-frame :caption="__('faq.text_welcome_to').$SITENAME.' - '.$SLOGAN" :center="false">
     {{ __('faq.text_welcome_content_one') }} <a class="faqlink" href="/web/contactstaff">{{ __('faq.text_contact') }}</a> {{ __('faq.text_welcome_content_one_end') }}<br /><br />{{ __('faq.text_welcome_content_one_two') }}
@@ -58,4 +58,5 @@
         @endif
     @endforeach
 @endif
+</x-page>
 @endsection

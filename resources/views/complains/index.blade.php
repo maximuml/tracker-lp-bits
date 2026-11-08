@@ -3,7 +3,7 @@
 @section('title', $title)
 
 @section('content')
-<h1 class="nx-sr-only">{{ $title }}</h1>
+<x-page :title="$title" width="list">
 @if ($mode === 'list')
     @if ($page === null)
         <x-frame :caption="__('complains.pending_complaints')" :center="false">
@@ -111,4 +111,5 @@
     </form>
 </section>
 @endif
+</x-page>
 @endsection

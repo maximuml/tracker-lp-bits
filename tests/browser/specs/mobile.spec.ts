@@ -163,6 +163,9 @@ test.describe('mobile staff forms', () => {
     '/web/tags',
     '/web/staff',
     `/web/viewsnatches?id=${BROWSER_TID}`,
+    '/web/getrss',
+    '/web/donated',
+    '/web/complains',
   ]) {
     test(`${path} form controls stay inside main-content`, async ({ page }) => {
       await page.goto(path, { waitUntil: 'networkidle' });

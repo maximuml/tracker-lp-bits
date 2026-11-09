@@ -12,6 +12,35 @@
     "/forums.php": [],
     "/usercp.php": [],
     "/topten.php": [],
-    "/messages.php": []
+    "/messages.php": [],
+    "/web/friends": [],
+    "/web/attendance": [
+      "aria-required-children"
+    ],
+    "/web/mybonus": [],
+    "/web/myhr": [],
+    "/web/offers": [],
+    "/web/bonus-log?uid=1": [],
+    "/web/log": [],
+    "/web/reports": [],
+    "/web/polloverview": [],
+    "/web/shoutbox_history": [],
+    "/web/latestcomments": [],
+    "/web/invite?id=1": [],
+    "/web/users": [],
+    "/web/uploaders": [],
+    "/web/viewsnatches?id=1": [],
+    "/web/complains": [],
+    "/web/tags": [],
+    "/web/staff": [],
+    "/web/rules": [],
+    "/web/faq": [],
+    "/web/donate": [],
+    "/web/downloadnotice": [],
+    "/web/settings": [],
+    "/forums?action=viewforum&forumid=1": [],
+    "/forums?action=viewtopic&topicid=1": [],
+    "/forums?action=viewunread": [],
+    "/forums?action=search": []
   }
 }

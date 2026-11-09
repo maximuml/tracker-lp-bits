@@ -1,6 +1,7 @@
 @props(['list'])
-<h2 class="text-center"><a class="faqlink" href="/forums">{{ $list->siteName }}&nbsp;{{ __('forums.text_forums') }}</a>--&gt;{{ __('forums.text_topics_with_unread_posts') }}</h2>
-@if ($list->topics !== [])
+<x-page :title="__('forums.text_topics_with_unread_posts')" :subtitle="trim($list->siteName).' › '.trim(__('forums.text_forums'))" width="list">
+    <x-slot:tabs><x-forum.nav-tabs active="viewunread" /></x-slot:tabs>
+    @if ($list->topics !== [])
     <x-data-table :caption="__('forums.text_topics_with_unread_posts')" captionHidden>
         <x-slot:head>
             <thead>
@@ -33,3 +34,4 @@
 @else
     <p>{{ __('forums.text_nothing_found') }}</p>
 @endif
+</x-page>

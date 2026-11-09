@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\UserClass;
+use App\Models\Forum;
+use App\Models\Post;
+use App\Models\Topic;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Support\Cache\NexusCache;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -480,5 +484,86 @@ final class PageShellTest extends TestCase
         $html = (string) $response->getContent();
         $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Mysql Server Status<\/h1>/', $html);
         $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
+    }
+
+    public function test_forums_index_has_visible_heading_and_tabs(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/forums');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">[^<]*Forums<\/h1>/', $html);
+        $this->assertStringContainsString('class="nx-tabs"', $html);
+        $this->assertStringContainsString('nx-tabs__link--active', $html);
+        $this->assertStringContainsString('?action=viewunread', $html);
+        $this->assertStringContainsString('?catchup=1', $html);
+        $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
+    }
+
+    public function test_viewforum_page_has_visible_heading_and_subtitle(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+        $forum = Forum::factory()->create(['name' => 'Shell Forum']);
+        // forums_list is cached for a day in NexusCache.
+        app(NexusCache::class)->redis?->flushDB();
+
+        $response = $this->withNexusCookie($user)->get('/forums?action=viewforum&forumid='.(int) $forum->id);
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Shell Forum<\/h1>/', $html);
+        $this->assertStringContainsString('nx-page__sub', $html);
+        // Regression: the forum breadcrumb used to be a centred h2.
+        $this->assertStringNotContainsString('<h2 class="text-center"><a class="faqlink"', $html);
+    }
+
+    public function test_viewtopic_page_has_visible_heading_and_reply_action(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+        $topic = Topic::factory()->create(['subject' => 'Shell Topic']);
+        Post::factory()->topic($topic)->create();
+
+        $response = $this->withNexusCookie($user)->get('/forums?action=viewtopic&topicid='.(int) $topic->id);
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Shell Topic<\/h1>/', $html);
+        $this->assertStringContainsString('id="top"', $html);
+        $this->assertStringContainsString('action=reply', $html);
+        $this->assertStringNotContainsString('<h2 class="nx-sr-only">', $html);
+    }
+
+    public function test_viewunread_page_has_visible_heading_and_tabs(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/forums?action=viewunread');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Topics with unread posts<\/h1>/', $html);
+        $this->assertStringContainsString('class="nx-tabs"', $html);
+        $this->assertStringNotContainsString('<h2 class="text-center"><a class="faqlink"', $html);
+    }
+
+    public function test_forum_search_page_has_visible_heading_and_form(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+
+        $response = $this->withNexusCookie($user)->get('/forums?action=search&keywords=shell');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Search on Forums<\/h1>/', $html);
+        $this->assertStringContainsString('id="search_form"', $html);
+        $this->assertStringContainsString('name="keywords"', $html);
+        $this->assertStringContainsString('class="nx-tabs"', $html);
     }
 }

@@ -1,4 +1,4 @@
-@props(['title' => null, 'subtitle' => null, 'tone' => 'info'])
+@props(['title' => null, 'subtitle' => null, 'tone' => 'info', 'body' => null])
 <div {{ $attributes->merge(['class' => 'nx-notice-page nx-page nx-page--form']) }}>
     @if ($title !== null && $title !== '')
         <div class="nx-page__head">
@@ -27,7 +27,11 @@
             @isset($bodyTitle)
                 <h2 class="nx-notice__title">{{ $bodyTitle }}</h2>
             @endisset
-            {{ $slot }}
+            @if ($body !== null)
+                {{ $body }}
+            @else
+                {{ $slot }}
+            @endif
             @isset($actionsCard)
                 <div class="nx-notice__actions">{{ $actionsCard }}</div>
             @endisset

@@ -1,3 +1,1 @@
-<x-notice class="nx-box--500" :title="$heading ? ($htmlstrip ? trim((string) $heading) : new \Illuminate\Support\HtmlString((string) $heading)) : null">
-    {{ $body ?? ($htmlstrip ? trim((string) $text) : new \Illuminate\Support\HtmlString((string) $text)) }}
-</x-notice>
+<x-notice class="nx-box--500" :title="$heading ? ($htmlstrip ? trim((string) $heading) : new \Illuminate\Support\HtmlString((string) $heading)) : null" :body="$body ?? ($htmlstrip ? trim((string) $text) : new \Illuminate\Support\HtmlString((string) $text))" />

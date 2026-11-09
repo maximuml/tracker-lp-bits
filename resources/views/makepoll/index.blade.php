@@ -3,19 +3,12 @@
 @section('title', $title ?? (__('makepoll.head_new_poll')))
 
 @section('content')
-@if (($pollid ?? 0) > 0)
-    <h1>{{ __('makepoll.text_edit_poll')}}</h1>
-@else
-    @if (($pollAge['question'] ?? '') !== '')
-        <p><span class="striking"><b>{{ __('makepoll.text_current_poll') }}(<i>{{ $pollAge['question'] }}</i>){{ __('makepoll.text_is_only') }}{{ $pollAge['age'] }}{{ __('makepoll.text_old') }}</b></span></p>
-    @endif
-    <h1>{{ __('makepoll.text_make_poll')}}</h1>
+<x-page :title="($pollid ?? 0) > 0 ? __('makepoll.text_edit_poll') : __('makepoll.text_make_poll')" width="form">
+@if (($pollAge['question'] ?? '') !== '')
+    <p><span class="striking"><b>{{ __('makepoll.text_current_poll') }}(<i>{{ $pollAge['question'] }}</i>){{ __('makepoll.text_is_only') }}{{ $pollAge['age'] }}{{ __('makepoll.text_old') }}</b></span></p>
 @endif
 
 <form method="post" action="/web/polls/create">@csrf
-<style type="text/css" nonce="{{ $cspNonce ?? '' }}">
-input.mp { width: 450px; max-width: 100%; box-sizing: border-box; }
-</style>
 <div class="nx-fgrid">
 <label class="nx-fhead" for="poll-question">{{ __('makepoll.text_question')}} <span class="text-nxm-danger">*</span></label><div class="nx-fcell"><input id="poll-question" name=question class=mp maxlength=255 value="{{ (string) ($poll['question'] ?? '') }}"></div>
 @for ($i = 0; $i <= 19; $i++)
@@ -29,4 +22,5 @@ input.mp { width: 450px; max-width: 100%; box-sizing: border-box; }
 @endif
 <input type=hidden name=returnto value="{{ $returnto }}">
 </form>
+</x-page>
 @endsection

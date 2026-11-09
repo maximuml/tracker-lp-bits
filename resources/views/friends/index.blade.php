@@ -3,11 +3,7 @@
 @section('title', $title)
 
 @section('content')
-<p><div class="nx-main nx-embedded">
-<h1> {{ __('friends.text_personallist')}} {{ $titleUsername }}</h1></div></p>
-
-<div class="nx-main nx-embedded nx-box--737">
-<br />
+<x-page :title="__('friends.text_personallist').' '.$titleUsername" width="list">
 <section class="nx-idx-card">
 <h2><a name="friends">{{ __('friends.text_friendlist')}}</a></h2>
 <div>
@@ -46,9 +42,8 @@
 @endif
 </div>
 </section>
-
-</div>
 @if ($canViewUserList)
     <p><a href="/web/users"><b>{{ __('friends.text_find_user')}}</b></a></p>
 @endif
+</x-page>
 @endsection

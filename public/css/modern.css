@@ -3367,6 +3367,9 @@ html[data-theme="dark"] .nx-off a.nx-btn:not(.nx-btn--primary) { color: var(--nx
     .nx-page__actions .nx-btn { width: 100%; box-sizing: border-box; justify-content: center; }
 }
 
+/* makepoll option/question inputs (legacy class kept for JS/CSS hooks). */
+.mp { width: 450px; max-width: 100%; box-sizing: border-box; }
+
 /* Shared notice card (x-notice): success / error / info message pages. */
 .nx-notice-page { margin-block: 1.5rem; }
 .nx-notice { display: flex; gap: 0.9rem; align-items: flex-start; border: 1px solid var(--nxm-border); border-radius: 12px; background: var(--nxm-surface); padding: 1rem 1.1rem; }

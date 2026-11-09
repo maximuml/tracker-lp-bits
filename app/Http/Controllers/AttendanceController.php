@@ -141,6 +141,11 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     calendar.render();
+    // axe scrollable-region-focusable: the month scroller must be keyboard-reachable.
+    var scroller = calendarEl.querySelector('.fc-scroller');
+    if (scroller !== null && !scroller.hasAttribute('tabindex')) {
+        scroller.setAttribute('tabindex', '0');
+    }
 });
 
 function retroactive(dateStr) {

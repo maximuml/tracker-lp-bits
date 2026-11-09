@@ -9,9 +9,9 @@
 @endif
 <form method="post">@csrf
 <div class="nx-fgrid">
-<div class="nx-fhead">User Name:</div><div class="nx-fcell"><input size="40" name="username" autocomplete="username"></div>
-<div class="nx-fhead">New Password:</div><div class="nx-fcell"><input type="password" size="40" name="newpassword" autocomplete="new-password"><br /><span class="small">Minimum is 6 characters</span></div>
-<div class="nx-fhead">Confirm New Password:</div><div class="nx-fcell"><input type="password" size="40" name="newpasswordagain" autocomplete="new-password"></div>
+<label class="nx-fhead" for="reset-username">User Name:</label><div class="nx-fcell"><input size="40" id="reset-username" name="username" autocomplete="username"></div>
+<label class="nx-fhead" for="reset-newpassword">New Password:</label><div class="nx-fcell"><input type="password" size="40" id="reset-newpassword" name="newpassword" autocomplete="new-password"><br /><span class="small">Minimum is 6 characters</span></div>
+<label class="nx-fhead" for="reset-newpasswordagain">Confirm New Password:</label><div class="nx-fcell"><input type="password" size="40" id="reset-newpasswordagain" name="newpasswordagain" autocomplete="new-password"></div>
 <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="Reset"></div>
 </div>
 </form>

@@ -136,6 +136,7 @@ return [
     'text_num_posts' => ' posts',
     'text_search_on_forum' => 'Search on Forums',
     'text_by_keyword' => 'by keyword',
+    'text_keywords' => 'Keywords',
     'head_forums' => 'Forums',
     'col_forums' => 'Forums',
     'col_topics' => 'Topics',

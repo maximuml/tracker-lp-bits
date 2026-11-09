@@ -3367,6 +3367,9 @@ html[data-theme="dark"] .nx-off a.nx-btn:not(.nx-btn--primary) { color: var(--nx
     .nx-page__actions .nx-btn { width: 100%; box-sizing: border-box; justify-content: center; }
 }
 
+/* Replaces legacy <nobr>: keep table headers/cells on one line. */
+.nx-nobr { white-space: nowrap; }
+
 /* makepoll option/question inputs (legacy class kept for JS/CSS hooks). */
 .mp { width: 450px; max-width: 100%; box-sizing: border-box; }
 

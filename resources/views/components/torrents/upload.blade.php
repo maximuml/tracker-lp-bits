@@ -43,15 +43,15 @@
                     <div class="nx-setrow__control">
                         <div class="nx-up__pair">
                             <div class="nx-up__pair-field">
-                                <label for="name"><b>{{ __('upload.text_english_title') ?? '' }}</b></label>
+                                <label for="name"><b>{{ __('upload.text_english_title') }}</b></label>
                                 <input type="text" id="name" name="name" aria-label="{{ __('upload.text_english_title') }}" value="{{ old('name') }}"@error('name') aria-invalid="true" aria-describedby="name-error"@enderror />
                             </div>
                             <div class="nx-up__pair-field">
-                                <label for="cnname"><b>{{ __('upload.text_chinese_title') ?? '' }}</b></label>
+                                <label for="cnname"><b>{{ __('upload.text_chinese_title') }}</b></label>
                                 <input type="text" id="cnname" name="cnname" aria-label="{{ __('upload.text_chinese_title') }}" value="{{ old('cnname') }}"@error('cnname') aria-invalid="true" aria-describedby="cnname-error"@enderror>
                             </div>
                         </div>
-                        <p class="nx-field__help">{{ __('upload.text_titles_note') ?? '' }}</p>
+                        <p class="nx-field__help">{{ __('upload.text_titles_note') }}</p>
                         @error('name')<div class="nx-field__error" id="name-error" role="alert">{{ $message }}</div>@enderror
                         @error('cnname')<div class="nx-field__error" id="cnname-error" role="alert">{{ $message }}</div>@enderror
                     </div>
@@ -89,7 +89,7 @@
                 <label class="nx-setrow__label" for="browsecat">{{ __('upload.row_type') }}<span class="text-nxm-danger">*</span></label>
                 <div class="nx-setrow__control">
                     <select name="type" id="browsecat" data-mode="{{ $browsecatmode }}" aria-label="{{ __('upload.row_type') }}" required @error('type') aria-invalid="true" aria-describedby="type-error"@enderror>
-                        <option value="0">{{ __('upload.select_choose_one') ?? '' }}</option>
+                        <option value="0">{{ __('upload.select_choose_one') }}</option>
                         @foreach ($cats as $row)
                             <option value="{{ $row['id'] }}"@selected((string) old('type', '') === (string) $row['id'])>{{ $row['name'] }}</option>
                         @endforeach
@@ -127,7 +127,7 @@
                     <label class="nx-setrow__label" for="technical_info">{{ __('functions.text_technical_info') }}</label>
                     <div class="nx-setrow__control">
                         <textarea name="technical_info" id="technical_info" rows="8" aria-label="{{ __('functions.text_technical_info') }}"@error('technical_info') aria-invalid="true" aria-describedby="technical_info-error"@enderror>{{ old('technical_info') }}</textarea>
-                        <p class="nx-field__help"><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</p>
+                        <p class="nx-field__help"><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank' rel="noopener">{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank' rel="noopener">{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</p>
                         @error('technical_info')<div class="nx-field__error" id="technical_info-error" role="alert">{{ $message }}</div>@enderror
                     </div>
                 </div>
@@ -141,7 +141,7 @@
                     <label class="nx-setrow__label" for="offer">{{ __('upload.row_your_offer') }}@if (! $uploadFreely)<span class="text-nxm-danger">*</span>@endif</label>
                     <div class="nx-setrow__control">
                         <select name="offer" id="offer"@error('offer') aria-invalid="true" aria-describedby="offer-error"@enderror>
-                            <option value="0">{{ __('upload.select_choose_one') ?? '' }}</option>
+                            <option value="0">{{ __('upload.select_choose_one') }}</option>
                             @foreach ($offerRows as $offerrow)
                                 <option value="{{ (int) $offerrow['id'] }}"@selected((string) old('offer', '0') === (string) $offerrow['id'])>{{ $offerrow['name'] }}</option>
                             @endforeach
@@ -175,7 +175,7 @@
                     <div class="nx-setrow__control">
                         <label for="uplver">
                             <input type="checkbox" id="uplver" name="uplver" value="yes" aria-label="{{ __('upload.row_show_uploader') }}"@checked(old('uplver') === 'yes')@error('uplver') aria-invalid="true" aria-describedby="uplver-error"@enderror />
-                            {{ __('upload.checkbox_hide_uploader_note') ?? '' }}
+                            {{ __('upload.checkbox_hide_uploader_note') }}
                         </label>
                         @error('uplver')<div class="nx-field__error" id="uplver-error" role="alert">{{ $message }}</div>@enderror
                     </div>
@@ -184,6 +184,6 @@
             @error('upload')<div class="nx-field__error" role="alert">{{ $message }}</div>@enderror
         </section>
     </div>
-    <div class="nx-upload__submit"><span>{{ __('upload.text_read_rules') ?? '' }}</span> <input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('upload.submit_upload') ?? '' }}" /></div>
+    <div class="nx-upload__submit"><span>{{ __('upload.text_read_rules') }}</span> <input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('upload.submit_upload') }}" /></div>
 </form>
 <script src="{{ \App\Support\AssetAppender::versionedSrc('js/upload.js') }}" type="text/javascript"></script>

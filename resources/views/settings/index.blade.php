@@ -3,10 +3,10 @@
 @section('title', __('settings.head_website_settings'))
 
 @section('content')
-<x-page :title="__('settings.text_website_settings') ?? 'Website Settings'" width="form">
+<x-page :title="__('settings.text_website_settings')" width="form">
 <div class="nx-fgrid nx-fgrid--pad10">
 <div class="nx-ffull nx-fbanner">
-<span class="text-white">{{ __('settings.text_configuration_file_saving_note') ?? 'Settings are stored in the database.' }}</span>
+<span class="text-white">{{ __('settings.text_configuration_file_saving_note') }}</span>
 </div>
 
 @if ($action === 'showmenu')
@@ -33,7 +33,7 @@
 @elseif ($action === 'basicsettings')
     <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_basic">@csrf
     <x-settings-row layout="grid" :label="__('settings.row_site_name')" for="SITENAME">
-        <input type="text" id="SITENAME" name="SITENAME" value="{{ (string)($config['SITENAME'] ?? 'Nexus') }}"> {{ __('settings.text_site_name_note') ?? '' }}
+        <input type="text" id="SITENAME" name="SITENAME" value="{{ (string)($config['SITENAME'] ?? 'Nexus') }}"> {{ __('settings.text_site_name_note') }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('settings.row_base_url')" for="BASEURL">
         <input type="text" id="BASEURL" name="BASEURL" value="{{ (string)($config['BASEURL'] ?? '') }}"> . <b><u>{{ __('settings.text_base_url_note') }}</u> {{ __('settings.text_base_url_note_end') }}</b>
@@ -95,16 +95,16 @@
     <x-settings-text layout="grid" :label="__('settings.row_site_logo')" name="logo" :value="$config['logo'] ?? ''" :note="__('settings.text_site_logo_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_max_torrent_size')" name="max_torrent_size" :value="$config['max_torrent_size'] ?? 1048576" :note="__('settings.text_max_torrent_size_note')" />
     <x-settings-row layout="grid" :label="__('settings.row_announce_interval')">
-        {{ __('settings.text_announce_interval_note_one') ?? '' }}<br>
+        {{ __('settings.text_announce_interval_note_one') }}<br>
         <ul>
-            <li><label>{{ __('settings.text_announce_default') ?? '' }}<input type="text" name="announce_interval" value="{{ (string)($config['announce_interval'] ?? 1800) }}"> {{ __('settings.text_announce_default_default') ?? '' }}</label></li>
-            <li><label>{{ __('settings.text_for_torrents_older_than') ?? '' }}<input type="text" name="annintertwoage" value="{{ (string)($config['annintertwoage'] ?? 7) }}">{{ __('settings.text_days') ?? 'days' }}</label><label><input type="text" name="annintertwo" value="{{ (string)($config['annintertwo'] ?? 2700) }}"> {{ __('settings.text_announce_two_default') ?? '' }}</label></li>
-            <li><label>{{ __('settings.text_for_torrents_older_than') ?? '' }}<input type="text" name="anninterthreeage" value="{{ (string)($config['anninterthreeage'] ?? 30) }}">{{ __('settings.text_days') ?? 'days' }}</label><label><input type="text" name="anninterthree" value="{{ (string)($config['anninterthree'] ?? 3600) }}"> {{ __('settings.text_announce_three_default') ?? '' }}</label></li>
+            <li><label>{{ __('settings.text_announce_default') }}<input type="text" name="announce_interval" value="{{ (string)($config['announce_interval'] ?? 1800) }}"> {{ __('settings.text_announce_default_default') }}</label></li>
+            <li><label>{{ __('settings.text_for_torrents_older_than') }}<input type="text" name="annintertwoage" value="{{ (string)($config['annintertwoage'] ?? 7) }}">{{ __('settings.text_days') }}</label><label><input type="text" name="annintertwo" value="{{ (string)($config['annintertwo'] ?? 2700) }}"> {{ __('settings.text_announce_two_default') }}</label></li>
+            <li><label>{{ __('settings.text_for_torrents_older_than') }}<input type="text" name="anninterthreeage" value="{{ (string)($config['anninterthreeage'] ?? 30) }}">{{ __('settings.text_days') }}</label><label><input type="text" name="anninterthree" value="{{ (string)($config['anninterthree'] ?? 3600) }}"> {{ __('settings.text_announce_three_default') }}</label></li>
         </ul>
-        {{ __('settings.text_announce_interval_note_two') ?? '' }}<br />{{ __('settings.text_announce_interval_note_two_tail') ?? '' }}
+        {{ __('settings.text_announce_interval_note_two') }}<br />{{ __('settings.text_announce_interval_note_two_tail') }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('settings.row_cleanup_interval')">
-        {{ __('settings.text_cleanup_interval_note_one') ?? '' }}<br>
+        {{ __('settings.text_cleanup_interval_note_one') }}<br>
         <ul>
             @foreach (['one' => 'autoclean_interval_one', 'two' => 'autoclean_interval_two', 'three' => 'autoclean_interval_three', 'four' => 'autoclean_interval_four', 'five' => 'autoclean_interval_five'] as $pri => $field)
                 <li><label>{{ __('settings.'."text_priority_{$pri}") }}<input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? '') }}"> {{ __('settings.'."text_priority_{$pri}_note") }}</label></li>
@@ -149,13 +149,13 @@
         :selected="$config['smtptype'] ?? 'default'"
         :break="true" />
     <tbody id="smtp_advanced"@if(($config['smtptype'] ?? 'default') !== 'advanced') class="nx-hidden"@endif>
-    <div class="nx-ffull text-center"><b>{{ __('settings.text_setting_for_advanced_type') ?? 'Advanced' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('settings.text_setting_for_advanced_type') }}</b></div>
     <x-settings-text layout="grid" :label="__('settings.row_smtp_host')" name="smtp_host" :value="$config['smtp_host'] ?? 'localhost'" :note="__('settings.text_smtp_host_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_smtp_port')" name="smtp_port" :value="$config['smtp_port'] ?? 25" :note="__('settings.text_smtp_port_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_smtp_sendmail_from')" name="smtp_from" :value="$config['smtp_from'] ?? ''" :note="__('settings.text_smtp_sendmail_from_note')" />
     </tbody>
     <tbody id="smtp_external"@if(($config['smtptype'] ?? 'default') !== 'external') class="nx-hidden"@endif>
-    <div class="nx-ffull text-center"><b>{{ __('settings.text_setting_for_external_type') ?? 'External' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('settings.text_setting_for_external_type') }}</b></div>
     <x-settings-text layout="grid" :label="__('settings.row_outgoing_mail_address')" name="smtpaddress" :value="$config['smtpaddress'] ?? ''" :note="__('settings.text_outgoing_mail_address_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_outgoing_mail_port')" name="smtpport" :value="$config['smtpport'] ?? ''" :note="__('settings.text_outgoing_mail_port_note')" />
     <x-settings-radios layout="grid"         :label="__('settings.row_outgoing_mail_encryption')"
@@ -163,7 +163,7 @@
         :options="['' => 'none', 'tls' => 'tls', 'ssl' => 'ssl']"
         :selected="(string)($config['encryption'] ?? '')" />
     <x-settings-text layout="grid" :label="__('settings.row_smtp_account_name')" name="accountname" :value="$config['accountname'] ?? ''" :note="__('settings.text_smtp_account_name_note')" />
-    <label class="nx-fhead whitespace-nowrap" for="accountpassword">{{ __('settings.row_smtp_account_password') ?? 'Password' }}</label><div class="nx-fcell"><input type=password id="accountpassword" name=accountpassword value="{{ (string)($config['accountpassword'] ?? '') }}"> <b>{{ __('settings.text_smtp_account_password_note') }}</b> {{ __('settings.text_smtp_account_password_note_end') }}</div>
+    <label class="nx-fhead whitespace-nowrap" for="accountpassword">{{ __('settings.row_smtp_account_password') }}</label><div class="nx-fcell"><input type=password id="accountpassword" name=accountpassword value="{{ (string)($config['accountpassword'] ?? '') }}"> <b>{{ __('settings.text_smtp_account_password_note') }}</b> {{ __('settings.text_smtp_account_password_note_end') }}</div>
     </tbody>
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
     </form>
@@ -182,8 +182,8 @@
             @foreach (['0' => 'select_none', '1' => 'select_conservative', '2' => 'select_normal', '3' => 'select_strict', '4' => 'select_paranoid'] as $val => $labelKey)
                 <option value="{{ $val }}"@if ((string)($config['cheaterdet'] ?? 0) === $val) selected @endif> {{ __('settings.'.$labelKey) }} </option>
             @endforeach
-        </select> {{ __('settings.text_cheater_detection_level_note') ?? '' }}<br>
-        {{ __('settings.text_never_suspect') ?? '' }}{{ \App\Support\UserClass::classSelectWithContext('nodetect', (int)($authority['staffmem'] ?? 0), $config['nodetect'] ?? 0, 0, false, false, __('settings.text_never_suspect')) }}{{ __('settings.text_or_above') ?? '' }}
+        </select> {{ __('settings.text_cheater_detection_level_note') }}<br>
+        {{ __('settings.text_never_suspect') }}{{ \App\Support\UserClass::classSelectWithContext('nodetect', (int)($authority['staffmem'] ?? 0), $config['nodetect'] ?? 0, 0, false, false, __('settings.text_never_suspect')) }}{{ __('settings.text_or_above') }}
     </x-settings-row>
     <x-settings-text layout="grid" :label="__('settings.row_max_ips')" name="maxip" :value="$config['maxip'] ?? 1" :note="__('settings.text_max_ips_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_max_login_attemps')" name="maxloginattempts" :value="$config['maxloginattempts'] ?? 7" :note="__('settings.text_max_login_attemps_note')" />
@@ -201,7 +201,7 @@
         :note="__('settings.text_guest_visit_value_static_page')" />
     </tbody>
     <tbody id="tbody_custom_content"@if(($config['guest_visit_type'] ?? '') !== 'custom_content') class="nx-hidden"@endif>
-    <div class="nx-fhead whitespace-nowrap">{{ __('settings.row_guest_visit_value_custom_content') ?? 'Custom content' }}</div><div class="nx-fcell"><x-bbcode-editor form="securitysettings_form" text="guest_visit_value_custom_content" :content="$config['guest_visit_value_custom_content'] ?? ''" /></div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('settings.row_guest_visit_value_custom_content') }}</div><div class="nx-fcell"><x-bbcode-editor form="securitysettings_form" text="guest_visit_value_custom_content" :content="$config['guest_visit_value_custom_content'] ?? ''" /></div>
     </tbody>
     <tbody id="tbody_redirect"@if(($config['guest_visit_type'] ?? '') !== 'redirect') class="nx-hidden"@endif>
     <x-settings-text layout="grid" :label="__('settings.row_guest_visit_value_redirect')" name="guest_visit_value_redirect" :value="$config['guest_visit_value_redirect'] ?? ''" />
@@ -210,18 +210,18 @@
         @foreach (['normal' => 'text_login_type_normal', 'secret' => 'text_login_type_secret', 'passkey' => 'text_login_type_passkey'] as $val => $labelKey)
             <label><input type="radio" name="login_type" value="{{ $val }}"@if (($config['login_type'] ?? 'normal') === $val) checked @endif>{{ __('settings.'.$labelKey) }}</label>
         @endforeach
-        <b>{{ __('settings.text_login_type_warning') ?? '' }}</b>
+        <b>{{ __('settings.text_login_type_warning') }}</b>
     </x-settings-row>
     <tbody id="tbody_login_secret"@if(!in_array($config['login_type'] ?? '', ['secret', 'passkey'])) class="nx-hidden"@endif>
     <x-settings-row layout="grid" :label="__('settings.row_login_secret')">
-        {{ __('settings.text_login_secret_current') ?? 'Current secret' }}：{{ $config['login_secret'] ?? '' }}
+        {{ __('settings.text_login_secret_current') }}：{{ $config['login_secret'] ?? '' }}
         @if (! empty($config['login_secret']))
-            <br>{{ __('settings.text_login_url_with_secret') ?? '' }}: {{ \App\Support\Url::schemeAndHost(false) }}/login?secret={{ $config['login_secret'] }}
+            <br>{{ __('settings.text_login_url_with_secret') }}: {{ \App\Support\Url::schemeAndHost(false) }}/login?secret={{ $config['login_secret'] }}
         @endif
-        <br><label><input type="radio" name="login_secret_regenerate" value="no"@if (! empty($config['login_secret'])) checked @endif>{{ __('settings.text_login_secret_regenerate_no') ?? 'No' }}</label>
-        <br><label><input type="radio" name="login_secret_regenerate" value="yes"@if (empty($config['login_secret'])) checked @endif>{{ __('settings.text_login_secret_regenerate_yes') ?? 'Yes' }}</label>
+        <br><label><input type="radio" name="login_secret_regenerate" value="no"@if (! empty($config['login_secret'])) checked @endif>{{ __('settings.text_login_secret_regenerate_no') }}</label>
+        <br><label><input type="radio" name="login_secret_regenerate" value="yes"@if (empty($config['login_secret'])) checked @endif>{{ __('settings.text_login_secret_regenerate_yes') }}</label>
     </x-settings-row>
-    <label class="nx-fhead whitespace-nowrap" for="login_secret_lifetime">{{ __('settings.row_login_secret_lifetime') ?? 'Secret lifetime' }}</label><div class="nx-fcell"><input type="text" id="login_secret_lifetime" name="login_secret_lifetime" value="{{ (string)($config['login_secret_lifetime'] ?? '') }}">{{ __('settings.text_login_secret_lifetime_unit') ?? ' min' }}</div>
+    <label class="nx-fhead whitespace-nowrap" for="login_secret_lifetime">{{ __('settings.row_login_secret_lifetime') }}</label><div class="nx-fcell"><input type="text" id="login_secret_lifetime" name="login_secret_lifetime" value="{{ (string)($config['login_secret_lifetime'] ?? '') }}">{{ __('settings.text_login_secret_lifetime_unit') }}</div>
     </tbody>
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
     </form>
@@ -279,7 +279,7 @@
         ['user-change-class', null, \App\Enums\UserClass::ADMINISTRATOR, null],
     ] as [$perm, $rowKey, $defaultClass, $noteKey])
     <x-settings-row layout="grid" :label="(string) ($rowKey !== null ? (__('settings.'.$rowKey)) : \App\Support\Locale::trans('permission.'.$perm.'.text', [], null))">
-        {{ __('settings.text_minimum_class') ?? 'Min class: ' }}{{ \App\Support\UserClass::classSelectWithContext($perm, \App\Enums\UserClass::SYSOP->value, $config[$perm] ?? 0, 0, true, false, (string) ($rowKey !== null ? (__('settings.'.$rowKey)) : \App\Support\Locale::trans('permission.'.$perm.'.text', [], null))) }}{{ __('settings.text_default') ?? ' Default: ' }}{{ \App\Support\UserClass::name($defaultClass->value, false, true, true) }}{{ $noteKey !== null ? (__('settings.'.$noteKey)) : \App\Support\Locale::trans('permission.'.$perm.'.desc', [], null) }}@if ($noteKey !== null && \Illuminate\Support\Facades\Lang::has('settings.'.$noteKey.'_tail'))<br />{{ __('settings.'.$noteKey.'_tail') }}@endif
+        {{ __('settings.text_minimum_class') }}{{ \App\Support\UserClass::classSelectWithContext($perm, \App\Enums\UserClass::SYSOP->value, $config[$perm] ?? 0, 0, true, false, (string) ($rowKey !== null ? (__('settings.'.$rowKey)) : \App\Support\Locale::trans('permission.'.$perm.'.text', [], null))) }}{{ __('settings.text_default') }}{{ \App\Support\UserClass::name($defaultClass->value, false, true, true) }}{{ $noteKey !== null ? (__('settings.'.$noteKey)) : \App\Support\Locale::trans('permission.'.$perm.'.desc', [], null) }}@if ($noteKey !== null && \Illuminate\Support\Facades\Lang::has('settings.'.$noteKey.'_tail'))<br />{{ __('settings.'.$noteKey.'_tail') }}@endif
     </x-settings-row>
     @endforeach
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
@@ -292,15 +292,15 @@
         @foreach (['enable' => 'text_enabled', 'disablesave' => 'text_disabled_but_save', 'disable' => 'text_disabled_no_save'] as $val => $labelKey)
             <input type="radio" id="bonus{{ $val }}" name="bonus" value="{{ $val }}"@if (($config['bonus'] ?? 'enable') === $val) checked @endif> <label for="bonus{{ $val }}">{{ __('settings.'.$labelKey) }}</label>
         @endforeach
-        <br>{{ __('settings.text_kps_note') ?? '' }}
+        <br>{{ __('settings.text_kps_note') }}
     </x-settings-row>
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_location')" name="enablelocation" :value="$config['enablelocation'] ?? 'no'" :note="__('settings.text_enable_location_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-yesno layout="grid" :label="__('settings.row_enable_tooltip')" name="enabletooltip" :value="$config['enabletooltip'] ?? 'no'" :note="__('settings.text_enable_tooltip_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-text layout="grid" :label="__('settings.row_title_keywords')" name="titlekeywords" :value="$config['titlekeywords'] ?? ''" :note="__('settings.text_title_keywords_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_meta_keywords')" name="metakeywords" :value="$config['metakeywords'] ?? ''" :note="__('settings.text_meta_keywords_note')" />
-    <label class="nx-fhead whitespace-nowrap" for="metadescription">{{ __('settings.row_meta_description') ?? 'Meta description' }}</label><div class="nx-fcell"><textarea cols="100" rows="5" id="metadescription" name='metadescription'>{{ (string)($config['metadescription'] ?? '') }}</textarea><br>{{ __('settings.text_meta_description_note') ?? '' }}</div>
-    <label class="nx-fhead whitespace-nowrap" for="analyticscode">{{ __('settings.row_web_analytics_code') ?? 'Analytics code' }}</label><div class="nx-fcell"><textarea cols="100" rows="5" id="analyticscode" name='analyticscode'>{{ (string)($config['analyticscode'] ?? '') }}</textarea><br>{{ __('settings.text_web_analytics_code_note') }} <br /><b>{{ __('settings.text_note') }}</b>: {{ __('settings.text_web_analytics_code_note_end') }}</div>
-    <div class="nx-fhead whitespace-nowrap">{{ __('settings.row_see_sql_debug') ?? 'SQL debug' }}</div><div class="nx-fcell"><label><input type='checkbox' name='enablesqldebug' value='yes'@if (($config['enablesqldebug'] ?? 'no') === 'yes') checked @endif>{{ __('settings.text_allow') ?? 'Allow' }}</label>{{ \App\Support\UserClass::classSelectWithContext('sqldebug', \App\Enums\UserClass::STAFFLEADER->value, $config['sqldebug'] ?? \App\Enums\UserClass::MODERATOR->value, 0, false, false, __('settings.row_see_sql_debug')) }}{{ __('settings.text_see_sql_list') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::SYSOP->value, false, true, true) }}</div>
+    <label class="nx-fhead whitespace-nowrap" for="metadescription">{{ __('settings.row_meta_description') }}</label><div class="nx-fcell"><textarea cols="100" rows="5" id="metadescription" name='metadescription'>{{ (string)($config['metadescription'] ?? '') }}</textarea><br>{{ __('settings.text_meta_description_note') }}</div>
+    <label class="nx-fhead whitespace-nowrap" for="analyticscode">{{ __('settings.row_web_analytics_code') }}</label><div class="nx-fcell"><textarea cols="100" rows="5" id="analyticscode" name='analyticscode'>{{ (string)($config['analyticscode'] ?? '') }}</textarea><br>{{ __('settings.text_web_analytics_code_note') }} <br /><b>{{ __('settings.text_note') }}</b>: {{ __('settings.text_web_analytics_code_note_end') }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('settings.row_see_sql_debug') }}</div><div class="nx-fcell"><label><input type='checkbox' name='enablesqldebug' value='yes'@if (($config['enablesqldebug'] ?? 'no') === 'yes') checked @endif>{{ __('settings.text_allow') }}</label>{{ \App\Support\UserClass::classSelectWithContext('sqldebug', \App\Enums\UserClass::STAFFLEADER->value, $config['sqldebug'] ?? \App\Enums\UserClass::MODERATOR->value, 0, false, false, __('settings.row_see_sql_debug')) }}{{ __('settings.text_see_sql_list') }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::SYSOP->value, false, true, true) }}</div>
     <x-settings-text layout="grid" :label="__('settings.row_tracker_founded_date')" name="datefounded" :value="$config['datefounded'] ?? '2007-12-24'" :note="__('settings.text_tracker_founded_date_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_css_date')" name="cssdate" :value="$config['cssdate'] ?? ''" :note="__('settings.text_css_date')" />
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
@@ -308,13 +308,13 @@
 
 @elseif ($action === 'bonussettings')
     <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_bonus">@csrf
-    <div class="nx-ffull text-center"><b>{{ __('settings.text_bonus_by_seeding') ?? 'Bonus by seeding' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('settings.text_bonus_by_seeding') }}</b></div>
     <x-settings-text layout="grid" :label="__('settings.row_min_size')" name="min_size" :value="$config['min_size'] ?? 0" :note="__('settings.text_bonus_mini_size').' '.(__('settings.text_bonus_mini_size_help'))" />
     <x-settings-text layout="grid" :label="__('settings.row_donor_gets_double')" name="donortimes" :value="$config['donortimes'] ?? 2" :note="__('settings.text_donor_gets').' '.(__('settings.text_times_as_many'))" />
     <x-settings-row layout="grid" :label="__('settings.row_basic_seeding_bonus')">
-        <label>{{ __('settings.text_user_would_get') ?? '' }}<input type="text" name="perseeding" value="{{ (string)($config['perseeding'] ?? 1) }}">{{ __('settings.text_bonus_points') ?? '' }}</label><label><input type="text" name="maxseeding" value="{{ (string)($config['maxseeding'] ?? 7) }}">{{ __('settings.text_torrents_default') ?? '' }}</label>
+        <label>{{ __('settings.text_user_would_get') }}<input type="text" name="perseeding" value="{{ (string)($config['perseeding'] ?? 1) }}">{{ __('settings.text_bonus_points') }}</label><label><input type="text" name="maxseeding" value="{{ (string)($config['maxseeding'] ?? 7) }}">{{ __('settings.text_torrents_default') }}</label>
     </x-settings-row>
-    <div class="nx-ffull text-center"><b>{{ __('settings.text_misc_ways_get_bonus') ?? 'Misc bonus' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('settings.text_misc_ways_get_bonus') }}</b></div>
     @foreach ([
         ['uploadtorrent', 'row_uploading_torrent', 15, 'text_uploading_torrent_note'],
         ['starttopic', 'row_starting_topic', 2, 'text_starting_topic_note'],
@@ -324,13 +324,13 @@
         ['offervote', 'row_voting_on_offer', 1, 'text_voting_on_offer_note'],
     ] as [$field, $rowKey, $default, $noteKey])
     <x-settings-row layout="grid" :label="__('settings.'.$rowKey)">
-        <label>{{ __('settings.text_user_would_get') ?? '' }}<input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('settings.'.$noteKey) }}</label>
+        <label>{{ __('settings.text_user_would_get') }}<input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('settings.'.$noteKey) }}</label>
     </x-settings-row>
     @endforeach
     <x-settings-row layout="grid" :label="__('settings.row_saying_thanks')">
-        <label>{{ __('settings.text_giver_and_receiver_get') ?? '' }}<input type="text" name="saythanks" value="{{ (string)($config['saythanks'] ?? 0.5) }}"></label><label>{{ __('settings.text_saying_thanks_and') ?? '' }}<input type="text" name="receivethanks" value="{{ (string)($config['receivethanks'] ?? 0) }}">{{ __('settings.text_saying_thanks_default') ?? '' }}</label>
+        <label>{{ __('settings.text_giver_and_receiver_get') }}<input type="text" name="saythanks" value="{{ (string)($config['saythanks'] ?? 0.5) }}"></label><label>{{ __('settings.text_saying_thanks_and') }}<input type="text" name="receivethanks" value="{{ (string)($config['receivethanks'] ?? 0) }}">{{ __('settings.text_saying_thanks_default') }}</label>
     </x-settings-row>
-    <div class="nx-ffull text-center"><b>{{ __('settings.text_things_cost_bonus') ?? 'Things that cost bonus' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('settings.text_things_cost_bonus') }}</b></div>
     @foreach ([
         ['onegbupload', 'row_one_gb_credit', 300, 'text_one_gb_credit_note'],
         ['fivegbupload', 'row_five_gb_credit', 800, 'text_five_gb_credit_note'],
@@ -349,30 +349,30 @@
         ['self_enable', 'row_self_enable', \App\Models\BonusLogs::DEFAULT_BONUS_SELF_ENABLE, 'text_self_enable_note'],
     ] as [$field, $rowKey, $default, $noteKey])
     <x-settings-row layout="grid" :label="__('settings.'.$rowKey)">
-        <label>{{ __('settings.text_it_costs_user') ?? '' }}<input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('settings.'.$noteKey) }}</label>
+        <label>{{ __('settings.text_it_costs_user') }}<input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('settings.'.$noteKey) }}</label>
     </x-settings-row>
     @endforeach
     <x-settings-yesno layout="grid" :label="__('settings.row_allow_giving_bonus_gift')" name="bonusgift" :value="$config['bonusgift'] ?? 'no'" :note="__('settings.text_giving_bonus_gift_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
     <x-settings-row layout="grid" :label="__('settings.row_bonus_gift_tax')">
-        <label>{{ __('settings.text_system_charges') ?? '' }}<input type="text" name="basictax" value="{{ (string)($config['basictax'] ?? 5) }}">{{ __('settings.text_bonus_points_plus') ?? '' }}</label><label><input type="text" name="taxpercentage" value="{{ (string)($config['taxpercentage'] ?? 10) }}">{{ __('settings.text_bonus_gift_tax_note') ?? '' }}</label><br />{{ __('settings.text_bonus_gift_tax_note_tail') ?? '' }}
+        <label>{{ __('settings.text_system_charges') }}<input type="text" name="basictax" value="{{ (string)($config['basictax'] ?? 5) }}">{{ __('settings.text_bonus_points_plus') }}</label><label><input type="text" name="taxpercentage" value="{{ (string)($config['taxpercentage'] ?? 10) }}">{{ __('settings.text_bonus_gift_tax_note') }}</label><br />{{ __('settings.text_bonus_gift_tax_note_tail') }}
     </x-settings-row>
-    <div class="nx-ffull text-center"><b>{{ __('settings.text_attendance_get_bonus') ?? 'Attendance bonus' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('settings.text_attendance_get_bonus') }}</b></div>
     <x-settings-text layout="grid" :label="__('settings.text_attendance_initial_reward')" name="attendance_initial" :value="$config['attendance_initial'] ?? 0" />
     <x-settings-text layout="grid" :label="__('settings.text_attendance_continuous_increment')" name="attendance_step" :value="$config['attendance_step'] ?? 0" />
     <x-settings-text layout="grid" :label="__('settings.text_attendance_reward_limit')" name="attendance_max" :value="$config['attendance_max'] ?? 0" />
     <x-settings-row layout="grid" :label="__('settings.text_attendance_continuous')">
-        <x-data-table :caption="__('settings.text_website_settings') ?? 'Website Settings'" captionHidden>
+        <x-data-table :caption="__('settings.text_website_settings')" captionHidden>
 <x-slot:head>
 <thead>
-<tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('settings.text_attendance_continuous_days') ?? 'Days' }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('settings.text_attendance_continuous_days_additional_reward') ?? 'Reward' }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('settings.text_attendance_continuous_days_action') ?? 'Action' }}</th></tr>
+<tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('settings.text_attendance_continuous_days') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('settings.text_attendance_continuous_days_additional_reward') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('settings.text_attendance_continuous_days_action') }}</th></tr>
 </thead>
 </x-slot:head>
 
             @foreach (($attendance_continuous ?? []) as $days => $value)
-            <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value="{{ $days }}" aria-label="{{ __('settings.text_attendance_continuous_days') ?? 'Days' }}"> {{ __('settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value="{{ $value }}" aria-label="{{ __('settings.text_attendance_continuous_days_additional_reward') ?? 'Reward' }}"> {{ __('settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-delrow">{{ __('settings.text_attendance_continuous_item_action_remove') ?? 'Remove' }}</a></td></tr>
+            <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value="{{ $days }}" aria-label="{{ __('settings.text_attendance_continuous_days') }}"> {{ __('settings.text_attendance_continuous_unit') }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value="{{ $value }}" aria-label="{{ __('settings.text_attendance_continuous_days_additional_reward') }}"> {{ __('settings.text_attendance_input_suffix') }}</td><td><a href="#" class="js-delrow">{{ __('settings.text_attendance_continuous_item_action_remove') }}</a></td></tr>
             @endforeach
-            <tr><td colspan="3">{{ __('settings.text_attendance_continuous_add_rules') ?? '' }}</td></tr>
-            <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value="" aria-label="{{ __('settings.text_attendance_continuous_days') ?? 'Days' }}"> {{ __('settings.text_attendance_continuous_unit') ?? 'days' }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value="" aria-label="{{ __('settings.text_attendance_continuous_days_additional_reward') ?? 'Reward' }}"> {{ __('settings.text_attendance_input_suffix') ?? '' }}</td><td><a href="#" class="js-newrow">{{ __('settings.text_attendance_continuous_item_action_add') ?? 'Add' }}</a></td></tr>
+            <tr><td colspan="3">{{ __('settings.text_attendance_continuous_add_rules') }}</td></tr>
+            <tr><td><input type="number" min="0" name="attendance_continuous_day[]" value="" aria-label="{{ __('settings.text_attendance_continuous_days') }}"> {{ __('settings.text_attendance_continuous_unit') }}</td><td><input type="number" min="0" name="attendance_continuous_value[]" value="" aria-label="{{ __('settings.text_attendance_continuous_days_additional_reward') }}"> {{ __('settings.text_attendance_input_suffix') }}</td><td><a href="#" class="js-newrow">{{ __('settings.text_attendance_continuous_item_action_add') }}</a></td></tr>
         </x-data-table>
     </x-settings-row>
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
@@ -380,18 +380,18 @@
 
 @elseif ($action === 'accountsettings')
     <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_account">@csrf
-    <div class="nx-ffull text-center"><b>{{ __('settings.text_delete_inactive_accounts') ?? 'Delete inactive' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('settings.text_delete_inactive_accounts') }}</b></div>
     <x-settings-row layout="grid" :label="__('settings.row_never_delete')">
-        {{ \App\Support\UserClass::classSelectWithContext('neverdelete', \App\Enums\UserClass::VIP->value, $config['neverdelete'] ?? 0, 0, false, false, __('settings.row_never_delete')) }}{{ __('settings.text_never_delete') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::VETERAN_USER->value, false, true, true) }}
+        {{ \App\Support\UserClass::classSelectWithContext('neverdelete', \App\Enums\UserClass::VIP->value, $config['neverdelete'] ?? 0, 0, false, false, __('settings.row_never_delete')) }}{{ __('settings.text_never_delete') }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::VETERAN_USER->value, false, true, true) }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('settings.row_never_delete_if_packed')">
-        {{ \App\Support\UserClass::classSelectWithContext('neverdeletepacked', \App\Enums\UserClass::VIP->value, $config['neverdeletepacked'] ?? 0, 0, false, false, __('settings.row_never_delete_if_packed')) }}{{ __('settings.text_never_delete_if_packed') ?? '' }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::ELITE_USER->value, false, true, true) }}
+        {{ \App\Support\UserClass::classSelectWithContext('neverdeletepacked', \App\Enums\UserClass::VIP->value, $config['neverdeletepacked'] ?? 0, 0, false, false, __('settings.row_never_delete_if_packed')) }}{{ __('settings.text_never_delete_if_packed') }}{{ \App\Support\UserClass::name(\App\Enums\UserClass::ELITE_USER->value, false, true, true) }}
     </x-settings-row>
     <x-settings-text layout="grid" :label="__('settings.row_delete_packed')" name="deletepacked" :value="$config['deletepacked'] ?? 400" :note="__('settings.text_delete_packed_note_two')" />
     <x-settings-text layout="grid" :label="__('settings.row_delete_unpacked')" name="deleteunpacked" :value="$config['deleteunpacked'] ?? 150" :note="__('settings.text_delete_unpacked_note_two')" />
     <x-settings-text layout="grid" :label="__('settings.row_delete_no_transfer')" name="deletenotransfer" :value="$config['deletenotransfer'] ?? 60" :note="__('settings.text_delete_transfer_note_two')" />
     <x-settings-text layout="grid" :label="__('settings.row_destroy_disabled')" name="destroy_disabled" :value="$config['destroy_disabled'] ?? 500" :note="__('settings.text_destroy_disabled_note_two')" />
-    <div class="nx-ffull text-center"><b>{{ __('settings.text_user_promotion_demotion') ?? 'Promotion/Demotion' }}</b></div>
+    <div class="nx-ffull text-center"><b>{{ __('settings.text_user_promotion_demotion') }}</b></div>
     @foreach ([
         [\App\Enums\UserClass::POWER_USER->value, 'pu', 4, 50, 1.05, 0.95, 1],
         [\App\Enums\UserClass::ELITE_USER->value, 'eu', 8, 120, 1.55, 1.45, 0],
@@ -404,13 +404,13 @@
     ] as [$class, $prefix, $time, $dl, $prratio, $deratio, $invites])
     <x-settings-row layout="grid">
         <x-slot:label>{{ __('settings.row_promote_to_one') }}{{ \App\Support\UserClass::name($class, false, false, true) }}{{ __('settings.row_promote_to_two') }}</x-slot:label>
-        <label>{{ __('settings.text_alias') ?? 'Alias: ' }}<input type="text" name="{{ $class }}_alias" value="{{ (string)($config[$class.'_alias'] ?? '') }}"></label><br>
-        <label>{{ __('settings.text_member_longer_than') ?? 'Member for ' }}<input type="text" name="{{ $prefix }}time" value="{{ (string)($config[$prefix.'time'] ?? $time) }}"></label>
-        <label>{{ __('settings.text_seed_points_more_than') ?? ' Seed points: ' }}<input type="text" name="{{ $class }}_min_seed_points" value="{{ (string)($config[$class.'_min_seed_points'] ?? 0) }}"></label>
-        <label>{{ __('settings.text_downloaded_more_than') ?? ' Downloaded: ' }}<input type="text" name="{{ $prefix }}dl" value="{{ (string)($config[$prefix.'dl'] ?? $dl) }}"></label>
-        <label>{{ __('settings.text_with_ratio_above') ?? ' Ratio: ' }}<input type="text" name="{{ $prefix }}prratio" value="{{ (string)($config[$prefix.'prratio'] ?? $prratio) }}"></label>
-        <label>{{ __('settings.text_demote_with_ratio_below') ?? ' Demote below: ' }}<input type="text" name="{{ $prefix }}deratio" value="{{ (string)($config[$prefix.'deratio'] ?? $deratio) }}"></label>
-        <label>{{ __('settings.text_users_get') ?? ' Invites: ' }}<input type="text" name="getInvitesByPromotion[{{ $class }}]" value="{{ (string)($config['getInvitesByPromotion'][$class] ?? $invites) }}"></label>
+        <label>{{ __('settings.text_alias') }}<input type="text" name="{{ $class }}_alias" value="{{ (string)($config[$class.'_alias'] ?? '') }}"></label><br>
+        <label>{{ __('settings.text_member_longer_than') }}<input type="text" name="{{ $prefix }}time" value="{{ (string)($config[$prefix.'time'] ?? $time) }}"></label>
+        <label>{{ __('settings.text_seed_points_more_than') }}<input type="text" name="{{ $class }}_min_seed_points" value="{{ (string)($config[$class.'_min_seed_points'] ?? 0) }}"></label>
+        <label>{{ __('settings.text_downloaded_more_than') }}<input type="text" name="{{ $prefix }}dl" value="{{ (string)($config[$prefix.'dl'] ?? $dl) }}"></label>
+        <label>{{ __('settings.text_with_ratio_above') }}<input type="text" name="{{ $prefix }}prratio" value="{{ (string)($config[$prefix.'prratio'] ?? $prratio) }}"></label>
+        <label>{{ __('settings.text_demote_with_ratio_below') }}<input type="text" name="{{ $prefix }}deratio" value="{{ (string)($config[$prefix.'deratio'] ?? $deratio) }}"></label>
+        <label>{{ __('settings.text_users_get') }}<input type="text" name="getInvitesByPromotion[{{ $class }}]" value="{{ (string)($config['getInvitesByPromotion'][$class] ?? $invites) }}"></label>
     </x-settings-row>
     @endforeach
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
@@ -428,12 +428,12 @@
         :options="collect($nfoViewStyles ?? [])->mapWithKeys(fn ($info, $style) => [(string)$style => $info['text'] ?? $style])->all()"
         :selected="(string)($config['nfo_view_style_default'] ?? 0)" />
     <x-settings-yesno layout="grid" :label="__('settings.row_paid_torrent_enabled')" name="paid_torrent_enabled" :value="$config['paid_torrent_enabled'] ?? 'no'" :note="__('settings.text_paid_torrent_enabled_note')" :yes-label="__('settings.text_yes')" :no-label="__('settings.text_no')" />
-    <label class="nx-fhead whitespace-nowrap" for="tax_factor">{{ __('settings.row_tax_factor') ?? 'Tax factor' }}</label><div class="nx-fcell"><input type='number' id="tax_factor" name=tax_factor value="{{ (string)($config['tax_factor'] ?? 0) }}"> {{ __('settings.text_tax_factor_note') ?? '' }}</div>
-    <label class="nx-fhead whitespace-nowrap" for="max_price">{{ __('settings.row_max_price') ?? 'Max price' }}</label><div class="nx-fcell"><input type='number' id="max_price" name=max_price value="{{ (string)($config['max_price'] ?? 0) }}"> {{ __('settings.text_max_price_note') ?? '' }}</div>
+    <label class="nx-fhead whitespace-nowrap" for="tax_factor">{{ __('settings.row_tax_factor') }}</label><div class="nx-fcell"><input type='number' id="tax_factor" name=tax_factor value="{{ (string)($config['tax_factor'] ?? 0) }}"> {{ __('settings.text_tax_factor_note') }}</div>
+    <label class="nx-fhead whitespace-nowrap" for="max_price">{{ __('settings.row_max_price') }}</label><div class="nx-fcell"><input type='number' id="max_price" name=max_price value="{{ (string)($config['max_price'] ?? 0) }}"> {{ __('settings.text_max_price_note') }}</div>
     <x-settings-text layout="grid" :label="__('settings.row_reward_bonus_options')" name="reward_bonus_options" :value="$config['reward_bonus_options'] ?? ''" :note="__('settings.text_reward_bonus_options_note')" />
-    <label class="nx-fhead whitespace-nowrap" for="reward_times_limit">{{ __('settings.row_reward_times_limit') ?? 'Reward limit' }}</label><div class="nx-fcell"><input type='number' id="reward_times_limit" name=reward_times_limit value="{{ (string)($config['reward_times_limit'] ?? 0) }}"> {{ __('settings.text_reward_times_limit_note') ?? '' }}</div>
+    <label class="nx-fhead whitespace-nowrap" for="reward_times_limit">{{ __('settings.row_reward_times_limit') }}</label><div class="nx-fcell"><input type='number' id="reward_times_limit" name=reward_times_limit value="{{ (string)($config['reward_times_limit'] ?? 0) }}"> {{ __('settings.text_reward_times_limit_note') }}</div>
     <x-settings-row layout="grid" :label="__('settings.row_random_promotion')">
-        {{ __('settings.text_random_promotion_note_one') ?? '' }}
+        {{ __('settings.text_random_promotion_note_one') }}
         <ul>
             @foreach ([
                 ['randomhalfleech', 5, 'halfdown', 'text_promo_halfdown'],
@@ -446,13 +446,13 @@
                 <li><label><input type="text" name="{{ $field }}" value="{{ (string)($config[$field] ?? $default) }}">{{ __('settings.text_chance_becoming') }}{{ view('components.settings.promo-label', ['cls' => $cls, 'label' => __('settings.'.$labelKey)]) }}{{ __('settings.text_chance_becoming_default', ['default' => $default]) }}</label></li>
             @endforeach
         </ul>
-        {{ __('settings.text_random_promotion_note_two') ?? '' }}
+        {{ __('settings.text_random_promotion_note_two') }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('settings.row_large_torrent_promotion')">
-        <label>{{ __('settings.text_torrent_larger_than') ?? '' }}<input type="text" name="largesize" value="{{ (string)($config['largesize'] ?? 20) }}"></label><label>{{ __('settings.text_gb_promoted_to') ?? '' }}<select name="largepro">{{ $promotionSelects['largepro'] ?? '' }}</select>{{ __('settings.text_by_system_upon_uploading') ?? '' }}</label><br>{{ __('settings.text_large_torrent_promotion_note') ?? '' }}
+        <label>{{ __('settings.text_torrent_larger_than') }}<input type="text" name="largesize" value="{{ (string)($config['largesize'] ?? 20) }}"></label><label>{{ __('settings.text_gb_promoted_to') }}<select name="largepro">{{ $promotionSelects['largepro'] ?? '' }}</select>{{ __('settings.text_by_system_upon_uploading') }}</label><br>{{ __('settings.text_large_torrent_promotion_note') }}
     </x-settings-row>
     <x-settings-row layout="grid" :label="__('settings.row_promotion_timeout')">
-        {{ __('settings.text_promotion_timeout_note_one') ?? '' }}
+        {{ __('settings.text_promotion_timeout_note_one') }}
         <ul>
             @foreach ([
                 ['halfleechbecome', 'expirehalfleech', 1, 5, 'halfdown', 'text_promo_halfdown', 'text_halfleech_timeout_default', 150],
@@ -463,10 +463,10 @@
                 ['thirtypercentleechbecome', 'expirethirtypercentleech', 1, 7, 'twouphalfdown', 'text_promo_thirtypercent', 'text_thirtypercentleech_timeout_default', 30],
                 ['normalbecome', 'expirenormal', 1, 0, null, 'text_promo_normal', 'text_normal_timeout_default', 0],
             ] as [$become, $expire, $defBecome, $hide, $cls, $labelKey, $defKey, $defExpire])
-                <li><label>{{ view('components.settings.promo-label', ['cls' => $cls, 'label' => __('settings.'.$labelKey)]) }}{{ __('settings.text_will_become') }}<select name="{{ $become }}">{{ $promotionSelects[$become] ?? '' }}</select></label><label>{{ __('settings.text_after') ?? ' after ' }}<input type="text" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ __('settings.'.$defKey) }}</label></li>
+                <li><label>{{ view('components.settings.promo-label', ['cls' => $cls, 'label' => __('settings.'.$labelKey)]) }}{{ __('settings.text_will_become') }}<select name="{{ $become }}">{{ $promotionSelects[$become] ?? '' }}</select></label><label>{{ __('settings.text_after') }}<input type="text" name="{{ $expire }}" value="{{ (string)($config[$expire] ?? $defExpire) }}">{{ __('settings.'.$defKey) }}</label></li>
             @endforeach
         </ul>
-        {{ __('settings.text_promotion_timeout_note_two') ?? '' }}
+        {{ __('settings.text_promotion_timeout_note_two') }}
     </x-settings-row>
     <x-settings-text layout="grid" :label="__('settings.row_auto_pick_hot')" name="hotdays" :value="$config['hotdays'] ?? 7" :note="__('settings.text_days_with_more_than')" />
     <x-settings-text layout="grid" :label="__('settings.row_auto_pick_hot')" name="hotseeder" :value="$config['hotseeder'] ?? 10" :note="__('settings.text_be_picked_as_hot')" />
@@ -487,7 +487,7 @@
                 ['four', \App\Enums\UserClass::EXTREME_USER, '', ''],
             ] as [$num, $defaultClass, $defOne, $defTwo])
                 <li>
-                    {{ \App\Support\UserClass::classSelectWithContext('class'.$num, \App\Enums\UserClass::STAFFLEADER->value, $config['class'.$num] ?? 0, 0, false, false, __('settings.row_attachment_authority').' '.$num) }}{{ __('settings.text_can_upload_at_most') ?? '' }}<input type="text" name="count{{ $num }}" value="{{ (string)($config['count'.$num] ?? '') }}" aria-label="{{ __('settings.text_can_upload_at_most') }}"> {{ __('settings.text_file_size_below') ?? '' }}<input type="text" name="size{{ $num }}" value="{{ (string)($config['size'.$num] ?? '') }}" aria-label="{{ __('settings.text_file_size_below') }}">{{ __('settings.text_with_extension_name') ?? '' }}<input type="text" name="ext{{ $num }}" value="{{ (string)($config['ext'.$num] ?? '') }}" aria-label="{{ __('settings.text_with_extension_name') }}">{{ __('settings.'.$defOne) }}{{ \App\Support\UserClass::name($defaultClass->value, false, true, true) }}{{ __('settings.'.$defTwo) }}
+                    {{ \App\Support\UserClass::classSelectWithContext('class'.$num, \App\Enums\UserClass::STAFFLEADER->value, $config['class'.$num] ?? 0, 0, false, false, __('settings.row_attachment_authority').' '.$num) }}{{ __('settings.text_can_upload_at_most') }}<input type="text" name="count{{ $num }}" value="{{ (string)($config['count'.$num] ?? '') }}" aria-label="{{ __('settings.text_can_upload_at_most') }}"> {{ __('settings.text_file_size_below') }}<input type="text" name="size{{ $num }}" value="{{ (string)($config['size'.$num] ?? '') }}" aria-label="{{ __('settings.text_file_size_below') }}">{{ __('settings.text_with_extension_name') }}<input type="text" name="ext{{ $num }}" value="{{ (string)($config['ext'.$num] ?? '') }}" aria-label="{{ __('settings.text_with_extension_name') }}">{{ __('settings.'.$defOne) }}{{ \App\Support\UserClass::name($defaultClass->value, false, true, true) }}{{ __('settings.'.$defTwo) }}
                 </li>
             @endforeach
         </ul>
@@ -507,8 +507,8 @@
         :note="__('settings.text_image_thumbnail_note')"
         :break="true" />
     <x-settings-text layout="grid" :label="__('settings.row_thumbnail_quality')" name="thumbquality" :value="$config['thumbquality'] ?? 80" :note="__('settings.text_thumbnail_quality_note')" />
-    <div class="nx-fhead whitespace-nowrap">{{ __('settings.row_thumbnail_size') ?? 'Thumb size' }}</div><div class="nx-fcell"><input type='text' name="thumbwidth" value="{{ (string)($config['thumbwidth'] ?? 500) }}" aria-label="{{ __('settings.row_thumbnail_size') ?? 'Thumb size' }} width"> * <input type='text' name="thumbheight" value="{{ (string)($config['thumbheight'] ?? 500) }}" aria-label="{{ __('settings.row_thumbnail_size') ?? 'Thumb size' }} height"> {{ __('settings.text_thumbnail_size_note') ?? '' }}</div>
-    <div class="nx-fhead whitespace-nowrap">{{ __('settings.row_alternative_thumbnail_size') ?? 'Alt thumb size' }}</div><div class="nx-fcell"><input type='text' name="altthumbwidth" value="{{ (string)($config['altthumbwidth'] ?? 180) }}" aria-label="{{ __('settings.row_alternative_thumbnail_size') ?? 'Alt thumb size' }} width"> * <input type='text' name="altthumbheight" value="{{ (string)($config['altthumbheight'] ?? 135) }}" aria-label="{{ __('settings.row_alternative_thumbnail_size') ?? 'Alt thumb size' }} height"> {{ __('settings.text_alternative_thumbnail_size_note') ?? '' }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('settings.row_thumbnail_size') }}</div><div class="nx-fcell"><input type='text' name="thumbwidth" value="{{ (string)($config['thumbwidth'] ?? 500) }}" aria-label="{{ __('settings.row_thumbnail_size') }} width"> * <input type='text' name="thumbheight" value="{{ (string)($config['thumbheight'] ?? 500) }}" aria-label="{{ __('settings.row_thumbnail_size') }} height"> {{ __('settings.text_thumbnail_size_note') }}</div>
+    <div class="nx-fhead whitespace-nowrap">{{ __('settings.row_alternative_thumbnail_size') }}</div><div class="nx-fcell"><input type='text' name="altthumbwidth" value="{{ (string)($config['altthumbwidth'] ?? 180) }}" aria-label="{{ __('settings.row_alternative_thumbnail_size') }} width"> * <input type='text' name="altthumbheight" value="{{ (string)($config['altthumbheight'] ?? 135) }}" aria-label="{{ __('settings.row_alternative_thumbnail_size') }} height"> {{ __('settings.text_alternative_thumbnail_size_note') }}</div>
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
     </form>
 
@@ -523,7 +523,7 @@
 
 @elseif ($action === 'miscsettings')
     <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_misc">@csrf
-    <label class="nx-fhead whitespace-nowrap" for="donation_custom">{{ __('settings.row_misc_donation_custom') ?? 'Donation custom' }}</label><div class="nx-fcell"><textarea cols="100" rows="10" id="donation_custom" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('settings.text_donation_custom_note') }}&nbsp;<b><a href="/web/tags" target="_blank">{{ __('settings.text_bbcode_tag') }}</a></b></div>
+    <label class="nx-fhead whitespace-nowrap" for="donation_custom">{{ __('settings.row_misc_donation_custom') }}</label><div class="nx-fcell"><textarea cols="100" rows="10" id="donation_custom" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('settings.text_donation_custom_note') }}&nbsp;<b><a href="/web/tags" target="_blank" rel="noopener">{{ __('settings.text_bbcode_tag') }}</a></b></div>
     <x-settings-text layout="grid" :label="__('settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('settings.text_protected_forum')" />
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
     </form>

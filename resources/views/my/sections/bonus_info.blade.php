@@ -32,7 +32,7 @@
         @if ($info->haremAdditionFactor !== null)
         <h3>{{ __('mybonus.text_get_by_harem') }}</h3>
         <ul>
-        <li>{{ __('mybonus.harem_additional_desc') }}<a href="/web/invite?id={{ $info->userId }}" class="altlink" target="_blank">{{ __('mybonus.text_here') }}</a></li>
+        <li>{{ __('mybonus.harem_additional_desc') }}<a href="/web/invite?id={{ $info->userId }}" class="altlink" target="_blank" rel="noopener">{{ __('mybonus.text_here') }}</a></li>
         <li>{{ __('mybonus.harem_additional_factor') }}{{ $info->haremAdditionFactor }}</li>
         <li>{{ __('mybonus.harem_additional_note') }}</li>
         </ul>

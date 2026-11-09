@@ -16,4 +16,4 @@
     @if (trim((string) $slot) !== '')<div class="nx-compose__opts">{{ $slot }}</div>@endif
     <input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('functions.submit_submit') }}" data-submit-once>
 </div>
-<p class="nx-compose__help"><a href="/web/tags" target="_blank">{{ __('functions.text_tags') }}</a> · <a href="/web/smilies" target="_blank">{{ __('functions.text_smilies') }}</a></p>
+<p class="nx-compose__help"><a href="/web/tags" target="_blank" rel="noopener">{{ __('functions.text_tags') }}</a> · <a href="/web/smilies" target="_blank" rel="noopener">{{ __('functions.text_smilies') }}</a></p>

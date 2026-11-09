@@ -9,20 +9,20 @@
         <x-frame :caption="__('complains.pending_complaints')" :center="false">
             @if (! empty($pendingRows))
                 <x-data-table :caption="__('complains.pending_complaints')" captionHidden><x-slot:head><thead><tr>
-                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') ?? 'Added' }}</th>
-                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') ?? 'Account' }}</th>
-                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_action_view') ?? 'View' }}</th>
+                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') }}</th>
+                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') }}</th>
+                    <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_action_view') }}</th>
                 </tr></thead></x-slot:head>
                 @foreach ($pendingRows as $row)
                     <tr>
                         <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
                         <td class="align-top px-2.5 py-1.5">{{ $row['email'] ?? '' }}</td>
-                        <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('complains.th_action_view') ?? 'View' }}</a></td>
+                        <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('complains.th_action_view') }}</a></td>
                     </tr>
                 @endforeach
                 </x-data-table>
             @else
-                {{ __('complains.no_pending_complaints') ?? 'No pending complaints.' }}
+                {{ __('complains.no_pending_complaints') }}
             @endif
         </x-frame>
     @endif
@@ -31,39 +31,39 @@
         @if (! empty($processedRows))
             {{ $pagertop ?? '' }}
             <x-data-table :caption="__('complains.complaints_processed')" captionHidden><x-slot:head><thead><tr>
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') ?? 'Added' }}</th>
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') ?? 'Account' }}</th>
-                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_action_view') ?? 'View' }}</th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') }}</th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') }}</th>
+                <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_action_view') }}</th>
             </tr></thead></x-slot:head>
             @foreach ($processedRows as $row)
                 <tr>
                     <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
                     <td class="align-top px-2.5 py-1.5">{{ $row['email'] ?? '' }}</td>
-                    <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('complains.th_action_view') ?? 'View' }}</a></td>
+                    <td class="align-top px-2.5 py-1.5"><a href="{{ request()->getPathInfo() }}?action=view&id={{ $row['uuid'] ?? '' }}" class="faqlink">{{ __('complains.th_action_view') }}</a></td>
                 </tr>
             @endforeach
             </x-data-table>
             {{ $pagerbottom ?? '' }}
         @else
-            {{ __('complains.no_complaints_have_been_processed') ?? 'No complaints have been processed.' }}
+            {{ __('complains.no_complaints_have_been_processed') }}
         @endif
     </x-frame>
 
 @elseif ($mode === 'view')
     @if (! $isLogin)
         <x-frame :caption="__('complains.text_created_title')" :center="false">
-            <p>{{ __('complains.text_created_note') ?? '' }}</p>
+            <p>{{ __('complains.text_created_note') }}</p>
         </x-frame>
     @endif
 
     <x-frame :caption="__('complains.text_new_body')" :center="false">
-        {{ __('complains.text_added') ?? 'Added' }}：<x-time :value="$complain['added'] ?? ''" /><br />{{ __('complains.text_new_email') ?? 'Email' }} {{ $complain['email'] ?? '' }}
+        {{ __('complains.text_added') }}：<x-time :value="$complain['added'] ?? ''" /><br />{{ __('complains.text_new_email') }} {{ $complain['email'] ?? '' }}
         @if ($isAdmin)
             @if (! empty($user))
-                [<a href="/userdetails?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank">{{ $user['username'] ?? '' }}</a>]
-                [<a href="/web/user-ban-log?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank">{{ __('complains.text_view_band_log') ?? 'View ban log' }}</a>]
+                [<a href="/userdetails?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank" rel="noopener">{{ $user['username'] ?? '' }}</a>]
+                [<a href="/web/user-ban-log?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank" rel="noopener">{{ __('complains.text_view_band_log') }}</a>]
             @else
-                [<a href="/web/usersearch?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank">{{ __('complains.text_search_account') ?? 'Search account' }}</a>]
+                [<a href="/web/usersearch?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank" rel="noopener">{{ __('complains.text_search_account') }}</a>]
             @endif
             <br />IP: {{ $complain['ip'] ?? '' }}
         @endif
@@ -81,14 +81,14 @@
                 {{ \App\Support\Format::formatComment($row['body'] ?? '') }}<hr />
             @endforeach
         @else
-            <p class="text-center">{{ __('complains.text_no_replies') ?? 'No replies.' }}</p>
+            <p class="text-center">{{ __('complains.text_no_replies') }}</p>
         @endif
     </x-frame>
 
     @if (! empty($complain['answered']) && (int) $complain['answered'] !== 0)
-        <p class="text-center">{{ __('complains.text_closed') ?? 'This complain has been closed.' }}</p>
+        <p class="text-center">{{ __('complains.text_closed') }}</p>
     @else
-        <br /><br /><div class="nx-box text-center"><b>{{ __('complains.text_reply') ?? 'Reply' }}</b><br /><br /><form id="reply" method="post" action="/web/complains/reply">@csrf<input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $complain['uuid'] ?? '' }}" /><br />
+        <br /><br /><div class="nx-box text-center"><b>{{ __('complains.text_reply') }}</b><br /><br /><form id="reply" method="post" action="/web/complains/reply">@csrf<input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $complain['uuid'] ?? '' }}" /><br />
         {{ $replyBoxHtml }}
         </form></div>
     @endif
@@ -99,14 +99,14 @@
 
 @else
     <section class="nx-idx-card">
-    <h2>{{ __('complains.text_new_complain') ?? 'New complain' }}</h2>
+    <h2>{{ __('complains.text_new_complain') }}</h2>
     <form action="/web/complains/new" method="post">
         @csrf
         <div class="nx-fgrid nx-fgrid--flat">
-            <label class="nx-fhead" for="complain-email">{{ __('complains.text_new_email') ?? 'Email' }}</label><div class="nx-fcell"><input id="complain-email" type="email" name="email" autocomplete="email" /></div>
-            <div class="nx-fhead">{{ __('complains.text_new_body') ?? 'Body' }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('complains.text_new_body_placeholder') ?? '' }}"></textarea></div>
+            <label class="nx-fhead" for="complain-email">{{ __('complains.text_new_email') }}</label><div class="nx-fcell"><input id="complain-email" type="email" name="email" autocomplete="email" /></div>
+            <div class="nx-fhead">{{ __('complains.text_new_body') }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('complains.text_new_body_placeholder') }}"></textarea></div>
             {{ $captchaHtml }}
-            <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') ?? 'Submit' }}" class="nx-btn nx-btn--primary" /></div>
+            <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') }}" class="nx-btn nx-btn--primary" /></div>
         </div>
     </form>
 </section>

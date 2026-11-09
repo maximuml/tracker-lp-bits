@@ -28,6 +28,6 @@
     </div>
     <input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('messages.submit_send') }}" data-submit-once>
 </div>
-<p class="nx-compose__help"><a href="/web/tags" target="_blank">{{ __('functions.text_tags') }}</a> · <a href="/web/smilies" target="_blank">{{ __('functions.text_smilies') }}</a></p>
+<p class="nx-compose__help"><a href="/web/tags" target="_blank" rel="noopener">{{ __('functions.text_tags') }}</a> · <a href="/web/smilies" target="_blank" rel="noopener">{{ __('functions.text_smilies') }}</a></p>
 </form>
 @endsection

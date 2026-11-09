@@ -129,7 +129,7 @@
             @foreach ($sentTmpRows as $arr1)
                 <tr>
                 <td class="align-top px-2.5 py-1.5">{{ $arr1['invitee'] }}</td>
-                <td class="align-top px-2.5 py-1.5">{{ $arr1['hash'] }}@if ($arr1['hashValid'] ?? false)&nbsp;<a href="/signup?type=invite&invitenumber={{ $arr1['hash'] }}" title="{{ __('invite.signup_link_help') }}" target="_blank"><small>[{{ __('invite.signup_link') }}]</small></a>@endif</td>
+                <td class="align-top px-2.5 py-1.5">{{ $arr1['hash'] }}@if ($arr1['hashValid'] ?? false)&nbsp;<a href="/signup?type=invite&invitenumber={{ $arr1['hash'] }}" title="{{ __('invite.signup_link_help') }}" target="_blank" rel="noopener"><small>[{{ __('invite.signup_link') }}]</small></a>@endif</td>
                 <td class="align-top px-2.5 py-1.5">{{ $arr1['time_invited'] }}</td>
                 @if ($menuSelected == 'sent')
                     <td class="align-top px-2.5 py-1.5">{{ $arr1['validText'] ?? '' }}</td>

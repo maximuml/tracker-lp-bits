@@ -1,2 +1,2 @@
 @props(['id'])
-<a class="shout-torrent" href="/web/details/{{ $id }}" target="_blank">#{{ $id }}</a>
+<a class="shout-torrent" href="/web/details/{{ $id }}" target="_blank" rel="noopener">#{{ $id }}</a>

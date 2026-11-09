@@ -5,7 +5,7 @@
 @section('content')
 <h1 class="nx-sr-only">{{ $headTitle }}</h1>
 @if (! $canEdit)
-<h2 class="text-center">{{ __('edit.text_cannot_edit_torrent') ?? '' }}</h2>
+<h2 class="text-center">{{ __('edit.text_cannot_edit_torrent') }}</h2>
 <p>{{ __('edit.text_cannot_edit_torrent_note') }} <a href="/login?returnto={{ $requestUri }}&nowarn=1">{{ __('edit.text_logged_in') }}</a> {{ __('edit.text_cannot_edit_torrent_note_end') }}</p>
 @else
 <form method="post" id="compose" name="edittorrent" action="/takeedit" enctype="multipart/form-data">@csrf
@@ -28,7 +28,7 @@
             <div class="nx-setrow__control" aria-labelledby="edit-descr-label"><livewire:bbcode-editor form="edittorrent" text="descr" :content="$descrContent ?? ''" /></div>
         </div>
         @if ($technicalInfoEnabled)
-        <x-settings-row layout="setrow" :label="__('functions.text_technical_info')" for="technical_info"><textarea id="technical_info" name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank'>{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</x-settings-row>
+        <x-settings-row layout="setrow" :label="__('functions.text_technical_info')" for="technical_info"><textarea id="technical_info" name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank' rel="noopener">{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank' rel="noopener">{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</x-settings-row>
         @endif
         <div class="nx-setrow">
             <label class="nx-setrow__label" for="type">{{ __('edit.row_type') }}<span class="text-nxm-danger">*</span></label>
@@ -60,7 +60,7 @@
         @endif
     </section>
 </div>
-<div class="nx-upload__submit"><input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('edit.submit_edit_it') ?? '' }}" /> <input type="reset" class="nx-btn" value="{{ __('edit.submit_revert_changes') ?? '' }}" /></div>
+<div class="nx-upload__submit"><input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('edit.submit_edit_it') }}" /> <input type="reset" class="nx-btn" value="{{ __('edit.submit_revert_changes') }}" /></div>
 </form>
 @if ($showDeleteForm)
 <form method="post" action="/web/torrents/delete">
@@ -94,7 +94,7 @@
         </div>
     </section>
 </div>
-<div class="nx-upload__submit"><input type="submit" class="nx-btn nx-btn--danger" value="{{ __('edit.submit_delete_it') ?? '' }}" /></div>
+<div class="nx-upload__submit"><input type="submit" class="nx-btn nx-btn--danger" value="{{ __('edit.submit_delete_it') }}" /></div>
 </form>
 @endif
 @endif

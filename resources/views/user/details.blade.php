@@ -5,31 +5,31 @@
 @section('content')
 <x-page :title="$usernameHtml" :subtitle="$countryName" width="list">
 @if (! \App\Support\YesNo::isYes($user['enabled'] ?? null))
-<p><b>{{ __('userdetails.text_account_disabled_note') ?? '' }}</b></p>
+<p><b>{{ __('userdetails.text_account_disabled_note') }}</b></p>
 @elseif (! $isOwner)
 @if ($isFriend)
-<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_friends') ?? '' }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_friends') }}</button></form>)</div>
 @elseif ($currentUserBlockedTarget)
-<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_blocks') ?? '' }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_blocks') }}</button></form>)</div>
 @else
-<div class="my-2">(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_friends') ?? '' }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_blocks') ?? '' }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_friends') }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_blocks') }}</button></form>)</div>
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
-<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') ?? '' }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('userdetails.text_here') ?? '' }}</button></form></div>
+<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('userdetails.text_here') }}</button></form></div>
 @endif
 <x-data-table :caption="__('userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)
-<x-settings-row-small :label="__('userdetails.text_user_id')">{{ $user['id'] }}@if ($canManageBasic && (int) $user['class'] < $currentClass)&nbsp;[<a href="{{ $userManageSystemUrl }}" target="_blank" class="altlink">{{ __('functions.text_management_system') ?? '' }}</a>]@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.text_user_id')">{{ $user['id'] }}@if ($canManageBasic && (int) $user['class'] < $currentClass)&nbsp;[<a href="{{ $userManageSystemUrl }}" target="_blank" rel="noopener" class="altlink">{{ __('functions.text_management_system') }}</a>]@endif</x-settings-row-small>
 @if ($isOwner || $canViewInvite)
 @if ((int) $user['invites'] <= 0 && $temporaryInviteCount <= 0)
-<x-settings-row-small :label="__('userdetails.row_invitation')">{{ __('userdetails.text_no_invitation') ?? '' }}</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_invitation')">{{ __('userdetails.text_no_invitation') }}</x-settings-row-small>
 @else
-<x-settings-row-small :label="__('userdetails.row_invitation')"><a href="/web/invite?id={{ $user['id'] }}" title="{{ __('userdetails.link_send_invitation') ?? '' }}">{{ $user['invites'] }}({{ $temporaryInviteCount }})</a></x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_invitation')"><a href="/web/invite?id={{ $user['id'] }}" title="{{ __('userdetails.link_send_invitation') }}">{{ $user['invites'] }}({{ $temporaryInviteCount }})</a></x-settings-row-small>
 @endif
 @else
 @if ((int) $user['invites'] <= 0)
-<x-settings-row-small :label="__('userdetails.row_invitation')">{{ __('userdetails.text_no_invitation') ?? '' }}</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_invitation')">{{ __('userdetails.text_no_invitation') }}</x-settings-row-small>
 @else
 <x-settings-row :label="__('userdetails.row_invitation')">{{ $user['invites'] }}</x-settings-row>
 @endif
@@ -37,8 +37,8 @@
 @if ((int) ($user['invited_by'] ?? 0) > 0)
 <x-settings-row-small :label="__('userdetails.row_invited_by')">{{ $invitedByHtml }}</x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('userdetails.row_join_date')">@if (($user['added'] ?? null) === null || $user['added'] === '0000-00-00 00:00:00'){{ __('userdetails.text_not_available') ?? '' }}@else{{ $user['added'] }} (<x-time :value="$user['added']" :force="true" />, {{ $joinWeeks }})@endif</x-settings-row-small>
-<x-settings-row-small :label="__('userdetails.row_last_seen')">@if (($user['last_access'] ?? null) === null || $user['last_access'] === '0000-00-00 00:00:00'){{ __('userdetails.text_not_available') ?? '' }}@else{{ $user['last_access'] }} (<x-time :value="$user['last_access']" :force="true" />)@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_join_date')">@if (($user['added'] ?? null) === null || $user['added'] === '0000-00-00 00:00:00'){{ __('userdetails.text_not_available') }}@else{{ $user['added'] }} (<x-time :value="$user['added']" :force="true" />, {{ $joinWeeks }})@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_last_seen')">@if (($user['last_access'] ?? null) === null || $user['last_access'] === '0000-00-00 00:00:00'){{ __('userdetails.text_not_available') }}@else{{ $user['last_access'] }} (<x-time :value="$user['last_access']" :force="true" />)@endif</x-settings-row-small>
 @if (($where_tweak ?? '') === 'yes')
 <x-settings-row-small :label="__('userdetails.row_last_seen_location')">{{ $user['page'] }}</x-settings-row-small>
 @endif
@@ -46,7 +46,7 @@
 <x-settings-row-small :label="__('userdetails.row_email')"><a href="mailto:{{ $user['email'] }}">{{ $user['email'] }}</a></x-settings-row-small>
 @endif
 @if ($canViewConfidential && $ipHistoryCount > 0)
-<x-settings-row-small :label="__('userdetails.row_ip_history')">{{ __('userdetails.text_user_earlier_used') ?? '' }}<b><a href="/iphistory?id={{ $user['id'] }}">{{ $ipHistoryCount }}{{ __('userdetails.text_different_ips') ?? '' }}{{ \App\Support\Strings::addS($ipHistoryCount, true) }}</a></b></x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_ip_history')">{{ __('userdetails.text_user_earlier_used') }}<b><a href="/iphistory?id={{ $user['id'] }}">{{ $ipHistoryCount }}{{ __('userdetails.text_different_ips') }}{{ \App\Support\Strings::addS($ipHistoryCount, true) }}</a></b></x-settings-row-small>
 @endif
 @if ($canViewConfidential || $isOwner)
 <x-settings-row-small :label="__('userdetails.row_ip_address')">{{ \App\Support\Strings::hidden((string) $user['ip'].$locationInfoHtml) }}</x-settings-row-small>
@@ -54,26 +54,26 @@
 @if ($clientSelectHtml !== null)
 <x-settings-row-small :label="__('userdetails.row_bt_client')">{{ $clientSelectHtml }}</x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('userdetails.row_transfer')"><x-data-table :caption="__('userdetails.row_transfer')" captionHidden>@if ($shareRatio !== null)<tr><td class="nx-embedded"><strong>{{ __('userdetails.row_share_ratio') ?? '' }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($shareRatio) }}">{{ number_format($shareRatio, 3) }}</span>(<strong>{{ __('userdetails.row_real_share_ratio') ?? '' }}</strong>: {{ number_format($trueRatio, 3) }})</td><td class="nx-embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($shareRatio) }}</td></tr>@endif<tr><td class="nx-embedded"><strong>{{ __('userdetails.row_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['uploaded']) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.row_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size((float) $user['downloaded']) }}</td></tr><tr><td class="nx-embedded"><strong>{{ __('userdetails.row_real_uploaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueUpload) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.row_real_downloaded') ?? '' }}</strong>:  {{ \App\Support\Format::size($trueDownload) }}</td><td class="nx-embedded text-muted">&nbsp;&nbsp;{{ __('userdetails.row_real_ps') ?? '' }}</td></tr></x-data-table></x-settings-row-small>
-<x-settings-row-small :label="__('userdetails.row_sltime')"><x-data-table :caption="__('userdetails.row_sltime')" captionHidden>@if ($seedLeechRatio !== null)<tr><td class="nx-embedded"><strong>{{ __('userdetails.text_seeding_leeching_time_ratio') ?? '' }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($seedLeechRatio) }}">{{ number_format($seedLeechRatio, 3) }}</span></td><td class="nx-embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($seedLeechRatio) }}</td></tr>@endif<tr><td class="nx-embedded"><strong>{{ __('userdetails.text_seeding_time') ?? '' }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['seedtime']) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.text_leeching_time') ?? '' }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['leechtime']) }}</td><td class="nx-embedded text-muted">@if (! empty($user['seed_time_updated_at']))&nbsp;&nbsp;({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_time_updated_at'] }})@endif</td></tr></x-data-table></x-settings-row-small>
-<x-settings-row-small :label="__('userdetails.row_gender')">@if (($user['gender'] ?? '') === 'Male')<i class='male' role='img' aria-label='Male' title='{{ __('userdetails.title_male') ?? '' }}'></i>@elseif (($user['gender'] ?? '') === 'Female')<i class='female' role='img' aria-label='Female' title='{{ __('userdetails.title_female') ?? '' }}'></i>@elseif (($user['gender'] ?? '') === 'N/A')<i class='no_gender' role='img' aria-label='N/A' title='{{ __('userdetails.title_not_available') ?? '' }}'></i>@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_transfer')"><x-data-table :caption="__('userdetails.row_transfer')" captionHidden>@if ($shareRatio !== null)<tr><td class="nx-embedded"><strong>{{ __('userdetails.row_share_ratio') }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($shareRatio) }}">{{ number_format($shareRatio, 3) }}</span>(<strong>{{ __('userdetails.row_real_share_ratio') }}</strong>: {{ number_format($trueRatio, 3) }})</td><td class="nx-embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($shareRatio) }}</td></tr>@endif<tr><td class="nx-embedded"><strong>{{ __('userdetails.row_uploaded') }}</strong>:  {{ \App\Support\Format::size((float) $user['uploaded']) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.row_downloaded') }}</strong>:  {{ \App\Support\Format::size((float) $user['downloaded']) }}</td></tr><tr><td class="nx-embedded"><strong>{{ __('userdetails.row_real_uploaded') }}</strong>:  {{ \App\Support\Format::size($trueUpload) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.row_real_downloaded') }}</strong>:  {{ \App\Support\Format::size($trueDownload) }}</td><td class="nx-embedded text-muted">&nbsp;&nbsp;{{ __('userdetails.row_real_ps') }}</td></tr></x-data-table></x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_sltime')"><x-data-table :caption="__('userdetails.row_sltime')" captionHidden>@if ($seedLeechRatio !== null)<tr><td class="nx-embedded"><strong>{{ __('userdetails.text_seeding_leeching_time_ratio') }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($seedLeechRatio) }}">{{ number_format($seedLeechRatio, 3) }}</span></td><td class="nx-embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($seedLeechRatio) }}</td></tr>@endif<tr><td class="nx-embedded"><strong>{{ __('userdetails.text_seeding_time') }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['seedtime']) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.text_leeching_time') }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['leechtime']) }}</td><td class="nx-embedded text-muted">@if (! empty($user['seed_time_updated_at']))&nbsp;&nbsp;({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_time_updated_at'] }})@endif</td></tr></x-data-table></x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_gender')">@if (($user['gender'] ?? '') === 'Male')<i class='male' role='img' aria-label='Male' title='{{ __('userdetails.title_male') }}'></i>@elseif (($user['gender'] ?? '') === 'Female')<i class='female' role='img' aria-label='Female' title='{{ __('userdetails.title_female') }}'></i>@elseif (($user['gender'] ?? '') === 'N/A')<i class='no_gender' role='img' aria-label='N/A' title='{{ __('userdetails.title_not_available') }}'></i>@endif</x-settings-row-small>
 @if (((float) ($user['donated'] ?? 0) > 0 || (float) ($user['donated_cny'] ?? 0) > 0) && ($canViewConfidential || $isOwner))
 <x-settings-row-small :label="__('userdetails.row_donated')">${{ $user['donated'] }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $user['donated_cny'] }}</x-settings-row-small>
 @endif
 @if (! empty($user['avatar']))
 <x-settings-row-small :label="__('userdetails.row_avatar')">{{ $avatarHtml }}</x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('userdetails.row_class')"><img class="nx-class-badge" alt="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($user['class']) }}" loading="lazy" decoding="async" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ __('userdetails.row_vip_until') ?? '' }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_class')"><img class="nx-class-badge" alt="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($user['class']) }}" loading="lazy" decoding="async" />@if (($user['title'] ?? '') !== '')&nbsp;{{ trim($user['title']) }}@endif @if ((int) $user['class'] === UC_VIP && ! empty($user['vip_until']) && strtotime((string) $user['vip_until'])){{ __('userdetails.row_vip_until') }}: {{ $user['vip_until'] }}@endif</x-settings-row-small>
 @if ($userProps !== [])
 <x-settings-row-small :label="__('userdetails.row_user_props')"><div>@foreach ($userProps as $prop){{ $prop }}@unless ($loop->last)&nbsp;|&nbsp;@endunless @endforeach</div></x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('userdetails.row_torrent_comment')">@if ($torrentcomments && ($isOwner || $canViewHistory))<a href="/web/userhistory?action=viewcomments&amp;id={{ $id }}" title="{{ __('userdetails.link_view_comments') ?? '' }}">{{ $torrentcomments }}</a>@else{{ $torrentcomments }}@endif</x-settings-row-small>
-<x-settings-row-small :label="__('userdetails.row_forum_posts')">@if ($forumposts && ($isOwner || $canViewHistory))<a href="/web/userhistory?action=viewposts&amp;id={{ $id }}" title="{{ __('userdetails.link_view_posts') ?? '' }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_torrent_comment')">@if ($torrentcomments && ($isOwner || $canViewHistory))<a href="/web/userhistory?action=viewcomments&amp;id={{ $id }}" title="{{ __('userdetails.link_view_comments') }}">{{ $torrentcomments }}</a>@else{{ $torrentcomments }}@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_forum_posts')">@if ($forumposts && ($isOwner || $canViewHistory))<a href="/web/userhistory?action=viewposts&amp;id={{ $id }}" title="{{ __('userdetails.link_view_posts') }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
 @if ($isOwner || $canViewHistory)
 @if ($hrStatusHtml !== '')
-<x-settings-row-small label="H&R"><a href="/web/myhr?userid={{ $user['id'] }}" target="_blank" aria-label="H&R stats">{{ $hrStatusHtml }}</a></x-settings-row-small>
+<x-settings-row-small label="H&R"><a href="/web/myhr?userid={{ $user['id'] }}" target="_blank" rel="noopener" aria-label="H&R stats">{{ $hrStatusHtml }}</a></x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('userdetails.row_karma_points')">{{ number_format((float) $user['seedbonus'], 1) }}&nbsp;&nbsp;<a href="/web/bonus-log?uid={{ $user['id'] }}" target="_blank" class="altlink">[{{ \App\Support\Locale::trans('bonus-log.view_detail', [], null) }}]</a></x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_karma_points')">{{ number_format((float) $user['seedbonus'], 1) }}&nbsp;&nbsp;<a href="/web/bonus-log?uid={{ $user['id'] }}" target="_blank" rel="noopener" class="altlink">[{{ \App\Support\Locale::trans('bonus-log.view_detail', [], null) }}]</a></x-settings-row-small>
 <x-settings-row-small :label="__('functions.text_seed_points')">{{ number_format((float) $user['seed_points'], 1) }}&nbsp;&nbsp;@if (! empty($user['seed_points_updated_at']))<span class='text-muted'>({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_points_updated_at'] }})</span>@endif</x-settings-row-small>
 @endif
 @if ($canManageBasic && (int) $user['class'] < $currentClass && $bonusTableHtml !== '')
@@ -90,10 +90,10 @@
 <tr><td colspan="2" class="p-[10pt]">{{ \App\Support\Format::formatComment($user['info'], false) }}</td></tr>
 @endif
 @else
-<tr><td colspan="2" class="p-[10pt]"><span class="text-nxm-accent-text">{{ __('userdetails.text_public_access_denied') ?? '' }}{{ $user['username'] }}{{ __('userdetails.text_user_wants_privacy') ?? '' }}</span></td></tr>
+<tr><td colspan="2" class="p-[10pt]"><span class="text-nxm-accent-text">{{ __('userdetails.text_public_access_denied') }}{{ $user['username'] }}{{ __('userdetails.text_user_wants_privacy') }}</span></td></tr>
 @endif
 @if (! $isOwner)
-<tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="/web/sendmessage?receiver={{ $user['id'] }}"><i class="f_pm" role="img" aria-label="PM" title="{{ __('userdetails.title_send_pm') ?? '' }}"></i></a>@endif<a href="/web/report?user={{ $user['id'] }}"><i class="f_report" role="img" aria-label="Report" title="{{ __('userdetails.title_report_user') ?? '' }}"></i></a></td></tr>
+<tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="/web/sendmessage?receiver={{ $user['id'] }}"><i class="f_pm" role="img" aria-label="PM" title="{{ __('userdetails.title_send_pm') }}"></i></a>@endif<a href="/web/report?user={{ $user['id'] }}"><i class="f_report" role="img" aria-label="Report" title="{{ __('userdetails.title_report_user') }}"></i></a></td></tr>
 @endif
 </x-data-table>
 
@@ -105,12 +105,12 @@
 <input type="hidden" name="returnto" value="/userdetails?id={{ $id }}" />
 <x-data-table :caption="__('userdetails.text_edit_user')" captionHidden class="nx-main">
 <x-settings-row :label="__('userdetails.row_title')" for="mod-title"><input type="text" size="60" id="mod-title" name="title" value="{{ trim((string) $user['title']) }}" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_privacy_level')"><label><input type="radio" name="privacy" value="low"@if (($user['privacy'] ?? '') === 'low') checked="checked"@endif />{{ __('userdetails.radio_low') ?? '' }}</label><label><input type="radio" name="privacy" value="normal"@if (($user['privacy'] ?? '') === 'normal') checked="checked"@endif />{{ __('userdetails.radio_normal') ?? '' }}</label><label><input type="radio" name="privacy" value="strong"@if (($user['privacy'] ?? '') === 'strong') checked="checked"@endif />{{ __('userdetails.radio_strong') ?? '' }}</label></x-settings-row>
+<x-settings-row :label="__('userdetails.row_privacy_level')"><label><input type="radio" name="privacy" value="low"@if (($user['privacy'] ?? '') === 'low') checked="checked"@endif />{{ __('userdetails.radio_low') }}</label><label><input type="radio" name="privacy" value="normal"@if (($user['privacy'] ?? '') === 'normal') checked="checked"@endif />{{ __('userdetails.radio_normal') }}</label><label><input type="radio" name="privacy" value="strong"@if (($user['privacy'] ?? '') === 'strong') checked="checked"@endif />{{ __('userdetails.radio_strong') }}</label></x-settings-row>
 <x-settings-row :label="__('userdetails.row_avatar_url')" for="mod-avatar"><input type="text" size="60" id="mod-avatar" name="avatar" value="{{ trim((string) $user['avatar']) }}" /></x-settings-row>
 @if ($currentClass === UC_STAFFLEADER)
 <x-settings-row :label="__('userdetails.row_donor_status')"><x-user.radio-yesno name="donor" :yes="\App\Support\YesNo::isYes($user['donor'] ?? null)" :no="\App\Support\YesNo::isNo($user['donor'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
-<x-settings-row :label="__('userdetails.row_donated')"><label>USD: <input type="text" size="5" name="donated" value="{{ $user['donated'] }}" /></label>&nbsp;&nbsp;&nbsp;&nbsp;<label>CNY: <input type="text" size="5" name="donated_cny" value="{{ $user['donated_cny'] }}" /></label><label>{{ __('userdetails.text_transaction_memo') ?? '' }}<input type="text" size="50" name="donation_memo" /></label></x-settings-row>
-<x-settings-row :label="__('userdetails.row_donoruntil')" for="donoruntil"><input type="text" id="donoruntil" name="donoruntil" value="{{ $user['donoruntil'] }}" /> {{ __('userdetails.text_donoruntil_note') ?? '' }}</x-settings-row>
+<x-settings-row :label="__('userdetails.row_donated')"><label>USD: <input type="text" size="5" name="donated" value="{{ $user['donated'] }}" /></label>&nbsp;&nbsp;&nbsp;&nbsp;<label>CNY: <input type="text" size="5" name="donated_cny" value="{{ $user['donated_cny'] }}" /></label><label>{{ __('userdetails.text_transaction_memo') }}<input type="text" size="50" name="donation_memo" /></label></x-settings-row>
+<x-settings-row :label="__('userdetails.row_donoruntil')" for="donoruntil"><input type="text" id="donoruntil" name="donoruntil" value="{{ $user['donoruntil'] }}" /> {{ __('userdetails.text_donoruntil_note') }}</x-settings-row>
 @endif
 <x-settings-row :label="__('functions.text_management_system')">{{ $migratedHelp }}</x-settings-row>
 <x-settings-row :label="__('userdetails.row_staff_duties')" for="staffduties"><textarea cols="60" rows="6" id="staffduties" name="staffduties">{{ $user['stafffor'] }}</textarea></x-settings-row>
@@ -121,39 +121,39 @@
 <x-settings-row :label="__('userdetails.row_comment')" for="modcomment"><textarea cols="60" rows="6" id="modcomment" name="modcomment" placeholder="{{ $modcomment }}"></textarea></x-settings-row>
 <x-settings-row :label="__('userdetails.row_seeding_karma')" for="bonuscomment"><textarea cols="60" rows="6" id="bonuscomment" name="bonuscomment" readonly="readonly">{{ $bonuscomment }}</textarea></x-settings-row>
 @endif
-<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('userdetails.row_warning_system') }}<br /><br />{{ __('userdetails.row_warning_system_note') }}</td><td class="align-top px-2.5 py-1.5"><x-data-table :caption="__('userdetails.row_warning_system')" captionHidden class="nx-main"><tr><td class="align-top px-2.5 py-1.5">@if ($warned)<label><input name="warned" value="yes" type="radio" checked="checked" />{{ __('userdetails.radio_yes') ?? '' }}</label><label><input name="warned" value="no" type="radio" />{{ __('userdetails.radio_no') ?? '' }}</label>@else{{ __('userdetails.text_not_warned') ?? '' }}@endif</td>
+<tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('userdetails.row_warning_system') }}<br /><br />{{ __('userdetails.row_warning_system_note') }}</td><td class="align-top px-2.5 py-1.5"><x-data-table :caption="__('userdetails.row_warning_system')" captionHidden class="nx-main"><tr><td class="align-top px-2.5 py-1.5">@if ($warned)<label><input name="warned" value="yes" type="radio" checked="checked" />{{ __('userdetails.radio_yes') }}</label><label><input name="warned" value="no" type="radio" />{{ __('userdetails.radio_no') }}</label>@else{{ __('userdetails.text_not_warned') }}@endif</td>
 @if ($warned)
 @if ($warnedUntilPretty === null)
-<td class="align-top px-2.5 py-1.5 text-center">{{ __('userdetails.text_arbitrary_duration') ?? '' }}</td>
+<td class="align-top px-2.5 py-1.5 text-center">{{ __('userdetails.text_arbitrary_duration') }}</td>
 @else
-<td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_until') ?? '' }}{{ $user['warneduntil'] }}<br />({{ $warnedUntilPretty }}{{ __('userdetails.text_to_go') ?? '' }})</td>
+<td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_until') }}{{ $user['warneduntil'] }}<br />({{ $warnedUntilPretty }}{{ __('userdetails.text_to_go') }})</td>
 @endif
 </tr>
 @else
-<td class="align-top px-2.5 py-1.5"><label>{{ __('userdetails.text_warn_for') ?? '' }}<select name="warnlength">
+<td class="align-top px-2.5 py-1.5"><label>{{ __('userdetails.text_warn_for') }}<select name="warnlength">
 <option value="0">------</option>
-<option value="1">1 {{ __('userdetails.text_week') ?? '' }}</option>
-<option value="2">2 {{ __('userdetails.text_weeks') ?? '' }}</option>
-<option value="4">4 {{ __('userdetails.text_weeks') ?? '' }}</option>
-<option value="8">8 {{ __('userdetails.text_weeks') ?? '' }}</option>
-<option value="255">{{ __('userdetails.text_unlimited') ?? '' }}</option>
+<option value="1">1 {{ __('userdetails.text_week') }}</option>
+<option value="2">2 {{ __('userdetails.text_weeks') }}</option>
+<option value="4">4 {{ __('userdetails.text_weeks') }}</option>
+<option value="8">8 {{ __('userdetails.text_weeks') }}</option>
+<option value="255">{{ __('userdetails.text_unlimited') }}</option>
 </select></label></td></tr>
-<tr><td class="align-top px-2.5 py-1.5"><label for="warnpm">{{ __('userdetails.text_reason_of_warning') ?? '' }}</label></td><td class="align-top px-2.5 py-1.5"><input type="text" size="60" id="warnpm" name="warnpm" /></td></tr>
+<tr><td class="align-top px-2.5 py-1.5"><label for="warnpm">{{ __('userdetails.text_reason_of_warning') }}</label></td><td class="align-top px-2.5 py-1.5"><input type="text" size="60" id="warnpm" name="warnpm" /></td></tr>
 @endif
-<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_times_warned') ?? '' }}</td><td class="align-top px-2.5 py-1.5">{{ $user['timeswarned'] }}</td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_times_warned') }}</td><td class="align-top px-2.5 py-1.5">{{ $user['timeswarned'] }}</td></tr>
 @if ((int) $user['timeswarned'] === 0)
-<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_last_warning') ?? '' }}</td><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_not_warned_note') ?? '' }}</td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_last_warning') }}</td><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_not_warned_note') }}</td></tr>
 @else
 @if (($user['warnedby'] ?? '') === 'System')
-<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_last_warning') ?? '' }}</td><td class="align-top px-2.5 py-1.5"> {{ $user['lastwarned'] }} .({{ __('userdetails.text_until') ?? '' }}{{ $elapsedLastWarn }})   <br />[{{ __('userdetails.text_by_system') ?? '' }}]</td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_last_warning') }}</td><td class="align-top px-2.5 py-1.5"> {{ $user['lastwarned'] }} .({{ __('userdetails.text_until') }}{{ $elapsedLastWarn }})   <br />[{{ __('userdetails.text_by_system') }}]</td></tr>
 @endif
-<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_last_warning') ?? '' }}</td><td class="align-top px-2.5 py-1.5"> {{ $user['lastwarned'] }} ({{ $elapsedLastWarn }}{{ __('userdetails.text_ago') ?? '' }})   @if (($user['warnedby'] ?? '') !== 'System'){{ $warnedByHtml }}@else<br />[{{ __('userdetails.text_by_system') ?? '' }}]@endif</td></tr>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_last_warning') }}</td><td class="align-top px-2.5 py-1.5"> {{ $user['lastwarned'] }} ({{ $elapsedLastWarn }}{{ __('userdetails.text_ago') }})   @if (($user['warnedby'] ?? '') !== 'System'){{ $warnedByHtml }}@else<br />[{{ __('userdetails.text_by_system') }}]@endif</td></tr>
 @endif
-<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.row_auto_warning') ?? '' }}<br /><i>({{ __('userdetails.text_low_ratio') ?? '' }})</i></td>
+<tr><td class="align-top px-2.5 py-1.5">{{ __('userdetails.row_auto_warning') }}<br /><i>({{ __('userdetails.text_low_ratio') }})</i></td>
 @if ($leechwarn)
-<td class="align-top px-2.5 py-1.5"><span class="text-nxm-danger">{{ __('userdetails.text_leech_warned') ?? '' }}</span> {{ __('userdetails.text_until') ?? '' }}{{ $user['leechwarnuntil'] }}<br />({{ $leechwarnUntilPretty }}{{ __('userdetails.text_to_go') ?? '' }})@if ($canRemoveLeechWarn)&nbsp;<input id="remove-leech-warn" type="button" class="nx-btn nx-btn--primary" value="Remove" data-uid="{{ $user['id'] }}" />@endif</td></tr>
+<td class="align-top px-2.5 py-1.5"><span class="text-nxm-danger">{{ __('userdetails.text_leech_warned') }}</span> {{ __('userdetails.text_until') }}{{ $user['leechwarnuntil'] }}<br />({{ $leechwarnUntilPretty }}{{ __('userdetails.text_to_go') }})@if ($canRemoveLeechWarn)&nbsp;<input id="remove-leech-warn" type="button" class="nx-btn nx-btn--primary" value="Remove" data-uid="{{ $user['id'] }}" />@endif</td></tr>
 @else
-<td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_not_warned') ?? '' }}</td></tr>
+<td class="align-top px-2.5 py-1.5">{{ __('userdetails.text_not_warned') }}</td></tr>
 @endif
 </x-data-table></td></tr>
 <x-settings-row :label="__('userdetails.row_forum_post_possible')"><x-user.radio-yesno name="forumpost" :yes="\App\Support\YesNo::isYes($user['forumpost'] ?? null)" :no="\App\Support\YesNo::isNo($user['forumpost'] ?? null)" :yesLabel="__('userdetails.radio_yes')" :noLabel="__('userdetails.radio_no')" /></x-settings-row>
@@ -163,8 +163,8 @@
 <x-settings-row :label="__('userdetails.row_change_username')" for="mod-username"><input type="text" size="25" id="mod-username" name="username" value="{{ $user['username'] }}" /></x-settings-row>
 <x-settings-row :label="__('userdetails.row_change_email')" for="mod-email"><input type="text" size="80" id="mod-email" name="email" value="{{ $user['email'] }}" /></x-settings-row>
 @endif
-<x-settings-row :label="__('userdetails.row_passkey')"><label><input name="resetkey" value="yes" type="checkbox" />{{ __('userdetails.checkbox_reset_passkey') ?? '' }}</label></x-settings-row>
-<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') ?? '' }}" /></td></tr>
+<x-settings-row :label="__('userdetails.row_passkey')"><label><input name="resetkey" value="yes" type="checkbox" />{{ __('userdetails.checkbox_reset_passkey') }}</label></x-settings-row>
+<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') }}" /></td></tr>
 </x-data-table>
 </form>
 </x-frame>

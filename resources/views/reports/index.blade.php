@@ -7,22 +7,22 @@
 <x-data-table :caption="__('reports.text_reports')" captionHidden class="mx-auto">
 <form method=post action="/web/system/update">@csrf
 <tr>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('reports.col_added')}}</nobr></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><span class="nx-nobr">{{ __('reports.col_added')}}</span></th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('reports.col_reporter')}}</th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('reports.col_reporting')}}</th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('reports.col_type')}}</nobr></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><span class="nx-nobr">{{ __('reports.col_type')}}</span></th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('reports.col_reason')}}</th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('reports.col_dealt_with')}}</nobr></th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><nobr>{{ __('reports.col_action')}}</nobr></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><span class="nx-nobr">{{ __('reports.col_dealt_with')}}</span></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><span class="nx-nobr">{{ __('reports.col_action')}}</span></th>
 </tr>
 @foreach ($rows as $row)
     <tr>
-        <td class="align-top px-2.5 py-1.5"><nobr>{{ $row['added_formatted'] }}</nobr></td>
+        <td class="align-top px-2.5 py-1.5"><span class="nx-nobr">{{ $row['added_formatted'] }}</span></td>
         <td class="align-top px-2.5 py-1.5">{{ $row['reporterHtml'] }}</td>
         <td class="align-top px-2.5 py-1.5">{{ $row['reporting'] }}</td>
-        <td class="align-top px-2.5 py-1.5"><nobr>{{ $row['type_label'] }}</nobr></td>
+        <td class="align-top px-2.5 py-1.5"><span class="nx-nobr">{{ $row['type_label'] }}</span></td>
         <td class="align-top px-2.5 py-1.5">{{ $row['reason'] }}</td>
-        <td class="align-top px-2.5 py-1.5"><nobr>@if ($row['dealtwith'])<span class="text-nxm-success">{{ __('reports.text_yes') }}</span> - {{ $row['dealtbyHtml'] }}@else<span class="text-nxm-danger">{{ __('reports.text_no') }}</span>@endif</nobr></td>
+        <td class="align-top px-2.5 py-1.5"><span class="nx-nobr">@if ($row['dealtwith'])<span class="text-nxm-success">{{ __('reports.text_yes') }}</span> - {{ $row['dealtbyHtml'] }}@else<span class="text-nxm-danger">{{ __('reports.text_no') }}</span>@endif</span></td>
         <td class="align-top px-2.5 py-1.5"><input type="checkbox" name="delreport[]" value="{{ (int) $row['id'] }}" aria-label="Delete report {{ (int) $row['id'] }}" /></td>
     </tr>
 @endforeach

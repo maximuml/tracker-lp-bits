@@ -47,6 +47,33 @@ class TorrentRepositoryDownHashTest extends TestCase
         $this->assertSame([456], $this->downloadRepository->decryptDownHash($legacyHash, $user));
     }
 
+    public function test_legacy_md5_downhash_rejected_when_flag_disabled(): void
+    {
+        putenv('ALLOW_LEGACY_DOWNHASH=false');
+        try {
+            $user = ['id' => 42, 'passkey' => 'abc123def456ghi789jkl012mno345pq'];
+            $legacyKey = md5($user['passkey'].date('Ymd').$user['id']);
+            $legacyHash = JWT::encode(['id' => 456, 'exp' => time() + 3600], $legacyKey, 'HS256');
+
+            $this->assertSame([], $this->downloadRepository->decryptDownHash($legacyHash, $user));
+        } finally {
+            putenv('ALLOW_LEGACY_DOWNHASH');
+        }
+    }
+
+    public function test_hkdf_downhash_still_works_when_legacy_flag_disabled(): void
+    {
+        putenv('ALLOW_LEGACY_DOWNHASH=false');
+        try {
+            $user = ['id' => 42, 'passkey' => 'abc123def456ghi789jkl012mno345pq'];
+            $hash = $this->downloadRepository->encryptDownHash(123, $user);
+
+            $this->assertSame([123], $this->downloadRepository->decryptDownHash($hash, $user));
+        } finally {
+            putenv('ALLOW_LEGACY_DOWNHASH');
+        }
+    }
+
     public function test_downhash_fails_after_passkey_change(): void
     {
         $oldUser = ['id' => 42, 'passkey' => 'oldpasskey1234567890123456789012'];

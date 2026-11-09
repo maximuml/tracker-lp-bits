@@ -125,9 +125,13 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
         // Legacy md5-based keys are still accepted until the user changes their
         // passkey; the old key material includes the passkey, so a passkey
         // rotation automatically invalidates any previously issued md5 downhash.
-        $now = time();
-        foreach ([$now, $now - 86400, $now - 2 * 86400] as $ts) {
-            $keys[] = $this->getLegacyMd5DownHashKey($userId, $passkey, date('Ymd', $ts));
+        // ALLOW_LEGACY_DOWNHASH=false drops the fallback entirely — read via
+        // Env (not config()) so pure-unit callers without the container work.
+        if (filter_var(Env::get('ALLOW_LEGACY_DOWNHASH', true), FILTER_VALIDATE_BOOLEAN)) {
+            $now = time();
+            foreach ([$now, $now - 86400, $now - 2 * 86400] as $ts) {
+                $keys[] = $this->getLegacyMd5DownHashKey($userId, $passkey, date('Ymd', $ts));
+            }
         }
 
         return $keys;

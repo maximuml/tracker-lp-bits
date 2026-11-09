@@ -3367,6 +3367,20 @@ html[data-theme="dark"] .nx-off a.nx-btn:not(.nx-btn--primary) { color: var(--nx
     .nx-page__actions .nx-btn { width: 100%; box-sizing: border-box; justify-content: center; }
 }
 
+/* Shared notice card (x-notice): success / error / info message pages. */
+.nx-notice-page { margin-block: 1.5rem; }
+.nx-notice { display: flex; gap: 0.9rem; align-items: flex-start; border: 1px solid var(--nxm-border); border-radius: 12px; background: var(--nxm-surface); padding: 1rem 1.1rem; }
+.nx-notice__icon { flex: none; width: 2rem; height: 2rem; margin-top: 0.1rem; border-radius: 50%; display: grid; place-items: center; }
+.nx-notice__content { flex: 1; min-width: 0; }
+.nx-notice__title { margin: 0 0 0.25rem; font-size: 1rem; }
+.nx-notice__actions { margin-top: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.nx-notice--info { border-color: var(--nxm-info-border, var(--nxm-border)); }
+.nx-notice--info .nx-notice__icon { background: var(--nxm-info-bg, transparent); color: var(--nxm-info, var(--nxm-accent)); }
+.nx-notice--success { border-color: var(--nxm-success-border, var(--nxm-border)); }
+.nx-notice--success .nx-notice__icon { background: var(--nxm-success-bg, transparent); color: var(--nxm-success); }
+.nx-notice--error { border-color: var(--nxm-danger-border, var(--nxm-border)); }
+.nx-notice--error .nx-notice__icon { background: var(--nxm-danger-bg, transparent); color: var(--nxm-danger); }
+
 /* Narrow-viewport form rows: keep controls inside the container instead of
    clipping them outside the horizontal scroller. */
 @media (max-width: 640px) {

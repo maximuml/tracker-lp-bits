@@ -158,6 +158,45 @@ final class PostPermissionMatrixTest extends TestCase
         $this->assertSame(0, Post::query()->where('topicid', $topic->id)->count());
     }
 
+    public function test_reply_denies_second_post_within_flood_window(): void
+    {
+        $user = $this->actAs(User::factory()->create(['class' => UserClass::USER->value]));
+        $forum = Forum::factory()->create(['minclassread' => 1, 'minclasswrite' => 1]);
+        $topic = Topic::factory()->create(['forumid' => $forum->id]);
+
+        $this->postJson("/api/v1/topics/{$topic->id}/posts", ['body' => 'first'])->assertOk();
+
+        // Sanctum::actingAs caches the user instance — refresh() reloads
+        // last_post, which updateUserLastPost stamped via query builder.
+        $user->refresh();
+
+        // An immediate second post must hit the same 10-second flood
+        // window as the legacy path.
+        $this->postJson("/api/v1/topics/{$topic->id}/posts", ['body' => 'second'])
+            ->assertStatus(422);
+
+        $this->assertSame(1, Post::query()->where('topicid', $topic->id)->count());
+    }
+
+    public function test_reply_allows_post_after_flood_window(): void
+    {
+        $user = $this->actAs(User::factory()->create(['class' => UserClass::USER->value]));
+        $forum = Forum::factory()->create(['minclassread' => 1, 'minclasswrite' => 1]);
+        $topic = Topic::factory()->create(['forumid' => $forum->id]);
+
+        $this->postJson("/api/v1/topics/{$topic->id}/posts", ['body' => 'first'])->assertOk();
+
+        // TIMENOW is defined once per PHP process (first request through
+        // NexusRequestMiddleware) and stays frozen for the whole test run,
+        // so the flood window must be measured against it — not now().
+        $timenow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
+        $user->forceFill(['last_post' => date('Y-m-d H:i:s', $timenow - 30)])->save();
+
+        $this->postJson("/api/v1/topics/{$topic->id}/posts", ['body' => 'second'])->assertOk();
+
+        $this->assertSame(2, Post::query()->where('topicid', $topic->id)->count());
+    }
+
     // -----------------------------------------------------------------------
     // Scenario 3: edit / delete own post
     // -----------------------------------------------------------------------
@@ -241,6 +280,41 @@ final class PostPermissionMatrixTest extends TestCase
         Post::factory()->create(['topicid' => $topic->id]);
         $post = Post::factory()->create(['topicid' => $topic->id]);
         $this->makeModerator($user, $forum);
+
+        $this->deleteJson("/api/v1/topics/{$topic->id}/posts/{$post->id}")
+            ->assertOk();
+
+        $this->assertNull(Post::query()->find($post->id));
+    }
+
+    public function test_owner_cannot_delete_post_after_write_access_revoked(): void
+    {
+        $user = $this->actAs(User::factory()->create(['class' => UserClass::USER->value]));
+        $forum = Forum::factory()->create(['minclassread' => 1, 'minclasswrite' => 1]);
+        $topic = Topic::factory()->create(['forumid' => $forum->id]);
+        Post::factory()->create(['topicid' => $topic->id]);
+        $post = Post::factory()->create(['topicid' => $topic->id, 'userid' => $user->id]);
+
+        // Write access revoked after the post was created — ownership
+        // alone must no longer allow deletion.
+        $forum->forceFill(['minclasswrite' => 100])->save();
+
+        $this->deleteJson("/api/v1/topics/{$topic->id}/posts/{$post->id}")
+            ->assertStatus(422);
+
+        $this->assertNotNull(Post::query()->find($post->id));
+    }
+
+    public function test_forum_moderator_can_delete_after_owner_write_revoked(): void
+    {
+        $user = $this->actAs(User::factory()->create(['class' => UserClass::USER->value]));
+        $forum = Forum::factory()->create(['minclassread' => 1, 'minclasswrite' => 1]);
+        $topic = Topic::factory()->create(['forumid' => $forum->id]);
+        Post::factory()->create(['topicid' => $topic->id]);
+        $post = Post::factory()->create(['topicid' => $topic->id]);
+        $this->makeModerator($user, $forum);
+
+        $forum->forceFill(['minclasswrite' => 100])->save();
 
         $this->deleteJson("/api/v1/topics/{$topic->id}/posts/{$post->id}")
             ->assertOk();

@@ -433,6 +433,52 @@ final class PeerLifecycleTest extends TestCase
         $this->assertSame(120, (int) $snatch->leech_time_no_seeder);
     }
 
+    public function test_process_update_never_regresses_peer_counters(): void
+    {
+        $user = $this->makeUser();
+        $torrent = $this->makeTorrent($user);
+        $peerId = $this->insertPeer($user, $torrent);
+        $this->insertSnatch($user, $torrent);
+        DB::table('peers')->where('id', $peerId)->update(['uploaded' => 5000, 'downloaded' => 2000]);
+
+        // Client reports lower cumulative counters — the stored peer row
+        // must keep the high-water mark so the same bytes cannot be
+        // re-credited as a fresh delta on the next announce.
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 100, 50), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
+        $lifecycle->findSelf();
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
+        $lifecycle->process(0, 0, 'leechtime', 60, 0);
+
+        $peer = $this->peerRow($torrent, $user);
+        $this->assertSame(5000, (int) $peer->uploaded);
+        $this->assertSame(2000, (int) $peer->downloaded);
+        $this->assertSame(400, (int) $peer->to_go);
+    }
+
+    public function test_apply_locked_self_uses_locked_row_as_counter_baseline(): void
+    {
+        $user = $this->makeUser();
+        $torrent = $this->makeTorrent($user);
+        $peerId = $this->insertPeer($user, $torrent);
+        $this->insertSnatch($user, $torrent);
+
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 600, 300), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
+        $lifecycle->findSelf();
+
+        // Simulate a concurrent announce that already moved the counters —
+        // the locked row must replace the stale pre-lock snapshot, so the
+        // reported 600 does not overwrite the stored 1000.
+        DB::table('peers')->where('id', $peerId)->update(['uploaded' => 1000, 'downloaded' => 700]);
+        $lockedRow = (array) DB::table('peers')->where('id', $peerId)->first();
+        $lifecycle->applyLockedSelf($lockedRow);
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
+        $lifecycle->process(0, 0, 'leechtime', 60, 0);
+
+        $peer = $this->peerRow($torrent, $user);
+        $this->assertSame(1000, (int) $peer->uploaded);
+        $this->assertSame(700, (int) $peer->downloaded);
+    }
+
     public function test_same_ip_seeder_is_warned(): void
     {
         $user = $this->makeUser();

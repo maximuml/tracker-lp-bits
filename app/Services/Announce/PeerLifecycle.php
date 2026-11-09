@@ -115,7 +115,37 @@ final class PeerLifecycle
             return null;
         }
 
-        $this->self = (array) $selfRecord;
+        $this->applySelfRow((array) $selfRecord);
+
+        return $this->self;
+    }
+
+    /**
+     * Replace the cached peer row with the row read under the announce
+     * transaction's row lock, so uploaded/downloaded deltas are computed
+     * against the serialized value rather than a pre-lock snapshot. A
+     * null row means the peer disappeared between findSelf() and the
+     * lock — the lifecycle then takes the new-peer path.
+     *
+     * @param  array<string, mixed>|null  $row
+     */
+    public function applyLockedSelf(?array $row): void
+    {
+        if ($row === null) {
+            $this->self = null;
+
+            return;
+        }
+
+        $this->applySelfRow($row);
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    private function applySelfRow(array $row): void
+    {
+        $this->self = $row;
         $this->self['last_action_unix_timestamp'] = $this->self['last_action']
             ? strtotime($this->self['last_action'])
             : 0;
@@ -123,8 +153,6 @@ final class PeerLifecycle
         $this->self['prevts'] = ! empty($this->self['prev_action'])
             ? strtotime($this->self['prev_action'])
             : 0;
-
-        return $this->self;
     }
 
     private function processNewPeer(): void
@@ -244,11 +272,21 @@ final class PeerLifecycle
             $peerIPUpdate['ipv6'] = $this->ipv6;
         }
 
+        // Client-reported cumulative counters must never move backwards:
+        // a regression would re-credit the same bytes on the next delta.
+        $reportedUploaded = (int) $this->params['uploaded'];
+        $reportedDownloaded = (int) $this->params['downloaded'];
+        $storedUploaded = (int) ($this->self['uploaded'] ?? 0);
+        $storedDownloaded = (int) ($this->self['downloaded'] ?? 0);
+        if ($reportedUploaded < $storedUploaded || $reportedDownloaded < $storedDownloaded) {
+            Logger::writeWithContext((string) "[ANNOUNCE] counter regression, torrent: {$this->torrentId}, user: {$this->userId}, uploaded {$storedUploaded} -> {$reportedUploaded}, downloaded {$storedDownloaded} -> {$reportedDownloaded}", (string) 'info', (bool) false);
+        }
+
         $peerUpdate = [
             'ip' => $this->ip,
             'port' => (int) $this->params['port'],
-            'uploaded' => (int) $this->params['uploaded'],
-            'downloaded' => (int) $this->params['downloaded'],
+            'uploaded' => max($reportedUploaded, $storedUploaded),
+            'downloaded' => max($reportedDownloaded, $storedDownloaded),
             'to_go' => $this->left,
             'prev_action' => (string) ($this->self['last_action'] ?? ''),
             'last_action' => $this->dt,

@@ -20,6 +20,7 @@ use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumAccessService;
 use App\Support\CurrentUser;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -75,6 +76,18 @@ class PostController extends Controller
             throw ValidationException::withMessages(['topic' => ['Topic is locked.']]);
         }
 
+        // Same 10-second flood window the legacy forum path enforces
+        // (ForumService) — moderators bypass it.
+        if (! Permission::can(PermissionEnum::POST_MANAGE, $user)) {
+            $lastPost = $user->last_post;
+            $lastPostTs = $lastPost instanceof CarbonInterface ? $lastPost->getTimestamp() : (is_string($lastPost) && $lastPost !== '' ? strtotime($lastPost) : 0);
+            $timenow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
+            if ($lastPostTs > ($timenow - 10)) {
+                $secs = 10 - ($timenow - $lastPostTs);
+                throw ValidationException::withMessages(['post' => [__('forums.std_post_flooding').$secs.(__('forums.std_seconds_before_making'))]]);
+            }
+        }
+
         $dto = StorePostDto::fromRequest($request);
 
         $date = now()->toDateTimeString();
@@ -101,6 +114,10 @@ class PostController extends Controller
     {
         $this->setContextUser();
 
+        if ((int) $post->topicid !== (int) $topic->id) {
+            abort(404);
+        }
+
         $forum = $topic->forum;
         if (! $forum instanceof Forum || ! $this->canRead($forum)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
@@ -121,6 +138,15 @@ class PostController extends Controller
         $user = Auth::user();
         if (! $user instanceof User) {
             abort(401);
+        }
+
+        if ((int) $post->topicid !== (int) $topic->id) {
+            abort(404);
+        }
+
+        $forum = $topic->forum;
+        if (! $forum instanceof Forum || ! $this->canRead($forum)) {
+            throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
         if (! $this->canEdit($post, $topic)) {
@@ -156,7 +182,17 @@ class PostController extends Controller
             abort(401);
         }
 
-        if (! $this->canModerate($topic) && (int) $post->userid !== (int) $user->id) {
+        if ((int) $post->topicid !== (int) $topic->id) {
+            abort(404);
+        }
+
+        $forum = $topic->forum;
+        if (! $forum instanceof Forum || ! $this->canRead($forum)) {
+            throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
+        }
+
+        $isOwner = (int) $post->userid === (int) $user->id;
+        if (! $this->canModerate($topic) && ! ($isOwner && $this->canWrite($forum))) {
             throw ValidationException::withMessages(['post' => ['Permission denied.']]);
         }
 

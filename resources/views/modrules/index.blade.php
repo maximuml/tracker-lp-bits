@@ -3,8 +3,8 @@
 @section('title', "Rules Management")
 
 @section('content')
+<x-page :title="$mode === 'newsect' ? 'Add Rules' : ($mode === 'edit' ? 'Edit Rules' : 'Rules Management')" width="form">
 @if ($mode === 'newsect')
-<h1 class="text-center">Add Rules</h1>
 <form method="post" class="nx-inline" action="/web/staff/modrules?act=addsect">
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
@@ -22,7 +22,6 @@
     </div>
 </form>
 @elseif ($mode === 'edit')
-<h1 class="text-center">Edit Rules</h1>
 <form method="post" class="nx-inline" action="/web/staff/modrules?act=edited">
     @csrf
     <div class="nx-fgrid nx-fgrid--auto">
@@ -40,7 +39,6 @@
     </div>
 </form>
 @else
-<h1 class="text-center">Rules Management</h1>
 <br /><div class="text-center p-[5px]"><a href="/web/modrules?act=newsect">Add Section</a></div>
 @foreach ($rows as $arr)
 <br /><x-data-table caption="Rules Management" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $arr['title'] }} - {{ $arr['lang_name'] }}</th></tr></thead></x-slot:head>
@@ -48,5 +46,6 @@
     <tr><td><a href="{{ request()->getPathInfo() }}?act=edit&id={{ (int) $arr['id'] }}">Edit</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="/web/staff/modrules?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-btn-link">Delete</button></form></td></tr>
 </x-data-table>
 @endforeach
+</x-page>
 @endif
 @endsection

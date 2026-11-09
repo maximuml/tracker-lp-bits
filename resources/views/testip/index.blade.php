@@ -3,8 +3,7 @@
 @section('title', '')
 
 @section('content')
-<h1 class="nx-sr-only">{{ 'Test IP' }}</h1>
-<h1>{{ ('Test IP address')}}</h1>
+<x-page :title="'Test IP address'" width="form">
 @if (! empty($hasResult))
 <div class="nx-embedded">The IP address <b>{{ $ip }}</b> is {{ $isBanned ? '' : 'not ' }}banned{{ $isBanned ? ':' : '.' }}</div>
     @if ($isBanned)
@@ -22,4 +21,5 @@
 <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="OK"></div>
 </div>
 </form>
+</x-page>
 @endsection

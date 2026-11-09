@@ -3,15 +3,12 @@
 @section('title', 'User ban log')
 
 @section('content')
-<div>
-    <h1>User ban log</h1>
+<x-page :title="'User ban log'" width="list">
     <form id="filterForm" action="{{ $serverRequestUri }}" method="get">
-        <input id="q" type="text" name="q" value="{{ $q }}" placeholder="username">
+        <input id="q" type="text" name="q" value="{{ $q }}" placeholder="username" aria-label="username">
         <input type="submit" class="nx-btn nx-btn--primary">
         <input type="reset" class="nx-btn js-filter-reset">
     </form>
-</div>
-
 <x-data-table caption="User ban log" captionHidden>
     <x-slot:head><thead><tr>
         @foreach ($header as $label)
@@ -27,4 +24,5 @@
         @endforeach
 </x-data-table>
 {{ ($paginationBottom ?? '') }}
+</x-page>
 @endsection

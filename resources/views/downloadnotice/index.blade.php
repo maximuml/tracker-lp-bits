@@ -3,8 +3,7 @@
 @section('title', $title ?? (__('downloadnotice.head_download_notice')))
 
 @section('content')
-<section class="nx-idx-card">
-<h2>{{ $title }}</h2>
+<x-page :title="($title ?? '')" width="form">
 <div>
 <div class="p-[10pt]"><p>{{ $note }}</p></div>
 <div class="flex items-start">
@@ -59,5 +58,5 @@
 </div>
 @endif
 </div>
-</section>
+</x-page>
 @endsection

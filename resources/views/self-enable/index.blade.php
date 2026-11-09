@@ -3,7 +3,8 @@
 @section('title', $title)
 
 @section('content')
-<x-frame :caption="$title" caption-align="center">
+<x-page :title="$title" width="form">
+<x-frame>
 @if ($unit <= 0)
     <h3>{{ $t['featureDisabled'] ?? '' }}</h3>
 @elseif ($enabled)
@@ -32,4 +33,5 @@
     @endif
 @endif
 </x-frame>
+</x-page>
 @endsection

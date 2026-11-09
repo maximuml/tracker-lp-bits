@@ -3,6 +3,7 @@
 @section('title', 'Unconfirmed Users')
 
 @section('content')
+<x-page title="Unconfirmed Users" width="list">
 @if (! empty($rows ?? []))
     <x-frame :center="false">
     <x-data-table caption="Unconfirmed Users" captionHidden>
@@ -39,4 +40,5 @@
     </x-data-table>
     </x-frame>
 @endif
+</x-page>
 @endsection

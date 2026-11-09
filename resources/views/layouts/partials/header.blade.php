@@ -35,7 +35,7 @@
             @if($chrome->search->globalSearchEnabled)
             <form class="nxm-search" id="nxm-search" action="/web/search" method="get" target="{{ $chrome->search->searchFormTarget }}">
                 <svg class="nxm-search__icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l4 4"/></svg>
-                <input type="text" name="search" value="{{ $chrome->search->requestSearch }}" placeholder="{{ $chrome->search->searchKeywordPlaceholder }}" />
+                <input type="text" name="search" value="{{ $chrome->search->requestSearch }}" placeholder="{{ $chrome->search->searchKeywordPlaceholder }}" aria-label="{{ $chrome->search->searchKeywordPlaceholder }}" />
                 <select name="search_area" aria-label="{{ __('search.search_area') }}">
                     @foreach($chrome->search->searchAreas as $area)
                     <option value="{{ $area['value'] }}"@if($area['selected']) selected @endif>{{ $area['label'] }}</option>

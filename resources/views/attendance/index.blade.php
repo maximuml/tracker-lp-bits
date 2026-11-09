@@ -3,7 +3,7 @@
 @section('title', __('attendance.title'))
 
 @section('content')
-<h1 class="nx-sr-only">{{ __('attendance.title') }}</h1>
+<x-page :title="__('attendance.title')" width="list">
 @if ($hasAttendedToday)
     <x-frame :caption="__('attendance.success')" :center="false">
     <p>{{ $headerLeft ?? '' }}<span>{{ $headerRight ?? '' }}</span></p>
@@ -33,4 +33,5 @@
             @endforeach
         </ol></li>
     </ul>
+</x-page>
 @endsection

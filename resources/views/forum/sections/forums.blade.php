@@ -1,15 +1,12 @@
 @if ($forums !== null)
-<h2 class="text-center">{{ $forums->siteName }}&nbsp;{{ __('forums.text_forums') }}</h2>
-<p class="text-center">
-    <a href="{{ request()->getPathInfo() }}?action=search"><b>{{ __('forums.text_search') }}</b></a> |
-    <a href="{{ request()->getPathInfo() }}?action=viewunread"><b>{{ __('forums.text_view_unread') }}</b></a> |
-    <a href="{{ request()->getPathInfo() }}?catchup=1"><b>{{ __('forums.text_catch_up') }}</b></a>
+<x-page :title="trim($forums->siteName).' '.trim(__('forums.text_forums'))" width="list">
+    <x-slot:tabs><x-forum.nav-tabs active="forums" /></x-slot:tabs>
     @if ($forums->canManageForums)
-        | <a href="/forummanage"><b>{{ __('forums.text_forum_manager') }}</b></a>
+        <x-slot:actions><a class="nx-btn" href="/forummanage">{{ __('forums.text_forum_manager') }}</a></x-slot:actions>
     @endif
-</p>
-<x-forum.index-table :sections="$forums->sections" />
-@if ($forums->stats !== null)
-    <x-forum.stats :stats="$forums->stats" />
-@endif
+    <x-forum.index-table :sections="$forums->sections" />
+    @if ($forums->stats !== null)
+        <x-forum.stats :stats="$forums->stats" />
+    @endif
+</x-page>
 @endif

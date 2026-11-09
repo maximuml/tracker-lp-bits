@@ -1,6 +1,5 @@
 @props(['list'])
-<h2 class="text-center"><a class="faqlink" href="/forums">{{ $list->siteName }}&nbsp;{{ __('forums.text_forums') }}</a>--&gt;<a class="faqlink" href="/forums?action=viewforum&amp;forumid={{ $list->forumId }}">{{ $list->forumName }}</a></h2>
-<br />
+<x-page :title="$list->forumName" :subtitle="trim($list->siteName).' › '.trim(__('forums.text_forums'))" width="list">
 @if (! $list->mayPost)
     <p><i>{{ __('forums.text_unpermitted_starting_new_topics') }}</i></p>
 @endif
@@ -57,3 +56,4 @@
 @else
     <p>{{ __('forums.text_no_topics_found') }}</p>
 @endif
+</x-page>

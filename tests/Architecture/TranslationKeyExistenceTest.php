@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
+use Tests\Attributes\TestCategory;
 
 /**
  * Ratchet: every `__('<group>.<key>')` literal used in Blade/PHP views must
@@ -16,6 +17,7 @@ use SplFileInfo;
  * forum-search aria-label regression). Dot-less keys and dynamic keys are
  * out of scope.
  */
+#[TestCategory(TestCategory::ARCHITECTURE)]
 final class TranslationKeyExistenceTest extends TestCase
 {
     private const BASE_DIR = __DIR__.'/../..';

@@ -346,7 +346,7 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::get('adduser', [UserAdminController::class, 'adduser'])->name('adduser.legacy');
     Route::get('bitbucketlog', [InfoController::class, 'bitbucketlog'])->name('bitbucketlog.legacy');
     Route::get('increment-bulk', [SystemBulkController::class, 'incrementBulk'])->name('increment-bulk.legacy');
-    Route::get('setlist_lookup', [SystemBulkController::class, 'setlistLookup'])->name('setlist_lookup.legacy');
+    Route::get('setlist_lookup', [SystemBulkController::class, 'setlistLookup'])->middleware('throttle:setlist')->name('setlist_lookup.legacy');
     Route::get('testip', [AdminToolsController::class, 'testip'])->name('testip.legacy');
 });
 

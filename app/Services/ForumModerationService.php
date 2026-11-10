@@ -208,7 +208,7 @@ final class ForumModerationService
 
     public function highlightTopic(Request $request): RedirectResponse
     {
-        $topicid = (int) $request->query('topicid');
+        $topicid = (int) $request->input('topicid');
         $topic = $this->data->topics->getTopic((int) $topicid);
 
         if ($topic === null) {

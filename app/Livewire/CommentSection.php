@@ -12,6 +12,7 @@ use App\Services\CommentService;
 use App\Support\Pagination;
 use App\Support\Smilies;
 use App\ViewModels\Comment\CommentTableFactory;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -93,7 +94,7 @@ final class CommentSection extends Component
 
         try {
             $this->comments()->post($user, $this->type, $this->parentId, $body);
-        } catch (HttpExceptionInterface $e) {
+        } catch (HttpExceptionInterface|AuthorizationException $e) {
             $this->status = $e->getMessage() !== '' ? $e->getMessage() : (string) __('comment.std_permission_denied');
 
             return;

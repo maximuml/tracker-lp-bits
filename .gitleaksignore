@@ -26,3 +26,6 @@ ca1fece396b500c2df433c1c7f96a3a49a8fd79a:tests/Feature/PrivateAttachmentsTest.ph
 # Dummy passkeys in the hashed-key pin tests (replaced by md5-derived values in acae826d)
 8a7a95a7dba6bd2949a259c75bde267f73c15ca3:tests/Integration/Services/PasskeyUserLookupTest.php:generic-api-key:48
 8a7a95a7dba6bd2949a259c75bde267f73c15ca3:tests/Integration/Http/Controllers/TorrentRssControllerTest.php:generic-api-key:129
+# Dummy passkeys in TorrentRepositoryDownHashTest are test fixtures (replaced by low-entropy values in 7c6f3a12)
+ac61afb520a7a8686af1c23b3a75cd581c9296a7:tests/Unit/Repositories/TorrentRepositoryDownHashTest.php:generic-api-key:54
+ac61afb520a7a8686af1c23b3a75cd581c9296a7:tests/Unit/Repositories/TorrentRepositoryDownHashTest.php:generic-api-key:68

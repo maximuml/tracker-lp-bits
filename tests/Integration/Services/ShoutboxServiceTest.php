@@ -8,6 +8,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\UserClass;
 use App\Repositories\ShoutboxRepository;
 use App\Services\ShoutboxService;
+use App\Support\Html\SafeHtml;
 use App\Support\Shoutbox;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -88,6 +89,33 @@ final class ShoutboxServiceTest extends TestCase
             'text' => $text,
             'type' => 0,
         ]);
+    }
+
+    // --- decorateRows ---
+
+    public function test_decorate_rows_username_survives_nick_reply_rewrite_as_html(): void
+    {
+        $this->insertUser(1); // shout author
+        $this->insertUser(2); // logged-in viewer (triggers the nick-reply rewrite)
+        $this->insertMessage(1, 'nick reply rendering');
+
+        $rows = (new ShoutboxRepository)->listLatest(10);
+        $items = Shoutbox::decorateRows(
+            $rows,
+            ['avatars' => 'no'],
+            2,
+            false,
+            ['counts' => [], 'mine' => [], 'users' => []]
+        );
+
+        $this->assertNotEmpty($items);
+        $username = $items[0]['username'];
+        $this->assertInstanceOf(SafeHtml::class, $username);
+        $html = (string) $username;
+        // Regression (db9d6eba3): the nick-reply preg_replace returned a plain
+        // string, fell into fromPlainText() and leaked raw markup as text.
+        $this->assertStringContainsString('shout-nick-reply', $html);
+        $this->assertStringNotContainsString('&lt;', $html);
     }
 
     // --- postMessage ---

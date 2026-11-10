@@ -88,6 +88,24 @@ final class TorrentApprovalPageTest extends TestCase
         $this->assertStringContainsString('>log 0<', (string) $page2->getContent());
     }
 
+    public function test_missing_torrent_id_returns_404_instead_of_redirect_loop(): void
+    {
+        /** @var User $admin */
+        $admin = User::factory()->create(['class' => UserClass::ADMINISTRATOR->value]);
+
+        $this->withNexusCookie($admin)
+            ->get('/web/torrent-approval-page')
+            ->assertNotFound();
+
+        $this->withNexusCookie($admin)
+            ->get('/web/torrent-approval-page?torrent_id=0')
+            ->assertNotFound();
+
+        $this->withNexusCookie($admin)
+            ->get('/web/torrent-approval-page?torrent_id=abc')
+            ->assertNotFound();
+    }
+
     public function test_regular_user_is_denied(): void
     {
         /** @var User $user */

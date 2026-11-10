@@ -10,6 +10,7 @@ use App\Contracts\Repositories\PostRepositoryInterface;
 use App\DTOs\Forum\ListPostsDto;
 use App\DTOs\Forum\StorePostDto;
 use App\DTOs\Forum\UpdatePostDto;
+use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
 use App\Http\Resources\PostResource;
 use App\Models\Forum;
@@ -18,7 +19,9 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
+use App\Services\BonusLedgerService;
 use App\Services\ForumAccessService;
+use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
@@ -35,6 +38,7 @@ class PostController extends Controller
         private readonly TopicRepository $topicRepository,
         private readonly CurrentUser $currentUser,
         private readonly ForumAccessService $forumAccess,
+        private readonly BonusLedgerService $bonusLedger,
     ) {}
 
     /**
@@ -67,8 +71,15 @@ class PostController extends Controller
             abort(401);
         }
 
+        // Same per-user posting kill-switch the legacy forum path enforces
+        // (ForumService::handlePost) — staff toggle `forumpost` off via
+        // moderation; without this check the REST API bypassed it.
+        if (! $user->forumpost) {
+            throw ValidationException::withMessages(['post' => [__('forums.std_permission_denied')]]);
+        }
+
         $forum = $topic->forum;
-        if (! $forum instanceof Forum || ! $this->canWrite($forum)) {
+        if (! $forum instanceof Forum || ! $this->canRead($forum) || ! $this->canWrite($forum)) {
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
@@ -90,9 +101,14 @@ class PostController extends Controller
 
         $dto = StorePostDto::fromRequest($request);
 
+        // Legacy parity: every forum reply earns the makepost bonus
+        // (ForumService::handlePost), and destroy() revokes it.
+        $makepostBonus = SiteConfig::current()->bonus->makePost();
         $date = now()->toDateTimeString();
-        $postId = DB::transaction(function () use ($topic, $forum, $user, $dto, $date): int {
+        $postId = DB::transaction(function () use ($topic, $forum, $user, $dto, $date, $makepostBonus): int {
             $postId = $this->postRepository->createPost((int) $topic->id, (int) $user->id, $dto->body, $date);
+
+            $this->bonusLedger->award((int) $user->id, $makepostBonus, BusinessType::FORUM_POST_BONUS, 'Make post');
 
             $this->topicRepository->setTopicLastPost((int) $topic->id, $postId);
             $this->forumRepository->incrementForumPostCount((int) $forum->id);
@@ -149,6 +165,13 @@ class PostController extends Controller
             throw ValidationException::withMessages(['topic' => ['Permission denied.']]);
         }
 
+        // Legacy parity: editing inside a locked topic requires
+        // moderation rights (ForumService::handlePost applies the same
+        // TopicPolicy::reply gate to the edit path).
+        if ($topic->locked && ! $this->canModerate($topic)) {
+            throw ValidationException::withMessages(['topic' => ['Topic is locked.']]);
+        }
+
         if (! $this->canEdit($post, $topic)) {
             throw ValidationException::withMessages(['post' => ['Permission denied.']]);
         }
@@ -200,11 +223,15 @@ class PostController extends Controller
             throw ValidationException::withMessages(['post' => ['Cannot delete the first post of a topic.']]);
         }
 
-        $deleted = DB::transaction(function () use ($topic, $post): bool {
+        // Legacy parity: deleting a reply claws back the makepost bonus
+        // the author earned (ForumModerationService::deletePost).
+        $makepostBonus = SiteConfig::current()->bonus->makePost();
+        $deleted = DB::transaction(function () use ($topic, $post, $makepostBonus): bool {
             if (! $this->postRepository->deletePost((int) $post->id, (int) $topic->id, (int) $topic->forumid)) {
                 return false;
             }
             $this->topicRepository->updateTopicLastPost((int) $topic->id);
+            $this->bonusLedger->revoke((int) $post->userid, $makepostBonus, BusinessType::BONUS_REVERSAL, 'Make post bonus revoked');
 
             return true;
         });

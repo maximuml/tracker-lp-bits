@@ -240,7 +240,7 @@ final class Shoutbox extends Component
 
     public function react(int $id, string $emoji): void
     {
-        if ($id <= 0) {
+        if ($id <= 0 || $this->actor()->id <= 0) {
             return;
         }
         ($this->shoutboxService ?? throw new \LogicException('Shoutbox component used before boot()'))->toggleReaction($this->actor(), $id, $emoji);

@@ -147,6 +147,10 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip() ?? 'default');
         });
 
+        RateLimiter::for('setlist', function (Request $request) {
+            return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip() ?? 'default');
+        });
+
         RateLimiter::for('upload', function (Request $request) {
             return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip() ?? 'default');
         });

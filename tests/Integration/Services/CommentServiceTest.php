@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Services;
 
-use App\Services\CommentService;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Services\CommentService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Attributes\TestCategory;
@@ -93,6 +94,35 @@ final class CommentServiceTest extends TestCase
         } catch (HttpException $e) {
             $this->assertSame(403, $e->getStatusCode());
         }
+    }
+
+    public function test_post_torrent_comment_invokes_torrent_policy_gate(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        /** @var Torrent $torrent */
+        $torrent = Torrent::factory()->create();
+
+        // TorrentPolicy::comment() only re-checks parked, which authorizeComment()
+        // already rejects — so the Gate call is behaviorally redundant and
+        // MethodCallRemoval survives without an explicit invocation assertion.
+        // forUser() cannot passthru() (it does `new static`), so return a real
+        // user-bound Gate resolved before the facade swap.
+        $realGate = app(\Illuminate\Contracts\Auth\Access\Gate::class);
+
+        Gate::partialMock()
+            ->shouldReceive('forUser')
+            ->once()
+            ->withArgs(static fn (mixed $actor): bool => $actor instanceof User && (int) $actor->id === (int) $user->id)
+            ->andReturn($realGate->forUser($user));
+
+        $this->comments->post($user, 'torrent', (int) $torrent->id, 'gate-checked comment');
+
+        $this->assertDatabaseHas('comments', [
+            'torrent' => $torrent->id,
+            'user' => $user->id,
+            'text' => 'gate-checked comment',
+        ]);
     }
 
     public function test_authorize_comment_offer_type_skips_torrent_policy(): void

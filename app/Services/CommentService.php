@@ -61,7 +61,7 @@ final class CommentService
             if (! $torrent) {
                 abort(404, __('comment.std_no_torrent_id'));
             }
-            Gate::authorize('comment', $torrent);
+            Gate::forUser($user)->authorize('comment', $torrent);
         }
     }
 

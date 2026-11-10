@@ -385,12 +385,17 @@ final class Shoutbox
                     }
                 }
                 if ($nickReplyName !== '' && $currentUserId > 0) {
-                    $username = (string) preg_replace(
-                        '#href="[^"]*userdetails\.php\?id=\d+"#',
+                    $replaced = preg_replace(
+                        '#href="[^"]*userdetails(?:\.php)?\?id=\d+"#',
                         'href="#" class="shout-nick-reply" data-nick="'.htmlspecialchars($nickReplyName, ENT_QUOTES).'" title="'.htmlspecialchars($tooltipReply, ENT_QUOTES).'"',
                         (string) $username,
                         1
                     );
+                    if (is_string($replaced)) {
+                        // UserDisplay::username() markup is trusted; the
+                        // replacement only carries escaped attribute values.
+                        $username = SafeHtml::fromTrustedHtml($replaced);
+                    }
                 }
             } else {
                 $username = (string) (__('shoutbox.text_guest'));

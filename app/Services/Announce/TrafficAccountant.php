@@ -124,14 +124,21 @@ final class TrafficAccountant
      * Lock peer, snatch, and user rows to prevent concurrent announce
      * races — must run inside the caller's transaction.
      *
+     * Returns the freshly locked peer row (hydrated columns only) so the
+     * caller can recompute uploaded/downloaded deltas against the
+     * serialized value; null when there is no peer row to lock.
+     *
      * @param  array<string, mixed>|null  $self
      * @param  array<string, mixed>|null  $snatchInfo
+     * @return array<string, mixed>|null
      */
-    public function lockRowsForUpdate(?array $self, ?array $snatchInfo, int $userId): void
+    public function lockRowsForUpdate(?array $self, ?array $snatchInfo, int $userId): ?array
     {
+        $lockedPeer = null;
+
         // Lock the existing peer row if present
         if ($self !== null && ! empty($self['id'])) {
-            $this->peers->lockById((int) $self['id']);
+            $lockedPeer = $this->peers->lockById((int) $self['id']);
         }
 
         // Lock the snatch row if present
@@ -141,5 +148,7 @@ final class TrafficAccountant
 
         // Lock the user row to serialize uploaded/downloaded increments
         $this->users->lockById($userId);
+
+        return $lockedPeer !== null ? (array) $lockedPeer : null;
     }
 }

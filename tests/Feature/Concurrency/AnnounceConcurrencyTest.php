@@ -346,6 +346,65 @@ final class AnnounceConcurrencyTest extends TestCase
     }
 
     /**
+     * A client that reports decreasing cumulative counters must not be
+     * able to re-credit the same bytes: peer counters are high-water
+     * marks, so uploaded=5000 → 1000 → 5000 credits 5000 exactly once.
+     */
+    public function test_counter_regression_cannot_recredit_traffic(): void
+    {
+        $user = User::factory()->create([
+            'uploaded' => 0,
+            'downloaded' => 0,
+            'class' => 1,
+        ]);
+        $torrent = Torrent::factory()->owner($user)->create([
+            'size' => 100000,
+            'seeders' => 0,
+            'leechers' => 0,
+            'times_completed' => 0,
+        ]);
+
+        $infoHash = InfoHash::fromBinary($torrent->info_hash)->toBinary();
+        $peerId = PeerId::fromBinary('-qB4500-'.random_bytes(12))->toBinary();
+
+        $this->announce($user->passkey, $infoHash, $peerId, 0, 1000, 99000, 'started');
+
+        $oldTime = date('Y-m-d H:i:s', TIMENOW - 3600);
+        $rewind = function () use ($torrent, $user, $peerId, $oldTime): void {
+            DB::table('peers')
+                ->where('torrent', $torrent->id)
+                ->where('userid', $user->id)
+                ->where('peer_id', $peerId)
+                ->update(['prev_action' => $oldTime, 'last_action' => $oldTime]);
+        };
+
+        // Legit progress to 5000 uploaded
+        $rewind();
+        $this->announce($user->passkey, $infoHash, $peerId, 5000, 2000, 98000);
+
+        // Regression: client "forgets" progress and reports 1000 again
+        $rewind();
+        $this->announce($user->passkey, $infoHash, $peerId, 1000, 1500, 98500);
+
+        // Re-report the high-water mark — must credit nothing new
+        $rewind();
+        $this->announce($user->passkey, $infoHash, $peerId, 5000, 2000, 98000);
+
+        $finalUploaded = (int) DB::table('users')->where('id', $user->id)->value('uploaded');
+        $finalDownloaded = (int) DB::table('users')->where('id', $user->id)->value('downloaded');
+
+        $this->assertSame(5000, $finalUploaded, 'Counter regression must not re-credit uploaded bytes');
+        $this->assertSame(1000, $finalDownloaded, 'Counter regression must not re-credit downloaded bytes');
+
+        $peerUploaded = (int) DB::table('peers')
+            ->where('torrent', $torrent->id)
+            ->where('userid', $user->id)
+            ->where('peer_id', $peerId)
+            ->value('uploaded');
+        $this->assertSame(5000, $peerUploaded, 'Peer row must keep the high-water mark');
+    }
+
+    /**
      * Announcing with an invalid passkey must not create any peer or
      * snatch rows. This is a security invariant: unauthenticated
      * announces must have zero side effects on accounting tables.

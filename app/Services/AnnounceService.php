@@ -121,7 +121,6 @@ class AnnounceService
         );
         $ctx = $ctx->withTraffic($traffic);
 
-        $this->cheaterDetector->checkSpeed($traffic->upthis, $ctx->self, $ctx->user);
         $this->cheaterDetector->checkCheating($traffic->upthis, $traffic->downthis, $ctx->self, $ctx->user, $torrent, $ctx->torrentId(), $ctx->dt);
 
         $response = DB::transaction(function () use ($ctx, $peerLifecycle, $traffic): array {
@@ -283,7 +282,42 @@ class AnnounceService
         // Lock the peer row, snatch row, and user row to prevent concurrent
         // announce updates from racing on the same peer. This ensures
         // consistent accounting under high concurrency.
-        $this->lockRowsForUpdate($ctx);
+        $lockedPeer = $this->lockRowsForUpdate($ctx);
+
+        // Deltas were computed from the pre-lock self snapshot; recompute
+        // them against the locked peer row so parallel announces on the
+        // same peer serialize instead of double-crediting the same bytes.
+        if ($ctx->self !== null) {
+            if ($lockedPeer !== null) {
+                $peerLifecycle->applyLockedSelf($lockedPeer);
+                $ctx = $ctx->withSelf($lockedPeer);
+                $traffic = $this->trafficAccountant->calculate(
+                    $lockedPeer,
+                    $ctx->params,
+                    $torrent,
+                    $ctx->user,
+                    $ctx->snatchInfo,
+                    $ctx->ip,
+                    $ctx->seeder,
+                );
+                $ctx = $ctx->withTraffic($traffic);
+            } else {
+                // The peer row vanished between findSelf() and the lock —
+                // treat this announce as a new peer (zero deltas).
+                $peerLifecycle->applyLockedSelf(null);
+                $ctx = $ctx->withSelf(null);
+                $traffic = $this->trafficAccountant->calculate(
+                    null,
+                    $ctx->params,
+                    $torrent,
+                    $ctx->user,
+                    $ctx->snatchInfo,
+                    $ctx->ip,
+                    $ctx->seeder,
+                );
+                $ctx = $ctx->withTraffic($traffic);
+            }
+        }
 
         $result = $peerLifecycle->process($traffic->upthis, $traffic->downthis, $traffic->snatchTimeColumn, $traffic->snatchTimeIncrement, $traffic->leechTimeNoSeederIncrement);
 
@@ -303,10 +337,15 @@ class AnnounceService
         return $ctx->responseBuilder->peerList($ctx->torrentId(), $ctx->userId(), $ctx->seeder === 1);
     }
 
-    /** Lock peer, snatch, and user rows to prevent concurrent announce races. */
-    private function lockRowsForUpdate(AnnounceContext $ctx): void
+    /**
+     * Lock peer, snatch, and user rows to prevent concurrent announce
+     * races. Returns the freshly locked peer row for delta recomputation.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function lockRowsForUpdate(AnnounceContext $ctx): ?array
     {
-        $this->trafficAccountant->lockRowsForUpdate($ctx->self, is_array($ctx->snatchInfo) ? $ctx->snatchInfo : null, $ctx->userId());
+        return $this->trafficAccountant->lockRowsForUpdate($ctx->self, is_array($ctx->snatchInfo) ? $ctx->snatchInfo : null, $ctx->userId());
     }
 
     private function applyUserUpdate(AnnounceContext $ctx, PeerLifecycleResult $result): void

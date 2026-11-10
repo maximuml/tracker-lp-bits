@@ -51,21 +51,6 @@ class TorrentPolicy extends BasePolicy
         return $torrent->owner == $user->id || Permission::canManageTorrent($user);
     }
 
-    public function delete(User $user, Torrent $torrent): bool
-    {
-        return false;
-    }
-
-    public function restore(User $user, Torrent $torrent): bool
-    {
-        return false;
-    }
-
-    public function forceDelete(User $user, Torrent $torrent): bool
-    {
-        return false;
-    }
-
     public function comment(User $user, Torrent $torrent): bool
     {
         return ! $user->parked;

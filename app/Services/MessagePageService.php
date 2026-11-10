@@ -431,7 +431,7 @@ class MessagePageService
         ];
     }
 
-    private function renderMessageBody(string $text, bool $stripHtml = false): SafeHtml
+    private function renderMessageBody(string $text, bool $stripHtml): SafeHtml
     {
         $key = 'fmt_pm_'.md5($text).($stripHtml ? '_s' : '');
         $cached = $this->cache?->get($key);

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Announce;
 
 use App\DTOs\Announce\AnnounceUser;
-use App\Enums\UserClass as UserClassEnum;
 use App\Exceptions\TrackerException;
 use App\Repositories\LogRepository;
 use App\Repositories\UserAccountRepository;
@@ -21,23 +20,6 @@ final class CheaterDetector
         private readonly UserAccountRepository $userAccountRepository,
         private readonly UserCleanupRepository $userCleanupRepository,
     ) {}
-
-    /**
-     * @param  array<string, mixed>  $self
-     */
-    public function checkSpeed(
-        int $upthis,
-        ?array $self,
-        AnnounceUser $user,
-    ): void {
-        if ($self === null || $self['announcetime'] <= 0) {
-            return;
-        }
-
-        if ($user->classAtLeast((int) UserClassEnum::VIP->value) || $user->isDonor) {
-            return;
-        }
-    }
 
     /**
      * @param  array<string, mixed>|null  $self

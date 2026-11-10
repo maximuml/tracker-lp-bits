@@ -279,7 +279,7 @@ final class PeerLifecycle
         $storedUploaded = (int) ($this->self['uploaded'] ?? 0);
         $storedDownloaded = (int) ($this->self['downloaded'] ?? 0);
         if ($reportedUploaded < $storedUploaded || $reportedDownloaded < $storedDownloaded) {
-            Logger::writeWithContext((string) "[ANNOUNCE] counter regression, torrent: {$this->torrentId}, user: {$this->userId}, uploaded {$storedUploaded} -> {$reportedUploaded}, downloaded {$storedDownloaded} -> {$reportedDownloaded}", (string) 'info', (bool) false);
+            Logger::writeWithContext((string) "[ANNOUNCE] counter regression, torrent: {$this->torrentId}, user: {$this->userId}, uploaded {$storedUploaded} -> {$reportedUploaded}, downloaded {$storedDownloaded} -> {$reportedDownloaded}", (string) 'info');
         }
 
         $peerUpdate = [

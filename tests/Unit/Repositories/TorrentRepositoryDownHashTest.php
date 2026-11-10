@@ -51,7 +51,7 @@ class TorrentRepositoryDownHashTest extends TestCase
     {
         putenv('ALLOW_LEGACY_DOWNHASH=false');
         try {
-            $user = ['id' => 42, 'passkey' => 'abc123def456ghi789jkl012mno345pq'];
+            $user = ['id' => 42, 'passkey' => 'test-passkey-downhash'];
             $legacyKey = md5($user['passkey'].date('Ymd').$user['id']);
             $legacyHash = JWT::encode(['id' => 456, 'exp' => time() + 3600], $legacyKey, 'HS256');
 
@@ -65,7 +65,7 @@ class TorrentRepositoryDownHashTest extends TestCase
     {
         putenv('ALLOW_LEGACY_DOWNHASH=false');
         try {
-            $user = ['id' => 42, 'passkey' => 'abc123def456ghi789jkl012mno345pq'];
+            $user = ['id' => 42, 'passkey' => 'test-passkey-downhash'];
             $hash = $this->downloadRepository->encryptDownHash(123, $user);
 
             $this->assertSame([123], $this->downloadRepository->decryptDownHash($hash, $user));

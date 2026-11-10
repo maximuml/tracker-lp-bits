@@ -13,11 +13,13 @@ use App\Models\User;
 use App\Services\Announce\PeerLifecycle;
 use App\Services\TorrentStatsService;
 use App\Support\Cache;
+use App\Support\Logger;
 use App\ValueObjects\InfoHash;
 use App\ValueObjects\Passkey;
 use App\ValueObjects\PeerId;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use ReflectionProperty;
 use stdClass;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -489,5 +491,135 @@ final class PeerLifecycleTest extends TestCase
 
         $this->expectException(TrackerWarningException::class);
         $lifecycle->process(100, 0, 'seedtime', 60, 0);
+    }
+
+    public function test_apply_locked_self_null_takes_new_peer_path(): void
+    {
+        $user = $this->makeUser();
+        $torrent = $this->makeTorrent($user);
+        $peerId = $this->insertPeer($user, $torrent);
+        $this->insertSnatch($user, $torrent);
+        DB::table('peers')->where('id', $peerId)->update(['uploaded' => 777, 'to_go' => 333]);
+
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 600, 300), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
+        $lifecycle->findSelf();
+
+        // The peer vanished between findSelf() and the row lock — the
+        // lifecycle must take the new-peer path, which short-circuits on
+        // isPeerExist() and leaves the existing row untouched.
+        $lifecycle->applyLockedSelf(null);
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
+        $lifecycle->process(0, 0, 'leechtime', 60, 0);
+
+        $peer = $this->peerRow($torrent, $user);
+        $this->assertSame(777, (int) $peer->uploaded);
+        $this->assertSame(333, (int) $peer->to_go);
+    }
+
+    public function test_process_update_treats_missing_stored_counters_as_zero(): void
+    {
+        $user = $this->makeUser();
+        $torrent = $this->makeTorrent($user);
+        $this->insertPeer($user, $torrent);
+        $this->insertSnatch($user, $torrent);
+
+        $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 0, 0), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
+        $self = $lifecycle->findSelf();
+        $this->assertNotNull($self);
+        unset($self['uploaded'], $self['downloaded']);
+        $lifecycle->applyLockedSelf($self);
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
+        $lifecycle->process(0, 0, 'leechtime', 60, 0);
+
+        $peer = $this->peerRow($torrent, $user);
+        $this->assertSame(0, (int) $peer->uploaded);
+        $this->assertSame(0, (int) $peer->downloaded);
+    }
+
+    public function test_process_update_refreshes_peer_ip(): void
+    {
+        $user = $this->makeUser();
+        $torrent = $this->makeTorrent($user);
+        $this->insertPeer($user, $torrent);
+        $this->insertSnatch($user, $torrent);
+
+        $lifecycle = new PeerLifecycle($this->makeDto(ip: '10.9.9.9'), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
+        $lifecycle->findSelf();
+        $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
+        $lifecycle->process(100, 50, 'leechtime', 60, 0);
+
+        $this->assertSame('10.9.9.9', $this->peerRow($torrent, $user)->ip);
+    }
+
+    public function test_counter_regression_is_logged(): void
+    {
+        $log = $this->withLogCapture(function (): void {
+            $user = $this->makeUser();
+            $torrent = $this->makeTorrent($user);
+            $this->insertPeer($user, $torrent);
+            $this->insertSnatch($user, $torrent);
+            DB::table('peers')->where('torrent', $torrent->id)->where('userid', $user->id)
+                ->update(['uploaded' => 5000, 'downloaded' => 100]);
+
+            // uploaded regresses (100 < 5000) while downloaded progresses
+            // (200 > 100) — either counter moving backwards must log.
+            $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 100, 200), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
+            $lifecycle->findSelf();
+            $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
+            $lifecycle->process(0, 0, 'leechtime', 60, 0);
+        });
+
+        $this->assertStringContainsString('counter regression', $log);
+    }
+
+    public function test_equal_counters_do_not_log_regression(): void
+    {
+        $log = $this->withLogCapture(function (): void {
+            $user = $this->makeUser();
+            $torrent = $this->makeTorrent($user);
+            $this->insertPeer($user, $torrent);
+            $this->insertSnatch($user, $torrent);
+            DB::table('peers')->where('torrent', $torrent->id)->where('userid', $user->id)
+                ->update(['uploaded' => 5000, 'downloaded' => 2000]);
+
+            $lifecycle = new PeerLifecycle($this->makeDto(null, 400, 5000, 2000), $this->torrentRow($torrent), $this->userRow($user), $this->dt(), app(TorrentStatsService::class));
+            $lifecycle->findSelf();
+            $lifecycle->setSnatchInfo(app(TorrentStatsService::class)->getSnatchInfo($torrent->id, $user->id));
+            $lifecycle->process(0, 0, 'leechtime', 60, 0);
+        });
+
+        $this->assertStringNotContainsString('counter regression', $log);
+    }
+
+    /**
+     * Run $callback with Logger pointed at a fresh temp directory and
+     * return everything written to the nexus log during the callback.
+     */
+    private function withLogCapture(callable $callback): string
+    {
+        $dir = sys_get_temp_dir().'/peerlog-'.bin2hex(random_bytes(6));
+        mkdir($dir, 0777, true);
+
+        $previous = getenv('NEXUS_LOG_DIR');
+        putenv('NEXUS_LOG_DIR='.$dir);
+        $this->resetLoggerFilePathCache();
+        try {
+            $callback();
+            $logFile = Logger::filePath();
+
+            return is_file($logFile) ? (string) file_get_contents($logFile) : '';
+        } finally {
+            if ($previous === false) {
+                putenv('NEXUS_LOG_DIR');
+            } else {
+                putenv('NEXUS_LOG_DIR='.$previous);
+            }
+            $this->resetLoggerFilePathCache();
+        }
+    }
+
+    private function resetLoggerFilePathCache(): void
+    {
+        (new ReflectionProperty(Logger::class, 'filePaths'))->setValue(null, []);
     }
 }

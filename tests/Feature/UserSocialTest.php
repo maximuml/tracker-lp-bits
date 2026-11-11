@@ -71,7 +71,7 @@ class UserSocialTest extends TestCase
         $receiver = User::factory()->create();
 
         $this->withNexusCookie($sender)
-            ->get('/web/sendmessage')
+            ->get('/web/sendmessage?receiver='.$receiver->id)
             ->assertStatus(200);
 
         $subject = 'Test PM subject';

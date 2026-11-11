@@ -74,7 +74,7 @@ final class MessageComposeTest extends TestCase
 
         $this->withNexusCookie($other)
             ->get('/web/sendmessage?receiver='.$sender->id.'&replyto='.$message->id)
-            ->assertOk()
+            ->assertForbidden()
             ->assertSee(__('sendmessage.std_permission_denied'))
             ->assertDontSee('class="nx-compose"', false);
     }

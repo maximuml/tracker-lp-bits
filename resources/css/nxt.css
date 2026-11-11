@@ -1034,6 +1034,14 @@ button.nx-btn-link {
 
 .nx-box--59 {width:59%;margin-left:auto;margin-right:auto}
 
+.nx-error {max-width:36rem;margin:2rem auto}
+
+.nx-error__code {font-size:3rem;font-weight:700;line-height:1;margin:0;color:var(--nxm-muted,#888)}
+
+.nx-error__title {font-size:1.4rem;margin:.35rem 0 .75rem}
+
+.nx-error__actions {margin-top:1.25rem;display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
+
 .nx-w-97 {width:97%}
 
 .nx-w-940 {width:940px}

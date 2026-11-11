@@ -10,7 +10,7 @@ use App\Support\Html\SafeHtml;
  * Prepared data for `torrents/_table.blade.php` — the Blade replacement
  * for `TorrentTable::render()` (Variant A, ADR 0014).
  *
- * @phpstan-type Column array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string}
+ * @phpstan-type Column array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string, shortLabel?: string, abbrTitle?: string}
  * @phpstan-type Tooltip array{id: string, content: SafeHtml}
  */
 final class TorrentListViewModel

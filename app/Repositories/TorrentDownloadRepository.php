@@ -209,7 +209,7 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
                 'torrent_id' => 0,
                 'secret' => Str::random(),
             ];
-            Logger::writeWithContext((string) ('[INSERT_TORRENT_SECRET] '.json_encode($insert)), (string) 'info', (bool) false);
+            Logger::writeWithContext((string) ('[INSERT_TORRENT_SECRET] uid='.$uid.' torrent_id='.$id), (string) 'info', (bool) false);
             TorrentSecret::query()->insert($insert);
 
             return $insert['secret'];

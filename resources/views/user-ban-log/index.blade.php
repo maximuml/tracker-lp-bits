@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'User ban log')
+@section('title', __('log.user_ban_log'))
 
 @section('content')
 <x-page :title="'User ban log'" width="list">

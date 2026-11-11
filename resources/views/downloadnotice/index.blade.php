@@ -27,7 +27,7 @@
 <a href="https://www.qbittorrent.org/download" target="_blank" rel="noopener" title="{{ __('downloadnotice.title_download')}}qBittorrent"><img src="/pic/qbittorrent.png" alt="qBittorrent"  width="128" height="128" /></a>
 </div>
 <div class="grow text-center">
-<a href="https://transmissionbt.com/download/" target="_blank" rel="noopener" title="{{ __('downloadnotice.title_download')}}Transmission"><img src="/pic/transmission.png" alt="Transmission"  width="128" height="128" /></a>
+<a href="https://transmissionbt.com/download/" target="_blank" rel="noopener" title="{{ __('downloadnotice.title_download')}}Transmission"><img src="/pic/transmission.png" alt="{{ __('downloadnotice.text_transmission') }}"  width="128" height="128" /></a>
 </div>
 </div>
 <div class="flex items-start">
@@ -36,7 +36,7 @@
 <div>{{ __('downloadnotice.text_for')}}Windows, Linux, Mac OS</div>
 </div>
 <div class="grow text-center">
-<div class="big"><a href="https://transmissionbt.com/download/" target="_blank" rel="noopener" title="{{ __('downloadnotice.title_download')}}Transmission"><b>Transmission</b></a></div>
+<div class="big"><a href="https://transmissionbt.com/download/" target="_blank" rel="noopener" title="{{ __('downloadnotice.title_download')}}Transmission"><b>{{ __('downloadnotice.text_transmission') }}</b></a></div>
 <div>{{ __('downloadnotice.text_for')}}Windows, Linux, Mac OS</div>
 </div>
 </div>

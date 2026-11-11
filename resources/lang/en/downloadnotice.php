@@ -51,4 +51,5 @@ return [
     'text_notice_not_show_again' => "Don't show this notice again. ",
     'text_notice_always_show' => 'This notice will always show until you have improved your ratio. ',
     'submit_download_the_torrent' => 'Download The Torrent',
+    'text_transmission' => 'Transmission',
 ];

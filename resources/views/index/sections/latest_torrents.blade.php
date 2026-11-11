@@ -19,7 +19,7 @@
             <span class="lt-seed" title="{{ $colSeeder }}">&#x25B2; {{ $item['seeders'] }}</span>
             <span class="lt-leech" title="{{ $colLeecher }}">&#x25BC; {{ $item['leechers'] }}</span>
             <span>{{ $item['size'] }}</span>
-            <span>@if ($item['owner'] === null)<i>Anonymous</i>@else{{ $item['owner'] }}@endif</span>
+            <span>@if ($item['owner'] === null)<i>{{ __('functions.text_anonymous') }}</i>@else{{ $item['owner'] }}@endif</span>
         </div>
     </div>
 @endforeach

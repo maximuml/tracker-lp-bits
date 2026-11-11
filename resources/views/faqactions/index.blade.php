@@ -6,7 +6,7 @@
 <x-page :title="($mode ?? '') === 'edit' ? 'Edit Section or Item' : (($mode ?? '') === 'confirm_delete' ? 'Confirmation required' : (($mode ?? '') === 'additem' ? 'Add Item' : (($mode ?? '') === 'addsection' ? 'Add Section' : 'FAQ Management')))" width="form">
 @if (($mode ?? '') === 'edit')
     @if (empty($arr))
-        <p>Invalid id</p>
+        <p>{{ __('faqactions.invalid_id') }}</p>
     @elseif (($arr['type'] ?? '') === 'item')
         <form method="post" action="/web/faq/actions?action=edititem">
             @csrf
@@ -16,10 +16,10 @@
             <label class="nx-fcell" for="faq-answer">Answer:</label><div class="nx-fcell"><textarea rows=20 id="faq-answer" name="answer">{{ $arr['answer'] ?? '' }}</textarea></div>
             <label class="nx-fcell" for="faq-flag">Status:</label><div class="nx-fcell">
                 <select name="flag" id="faq-flag">
-                    <option value="0"@if (($arr['flag'] ?? -1) == 0) selected="selected"@endif>Hidden</option>
-                    <option value="1"@if (($arr['flag'] ?? -1) == 1) selected="selected"@endif>Normal</option>
-                    <option value="2"@if (($arr['flag'] ?? -1) == 2) selected="selected"@endif>Updated</option>
-                    <option value="3"@if (($arr['flag'] ?? -1) == 3) selected="selected"@endif>New</option>
+                    <option value="0"@if (($arr['flag'] ?? -1) == 0) selected="selected"@endif>{{ __('faqactions.status_hidden') }}</option>
+                    <option value="1"@if (($arr['flag'] ?? -1) == 1) selected="selected"@endif>{{ __('faqactions.status_normal') }}</option>
+                    <option value="2"@if (($arr['flag'] ?? -1) == 2) selected="selected"@endif>{{ __('faqactions.status_updated') }}</option>
+                    <option value="3"@if (($arr['flag'] ?? -1) == 3) selected="selected"@endif>{{ __('faqactions.status_new') }}</option>
                 </select>
             </div>
             <label class="nx-fcell" for="faq-categ">Category:</label><div class="nx-fcell">
@@ -29,7 +29,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="Edit"></div>
+            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}"></div>
             </div>
         </form>
     @elseif (($arr['type'] ?? '') === 'categ')
@@ -41,11 +41,11 @@
             <label class="nx-fcell" for="faq-title">Title:</label><div class="nx-fcell"><input type="text" id="faq-title" name="title" value="{{ $arr['question'] ?? '' }}" /></div>
             <label class="nx-fcell" for="faq-flag">Status:</label><div class="nx-fcell">
                 <select name="flag" id="faq-flag">
-                    <option value="0"@if (($arr['flag'] ?? -1) == 0) selected="selected"@endif>Hidden</option>
-                    <option value="1"@if (($arr['flag'] ?? -1) == 1) selected="selected"@endif>Normal</option>
+                    <option value="0"@if (($arr['flag'] ?? -1) == 0) selected="selected"@endif>{{ __('faqactions.status_hidden') }}</option>
+                    <option value="1"@if (($arr['flag'] ?? -1) == 1) selected="selected"@endif>{{ __('faqactions.status_normal') }}</option>
                 </select>
             </div>
-            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="Edit"></div>
+            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}"></div>
             </div>
         </form>
     @endif
@@ -61,15 +61,15 @@
         <label class="nx-fcell" for="faq-answer">Answer:</label><div class="nx-fcell"><textarea rows=20 id="faq-answer" name="answer"></textarea></div>
         <label class="nx-fcell" for="faq-flag">Status:</label><div class="nx-fcell">
             <select name="flag" id="faq-flag">
-                <option value="0">Hidden</option>
-                <option value="1">Normal</option>
-                <option value="2">Updated</option>
-                <option value="3" selected="selected">New</option>
+                <option value="0">{{ __('faqactions.status_hidden') }}</option>
+                <option value="1">{{ __('faqactions.status_normal') }}</option>
+                <option value="2">{{ __('faqactions.status_updated') }}</option>
+                <option value="3" selected="selected">{{ __('faqactions.status_new') }}</option>
             </select>
         </div>
         <input type="hidden" name="categ" value="{{ (int) ($inid ?? 0) }}">
         <input type="hidden" name="langid" value="{{ (int) ($langid ?? 0) }}">
-        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="Add"></div>
+        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}"></div>
         </div>
     </form>
 @elseif (($mode ?? '') === 'addsection')
@@ -86,11 +86,11 @@
         </div>
         <label class="nx-fcell" for="faq-flag">Status:</label><div class="nx-fcell">
             <select name="flag" id="faq-flag">
-                <option value="0">Hidden</option>
-                <option value="1" selected="selected">Normal</option>
+                <option value="0">{{ __('faqactions.status_hidden') }}</option>
+                <option value="1" selected="selected">{{ __('faqactions.status_normal') }}</option>
             </select>
         </div>
-        <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="Add"></div>
+        <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}"></div>
         </div>
     </form>
 @endif

@@ -4,18 +4,18 @@
 <x-data-table :caption="'Search results'" :caption-hidden="true">
     <x-slot:head>
         <thead>
-            <tr><th scope="col">Name</th>
-                <th scope="col">Ratio</th>
+            <tr><th scope="col">{{ __('label.name') }}</th>
+                <th scope="col">{{ __('topten.col_ratio') }}</th>
                 <th scope="col">IP</th>
-                <th scope="col">Email</th>
+                <th scope="col">{{ __('label.email') }}</th>
                 <th scope="col">Joined:</th>
-                <th scope="col">Last seen:</th>
-                <th scope="col">Status</th>
-                <th scope="col">Enabled</th>
+                <th scope="col">{{ __('usersearch.last_seen') }}</th>
+                <th scope="col">{{ __('label.status') }}</th>
+                <th scope="col">{{ __('label.enabled') }}</th>
                 <th class="text-center" scope="col">pR</th>
                 <th class="text-center" scope="col">pUL</th>
                 <th class="text-center" scope="col">pDL</th>
-                <th class="text-center" scope="col">History</th></tr>
+                <th class="text-center" scope="col">{{ __('mybonus.text_history') }}</th></tr>
         </thead>
     </x-slot:head>
     @foreach ($results->rows as $row)

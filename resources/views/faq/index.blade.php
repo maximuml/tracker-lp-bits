@@ -25,9 +25,9 @@
                     @if ($faqCategories[$id]['items'][$id2]['flag'] == "1")
                         <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a></li>
                     @elseif ($faqCategories[$id]['items'][$id2]['flag'] == "2")
-                        <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a> <span class="nx-faq-badge nx-faq-badge--updated">Updated</span></li>
+                        <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a> <span class="nx-faq-badge nx-faq-badge--updated">{{ __('faq.status_updated') }}</span></li>
                     @elseif ($faqCategories[$id]['items'][$id2]['flag'] == "3")
-                        <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a> <span class="nx-faq-badge nx-faq-badge--new">New</span></li>
+                        <li><a href="#id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}" class="faqlink">{{ $faqCategories[$id]['items'][$id2]['question'] }}</a> <span class="nx-faq-badge nx-faq-badge--new">{{ __('faq.status_new') }}</span></li>
                     @endif
                 @endforeach
             @endif
@@ -39,14 +39,14 @@
 
     @foreach ($faqCategories as $id => $temp)
         @if ($faqCategories[$id]['flag'] == "1")
-            <x-frame :center="false"><x-slot:caption>{{ $faqCategories[$id]['title'] }} - <a href="#top"><i class="top" role="img" aria-label="Top" title="Top"></i></a></x-slot>
+            <x-frame :center="false"><x-slot:caption>{{ $faqCategories[$id]['title'] }} - <a href="#top"><i class="top" role="img" aria-label="{{ __('functions.text_top') }}" title="{{ __('functions.text_top') }}"></i></a></x-slot>
             <div class="nx-faq" id="id{{ $faqCategories[$id]['link_id'] }}">
             @if (isset($faqCategories[$id]['items']))
                 @foreach ($faqCategories[$id]['items'] as $id2 => $tempItem)
                     @if ($faqCategories[$id]['items'][$id2]['flag'] != "0")
                         <details class="nx-faq__item" id="id{{ $faqCategories[$id]['items'][$id2]['link_id'] }}">
                             <summary>
-                                <span>{{ $faqCategories[$id]['items'][$id2]['question'] }}</span>@if ($faqCategories[$id]['items'][$id2]['flag'] == "2") <span class="nx-faq-badge nx-faq-badge--updated">Updated</span>@elseif ($faqCategories[$id]['items'][$id2]['flag'] == "3") <span class="nx-faq-badge nx-faq-badge--new">New</span>@endif
+                                <span>{{ $faqCategories[$id]['items'][$id2]['question'] }}</span>@if ($faqCategories[$id]['items'][$id2]['flag'] == "2") <span class="nx-faq-badge nx-faq-badge--updated">{{ __('faq.status_updated') }}</span>@elseif ($faqCategories[$id]['items'][$id2]['flag'] == "3") <span class="nx-faq-badge nx-faq-badge--new">{{ __('faq.status_new') }}</span>@endif
                             </summary>
                             <div class="nx-faq__answer">{{ $faqCategories[$id]['items'][$id2]['answerHtml'] ?? '' }}</div>
                         </details>

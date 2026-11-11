@@ -10,7 +10,7 @@
     <span class="nxm-footer__copy">(c) <a href="{{ $chrome->baseUrl }}">{{ $chrome->siteName }}</a>
         {{ $chrome->footer->icpLicense !== '' ? $chrome->footer->icpLicense.' ' : '' }}{{ $chrome->footer->yearFounded != date('Y') ? $chrome->footer->yearFounded.'-' : '' }}{{ date('Y') }} {{ $chrome->footer->versionHtml }}</span>
     @if($chrome->footer->debugEnabled)
-    <div id="sql_debug">SQL query list: <ul>
+    <div id="sql_debug">{{ __('functions.sql_query_list') }} <ul>
         @foreach($chrome->footer->debugQueries as $query)
         <li>{{ $query['query'] }} [{{ $query['time'] }}]</li>
         @endforeach

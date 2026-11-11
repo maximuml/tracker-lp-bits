@@ -115,4 +115,7 @@ View more detailed information and download it (you may need to log in), please 
     'section_media' => 'Media',
     'section_publish' => 'Publish',
     'row_announce_url' => 'Announce URL',
+    'attention' => 'ATTENTION',
+    'dir_not_writable' => ": Torrent directory isn\'t writable. Please contact the administrator about this problem!",
+    'max_size_not_set' => ': Max. Torrent Size not set. Please contact the administrator about this problem!',
 ];

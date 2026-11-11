@@ -459,4 +459,5 @@ Note: In 1.8, the 'searchbox_name' part can be omitted, i.e. the rule is 'pic/ca
         'topics' => 'Topics',
         'posts' => 'Posts',
     ],
+    'actions' => 'Actions',
 ];

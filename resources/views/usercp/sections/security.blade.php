@@ -90,10 +90,10 @@
                     </div>
                 @else
                     <div class="nx-tfa">
-                        <img class="nx-tfa__qr" src="{{ $security->twoStep->qrCodeUrl }}" alt="QR code">
+                        <img class="nx-tfa__qr" src="{{ $security->twoStep->qrCodeUrl }}" alt="{{ __('usercp.qr_code_attr') }}">
                         <ol class="nx-tfa__steps">
                             <li>{{ __('usercp.text_two_step_secret_bind_by_qrdoe_note') }}</li>
-                            <li>{{ __('usercp.text_two_step_qr_fail_note') }} <a href="{{ $security->twoStep->qrCodeUrl }}" target="_blank" rel="noopener">Link</a></li>
+                            <li>{{ __('usercp.text_two_step_qr_fail_note') }} <a href="{{ $security->twoStep->qrCodeUrl }}" target="_blank" rel="noopener">{{ __('label.url') }}</a></li>
                             <li>{{ __('usercp.text_two_step_secret_bind_manually_note') }} <code class="nx-tfa__secret">{{ $security->twoStep->secret }}</code></li>
                             <li>
                                 {{ __('usercp.text_two_step_secret_bind_complete_note') }}

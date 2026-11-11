@@ -1,3 +1,3 @@
 {{ __('settings.text_enable_technical_info') }}<br>
-{{ __('settings.text_technical_info_mediainfo_pre') }}<b><a href="https://mediaarea.net/en/MediaInfo" target="_blank" rel="noopener">MediaInfo</a></b>{{ __('settings.text_technical_info_mediainfo_tail') }}<br>
-{{ __('settings.text_technical_info_bdinfo_pre') }}<b><a href="https://github.com/UniqProject/BDInfo" target="_blank" rel="noopener">BDInfo</a></b>{{ __('settings.text_technical_info_bdinfo_tail') }}
+{{ __('settings.text_technical_info_mediainfo_pre') }}<b><a href="https://mediaarea.net/en/MediaInfo" target="_blank" rel="noopener">{{ __('functions.technical_mediainfo') }}</a></b>{{ __('settings.text_technical_info_mediainfo_tail') }}<br>
+{{ __('settings.text_technical_info_bdinfo_pre') }}<b><a href="https://github.com/UniqProject/BDInfo" target="_blank" rel="noopener">{{ __('functions.technical_bdinfo') }}</a></b>{{ __('settings.text_technical_info_bdinfo_tail') }}

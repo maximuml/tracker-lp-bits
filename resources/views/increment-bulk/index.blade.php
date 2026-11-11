@@ -34,7 +34,7 @@
                             <div class="nx-fhead">{{ __('incrementbulk.labels')['msg_body'] }} </div><div class="nx-fcell"><textarea aria-label="{{ __('incrementbulk.labels')['msg_body'] ?? 'Message' }}" name="msg" cols="80" rows="5" class="w-full">{{ $body }}</textarea></div>
                                 <div class="nx-ffull"><div class="text-center"><b>{{ __('incrementbulk.labels')['operator'] }}:&nbsp;&nbsp;</b>
                                         <label><input name="sender" type="radio" value="self" checked>{{ $CURUSER['username'] ?? '' }}</label>
-                                        &nbsp; <label><input name="sender" type="radio" value="system">System</label>
+                                        &nbsp; <label><input name="sender" type="radio" value="system">{{ __('staffbox.text_system') }}</label>
                                     </div></div>
                             <div class="nx-ffull text-center"><input type="submit" value="{{ $submitLabel }}" class="nx-btn nx-btn--primary"></div>
                         </div>

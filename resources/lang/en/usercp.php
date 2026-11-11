@@ -270,4 +270,5 @@ return [
     'section_activity' => 'Activity',
     'row_tracker_url' => 'Tracker URL',
     'row_tracker_url_help' => 'Once selected, announce can only be sent to the selected link. By default, announce can only be sent to the first default link in the list.',
+    'qr_code_attr' => 'QR code',
 ];

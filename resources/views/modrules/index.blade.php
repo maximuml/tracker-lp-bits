@@ -18,7 +18,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="Add"></div>
+        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}"></div>
     </div>
 </form>
 @elseif ($mode === 'edit')
@@ -35,15 +35,15 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($rule['id'] ?? 0) }}" name="id"><input type="submit" class="nx-btn nx-btn--primary" value="Save"></div>
+        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($rule['id'] ?? 0) }}" name="id"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('label.save') }}"></div>
     </div>
 </form>
 @else
-<br /><div class="text-center p-[5px]"><a href="/web/modrules?act=newsect">Add Section</a></div>
+<br /><div class="text-center p-[5px]"><a href="/web/modrules?act=newsect">{{ __('modrules.add_section') }}</a></div>
 @foreach ($rows as $arr)
 <br /><x-data-table caption="Rules Management" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $arr['title'] }} - {{ $arr['lang_name'] }}</th></tr></thead></x-slot:head>
     <tr><td>{{ $arr['textHtml'] }}</td></tr>
-    <tr><td><a href="{{ request()->getPathInfo() }}?act=edit&id={{ (int) $arr['id'] }}">Edit</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="/web/staff/modrules?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-btn-link">Delete</button></form></td></tr>
+    <tr><td><a href="{{ request()->getPathInfo() }}?act=edit&id={{ (int) $arr['id'] }}">{{ __('functions.text_edit') }}</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="/web/staff/modrules?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-btn-link">{{ __('functions.text_delete') }}</button></form></td></tr>
 </x-data-table>
 @endforeach
 </x-page>

@@ -378,4 +378,13 @@ return [
     'text_confirm' => 'Confirm',
     'text_ok' => 'OK',
     'text_loading' => 'Loading...',
+    'sql_query_list' => 'SQL query list:',
+    'error_403' => '403 Forbidden',
+    'error_not_found' => 'Not Found',
+    'yt_video_attr' => 'YouTube video',
+    'yt_play_attr' => 'Play YouTube video',
+    'yt_click_load' => 'YouTube — click to load',
+    'image_ext_jpeg' => '.jpeg or',
+    'technical_mediainfo' => 'MediaInfo',
+    'technical_bdinfo' => 'BDInfo',
 ];

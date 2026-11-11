@@ -14,4 +14,6 @@ return [
     'text_user_agreement' => 'user agreement',
     'text_contents' => 'Contents',
     'text_search_faq' => 'Search questions…',
+    'status_updated' => 'Updated',
+    'status_new' => 'New',
 ];

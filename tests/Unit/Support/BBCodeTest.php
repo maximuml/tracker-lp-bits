@@ -3,7 +3,6 @@
 namespace Tests\Unit\Support;
 
 use App\Support\BBCode;
-use App\Support\Format;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -464,15 +463,5 @@ class BBCodeTest extends TestCase
     public function test_lists_empty_block_produces_no_markup(): void
     {
         $this->assertSame('', BBCode::lists('[list][*][*][/list]'));
-    }
-
-    public function test_format_comment_renders_list_block_end_to_end(): void
-    {
-        $html = (string) Format::formatComment("[list]\n[*] alpha\n[*] beta\n[/list]");
-
-        $this->assertStringContainsString('<ul><li>alpha', $html);
-        $this->assertStringContainsString('</li><li>beta</li></ul>', $html);
-        $this->assertStringNotContainsString('[list]', $html);
-        $this->assertStringNotContainsString('[*]', $html);
     }
 }

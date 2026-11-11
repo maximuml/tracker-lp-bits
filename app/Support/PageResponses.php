@@ -41,6 +41,7 @@ final class PageResponses
         bool $htmlstrip = true,
         bool $head = true,
         bool $foot = true,
+        int $status = 403,
     ): never {
         $renderer = self::pageRenderer();
 
@@ -75,7 +76,7 @@ final class PageResponses
             }
         }
 
-        throw new HttpResponseException(new Response($html));
+        throw new HttpResponseException(new Response($html, $status));
     }
 
     /**

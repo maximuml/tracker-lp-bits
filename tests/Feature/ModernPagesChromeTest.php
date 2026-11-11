@@ -85,9 +85,11 @@ final class ModernPagesChromeTest extends TestCase
             '/web/index' => '/web/index',
             '/web/torrents' => '/web/torrents',
             '/web/details/'.$torrent->id => '/web/torrents',
-            '/web/upload' => '/web/upload',
             '/forums' => '/forums',
         ];
+
+        // Class-1 user cannot upload — the denial page now carries HTTP 403.
+        $this->withNexusCookie($user)->get('/web/upload')->assertForbidden();
 
         foreach ($routes as $uri => $expectedHref) {
             $response = $this->withNexusCookie($user)->get($uri);

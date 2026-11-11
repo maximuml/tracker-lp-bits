@@ -180,12 +180,12 @@ final class MessageHttpTest extends TestCase
         $message2 = Message::factory()->between($sender, $owner)->create();
 
         // Other user cannot delete — denial renders the legacy error page
-        // (PageResponses::abort is an inline 200 stderr, not a redirect)
+        // (PageResponses::abort renders the legacy error page with HTTP 403)
         $this->withNexusCookie($other)
             ->post('/web/messages/delete/in', [
                 'id' => (string) $message2->id,
             ])
-            ->assertOk();
+            ->assertForbidden();
         $this->assertNotNull(Message::query()->find($message2->id));
     }
 
@@ -207,12 +207,12 @@ final class MessageHttpTest extends TestCase
         $message2 = Message::factory()->between($sender, $receiver)->create();
 
         // Other user cannot delete from sentbox — denial renders the
-        // legacy error page (PageResponses::abort is an inline 200 stderr)
+        // legacy error page (PageResponses::abort renders the legacy error page with HTTP 403)
         $this->withNexusCookie($other)
             ->post('/web/messages/delete/out', [
                 'id' => (string) $message2->id,
             ])
-            ->assertOk();
+            ->assertForbidden();
         $this->assertNotNull(Message::query()->find($message2->id));
     }
 
@@ -299,7 +299,7 @@ final class MessageHttpTest extends TestCase
                 'subject' => 'Test',
                 'body' => 'Second PM',
             ])
-            ->assertOk()
+            ->assertForbidden()
             ->assertSee('Message Flooding Not Allowed');
     }
 

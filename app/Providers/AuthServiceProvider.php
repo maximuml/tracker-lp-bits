@@ -8,6 +8,7 @@ use App\Auth\NexusWebGuard;
 use App\Auth\NexusWebUserProvider;
 use App\Contracts\Repositories\AuthRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
+use App\Enums\UserClass;
 use App\Models\AudioCodec;
 use App\Models\Category;
 use App\Models\Codec;
@@ -23,6 +24,7 @@ use App\Models\Standard;
 use App\Models\Topic;
 use App\Models\Torrent;
 use App\Models\TorrentCustomField;
+use App\Models\User;
 use App\Policies\CodecPolicy;
 use App\Policies\MessagePolicy;
 use App\Policies\PostPolicy;
@@ -32,9 +34,11 @@ use App\Repositories\AnnounceUserRepository;
 use App\Services\WebAuthService;
 use App\Support\AuthCookie;
 use App\Support\CurrentUser;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -93,5 +97,45 @@ class AuthServiceProvider extends ServiceProvider
             return $this->app->make(AnnounceUserRepository::class)->findByPasskey($passkey);
         });
 
+        Gate::before(function ($user, $ability, array $arguments) {
+            if (! $user instanceof User || ! self::isAdminPanelContext()) {
+                return null;
+            }
+
+            $model = $arguments[0] ?? null;
+            $modelClass = is_object($model) ? $model::class : (is_string($model) ? $model : null);
+            if ($modelClass === null || ! is_subclass_of($modelClass, Model::class)) {
+                return null;
+            }
+
+            if (Gate::getPolicyFor($modelClass) !== null) {
+                return null;
+            }
+
+            if ((int) $user->class >= UserClass::ADMINISTRATOR->value) {
+                return null;
+            }
+
+            return false;
+        });
+    }
+
+    private static function isAdminPanelContext(): bool
+    {
+        $request = request();
+        $routeName = $request->route()?->getName();
+        if (is_string($routeName) && str_starts_with($routeName, 'filament.admin.')) {
+            return true;
+        }
+
+        foreach ((array) $request->input('components', []) as $component) {
+            $snapshot = json_decode((string) (is_array($component) ? ($component['snapshot'] ?? '') : ''), true);
+            $name = is_array($snapshot) ? ($snapshot['memo']['name'] ?? null) : null;
+            if (is_string($name) && str_starts_with($name, 'App\\Filament\\')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

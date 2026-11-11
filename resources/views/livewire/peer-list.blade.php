@@ -6,7 +6,7 @@
     </td>
     <td class="align-top px-2.5 py-1.5">
         <div @if ($open) class="nx-hidden" @endif><b>{{ $seeders }}{{ __('details.text_seeders') }}{{ \App\Support\Strings::addS($seeders) }}</b> | <b>{{ $leechers }}{{ __('details.text_leechers') }}{{ \App\Support\Strings::addS($leechers) }}</b></div>
-        <i wire:loading>Loading...</i>
+        <i wire:loading>{{ __('functions.text_loading') }}</i>
         @if ($open)
             @include('viewpeerlist.index', ['seederTable' => $seederTable, 'leecherTable' => $leecherTable])
         @endif

@@ -57,8 +57,8 @@
             <input type="hidden" name="returnto" value="{{ $returnto }}" />
         @endif
 
-        <x-form-field :label="__('login.rowhead_username')" name="username" :value="old('username')" autocomplete="username" />
-        <x-form-field :label="__('login.rowhead_password')" name="password" type="password" autocomplete="current-password" :password-toggle="true" />
+        <x-form-field :label="__('login.rowhead_username')" name="username" :value="old('username')" autocomplete="username" required />
+        <x-form-field :label="__('login.rowhead_password')" name="password" type="password" autocomplete="current-password" :password-toggle="true" required />
         <x-form-field :label="__('login.rowhead_two_step_code')" name="two_step_code" inputmode="numeric" pattern="[0-9]*" :placeholder="__('login.two_step_code_tooltip')" />
 
         @if ($captchaEnabled && $captchaMarkup !== '')

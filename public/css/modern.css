@@ -2155,6 +2155,7 @@ input.nx-postbtn {
     border-radius: var(--nxm-radius);
     background: transparent;
     color: var(--nxm-text-dim);
+    font: inherit;
     font-size: 0.8rem;
     line-height: 1.3;
     text-decoration: none;

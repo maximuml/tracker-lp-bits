@@ -16,7 +16,7 @@
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
-<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nxm-linkbtn altlink">{{ __('userdetails.text_here') }}</button></form></div>
+<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nx-postbtn nx-postbtn--danger">{{ __('userdetails.text_here') }}</button></form></div>
 @endif
 <x-data-table :caption="__('userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)

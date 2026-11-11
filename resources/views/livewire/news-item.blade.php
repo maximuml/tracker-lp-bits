@@ -3,6 +3,6 @@
     <div @if(!$open) class="nx-hidden" @endif> {{ \App\Support\Format::formatComment($body, 0) }} </div>
     @if($canManage)
     &nbsp; [<a class="faqlink" href="/web/news?action=edit&amp;newsid={{ $itemId }}"><b>{{ $editLabel }}</b></a>]
-    <form method="post" action="/web/news/delete" class="nx-inline">@csrf<input type="hidden" name="newsid" value="{{ $itemId }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="faqlink"><b>{{ $deleteLabel }}</b></button></form>
+    <form method="post" action="/web/news/delete" class="nx-inline">@csrf<input type="hidden" name="newsid" value="{{ $itemId }}" /><input type="hidden" name="sure" value="1" /><button type="submit" class="nx-postbtn nx-postbtn--danger"><b>{{ $deleteLabel }}</b></button></form>
     @endif
 </div>

@@ -30,4 +30,19 @@ final class TorrentListViewModel
         public readonly array $lastCommentTooltips,
         public readonly string $sortLabel,
     ) {}
+
+    /**
+     * Visible label for a column key — the abbr expansion when present,
+     * else the short/full label. Used for the mobile card data-labels.
+     */
+    public function columnLabel(string $key): string
+    {
+        foreach ($this->columns as $col) {
+            if ($col['key'] === $key) {
+                return $col['abbrTitle'] ?? $col['shortLabel'] ?? $col['label'];
+            }
+        }
+
+        return '';
+    }
 }

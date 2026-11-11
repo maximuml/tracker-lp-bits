@@ -25,7 +25,7 @@
         @endif
         <div class="nx-setrow">
             <span class="nx-setrow__label" id="edit-descr-label">{{ __('edit.row_description') }}<span class="text-nxm-danger">*</span></span>
-            <div class="nx-setrow__control" aria-labelledby="edit-descr-label"><livewire:bbcode-editor form="edittorrent" text="descr" :content="$descrContent ?? ''" /></div>
+            <div class="nx-setrow__control" aria-labelledby="edit-descr-label"><livewire:bbcode-editor form="edittorrent" text="descr" :content="$descrContent ?? ''" :required="true" /></div>
         </div>
         @if ($technicalInfoEnabled)
         <x-settings-row layout="setrow" :label="__('functions.text_technical_info')" for="technical_info"><textarea id="technical_info" name="technical_info" rows="8">{{ $torrentRow['technical_info'] ?? '' }}</textarea><br/><b>&middot;</b> {{ __('functions.text_technical_info_help_text') }} <b><a href="https://mediaarea.net/en/MediaInfo" target='_blank' rel="noopener">{{ __('functions.text_technical_info_help_link_mediainfo') }}</a></b>{{ __('functions.text_technical_info_help_text_one_end') }}<br /><b>&middot;</b> {{ __('functions.text_technical_info_help_text_two') }} <b><a href="https://github.com/UniqProject/BDInfo" target='_blank' rel="noopener">{{ __('functions.text_technical_info_help_link_bdinfo') }}</a></b>{{ __('functions.text_technical_info_help_text_two_end') }}</x-settings-row>

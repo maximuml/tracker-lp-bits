@@ -8,7 +8,7 @@
         </div>
     @endif
     <div @if ($previewMode) class="nx-hidden" @endif>
-        <x-bbcode-editor :form="$form" :text="$text" :content="$body" :invalid="$invalid" :described-by="$describedBy" :label="$label" :wire-model="'body'" :compact="$compact" />
+        <x-bbcode-editor :form="$form" :text="$text" :content="$body" :invalid="$invalid" :described-by="$describedBy" :label="$label" :wire-model="'body'" :compact="$compact" :required="$required && ! $previewMode" />
     </div>
     @if (! $compact)
         <div class="text-center mt-2">

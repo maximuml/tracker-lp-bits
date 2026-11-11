@@ -43,6 +43,7 @@ final class BbcodeEditor extends Component
         public readonly string $label = '',
         public readonly string $wireModel = '',
         public readonly bool $compact = false,
+        public readonly bool $required = false,
     ) {
         $this->quickSmilies = self::QUICK_SMILIES;
         $this->enableAttach = SiteConfig::current()->attachment->enableAttach();

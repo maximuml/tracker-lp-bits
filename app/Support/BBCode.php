@@ -338,4 +338,35 @@ final class BBCode
 
         return $text;
     }
+
+    /**
+     * Rewrite `[list]`/`[ul]`/`[ol]` blocks as real `<ul>`/`<ol>` lists.
+     * `[*]` markers inside a block become `<li>` items; `[*]` outside
+     * lists is untouched (the caller's literal map renders it as a
+     * bullet glyph). Blocks without a matching close tag are left
+     * verbatim, matching the quotes() contract.
+     *
+     * Must run before nl2br/literal substitution so item text keeps
+     * flowing through the rest of the pipeline.
+     */
+    public static function lists(string $text): string
+    {
+        return (string) preg_replace_callback(
+            '/\[(list|ul|ol)\](.*?)\[\/\1\]/is',
+            static function (array $m): string {
+                $tag = strtolower($m[1]) === 'ol' ? 'ol' : 'ul';
+                $items = preg_split('/\[\*\]/i', $m[2]) ?: [];
+                $items = array_values(array_filter(
+                    array_map('trim', $items),
+                    static fn (string $item): bool => $item !== '',
+                ));
+                if ($items === []) {
+                    return '';
+                }
+
+                return '<'.$tag.'><li>'.implode('</li><li>', $items).'</li></'.$tag.'>';
+            },
+            $text,
+        );
+    }
 }

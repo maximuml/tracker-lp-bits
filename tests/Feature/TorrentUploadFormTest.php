@@ -60,6 +60,19 @@ final class TorrentUploadFormTest extends TestCase
         ]);
     }
 
+    public function test_description_textarea_is_marked_required(): void
+    {
+        $user = User::factory()->admin()->create();
+
+        $page = $this->withNexusCookie($user)->get('/web/upload');
+
+        $page->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/<textarea[^>]*\bname="descr"[^>]*\brequired\b/',
+            (string) $page->getContent(),
+        );
+    }
+
     public function test_form_rerender_shows_old_values_and_visible_errors(): void
     {
         $user = User::factory()->admin()->create();

@@ -3,6 +3,7 @@
 namespace Tests\Unit\Support;
 
 use App\Support\BBCode;
+use App\Support\Format;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -434,5 +435,44 @@ class BBCodeTest extends TestCase
         $html = BBCode::img('pic"onerror="alert(1)', false, 800, 600);
         $this->assertStringNotContainsString('"onerror="alert(1)"', $html);
         $this->assertStringContainsString('&quot;', $html);
+    }
+
+    // ---------- lists ----------
+
+    public function test_lists_renders_list_and_ul_tags_as_unordered_list(): void
+    {
+        $expected = '<ul><li>one</li><li>two</li></ul>';
+        $this->assertSame($expected, BBCode::lists('[list][*]one[*]two[/list]'));
+        $this->assertSame($expected, BBCode::lists("[ul]\n[*] one\n[*] two\n[/ul]"));
+    }
+
+    public function test_lists_renders_ol_tag_as_ordered_list(): void
+    {
+        $this->assertSame(
+            '<ol><li>first</li><li>second</li></ol>',
+            BBCode::lists('[ol][*]first[*]second[/ol]'),
+        );
+    }
+
+    public function test_lists_leaves_unmatched_blocks_and_outer_stars_untouched(): void
+    {
+        $this->assertSame('[list][*]one', BBCode::lists('[list][*]one'));
+        $this->assertSame('[*] bullet', BBCode::lists('[*] bullet'));
+        $this->assertSame('[list]x[/ol]', BBCode::lists('[list]x[/ol]'));
+    }
+
+    public function test_lists_empty_block_produces_no_markup(): void
+    {
+        $this->assertSame('', BBCode::lists('[list][*][*][/list]'));
+    }
+
+    public function test_format_comment_renders_list_block_end_to_end(): void
+    {
+        $html = (string) Format::formatComment("[list]\n[*] alpha\n[*] beta\n[/list]");
+
+        $this->assertStringContainsString('<ul><li>alpha', $html);
+        $this->assertStringContainsString('</li><li>beta</li></ul>', $html);
+        $this->assertStringNotContainsString('[list]', $html);
+        $this->assertStringNotContainsString('[*]', $html);
     }
 }

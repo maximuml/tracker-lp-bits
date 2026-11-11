@@ -42,6 +42,50 @@ final class UiLinksAndTitleTest extends TestCase
         $this->assertStringNotContainsString('&amp;amp;', $html);
     }
 
+    public function test_details_torrent_url_row_offers_copy_button(): void
+    {
+        $user = User::factory()->create();
+        $torrent = Torrent::factory()->owner($user)->create();
+        app(NexusCache::class)->redis?->flushDB();
+
+        $response = $this->withNexusCookie($user)->get('/web/details/'.$torrent->id);
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringContainsString('data-nx-copy="', $html);
+        $this->assertStringContainsString('/download?downhash=', $html);
+        $this->assertStringContainsString('Copy torrent link', $html);
+        $this->assertStringContainsString('data-nx-copy-live', $html);
+        $this->assertStringNotContainsString('Right click to view', $html);
+    }
+
+    public function test_details_torrent_url_row_hidden_when_download_denied(): void
+    {
+        $owner = User::factory()->create();
+        $viewer = User::factory()->create(['downloadpos' => false]);
+        $torrent = Torrent::factory()->owner($owner)->create();
+        app(NexusCache::class)->redis?->flushDB();
+
+        $response = $this->withNexusCookie($viewer)->get('/web/details/'.$torrent->id);
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertStringNotContainsString('data-nx-copy', $html);
+        $this->assertStringNotContainsString('Torrent URL', $html);
+    }
+
+    public function test_details_torrent_url_row_visible_to_owner_without_downloadpos(): void
+    {
+        $owner = User::factory()->create(['downloadpos' => false]);
+        $torrent = Torrent::factory()->owner($owner)->create();
+        app(NexusCache::class)->redis?->flushDB();
+
+        $response = $this->withNexusCookie($owner)->get('/web/details/'.$torrent->id);
+
+        $response->assertOk();
+        $this->assertStringContainsString('data-nx-copy="', (string) $response->getContent());
+    }
+
     public function test_forum_pager_normalizes_query_only_href(): void
     {
         $this->app->instance('request', Request::create('/forums', 'GET'));

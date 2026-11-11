@@ -377,7 +377,7 @@ final class TorrentListViewFactory
      * Column descriptors for the table head. Sort links preserve the
      * current query minus sort/type, same as the legacy renderer.
      *
-     * @return list<array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string, ariaSort: ?string, shortLabel?: string, thClass?: string}>
+     * @return list<array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string, ariaSort: ?string, shortLabel?: string, abbrTitle?: string, thClass?: string}>
      */
     private function columns(bool $showWait, bool $showComments, string $timetype): array
     {
@@ -416,13 +416,13 @@ final class TorrentListViewFactory
             $columns[] = ['key' => 'wait', 'label' => (string) __('functions.col_wait'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => null, 'ariaSort' => null];
         }
         if ($showComments) {
-            $columns[] = ['key' => 'comments', 'label' => '', 'shortLabel' => 'Com', 'iconClass' => 'comments', 'iconTitle' => (string) __('functions.title_number_of_comments'), 'sortUrl' => $sortUrl(3), 'thClass' => ltrim($sortedClass(3)), 'ariaSort' => $ariaSort(3)];
+            $columns[] = ['key' => 'comments', 'label' => '', 'shortLabel' => 'Com', 'abbrTitle' => (string) __('torrents.sort_field_comments'), 'iconClass' => 'comments', 'iconTitle' => (string) __('functions.title_number_of_comments'), 'sortUrl' => $sortUrl(3), 'thClass' => ltrim($sortedClass(3)), 'ariaSort' => $ariaSort(3)];
         }
         $columns[] = ['key' => 'time', 'label' => '', 'shortLabel' => 'Added', 'iconClass' => 'time', 'iconTitle' => $timetype != UserTimeType::TIMEALIVE->value ? (string) __('functions.title_time_added') : (string) __('functions.title_time_alive'), 'sortUrl' => $sortUrl(4), 'thClass' => ltrim($sortedClass(4)), 'ariaSort' => $ariaSort(4)];
         $columns[] = ['key' => 'size', 'label' => '', 'shortLabel' => (string) __('functions.text_size'), 'iconClass' => 'size', 'iconTitle' => (string) __('functions.title_size'), 'sortUrl' => $sortUrl(5), 'thClass' => ltrim($sortedClass(5)), 'ariaSort' => $ariaSort(5)];
-        $columns[] = ['key' => 'seeders', 'label' => '', 'shortLabel' => 'S', 'thClass' => 'nx-center'.$sortedClass(7), 'iconClass' => 'seeders', 'iconTitle' => (string) __('functions.title_number_of_seeders'), 'sortUrl' => $sortUrl(7), 'ariaSort' => $ariaSort(7)];
-        $columns[] = ['key' => 'leechers', 'label' => '', 'shortLabel' => 'L', 'thClass' => 'nx-center'.$sortedClass(8), 'iconClass' => 'leechers', 'iconTitle' => (string) __('functions.title_number_of_leechers'), 'sortUrl' => $sortUrl(8), 'ariaSort' => $ariaSort(8)];
-        $columns[] = ['key' => 'snatched', 'label' => '', 'shortLabel' => 'Sn', 'thClass' => 'nx-center'.$sortedClass(6), 'iconClass' => 'snatched', 'iconTitle' => (string) __('functions.title_number_of_snatched'), 'sortUrl' => $sortUrl(6), 'ariaSort' => $ariaSort(6)];
+        $columns[] = ['key' => 'seeders', 'label' => '', 'shortLabel' => 'S', 'abbrTitle' => (string) __('torrents.sort_field_seeders'), 'thClass' => 'nx-center'.$sortedClass(7), 'iconClass' => 'seeders', 'iconTitle' => (string) __('functions.title_number_of_seeders'), 'sortUrl' => $sortUrl(7), 'ariaSort' => $ariaSort(7)];
+        $columns[] = ['key' => 'leechers', 'label' => '', 'shortLabel' => 'L', 'abbrTitle' => (string) __('torrents.sort_field_leechers'), 'thClass' => 'nx-center'.$sortedClass(8), 'iconClass' => 'leechers', 'iconTitle' => (string) __('functions.title_number_of_leechers'), 'sortUrl' => $sortUrl(8), 'ariaSort' => $ariaSort(8)];
+        $columns[] = ['key' => 'snatched', 'label' => '', 'shortLabel' => 'Sn', 'abbrTitle' => (string) __('torrents.sort_field_snatched'), 'thClass' => 'nx-center'.$sortedClass(6), 'iconClass' => 'snatched', 'iconTitle' => (string) __('functions.title_number_of_snatched'), 'sortUrl' => $sortUrl(6), 'ariaSort' => $ariaSort(6)];
         $columns[] = ['key' => 'uploader', 'label' => (string) __('functions.col_uploader'), 'iconClass' => '', 'iconTitle' => '', 'sortUrl' => $sortUrl(9), 'thClass' => ltrim($sortedClass(9)), 'ariaSort' => $ariaSort(9)];
 
         return $columns;

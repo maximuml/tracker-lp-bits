@@ -177,9 +177,10 @@ final class TorrentsModernPageTest extends TestCase
             $this->assertSame(1, preg_match_all('/<th\b[^>]*\baria-sort=/i', $html));
         }
 
-        foreach (['S', 'L', 'Sn'] as $label) {
-            $this->assertStringContainsString('nxm-th__label">'.$label.'</span>', $html);
+        foreach (['S' => 'Seeders', 'L' => 'Leechers', 'Sn' => 'Snatched'] as $abbr => $title) {
+            $this->assertStringContainsString('nxm-th__label" title="'.$title.'">'.$abbr.'</abbr>', $html);
         }
+        $this->assertStringContainsString('data-label="Seeders"', $html);
     }
 
     public function test_torrents_results_line_shows_count_and_current_sort(): void

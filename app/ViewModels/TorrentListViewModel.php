@@ -10,7 +10,7 @@ use App\Support\Html\SafeHtml;
  * Prepared data for `torrents/_table.blade.php` — the Blade replacement
  * for `TorrentTable::render()` (Variant A, ADR 0014).
  *
- * @phpstan-type Column array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string}
+ * @phpstan-type Column array{key: string, label: string, iconClass: string, iconTitle: string, sortUrl: ?string, shortLabel?: string, abbrTitle?: string}
  * @phpstan-type Tooltip array{id: string, content: SafeHtml}
  */
 final class TorrentListViewModel
@@ -30,4 +30,19 @@ final class TorrentListViewModel
         public readonly array $lastCommentTooltips,
         public readonly string $sortLabel,
     ) {}
+
+    /**
+     * Visible label for a column key — the abbr expansion when present,
+     * else the short/full label. Used for the mobile card data-labels.
+     */
+    public function columnLabel(string $key): string
+    {
+        foreach ($this->columns as $col) {
+            if ($col['key'] === $key) {
+                return $col['abbrTitle'] ?? $col['shortLabel'] ?? $col['label'];
+            }
+        }
+
+        return '';
+    }
 }

@@ -6,7 +6,13 @@
     <th class="nx-colhead @if (($col['thClass'] ?? '') !== ''){{ $col['thClass'] }}@endif" scope="col" @if (($col['ariaSort'] ?? null) !== null) aria-sort="{{ $col['ariaSort'] }}" @endif>
         @if ($col['sortUrl'])<a href="{{ $col['sortUrl'] }}">@endif
             @if ($col['iconClass'])<i class="{{ $col['iconClass'] }}" role="img" aria-label="{{ (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '') ? '' : $col['iconTitle'] }}" title="{{ $col['iconTitle'] }}"></i>@endif
-            @if (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '')<span class="nxm-th__label">{{ ($col['shortLabel'] ?? '') !== '' ? $col['shortLabel'] : $col['label'] }}</span>@endif
+            @if (($col['shortLabel'] ?? '') !== '' || $col['label'] !== '')
+                @if (($col['abbrTitle'] ?? '') !== '')
+                    <abbr class="nxm-th__label" title="{{ $col['abbrTitle'] }}">{{ ($col['shortLabel'] ?? '') !== '' ? $col['shortLabel'] : $col['label'] }}</abbr>
+                @else
+                    <span class="nxm-th__label">{{ ($col['shortLabel'] ?? '') !== '' ? $col['shortLabel'] : $col['label'] }}</span>
+                @endif
+            @endif
         @if ($col['sortUrl'])</a>@endif
     </th>
     @endforeach
@@ -33,7 +39,7 @@
     <td class="nx-rowfollow nowrap nxm-td-wait">@if ($row->waitClass !== null)<a href="/web/faq#id46"><span class="{{ $row->waitClass }}">{{ $row->waitText }}</span></a>@else{{ $row->waitText }}@endif</td>
     @endif
     @if ($listVm->showComments)
-    <td class="nx-rowfollow nxm-td-comments" data-label="{{ 'Com' }}">
+    <td class="nx-rowfollow nxm-td-comments" data-label="{{ $listVm->columnLabel('comments') }}">
         @if ($row->comments === 0)
             <a href="/comment/add?pid={{ $row->id }}&amp;type=torrent" title="{{ __('functions.title_add_comments') }}">0</a>
         @else
@@ -43,15 +49,15 @@
     @endif
     <td class="nx-rowfollow nowrap nxm-td-added"><time datetime="{{ str_replace(' ', 'T', (string) $row->added) }}">{{ $row->addedDate }} <br/>{{ $row->addedTime }}</time></td>
     <td class="nx-rowfollow nowrap nxm-td-size">{{ $row->size['value'] }} {{ $row->size['unit'] }}</td>
-    <td class="nx-rowfollow nxm-td-seeders nx-center" data-label="{{ 'S' }}">
+    <td class="nx-rowfollow nxm-td-seeders nx-center" data-label="{{ $listVm->columnLabel('seeders') }}">
         @if ($row->seedersUrl)
             <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
         @else
             <span class="{{ $row->seedersZeroClass }}">{{ number_format($row->seeders) }}</span>
         @endif
     </td>
-    <td class="nx-rowfollow nxm-td-leechers nx-center" data-label="{{ 'L' }}">@if ($row->leechersUrl)<b><a href="{{ $row->leechersUrl }}">{{ number_format($row->leechers) }}</a></b>@else{{ $row->leechers }}@endif</td>
-    <td class="nx-rowfollow nxm-td-snatched nx-center" data-label="{{ 'Sn' }}">@if ($row->snatchedUrl)<a href="{{ $row->snatchedUrl }}"><b>{{ number_format($row->snatched) }}</b></a>@else{{ number_format($row->snatched) }}@endif</td>
+    <td class="nx-rowfollow nxm-td-leechers nx-center" data-label="{{ $listVm->columnLabel('leechers') }}">@if ($row->leechersUrl)<b><a href="{{ $row->leechersUrl }}">{{ number_format($row->leechers) }}</a></b>@else{{ $row->leechers }}@endif</td>
+    <td class="nx-rowfollow nxm-td-snatched nx-center" data-label="{{ $listVm->columnLabel('snatched') }}">@if ($row->snatchedUrl)<a href="{{ $row->snatchedUrl }}"><b>{{ number_format($row->snatched) }}</b></a>@else{{ number_format($row->snatched) }}@endif</td>
     <td class="nx-rowfollow nxm-td-uploader nx-center">
         @if ($row->uploaderAnonymous)
             <i>{{ __('functions.text_anonymous') }}</i>@if ($row->uploaderShowOwner)<br />@if ($row->uploaderName)({{ $row->uploaderName }})@else(<i>{{ __('functions.text_orphaned') }}</i>)@endif @endif

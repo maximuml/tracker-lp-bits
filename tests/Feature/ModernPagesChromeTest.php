@@ -88,8 +88,10 @@ final class ModernPagesChromeTest extends TestCase
             '/forums' => '/forums',
         ];
 
-        // Class-1 user cannot upload — the denial page now carries HTTP 403.
-        $this->withNexusCookie($user)->get('/web/upload')->assertForbidden();
+        // uploadpos=false pins the denial regardless of site settings —
+        // the denial page now carries HTTP 403.
+        $denied = User::factory()->create(['class' => 1, 'uploadpos' => false]);
+        $this->withNexusCookie($denied)->get('/web/upload')->assertForbidden();
 
         foreach ($routes as $uri => $expectedHref) {
             $response = $this->withNexusCookie($user)->get($uri);

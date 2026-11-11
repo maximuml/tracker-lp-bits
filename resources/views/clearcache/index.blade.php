@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', {{ __('clearcache.page_title') }})
+@section('title', __('clearcache.page_title'))
 
 @section('content')
 <x-page :title="'Clear cache'" width="form">

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', {{ __('mysqlstats.page_title') }})
+@section('title', __('mysqlstats.page_title'))
 
 @section('content')
 <x-page :title="'Mysql Server Status'" width="list">

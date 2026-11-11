@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', {{ __('faqmanage.page_title') }})
+@section('title', __('faqmanage.page_title'))
 
 @section('content')
 <x-page :title="'FAQ Management'" width="list">

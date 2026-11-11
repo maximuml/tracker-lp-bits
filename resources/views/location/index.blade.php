@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', {{ __('location.page_title') }})
+@section('title', __('location.page_title'))
 
 @section('content')
 <x-page :title="'Manage Locations'" width="list">

@@ -24,10 +24,10 @@
             </div>
             @endforeach
     </div>
-    <div class="nx-fhead">{{ __('label.subject') }}</div>
-    <div class="nx-fcell"><input type=text name=subject size=75 aria-label="{{ __('label.subject') }}" class="w-full"></div>
-    <div class="nx-fhead">{{ __('label.message') }}</div>
-    <div class="nx-fcell"><textarea name=msg cols=80 rows=15 aria-label="{{ __('label.message') }}" class="w-full">{{ $body }}</textarea></div>
+    <div class="nx-fhead">{{ __('staffmess.subject') }}</div>
+    <div class="nx-fcell"><input type=text name=subject size=75 aria-label="{{ __('staffmess.subject') }}" class="w-full"></div>
+    <div class="nx-fhead">{{ __('staffmess.message') }}</div>
+    <div class="nx-fcell"><textarea name=msg cols=80 rows=15 aria-label="{{ __('staffmess.message') }}" class="w-full">{{ $body }}</textarea></div>
 <div class="nx-ffull"><div class="text-center"><b>Sender:&nbsp;&nbsp;</b>
 {{ $username }}
 <input name="sender" type="radio" value="self" checked aria-label="{{ $username }}">

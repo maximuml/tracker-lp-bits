@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', {{ __('thank.page_title') }})
+@section('title', {{ __('thank.index.page_title') }})
 
 @section('content')
 <x-std-message heading="Thanks" :text="\App\Support\Html\SafeHtml::fromUntrustedHtml($message ?? '')" :htmlstrip="false" />

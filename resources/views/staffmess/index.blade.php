@@ -12,9 +12,9 @@
 @endif
 <div class="nx-fgrid nx-fgrid--flat">
 @if ($sent === 1)
-<div class="nx-ffull"><span class="text-nxm-danger"><b>The message has ben sent.</b></span></div>
+<div class="nx-ffull"><span class="text-nxm-danger"><b>{{ __('staffmess.sent') }}</b></span></div>
 @endif
-    <div class="nx-fcell"><b>Send to class:</b></div>
+    <div class="nx-fcell"><b>{{ __('staffmess.send_to_class') }}</b></div>
     <div class="nx-fcell">
             @foreach ($classes as $chunk)
             <div class="flex flex-wrap items-start">
@@ -24,15 +24,15 @@
             </div>
             @endforeach
     </div>
-    <div class="nx-fhead">Subject</div>
-    <div class="nx-fcell"><input type=text name=subject size=75 aria-label="Subject" class="w-full"></div>
-    <div class="nx-fhead">Message</div>
-    <div class="nx-fcell"><textarea name=msg cols=80 rows=15 aria-label="Message" class="w-full">{{ $body }}</textarea></div>
+    <div class="nx-fhead">{{ __('staffmess.subject') }}</div>
+    <div class="nx-fcell"><input type=text name=subject size=75 aria-label="{{ __('staffmess.subject') }}" class="w-full"></div>
+    <div class="nx-fhead">{{ __('staffmess.message') }}</div>
+    <div class="nx-fcell"><textarea name=msg cols=80 rows=15 aria-label="{{ __('staffmess.message') }}" class="w-full">{{ $body }}</textarea></div>
 <div class="nx-ffull"><div class="text-center"><b>Sender:&nbsp;&nbsp;</b>
 {{ $username }}
 <input name="sender" type="radio" value="self" checked aria-label="{{ $username }}">
 &nbsp; System
-<input name="sender" type="radio" value="system" aria-label="System">
+<input name="sender" type="radio" value="system" aria-label="{{ __('staffbox.text_system') }}">
 </div></div>
 <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="Send!"></div>
 </div>

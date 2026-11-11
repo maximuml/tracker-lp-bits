@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Mysql Server Status')
+@section('title', __('mysqlstats.page_title'))
 
 @section('content')
 <x-page :title="'Mysql Server Status'" width="list">
@@ -11,7 +11,7 @@
 
 <ul>
     <li>
-        <b>Server traffic:</b> These tables show the network traffic statistics of this MySQL server since its startup
+        <b>{{ __('mysqlstats.server_traffic') }}</b> These tables show the network traffic statistics of this MySQL server since its startup
         <br />
         <div class="flex items-start overflow-x-auto" tabindex="0">
                     <x-data-table caption="Traffic" captionHidden><x-slot:head><thead><tr>
@@ -62,7 +62,7 @@
         <br />
     </li>
     <li>
-        <b>Query Statistics:</b> Since it's start up, {{ $questionsTotal }} queries have been sent to the server.
+        <b>{{ __('mysqlstats.query_stats') }}</b> Since it's start up, {{ $questionsTotal }} queries have been sent to the server.
         <div>
                     <br />
                     <x-data-table caption="Query Statistics" captionHidden><x-slot:head><thead><tr>
@@ -101,7 +101,7 @@
 @if ($hasServerStatus)
     <li>
     <br />
-        <b>More status variables</b><br />
+        <b>{{ __('mysqlstats.more_vars') }}</b><br />
         <div class="flex items-start">
 @foreach ($statusColumns as $column)
                     <x-data-table caption="More status variables" captionHidden><x-slot:head><thead><tr>

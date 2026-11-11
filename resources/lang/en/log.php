@@ -59,4 +59,6 @@ return [
     'text_all' => 'all',
     'text_normal' => 'normal',
     'text_mod' => 'mod',
+    'bitbucket_log' => 'BitBucket Log',
+    'user_ban_log' => 'User ban log',
 ];

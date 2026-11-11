@@ -98,7 +98,7 @@ final class CompatRedirectController
 
         $abortText = $entry['abort'] ?? null;
         if (is_string($abortText)) {
-            return response(PageResponses::captureAbort(__('functions.std_error'), $abortText));
+            return response(PageResponses::captureAbort(__('functions.std_error'), $abortText), 404);
         }
 
         return redirect((string) ($entry['default'] ?? '/'), 302);

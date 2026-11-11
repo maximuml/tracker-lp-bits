@@ -51,7 +51,7 @@ final class MessageQuickReplyTest extends TestCase
 
         $this->withNexusCookie($sender)
             ->get('/web/messages?action=viewmessage&id='.$outgoing->id)
-            ->assertOk()
+            ->assertForbidden()
             ->assertDontSee('class="nx-quickreply"', false);
 
         $systemSender = $this->createUser();

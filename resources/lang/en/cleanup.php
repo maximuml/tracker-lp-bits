@@ -33,4 +33,6 @@ return [
     'msg_your_torrent_deleted' => 'Your torrent was deleted',
     'msg_your_torrent' => 'Your torrent ',
     'msg_was_deleted_because_dead' => " was deleted by system because it's been dead for a long time. However, you keep the karma bonus for uploading the torrent.",
+    'do_cleanup' => 'Do Clean-up',
+    'in_progress' => 'clean-up in progress...please wait',
 ];

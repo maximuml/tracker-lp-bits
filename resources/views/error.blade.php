@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error</title>
+    <title>{{ __('functions.text_error') }}</title>
     <style nonce="{{ $cspNonce ?? '' }}">
         * {
             margin: 0;
@@ -205,14 +205,14 @@
     <div class="error-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 0C114.6 0 0 114.6 0 256S114.6 512 256 512 512 397.4 512 256 397.4 0 256 0zM232 128h48v160h-48zm0 200h48v48h-48z"/></svg>
     </div>
-    <h1 class="error-title">Error</h1>
+    <h1 class="error-title">{{ __('functions.text_error') }}</h1>
     <p class="error-message">
         {{ $error }}
     </p>
 
     <div class="action-links">
-        <a href="/" class="btn btn-primary">Go home</a>
-        <a href="#" class="btn btn-secondary js-history-back">Go back</a>
+        <a href="/" class="btn btn-primary">{{ __('functions.text_go_home') }}</a>
+        <a href="#" class="btn btn-secondary js-history-back">{{ __('functions.text_go_back') }}</a>
     </div>
 </div>
 <script nonce="{{ $cspNonce ?? '' }}">document.querySelector('.js-history-back').addEventListener('click',function(e){e.preventDefault();if(window.history.length>1){window.history.back();}else{window.location.href='/';}});</script>

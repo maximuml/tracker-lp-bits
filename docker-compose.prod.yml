@@ -30,6 +30,8 @@ services:
       - torrents-data:/var/www/html/torrents
       - public-data:/var/www/html/public
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       assets-init:
         condition: service_completed_successfully
@@ -55,6 +57,8 @@ services:
       - bootstrap-cache:/var/www/html/bootstrap/cache
       - attachments-data:/var/www/html/attachments
       - torrents-data:/var/www/html/torrents
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
@@ -83,6 +87,8 @@ services:
       - attachments-data:/var/www/html/attachments
       - torrents-data:/var/www/html/torrents
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+    security_opt:
+      - no-new-privileges:true
     deploy:
       resources:
         limits:
@@ -130,7 +136,9 @@ services:
       - attachments-data:/var/www/html/attachments:ro
       - torrents-data:/var/www/html/torrents:ro
       - acme-data:/var/www/acme:ro
-      - certs-data:/certs
+      - certs-data:/certs:ro
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       assets-init:
         condition: service_completed_successfully

@@ -297,7 +297,7 @@ class SettingsController extends BasePageController
             }
             $staticPage = $data['guest_visit_value_static_page'] ?? null;
             if (is_string($staticPage) && $staticPage !== '' && ! in_array($staticPage, $this->getStaticPages(), true)) {
-                return $this->abortResponse('Error', 'Invalid static page: '.$staticPage);
+                return $this->abortResponse('Error', 'Invalid static page: '.$staticPage, true, 200);
             }
         }
 
@@ -307,7 +307,7 @@ class SettingsController extends BasePageController
                 if (in_array($config, Setting::$permissionMustHaveClass, true)) {
                     $classValue = is_string($data[$config] ?? null) || is_int($data[$config] ?? null) ? (string) ($data[$config] ?? '') : '';
                     if (! isset(User::$classes[$classValue])) {
-                        return $this->abortResponse('Error', 'Invalid user class: '.$classValue);
+                        return $this->abortResponse('Error', 'Invalid user class: '.$classValue, true, 200);
                     }
                 }
             }
@@ -327,7 +327,7 @@ class SettingsController extends BasePageController
             }
             $normalized = is_string($value) ? Url::normalize($value) : null;
             if ($normalized === null) {
-                return $this->abortResponse('Error', "Invalid URL: {$urlField}");
+                return $this->abortResponse('Error', "Invalid URL: {$urlField}", true, 200);
             }
             $data[$urlField] = $normalized;
         }
@@ -336,7 +336,7 @@ class SettingsController extends BasePageController
         if ($section === 'misc') {
             $protectedForum = is_string($data['protected_forum'] ?? null) ? (string) $data['protected_forum'] : '';
             if (! empty($protectedForum) && ! preg_match('/^[,\d]*\d+$/', $protectedForum)) {
-                return $this->abortResponse('Error', 'Forum format error: use comma-separated IDs.');
+                return $this->abortResponse('Error', 'Forum format error: use comma-separated IDs.', true, 200);
             }
         }
 

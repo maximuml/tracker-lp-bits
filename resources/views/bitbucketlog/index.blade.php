@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'BitBucket Log')
+@section('title', __('log.bitbucket_log'))
 
 @section('content')
 <x-page :title="'BitBucket Log'" width="list">

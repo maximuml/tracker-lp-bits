@@ -145,4 +145,6 @@ return [
     'meta_key_change_username_username' => 'New username',
     'consume' => 'Use',
     'text_bonus_table' => 'Bonus per hour',
+    'col_agent' => 'Agent',
+    'col_port' => 'Port',
 ];

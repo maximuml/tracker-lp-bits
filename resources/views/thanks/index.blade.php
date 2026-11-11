@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Thanks')
+@section('title', __('thank.index.page_title'))
 
 @section('content')
 <x-std-message heading="Thanks" :text="\App\Support\Html\SafeHtml::fromUntrustedHtml($message ?? '')" :htmlstrip="false" />
-<p class="text-center"><a href='/web/details/{{ $torrentid ?? 0 }}'>Back to torrent</a></p>
+<p class="text-center"><a href='/web/details/{{ $torrentid ?? 0 }}'>{{ __('thanks.back_to_torrent') }}</a></p>
 @endsection

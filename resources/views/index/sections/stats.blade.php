@@ -2,7 +2,7 @@
 @if($stats->todayUsers->count > 0)
 <section class="nx-idx-card">
 <h2>{{ $stats->labels['rowUsersActiveToday'] }}: {{ number_format($stats->todayUsers->count) }}</h2>
-<x-data-table class="nx-today-users"><tr><td><div class="nx-today-users__list">@foreach($stats->todayUsers->cards as $uid => $c)<span class="nx-tip" tabindex="0">{{ \App\Support\UserDisplay::username($uid) }}<span class="nx-card"><span class="nx-card__ava">@if($c->avatar !== '')<img src="{{ $c->avatar }}" alt="" loading="lazy" decoding="async" />@else{{ mb_substr($c->username, 0, 1) }}@endif</span><span class="nx-card__body"><b>{{ $c->username }}</b><span class="nx-card__meta">{{ $c->classLabel }} · {{ __('functions.text_ratio') }} {{ $c->ratio }}</span><span class="nx-card__meta">↑{{ $c->uploaded }} · ↓{{ $c->downloaded }} · {{ $c->lastSeen }}</span><span class="nx-card__links"><a href="/userdetails?id={{ $uid }}">Profile</a> · <a href="/web/sendmessage?receiver={{ $uid }}">PM</a></span></span></span></span>@if(!$loop->last)<span class="nx-today-users__sep"> | </span>@endif@endforeach</div></td></tr></x-data-table>
+<x-data-table class="nx-today-users"><tr><td><div class="nx-today-users__list">@foreach($stats->todayUsers->cards as $uid => $c)<span class="nx-tip" tabindex="0">{{ \App\Support\UserDisplay::username($uid) }}<span class="nx-card"><span class="nx-card__ava">@if($c->avatar !== '')<img src="{{ $c->avatar }}" alt="" loading="lazy" decoding="async" />@else{{ mb_substr($c->username, 0, 1) }}@endif</span><span class="nx-card__body"><b>{{ $c->username }}</b><span class="nx-card__meta">{{ $c->classLabel }} · {{ __('functions.text_ratio') }} {{ $c->ratio }}</span><span class="nx-card__meta">↑{{ $c->uploaded }} · ↓{{ $c->downloaded }} · {{ $c->lastSeen }}</span><span class="nx-card__links"><a href="/userdetails?id={{ $uid }}">{{ __('functions.text_profile') }}</a> · <a href="/web/sendmessage?receiver={{ $uid }}">PM</a></span></span></span></span>@if(!$loop->last)<span class="nx-today-users__sep"> | </span>@endif@endforeach</div></td></tr></x-data-table>
 </section>
 @endif
 <section class="nx-idx-card">
@@ -21,7 +21,7 @@
 </tr>
 <tr>
 <td>{{ $stats->userStats['vipLabel'] }}</td><td>{{ $stats->userStats['vip'] }}</td>
-<td>{{ $stats->userStats['donorsLabel'] }} <i class="star" role="img" aria-label="Donor"></i></td><td>{{ $stats->userStats['donors'] }}</td>
+<td>{{ $stats->userStats['donorsLabel'] }} <i class="star" role="img" aria-label="{{ __('functions.title_donor') }}"></i></td><td>{{ $stats->userStats['donors'] }}</td>
 </tr>
 <tr>
 <td>{{ $stats->userStats['warnedLabel'] }} <i class="warned" role="img" aria-label="warned"></i></td><td>{{ $stats->userStats['warned'] }}</td>

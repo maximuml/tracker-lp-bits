@@ -1,1 +1,1 @@
-<!DOCTYPE html><html><head><title>Error</title></head><body>
+<!DOCTYPE html><html><head><title>{{ __('functions.text_error') }}</title></head><body>

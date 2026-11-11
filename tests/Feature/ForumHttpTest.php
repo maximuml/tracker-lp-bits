@@ -127,7 +127,7 @@ final class ForumHttpTest extends TestCase
                 'topicid' => (string) $topic->id,
                 'locked' => 1,
             ])
-            ->assertStatus(200);
+            ->assertForbidden();
     }
 
     public function test_setsticky_permission_denied_for_non_moderator(): void
@@ -140,7 +140,7 @@ final class ForumHttpTest extends TestCase
                 'topicid' => (string) $topic->id,
                 'sticky' => 'yes',
             ])
-            ->assertStatus(200);
+            ->assertForbidden();
     }
 
     public function test_deletetopic_permission_denied_for_non_moderator(): void
@@ -169,7 +169,7 @@ final class ForumHttpTest extends TestCase
                 'postid' => (string) $post->id,
                 'sure' => 1,
             ])
-            ->assertStatus(200);
+            ->assertForbidden();
     }
 
     // ─── Success paths ──────────────────────────────────────────────────

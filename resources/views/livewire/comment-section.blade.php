@@ -1,6 +1,8 @@
 <div>
     @if ($vm->rows !== [])
         @include('comments.table', ['vm' => $vm])
+    @else
+        <div class="nx-empty text-center">{{ __($type === 'offer' ? 'offers.text_no_comments' : 'details.text_no_comments_yet') }}</div>
     @endif
 
     <br /><br />

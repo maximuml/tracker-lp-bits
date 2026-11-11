@@ -37,9 +37,9 @@ abstract class BasePageController extends Controller
         return $view;
     }
 
-    protected function abortResponse(string $heading, string $text, bool $htmlstrip = true): Response
+    protected function abortResponse(string $heading, string $text, bool $htmlstrip = true, int $status = 403): Response
     {
-        return response(PageResponses::captureAbort($heading, $text, $htmlstrip));
+        return response(PageResponses::captureAbort($heading, $text, $htmlstrip), $status);
     }
 
     private function viewName(string $page): string

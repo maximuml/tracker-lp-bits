@@ -20,10 +20,10 @@
                         <button type="button" class="nx-postbtn" data-copy="#announce-url" data-copy-done="{{ __('functions.text_copied') }}">{{ __('functions.text_copy') }}</button>
                     </span>
                     @unless ($torrentDirWritable)
-                        <div class="nx-field__error" role="alert"><b>ATTENTION</b>: Torrent directory isn't writable. Please contact the administrator about this problem!</div>
+                        <div class="nx-field__error" role="alert"><b>{{ __('upload.attention') }}</b>{{ __('upload.dir_not_writable') }}</div>
                     @endunless
                     @if (empty($max_torrent_size))
-                        <div class="nx-field__error" role="alert"><b>ATTENTION</b>: Max. Torrent Size not set. Please contact the administrator about this problem!</div>
+                        <div class="nx-field__error" role="alert"><b>{{ __('upload.attention') }}</b>{{ __('upload.max_size_not_set') }}</div>
                     @endif
                 </div>
             </div>

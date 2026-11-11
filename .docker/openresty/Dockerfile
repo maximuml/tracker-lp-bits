@@ -29,6 +29,11 @@ RUN apk upgrade --no-cache brotli-libs
 # execution; upgrade to 1.2.6-r3 until the pinned digest moves past it.
 RUN apk upgrade --no-cache musl musl-utils
 
+# CVE-2026-87636 / CVE-2026-9947 / CVE-2025-10911: libxslt XML type
+# confusion and use-after-free; upgrade to 1.1.43-r4 until the pinned
+# digest moves past it.
+RUN apk upgrade --no-cache libxslt
+
 # 拷贝 entrypoint
 COPY .docker/openresty/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY .docker/openresty/render-config.sh /usr/local/bin/render-config.sh

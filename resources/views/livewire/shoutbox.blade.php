@@ -12,12 +12,14 @@
 <div id="kshoutbox" class="p-[10pt] @if(!$open) nx-hidden @endif">
 <div wire:poll.visible.{{ $refresh }}s>
     <x-data-table :caption="__('index.text_shoutbox')" captionHidden>
-    @foreach ($items as $item)
+    @forelse ($items as $item)
         <tr><td class="{{ $item['rowClass'] }}"><span class='date'>[{{ $item['time'] }}]</span> @if ($item['actions'] !== null)<span class="shout-actions">@if ($item['actions']['canEdit']) <a href="#" class="shout-action-edit" wire:click.prevent="startEdit({{ $item['actions']['msgId'] }})" title="{{ __('shoutbox.title_edit_shout') }}">[{{ __('shoutbox.text_edit') }}]</a>@endif
 @if ($item['actions']['canDelete']) <a href="#" class="shout-action-del" data-shout-del wire:click.prevent="confirmDelete({{ $item['actions']['msgId'] }})" title="{{ __('shoutbox.title_delete_shout') }}">[{{ __('shoutbox.text_del') }}]</a>@endif</span>@endif <x-shoutbox.avatar :url="$item['avatarUrl']" :user-id="$item['avatarUserId']" :tooltip="$item['avatarTooltip']" :spacer="$item['avatarSpacer']" /> @if ($item['classBadge'] !== null)<x-shoutbox.class-badge :modifier="$item['classBadge']['modifier']" :tooltip="$item['classBadge']['tooltip']" :label="$item['classBadge']['label']" />@endif@if (! empty($item['isGuest']))<b>{{ $item['username'] }}</b>@else{{ $item['username'] }}@endif @if ($item['reactions'] !== null)<span class="shout-reactions">@foreach ($item['reactions']['reactions'] as $r)<button type="button" class="shout-reaction{{ $r['active'] ? ' active' : '' }}" wire:click.prevent="react({{ $item['reactions']['shoutId'] }}, @js($r['emoji']))" title="{{ $r['title'] }}">{{ $r['emoji'] }} {{ $r['count'] }}</button>@endforeach
 @if ($item['reactions']['showPicker'])<button type="button" class="shout-reaction shout-reaction-add" wire:click.prevent="togglePicker({{ $item['reactions']['shoutId'] }})" aria-expanded="{{ $openPickerId === $item['reactions']['shoutId'] ? 'true' : 'false' }}" title="{{ __('shoutbox.title_add_reaction') }}">+</button><span class="shout-reaction-picker{{ $openPickerId === $item['reactions']['shoutId'] ? '' : ' nx-hidden' }}" id="shout-reaction-picker-{{ $item['reactions']['shoutId'] }}">@foreach ($item['reactions']['pickerEmojis'] as $emoji)<button type="button" class="shout-reaction" wire:click.prevent="react({{ $item['reactions']['shoutId'] }}, @js($emoji))" title="{{ __('shoutbox.title_react') }}">{{ $emoji }}</button>@endforeach</span>@endif</span>@endif @if ($editingId === $item['msgId'])<span class="shoutbox-editing"><input type="text" wire:model="editText" wire:keydown.enter.prevent="saveEdit" wire:keydown.escape="cancelEdit" /><button type="button" class="nx-btn nx-btn--primary" wire:click="saveEdit">{{ __('label.save') }}</button><button type="button" class="nx-btn nx-btn--primary" wire:click="cancelEdit">{{ __('label.cancel') }}</button></span>@else<x-shoutbox.message :id="$item['msgId']" :is-long="$item['msgLong']" :raw="$item['msgRaw']" :formatted="$item['msgFormatted']" :edited-time="$item['editedTime']" :label-more="$item['labelMore']" :label-less="$item['labelLess']" />@endif
 </td></tr>
-    @endforeach
+    @empty
+        <tr><td class="text-nxm-text-dim">{{ __('shoutbox.text_history_empty') }}</td></tr>
+    @endforelse
     </x-data-table>
     @if ($status !== '')
         <p>{{ $status }}</p>

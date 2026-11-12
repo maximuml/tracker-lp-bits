@@ -7,12 +7,14 @@
         <thead>
             <tr>
                 <th scope="col">{{ __('viewfilelist.col_path') }}</th>
-                <th scope="col"><i class="size" role="img" aria-label="size"></i></th>
+                <th scope="col"><i class="size" role="img" aria-label="{{ __('viewfilelist.col_size') }}"></i></th>
             </tr>
         </thead>
     </x-slot:head>
-    @foreach ($files as $file)
+    @forelse ($files as $file)
         <tr><td><span class="fileicon fi-{{ $file['badge']['cat'] }}" title="{{ $file['badge']['cat'] }}">{{ $file['badge']['label'] }}</span>{{ $file['filename'] }}</td><td class="text-right">{{ $file['size'] }}</td></tr>
-    @endforeach
+    @empty
+        <tr><td colspan="2" class="text-nxm-text-dim">{{ __('viewfilelist.text_no_files') }}</td></tr>
+    @endforelse
 </x-data-table>
 @endisset

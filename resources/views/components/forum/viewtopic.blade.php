@@ -18,7 +18,7 @@
         <span class="nx-postbar__actions">
             @if ($topic->isMod)
                 <details class="nx-modtools">
-                    <summary title="{{ __('forums.text_mod_tools') }}">⋯</summary>
+                    <summary title="{{ __('forums.text_mod_tools') }}"><span class="nx-sr-only">{{ __('forums.text_mod_tools') }}</span><span aria-hidden="true">⋯</span></summary>
                     <span class="nx-modtools__panel">
                         <form method="post" action="/web/forums/setsticky">@csrf
                             <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />

@@ -207,7 +207,7 @@ final class UsersearchPageService
         $bannedIps = $extraStats['bannedIps'];
 
         if (count($res) == 0) {
-            return new UsersearchResultsViewModel([], false, SafeHtml::fromPlainText(''), SafeHtml::fromPlainText(''), view('partials.std-message', [
+            return new UsersearchResultsViewModel([], false, SafeHtml::fromPlainText(''), SafeHtml::fromPlainText(''), [], view('partials.std-message', [
                 'heading' => 'Warning',
                 'text' => 'No user was found.',
                 'htmlstrip' => false,

@@ -31,6 +31,9 @@
 </section>
 
 <section class="nx-idx-card">
+@if (empty($items))
+<x-empty-state :title="__('shoutbox.text_history_empty')" />
+@else
 <x-data-table :caption="__('shoutbox.text_history_title')" captionHidden>
 @foreach ($items ?? [] as $item)
     <tr><td class="shoutrow{{ $item['mentionsMe'] ? ' shoutrow-mentions-me' : '' }}">
@@ -39,6 +42,7 @@
     </td></tr>
 @endforeach
 </x-data-table>
+@endif
 </section>
 
 @if (($totalPages ?? 0) > 1)

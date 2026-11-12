@@ -145,4 +145,5 @@ return [
     'text_right_description' => 'Insert right-justified content on the page',
     'text_right_syntax' => '[right]This is the right-aligned content[/right]',
     'text_right_example' => '[right]This is the right-aligned content[/right]',
+    'text_no_tags' => 'No tags defined',
 ];

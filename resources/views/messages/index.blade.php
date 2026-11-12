@@ -15,7 +15,7 @@
 		</a>
 	@endforeach
 	@if (empty($viewmailbox['rows']))
-		<div class="nx-maillist__empty">{{ __('messages.text_no_messages') }}</div>
+		<x-empty-state :title="__('messages.text_no_messages')" />
 	@endif
 	</div>
 	<div class="nx-msgsplit__pane">@include('messages.sections.viewmessage')</div>

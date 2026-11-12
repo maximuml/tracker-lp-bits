@@ -658,7 +658,60 @@ document.addEventListener('click', function (e) {
         e.preventDefault();
         return;
     }
+
+    var copyBtn = target.closest('[data-nx-copy]');
+    if (copyBtn) {
+        e.preventDefault();
+        nxCopyText(copyBtn.getAttribute('data-nx-copy')).then(function () {
+            nxCopyFeedback(copyBtn, true);
+        }).catch(function () {
+            nxCopyFeedback(copyBtn, false);
+        });
+        return;
+    }
 });
+
+function nxCopyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.className = 'nx-sr-only';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            if (document.execCommand('copy')) {
+                resolve();
+            } else {
+                reject(new Error('execCommand copy failed'));
+            }
+        } catch (err) {
+            reject(err);
+        }
+        ta.remove();
+    });
+}
+
+function nxCopyFeedback(btn, ok) {
+    var label = btn.getAttribute(ok ? 'data-nx-copy-done' : 'data-nx-copy-fail') || (ok ? 'Copied!' : 'Copy failed');
+    var row = btn.closest('tr') || btn.parentNode;
+    var status = row ? row.querySelector('[data-nx-copy-live]') : null;
+    if (status) {
+        status.textContent = '';
+        setTimeout(function () { status.textContent = label; }, 30);
+    }
+    if (btn.__nxCopyOrig === undefined) {
+        btn.__nxCopyOrig = btn.textContent;
+    }
+    btn.textContent = label;
+    clearTimeout(btn.__nxCopyTimer);
+    btn.__nxCopyTimer = setTimeout(function () {
+        btn.textContent = btn.__nxCopyOrig;
+    }, 2000);
+}
 
 document.addEventListener('submit', function (e) {
     var form = e.target;

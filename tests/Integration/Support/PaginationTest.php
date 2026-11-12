@@ -22,10 +22,21 @@ final class PaginationTest extends TestCase
 
     // ---------- render() ----------
 
-    public function test_render_returns_six_element_array(): void
+    public function test_render_returns_seven_element_array(): void
     {
         $result = Pagination::render(10, 100, '/list.php?', 0, 10, self::LABELS);
-        $this->assertCount(6, $result);
+        $this->assertCount(7, $result);
+    }
+
+    public function test_render_appends_x_pagination_props(): void
+    {
+        $result = Pagination::render(10, 100, '/list.php?', 2, 10, self::LABELS);
+        $props = $result[6];
+        $this->assertSame(3, $props['page']);
+        $this->assertSame(10, $props['pages']);
+        $this->assertSame('/list.php?page={page}', $props['href']);
+        $this->assertTrue($props['zeroBased']);
+        $this->assertSame('Prev', $props['prevLabel']);
     }
 
     public function test_render_pagers_are_safe_html(): void

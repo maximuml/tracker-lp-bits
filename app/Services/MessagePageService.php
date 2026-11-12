@@ -167,7 +167,7 @@ class MessagePageService
             .($unreadRaw ? '&unread='.$unreadRaw : '')
             .'&';
 
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $pagerHref);
+        [$pagertop, $pagerbottom, , $offset, $perpage, , $pager] = Pagination::pager($perpage, $count, $pagerHref);
 
         $messages = $this->messageRepository->listMailboxMessages($userId, $mailbox, $keyword, $place, $unreadBool, (int) $offset, (int) $perpage);
 
@@ -235,6 +235,7 @@ class MessagePageService
             'unread' => is_string($unreadRaw) ? $unreadRaw : '',
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'rows' => $rows,
             'hasMessages' => $messages->isNotEmpty(),
             'mailboxTabs' => $mailboxTabs,

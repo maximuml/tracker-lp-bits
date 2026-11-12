@@ -5,7 +5,7 @@
 @if (! $viewmailbox['hasMessages'])
 <x-empty-state :title="__('messages.text_no_messages')" />
 @else
-{{ $viewmailbox['pagertop'] ?? '' }}
+<x-pagination :page="$viewmailbox['pager']['page']" :pages="$viewmailbox['pager']['pages']" :href="$viewmailbox['pager']['href']" :prev-label="$viewmailbox['pager']['prevLabel']" :next-label="$viewmailbox['pager']['nextLabel']" :zero-based="$viewmailbox['pager']['zeroBased']" label="Pagination top" />
 <form action="/web/messages/move-or-delete" method="post">
 @csrf
 <div class="nx-maillist">
@@ -44,5 +44,5 @@
 </div>
 </div>
 </form>
-{{ $viewmailbox['pagerbottom'] ?? '' }}
+<x-pagination :page="$viewmailbox['pager']['page']" :pages="$viewmailbox['pager']['pages']" :href="$viewmailbox['pager']['href']" :prev-label="$viewmailbox['pager']['prevLabel']" :next-label="$viewmailbox['pager']['nextLabel']" :zero-based="$viewmailbox['pager']['zeroBased']" label="Pagination bottom" />
 @endif

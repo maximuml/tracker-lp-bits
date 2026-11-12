@@ -38,6 +38,7 @@ final class Pagination extends Component
         public readonly string $label = 'Pagination',
         public readonly string $prevLabel = 'Previous',
         public readonly string $nextLabel = 'Next',
+        public readonly bool $zeroBased = false,
     ) {
         $this->items = self::window($this->page, $this->pages);
     }
@@ -83,7 +84,9 @@ final class Pagination extends Component
      */
     public function url(int $page): string
     {
-        return str_replace('{page}', (string) $page, $this->href);
+        $n = $this->zeroBased ? $page - 1 : $page;
+
+        return str_replace('{page}', (string) $n, $this->href);
     }
 
     public function render(): View

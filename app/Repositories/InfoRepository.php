@@ -190,7 +190,7 @@ final class InfoRepository implements InfoRepositoryInterface
             ->distinct()
             ->count('p.id');
 
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $postcount, $phpSelf."?action=viewposts&id=$userId&");
+        [$pagertop, $pagerbottom, , $offset, $perpage, , $pager] = Pagination::pager($perpage, $postcount, $phpSelf."?action=viewposts&id=$userId&");
 
         $posts = DB::table('posts as p')
             ->leftJoin('topics as t', 'p.topicid', '=', 't.id')
@@ -216,6 +216,7 @@ final class InfoRepository implements InfoRepositoryInterface
             'postcount' => $postcount,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'perpage' => $perpage,
             'posts' => $posts,
             'editorNames' => $editorNames,
@@ -232,7 +233,7 @@ final class InfoRepository implements InfoRepositoryInterface
             ->where('c.user', $userId)
             ->count();
 
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $commentcount, $phpSelf."?action=viewcomments&id=$userId&");
+        [$pagertop, $pagerbottom, , $offset, $perpage, , $pager] = Pagination::pager($perpage, $commentcount, $phpSelf."?action=viewcomments&id=$userId&");
 
         $comments = DB::table('comments as c')
             ->leftJoin('torrents as t', 'c.torrent', '=', 't.id')
@@ -267,6 +268,7 @@ final class InfoRepository implements InfoRepositoryInterface
             'commentcount' => $commentcount,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'perpage' => $perpage,
             'comments' => $comments,
             'commentPageMap' => $countsBefore,

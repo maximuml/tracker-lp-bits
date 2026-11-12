@@ -6,7 +6,7 @@
 @if ($action === 'viewposts')
 <x-page :title="__('userhistory.text_posts_history_for')" :subtitle="$subject" width="list">
     @if (($postcount ?? 0) > ($perpage ?? 15))
-        {{ $pagertop ?? '' }}
+        <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
     @endif
     <x-frame :center="false">
     @if (empty($items))
@@ -31,13 +31,13 @@
     @endif
     </x-frame>
     @if (($postcount ?? 0) > ($perpage ?? 15))
-        {{ $pagerbottom ?? '' }}
+        <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
     @endif
 </x-page>
 @elseif ($action === 'viewcomments')
 <x-page :title="__('userhistory.text_comments_history_for')" :subtitle="$subject" width="list">
     @if (($commentcount ?? 0) > ($perpage ?? 15))
-        {{ $pagertop ?? '' }}
+        <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
     @endif
     <x-frame :center="false">
     @if (empty($items))
@@ -62,7 +62,7 @@
     @endif
     </x-frame>
     @if (($commentcount ?? 0) > ($perpage ?? 15))
-        {{ $pagerbottom ?? '' }}
+        <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
     @endif
 </x-page>
 @endif

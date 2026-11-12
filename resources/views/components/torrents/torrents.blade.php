@@ -26,9 +26,9 @@
 @if ($count && isset($rows))
     <p class="nxm-results" role="status">{{ __('torrents.results_found', ['count' => number_format($count)]) }} <span class="nxm-results__sort">&middot; {{ $listVm->sortLabel }}</span></p>
 
-    {{ $pagertop }}
+    <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
     @include('components.torrents.table')
-    {{ $pagerbottom }}
+    <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
 @else
     <div class="nxm-empty" role="status">
         <p class="nxm-empty__title">{{ $emptyTitle }}</p>

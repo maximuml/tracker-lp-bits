@@ -39,7 +39,7 @@
 @endforeach
 </p>
 
-{{ $pagertop ?? '' }}
+<x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
 
 @if (empty($rows))
 <x-empty-state :title="__('users.text_no_users')" />
@@ -63,6 +63,6 @@
 </x-data-table>
 @endif
 
-{{ $pagerbottom ?? '' }}
+<x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
 </x-page>
 @endsection

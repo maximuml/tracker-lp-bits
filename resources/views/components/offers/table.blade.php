@@ -62,7 +62,7 @@
 </tr>
 @endforeach
 </x-data-table>
-{{ $table->pagerBottom }}
+<x-pagination :page="$table->pager['page']" :pages="$table->pager['pages']" :href="$table->pager['href']" :prev-label="$table->pager['prevLabel']" :next-label="$table->pager['nextLabel']" :zero-based="$table->pager['zeroBased']" label="Pagination bottom" />
 @if ($table->tooltips !== [])
 <div class="nx-hidden">
     @foreach ($table->tooltips as $tooltip)

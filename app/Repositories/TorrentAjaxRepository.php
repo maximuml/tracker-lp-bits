@@ -81,6 +81,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             'count' => $count,
             'pagertop' => $pager[0],
             'pagerbottom' => $pager[1],
+            'pager' => $pager[6] ?? [],
             'snatchedRows' => $snatchedRows,
         ];
     }
@@ -250,6 +251,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
                 'total_size' => 0,
                 'pagertop' => SafeHtml::fromPlainText(''),
                 'pagerbottom' => SafeHtml::fromPlainText(''),
+                'pager' => [],
                 'torrentlist' => '',
                 'seedTimeAndUploaded' => collect(),
             ];
@@ -287,6 +289,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
             'total_size' => $totalSize,
             'pagertop' => $pager[0],
             'pagerbottom' => $pager[1],
+            'pager' => $pager[6] ?? [],
             'torrentRep' => $this->torrentModerationRepository,
             'seedTimeAndUploaded' => $seedTimeAndUploaded,
         ];

@@ -7,7 +7,7 @@
 @if ($count == 0)
     <x-empty-state :title="__('functions.text_no_comments')" />
 @else
-    {{ $pagertop }}
+    <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
     @foreach ($rows as $row)
         <div>
             <div id="cid{{ $row['id'] }}" class="nx-embedded">
@@ -29,7 +29,7 @@
             </div>
         </div>
     @endforeach
-    {{ $pagerbottom }}
+    <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
 @endif
 </x-page>
 @endsection

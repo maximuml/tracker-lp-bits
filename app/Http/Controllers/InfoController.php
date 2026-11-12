@@ -241,7 +241,7 @@ class InfoController extends BasePageController
 
         $count = $this->usercpLookupRepository->countBitbucket();
         $perpage = 10;
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, '/web/bitbucketlog?');
+        [$pagertop, $pagerbottom, , $offset, $perpage, , $pager] = Pagination::pager($perpage, $count, '/web/bitbucketlog?');
         $bitbucketRows = $this->usercpLookupRepository->listBitbucket($offset, $perpage);
 
         $userIds = [];
@@ -299,6 +299,7 @@ class InfoController extends BasePageController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'isModerator' => $isModerator,
         ]);
     }

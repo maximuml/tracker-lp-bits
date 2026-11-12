@@ -109,7 +109,9 @@
             @endif
         </x-data-table>
         @endif
-        {{ $inviteePagertop }}
+        @if ($inviteePager !== [])
+<x-pagination :page="$inviteePager['page']" :pages="$inviteePager['pages']" :href="$inviteePager['href']" :prev-label="$inviteePager['prevLabel']" :next-label="$inviteePager['nextLabel']" :zero-based="$inviteePager['zeroBased']" label="Pagination top" />
+@endif
 
     @elseif (in_array($menuSelected, ['sent', 'tmp'], true))
         @if (! $sentTmpCount)
@@ -143,7 +145,9 @@
             @endforeach
         </x-data-table>
         @endif
-        {{ $sentTmpPagertop }}
+        @if ($sentTmpPager !== [])
+<x-pagination :page="$sentTmpPager['page']" :pages="$sentTmpPager['pages']" :href="$sentTmpPager['href']" :prev-label="$sentTmpPager['prevLabel']" :next-label="$sentTmpPager['nextLabel']" :zero-based="$sentTmpPager['zeroBased']" label="Pagination top" />
+@endif
     @endif
 @endif
 </x-page>

@@ -147,10 +147,11 @@ class PollController extends BasePageController
             $answers = [];
             $pagertop = SafeHtml::fromPlainText('');
             $pagerbottom = SafeHtml::fromPlainText('');
+            $pager = [];
 
             if ($count > 0) {
                 $perpage = 100;
-                [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, "?id={$pollid}&");
+                [$pagertop, $pagerbottom, , $offset, $perpage, , $pager] = Pagination::pager($perpage, $count, "?id={$pollid}&");
                 $answers = $this->pollRepository->answers($pollid, $offset, $perpage);
             }
             $userDisplayMap = $this->pollRepository->userDisplayMap($answers);
@@ -180,6 +181,7 @@ class PollController extends BasePageController
                 'answers' => $answerRows,
                 'pagertop' => $pagertop,
                 'pagerbottom' => $pagerbottom,
+                'pager' => $pager,
             ]);
         }
 

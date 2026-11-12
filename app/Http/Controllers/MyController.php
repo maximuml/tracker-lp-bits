@@ -125,7 +125,7 @@ class MyController extends Controller
         $q = htmlspecialchars((string) ($request->query('q') ?? ''));
 
         $rescount = $this->hitAndRunRepository->countForUser($userid, $status);
-        [$pagertop, $pagerbottom, $limit, $offset, $pageSize] = Pagination::pager(50, $rescount, sprintf('?%s&', $queryString));
+        [$pagertop, $pagerbottom, $limit, $offset, $pageSize, , $pager] = Pagination::pager(50, $rescount, sprintf('?%s&', $queryString));
 
         $list = [];
         if ($rescount > 0) {
@@ -173,6 +173,7 @@ JS;
             'rescount' => $rescount,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'list' => $list,
             'cancelHrBonus' => $cancelHrBonus,
             'page' => $page,

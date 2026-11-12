@@ -29,5 +29,7 @@ final class OfferDetailsViewModel
         public readonly int $commentCount,
         public readonly SafeHtml $pagerTop,
         public readonly SafeHtml $pagerBottom,
+        /** @var array<string, mixed> <x-pagination> prop map */
+        public readonly array $pager,
     ) {}
 }

@@ -94,8 +94,9 @@ final class OfferDetailsBuilder
 
         $pagerTop = SafeHtml::fromPlainText('');
         $pagerBottom = SafeHtml::fromPlainText('');
+        $pager = [];
         if ($commentCount) {
-            [$pagerTop, $pagerBottom] = Pagination::pager(10, $commentCount, "/web/offers?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
+            [$pagerTop, $pagerBottom, , , , , $pager] = Pagination::pager(10, $commentCount, "/web/offers?id={$id}&off_details=1&", ['lastpagedefault' => 1]);
         }
 
         return new OfferDetailsViewModel(
@@ -115,6 +116,7 @@ final class OfferDetailsBuilder
             commentCount: $commentCount,
             pagerTop: $pagerTop,
             pagerBottom: $pagerBottom,
+            pager: $pager,
         );
     }
 }

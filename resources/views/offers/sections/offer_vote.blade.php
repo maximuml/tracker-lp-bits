@@ -2,7 +2,9 @@
 @if (! $offer_vote['hasVotes'])
 <p class="text-center"><b>{{ $offer_vote['noVotesNote'] }}</b></p>
 @else
-{{ $offer_vote['pagerTop'] ?? '' }}
+@if (($offer_vote['pager'] ?? []) !== [])
+<x-pagination :page="$offer_vote['pager']['page']" :pages="$offer_vote['pager']['pages']" :href="$offer_vote['pager']['href']" :prev-label="$offer_vote['pager']['prevLabel']" :next-label="$offer_vote['pager']['nextLabel']" :zero-based="$offer_vote['pager']['zeroBased']" label="Pagination top" />
+@endif
 <x-data-table :caption="__('offers.text_vote_results_for') . ' ' . $offer_vote['offerName']" captionHidden>
 <x-slot:head>
 <thead>
@@ -14,5 +16,7 @@
 <tr><td class="align-top px-2.5 py-1.5">{{ $row['username'] ?? '' }}</td><td class="align-top px-2.5 py-1.5">@if (($row['vote'] ?? '') === 'yeah')<b><span class="text-nxm-success">{{ __('offers.text_for') }}</span></b>@elseif (($row['vote'] ?? '') === 'against')<b><span class="text-nxm-danger">{{ __('offers.text_against') }}</span></b>@else{{ 'unknown' }}@endif</td></tr>
 @endforeach
 </x-data-table>
-{{ $offer_vote['pagerBottom'] ?? '' }}
+@if (($offer_vote['pager'] ?? []) !== [])
+<x-pagination :page="$offer_vote['pager']['page']" :pages="$offer_vote['pager']['pages']" :href="$offer_vote['pager']['href']" :prev-label="$offer_vote['pager']['prevLabel']" :next-label="$offer_vote['pager']['nextLabel']" :zero-based="$offer_vote['pager']['zeroBased']" label="Pagination bottom" />
+@endif
 @endif

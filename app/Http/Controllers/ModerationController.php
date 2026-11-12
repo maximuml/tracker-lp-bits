@@ -238,7 +238,7 @@ class ModerationController extends BasePageController
         }
 
         $perpage = 10;
-        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, '/web/reports?');
+        [$pagertop, $pagerbottom, , $offset, $rpp, , $pager] = Pagination::pager($perpage, $count, '/web/reports?');
 
         $reportRows = $repo->getReports($offset, $rpp);
 
@@ -350,6 +350,7 @@ class ModerationController extends BasePageController
         return $this->renderPage($request, 'reports', true, [
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'rows' => $rows,
         ]);
 

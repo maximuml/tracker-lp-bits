@@ -111,7 +111,7 @@ final class OfferListBuilder
         $offerResult = $this->offerRepository->getLegacyList($categ, $offerorid, $search, $sortColumn, $direction, 0, 0);
         $count = (int) $offerResult['count'];
 
-        [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager(
+        [$pagerTop, $pagerBottom, , $offset, $perpage, , $pager] = Pagination::pager(
             $perpage,
             $count,
             $self.'?'.'category='.((is_string($cat = $request->query('category', '')) ? $cat : '')).'&sort='.((is_string($sortQ = $request->query('sort', '')) ? $sortQ : '')).'&'
@@ -331,6 +331,7 @@ final class OfferListBuilder
                 rows: $rows,
                 tooltips: $showlastcom ? $tooltips : [],
                 pagerBottom: $pagerBottom,
+                pager: $pager,
             );
         }
 

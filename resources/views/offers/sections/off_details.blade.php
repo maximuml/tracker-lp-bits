@@ -35,11 +35,15 @@
     @if (! $off_details->commentCount)
     <p class="nx-off__meta">{{ __('offers.text_no_comments') }}</p>
     @else
-    {{ $off_details->pagerTop }}
+    @if ($off_details->pager !== [])
+<x-pagination :page="$off_details->pager['page']" :pages="$off_details->pager['pages']" :href="$off_details->pager['href']" :prev-label="$off_details->pager['prevLabel']" :next-label="$off_details->pager['nextLabel']" :zero-based="$off_details->pager['zeroBased']" label="Pagination top" />
+@endif
     @endif
     <livewire:comment-section :parent-id="$off_details->id" type="offer" />
     @if ($off_details->commentCount)
-    {{ $off_details->pagerBottom }}
+    @if ($off_details->pager !== [])
+<x-pagination :page="$off_details->pager['page']" :pages="$off_details->pager['pages']" :href="$off_details->pager['href']" :prev-label="$off_details->pager['prevLabel']" :next-label="$off_details->pager['nextLabel']" :zero-based="$off_details->pager['zeroBased']" label="Pagination bottom" />
+@endif
     @endif
     <p class="nx-off__meta"><a href="/comment/add?pid={{ $off_details->id }}&amp;type=offer">{{ __('offers.text_add_comment') }}</a></p>
 </section>

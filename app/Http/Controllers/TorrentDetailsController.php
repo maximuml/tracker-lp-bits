@@ -212,12 +212,13 @@ class TorrentDetailsController extends Controller
         );
         $commentPagerTop = SafeHtml::fromPlainText('');
         $commentPagerBottom = SafeHtml::fromPlainText('');
+        $commentPager = [];
         $commentCount = 0;
         $commentsEnabled = ! ActorContext::current()->no('showcomment');
         if ($commentsEnabled) {
             $commentCount = $this->torrentDetailRepository->getCommentCount($id);
             if ($commentCount > 0) {
-                [$commentPagerTop, $commentPagerBottom] = Pagination::pager(
+                [$commentPagerTop, $commentPagerBottom, , , , , $commentPager] = Pagination::pager(
                     10, $commentCount, "/web/details/$id?cmtpage=1&", ['lastpagedefault' => 1], 'page'
                 );
             }
@@ -236,6 +237,7 @@ class TorrentDetailsController extends Controller
             'commentCount' => $commentCount,
             'commentPagerTop' => $commentPagerTop,
             'commentPagerBottom' => $commentPagerBottom,
+            'commentPager' => $commentPager,
             'commentsEnabled' => $commentsEnabled,
         ];
     }

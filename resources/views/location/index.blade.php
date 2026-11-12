@@ -95,7 +95,7 @@
 </tr>
 @endforeach
 </x-data-table>
-{{ $pagerbottom ?? '' }}
+<x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
 @endif
 </x-frame>
 </x-page>

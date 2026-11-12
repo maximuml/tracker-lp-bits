@@ -30,5 +30,7 @@ final class OfferTableViewModel
         public readonly array $rows,
         public readonly array $tooltips,
         public readonly SafeHtml $pagerBottom,
+        /** @var array<string, mixed> <x-pagination> prop map */
+        public readonly array $pager,
     ) {}
 }

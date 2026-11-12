@@ -11,7 +11,7 @@
         <input type="hidden" name="returnto" value="{{ $returnto }}">
     @endif
     <p class="text-center">
-        <button type="submit" class="nx-postbtn nx-postbtn--danger"><b>{{ $confirmLabel }}</b></button>{{ $confirmSuffix ?? '' }}
+        <button type="submit" class="nx-postbtn nx-postbtn--danger" data-submit-once><b>{{ $confirmLabel }}</b></button>{{ $confirmSuffix ?? '' }}
         @if (($cancelLabel ?? '') !== '')
             &nbsp;|&nbsp;
             <a href="{{ $cancelUrl }}">{{ $cancelLabel }}</a>

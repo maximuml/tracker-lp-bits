@@ -60,7 +60,7 @@
         @endif
     </section>
 </div>
-<div class="nx-upload__submit"><input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('edit.submit_edit_it') }}" /> <input type="reset" class="nx-btn" value="{{ __('edit.submit_revert_changes') }}" /></div>
+<div class="nx-upload__submit"><input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('edit.submit_edit_it') }}"  data-submit-once /> <input type="reset" class="nx-btn" value="{{ __('edit.submit_revert_changes') }}" /></div>
 </form>
 @if ($showDeleteForm)
 <form method="post" action="/web/torrents/delete">
@@ -94,7 +94,7 @@
         </div>
     </section>
 </div>
-<div class="nx-upload__submit"><input type="submit" class="nx-btn nx-btn--danger" value="{{ __('edit.submit_delete_it') }}" /></div>
+<div class="nx-upload__submit"><input type="submit" class="nx-btn nx-btn--danger" value="{{ __('edit.submit_delete_it') }}"  data-submit-once /></div>
 </form>
 @endif
 @endif

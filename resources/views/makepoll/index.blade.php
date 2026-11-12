@@ -14,7 +14,7 @@
 @for ($i = 0; $i <= 19; $i++)
 <label class="nx-fhead" for="poll-option{{ $i }}">{{ (__('makepoll.text_option')).($i + 1) }}@if ($i < 2) <span class="text-nxm-danger">*</span>@endif</label><div class="nx-fcell"><input id="poll-option{{ $i }}" name=option{{ $i }} class=mp maxlength=40 value="{{ (string) ($poll["option{$i}"] ?? '') }}"><br /></div>
 @endfor
-<div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ $pollid ? (__('makepoll.submit_edit_poll')) : (__('makepoll.submit_create_poll')) }}"></div>
+<div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ $pollid ? (__('makepoll.submit_edit_poll')) : (__('makepoll.submit_create_poll')) }}" data-submit-once></div>
 </div>
 <p><span class="text-nxm-danger">*</span>{{ __('makepoll.text_required')}}</p>
 @if ($pollid > 0)

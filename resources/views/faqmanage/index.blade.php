@@ -43,7 +43,7 @@
 <div class="nx-box nx-box--tight w-[97%] mx-auto text-center">
     <a href="/web/faqactions?action=addsection">{{ __('faqmanage.add_section') }}</a>
 </div>
-<p class="text-center"><input type="submit" name="reorder" class="nx-btn nx-btn--primary" value="{{ __('faqmanage.reorder') }}"></p>
+<p class="text-center"><input type="submit" name="reorder" class="nx-btn nx-btn--primary" value="{{ __('faqmanage.reorder') }}" data-submit-once></p>
 </form>
 <p>{{ __('faqmanage.position_note') }}</p>
 </x-page>

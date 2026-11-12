@@ -8,15 +8,15 @@
 <p><b>{{ __('userdetails.text_account_disabled_note') }}</b></p>
 @elseif (! $isOwner)
 @if ($isFriend)
-<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_friends') }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('userdetails.text_remove_from_friends') }}</button></form>)</div>
 @elseif ($currentUserBlockedTarget)
-<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_blocks') }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('userdetails.text_remove_from_blocks') }}</button></form>)</div>
 @else
-<div class="my-2">(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_friends') }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_blocks') }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('userdetails.text_add_to_friends') }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('userdetails.text_add_to_blocks') }}</button></form>)</div>
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
-<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nx-postbtn nx-postbtn--danger" data-confirm="{{ __('userdetails.confirm_flush_ghost') }}">{{ __('userdetails.text_here') }}</button></form></div>
+<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nx-postbtn nx-postbtn--danger" data-confirm="{{ __('userdetails.confirm_flush_ghost') }}" data-submit-once>{{ __('userdetails.text_here') }}</button></form></div>
 @endif
 <x-data-table :caption="__('userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)
@@ -164,7 +164,7 @@
 <x-settings-row :label="__('userdetails.row_change_email')" for="mod-email"><input type="text" size="80" id="mod-email" name="email" value="{{ $user['email'] }}" /></x-settings-row>
 @endif
 <x-settings-row :label="__('userdetails.row_passkey')"><label><input name="resetkey" value="yes" type="checkbox" />{{ __('userdetails.checkbox_reset_passkey') }}</label></x-settings-row>
-<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') }}" /></td></tr>
+<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') }}"  data-submit-once /></td></tr>
 </x-data-table>
 </form>
 </x-frame>

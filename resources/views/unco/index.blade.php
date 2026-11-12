@@ -33,7 +33,7 @@
                             <option value="confirmed">{{ __('unco.status_confirmed') }}</option>
                         </select>
                     </td>
-                    <td class="text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('unco.submit_go') }}"></td>
+                    <td class="text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('unco.submit_go') }}" data-submit-once></td>
                 </form>
             </tr>
         @endforeach

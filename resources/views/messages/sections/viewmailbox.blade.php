@@ -29,12 +29,12 @@
 <div class="nx-bulkbar" data-bulkbar hidden>
 	<span class="nx-bulkbar__count"><b data-bulk-count>0</b> {{ __('messages.text_selected') }}</span>
 	@if (! $viewmailbox['isSentBox'])
-	<input class="nx-postbtn" type="submit" name="markread" value="{{ __('messages.submit_mark_as_read') }}">
+	<input class="nx-postbtn" type="submit" name="markread" value="{{ __('messages.submit_mark_as_read') }}" data-submit-once>
 	@endif
-	<input class="nx-postbtn nx-postbtn--danger" type="submit" name="delete" value="{{ __('messages.submit_delete') }}" data-confirm="{{ __('messages.confirm_delete_selected') }}">
+	<input class="nx-postbtn nx-postbtn--danger" type="submit" name="delete" value="{{ __('messages.submit_delete') }}" data-confirm="{{ __('messages.confirm_delete_selected') }}" data-submit-once>
 	@if (! $viewmailbox['isSentBox'])
 	{{ __('messages.text_or') }}
-	<input class="nx-postbtn" type="submit" name="move" value="{{ __('messages.submit_move_to') }}">
+	<input class="nx-postbtn" type="submit" name="move" value="{{ __('messages.submit_move_to') }}" data-submit-once>
 	<select name="box" aria-label="{{ __('messages.submit_move_to') }}"><option value="1">{{ __('messages.text_inbox') }}</option>
 	@foreach ($viewmailbox['moveBoxes'] as $opt)
 	<option value="{{ $opt->value }}">{{ $opt->label }}</option>

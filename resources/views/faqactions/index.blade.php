@@ -29,7 +29,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}"></div>
+            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}" data-submit-once></div>
             </div>
         </form>
     @elseif (($arr['type'] ?? '') === 'categ')
@@ -45,13 +45,13 @@
                     <option value="1"@if (($arr['flag'] ?? -1) == 1) selected="selected"@endif>{{ __('faqactions.status_normal') }}</option>
                 </select>
             </div>
-            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}"></div>
+            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}" data-submit-once></div>
             </div>
         </form>
     @endif
 @elseif (($mode ?? '') === 'confirm_delete')
     <div class="nx-box w-[97%] mx-auto text-center">
-    Please click <form method="post" action="/web/faq/actions?action=delete&id={{ (int) ($id ?? 0) }}" class="nx-inline">@csrf<input type="hidden" name="confirm" value="yes"><button type="submit" class="nx-postbtn nx-postbtn--danger">here</button></form> to confirm.
+    Please click <form method="post" action="/web/faq/actions?action=delete&id={{ (int) ($id ?? 0) }}" class="nx-inline">@csrf<input type="hidden" name="confirm" value="yes"><button type="submit" class="nx-postbtn nx-postbtn--danger" data-submit-once>here</button></form> to confirm.
     </div>
 @elseif (($mode ?? '') === 'additem')
     <form method="post" action="/web/faq/actions?action=addnewitem">
@@ -69,7 +69,7 @@
         </div>
         <input type="hidden" name="categ" value="{{ (int) ($inid ?? 0) }}">
         <input type="hidden" name="langid" value="{{ (int) ($langid ?? 0) }}">
-        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}"></div>
+        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once></div>
         </div>
     </form>
 @elseif (($mode ?? '') === 'addsection')
@@ -90,7 +90,7 @@
                 <option value="1" selected="selected">{{ __('faqactions.status_normal') }}</option>
             </select>
         </div>
-        <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}"></div>
+        <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once></div>
         </div>
     </form>
 @endif

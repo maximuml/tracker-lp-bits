@@ -50,6 +50,7 @@
             @if($chrome->search->globalSearchEnabled)
             <button type="button" class="nxm-iconbtn nxm-searchbtn" aria-expanded="false" aria-controls="nxm-search" title="{{ __('functions.text_search') }}" aria-label="{{ __('functions.text_search') }}"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 4 4"/></svg></button>
             @endif
+            <span id="nx-conn-badge" class="nx-conn-badge" role="status" hidden>{{ __('functions.text_no_connection') }}</span>
             <div class="nxm-userbar__icons">
                 <a href="/web/messages" class="nxm-iconbtn nxm-inboxbtn" title="{{ $chrome->userBar->unreadCount > 0 ? __('functions.title_inbox_new_messages') : __('functions.title_inbox_no_new_messages') }}" aria-label="{{ $chrome->userBar->unreadCount > 0 ? __('functions.title_inbox_new_messages') : __('functions.title_inbox_no_new_messages') }}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="m2.5 5 5.5 4 5.5-4"/></svg>@if($chrome->userBar->unreadCount > 0)<span class="nxm-badge">{{ $chrome->userBar->unreadCount }}</span>@endif</a>
                 <span class="nx-notif">

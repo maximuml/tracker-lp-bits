@@ -387,4 +387,5 @@ return [
     'image_ext_jpeg' => '.jpeg or',
     'technical_mediainfo' => 'MediaInfo',
     'technical_bdinfo' => 'BDInfo',
+    'text_no_connection' => 'No connection',
 ];

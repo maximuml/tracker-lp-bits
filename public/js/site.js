@@ -1644,3 +1644,33 @@ document.addEventListener('DOMContentLoaded', function () {
         subtree: true
     });
 })();
+
+/* Connectivity badge: show "No connection" in the header when the browser
+   goes offline, and briefly when a fetch() fails at the network layer
+   (covers Livewire actions and other AJAX without per-call handling). */
+(function () {
+    var badge = document.getElementById('nx-conn-badge');
+    var flashTimer = null;
+    function show() { if (badge) { badge.hidden = false; } }
+    function hide() { if (badge) { badge.hidden = true; } }
+    window.addEventListener('offline', show);
+    window.addEventListener('online', function () {
+        clearTimeout(flashTimer);
+        hide();
+    });
+    if (badge && navigator.onLine === false) { show(); }
+
+    if (typeof window.fetch === 'function') {
+        var origFetch = window.fetch;
+        window.fetch = function () {
+            return origFetch.apply(this, arguments).catch(function (err) {
+                if (navigator.onLine !== false) {
+                    show();
+                    clearTimeout(flashTimer);
+                    flashTimer = setTimeout(hide, 4000);
+                }
+                throw err;
+            });
+        };
+    }
+})();

@@ -15,16 +15,16 @@
 <input type='hidden' name='edited' value='1'>
 <div class="nx-fgrid nx-fgrid--flat nx-main w-[50%]">
 <div class="nx-ffull nx-colhead text-center">{{ __('location.editing') }}</div>
-<div class="nx-fhead">Name:</div><div class="nx-fcell"><input type='text' class="w-full" size=10 name='name' aria-label='Name' id='loc-name' value='{{ $editRow['name'] }}'></div>
-<label class="nx-fhead" for="loc-location_main"><span class="nx-nobr">{{ __('location.main_location_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=50 name='location_main' aria-label='Main Location' id='loc-location_main' value='{{ $editRow['location_main'] }}'></div>
-<label class="nx-fhead" for="loc-location_sub"><span class="nx-nobr">{{ __('location.sub_location_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=50 name='location_sub' aria-label='Sub Location' id='loc-location_sub' value='{{ $editRow['location_sub'] }}'></div>
-<label class="nx-fhead" for="loc-start_ip"><span class="nx-nobr">{{ __('location.start_ip_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=30 name='start_ip' aria-label='Start IP' id='loc-start_ip' value='{{ $editRow['start_ip'] }}'></div>
-<label class="nx-fhead" for="loc-end_ip"><span class="nx-nobr">{{ __('location.end_ip_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=30 name='end_ip' aria-label='End IP' id='loc-end_ip' value='{{ $editRow['end_ip'] }}'></div>
-<label class="nx-fhead" for="loc-theory_upspeed"><span class="nx-nobr">{{ __('location.theory_up_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='theory_upspeed' aria-label='Theory Up' id='loc-theory_upspeed' value='{{ $editRow['theory_upspeed'] }}'></div>
-<label class="nx-fhead" for="loc-theory_downspeed"><span class="nx-nobr">{{ __('location.theory_down_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='theory_downspeed' aria-label='Theory Down' id='loc-theory_downspeed' value='{{ $editRow['theory_downspeed'] }}'></div>
-<label class="nx-fhead" for="loc-practical_upspeed"><span class="nx-nobr">{{ __('location.practical_up_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='practical_upspeed' aria-label='Practical Up' id='loc-practical_upspeed' value='{{ $editRow['practical_upspeed'] }}'></div>
-<label class="nx-fhead" for="loc-practical_downspeed"><span class="nx-nobr">{{ __('location.practical_down_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='practical_downspeed' aria-label='Practical Down' id='loc-practical_downspeed' value='{{ $editRow['practical_downspeed'] }}'></div>
-<div class="nx-fhead">Picture:</div><div class="nx-fcell"><input type='text' class="w-full" size=50 name='flagpic' aria-label='Picture' id='loc-flagpic' value='{{ $editRow['flagpic'] }}'></div>
+<div class="nx-fhead">{{ __('location.col_name') }}:</div><div class="nx-fcell"><input type='text' class="w-full" size=10 name='name' aria-label="{{ __('location.col_name') }}" id='loc-name' value='{{ $editRow['name'] }}'></div>
+<label class="nx-fhead" for="loc-location_main"><span class="nx-nobr">{{ __('location.main_location_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=50 name='location_main' id='loc-location_main' value='{{ $editRow['location_main'] }}'></div>
+<label class="nx-fhead" for="loc-location_sub"><span class="nx-nobr">{{ __('location.sub_location_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=50 name='location_sub' id='loc-location_sub' value='{{ $editRow['location_sub'] }}'></div>
+<label class="nx-fhead" for="loc-start_ip"><span class="nx-nobr">{{ __('location.start_ip_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=30 name='start_ip' id='loc-start_ip' value='{{ $editRow['start_ip'] }}'></div>
+<label class="nx-fhead" for="loc-end_ip"><span class="nx-nobr">{{ __('location.end_ip_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=30 name='end_ip' id='loc-end_ip' value='{{ $editRow['end_ip'] }}'></div>
+<label class="nx-fhead" for="loc-theory_upspeed"><span class="nx-nobr">{{ __('location.theory_up_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='theory_upspeed' id='loc-theory_upspeed' value='{{ $editRow['theory_upspeed'] }}'></div>
+<label class="nx-fhead" for="loc-theory_downspeed"><span class="nx-nobr">{{ __('location.theory_down_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='theory_downspeed' id='loc-theory_downspeed' value='{{ $editRow['theory_downspeed'] }}'></div>
+<label class="nx-fhead" for="loc-practical_upspeed"><span class="nx-nobr">{{ __('location.practical_up_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='practical_upspeed' id='loc-practical_upspeed' value='{{ $editRow['practical_upspeed'] }}'></div>
+<label class="nx-fhead" for="loc-practical_downspeed"><span class="nx-nobr">{{ __('location.practical_down_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='practical_downspeed' id='loc-practical_downspeed' value='{{ $editRow['practical_downspeed'] }}'></div>
+<div class="nx-fhead">{{ __('location.col_pic') }}:</div><div class="nx-fcell"><input type='text' class="w-full" size=50 name='flagpic' aria-label="{{ __('location.col_pic') }}" id='loc-flagpic' value='{{ $editRow['flagpic'] }}'></div>
 <div class="nx-ffull nx-toolbox text-center"><input class='nx-btn nx-btn--primary' type='Submit'></div>
 </div>
 </form>
@@ -33,16 +33,16 @@
 <form name='form1' method='post' action='/web/system/location' class="w-full md:w-[48%]">@csrf
 <div class="nx-fgrid nx-fgrid--flat nx-main">
 <div class="nx-ffull nx-colhead text-center">{{ __('location.add_new') }}</div>
-<div class="nx-fhead">Name:</div><div class="nx-fcell"><input type='text' class="w-full" size=10 name='name' aria-label='Name'></div>
-<label class="nx-fhead" for="loc-location_main"><span class="nx-nobr">{{ __('location.main_location_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=50 name='location_main' aria-label='Main Location'></div>
-<label class="nx-fhead" for="loc-location_sub"><span class="nx-nobr">{{ __('location.sub_location_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=50 name='location_sub' aria-label='Sub Location'></div>
-<label class="nx-fhead" for="loc-start_ip"><span class="nx-nobr">{{ __('location.start_ip_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=30 name='start_ip' aria-label='Start IP'></div>
-<label class="nx-fhead" for="loc-end_ip"><span class="nx-nobr">{{ __('location.end_ip_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=30 name='end_ip' aria-label='End IP'></div>
-<label class="nx-fhead" for="loc-theory_upspeed"><span class="nx-nobr">{{ __('location.theory_up_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='theory_upspeed' aria-label='Theory Up'></div>
-<label class="nx-fhead" for="loc-theory_downspeed"><span class="nx-nobr">{{ __('location.theory_down_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='theory_downspeed' aria-label='Theory Down'></div>
-<label class="nx-fhead" for="loc-practical_upspeed"><span class="nx-nobr">{{ __('location.practical_up_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='practical_upspeed' aria-label='Practical Up'></div>
-<label class="nx-fhead" for="loc-practical_downspeed"><span class="nx-nobr">{{ __('location.practical_down_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='practical_downspeed' aria-label='Practical Down'></div>
-<div class="nx-fhead">Picture:</div><div class="nx-fcell"><input type='text' class="w-full" size=50 name='flagpic' aria-label='Picture'><input type='hidden' name='add' value='true'></div>
+<div class="nx-fhead">{{ __('location.col_name') }}:</div><div class="nx-fcell"><input type='text' class="w-full" size=10 name='name' aria-label="{{ __('location.col_name') }}"></div>
+<label class="nx-fhead" for="loc-location_main"><span class="nx-nobr">{{ __('location.main_location_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=50 name='location_main'></div>
+<label class="nx-fhead" for="loc-location_sub"><span class="nx-nobr">{{ __('location.sub_location_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=50 name='location_sub'></div>
+<label class="nx-fhead" for="loc-start_ip"><span class="nx-nobr">{{ __('location.start_ip_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=30 name='start_ip'></div>
+<label class="nx-fhead" for="loc-end_ip"><span class="nx-nobr">{{ __('location.end_ip_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=30 name='end_ip'></div>
+<label class="nx-fhead" for="loc-theory_upspeed"><span class="nx-nobr">{{ __('location.theory_up_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='theory_upspeed'></div>
+<label class="nx-fhead" for="loc-theory_downspeed"><span class="nx-nobr">{{ __('location.theory_down_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='theory_downspeed'></div>
+<label class="nx-fhead" for="loc-practical_upspeed"><span class="nx-nobr">{{ __('location.practical_up_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='practical_upspeed'></div>
+<label class="nx-fhead" for="loc-practical_downspeed"><span class="nx-nobr">{{ __('location.practical_down_colon') }}</span></label><div class="nx-fcell"><input type='text' class="w-full" size=10 name='practical_downspeed'></div>
+<div class="nx-fhead">{{ __('location.col_pic') }}:</div><div class="nx-fcell"><input type='text' class="w-full" size=50 name='flagpic' aria-label="{{ __('location.col_pic') }}"><input type='hidden' name='add' value='true'></div>
 <div class="nx-ffull nx-toolbox text-center"><input class='nx-btn nx-btn--primary' type='Submit'></div>
 </div>
 </form>
@@ -50,8 +50,8 @@
 <form name='form2' method='get' action='{{ $actionUrl ?? '' }}' class="w-full md:w-[48%]">
 <div class="nx-fgrid nx-fgrid--flat nx-main">
 <div class="nx-ffull nx-colhead text-center">{{ __('location.check_ip_range') }}</div>
-<div class="nx-fhead"><span class="nx-nobr">{{ __('location.start_ip_colon') }}</span></div><div class="nx-fcell"><input type='text' class="w-full" size=30 name='range_start_ip' aria-label='Range start IP' value='{{ $rangeStartIp ?? '' }}'></div>
-<div class="nx-fhead"><span class="nx-nobr">{{ __('location.end_ip_colon') }}</span></div><div class="nx-fcell"><input type='text' class="w-full" size=30 name='range_end_ip' aria-label='Range end IP' value='{{ $rangeEndIp ?? '' }}'><input type='hidden' name='check_range' value='true'></div>
+<div class="nx-fhead"><span class="nx-nobr">{{ __('location.start_ip_colon') }}</span></div><div class="nx-fcell"><input type='text' class="w-full" size=30 name='range_start_ip' aria-label="{{ __('location.col_start_ip') }}" value='{{ $rangeStartIp ?? '' }}'></div>
+<div class="nx-fhead"><span class="nx-nobr">{{ __('location.end_ip_colon') }}</span></div><div class="nx-fcell"><input type='text' class="w-full" size=30 name='range_end_ip' aria-label="{{ __('location.col_end_ip') }}" value='{{ $rangeEndIp ?? '' }}'><input type='hidden' name='check_range' value='true'></div>
 <div class="nx-ffull nx-toolbox text-center"><input class='nx-btn nx-btn--primary' type='Submit'></div>
 </div>
 </form>

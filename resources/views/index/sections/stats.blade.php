@@ -24,8 +24,8 @@
 <td>{{ $stats->userStats['donorsLabel'] }} <i class="star" role="img" aria-label="{{ __('functions.title_donor') }}"></i></td><td>{{ $stats->userStats['donors'] }}</td>
 </tr>
 <tr>
-<td>{{ $stats->userStats['warnedLabel'] }} <i class="warned" role="img" aria-label="warned"></i></td><td>{{ $stats->userStats['warned'] }}</td>
-<td>{{ $stats->userStats['bannedLabel'] }} <i class="disabled" role="img" aria-label="disabled"></i></td><td>{{ $stats->userStats['banned'] }}</td>
+<td>{{ $stats->userStats['warnedLabel'] }} <i class="warned" role="img" aria-label="{{ $stats->userStats['warnedLabel'] }}"></i></td><td>{{ $stats->userStats['warned'] }}</td>
+<td>{{ $stats->userStats['bannedLabel'] }} <i class="disabled" role="img" aria-label="{{ $stats->userStats['bannedLabel'] }}"></i></td><td>{{ $stats->userStats['banned'] }}</td>
 </tr>
 <tr>
 <td>{{ $stats->userStats['maleLabel'] }}</td><td>{{ $stats->userStats['male'] }}</td>

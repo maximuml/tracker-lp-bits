@@ -23,7 +23,7 @@
         <td class="align-top px-2.5 py-1.5"><span class="nx-nobr">{{ $row['type_label'] }}</span></td>
         <td class="align-top px-2.5 py-1.5">{{ $row['reason'] }}</td>
         <td class="align-top px-2.5 py-1.5"><span class="nx-nobr">@if ($row['dealtwith'])<span class="text-nxm-success">{{ __('reports.text_yes') }}</span> - {{ $row['dealtbyHtml'] }}@else<span class="text-nxm-danger">{{ __('reports.text_no') }}</span>@endif</span></td>
-        <td class="align-top px-2.5 py-1.5"><input type="checkbox" name="delreport[]" value="{{ (int) $row['id'] }}" aria-label="Delete report {{ (int) $row['id'] }}" /></td>
+        <td class="align-top px-2.5 py-1.5"><input type="checkbox" name="delreport[]" value="{{ (int) $row['id'] }}" aria-label="{{ __('reports.aria_delete_report', ['id' => (int) $row['id']]) }}" /></td>
     </tr>
 @endforeach
 <tr>

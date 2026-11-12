@@ -128,6 +128,37 @@ final class A11yI18nChromeTest extends TestCase
         $this->assertStringNotContainsString('nxm-logo" href="/web/index"><img src="{{ $chrome->logoMain }}" alt="{{ $chrome->siteName }}" loading="lazy"', $header);
     }
 
+    public function test_views_have_no_hardcoded_aria_labels(): void
+    {
+        $offenders = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(base_path('resources/views'), \RecursiveDirectoryIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $file) {
+            if (! $file->isFile() || ! str_ends_with($file->getFilename(), '.blade.php')) {
+                continue;
+            }
+
+            $content = file_get_contents($file->getPathname());
+            if ($content === false) {
+                continue;
+            }
+
+            foreach (explode("\n", $content) as $lineNo => $line) {
+                if (preg_match('/aria-label=["\'][A-Za-z]/', $line) === 1) {
+                    $offenders[] = sprintf('%s:%d', $file->getFilename(), $lineNo + 1);
+                }
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offenders,
+            'Hardcoded aria-label literals must go through __() lang keys:\n'.implode("\n", $offenders),
+        );
+    }
+
     public function test_security_and_reset_forms_expose_autocomplete_hints(): void
     {
         $security = file_get_contents(base_path('resources/views/usercp/sections/security.blade.php'));

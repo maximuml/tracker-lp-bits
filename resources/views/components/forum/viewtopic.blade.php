@@ -1,5 +1,5 @@
 @props(['topic'])
-<nav class="nx-crumbs" aria-label="breadcrumbs">
+<nav class="nx-crumbs" aria-label="{{ __('forums.aria_breadcrumbs') }}">
     <a href="/web/index">{{ $topic->sitename }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
     <a href="/forums">{{ trim(__('forums.text_forums')) }}</a>

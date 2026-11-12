@@ -15,7 +15,7 @@
             <tr>
                 <td>
                     <div class="flex items-start gap-2">
-                        <i class="unlockednew" role="img" aria-label="unread" title="{{ __('forums.title_unread') }}"></i>
+                        <i class="unlockednew" role="img" aria-label="{{ __('forums.title_unread') }}" title="{{ __('forums.title_unread') }}"></i>
                         <div>
                             <a href="{{ request()->getPathInfo() }}?action=viewtopic&amp;topicid={{ $row->topicId }}@if ($row->jumpToPostId !== null)&amp;page=p{{ $row->jumpToPostId }}#pid{{ $row->jumpToPostId }}@endif">@if ($row->hlcolor > 0)<b class="nx-hl-{{ $row->hlcolor }}">{{ $row->subject }}</b>@else{{ $row->subject }}@endif</a>
                         </div>

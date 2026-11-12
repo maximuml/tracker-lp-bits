@@ -16,4 +16,6 @@ return [
     'text_username' => 'Username',
     'text_torrent_size' => 'Torrent Size',
     'text_torrent_num' => 'Torrent Num',
+    'aria_year' => 'Year',
+    'aria_month' => 'Month',
 ];

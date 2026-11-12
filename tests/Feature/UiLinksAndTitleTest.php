@@ -52,10 +52,10 @@ final class UiLinksAndTitleTest extends TestCase
 
         $response->assertOk();
         $html = (string) $response->getContent();
-        $this->assertStringContainsString('data-nx-copy="', $html);
+        $this->assertStringContainsString('data-copy-value="', $html);
         $this->assertStringContainsString('/download?downhash=', $html);
         $this->assertStringContainsString('Copy torrent link', $html);
-        $this->assertStringContainsString('data-nx-copy-live', $html);
+        $this->assertStringContainsString('data-copy-live', $html);
         $this->assertStringNotContainsString('Right click to view', $html);
     }
 
@@ -71,6 +71,7 @@ final class UiLinksAndTitleTest extends TestCase
         $response->assertOk();
         $html = (string) $response->getContent();
         $this->assertStringNotContainsString('data-nx-copy', $html);
+        $this->assertStringNotContainsString('data-copy-value', $html);
         $this->assertStringNotContainsString('Torrent URL', $html);
     }
 
@@ -83,7 +84,7 @@ final class UiLinksAndTitleTest extends TestCase
         $response = $this->withNexusCookie($owner)->get('/web/details/'.$torrent->id);
 
         $response->assertOk();
-        $this->assertStringContainsString('data-nx-copy="', (string) $response->getContent());
+        $this->assertStringContainsString('data-copy-value="', (string) $response->getContent());
     }
 
     public function test_forum_pager_normalizes_query_only_href(): void

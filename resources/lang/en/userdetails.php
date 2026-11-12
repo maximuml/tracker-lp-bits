@@ -148,4 +148,6 @@ return [
     'col_agent' => 'Agent',
     'col_port' => 'Port',
     'confirm_flush_ghost' => 'Delete all ghost torrents (no seeders and no leechers) of this user? This cannot be undone.',
+    'aria_hr_stats' => 'H&R stats',
+    'row_hr' => 'H&R',
 ];

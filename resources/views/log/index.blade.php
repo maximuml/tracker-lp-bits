@@ -25,7 +25,7 @@
     @if (empty($logRows))
         <x-empty-state :title="__('log.text_log_empty')" />
     @else
-        <x-data-table :caption="__('log.text_daily_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="time" role="img" aria-label="time" title="{{ __('log.title_time_added')}}"></i></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>
+        <x-data-table :caption="__('log.text_daily_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="time" role="img" aria-label="{{ __('log.title_time_added')}}" title="{{ __('log.title_time_added')}}"></i></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>
         @if ($canConfidentialLog)
             <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_user')}}</th>
         @endif

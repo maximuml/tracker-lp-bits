@@ -34,13 +34,13 @@
                 <input type="hidden" name="menu" value="invitee" />
                 <input type="hidden" name="id" value="{{ $id }}" />
                 <span>{{ __('invite.text_enabled')}}:</span>
-                <select name="enabled" aria-label="Enabled">
+                <select name="enabled" aria-label="{{ __('invite.text_enabled') }}">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
                     @foreach ($inviteeEnabledOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
                 </select>
                 &nbsp;&nbsp;
                 <span>{{ __('invite.text_status')}}:</span>
-                <select name="status" aria-label="Status">
+                <select name="status" aria-label="{{ __('invite.text_status') }}">
                     <option value="">-{{ $textSelectOnePlease }}-</option>
                     @foreach ($inviteeStatusOptions as $opt)<option value="{{ $opt['value'] }}"{{ $opt['selected'] ? ' selected' : '' }}>{{ $opt['text'] }}</option>@endforeach
                 </select>

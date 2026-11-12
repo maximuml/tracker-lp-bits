@@ -203,4 +203,6 @@ return [
     'text_report' => 'Report',
     'text_mod_tools' => 'Moderator tools',
     'confirm_delete_topic' => 'Delete this topic and all its posts?',
+    'aria_breadcrumbs' => 'Breadcrumbs',
+    'title_multipage' => 'Multi-page',
 ];

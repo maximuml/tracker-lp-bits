@@ -36,7 +36,7 @@
     </div>
     <footer class="nx-post__foot">
         <span class="nx-post__contact">
-            <span class="nx-post__status{{ $post->online ? ' nx-post__status--on' : '' }}" title="{{ $post->online ? __('forums.title_online') : __('forums.title_offline') }}"></span>
+            <span class="nx-post__status{{ $post->online ? ' nx-post__status--on' : '' }}" title="{{ $post->online ? __('forums.title_online') : __('forums.title_offline') }}"><span class="nx-sr-only">{{ $post->online ? __('forums.title_online') : __('forums.title_offline') }}</span></span>
             <a class="nx-postbtn" href="/web/sendmessage?receiver={{ $post->posterId }}" title="{{ __('forums.title_send_message_to') }}{{ $post->posterName }}">{{ __('forums.text_pm') }}</a>
             <a class="nx-postbtn" href="/web/report?forumpost={{ $post->id }}" title="{{ __('forums.title_report_this_post') }}">{{ __('forums.text_report') }}</a>
         </span>

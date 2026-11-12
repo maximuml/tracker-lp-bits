@@ -79,7 +79,7 @@
 
         <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="upl-sec-descr">
             <h2 class="nx-setcard__title" id="upl-sec-descr">{{ __('upload.section_description') }}<span class="text-nxm-danger">*</span></h2>
-            <livewire:bbcode-editor form="upload" text="descr" :content="$descrContent ?? ''" :invalid="$descrInvalid ?? false" described-by="descr-error" :label="__('upload.section_description')" :compact="true" />
+            <livewire:bbcode-editor form="upload" text="descr" :content="$descrContent ?? ''" :invalid="$descrInvalid ?? false" described-by="descr-error" :label="__('upload.section_description')" :compact="true" :required="true" />
             @error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror
         </section>
 

@@ -76,6 +76,10 @@ final class Comment
             );
         }
 
+        if (str_contains($s, '[list') || str_contains($s, '[ul') || str_contains($s, '[ol')) {
+            $s = BBCode::lists($s);
+        }
+
         $s = nl2br($s);
 
         /** @var array<string, string> $literalMap */

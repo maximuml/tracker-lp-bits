@@ -38,6 +38,9 @@ final class BbcodeEditor extends Component
     #[Locked]
     public string $label = '';
 
+    #[Locked]
+    public bool $required = false;
+
     public function mount(
         string $form = '',
         string $text = 'body',
@@ -46,6 +49,7 @@ final class BbcodeEditor extends Component
         string $describedBy = '',
         string $label = '',
         bool $compact = false,
+        bool $required = false,
     ): void {
         $this->form = $form;
         $this->text = $text;
@@ -54,6 +58,7 @@ final class BbcodeEditor extends Component
         $this->describedBy = $describedBy;
         $this->label = $label;
         $this->compact = $compact;
+        $this->required = $required;
     }
 
     public function preview(): void

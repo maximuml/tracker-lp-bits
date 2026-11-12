@@ -435,4 +435,33 @@ class BBCodeTest extends TestCase
         $this->assertStringNotContainsString('"onerror="alert(1)"', $html);
         $this->assertStringContainsString('&quot;', $html);
     }
+
+    // ---------- lists ----------
+
+    public function test_lists_renders_list_and_ul_tags_as_unordered_list(): void
+    {
+        $expected = '<ul><li>one</li><li>two</li></ul>';
+        $this->assertSame($expected, BBCode::lists('[list][*]one[*]two[/list]'));
+        $this->assertSame($expected, BBCode::lists("[ul]\n[*] one\n[*] two\n[/ul]"));
+    }
+
+    public function test_lists_renders_ol_tag_as_ordered_list(): void
+    {
+        $this->assertSame(
+            '<ol><li>first</li><li>second</li></ol>',
+            BBCode::lists('[ol][*]first[*]second[/ol]'),
+        );
+    }
+
+    public function test_lists_leaves_unmatched_blocks_and_outer_stars_untouched(): void
+    {
+        $this->assertSame('[list][*]one', BBCode::lists('[list][*]one'));
+        $this->assertSame('[*] bullet', BBCode::lists('[*] bullet'));
+        $this->assertSame('[list]x[/ol]', BBCode::lists('[list]x[/ol]'));
+    }
+
+    public function test_lists_empty_block_produces_no_markup(): void
+    {
+        $this->assertSame('', BBCode::lists('[list][*][*][/list]'));
+    }
 }

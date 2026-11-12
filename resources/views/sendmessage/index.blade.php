@@ -18,7 +18,7 @@
 </div>
 <div class="nx-compose__field">
     <label for="body">{{ __('functions.row_body') }}</label>
-    <livewire:bbcode-editor form="compose" text="body" :content="old('body', $body)" :compact="true" :invalid="isset($errors) && $errors->has('body')" :described-by="isset($errors) && $errors->has('body') ? 'compose-body-error' : ''" />
+    <livewire:bbcode-editor form="compose" text="body" :content="old('body', $body)" :compact="true" :required="true" :invalid="isset($errors) && $errors->has('body')" :described-by="isset($errors) && $errors->has('body') ? 'compose-body-error' : ''" />
     @if (isset($errors) && $errors->has('body'))<p class="nx-field__error" id="compose-body-error">{{ $errors->first('body') }}</p>@endif
 </div>
 <div class="nx-compose__foot">

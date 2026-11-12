@@ -390,4 +390,5 @@ return [
     'aria_show_hide' => 'Show/Hide',
     'aria_bookmarked' => 'Bookmarked',
     'aria_unbookmarked' => 'Unbookmarked',
+    'text_no_connection' => 'No connection',
 ];

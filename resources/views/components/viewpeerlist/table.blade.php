@@ -60,4 +60,6 @@
         </tr>
     @endforeach
 </x-data-table>
+@else
+    <i class="text-nxm-text-dim">{{ __('viewpeerlist.text_no_peers') }}</i>
 @endif

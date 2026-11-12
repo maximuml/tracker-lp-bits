@@ -535,6 +535,7 @@ final class PageShellTest extends TestCase
         $this->assertMatchesRegularExpression('/<h1 class="nx-page__title">Shell Topic<\/h1>/', $html);
         $this->assertStringContainsString('id="top"', $html);
         $this->assertStringContainsString('action=reply', $html);
+        $this->assertStringContainsString('data-submit-once', $html);
         $this->assertStringNotContainsString('<h2 class="nx-sr-only">', $html);
     }
 

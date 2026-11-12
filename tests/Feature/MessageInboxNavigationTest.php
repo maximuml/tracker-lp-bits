@@ -93,7 +93,8 @@ final class MessageInboxNavigationTest extends TestCase
             ->get('/web/messages?action=viewmailbox&box=1')
             ->assertOk()
             ->assertSee('name="delete"', false)
-            ->assertSee('data-confirm="'.e(__('messages.confirm_delete_selected')).'"', false);
+            ->assertSee('data-confirm="'.e(__('messages.confirm_delete_selected')).'"', false)
+            ->assertSee('data-submit-once', false);
 
         $this->withNexusCookie($receiver)
             ->get('/web/messages?action=viewmessage&id='.$message->id)

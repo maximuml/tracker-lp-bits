@@ -16,7 +16,7 @@
     <div class="nx-attach-controls">
     <input type="file" name="file[]" multiple aria-label="{{ __('attachment.submit_upload') }}" @if (! $count_left) disabled="disabled"@endif />
     <label><input type="checkbox" name="altsize" value="yes"@if ($altsize == 'yes') checked="checked"@endif /> {{ __('attachment.text_small_thumbnail')}}</label>
-    <input type="submit" class="nx-postbtn" name="submit" value="{{ __('attachment.submit_upload')}}"@if (! $count_left) disabled="disabled"@endif />
+    <input type="submit" class="nx-postbtn" name="submit" value="{{ __('attachment.submit_upload')}}"@if (! $count_left) disabled="disabled"@endif  data-submit-once />
     </div>
     <div class="nx-attach-info">
     @if ($warning)

@@ -28,8 +28,8 @@
 @endforeach
 <tr>
     <th class="bg-nxm-surface-alt font-semibold text-right" colspan="7" scope="colgroup">
-        <input type="submit" name="setdealt" class="nx-btn nx-btn--primary" value="{{ __('reports.submit_set_dealt')}}" />
-        <input type="submit" name="delete" class="nx-btn nx-btn--danger" value="{{ __('reports.submit_delete')}}" data-confirm="{{ __('reports.confirm_delete_reports') }}" />
+        <input type="submit" name="setdealt" class="nx-btn nx-btn--primary" value="{{ __('reports.submit_set_dealt')}}"  data-submit-once />
+        <input type="submit" name="delete" class="nx-btn nx-btn--danger" value="{{ __('reports.submit_delete')}}" data-confirm="{{ __('reports.confirm_delete_reports') }}"  data-submit-once />
     </th>
 </tr>
 </form>

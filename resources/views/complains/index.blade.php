@@ -94,7 +94,7 @@
     @endif
 
     @if ($isAdmin)
-        <form action="{{ ! empty($complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post">@csrf<input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button type="submit" class="nx-btn">{{ ! empty($complain['answered']) ? (__('complains.text_unanswer_it')) : (__('complains.text_answer_it')) }}</button></form>
+        <form action="{{ ! empty($complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post">@csrf<input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button type="submit" class="nx-btn" data-submit-once>{{ ! empty($complain['answered']) ? (__('complains.text_unanswer_it')) : (__('complains.text_answer_it')) }}</button></form>
     @endif
 
 @else
@@ -106,7 +106,7 @@
             <label class="nx-fhead" for="complain-email">{{ __('complains.text_new_email') }}</label><div class="nx-fcell"><input id="complain-email" type="email" name="email" autocomplete="email" /></div>
             <div class="nx-fhead">{{ __('complains.text_new_body') }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('complains.text_new_body_placeholder') }}"></textarea></div>
             {{ $captchaHtml }}
-            <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') }}" class="nx-btn nx-btn--primary" /></div>
+            <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') }}" class="nx-btn nx-btn--primary"  data-submit-once /></div>
         </div>
     </form>
 </section>

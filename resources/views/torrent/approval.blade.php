@@ -48,7 +48,7 @@
             </div>
             <div id="approval-msg" role="alert"></div>
             <div class="row">
-                <button type="submit" class="nx-btn nx-btn--primary">{{ __('label.submit') }}</button>
+                <button type="submit" class="nx-btn nx-btn--primary" data-submit-once>{{ __('label.submit') }}</button>
                 <button type="reset" class="nx-btn">{{ __('label.reset') }}</button>
             </div>
         </form>

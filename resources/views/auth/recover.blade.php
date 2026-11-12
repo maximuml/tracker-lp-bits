@@ -46,7 +46,7 @@
             <x-form-field :label="__('recover.row_confirm_password')" name="password_confirmation" type="password" autocomplete="new-password" />
 
             <div class="nx-auth__actions">
-                <x-button type="submit" variant="primary">{{ __('recover.submit_reset_password') }}</x-button>
+                <x-button type="submit" variant="primary" data-submit-once>{{ __('recover.submit_reset_password') }}</x-button>
             </div>
         </form>
     @else
@@ -67,7 +67,7 @@
             @endif
 
             <div class="nx-auth__actions">
-                <x-button type="submit" variant="primary">{{ __('recover.submit_recover_it')}}</x-button>
+                <x-button type="submit" variant="primary" data-submit-once>{{ __('recover.submit_recover_it')}}</x-button>
             </div>
         </form>
 

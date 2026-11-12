@@ -83,6 +83,24 @@ final class MessageInboxNavigationTest extends TestCase
             ->assertOk();
     }
 
+    public function test_delete_controls_carry_data_confirm(): void
+    {
+        $receiver = $this->createUser();
+        $sender = $this->createUser();
+        $message = $this->createMessage($sender, $receiver);
+
+        $this->withNexusCookie($receiver)
+            ->get('/web/messages?action=viewmailbox&box=1')
+            ->assertOk()
+            ->assertSee('name="delete"', false)
+            ->assertSee('data-confirm="'.e(__('messages.confirm_delete_selected')).'"', false);
+
+        $this->withNexusCookie($receiver)
+            ->get('/web/messages?action=viewmessage&id='.$message->id)
+            ->assertOk()
+            ->assertSee('data-confirm="'.e(__('messages.confirm_delete_message')).'"', false);
+    }
+
     private function createUser(): User
     {
         $created = User::factory()->create();

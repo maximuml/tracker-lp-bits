@@ -36,7 +36,7 @@
                             @csrf
                             <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                             <input type="hidden" name="forumid" value="{{ $topic->forumid }}" />
-                            <input type="submit" class="nx-btn" value="{{ __('forums.submit_delete_topic') }}" />
+                            <input type="submit" class="nx-btn" value="{{ __('forums.submit_delete_topic') }}" data-confirm="{{ __('forums.confirm_delete_topic') }}" />
                         </form>
                         <form method="post" action="/web/forums/movetopic?topicid={{ $topic->topicid }}">@csrf
                             {{ __('forums.text_move_thread_to') }}

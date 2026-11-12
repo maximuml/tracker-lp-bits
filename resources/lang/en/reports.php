@@ -35,4 +35,5 @@ return [
     'text_for_torrent_id' => ' for torrent ID ',
     'submit_set_dealt' => 'Set Dealt',
     'submit_delete' => 'Delete',
+    'confirm_delete_reports' => 'Delete the selected reports?',
 ];

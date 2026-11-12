@@ -146,4 +146,5 @@ return [
     'text_comments' => 'Comments',
     'more_to_approve' => ':count more to approve',
     'approved_at' => 'Approved at +:count',
+    'confirm_delete_offer' => 'Delete this offer?',
 ];

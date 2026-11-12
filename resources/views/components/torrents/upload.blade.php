@@ -184,6 +184,6 @@
             @error('upload')<div class="nx-field__error" role="alert">{{ $message }}</div>@enderror
         </section>
     </div>
-    <div class="nx-upload__submit"><span>{{ __('upload.text_read_rules') }}</span> <input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('upload.submit_upload') }}" /></div>
+    <div class="nx-upload__submit"><span>{{ __('upload.text_read_rules') }}</span> <button type="submit" id="qr" class="nx-btn nx-btn--primary" data-processing-label="{{ __('upload.submit_processing') }}"><span class="nx-upload__btn-text">{{ __('upload.submit_upload') }}</span></button></div>
 </form>
 <script src="{{ \App\Support\AssetAppender::versionedSrc('js/upload.js') }}" type="text/javascript"></script>

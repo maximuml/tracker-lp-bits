@@ -2414,7 +2414,17 @@ html[data-theme="dark"] .nxm-main .nx-compose__help a {
     background: var(--nxm-surface);
 }
 
-.nx-upload__submit span { font-weight: 600; font-size: 0.9em; color: var(--nxm-text-dim); }
+.nx-upload__submit > span { font-weight: 600; font-size: 0.9em; color: var(--nxm-text-dim); }
+#qr.is-processing { cursor: progress; }
+#qr.is-processing::after {
+    content: ''; display: inline-block; width: .85em; height: .85em;
+    margin-left: .45em; border: 2px solid currentColor;
+    border-top-color: transparent; border-radius: 50%;
+    animation: nx-spin .8s linear infinite; vertical-align: -0.12em;
+}
+@media (prefers-reduced-motion: reduce) {
+    #qr.is-processing::after { animation: none; }
+}
 @media (max-width: 40rem) {
     .nx-up__pair { flex-direction: column; align-items: stretch; }
     .nx-upload__submit { flex-direction: column; align-items: stretch; }

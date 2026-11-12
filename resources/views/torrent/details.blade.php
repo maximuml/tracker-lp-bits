@@ -37,7 +37,7 @@
 <x-settings-row :label="__('details.row_basic_info')"><b>{{ __('details.text_size') }}</b>{{ \App\Support\Format::size((float) $torrentRow['size']) }}&nbsp;&nbsp;&nbsp;<b>{{ __('details.row_type') }}:</b>&nbsp;{{ $torrentRow['cat_name'] }}@foreach ($details->taxonomy as $entry)&nbsp;&nbsp;&nbsp;<b>{{ $entry->label }}: </b>{{ $entry->value }}@endforeach</x-settings-row>
 <x-settings-row :label="__('details.row_action')">@include('components.torrent.details.actions')</x-settings-row>
 @if ($details->downloadAllowed)
-<x-settings-row :label="__('details.torrent_dl_url')"><button type="button" class="nx-btn nx-btn--sm" data-nx-copy="{{ $downloadUrl }}" data-nx-copy-done="{{ __('details.torrent_dl_url_copied') }}" data-nx-copy-fail="{{ __('details.torrent_dl_url_copy_failed') }}" title="{{ __('details.torrent_dl_url_notice') }}">{{ __('details.torrent_dl_url_copy') }}</button><span class="nx-sr-only" role="status" data-nx-copy-live></span></x-settings-row>
+<x-settings-row :label="__('details.torrent_dl_url')"><button type="button" class="nx-btn nx-btn--sm" data-copy-value="{{ $downloadUrl }}" data-copy-done="{{ __('details.torrent_dl_url_copied') }}" data-copy-fail="{{ __('details.torrent_dl_url_copy_failed') }}" title="{{ __('details.torrent_dl_url_notice') }}">{{ __('details.torrent_dl_url_copy') }}</button><span class="nx-sr-only" role="status" data-copy-live></span></x-settings-row>
 @endif
 {{ $customFieldsHtml }}
 @if ($technicalInfoResult !== null)

@@ -658,17 +658,6 @@ document.addEventListener('click', function (e) {
         e.preventDefault();
         return;
     }
-
-    var copyBtn = target.closest('[data-nx-copy]');
-    if (copyBtn) {
-        e.preventDefault();
-        nxCopyText(copyBtn.getAttribute('data-nx-copy')).then(function () {
-            nxCopyFeedback(copyBtn, true);
-        }).catch(function () {
-            nxCopyFeedback(copyBtn, false);
-        });
-        return;
-    }
 });
 
 function nxCopyText(text) {
@@ -696,9 +685,9 @@ function nxCopyText(text) {
 }
 
 function nxCopyFeedback(btn, ok) {
-    var label = btn.getAttribute(ok ? 'data-nx-copy-done' : 'data-nx-copy-fail') || (ok ? 'Copied!' : 'Copy failed');
+    var label = btn.getAttribute(ok ? 'data-copy-done' : 'data-copy-fail') || (ok ? 'Copied!' : 'Copy failed');
     var row = btn.closest('tr') || btn.parentNode;
-    var status = row ? row.querySelector('[data-nx-copy-live]') : null;
+    var status = row ? row.querySelector('[data-copy-live]') : null;
     if (status) {
         status.textContent = '';
         setTimeout(function () { status.textContent = label; }, 30);
@@ -1423,27 +1412,30 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 })();
 
-/* data-copy buttons: copy the referenced input's value to the clipboard
-   and briefly confirm on the button label. */
+/* data-copy buttons: copy a literal (data-copy-value on the button) or the
+   referenced input's value (data-copy="#selector"; mask-aware via the
+   input's own data-copy-value, e.g. the usercp passkey) to the clipboard,
+   then confirm on the button label and an optional live region. */
 (function () {
     document.addEventListener('click', function (e) {
-        var btn = e.target.closest('[data-copy]');
+        var btn = e.target.closest('[data-copy], button[data-copy-value], a[data-copy-value]');
         if (!btn) { return; }
-        var input = document.querySelector(btn.getAttribute('data-copy'));
-        if (!input) { return; }
-        var real = input.getAttribute('data-copy-value');
-        var shown = input.value;
-        if (real !== null) { input.value = real; }
-        input.select();
-        input.setSelectionRange(0, input.value.length);
-        try { document.execCommand('copy'); } catch (err) {}
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(input.value).catch(function () {});
+        e.preventDefault();
+        var text = btn.getAttribute('data-copy-value');
+        if (text === null) {
+            var input = document.querySelector(btn.getAttribute('data-copy'));
+            if (!input) { return; }
+            var real = input.getAttribute('data-copy-value');
+            var shown = input.value;
+            if (real !== null) { input.value = real; }
+            text = input.value;
+            if (real !== null) { input.value = shown; }
         }
-        if (real !== null) { input.value = shown; }
-        var original = btn.textContent;
-        btn.textContent = btn.getAttribute('data-copy-done') || 'Copied';
-        setTimeout(function () { btn.textContent = original; }, 1500);
+        nxCopyText(text).then(function () {
+            nxCopyFeedback(btn, true);
+        }).catch(function () {
+            nxCopyFeedback(btn, false);
+        });
     });
 })();
 

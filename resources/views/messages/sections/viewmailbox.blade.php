@@ -31,7 +31,7 @@
 	@if (! $viewmailbox['isSentBox'])
 	<input class="nx-postbtn" type="submit" name="markread" value="{{ __('messages.submit_mark_as_read') }}">
 	@endif
-	<input class="nx-postbtn nx-postbtn--danger" type="submit" name="delete" value="{{ __('messages.submit_delete') }}">
+	<input class="nx-postbtn nx-postbtn--danger" type="submit" name="delete" value="{{ __('messages.submit_delete') }}" data-confirm="{{ __('messages.confirm_delete_selected') }}">
 	@if (! $viewmailbox['isSentBox'])
 	{{ __('messages.text_or') }}
 	<input class="nx-postbtn" type="submit" name="move" value="{{ __('messages.submit_move_to') }}">

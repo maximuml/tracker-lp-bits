@@ -61,4 +61,5 @@ return [
     'text_mod' => 'mod',
     'bitbucket_log' => 'BitBucket Log',
     'user_ban_log' => 'User ban log',
+    'confirm_delete_chronicle' => 'Delete this chronicle entry?',
 ];

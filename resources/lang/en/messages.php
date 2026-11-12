@@ -84,4 +84,6 @@ return [
     'std_cannot_mark_messages' => 'Could not mark message as read.',
     'std_no_message_selected' => 'No message selected.',
     'text_selected' => 'selected',
+    'confirm_delete_selected' => 'Delete the selected messages?',
+    'confirm_delete_message' => 'Delete this message?',
 ];

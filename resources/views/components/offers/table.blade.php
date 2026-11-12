@@ -57,7 +57,7 @@
     <td class="nx-offtable__to px-2.5 py-1.5 whitespace-nowrap">{{ $row->timeout }}</td>
     @endif
     @if ($table->canManage)
-    <td class="nx-offtable__act px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nx-postbtn nx-postbtn--danger" title="{{ __('offers.title_delete') }}"><i class="staff_delete" role="img" aria-label="D" title="{{ __('offers.title_delete') }}"></i></button></form><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><i class="staff_edit" role="img" aria-label="E" title="{{ __('offers.title_edit') }}"></i></a></td>
+    <td class="nx-offtable__act px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nx-postbtn nx-postbtn--danger" title="{{ __('offers.title_delete') }}" data-confirm="{{ __('offers.confirm_delete_offer') }}"><i class="staff_delete" role="img" aria-label="D" title="{{ __('offers.title_delete') }}"></i></button></form><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><i class="staff_edit" role="img" aria-label="E" title="{{ __('offers.title_edit') }}"></i></a></td>
     @endif
 </tr>
 @endforeach

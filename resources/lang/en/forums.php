@@ -202,4 +202,5 @@ return [
     'text_pm' => 'PM',
     'text_report' => 'Report',
     'text_mod_tools' => 'Moderator tools',
+    'confirm_delete_topic' => 'Delete this topic and all its posts?',
 ];

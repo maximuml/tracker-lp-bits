@@ -15,7 +15,7 @@
 			@endforeach
 			</select></form>
 			@endif
-			<form action="/web/messages/delete" method="post" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $viewmessage['pmId'] }}"><input class="nx-postbtn nx-postbtn--danger" type="submit" value="{{ __('messages.text_delete') }}"></form>
+			<form action="/web/messages/delete" method="post" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $viewmessage['pmId'] }}"><input class="nx-postbtn nx-postbtn--danger" type="submit" value="{{ __('messages.text_delete') }}" data-confirm="{{ __('messages.confirm_delete_message') }}"></form>
 		</div>
 	</header>
 	<div class="nx-msgview__body">{{ $viewmessage['body'] ?? '' }}</div>

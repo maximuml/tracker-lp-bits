@@ -387,5 +387,8 @@ return [
     'image_ext_jpeg' => '.jpeg or',
     'technical_mediainfo' => 'MediaInfo',
     'technical_bdinfo' => 'BDInfo',
+    'aria_show_hide' => 'Show/Hide',
+    'aria_bookmarked' => 'Bookmarked',
+    'aria_unbookmarked' => 'Unbookmarked',
     'text_no_connection' => 'No connection',
 ];

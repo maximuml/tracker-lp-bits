@@ -60,7 +60,8 @@
             <div class="nx-setrow">
                 <label class="nx-setrow__label" for="usercp-signature">{{ __('usercp.row_forum_signature') }}</label>
                 <div class="nx-setrow__control">
-                    <textarea name="signature" id="usercp-signature" rows="10">{{ $forum->signature }}</textarea>
+                    <textarea name="signature" id="usercp-signature" rows="10"@error('signature') aria-invalid="true" aria-describedby="usercp-signature-error"@enderror>{{ old('signature', $forum->signature) }}</textarea>
+                    @error('signature')<div class="nx-field__error" id="usercp-signature-error" role="alert">{{ $message }}</div>@enderror
                     <p class="nx-setrow__hint">{{ __('usercp.text_signature_note') }} <a class="faqlink" href="/web/tags" target="_new">{{ __('usercp.text_bb_codes') }}</a>{{ __('usercp.text_signature_note_tail') }}</p>
                 </div>
             </div>

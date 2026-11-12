@@ -14,4 +14,5 @@ return [
     'col_class' => 'Class',
     'col_country' => 'Country',
     'select_any_country' => '(any country)',
+    'text_no_users' => 'No users found',
 ];

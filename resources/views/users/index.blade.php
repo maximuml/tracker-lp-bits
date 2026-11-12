@@ -41,6 +41,9 @@
 
 {{ $pagertop ?? '' }}
 
+@if (empty($rows))
+<x-empty-state :title="__('users.text_no_users')" />
+@else
 <x-data-table :caption="__('users.text_users')" :caption-hidden="true" :headers="[
     __('users.col_user_name'),
     __('users.col_registered'),
@@ -58,6 +61,7 @@
 </tr>
 @endforeach
 </x-data-table>
+@endif
 
 {{ $pagerbottom ?? '' }}
 </x-page>

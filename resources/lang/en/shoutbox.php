@@ -43,4 +43,5 @@ return [
     'js_collapse' => 'Collapse',
     'js_expand' => 'Expand',
     'js_new_mentions' => '%d new mentions',
+    'text_history_empty' => 'No shoutbox messages',
 ];

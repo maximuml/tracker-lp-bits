@@ -950,14 +950,6 @@ a.nxm-logo:link, a.nxm-logo:visited {
     border: 0;
 }
 
-.nx-empty {
-    padding: 2rem 1rem;
-    text-align: center;
-    color: var(--nxm-text-dim);
-}
-.nx-empty__title { margin: 0; font-weight: 600; }
-.nx-empty__desc { margin: 0.4rem 0 0; }
-.nx-empty__actions { margin-top: 0.8rem; }
 
 /* nx-tooltip.js popup — replaces domTT 'smilies'/'niceTitle'/'attach' classes */
 .nx-tt-pop {
@@ -2475,7 +2467,6 @@ html[data-theme="dark"] .nxm-main .nx-compose__help a {
     background: color-mix(in srgb, var(--nxm-accent) 14%, var(--nxm-surface));
     font-weight: 600;
 }
-.nx-maillist__empty { padding: 1rem; text-align: center; color: var(--nxm-text-dim); }
 .nx-mail {
     display: flex; align-items: center; gap: 0.6rem;
     padding: 0.45rem 0.7rem;

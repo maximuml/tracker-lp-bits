@@ -8,7 +8,7 @@ Total Images Stored: {{ $count ?? 0 }}
 {{ $pagertop ?? '' }}
 
 @if (empty($items ?? []))
-    <x-empty-state title="BitBucket Log is empty" />
+    <x-empty-state :title="__('log.bitbucket_log_empty')" />
 @else
     <x-data-table caption="BitBucket Log" captionHidden>
     @foreach ($items as $item)

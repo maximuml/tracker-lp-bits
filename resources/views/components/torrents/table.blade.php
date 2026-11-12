@@ -53,7 +53,7 @@
         @if ($row->seedersUrl)
             <b><a href="{{ $row->seedersUrl }}">@if ($row->seedersClass)<span class="{{ $row->seedersClass }}">{{ number_format($row->seeders) }}</span>@else{{ number_format($row->seeders) }}@endif</a></b>
         @else
-            <span class="{{ $row->seedersZeroClass }}">{{ number_format($row->seeders) }}</span>
+            <x-status-pill :cls="$row->seedersZeroClass !== '' ? $row->seedersZeroClass : null">{{ number_format($row->seeders) }}</x-status-pill>
         @endif
     </td>
     <td class="nx-rowfollow nxm-td-leechers nx-center" data-label="{{ $listVm->columnLabel('leechers') }}">@if ($row->leechersUrl)<b><a href="{{ $row->leechersUrl }}">{{ number_format($row->leechers) }}</a></b>@else{{ $row->leechers }}@endif</td>

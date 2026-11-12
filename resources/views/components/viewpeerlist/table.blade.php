@@ -52,7 +52,7 @@
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->uploadRate }}/s</td>
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->downloaded }}</td>
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->downloadRate }}/s</td>
-            <td class="w-[1%] whitespace-nowrap text-center">@if ($row->ratioClass !== null)<span class="{{ $row->ratioClass }}"><span class="whitespace-nowrap">{{ $row->ratioText }}</span></span>@else{{ $row->ratioText }}@endif</td>
+            <td class="w-[1%] whitespace-nowrap text-center"><x-status-pill :cls="$row->ratioClass"><span class="whitespace-nowrap">{{ $row->ratioText }}</span></x-status-pill></td>
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->completePercent }}</td>
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->connected }}</td>
             <td class="w-[1%] whitespace-nowrap text-center">{{ $row->idle }}</td>

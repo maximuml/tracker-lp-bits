@@ -232,6 +232,17 @@ function shoutboxToggleReactionPicker(id) {
     } else {
         picker.style.display = 'none';
     }
+    var toggle = document.querySelector('button[data-shout-picker="' + id + '"]');
+    if (toggle) {
+        toggle.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+    }
+    // Other pickers closed above need their toggles reset too.
+    var otherToggles = document.querySelectorAll('button[data-shout-picker]:not([data-shout-picker="' + id + '"])');
+    if (isHidden) {
+        for (var j = 0; j < otherToggles.length; j++) {
+            otherToggles[j].setAttribute('aria-expanded', 'false');
+        }
+    }
 }
 
 function shoutboxRefresh() {

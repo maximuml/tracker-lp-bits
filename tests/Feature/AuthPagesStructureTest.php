@@ -42,6 +42,17 @@ final class AuthPagesStructureTest extends TestCase
         }
     }
 
+    public function test_login_username_and_password_are_required(): void
+    {
+        $response = $this->get('/login');
+
+        $response->assertOk();
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression('/name="username"[^>]*\brequired\b/', $html);
+        $this->assertMatchesRegularExpression('/name="password"[^>]*\brequired\b/', $html);
+        $this->assertDoesNotMatchRegularExpression('/name="two_step_code"[^>]*\brequired\b/', $html);
+    }
+
     public function test_signup_page_groups_fields_and_keeps_hash_contract(): void
     {
         $response = $this->get('/signup');

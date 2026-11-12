@@ -1583,3 +1583,64 @@ document.addEventListener('DOMContentLoaded', function () {
         facade.replaceChildren(iframe);
     });
 })();
+
+/* ===== nx-loading-status: announce wire:loading indicators =====
+   Livewire toggles bare [wire:loading] elements via inline display
+   only — no DOM mutation — so aria-live on the element itself can
+   never fire. Mirror each indicator's visibility into a persistent
+   role=status node so screen readers hear the (translated) label. */
+(function () {
+    'use strict';
+
+    var STATUS_SEL = '[data-nx-loading-status]';
+
+    function statusFor(el) {
+        var parent = el.parentNode;
+        if (!parent) { return null; }
+        var status = parent.querySelector(STATUS_SEL);
+        if (!status) {
+            status = document.createElement('span');
+            status.setAttribute('data-nx-loading-status', '');
+            status.className = 'nx-sr-only';
+            status.setAttribute('role', 'status');
+            status.setAttribute('aria-live', 'polite');
+            parent.appendChild(status);
+        }
+        return status;
+    }
+
+    function sync(el) {
+        var status = statusFor(el);
+        if (!status) { return; }
+        var seq = (el.__nxLoadSeq = (el.__nxLoadSeq || 0) + 1);
+        var label = window.getComputedStyle(el).display !== 'none'
+            ? (el.textContent || '').trim()
+            : '';
+        status.textContent = '';
+        if (label !== '') {
+            // Deferred write so repeat announcements of the same label
+            // still register as a DOM change for live regions; the seq
+            // guard drops stale writes when the indicator hides first.
+            setTimeout(function () {
+                if (el.__nxLoadSeq === seq && window.getComputedStyle(el).display !== 'none') {
+                    status.textContent = label;
+                }
+            }, 30);
+        }
+    }
+
+    if (typeof MutationObserver === 'undefined') { return; }
+
+    new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+            var el = m.target;
+            if (el && el.nodeType === 1 && el.matches && el.matches('[wire\\:loading]')) {
+                sync(el);
+            }
+        });
+    }).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['style'],
+        subtree: true
+    });
+})();

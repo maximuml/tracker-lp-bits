@@ -8,15 +8,15 @@
 <p><b>{{ __('userdetails.text_account_disabled_note') }}</b></p>
 @elseif (! $isOwner)
 @if ($isFriend)
-<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_friends') }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('userdetails.text_remove_from_friends') }}</button></form>)</div>
 @elseif ($currentUserBlockedTarget)
-<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_remove_from_blocks') }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('userdetails.text_remove_from_blocks') }}</button></form>)</div>
 @else
-<div class="my-2">(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_friends') }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn">{{ __('userdetails.text_add_to_blocks') }}</button></form>)</div>
+<div class="my-2">(<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('userdetails.text_add_to_friends') }}</button></form>) - (<form method="post" action="/web/friends/add" class="nx-inline">@csrf<input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $id }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('userdetails.text_add_to_blocks') }}</button></form>)</div>
 @endif
 @endif
 @if ($isOwner || $canManageConfidential)
-<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nx-postbtn nx-postbtn--danger" data-confirm="{{ __('userdetails.confirm_flush_ghost') }}">{{ __('userdetails.text_here') }}</button></form></div>
+<div><h2 class="nx-inline">{{ __('userdetails.text_flush_ghost_torrents') }}</h2> <form method="post" action="/web/torrents/flush?id={{ $id }}" class="nx-inline">@csrf<button type="submit" class="nx-postbtn nx-postbtn--danger" data-confirm="{{ __('userdetails.confirm_flush_ghost') }}" data-submit-once>{{ __('userdetails.text_here') }}</button></form></div>
 @endif
 <x-data-table :caption="__('userdetails.head_details_for') . ' ' . $user['username']" captionHidden>
 @if (($user['privacy'] ?? '') !== 'strong' || $canManageBasic || $isOwner)
@@ -56,7 +56,7 @@
 @endif
 <x-settings-row-small :label="__('userdetails.row_transfer')"><x-data-table :caption="__('userdetails.row_transfer')" captionHidden>@if ($shareRatio !== null)<tr><td class="nx-embedded"><strong>{{ __('userdetails.row_share_ratio') }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($shareRatio) }}">{{ number_format($shareRatio, 3) }}</span>(<strong>{{ __('userdetails.row_real_share_ratio') }}</strong>: {{ number_format($trueRatio, 3) }})</td><td class="nx-embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($shareRatio) }}</td></tr>@endif<tr><td class="nx-embedded"><strong>{{ __('userdetails.row_uploaded') }}</strong>:  {{ \App\Support\Format::size((float) $user['uploaded']) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.row_downloaded') }}</strong>:  {{ \App\Support\Format::size((float) $user['downloaded']) }}</td></tr><tr><td class="nx-embedded"><strong>{{ __('userdetails.row_real_uploaded') }}</strong>:  {{ \App\Support\Format::size($trueUpload) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.row_real_downloaded') }}</strong>:  {{ \App\Support\Format::size($trueDownload) }}</td><td class="nx-embedded text-muted">&nbsp;&nbsp;{{ __('userdetails.row_real_ps') }}</td></tr></x-data-table></x-settings-row-small>
 <x-settings-row-small :label="__('userdetails.row_sltime')"><x-data-table :caption="__('userdetails.row_sltime')" captionHidden>@if ($seedLeechRatio !== null)<tr><td class="nx-embedded"><strong>{{ __('userdetails.text_seeding_leeching_time_ratio') }}</strong>:  <span class="{{ \App\Support\Ratio::colorClass($seedLeechRatio) }}">{{ number_format($seedLeechRatio, 3) }}</span></td><td class="nx-embedded">&nbsp;&nbsp;{{ \App\Support\Ratio::image($seedLeechRatio) }}</td></tr>@endif<tr><td class="nx-embedded"><strong>{{ __('userdetails.text_seeding_time') }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['seedtime']) }}</td><td class="nx-embedded">&nbsp;&nbsp;<strong>{{ __('userdetails.text_leeching_time') }}</strong>:  {{ \App\Support\Format::prettyTimeWithLocale((int) $user['leechtime']) }}</td><td class="nx-embedded text-muted">@if (! empty($user['seed_time_updated_at']))&nbsp;&nbsp;({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_time_updated_at'] }})@endif</td></tr></x-data-table></x-settings-row-small>
-<x-settings-row-small :label="__('userdetails.row_gender')">@if (($user['gender'] ?? '') === 'Male')<i class='male' role='img' aria-label='Male' title='{{ __('userdetails.title_male') }}'></i>@elseif (($user['gender'] ?? '') === 'Female')<i class='female' role='img' aria-label='Female' title='{{ __('userdetails.title_female') }}'></i>@elseif (($user['gender'] ?? '') === 'N/A')<i class='no_gender' role='img' aria-label='N/A' title='{{ __('userdetails.title_not_available') }}'></i>@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_gender')">@if (($user['gender'] ?? '') === 'Male')<i class='male' role='img' aria-label='{{ __('userdetails.title_male') }}' title='{{ __('userdetails.title_male') }}'></i>@elseif (($user['gender'] ?? '') === 'Female')<i class='female' role='img' aria-label='{{ __('userdetails.title_female') }}' title='{{ __('userdetails.title_female') }}'></i>@elseif (($user['gender'] ?? '') === 'N/A')<i class='no_gender' role='img' aria-label='{{ __('userdetails.title_not_available') }}' title='{{ __('userdetails.title_not_available') }}'></i>@endif</x-settings-row-small>
 @if (((float) ($user['donated'] ?? 0) > 0 || (float) ($user['donated_cny'] ?? 0) > 0) && ($canViewConfidential || $isOwner))
 <x-settings-row-small :label="__('userdetails.row_donated')">${{ $user['donated'] }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $user['donated_cny'] }}</x-settings-row-small>
 @endif
@@ -71,7 +71,7 @@
 <x-settings-row-small :label="__('userdetails.row_forum_posts')">@if ($forumposts && ($isOwner || $canViewHistory))<a href="/web/userhistory?action=viewposts&amp;id={{ $id }}" title="{{ __('userdetails.link_view_posts') }}">{{ $forumposts }}</a>@else{{ $forumposts }}@endif</x-settings-row-small>
 @if ($isOwner || $canViewHistory)
 @if ($hrStatusHtml !== '')
-<x-settings-row-small label="H&R"><a href="/web/myhr?userid={{ $user['id'] }}" target="_blank" rel="noopener" aria-label="H&R stats">{{ $hrStatusHtml }}</a></x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_hr')"><a href="/web/myhr?userid={{ $user['id'] }}" target="_blank" rel="noopener" aria-label="{{ __('userdetails.aria_hr_stats') }}">{{ $hrStatusHtml }}</a></x-settings-row-small>
 @endif
 <x-settings-row-small :label="__('userdetails.row_karma_points')">{{ number_format((float) $user['seedbonus'], 1) }}&nbsp;&nbsp;<a href="/web/bonus-log?uid={{ $user['id'] }}" target="_blank" rel="noopener" class="altlink">[{{ \App\Support\Locale::trans('bonus-log.view_detail', [], null) }}]</a></x-settings-row-small>
 <x-settings-row-small :label="__('functions.text_seed_points')">{{ number_format((float) $user['seed_points'], 1) }}&nbsp;&nbsp;@if (! empty($user['seed_points_updated_at']))<span class='text-muted'>({{ \App\Support\Locale::trans('label.updated_at', [], null) }}: {{ $user['seed_points_updated_at'] }})</span>@endif</x-settings-row-small>
@@ -93,7 +93,7 @@
 <tr><td colspan="2" class="p-[10pt]"><span class="text-nxm-accent-text">{{ __('userdetails.text_public_access_denied') }}{{ $user['username'] }}{{ __('userdetails.text_user_wants_privacy') }}</span></td></tr>
 @endif
 @if (! $isOwner)
-<tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="/web/sendmessage?receiver={{ $user['id'] }}"><i class="f_pm" role="img" aria-label="PM" title="{{ __('userdetails.title_send_pm') }}"></i></a>@endif<a href="/web/report?user={{ $user['id'] }}"><i class="f_report" role="img" aria-label="Report" title="{{ __('userdetails.title_report_user') }}"></i></a></td></tr>
+<tr><td colspan="2" class="text-center">@if ($showPmButton)<a href="/web/sendmessage?receiver={{ $user['id'] }}"><i class="f_pm" role="img" aria-label="{{ __('userdetails.title_send_pm') }}" title="{{ __('userdetails.title_send_pm') }}"></i></a>@endif<a href="/web/report?user={{ $user['id'] }}"><i class="f_report" role="img" aria-label="{{ __('userdetails.title_report_user') }}" title="{{ __('userdetails.title_report_user') }}"></i></a></td></tr>
 @endif
 </x-data-table>
 
@@ -164,7 +164,7 @@
 <x-settings-row :label="__('userdetails.row_change_email')" for="mod-email"><input type="text" size="80" id="mod-email" name="email" value="{{ $user['email'] }}" /></x-settings-row>
 @endif
 <x-settings-row :label="__('userdetails.row_passkey')"><label><input name="resetkey" value="yes" type="checkbox" />{{ __('userdetails.checkbox_reset_passkey') }}</label></x-settings-row>
-<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') }}" /></td></tr>
+<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') }}"  data-submit-once /></td></tr>
 </x-data-table>
 </form>
 </x-frame>

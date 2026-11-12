@@ -27,9 +27,9 @@
             @if ($row->coverSrc !== null)
             <div class="nx-embedded nxm-cover"><img src="/pic/misc/cover.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-cover__img" alt="" /></div>
             @endif
-            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<i class="sticky" role="img" aria-label="Sticky" title="{{ $row->stickyTitle }}"></i>&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<span class="new">{{ __('functions.text_new_uppercase') }}</span>)</b>@endif @if ($row->isBanned) <b>(<span class="striking">{{ __('functions.text_banned') }}</span>)</b>@endif<x-torrent.badges :set="$row->badges" />@if ($row->tags !== [])<br /><x-torrent.tags :tags="$row->tags" />@endif<x-torrent.progress :progress="$row->progress" /></div>
+            <div class="nx-embedded nxm-namecell">@for ($i = 0; $i < $row->stickyCount; $i++)<i class="sticky" role="img" aria-label="{{ $row->stickyTitle }}" title="{{ $row->stickyTitle }}"></i>&nbsp;@endfor<a title="{{ $row->nameTitle }}" href="{{ $row->nameUrl }}"><b>{{ $row->displayName }}</b></a>@if ($row->isNew) <b>(<span class="new">{{ __('functions.text_new_uppercase') }}</span>)</b>@endif @if ($row->isBanned) <b>(<span class="striking">{{ __('functions.text_banned') }}</span>)</b>@endif<x-torrent.badges :set="$row->badges" />@if ($row->tags !== [])<br /><x-torrent.tags :tags="$row->tags" />@endif<x-torrent.progress :progress="$row->progress" /></div>
             <div class="nx-embedded nxm-rowactions">
-                @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><i class="download" role="img" aria-label="download" title="{{ __('functions.title_download_torrent') }}"></i></a>@endif
+                @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><i class="download" role="img" aria-label="{{ __('functions.title_download_torrent') }}" title="{{ __('functions.title_download_torrent') }}"></i></a>@endif
                 @if ($row->showDownload && $row->showBookmark)<br />@endif
                 @if ($row->showBookmark)<livewire:bookmark-icon :torrent-id="$row->id" />@endif
             </div>

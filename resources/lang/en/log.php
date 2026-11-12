@@ -62,4 +62,6 @@ return [
     'bitbucket_log' => 'BitBucket Log',
     'user_ban_log' => 'User ban log',
     'confirm_delete_chronicle' => 'Delete this chronicle entry?',
+    'bitbucket_log_empty' => 'BitBucket Log is empty',
+    'aria_username' => 'Username',
 ];

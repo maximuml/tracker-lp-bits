@@ -96,6 +96,7 @@ View more detailed information and download it (you may need to log in), please 
     'checkbox_hide_uploader_note' => "Don't show my username in 'Uploaded By' field.",
     'text_read_rules' => 'I read the rules before this uploading.',
     'submit_upload' => 'Upload',
+    'submit_processing' => 'Processing…',
     'error_summary' => 'The upload could not be completed. Please fix the following and submit again:',
     'reselect_file_note' => 'The previously selected file was not kept — please choose the torrent file again.',
     'text_medium' => 'Medium:',

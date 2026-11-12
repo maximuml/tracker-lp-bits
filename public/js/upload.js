@@ -44,16 +44,24 @@ if (uploadComposeForm) {
     syncRelationRows();
 
     var uploadSubmitBtn = document.getElementById("qr");
+    var uploadIdleLabel = uploadSubmitBtn ? uploadSubmitBtn.textContent : null;
     uploadComposeForm.addEventListener("submit", function () {
-        if (uploadSubmitBtn) {
-            uploadSubmitBtn.disabled = true;
-            uploadSubmitBtn.setAttribute("aria-busy", "true");
+        if (!uploadSubmitBtn || uploadSubmitBtn.disabled) { return; }
+        uploadSubmitBtn.disabled = true;
+        uploadSubmitBtn.classList.add("is-processing");
+        uploadSubmitBtn.setAttribute("aria-busy", "true");
+        var label = uploadSubmitBtn.querySelector(".nx-upload__btn-text");
+        if (label) {
+            label.textContent = uploadSubmitBtn.getAttribute("data-processing-label") || "Processing…";
         }
     });
     window.addEventListener("pageshow", function (event) {
         if (event.persisted && uploadSubmitBtn) {
             uploadSubmitBtn.disabled = false;
+            uploadSubmitBtn.classList.remove("is-processing");
             uploadSubmitBtn.removeAttribute("aria-busy");
+            var label = uploadSubmitBtn.querySelector(".nx-upload__btn-text");
+            if (label && uploadIdleLabel !== null) { label.textContent = uploadIdleLabel; }
         }
     });
 } else {

@@ -71,7 +71,7 @@
         </label>
 
         <div class="nx-auth__actions">
-            <x-button type="submit" variant="primary">{{ __('login.button_login')}}</x-button>
+            <x-button type="submit" variant="primary" data-submit-once>{{ __('login.button_login')}}</x-button>
             <x-button type="reset">{{ __('login.button_reset')}}</x-button>
         </div>
 

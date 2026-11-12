@@ -48,7 +48,8 @@
                     <div class="nx-setrow">
                         <label class="nx-setrow__label" for="usercp-email">{{ __('usercp.row_email_address') }}</label>
                         <div class="nx-setrow__control">
-                            <input type="email" name="email" id="usercp-email" value="{{ $security->email }}" autocomplete="email">
+                            <input type="email" name="email" id="usercp-email" value="{{ old('email', $security->email) }}" autocomplete="email"@error('email') aria-invalid="true" aria-describedby="usercp-email-error"@enderror>
+                            @error('email')<div class="nx-field__error" id="usercp-email-error" role="alert">{{ $message }}</div>@enderror
                             <p class="nx-setrow__hint">{{ __('usercp.text_note') }} {{ __('usercp.text_email_address_note') }}</p>
                         </div>
                     </div>
@@ -59,10 +60,11 @@
                         <input type="password" class="password" id="usercp-password" autocomplete="new-password">
                     </div>
                 </div>
+                @error('chpassword')<div class="nx-field__error" id="usercp-chpassword-error" role="alert">{{ $message }}</div>@enderror
                 <div class="nx-setrow">
                     <label class="nx-setrow__label" for="usercp-passagain">@safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.row_type_password_again')))</label>
                     <div class="nx-setrow__control">
-                        <input type="password" class="passagain" id="usercp-passagain" autocomplete="new-password">
+                        <input type="password" class="passagain" id="usercp-passagain" autocomplete="new-password"@error('chpassword') aria-invalid="true" aria-describedby="usercp-chpassword-error"@enderror>
                     </div>
                 </div>
             </section>
@@ -75,6 +77,7 @@
                         <label><input type="radio" name="privacy" value="normal" @checked($security->privacy === 'normal')>{{ __('usercp.radio_normal') }}</label>
                         <label><input type="radio" name="privacy" value="low" @checked($security->privacy === 'low')>{{ __('usercp.radio_low') }}</label>
                         <label><input type="radio" name="privacy" value="strong" @checked($security->privacy === 'strong')>{{ __('usercp.radio_strong') }}</label>
+                        @error('privacy')<div class="nx-field__error" role="alert">{{ $message }}</div>@enderror
                     </div>
                 </div>
             </section>
@@ -84,7 +87,7 @@
                     <div class="nx-setrow">
                         <label class="nx-setrow__label" for="usercp-two-step-code">{{ __('usercp.row_two_step_secret') }}</label>
                         <div class="nx-setrow__control">
-                            <input type="text" name="two_step_code" id="usercp-two-step-code" inputmode="numeric" autocomplete="one-time-code">
+                            <input type="text" name="two_step_code" id="usercp-two-step-code" inputmode="numeric" autocomplete="one-time-code"@error('two_step_code') aria-invalid="true" aria-describedby="usercp-two-step-error"@enderror>
                             <p class="nx-setrow__hint">{{ __('usercp.text_two_step_secret_unbind_note') }}</p>
                         </div>
                     </div>
@@ -98,12 +101,13 @@
                             <li>
                                 {{ __('usercp.text_two_step_secret_bind_complete_note') }}
                                 <input type="hidden" name="two_step_secret" value="{{ $security->twoStep->secret }}">
-                                <input type="text" name="two_step_code" id="usercp-two-step-code" aria-label="{{ __('usercp.text_two_step_secret_bind_complete_note') }}" inputmode="numeric" autocomplete="one-time-code" readonly>
+                                <input type="text" name="two_step_code" id="usercp-two-step-code" aria-label="{{ __('usercp.text_two_step_secret_bind_complete_note') }}" inputmode="numeric" autocomplete="one-time-code" readonly @error('two_step_code') aria-invalid="true" aria-describedby="usercp-two-step-error"@enderror>
                             </li>
                         </ol>
                     </div>
                     <script @if ($security->cspNonce !== '') nonce="{{ $security->cspNonce }}"@endif>document.addEventListener("focusin",function(e){if(e.target&&e.target.name==="two_step_code"){e.target.removeAttribute("readonly")}})</script>
                 @endif
+                @error('two_step_code')<div class="nx-field__error" id="usercp-two-step-error" role="alert">{{ $message }}</div>@enderror
             </section>
         @endif
     </form>

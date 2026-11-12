@@ -22,4 +22,5 @@ return [
     'text_yes' => 'Yes',
     'text_no' => 'No',
     'text_inf' => 'Inf.',
+    'text_no_peers' => 'No peers',
 ];

@@ -138,6 +138,7 @@ final class TorrentHttpTest extends TestCase
 
         $this->withNexusCookie($user)
             ->get('/edit?id='.$torrent->id)
-            ->assertStatus(200);
+            ->assertStatus(200)
+            ->assertSee('data-submit-once', false);
     }
 }

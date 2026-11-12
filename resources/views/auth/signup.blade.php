@@ -128,7 +128,7 @@
 
         <p class="nx-auth__required">{{ __('signup.text_all_fields_required')}}</p>
         <div class="nx-auth__actions">
-            <x-button type="submit" id="submit-btn" variant="primary">{{ __('signup.submit_sign_up')}}</x-button>
+            <x-button type="submit" id="submit-btn" variant="primary" data-submit-once>{{ __('signup.submit_sign_up')}}</x-button>
         </div>
         <input type="hidden" name="wantpassword" />
         <input type="hidden" name="passagain" />

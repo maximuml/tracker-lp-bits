@@ -1,5 +1,5 @@
 @props(['topic'])
-<nav class="nx-crumbs" aria-label="breadcrumbs">
+<nav class="nx-crumbs" aria-label="{{ __('forums.aria_breadcrumbs') }}">
     <a href="/web/index">{{ $topic->sitename }}</a>
     <span class="nx-crumbs__sep" aria-hidden="true">›</span>
     <a href="/forums">{{ trim(__('forums.text_forums')) }}</a>
@@ -18,25 +18,25 @@
         <span class="nx-postbar__actions">
             @if ($topic->isMod)
                 <details class="nx-modtools">
-                    <summary title="{{ __('forums.text_mod_tools') }}">⋯</summary>
+                    <summary title="{{ __('forums.text_mod_tools') }}"><span class="nx-sr-only">{{ __('forums.text_mod_tools') }}</span><span aria-hidden="true">⋯</span></summary>
                     <span class="nx-modtools__panel">
                         <form method="post" action="/web/forums/setsticky">@csrf
                             <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                             <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
                             <input type="hidden" name="sticky" value="{{ $topic->sticky ? 'no' : 'yes' }}" />
-                            <input type="submit" class="nx-btn" value="{{ $topic->sticky ? __('forums.submit_unsticky') : __('forums.submit_sticky') }}" />
+                            <input type="submit" class="nx-btn" value="{{ $topic->sticky ? __('forums.submit_unsticky') : __('forums.submit_sticky') }}"  data-submit-once />
                         </form>
                         <form method="post" action="/web/forums/setlocked">@csrf
                             <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                             <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
                             <input type="hidden" name="locked" value="{{ $topic->locked ? 0 : 1 }}" />
-                            <input type="submit" class="nx-btn" value="{{ $topic->locked ? __('forums.submit_unlock') : __('forums.submit_lock') }}" />
+                            <input type="submit" class="nx-btn" value="{{ $topic->locked ? __('forums.submit_unlock') : __('forums.submit_lock') }}"  data-submit-once />
                         </form>
                         <form method="post" action="/web/forums/deletetopic">
                             @csrf
                             <input type="hidden" name="topicid" value="{{ $topic->topicid }}" />
                             <input type="hidden" name="forumid" value="{{ $topic->forumid }}" />
-                            <input type="submit" class="nx-btn" value="{{ __('forums.submit_delete_topic') }}" data-confirm="{{ __('forums.confirm_delete_topic') }}" />
+                            <input type="submit" class="nx-btn" value="{{ __('forums.submit_delete_topic') }}" data-confirm="{{ __('forums.confirm_delete_topic') }}"  data-submit-once />
                         </form>
                         <form method="post" action="/web/forums/movetopic?topicid={{ $topic->topicid }}">@csrf
                             {{ __('forums.text_move_thread_to') }}
@@ -45,14 +45,14 @@
                                     <option value="{{ $forum['id'] }}">{{ $forum['name'] }}</option>
                                 @endforeach
                             </select>
-                            <input type="submit" class="nx-btn" value="{{ __('forums.submit_move') }}" />
+                            <input type="submit" class="nx-btn" value="{{ __('forums.submit_move') }}"  data-submit-once />
                         </form>
                         <form method="post" action="/web/forums/hltopic?topicid={{ $topic->topicid }}">@csrf
                             {{ __('forums.text_highlight_topic') }}
                             <select class="med" name="color">@foreach ($topic->highlightColorOptions as $opt)<option value="{{ $opt['value'] }}">{{ $opt['label'] }}</option>
 @endforeach</select>
                             <input type="hidden" name="returnto" value="{{ $topic->requestUri }}" />
-                            <input type="submit" class="nx-btn" value="{{ __('forums.submit_change') }}" />
+                            <input type="submit" class="nx-btn" value="{{ __('forums.submit_change') }}"  data-submit-once />
                         </form>
                     </span>
                 </details>

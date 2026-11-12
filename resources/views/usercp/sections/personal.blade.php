@@ -87,7 +87,8 @@
             <div class="nx-setrow">
                 <label class="nx-setrow__label" for="usercp-avatar">@safeHtml(\App\Support\Html\SafeHtml::fromUntrustedHtml(__('usercp.row_avatar_url')))</label>
                 <div class="nx-setrow__control">
-                    <input type="text" name="avatar" id="usercp-avatar" value="{{ $personal->avatar }}">
+                    <input type="text" name="avatar" id="usercp-avatar" value="{{ old('avatar', $personal->avatar) }}"@error('avatar') aria-invalid="true" aria-describedby="usercp-avatar-error"@enderror>
+                    @error('avatar')<div class="nx-field__error" id="usercp-avatar-error" role="alert">{{ $message }}</div>@enderror
                     <p class="nx-setrow__hint">{{ __('usercp.text_avatar_note') }}@if ($personal->enableBitbucket) {{ __('usercp.text_bitbucket_note') }} <a class="faqlink" href="/web/bitbucket-upload">{{ __('usercp.text_bitbucket') }}</a>.@endif</p>
                 </div>
             </div>
@@ -98,7 +99,8 @@
             <div class="nx-setrow">
                 <label class="nx-setrow__label" for="usercp-info">{{ __('usercp.row_info') }}</label>
                 <div class="nx-setrow__control">
-                    <textarea name="info" id="usercp-info" rows="10">{{ $personal->info }}</textarea>
+                    <textarea name="info" id="usercp-info" rows="10"@error('info') aria-invalid="true" aria-describedby="usercp-info-error"@enderror>{{ old('info', $personal->info) }}</textarea>
+                    @error('info')<div class="nx-field__error" id="usercp-info-error" role="alert">{{ $message }}</div>@enderror
                     <p class="nx-setrow__hint">{{ __('usercp.text_info_note') }} <a class="faqlink" href="/web/tags" target="_new">{{ __('usercp.text_bb_codes') }}</a>.</p>
                 </div>
             </div>

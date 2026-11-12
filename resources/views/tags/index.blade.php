@@ -16,6 +16,9 @@
     <p><hr>{{ \App\Support\Format::formatComment($test) }}</hr></p>
 @endif
 
+@if (empty($tagItems))
+    <x-empty-state :title="__('tags.text_no_tags')" />
+@endif
 @foreach ($tagItems ?? [] as $item)
     <p class=sub><b>{{ $item['name'] }}</b></p>
     <x-data-table :caption="__('tags.text_tags')" captionHidden class="nx-main">

@@ -1,1 +1,1 @@
-<form method="post" action="/web/forums/{{ $action }}" class="nx-inline">@csrf<input type="hidden" name="{{ $name }}" value="{{ $value }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-postbtn nx-postbtn--danger">{{ $text }}</button></form>
+<form method="post" action="/web/forums/{{ $action }}" class="nx-inline">@csrf<input type="hidden" name="{{ $name }}" value="{{ $value }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-postbtn nx-postbtn--danger" data-submit-once>{{ $text }}</button></form>

@@ -9,6 +9,9 @@
         {{ $pagertop ?? '' }}
     @endif
     <x-frame :center="false">
+    @if (empty($items))
+        <x-empty-state :title="__('userhistory.std_no_posts_found')" />
+    @else
     @foreach ($items ?? [] as $item)
         <p class="sub">
         {{ $item['added'] }}&nbsp;--&nbsp;<b>{{ __('userhistory.text_forum') }}&nbsp;</b>
@@ -25,6 +28,7 @@
         </x-data-table>
         <br />
     @endforeach
+    @endif
     </x-frame>
     @if (($postcount ?? 0) > ($perpage ?? 15))
         {{ $pagerbottom ?? '' }}
@@ -36,6 +40,9 @@
         {{ $pagertop ?? '' }}
     @endif
     <x-frame :center="false">
+    @if (empty($items))
+        <x-empty-state :title="__('userhistory.std_no_comments_found')" />
+    @else
     @foreach ($items ?? [] as $item)
         <p class="sub">
         {{ $item['added'] }}&nbsp;---&nbsp;<b>{{ __('userhistory.text_torrent') }}&nbsp;</b>
@@ -52,6 +59,7 @@
         </x-data-table>
         <br />
     @endforeach
+    @endif
     </x-frame>
     @if (($commentcount ?? 0) > ($perpage ?? 15))
         {{ $pagerbottom ?? '' }}

@@ -23,13 +23,13 @@
         <td class="align-top px-2.5 py-1.5"><span class="nx-nobr">{{ $row['type_label'] }}</span></td>
         <td class="align-top px-2.5 py-1.5">{{ $row['reason'] }}</td>
         <td class="align-top px-2.5 py-1.5"><span class="nx-nobr">@if ($row['dealtwith'])<span class="text-nxm-success">{{ __('reports.text_yes') }}</span> - {{ $row['dealtbyHtml'] }}@else<span class="text-nxm-danger">{{ __('reports.text_no') }}</span>@endif</span></td>
-        <td class="align-top px-2.5 py-1.5"><input type="checkbox" name="delreport[]" value="{{ (int) $row['id'] }}" aria-label="Delete report {{ (int) $row['id'] }}" /></td>
+        <td class="align-top px-2.5 py-1.5"><input type="checkbox" name="delreport[]" value="{{ (int) $row['id'] }}" aria-label="{{ __('reports.aria_delete_report', ['id' => (int) $row['id']]) }}" /></td>
     </tr>
 @endforeach
 <tr>
     <th class="bg-nxm-surface-alt font-semibold text-right" colspan="7" scope="colgroup">
-        <input type="submit" name="setdealt" class="nx-btn nx-btn--primary" value="{{ __('reports.submit_set_dealt')}}" />
-        <input type="submit" name="delete" class="nx-btn nx-btn--danger" value="{{ __('reports.submit_delete')}}" data-confirm="{{ __('reports.confirm_delete_reports') }}" />
+        <input type="submit" name="setdealt" class="nx-btn nx-btn--primary" value="{{ __('reports.submit_set_dealt')}}"  data-submit-once />
+        <input type="submit" name="delete" class="nx-btn nx-btn--danger" value="{{ __('reports.submit_delete')}}" data-confirm="{{ __('reports.confirm_delete_reports') }}"  data-submit-once />
     </th>
 </tr>
 </form>

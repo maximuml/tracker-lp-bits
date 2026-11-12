@@ -962,14 +962,6 @@ a.nxm-logo:link, a.nxm-logo:visited {
     border: 0;
 }
 
-.nx-empty {
-    padding: 2rem 1rem;
-    text-align: center;
-    color: var(--nxm-text-dim);
-}
-.nx-empty__title { margin: 0; font-weight: 600; }
-.nx-empty__desc { margin: 0.4rem 0 0; }
-.nx-empty__actions { margin-top: 0.8rem; }
 
 /* nx-tooltip.js popup — replaces domTT 'smilies'/'niceTitle'/'attach' classes */
 .nx-tt-pop {
@@ -1713,6 +1705,16 @@ table.nx-torrents th.nxm-th--sorted :is(a:link, a:visited) { color: var(--nxm-te
 .nxm-cover__img { max-height: 46px; max-width: 46px; }
 .nxm-namecell { flex: 1 1 auto; min-width: 0; padding-left: 5px; }
 .nxm-rowactions { flex: 0 0 auto; text-align: right; padding-right: 5px; }
+/* 16px sprite icons get a >=24px tap target via padding on the link;
+   the icon itself keeps its compact size. */
+.nxm-rowactions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    vertical-align: middle;
+}
 .nxm-note { color: var(--nxm-muted, #666); }
 .nx-progress { width: 44px; height: 8px; margin-left: .35rem; vertical-align: middle; accent-color: var(--nxm-muted); }
 .nx-progress--seeding { accent-color: var(--nxm-success); }
@@ -2426,7 +2428,17 @@ html[data-theme="dark"] .nxm-main .nx-compose__help a {
     background: var(--nxm-surface);
 }
 
-.nx-upload__submit span { font-weight: 600; font-size: 0.9em; color: var(--nxm-text-dim); }
+.nx-upload__submit > span { font-weight: 600; font-size: 0.9em; color: var(--nxm-text-dim); }
+#qr.is-processing { cursor: progress; }
+#qr.is-processing::after {
+    content: ''; display: inline-block; width: .85em; height: .85em;
+    margin-left: .45em; border: 2px solid currentColor;
+    border-top-color: transparent; border-radius: 50%;
+    animation: nx-spin .8s linear infinite; vertical-align: -0.12em;
+}
+@media (prefers-reduced-motion: reduce) {
+    #qr.is-processing::after { animation: none; }
+}
 @media (max-width: 40rem) {
     .nx-up__pair { flex-direction: column; align-items: stretch; }
     .nx-upload__submit { flex-direction: column; align-items: stretch; }
@@ -2477,7 +2489,6 @@ html[data-theme="dark"] .nxm-main .nx-compose__help a {
     background: color-mix(in srgb, var(--nxm-accent) 14%, var(--nxm-surface));
     font-weight: 600;
 }
-.nx-maillist__empty { padding: 1rem; text-align: center; color: var(--nxm-text-dim); }
 .nx-mail {
     display: flex; align-items: center; gap: 0.6rem;
     padding: 0.45rem 0.7rem;

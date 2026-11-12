@@ -5,8 +5,8 @@
     <th class="bg-nxm-surface-alt font-semibold nx-offtable__type" scope="col"><a href="{{ $table->sortCatUrl }}">{{ __('offers.col_type') }}</a></th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortNameUrl }}">{{ __('offers.col_title') }}</a></th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortVResUrl }}">{{ __('offers.col_vote_results') }}</a></th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCommentsUrl }}"><i class="comments" role="img" aria-label="comments" title="{{ __('offers.title_comment') }}"></i></a></th>
-    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortAddedUrl }}"><i class="time" role="img" aria-label="time" title="{{ __('offers.title_time_added') }}"></i></a></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortCommentsUrl }}"><i class="comments" role="img" aria-label="{{ __('offers.title_comment') }}" title="{{ __('offers.title_comment') }}"></i></a></th>
+    <th class="bg-nxm-surface-alt font-semibold" scope="col"><a href="{{ $table->sortAddedUrl }}"><i class="time" role="img" aria-label="{{ __('offers.title_time_added') }}" title="{{ __('offers.title_time_added') }}"></i></a></th>
     @if ($table->showTimeout)
     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('offers.col_timeout') }}</th>
     @endif
@@ -38,9 +38,9 @@
         <div class="nx-off__meta">{{ __('offers.approved_at', ['count' => $table->minVotes]) }}</div>
         @endif
         <div class="nx-off__voting">
-            <form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="yeah" /><button type="submit" class="nx-btn-link" title="{{ __('offers.title_i_want_this') }}"><span class="text-nxm-success"><b>{{ __('offers.text_yep') }}</b></span></button></form>
+            <form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="yeah" /><button type="submit" class="nx-btn-link" title="{{ __('offers.title_i_want_this') }}" data-submit-once><span class="text-nxm-success"><b>{{ __('offers.text_yep') }}</b></span></button></form>
             @if ($table->showAgainstCell)
-            · <form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="against" /><button type="submit" class="nx-btn-link" title="{{ __('offers.title_do_not_want_it') }}"><span class="text-nxm-danger"><b>{{ __('offers.text_nah') }}</b></span></button></form>
+            · <form method="post" action="/web/offers/vote" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><input type="hidden" name="vote" value="against" /><button type="submit" class="nx-btn-link" title="{{ __('offers.title_do_not_want_it') }}" data-submit-once><span class="text-nxm-danger"><b>{{ __('offers.text_nah') }}</b></span></button></form>
             @endif
         </div>
         @endif
@@ -57,7 +57,7 @@
     <td class="nx-offtable__to px-2.5 py-1.5 whitespace-nowrap">{{ $row->timeout }}</td>
     @endif
     @if ($table->canManage)
-    <td class="nx-offtable__act px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nx-postbtn nx-postbtn--danger" title="{{ __('offers.title_delete') }}" data-confirm="{{ __('offers.confirm_delete_offer') }}"><i class="staff_delete" role="img" aria-label="D" title="{{ __('offers.title_delete') }}"></i></button></form><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><i class="staff_edit" role="img" aria-label="E" title="{{ __('offers.title_edit') }}"></i></a></td>
+    <td class="nx-offtable__act px-2.5 py-1.5"><form method="post" action="/web/offers/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $row->id }}" /><button type="submit" class="nx-postbtn nx-postbtn--danger" title="{{ __('offers.title_delete') }}" data-confirm="{{ __('offers.confirm_delete_offer') }}" data-submit-once><i class="staff_delete" role="img" aria-label="{{ __('offers.title_delete') }}" title="{{ __('offers.title_delete') }}"></i></button></form><a href="{{ request()->getPathInfo() }}?id={{ $row->id }}&amp;edit_offer=1"><i class="staff_edit" role="img" aria-label="{{ __('offers.title_edit') }}" title="{{ __('offers.title_edit') }}"></i></a></td>
     @endif
 </tr>
 @endforeach

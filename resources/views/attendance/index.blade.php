@@ -15,7 +15,7 @@
     <form method="post" action="/web/user/attendance" class="nx-inline-block">@csrf
     <div class="nx-fgrid nx-fgrid--flat">
     {{ $captchaHtml ?? '' }}
-    <div class="nx-ffull text-center"><input type="submit" value="{{ __('attendance.attend_button')}}" class="nx-btn nx-btn--primary" /></div>
+    <div class="nx-ffull text-center"><input type="submit" value="{{ __('attendance.attend_button')}}" class="nx-btn nx-btn--primary"  data-submit-once /></div>
     </div>
     </form>
     </div>

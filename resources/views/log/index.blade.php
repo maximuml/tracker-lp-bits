@@ -19,13 +19,13 @@
                     </select>
                 @endif
                 <input type="hidden" name="action" value="dailylog">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($logRows))
         <x-empty-state :title="__('log.text_log_empty')" />
     @else
-        <x-data-table :caption="__('log.text_daily_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="time" role="img" aria-label="time" title="{{ __('log.title_time_added')}}"></i></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>
+        <x-data-table :caption="__('log.text_daily_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="time" role="img" aria-label="{{ __('log.title_time_added')}}" title="{{ __('log.title_time_added')}}"></i></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>
         @if ($canConfidentialLog)
             <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_user')}}</th>
         @endif
@@ -48,7 +48,7 @@
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
                 <input type="hidden" name="action" value="chronicle">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
         </td></tr>
     </x-data-table><br />
     @if ($canManage)
@@ -59,7 +59,7 @@
                     @if (! empty($editItem))
                         <input type="hidden" name="id" value="{{ (int) ($editItem['id'] ?? 0) }}">
                     @endif
-                    <input type="submit" class="nx-btn" value="{{ __('log.submit_add') }}"></form>
+                    <input type="submit" class="nx-btn" value="{{ __('log.submit_add') }}" data-submit-once></form>
             </td></tr>
         </x-data-table><br />
     @endif
@@ -68,7 +68,7 @@
     @else
         <x-data-table :caption="__('log.text_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_date')}}</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>@if ($canManage)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_modify')}}</th>@endif</tr></thead></x-slot:head>
         @foreach ($chronicleRows as $arr)
-            <tr><td class="align-top px-2.5 py-1.5 text-center"><span class="nx-nobr">{{ $arr['dateHtml'] ?? '' }}</span></td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td class="text-center whitespace-nowrap"><b><a href="{{ request()->getPathInfo() }}?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="/web/log/chronicle/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-postbtn nx-postbtn--danger" data-confirm="{{ __('log.confirm_delete_chronicle') }}">{{ __('log.text_delete')}}</button></form></b></td>@endif</tr>
+            <tr><td class="align-top px-2.5 py-1.5 text-center"><span class="nx-nobr">{{ $arr['dateHtml'] ?? '' }}</span></td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td class="text-center whitespace-nowrap"><b><a href="{{ request()->getPathInfo() }}?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="/web/log/chronicle/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-postbtn nx-postbtn--danger" data-confirm="{{ __('log.confirm_delete_chronicle') }}" data-submit-once>{{ __('log.text_delete')}}</button></form></b></td>@endif</tr>
         @endforeach
         </x-data-table>
         {{ $pagerbottom ?? '' }}
@@ -86,7 +86,7 @@
                 @endforeach
                 </select>
                 <input type="hidden" name="action" value="news">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}"></form>
+                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($newsRows))

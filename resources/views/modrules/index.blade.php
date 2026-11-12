@@ -18,7 +18,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}"></div>
+        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once></div>
     </div>
 </form>
 @elseif ($mode === 'edit')
@@ -35,7 +35,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($rule['id'] ?? 0) }}" name="id"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('label.save') }}"></div>
+        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($rule['id'] ?? 0) }}" name="id"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('label.save') }}" data-submit-once></div>
     </div>
 </form>
 @else
@@ -43,7 +43,7 @@
 @foreach ($rows as $arr)
 <br /><x-data-table caption="Rules Management" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ $arr['title'] }} - {{ $arr['lang_name'] }}</th></tr></thead></x-slot:head>
     <tr><td>{{ $arr['textHtml'] }}</td></tr>
-    <tr><td><a href="{{ request()->getPathInfo() }}?act=edit&id={{ (int) $arr['id'] }}">{{ __('functions.text_edit') }}</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="/web/staff/modrules?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-postbtn nx-postbtn--danger">{{ __('functions.text_delete') }}</button></form></td></tr>
+    <tr><td><a href="{{ request()->getPathInfo() }}?act=edit&id={{ (int) $arr['id'] }}">{{ __('functions.text_edit') }}</a>&nbsp;&nbsp;<form method="post" class="nx-inline" action="/web/staff/modrules?act=del">@csrf<input type="hidden" name="id" value="{{ (int) $arr['id'] }}"><input type="hidden" name="sure" value="1"><button type="submit" class="nx-postbtn nx-postbtn--danger" data-submit-once>{{ __('functions.text_delete') }}</button></form></td></tr>
 </x-data-table>
 @endforeach
 </x-page>

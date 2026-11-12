@@ -8,8 +8,8 @@
     <div class="flex flex-col gap-1">
         <span class="mb-1 block font-bold">{{ __('uploaders.text_select_month') }}</span>
         <div class="flex items-center gap-2">
-            <select name="year" aria-label="Year">@foreach ($yearOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
-            <select name="month" aria-label="Month">@foreach ($monthOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
+            <select name="year" aria-label="{{ __('uploaders.aria_year') }}">@foreach ($yearOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
+            <select name="month" aria-label="{{ __('uploaders.aria_month') }}">@foreach ($monthOptions as $o)<option value="{{ $o['value'] }}" @if ($o['selected']) selected="selected" @endif>{{ $o['value'] }}</option>@endforeach</select>
             <button class="nx-btn nx-btn--primary" type="submit">{{ __('uploaders.submit_go') }}</button>
         </div>
     </div>

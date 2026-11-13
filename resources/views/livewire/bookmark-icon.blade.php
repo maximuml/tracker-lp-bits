@@ -1,1 +1,0 @@
-<a href="#" wire:click.prevent="toggle"><i class="{{ $bookmarked ? 'bookmark' : 'delbookmark' }}" role="img" aria-label="{{ $bookmarked ? __('functions.aria_bookmarked') : __('functions.aria_unbookmarked') }}" title="{{ $bookmarked ? __('functions.title_delbookmark_torrent') : __('functions.title_bookmark_torrent') }}"></i></a>

@@ -50,6 +50,7 @@ final class TorrentListViewModelsTest extends TestCase
             showDownload: true,
             downloadUrl: '/download?id=42',
             showBookmark: true,
+            bookmarked: true,
             waitText: '5h',
             waitClass: 'nx-wait-10',
             commentsUrl: '/web/details/42?hit=1&cmtpage=1#startcomments',
@@ -93,6 +94,7 @@ final class TorrentListViewModelsTest extends TestCase
         $this->assertSame(75.0, $progress->percent);
         $this->assertSame('5h', $row->waitText);
         $this->assertSame('nx-wait-10', $row->waitClass);
+        $this->assertTrue($row->bookmarked);
         $this->assertSame('4.00', $row->size['value']);
         $this->assertSame('GB', $row->size['unit']);
     }

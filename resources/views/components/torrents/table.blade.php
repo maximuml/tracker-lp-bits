@@ -31,7 +31,7 @@
             <div class="nx-embedded nxm-rowactions">
                 @if ($row->showDownload)<a href="{{ $row->downloadUrl }}"><i class="download" role="img" aria-label="{{ __('functions.title_download_torrent') }}" title="{{ __('functions.title_download_torrent') }}"></i></a>@endif
                 @if ($row->showDownload && $row->showBookmark)<br />@endif
-                @if ($row->showBookmark)<livewire:bookmark-icon :torrent-id="$row->id" />@endif
+                @if ($row->showBookmark)<x-torrent.bookmark :torrent-id="$row->id" :bookmarked="$row->bookmarked" />@endif
             </div>
         </div>
     </td>

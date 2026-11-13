@@ -31,7 +31,6 @@ final class LivewireLockedPropertiesTest extends TestCase
         'App\\Livewire\\BbcodeEditor::body' => true,
         'App\\Livewire\\BbcodeEditor::invalid' => true,
         'App\\Livewire\\BbcodeEditor::previewMode' => true,
-        'App\\Livewire\\BookmarkIcon::bookmarked' => true,
         'App\\Livewire\\CommentSection::page' => true,
         'App\\Livewire\\CommentSection::status' => true,
         'App\\Livewire\\CommentSection::text' => true,

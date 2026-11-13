@@ -227,4 +227,8 @@ return [
     'row_tags' => 'Tags',
     'row_screenshots' => 'Screenshots',
     'torrent_existed' => 'Torrent already uploaded!',
+    'section_download_actions' => 'Download & actions',
+    'section_info' => 'Info',
+    'section_files_peers' => 'Files & peers',
+    'section_community' => 'Community',
 ];

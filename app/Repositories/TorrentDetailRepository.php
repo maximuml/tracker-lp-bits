@@ -12,6 +12,7 @@ use App\Models\Torrent;
 use App\Models\TorrentOperationLog;
 use App\Models\TorrentState;
 use App\Models\TorrentTag;
+use App\Support\Cache\NexusCache;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection as SupportCollection;
@@ -19,6 +20,20 @@ use Illuminate\Support\Facades\DB;
 
 class TorrentDetailRepository
 {
+    private const MAGIC_CACHE_TTL = 3600;
+
+    private const THANKS_CACHE_TTL = 3600;
+
+    public static function magicCacheKey(int $torrentId): string
+    {
+        return 'td_magic_'.$torrentId;
+    }
+
+    public static function thanksCacheKey(int $torrentId): string
+    {
+        return 'td_thanks_'.$torrentId;
+    }
+
     /**
      * @return ?array<string, mixed>
      */
@@ -62,29 +77,48 @@ class TorrentDetailRepository
      */
     public function getMagicInfo(int $torrentId, int $currentUserId): array
     {
-        $givers = DB::table('magic')
-            ->where('torrentid', $torrentId)
-            ->orderByDesc('id')
-            ->get(['userid', 'value']);
+        $cache = NexusCache::instance();
+        $shared = $cache?->get(self::magicCacheKey($torrentId));
 
-        $sumValue = 0;
+        if (! is_array($shared)) {
+            $givers = DB::table('magic')
+                ->where('torrentid', $torrentId)
+                ->orderByDesc('id')
+                ->get(['userid', 'value']);
+
+            $sumValue = 0;
+            $giverIds = [];
+            $sharedGivers = [];
+            foreach ($givers as $giver) {
+                $uid = (int) $giver->userid;
+                $val = (int) $giver->value;
+                $sumValue += $val;
+                $giverIds[$uid] = true;
+                $sharedGivers[] = ['userid' => $uid, 'value' => $val];
+            }
+
+            $shared = [
+                'givers' => $sharedGivers,
+                'count_user_number' => count($giverIds),
+                'sum_value' => $sumValue,
+            ];
+            $cache?->put(self::magicCacheKey($torrentId), $shared, self::MAGIC_CACHE_TTL);
+        }
+
         $whetherHaveGiveValue = 0;
         $addValue = '';
-        foreach ($givers as $giver) {
-            $sumValue += (int) $giver->value;
-            if ((int) $giver->userid === $currentUserId) {
+        foreach ($shared['givers'] as $giver) {
+            if ($giver['userid'] === $currentUserId) {
                 $whetherHaveGiveValue = 1;
-                $addValue = (int) $giver->value;
+                $addValue = $giver['value'];
+                break;
             }
         }
 
         return [
-            'givers' => $givers,
-            'count_user_number' => DB::table('magic')
-                ->where('torrentid', $torrentId)
-                ->distinct()
-                ->count('userid'),
-            'sum_value' => $sumValue,
+            'givers' => array_map(static fn (array $giver): object => (object) $giver, $shared['givers']),
+            'count_user_number' => $shared['count_user_number'],
+            'sum_value' => $shared['sum_value'],
             'whether_have_give_value' => $whetherHaveGiveValue,
             'add_value' => $addValue,
         ];
@@ -100,11 +134,14 @@ class TorrentDetailRepository
 
     public function insertMagic(int $torrentId, int $userId, int $value): int
     {
-        return (int) DB::table('magic')->insertGetId([
+        $id = (int) DB::table('magic')->insertGetId([
             'torrentid' => $torrentId,
             'userid' => $userId,
             'value' => $value,
         ]);
+        NexusCache::instance()?->forget(self::magicCacheKey($torrentId));
+
+        return $id;
     }
 
     /**
@@ -112,15 +149,28 @@ class TorrentDetailRepository
      */
     public function getThanksInfo(int $torrentId, int $currentUserId): array
     {
-        $thanks = DB::table('thanks')
-            ->where('torrentid', $torrentId)
-            ->orderByDesc('id')
-            ->limit(20)
-            ->get(['userid']);
+        $cache = NexusCache::instance();
+        $shared = $cache?->get(self::thanksCacheKey($torrentId));
+
+        if (! is_array($shared)) {
+            $thanksRows = DB::table('thanks')
+                ->where('torrentid', $torrentId)
+                ->orderByDesc('id')
+                ->limit(20)
+                ->get(['userid']);
+
+            $shared = [
+                'thanks' => $thanksRows
+                    ->map(static fn (object $t): array => ['userid' => (int) $t->userid])
+                    ->all(),
+                'count' => DB::table('thanks')->where('torrentid', $torrentId)->count(),
+            ];
+            $cache?->put(self::thanksCacheKey($torrentId), $shared, self::THANKS_CACHE_TTL);
+        }
 
         $hasThanked = false;
-        foreach ($thanks as $t) {
-            if ((int) $t->userid === $currentUserId) {
+        foreach ($shared['thanks'] as $t) {
+            if ($t['userid'] === $currentUserId) {
                 $hasThanked = true;
                 break;
             }
@@ -134,8 +184,8 @@ class TorrentDetailRepository
         }
 
         return [
-            'thanks' => $thanks,
-            'count' => DB::table('thanks')->where('torrentid', $torrentId)->count(),
+            'thanks' => array_map(static fn (array $t): object => (object) $t, $shared['thanks']),
+            'count' => $shared['count'],
             'has_thanked' => $hasThanked,
         ];
     }
@@ -247,10 +297,15 @@ class TorrentDetailRepository
      */
     public function insertThanks(int $torrentId, int $userId): bool
     {
-        return DB::table('thanks')->insertOrIgnore([
+        $inserted = DB::table('thanks')->insertOrIgnore([
             'torrentid' => $torrentId,
             'userid' => $userId,
         ]) === 1;
+        if ($inserted) {
+            NexusCache::instance()?->forget(self::thanksCacheKey($torrentId));
+        }
+
+        return $inserted;
     }
 
     /**

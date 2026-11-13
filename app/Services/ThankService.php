@@ -8,7 +8,9 @@ use App\Enums\BusinessType;
 use App\Models\Thank;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Repositories\TorrentDetailRepository;
 use App\Repositories\UserAccountRepository;
+use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +47,7 @@ final class ThankService
 
         return DB::transaction(function () use ($user, $torrentOwner, $torrent) {
             $thank = $user->thank_torrent_logs()->create(['torrentid' => $torrent->id]);
+            NexusCache::instance()?->forget(TorrentDetailRepository::thanksCacheKey((int) $torrent->id));
 
             $sayThanksBonus = SiteConfig::current()->bonus->sayThanks();
             $receiveThanksBonus = SiteConfig::current()->bonus->receiveThanks();

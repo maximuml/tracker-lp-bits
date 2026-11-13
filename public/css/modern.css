@@ -3432,3 +3432,20 @@ html[data-theme="dark"] .nx-off a.nx-btn:not(.nx-btn--primary) { color: var(--nx
     .nx-search-form__input { width: 100%; min-width: 0; flex: 1 1 0; }
     input[type="date"] { min-width: 0; }
 }
+
+/* Torrent structure tree (torrent_info page): bencode-type icon colors. */
+#torrent-structure, #torrent-structure ul, #torrent-structure li { padding: 0px; margin: 0px; list-style-type: none; color: var(--nxm-text); font-weight: normal;}
+#torrent-structure ul { margin-left: 15px; }
+#torrent-structure a { color: var(--nxm-accent-text); text-decoration: none; font-weight: normal; }
+#torrent-structure li { display: list-item; }
+
+#torrent-structure li div.string  {padding: 3px;}
+#torrent-structure li div.integer {padding: 3px;}
+#torrent-structure li div.dictionary {padding: 3px;}
+#torrent-structure li div.list {padding: 3px;}
+#torrent-structure li div.string span.icon {color:#090;padding: 2px;}
+#torrent-structure li div.integer span.icon {color:#990;padding: 2px;}
+#torrent-structure li div.dictionary span.icon {color:#909;padding: 2px;}
+#torrent-structure li div.list span.icon {color:#009;padding: 2px;}
+
+#torrent-structure li span.title {font-weight: bold;}

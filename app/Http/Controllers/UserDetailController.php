@@ -393,6 +393,13 @@ JS, 'footer', false);
             'bonusTableHtml' => SafeHtml::fromTrustedHtml($bonusTableHtml),
             'hrStatusHtml' => SafeHtml::fromTrustedHtml($hrStatusHtml),
             'ipHistoryCount' => $ipHistoryCount,
+            'torrentListSections' => [
+                ['type' => 'uploaded', 'label' => __('userdetails.row_uploaded_torrents')],
+                ['type' => 'seeding', 'label' => __('userdetails.row_current_seeding')],
+                ['type' => 'leeching', 'label' => __('userdetails.row_current_leeching')],
+                ['type' => 'completed', 'label' => __('userdetails.row_completed_torrents')],
+                ['type' => 'incomplete', 'label' => __('userdetails.row_incomplete_torrents')],
+            ],
             'userProps' => $userProps,
             'triggerId' => $triggerId,
         ];

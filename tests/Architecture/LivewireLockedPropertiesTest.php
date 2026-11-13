@@ -52,7 +52,6 @@ final class LivewireLockedPropertiesTest extends TestCase
         'App\\Livewire\\Shoutbox::text' => true,
         'App\\Livewire\\ThanksSection::status' => true,
         'App\\Livewire\\TorrentFileList::open' => true,
-        'App\\Livewire\\UserTorrentList::open' => true,
     ];
 
     public function test_livewire_public_properties_are_locked_or_explicitly_writable(): void

@@ -80,11 +80,9 @@
 <x-settings-row-small :label="__('userdetails.text_bonus_table')">{{ $bonusTableHtml }}</x-settings-row-small>
 @endif
 @if (! empty($user['ip']) && ($canViewTorrentHistory || $isOwner))
-<livewire:user-torrent-list :user-id="$user['id']" type="uploaded" :label="__('userdetails.row_uploaded_torrents')" :title="__('userdetails.title_show_or_hide')" :link-text="__('userdetails.text_show_or_hide')" />
-<livewire:user-torrent-list :user-id="$user['id']" type="seeding" :label="__('userdetails.row_current_seeding')" :title="__('userdetails.title_show_or_hide')" :link-text="__('userdetails.text_show_or_hide')" />
-<livewire:user-torrent-list :user-id="$user['id']" type="leeching" :label="__('userdetails.row_current_leeching')" :title="__('userdetails.title_show_or_hide')" :link-text="__('userdetails.text_show_or_hide')" />
-<livewire:user-torrent-list :user-id="$user['id']" type="completed" :label="__('userdetails.row_completed_torrents')" :title="__('userdetails.title_show_or_hide')" :link-text="__('userdetails.text_show_or_hide')" />
-<livewire:user-torrent-list :user-id="$user['id']" type="incomplete" :label="__('userdetails.row_incomplete_torrents')" :title="__('userdetails.title_show_or_hide')" :link-text="__('userdetails.text_show_or_hide')" />
+@foreach ($torrentListSections as $section)
+<tr><td class="w-[1%] whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ $section['label'] }}</td><td class="w-[99%] align-top px-2.5 py-1.5"><a href="#" data-nx-torrentlist data-userid="{{ $user['id'] }}" data-type="{{ $section['type'] }}" aria-expanded="false"><i class="plus" role="img" aria-label="{{ __('functions.aria_show_hide') }}" title="{{ __('userdetails.title_show_or_hide') }}"></i>&nbsp;&nbsp;<u>{{ __('userdetails.text_show_or_hide') }}</u></a><i data-nx-torrentlist-loading hidden>{{ __('functions.text_loading') }}</i><div data-nx-torrentlist-body hidden></div></td></tr>
+@endforeach
 @endif
 @if (! empty($user['info']))
 <tr><td colspan="2" class="p-[10pt]">{{ \App\Support\Format::formatComment($user['info'], false) }}</td></tr>

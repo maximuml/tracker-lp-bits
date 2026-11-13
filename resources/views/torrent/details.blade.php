@@ -55,7 +55,7 @@
 <x-settings-row :label="__('details.row_screenshots')">
     <div class="nxm-screens">
     @foreach ($screenshots as $shot)
-        <a class="nxm-screens__item" href="{{ $shot }}" target="_blank" rel="noopener"><img src="{{ $shot }}" alt="{{ $details->title->name }}" loading="lazy" /></a>
+        <a class="nxm-screens__item" href="{{ $shot }}" target="_blank" rel="noopener"><img src="{{ $shot }}" alt="{{ $details->title->name }}" loading="lazy" data-zoomable /></a>
     @endforeach
     </div>
 </x-settings-row>

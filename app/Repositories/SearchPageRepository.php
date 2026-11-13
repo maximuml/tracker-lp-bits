@@ -189,6 +189,7 @@ class SearchPageRepository
 
     /**
      * @param  array<int, array<string, mixed>>  $rows
+     * @param  array{page: int, pages: int, href: string, prevLabel: string, nextLabel: string, zeroBased: bool}|array{}  $pagerProps
      * @return array<string, mixed>
      */
     private function formatResult(string $searchRaw, int $searchArea, int $count, array $rows, SafeHtml $pagertop, SafeHtml $pagerbottom, int $torrentsperpage, array $pagerProps = []): array

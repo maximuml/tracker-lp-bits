@@ -175,6 +175,7 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->assertSame('', $s->allowedNote);
         $this->assertSame('', (string) $s->pagerTop);
         $this->assertSame('', (string) $s->pagerBottom);
+        $this->assertSame([], $s->pager);
         $this->assertSame(
             (string) __('offers.text_blank').Time::format('2024-01-02 03:04:05', true, false),
             (string) $s->offerTime,
@@ -274,6 +275,9 @@ final class OfferDetailsBuilderTest extends TestCase
         $this->assertSame(30, $s->commentCount);
         $this->assertNotEmpty((string) $s->pagerTop);
         $this->assertStringContainsString('off_details=1', (string) $s->pagerTop);
+        $this->assertSame('/web/offers?id=5&off_details=1&page={page}', $s->pager['href']);
+        $this->assertSame(3, $s->pager['page']);
+        $this->assertSame(3, $s->pager['pages']);
     }
 
     public function test_null_added_renders_prefix_only(): void

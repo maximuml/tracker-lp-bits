@@ -31,7 +31,7 @@
         @endif
         </tr></thead></x-slot:head>
         @foreach ($logRows as $arr)
-            <tr><td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center">{{ $arr['dateHtml'] ?? '' }}</td><td class="align-top px-2.5 py-1.5"><span class="{{ $arr['colorClass'] ?? '' }}">{{ $arr['txt'] ?? '' }}</span></td>
+            <tr><td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center">{{ $arr['dateHtml'] ?? '' }}</td><td class="align-top px-2.5 py-1.5"><x-status-pill :cls="($arr['colorClass'] ?? '') !== '' ? $arr['colorClass'] : null">{{ $arr['txt'] ?? '' }}</x-status-pill></td>
             @if ($canConfidentialLog)
                 <td class="align-top px-2.5 py-1.5">{{ $arr['usernameHtml'] ?? '' }}</td>
             @endif

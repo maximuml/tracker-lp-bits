@@ -27,7 +27,7 @@
 @if ($userTorrentListVm->showLeechers)<td class="align-top px-2.5 py-1.5 text-center">{{ $row->leechers }}</td>@endif
 @if ($userTorrentListVm->showUploaded)<td class="align-top px-2.5 py-1.5 text-center">{{ $row->uploaded['value'] }}<br />{{ $row->uploaded['unit'] }}</td>@endif
 @if ($userTorrentListVm->showDownloaded)<td class="align-top px-2.5 py-1.5 text-center">{{ $row->downloaded['value'] }}<br />{{ $row->downloaded['unit'] }}</td>@endif
-@if ($userTorrentListVm->showRatio)<td class="align-top px-2.5 py-1.5 text-center">@if ($row->ratioClass !== null)<span class="{{ $row->ratioClass }}">{{ $row->ratioText }}</span>@else{{ $row->ratioText }}@endif</td>@endif
+@if ($userTorrentListVm->showRatio)<td class="align-top px-2.5 py-1.5 text-center"><x-status-pill :cls="$row->ratioClass">{{ $row->ratioText }}</x-status-pill></td>@endif
 @if ($userTorrentListVm->showSeedTime)<td class="align-top px-2.5 py-1.5 text-center">{{ $row->seedTime }}</td>@endif
 @if ($userTorrentListVm->showLeechTime)<td class="align-top px-2.5 py-1.5 text-center">{{ $row->leechTime }}</td>@endif
 @if ($userTorrentListVm->showCompletedAt)<td class="align-top px-2.5 py-1.5 text-center"><x-time :value="$row->completedAt" :ago="false" :two-line="true" /></td>@endif

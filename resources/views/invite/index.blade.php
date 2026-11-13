@@ -82,7 +82,7 @@
                     <td class="align-top px-2.5 py-1.5">{{ $arr['torrent_count'] }}</td>
                     <td class="align-top px-2.5 py-1.5">{{ \App\Support\Format::size($arr['uploaded']) }}</td>
                     <td class="align-top px-2.5 py-1.5">{{ \App\Support\Format::size($arr['downloaded']) }}</td>
-                    <td class="align-top px-2.5 py-1.5">@if (($arr['ratioClass'] ?? '') !== '')<span class="{{ $arr['ratioClass'] }}">{{ $arr['ratioText'] }}</span>@else{{ $arr['ratioText'] ?? '' }}@endif</td>
+                    <td class="align-top px-2.5 py-1.5"><x-status-pill :cls="$arr['ratioClass'] ?? null">{{ $arr['ratioText'] ?? '' }}</x-status-pill></td>
                     <td class="align-top px-2.5 py-1.5">{{ number_format($arr['seeding_torrent_count']) }}</td>
                     <td class="align-top px-2.5 py-1.5">{{ \App\Support\Format::size($arr['seeding_torrent_size']) }}</td>
                     <td class="align-top px-2.5 py-1.5">{{ number_format($arr['seed_points_per_hour'], 3) }}</td>

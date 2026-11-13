@@ -47,7 +47,7 @@ final class ThankService
 
         return DB::transaction(function () use ($user, $torrentOwner, $torrent) {
             $thank = $user->thank_torrent_logs()->create(['torrentid' => $torrent->id]);
-            NexusCache::instance()?->forget(TorrentDetailRepository::thanksCacheKey((int) $torrent->id));
+            NexusCache::instance()?->forget(TorrentDetailRepository::THANKS_CACHE_KEY_PREFIX.(int) $torrent->id);
 
             $sayThanksBonus = SiteConfig::current()->bonus->sayThanks();
             $receiveThanksBonus = SiteConfig::current()->bonus->receiveThanks();

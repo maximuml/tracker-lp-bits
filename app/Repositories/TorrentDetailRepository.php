@@ -24,14 +24,18 @@ class TorrentDetailRepository
 
     private const THANKS_CACHE_TTL = 3600;
 
-    public static function magicCacheKey(int $torrentId): string
+    public const THANKS_CACHE_KEY_PREFIX = 'td_thanks_';
+
+    private const MAGIC_CACHE_KEY_PREFIX = 'td_magic_';
+
+    private static function magicCacheKey(int $torrentId): string
     {
-        return 'td_magic_'.$torrentId;
+        return self::MAGIC_CACHE_KEY_PREFIX.$torrentId;
     }
 
-    public static function thanksCacheKey(int $torrentId): string
+    private static function thanksCacheKey(int $torrentId): string
     {
-        return 'td_thanks_'.$torrentId;
+        return self::THANKS_CACHE_KEY_PREFIX.$torrentId;
     }
 
     /**

@@ -131,6 +131,7 @@ class TorrentController extends Controller
             'torrent' => $torrent,
             'denyReasons' => $denyReasons,
             'logs' => $logs,
+            'approvalStatuses' => Torrent::listApprovalStatus(true),
             'theme' => UserTheme::fromStringSafe(is_string($theme) ? $theme : null)->value,
             'fontSize' => UserFontsize::fromMixed($actor->value('fontsize'))->stringValue(),
         ]);

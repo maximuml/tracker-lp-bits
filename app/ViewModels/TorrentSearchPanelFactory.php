@@ -176,6 +176,8 @@ final class TorrentSearchPanelFactory
             sortType: $sortType,
             appliedFilters: $appliedFilters,
             resetUrl: '/web/torrents',
+            approvalStatuses: $showApprovalStatusFilter ? Torrent::listApprovalStatus(true) : [],
+            defaultSearchMode: (string) SearchBox::getDefaultSearchMode(),
         );
     }
 

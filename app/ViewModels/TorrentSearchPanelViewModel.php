@@ -25,6 +25,7 @@ final class TorrentSearchPanelViewModel
      * @param  array<int|string, string>  $searchModes
      * @param  array<int, string>  $promotionOptions
      * @param  list<AppliedFilter>  $appliedFilters
+     * @param  array<int|string, string>  $approvalStatuses
      */
     public function __construct(
         public readonly array $categoryRows,
@@ -38,5 +39,7 @@ final class TorrentSearchPanelViewModel
         public readonly ?string $sortType,
         public readonly array $appliedFilters = [],
         public readonly string $resetUrl = '/web/torrents',
+        public readonly array $approvalStatuses = [],
+        public readonly string $defaultSearchMode = '0',
     ) {}
 }

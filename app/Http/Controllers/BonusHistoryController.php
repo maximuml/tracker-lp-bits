@@ -104,7 +104,7 @@ class BonusHistoryController extends BasePageController
 
         $rep = $this->bonusCalculationRepository;
         $total = $rep->getCount($category, $uid, $businessType);
-        [$pagertop, $pagerbottom, , , $pageSize, $page] = Pagination::pager(50, $total, "{$pagerParam}&");
+        [$pagertop, $pagerbottom, , , $pageSize, $page, $pager] = Pagination::pager(50, $total, "{$pagerParam}&");
         $list = $rep->getList($category, $uid, $businessType, $page + 1, $pageSize);
 
         $rows = [];
@@ -148,6 +148,7 @@ JS;
             'pagerParam' => $pagerParam,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'rows' => $rows,
             'requestUri' => (string) $request->server->get('REQUEST_URI', ''),
             'columnBusinessTypeLabel' => Locale::trans('bonus-log.fields.business_type', [], null),

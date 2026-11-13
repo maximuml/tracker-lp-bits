@@ -1,5 +1,5 @@
 @if ($results->showPager)
-{{ $results->pagerTop }}
+<x-pagination :page="$results->pager['page']" :pages="$results->pager['pages']" :href="$results->pager['href']" :prev-label="$results->pager['prevLabel']" :next-label="$results->pager['nextLabel']" :zero-based="$results->pager['zeroBased']" label="Pagination top" />
 @endif
 <x-data-table :caption="'Search results'" :caption-hidden="true">
     <x-slot:head>
@@ -34,5 +34,5 @@
     @endforeach
 </x-data-table>
 @if ($results->showPager)
-{{ $results->pagerBottom }}
+<x-pagination :page="$results->pager['page']" :pages="$results->pager['pages']" :href="$results->pager['href']" :prev-label="$results->pager['prevLabel']" :next-label="$results->pager['nextLabel']" :zero-based="$results->pager['zeroBased']" label="Pagination bottom" />
 @endif

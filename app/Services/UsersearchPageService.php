@@ -194,7 +194,7 @@ final class UsersearchPageService
         $count = (int) $searchResult['count'];
         $q = (string) $searchResult['q'];
         $perpage = 30;
-        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, $requestUri.'?'.$q);
+        [$pagertop, $pagerbottom, , $offset, $rpp, , $pager] = Pagination::pager($perpage, $count, $requestUri.'?'.$q);
         $res = $searchResult['rows'];
 
         $userIds = array_map(fn ($row) => (int) ($row['id'] ?? 0), $res);
@@ -206,8 +206,8 @@ final class UsersearchPageService
         $commentCounts = $extraStats['comments'];
         $bannedIps = $extraStats['bannedIps'];
 
-        if (count($res) == 0) {
-            return new UsersearchResultsViewModel([], false, SafeHtml::fromPlainText(''), SafeHtml::fromPlainText(''), view('partials.std-message', [
+        if ($res === []) {
+            return new UsersearchResultsViewModel([], false, SafeHtml::fromPlainText(''), SafeHtml::fromPlainText(''), [], view('partials.std-message', [
                 'heading' => 'Warning',
                 'text' => 'No user was found.',
                 'htmlstrip' => false,
@@ -260,6 +260,7 @@ final class UsersearchPageService
             showPager: $count > $perpage,
             pagerTop: $pagertop,
             pagerBottom: $pagerbottom,
+            pager: $pager,
             emptyMessage: null,
         );
     }

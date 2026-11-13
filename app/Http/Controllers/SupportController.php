@@ -194,7 +194,7 @@ class SupportController extends BasePageController
         }
 
         $count = $this->complainRepository->countAnswered();
-        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager(20, $count, '?action=list&');
+        [$pagertop, $pagerbottom, , $offset, $rpp, , $pager] = Pagination::pager(20, $count, '?action=list&');
         $processedRows = $this->complainRepository->listAnswered($offset, $rpp);
 
         return $this->renderPage($request, 'complains', false, [
@@ -204,6 +204,7 @@ class SupportController extends BasePageController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'page' => $request->input('page'),
             'title' => __('complains.text_complain'),
             'isAdmin' => $isAdmin,

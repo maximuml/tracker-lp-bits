@@ -249,6 +249,9 @@ final class UsersearchPageServiceTest extends TestCase
         $this->assertNull($data['results']->emptyMessage);
         $this->assertNotEmpty($data['results']->rows);
         $this->assertNull($data['resultsError']);
+        $this->assertSame(1, $data['results']->pager['page']);
+        $this->assertSame(1, $data['results']->pager['pages']);
+        $this->assertSame('/usersearch.php?n=searchtarget?n=searchtarget&page={page}', $data['results']->pager['href']);
     }
 
     // --- search with wildcard ---

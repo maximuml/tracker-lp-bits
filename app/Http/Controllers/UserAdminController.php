@@ -106,7 +106,7 @@ class UserAdminController extends BasePageController
         $perPage = 50;
         $filters = ['search' => $search, 'class' => $class, 'country' => $country, 'letter' => $letter];
         $count = $this->userListingRepository->countUsers($filters);
-        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perPage, $count, '/web/users?'.$q.($q ? '&' : ''));
+        [$pagertop, $pagerbottom, , $offset, , , $pager] = Pagination::pager($perPage, $count, '/web/users?'.$q.($q ? '&' : ''));
         $userRows = $this->userListingRepository->listUsers($filters, (int) $offset, $perPage);
 
         UserDisplay::preload(array_values(array_map(fn ($arr) => (int) $arr['id'], $userRows)));
@@ -145,6 +145,7 @@ class UserAdminController extends BasePageController
             'pagerParam' => $q,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'rows' => $rows,
             'letterItems' => $letterItems,
         ]);

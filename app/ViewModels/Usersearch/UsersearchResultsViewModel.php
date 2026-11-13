@@ -21,6 +21,8 @@ final class UsersearchResultsViewModel
         public readonly bool $showPager,
         public readonly SafeHtml $pagerTop,
         public readonly SafeHtml $pagerBottom,
+        /** @var array<string, mixed> <x-pagination> prop map */
+        public readonly array $pager,
         public readonly ?Htmlable $emptyMessage,
     ) {}
 }

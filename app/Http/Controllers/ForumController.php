@@ -146,7 +146,7 @@ class ForumController extends BasePageController
         $perpage = 20;
         $count = $this->commentRepository->countLatest();
 
-        [$pagertop, $pagerbottom, , $offset, $perpage] = Pagination::pager($perpage, $count, '/web/latestcomments?');
+        [$pagertop, $pagerbottom, , $offset, $perpage, , $pager] = Pagination::pager($perpage, $count, '/web/latestcomments?');
         $rows = $this->commentRepository->getLatest($perpage, $offset);
 
         $userIds = array_filter(array_unique(array_column($rows, 'user')));
@@ -183,6 +183,7 @@ class ForumController extends BasePageController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'offset' => $offset,
             'perpage' => $perpage,
         ]);

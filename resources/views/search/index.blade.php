@@ -26,9 +26,9 @@
     <h1 class="nx-sr-only">{{ __('search.global_search') }}</h1>
 @endif
 @if (! empty($hasResults))
-    {{ $pagertop ?? '' }}
+    <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
     @include('components.torrents.table')
-    {{ $pagerbottom ?? '' }}
+    <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
 @elseif (($search ?? '') !== '')
     <x-std-message :text="__('torrents.std_try_again')" :htmlstrip="false"><x-slot:heading>{{ __('torrents.std_search_results_for') }}{{ \App\Support\Html\SafeHtml::fromUntrustedHtml($searchstr_ori ?? '') }}"</x-slot></x-std-message>
 @endif

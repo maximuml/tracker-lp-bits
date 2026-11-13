@@ -69,7 +69,9 @@ final class OfferVoteListBuilderTest extends TestCase
                 (object) ['userid' => 0, 'vote' => 99],
             ]));
 
-        $r = $this->builder()->build(Request::create('/web/offers?id=5', 'GET'));
+        $request = Request::create('/web/offers?id=5', 'GET');
+        $this->app->instance('request', $request);
+        $r = $this->builder()->build($request);
 
         $this->assertSame(5, $r['offerId']);
         $this->assertTrue($r['hasVotes']);
@@ -78,6 +80,10 @@ final class OfferVoteListBuilderTest extends TestCase
         $this->assertSame('against', $r['rows'][1]['vote']);
         $this->assertSame('unknown', $r['rows'][2]['vote']);
         $this->assertNotEmpty($r['pagerTop']);
+        $this->assertSame('/web/offers?id=5&offer_vote=1&page={page}', $r['pager']['href']);
+        $this->assertSame(1, $r['pager']['page']);
+        $this->assertSame(1, $r['pager']['pages']);
+        $this->assertTrue($r['pager']['zeroBased']);
     }
 
     public function test_empty_vote_list(): void

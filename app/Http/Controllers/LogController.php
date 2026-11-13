@@ -112,7 +112,7 @@ class LogController extends BasePageController
 
         $perpage = 50;
         $base = '?action=dailylog&'.($search !== '' && $canConfidential ? 'search='.rawurlencode($search).'&' : '').($q !== '' ? 'query='.rawurlencode($q).'&' : '');
-        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
+        [$pagertop, $pagerbottom, , $offset, , $pager] = Pagination::pager($perpage, $count, $base);
 
         $logRows = $this->logRepository->getSiteLog($filters, (int) $offset, $perpage);
 
@@ -149,6 +149,7 @@ class LogController extends BasePageController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'userDisplayMap' => $userDisplayMap,
             'canConfidentialLog' => $canConfidential,
             'title' => __('log.head_site_log'),
@@ -329,7 +330,7 @@ class LogController extends BasePageController
         $count = $this->logRepository->countChronicle($q);
         $perpage = 50;
         $base = '?action=chronicle&'.($q !== '' ? 'query='.rawurlencode($q).'&' : '');
-        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
+        [$pagertop, $pagerbottom, , $offset, , $pager] = Pagination::pager($perpage, $count, $base);
 
         $chronicleRows = $this->logRepository->getChronicle($q, (int) $offset, $perpage);
 
@@ -348,6 +349,7 @@ class LogController extends BasePageController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'canManage' => $canManage,
             'title' => __('log.head_chronicle'),
         ]);
@@ -363,7 +365,7 @@ class LogController extends BasePageController
 
         $perpage = 20;
         $base = '?action=news&'.($search !== '' ? 'search='.rawurlencode($search).'&' : '').($q !== '' ? 'query='.rawurlencode($q).'&' : '');
-        [$pagertop, $pagerbottom, , $offset] = Pagination::pager($perpage, $count, $base);
+        [$pagertop, $pagerbottom, , $offset, , $pager] = Pagination::pager($perpage, $count, $base);
 
         $newsRows = $this->logRepository->getNews($filters, (int) $offset, $perpage);
 
@@ -382,6 +384,7 @@ class LogController extends BasePageController
             'count' => $count,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'title' => __('log.head_news'),
         ]);
     }

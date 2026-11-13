@@ -24,13 +24,17 @@
     @if ($count == 0)
         <p class="text-center">{{ __('polloverview.text_no_users_voted')}}</p>
     @else
-        {{ $pagertop ?? '' }}
+        @if ($pager !== [])
+<x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
+@endif
         <x-data-table :caption="__('polloverview.text_polls_user_overview')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><span class="nx-nobr">{{ __('polloverview.col_username')}}</span></th><th class="bg-nxm-surface-alt font-semibold" scope="col"><span class="nx-nobr">{{ __('polloverview.col_selection')}}<span class="nx-nobr"></th></tr></thead></x-slot:head>
         @foreach ($answers as $answerRow)
             <tr><td>{{ $answerRow['usernameHtml'] ?? '' }}</td><td>{{ $poll["option{$answerRow['selection']}"] ?? '' }}</td></tr>
         @endforeach
         </x-data-table>
-        {{ $pagerbottom ?? '' }}
+        @if ($pager !== [])
+<x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
+@endif
     @endif
 </x-page>
 

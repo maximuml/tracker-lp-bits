@@ -33,7 +33,7 @@ final class OfferVoteListBuilder
 
         $perpage = 25;
         $self = RequestValues::serverValue('PHP_SELF');
-        [$pagerTop, $pagerBottom, , $offset, $perpage] = Pagination::pager($perpage, $count, $self.'?id='.$offerId.'&offer_vote=1&');
+        [$pagerTop, $pagerBottom, , $offset, $perpage, , $pager] = Pagination::pager($perpage, $count, $self.'?id='.$offerId.'&offer_vote=1&');
         $voteRows = $this->offerVoteRepository->getVoteRows($offerId, (int) $offset, (int) $perpage);
 
         UserDisplay::preload($voteRows->map(fn ($r) => (int) (((array) $r)['userid'] ?? 0))->all());
@@ -53,6 +53,7 @@ final class OfferVoteListBuilder
             'noVotesNote' => __('offers.std_no_votes_yet'),
             'pagerTop' => $pagerTop,
             'pagerBottom' => $pagerBottom,
+            'pager' => $pager,
             'rows' => $rows,
         ];
     }

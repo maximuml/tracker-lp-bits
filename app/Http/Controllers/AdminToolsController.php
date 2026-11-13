@@ -51,7 +51,7 @@ class AdminToolsController extends BasePageController
         $queryParam = $q === '' ? null : $q;
         $total = $this->userModerationRepository->countBanLogs($queryParam);
         $perPage = 50;
-        [$paginationTop, $paginationBottom, $limit, $offset] = Pagination::pager($perPage, $total, '?');
+        [$paginationTop, $paginationBottom, $limit, $offset, , , $pager] = Pagination::pager($perPage, $total, '?');
         $rows = $this->userModerationRepository->listBanLogs($queryParam, $offset, $perPage)
             ->toArray();
 
@@ -69,6 +69,7 @@ class AdminToolsController extends BasePageController
             'rows' => $rows,
             'paginationTop' => $paginationTop,
             'paginationBottom' => $paginationBottom,
+            'pager' => $pager,
             'serverRequestUri' => RequestValues::serverValue('REQUEST_URI'),
         ]);
     }
@@ -300,7 +301,7 @@ class AdminToolsController extends BasePageController
         $rangeEndInt = $hasRangeFilter ? (int) ip2long($rangeEndIp) : null;
 
         $count = $this->locationService->countLocations($rangeStartInt, $rangeEndInt);
-        [$pagertop, $pagerbottom, , $offset, $rpp] = Pagination::pager($perpage, $count, '/web/location?');
+        [$pagertop, $pagerbottom, , $offset, $rpp, , $pager] = Pagination::pager($perpage, $count, '/web/location?');
 
         $locations = $this->locationService->listLocations($offset, $rpp, $rangeStartInt, $rangeEndInt);
 
@@ -325,6 +326,7 @@ class AdminToolsController extends BasePageController
             'hasRangeFilter' => $hasRangeFilter,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pager,
             'rows' => $rows,
             'actionUrl' => $actionUrl,
         ]);

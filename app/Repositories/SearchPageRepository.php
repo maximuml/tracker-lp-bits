@@ -110,7 +110,7 @@ class SearchPageRepository
             $rows = (array) ($meiliResult['list'] ?? []);
             $pager = Pagination::pager($torrentsperpage, $count, $addparam);
 
-            return $this->formatResult($searchRaw, $searchArea, $count, $rows, $pager[0] ?? '', $pager[1] ?? '', $torrentsperpage);
+            return $this->formatResult($searchRaw, $searchArea, $count, $rows, $pager[0] ?? '', $pager[1] ?? '', $torrentsperpage, $pager[6] ?? []);
         }
 
         $count = 0;
@@ -136,7 +136,7 @@ class SearchPageRepository
             $pager = Pagination::pager($torrentsperpage, 0, $addparam);
         }
 
-        return $this->formatResult($searchRaw, $searchArea, $count, $rows, $pager[0] ?? '', $pager[1] ?? '', $torrentsperpage);
+        return $this->formatResult($searchRaw, $searchArea, $count, $rows, $pager[0] ?? '', $pager[1] ?? '', $torrentsperpage, $pager[6] ?? []);
     }
 
     /**
@@ -189,9 +189,10 @@ class SearchPageRepository
 
     /**
      * @param  array<int, array<string, mixed>>  $rows
+     * @param  array{page: int, pages: int, href: string, prevLabel: string, nextLabel: string, zeroBased: bool}|array{}  $pagerProps
      * @return array<string, mixed>
      */
-    private function formatResult(string $searchRaw, int $searchArea, int $count, array $rows, SafeHtml $pagertop, SafeHtml $pagerbottom, int $torrentsperpage): array
+    private function formatResult(string $searchRaw, int $searchArea, int $count, array $rows, SafeHtml $pagertop, SafeHtml $pagerbottom, int $torrentsperpage, array $pagerProps = []): array
     {
         return [
             'search' => $searchRaw,
@@ -200,6 +201,7 @@ class SearchPageRepository
             'rows' => $rows,
             'pagertop' => $pagertop,
             'pagerbottom' => $pagerbottom,
+            'pager' => $pagerProps,
             'torrentsperpage' => $torrentsperpage,
             'searchstr_ori' => htmlspecialchars($searchRaw),
             'hasResults' => $searchRaw !== '' && $count > 0,

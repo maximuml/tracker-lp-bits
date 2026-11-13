@@ -230,7 +230,7 @@ class TorrentSearchRepository
                 }
             }
 
-            [$pagertop, $pagerbottom, $limit, $offset, $size, $page] = Pagination::pager($torrentsperpage, $count, '?'.$addparam);
+            [$pagertop, $pagerbottom, $limit, $offset, $size, $page, $pager] = Pagination::pager($torrentsperpage, $count, '?'.$addparam);
 
             $fieldsArr = Torrent::getFieldsForList(true);
             $rows = $shouldUseMeili

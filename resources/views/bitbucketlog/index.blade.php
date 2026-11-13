@@ -5,7 +5,7 @@
 @section('content')
 <x-page :title="'BitBucket Log'" width="list">
 Total Images Stored: {{ $count ?? 0 }}
-{{ $pagertop ?? '' }}
+<x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
 
 @if (empty($items ?? []))
     <x-empty-state :title="__('log.bitbucket_log_empty')" />
@@ -24,6 +24,6 @@ Total Images Stored: {{ $count ?? 0 }}
     @endforeach
     </x-data-table>
 @endif
-{{ $pagerbottom ?? '' }}
+<x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
 </x-page>
 @endsection

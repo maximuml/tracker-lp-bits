@@ -29,7 +29,7 @@
 
     <x-frame :caption="__('complains.complaints_processed')" :center="false">
         @if (! empty($processedRows))
-            {{ $pagertop ?? '' }}
+            <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
             <x-data-table :caption="__('complains.complaints_processed')" captionHidden><x-slot:head><thead><tr>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') }}</th>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') }}</th>
@@ -43,7 +43,7 @@
                 </tr>
             @endforeach
             </x-data-table>
-            {{ $pagerbottom ?? '' }}
+            <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
         @else
             {{ __('complains.no_complaints_have_been_processed') }}
         @endif

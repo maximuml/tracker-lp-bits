@@ -210,11 +210,12 @@ class InviteController extends BasePageController
         $inviteRows = [];
         $pagertop = SafeHtml::fromPlainText('');
         $pagerbottom = SafeHtml::fromPlainText('');
+        $pager = [];
         $haremAdditionFactor = SiteConfig::current()->bonus->haremAddition();
         $pendingCount = 0;
 
         if ($number > 0) {
-            [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=invitee&");
+            [$pagertop, $pagerbottom, , $offset, , $pager] = Pagination::pager($pageSize, $number, "?id=$id&menu=invitee&");
             $inviteRows = $this->inviteRepository->getInvitees($id, $filters, (int) $offset, $pageSize);
         }
 
@@ -253,6 +254,7 @@ JS;
             'inviteeRows' => $inviteRows,
             'inviteePagertop' => $pagertop,
             'inviteePagerbottom' => $pagerbottom,
+            'inviteePager' => $pager,
             'inviteeEnabledOptions' => $enabledOptions,
             'inviteeStatusOptions' => $statusOptions,
             'haremAdditionFactor' => $haremAdditionFactor,
@@ -277,9 +279,10 @@ JS;
         $inviteRows = [];
         $pagertop = SafeHtml::fromPlainText('');
         $pagerbottom = SafeHtml::fromPlainText('');
+        $pager = [];
 
         if ($number > 0) {
-            [$pagertop, $pagerbottom, , $offset] = Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
+            [$pagertop, $pagerbottom, , $offset, , $pager] = Pagination::pager($pageSize, $number, "?id=$id&menu=$menuSelected&");
             $inviteRows = $this->inviteRepository->getInvites($id, $menuSelected, (int) $offset, $pageSize);
         }
 
@@ -294,6 +297,7 @@ JS;
             'sentTmpRows' => $inviteRows,
             'sentTmpPagertop' => $pagertop,
             'sentTmpPagerbottom' => $pagerbottom,
+            'sentTmpPager' => $pager,
         ];
     }
 }

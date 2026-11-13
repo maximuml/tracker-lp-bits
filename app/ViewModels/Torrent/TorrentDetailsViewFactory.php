@@ -266,7 +266,7 @@ JS, \json_encode($approvalTitle)), 'footer', false);
     private function buildHotMeter(int $id, array $row): HotMeterRow
     {
         $snatchesPre = (string) __('details.text_view_snatches_pre');
-        $snatchesPost = (string) __('details.text_view_snatches_post');
+        $snatchesPost = (string) __('details.text_view_snatches_post').Strings::addS((int) $row['times_completed']);
 
         return new HotMeterRow(
             views: $row['views'],

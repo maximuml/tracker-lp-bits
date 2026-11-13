@@ -428,7 +428,7 @@ return [
     'row_offer_upload_timeout' => 'Offer Upload Timeout',
     'text_offer_upload_timeout_note' => "In seconds. Delete offers if not uploaded after being voted on for XXX seconds. Default '86400', i.e. 24 hours. Set it to '0' to disable timeout.",
     'row_max_subtitle_size' => 'Max Subtitle Size',
-    'text_max_subtitle_size_note' => "In bytes. Max size of subtitles allowed to be uploaded. Default 3145728, i.e. 3 MB.  Set it to '0' to disable limit.",
+    'text_max_subtitle_size_note' => "In bytes. Max size of subtitles allowed to be uploaded. Default 3145728, i.e. 3 MB. Set it to '0' to disable limit.",
     'row_posts_per_page' => 'Default posts per page',
     'text_posts_per_page_note' => "Number of posts per page shown at a forum's topic. Default '10'.",
     'text_posts_per_page_note_tail' => "Note that user's personal setting would override this",

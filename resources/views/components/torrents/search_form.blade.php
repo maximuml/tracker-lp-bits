@@ -110,7 +110,7 @@
 								<label for="f-approval">{{ __('torrents.text_approval_status')}}</label>
 								<select class="med" id="f-approval" name="approval_status">
 									<option value="">{{ __('torrents.select_all')}}</option>
-									@foreach (\App\Models\Torrent::listApprovalStatus(true) as $key => $value)
+									@foreach ($panelVm->approvalStatuses as $key => $value)
 										<option value="{{ $key }}"@if (isset($approvalStatus) && (string) $approvalStatus === (string) $key) selected="selected"@endif>{{ $value }}</option>
 									@endforeach
 								</select>
@@ -120,7 +120,7 @@
 								<label for="f-search-mode">{{ __('torrents.label_search_mode') }}</label>
 								<select id="f-search-mode" name="search_mode">
 									@foreach ($panelVm->searchModes as $mKey => $mLabel)
-									<option value="{{ $mKey }}"@if ((string) ($filterInput['search_mode'] ?? \App\Models\SearchBox::getDefaultSearchMode()) === (string) $mKey) selected="selected"@endif>{{ $mLabel }}</option>
+									<option value="{{ $mKey }}"@if ((string) ($filterInput['search_mode'] ?? $panelVm->defaultSearchMode) === (string) $mKey) selected="selected"@endif>{{ $mLabel }}</option>
 									@endforeach
 								</select>
 							</div>

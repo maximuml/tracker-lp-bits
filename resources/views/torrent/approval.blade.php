@@ -35,7 +35,7 @@
             <div class="row">
                 <label class="main">{{ __('torrent.approval.status_label') }}</label>
                 <div>
-                    @foreach (\App\Models\Torrent::listApprovalStatus(true) as $status => $text)
+                    @foreach ($approvalStatuses as $status => $text)
                     <label class="radio"><input type="radio" name="approval_status" value="{{ $status }}" @if($status == $torrent->approval_status) checked @endif> {{ $text }}</label>
                     @endforeach
                 </div>

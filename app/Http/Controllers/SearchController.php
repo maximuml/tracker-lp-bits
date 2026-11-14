@@ -16,6 +16,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\RedisGuard;
 use App\Support\RequestValues;
 use App\Support\Url;
+use App\ViewModels\TagsPageViewModel;
 use App\ViewModels\TorrentListViewFactory;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Http\RedirectResponse;
@@ -53,9 +54,9 @@ class SearchController extends BasePageController
 
     public function usersearch(Request $request): View|Response|RedirectResponse
     {
-        $data = $this->usersearchPageService->build($request)->toArray();
-
-        return $this->renderPage($request, 'usersearch', true, $data);
+        return $this->renderPage($request, 'usersearch', true, [
+            'vm' => $this->usersearchPageService->build($request),
+        ]);
     }
 
     public function tags(Request $request): View|RedirectResponse
@@ -64,9 +65,11 @@ class SearchController extends BasePageController
         $username = $this->actor->username;
 
         return $this->renderPage($request, 'tags', false, [
-            'test' => (string) $request->post('test', ''),
-            'siteName' => $siteName,
-            'tagItems' => $this->tagItems($siteName, $username),
+            'vm' => new TagsPageViewModel(
+                test: (string) $request->post('test', ''),
+                siteName: $siteName,
+                tagItems: $this->tagItems($siteName, $username),
+            ),
         ]);
     }
 

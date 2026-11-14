@@ -10,6 +10,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UtilityController;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
+use App\ViewModels\TagsPageViewModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -142,8 +143,8 @@ final class UtilityControllerTest extends TestCase
         $this->mockCurrentUser(null);
         View::shouldReceive('make')->once()->with(
             'tags.index',
-            Mockery::on(fn (array $data): bool => ($data['test'] ?? null) === 'abc'
-                && isset($data['tagItems'], $data['siteName'])),
+            Mockery::on(fn (array $data): bool => ($data['vm'] ?? null) instanceof TagsPageViewModel
+                && $data['vm']->test === 'abc'),
         )->andReturn($this->fakeView());
         View::shouldReceive('make')->zeroOrMoreTimes()->withAnyArgs()->andReturn($this->fakeView());
 

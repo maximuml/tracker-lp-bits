@@ -1,24 +1,24 @@
 @extends('layouts.app', ['chromeVariant' => 'auth'])
 
-@section('title', $headTitle)
+@section('title', $vm->headTitle)
 
 @section('content')
-    @if ($error)
-        <div class="nx-auth__error">{{ $error }}</div>
+    @if ($vm->error)
+        <div class="nx-auth__error">{{ $vm->error }}</div>
     @endif
 
     <x-auth.errors :errors="$errors ?? null" />
 
     <form method="get" action="/signup" class="nx-auth__lang">
-        @if ($isInvite)
+        @if ($vm->isInvite)
             <input type="hidden" name="type" value="invite" />
-            <input type="hidden" name="invitenumber" value="{{ $code }}" />
+            <input type="hidden" name="invitenumber" value="{{ $vm->code }}" />
         @endif
-        <input type="hidden" name="secret" value="{{ $secret }}" />
-        <x-auth.language-select :label="__('signup.text_select_lang')" :languages="$languages" :lang-folder="$langFolder" />
+        <input type="hidden" name="secret" value="{{ $vm->secret }}" />
+        <x-auth.language-select :label="__('signup.text_select_lang')" :languages="$vm->languages" :lang-folder="$vm->langFolder" />
     </form>
 
-    <h1>{{ $headTitle }}</h1>
+    <h1>{{ $vm->headTitle }}</h1>
     <p class="nx-auth__sub"><b>{{ __('signup.text_note') }}</b>: {{ __('signup.text_cookies_note') }}</p>
 
     <form method="post" action="/signup" id="signup-form"
@@ -30,17 +30,17 @@
           data-tip-equal-username="{{ \App\Support\Locale::trans('signup.password_equals_username', [], null) }}"
           data-tip-unmatched="{{ \App\Support\Locale::trans('signup.passwords_unmatched', [], null) }}">
         @csrf
-        @if ($isInvite)
-            <input type="hidden" name="inviter" value="{{ $invite->inviter ?? $inviter ?? '' }}" />
+        @if ($vm->isInvite)
+            <input type="hidden" name="inviter" value="{{ $vm->invite->inviter ?? $inviter ?? '' }}" />
             <input type="hidden" name="type" value="invite" />
-            <input type="hidden" name="hash" value="{{ $code }}" />
+            <input type="hidden" name="hash" value="{{ $vm->code }}" />
         @endif
 
         <p class="nx-auth__group nx-auth__group--first">{{ __('signup.group_account') }}</p>
 
         <div class="nx-field">
             <label class="nx-field__label" for="wantusername">{{ __('signup.row_desired_username')}}</label>
-            <input type="text" class="nx-field__input" id="wantusername" name="wantusername" aria-label="{{ __('signup.row_desired_username') }}" value="{{ $usernameValue }}"@if($usernameReadonly) readonly @endif autocomplete="username"@error('wantusername') aria-invalid="true" aria-describedby="wantusername-error"@enderror />
+            <input type="text" class="nx-field__input" id="wantusername" name="wantusername" aria-label="{{ __('signup.row_desired_username') }}" value="{{ $vm->usernameValue }}"@if($vm->usernameReadonly) readonly @endif autocomplete="username"@error('wantusername') aria-invalid="true" aria-describedby="wantusername-error"@enderror />
             @error('wantusername')<div class="nx-field__error" id="wantusername-error" role="alert">{{ $message }}</div>@enderror
             <p class="nx-field__help">{{ __('signup.text_allowed_characters')}}</p>
         </div>
@@ -64,14 +64,14 @@
             @error('passagain')<div class="nx-field__error" id="passagain-error" role="alert">{{ $message }}</div>@enderror
         </div>
 
-        @if ($captchaEnabled && $captchaMarkup !== '')
-            {{ $captchaMarkup }}
+        @if ($vm->captchaEnabled && $vm->captchaMarkup !== '')
+            {{ $vm->captchaMarkup }}
             @error('imagestring')<div class="nx-field__error" id="imagestring-error" role="alert">{{ $message }}</div>@enderror
         @endif
 
         <div class="nx-field">
             <label class="nx-field__label" for="email">{{ __('signup.row_email_address')}}</label>
-            <input type="email" class="nx-field__input" id="email" name="email" aria-label="{{ __('signup.row_email_address') }}" value="{{ $emailValue }}"@if($emailReadonly) readonly @endif autocomplete="email"@error('email') aria-invalid="true" aria-describedby="email-error"@enderror />
+            <input type="email" class="nx-field__input" id="email" name="email" aria-label="{{ __('signup.row_email_address') }}" value="{{ $vm->emailValue }}"@if($vm->emailReadonly) readonly @endif autocomplete="email"@error('email') aria-invalid="true" aria-describedby="email-error"@enderror />
             @error('email')<div class="nx-field__error" id="email-error" role="alert">{{ $message }}</div>@enderror
         </div>
 
@@ -81,7 +81,7 @@
             <label class="nx-field__label" for="country">{{ __('signup.row_country')}}</label>
             <select id="country" name="country" class="nx-field__input"@error('country') aria-invalid="true" aria-describedby="country-error"@enderror>
                 <option value="8">---- {{ __('signup.select_none_selected')}} ----</option>
-                @foreach ($countries as $country)
+                @foreach ($vm->countries as $country)
                     <option value="{{ $country->id }}" @if ((int) old('country', 8) === (int) $country->id) selected @endif>{{ $country->name }}</option>
                 @endforeach
             </select>

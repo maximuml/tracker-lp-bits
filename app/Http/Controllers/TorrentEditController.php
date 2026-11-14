@@ -25,6 +25,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\YesNo;
+use App\ViewModels\Torrent\TorrentEditPageViewModel;
 use App\ViewModels\Torrent\TorrentEditPickViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -127,30 +128,32 @@ class TorrentEditController extends Controller
         $showDeleteForm = Permission::can(PermissionEnum::TORRENT_DELETE) && Permission::can(PermissionEnum::TORRENT_MANAGE);
 
         return view('torrent.edit', [
-            'torrentId' => $id,
-            'torrentRow' => $row,
-            'currentUser' => $currentUser,
-            'headTitle' => $headTitle,
-            'tagIds' => $this->torrentDetailRepository->getTagIds($id),
-            'cats' => $cats,
-            'returnto' => (string) $request->input('returnto', ''),
-            'requestUri' => is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
-            'taxonomySelect' => $this->searchBoxSchemaBuilder->renderTaxonomySelect($sectionmode, $row),
-            'tagCheckbox' => $this->tagRepository->renderCheckbox($sectionmode, (array) $this->torrentDetailRepository->getTagIds($id)),
-            'customFieldsHtml' => $this->customField->renderOnUploadPage($id, $sectionmode),
-            'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
-            'canEdit' => $canEdit,
-            'priceRow' => $priceRow,
-            'sectionMode' => $sectionmode,
-            'showVisibleCheck' => $showVisibleCheck,
-            'visibleChecked' => YesNo::isYes($row['visible'] ?? null),
-            'showAnonymousCheck' => $showAnonymousCheck,
-            'anonymousChecked' => YesNo::isYes($row['anonymous'] ?? null),
-            'pick' => $pick,
-            'showDeleteForm' => $showDeleteForm,
-            'descrContent' => (string) ($row['descr'] ?? ''),
-            'technicalInfoEnabled' => SiteConfig::current()->main->enableTechnicalInfo(),
-            'modeClass' => 'mode_'.$sectionmode,
+            'vm' => new TorrentEditPageViewModel(
+                torrentId: $id,
+                torrentRow: $row,
+                currentUser: $currentUser,
+                headTitle: $headTitle,
+                tagIds: $this->torrentDetailRepository->getTagIds($id),
+                cats: $cats,
+                returnto: (string) $request->input('returnto', ''),
+                requestUri: is_string($request->server('REQUEST_URI')) ? $request->server('REQUEST_URI') : '',
+                taxonomySelect: $this->searchBoxSchemaBuilder->renderTaxonomySelect($sectionmode, $row),
+                tagCheckbox: $this->tagRepository->renderCheckbox($sectionmode, (array) $this->torrentDetailRepository->getTagIds($id)),
+                customFieldsHtml: $this->customField->renderOnUploadPage($id, $sectionmode),
+                hitAndRunHtml: $this->hitAndRunRepository->renderOnUploadPage($row['hr'] ?? 0, $sectionmode),
+                canEdit: $canEdit,
+                priceRow: $priceRow,
+                sectionMode: $sectionmode,
+                showVisibleCheck: $showVisibleCheck,
+                visibleChecked: YesNo::isYes($row['visible'] ?? null),
+                showAnonymousCheck: $showAnonymousCheck,
+                anonymousChecked: YesNo::isYes($row['anonymous'] ?? null),
+                pick: $pick,
+                showDeleteForm: $showDeleteForm,
+                descrContent: (string) ($row['descr'] ?? ''),
+                technicalInfoEnabled: SiteConfig::current()->main->enableTechnicalInfo(),
+                modeClass: 'mode_'.$sectionmode,
+            ),
         ]);
     }
 

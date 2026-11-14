@@ -10,15 +10,15 @@
     @foreach ($errors->all() as $message)<div>{{ $message }}</div>@endforeach
 </x-alert>
 @endif
-@if (($action ?? '') === 'personal')
-@include('usercp.sections.personal')
-@elseif (($action ?? '') === 'tracker')
-@include('usercp.sections.tracker')
-@elseif (($action ?? '') === 'forum')
-@include('usercp.sections.forum')
-@elseif (($action ?? '') === 'security')
-@include('usercp.sections.security')
+@if (($vm->action ?? '') === 'personal')
+@include('usercp.sections.personal', ['personal' => $vm->personal, 'type' => $vm->type])
+@elseif (($vm->action ?? '') === 'tracker')
+@include('usercp.sections.tracker', ['tracker' => $vm->tracker, 'type' => $vm->type])
+@elseif (($vm->action ?? '') === 'forum')
+@include('usercp.sections.forum', ['forum' => $vm->forum, 'type' => $vm->type])
+@elseif (($vm->action ?? '') === 'security')
+@include('usercp.sections.security', ['security' => $vm->security, 'curUser' => $vm->curUser, 'type' => $vm->type])
 @else
-@include('usercp.sections.home')
+@include('usercp.sections.home', ['home' => $vm->home, 'curUser' => $vm->curUser])
 @endif
 @endsection

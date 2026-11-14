@@ -23,4 +23,5 @@ return [
     'text_no' => 'No',
     'text_inf' => 'Inf.',
     'text_no_peers' => 'No peers',
+    'head_title' => 'Peer list',
 ];

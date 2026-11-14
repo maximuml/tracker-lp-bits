@@ -394,6 +394,9 @@ Route::group(['prefix' => 'web', 'middleware' => ['throttle:legacy']], function 
     Route::get('shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['auth.nexus:nexus-web', 'throttle:shoutbox'])->name('shoutbox.legacy');
     Route::get('viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
     Route::get('viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->middleware('auth.nexus:nexus-web')->name('viewpeerlist.legacy');
+    // usercp lives at the root /usercp (the .php shim rewrites there) —
+    // keep the /web/ spelling working like every other legacy page.
+    Route::get('usercp', [CompatRedirectController::class, 'get'])->defaults('redirect_to', '/usercp');
 });
 
 // Passkey login v2 — fixed route with HMAC-SHA256, nonce replay protection,

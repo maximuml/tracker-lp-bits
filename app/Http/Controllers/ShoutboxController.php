@@ -297,6 +297,11 @@ class ShoutboxController extends BasePageController
                 } else {
                     $this->runShoutLoop($lastId, $maxLoops, $interval, $owns);
                 }
+            } catch (\Throwable $e) {
+                // Headers and the first frames are already on the wire —
+                // letting the exception escape would make Laravel try to
+                // send an error response and die on "headers already sent".
+                logger()->warning('shoutbox_sse stream aborted', ['error' => $e->getMessage(), 'type' => $isNotifications ? 'notifications' : 'shoutbox']);
             } finally {
                 $release();
             }

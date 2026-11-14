@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\SitelogSecurityLevel;
 use App\Models\Category;
+use App\Models\File;
 use App\Models\Forum;
 use App\Models\HitAndRun;
 use App\Models\Post;
@@ -58,6 +59,39 @@ class BrowserSmokeSeeder extends Seeder
                 ]),
             );
         }
+
+        // File-list and peer fixtures: details.php renders an empty file
+        // list and an empty peer list without them.
+        foreach (['smoke-fixture-video.mkv' => 1_500_000_000, 'smoke-fixture-info.nfo' => 4_096] as $filename => $size) {
+            File::query()->firstOrCreate(
+                ['torrent' => $hrTorrent->id, 'filename' => $filename],
+                ['size' => $size],
+            );
+        }
+        if (! DB::table('peers')->where('torrent', $hrTorrent->id)->where('peer_id', '-qB4250-smokefixtur')->exists()) {
+            DB::table('peers')->insert([
+                'torrent' => $hrTorrent->id,
+                'peer_id' => '-qB4250-smokefixtur',
+                'ip' => '127.0.0.1',
+                'port' => 51413,
+                'uploaded' => 900_000_000,
+                'downloaded' => 647_865_608,
+                'to_go' => 0,
+                'started' => now()->subDay()->toDateTimeString(),
+                'last_action' => now()->toDateTimeString(),
+                'userid' => $owner->id,
+                'agent' => 'qBittorrent/4.2.5',
+                'finishedat' => 0,
+                'downloadoffset' => 0,
+                'uploadoffset' => 0,
+                'passkey' => str_repeat('0', 32),
+                'ipv4' => '127.0.0.1',
+                'ipv6' => '::1',
+                'connectable' => 1,
+                'seeder' => 1,
+            ]);
+        }
+
         $hrSnatch = Snatch::query()->firstOrCreate(
             ['torrentid' => $hrTorrent->id, 'userid' => $owner->id],
             [

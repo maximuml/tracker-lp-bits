@@ -412,12 +412,12 @@ class LogController extends BasePageController
                 'sureSuffix' => $sureSuffix,
             ])->render();
 
-            return $this->abortResponse(__('log.std_delete_poll'), $confirm, false);
+            return $this->abortResponse(__('log.std_delete_poll'), $confirm, false, 200);
         }
 
         $pollcount = $this->logRepository->getPollCount();
         if ($pollcount === 0) {
-            return $this->abortResponse(__('log.std_sorry'), __('log.std_no_polls'));
+            return $this->abortResponse(__('log.std_sorry'), __('log.std_no_polls'), true, 404);
         }
 
         $polls = $this->logRepository->getPollsExceptFirst();

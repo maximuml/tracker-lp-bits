@@ -4,11 +4,11 @@
 
 @section('content')
 <x-page :title="'Clear cache'" width="form">
-@if ($done ?? false)
+@if ($vm->done ?? false)
     <p class="text-center"><span class="striking">{{ __('clearcache.cleared') }}</span></p>
 @endif
-@if (($error ?? '') !== '')
-    <p class="text-center"><span class="striking">{{ $error }}</span></p>
+@if (($vm->error ?? '') !== '')
+    <p class="text-center"><span class="striking">{{ $vm->error }}</span></p>
 @endif
 
 <form method="post" action="/web/system/clear-cache">

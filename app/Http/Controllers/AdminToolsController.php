@@ -19,6 +19,9 @@ use App\Support\Pagination;
 use App\Support\RequestValues;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\ClearcachePageViewModel;
+use App\ViewModels\LocationPageViewModel;
+use App\ViewModels\TestipPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -89,8 +92,7 @@ class AdminToolsController extends BasePageController
         $error = '';
 
         return $this->renderPage($request, 'clearcache', true, [
-            'done' => $done,
-            'error' => $error,
+            'vm' => new ClearcachePageViewModel(done: $done, error: $error),
         ]);
     }
 
@@ -115,8 +117,7 @@ class AdminToolsController extends BasePageController
         }
 
         return $this->renderPage($request, 'clearcache', true, [
-            'done' => $done,
-            'error' => $error,
+            'vm' => new ClearcachePageViewModel(done: $done, error: $error),
         ]);
     }
 
@@ -162,9 +163,11 @@ class AdminToolsController extends BasePageController
                 $mode = 'edit';
 
                 return $this->renderPage($request, 'location', true, [
-                    'mode' => $mode,
-                    'editRow' => $editRow,
-                    'actionUrl' => $actionUrl,
+                    'vm' => new LocationPageViewModel(
+                        mode: $mode,
+                        actionUrl: $actionUrl,
+                        editRow: $editRow,
+                    ),
                 ]);
             }
         }
@@ -317,18 +320,18 @@ class AdminToolsController extends BasePageController
         }
 
         return $this->renderPage($request, 'location', true, [
-            'mode' => 'list',
-            'success' => $success,
-            'error' => $error,
-            'message' => SafeHtml::fromPlainText($message),
-            'rangeStartIp' => $rangeStartIp,
-            'rangeEndIp' => $rangeEndIp,
-            'hasRangeFilter' => $hasRangeFilter,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'pager' => $pager,
-            'rows' => $rows,
-            'actionUrl' => $actionUrl,
+            'vm' => new LocationPageViewModel(
+                mode: 'list',
+                actionUrl: $actionUrl,
+                success: $success,
+                error: $error,
+                message: SafeHtml::fromPlainText($message),
+                rangeStartIp: $rangeStartIp,
+                rangeEndIp: $rangeEndIp,
+                hasRangeFilter: $hasRangeFilter,
+                pager: $pager,
+                rows: $rows,
+            ),
         ]);
 
     }
@@ -374,10 +377,12 @@ class AdminToolsController extends BasePageController
         }
 
         return $this->renderPage($request, 'testip', true, [
-            'ip' => $ip,
-            'isBanned' => $isBanned,
-            'banRows' => $banRows,
-            'hasResult' => $hasResult,
+            'vm' => new TestipPageViewModel(
+                ip: $ip,
+                isBanned: $isBanned,
+                banRows: $banRows,
+                hasResult: $hasResult,
+            ),
         ]);
 
     }

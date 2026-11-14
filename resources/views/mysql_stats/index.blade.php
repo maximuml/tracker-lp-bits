@@ -6,7 +6,7 @@
 <x-page :title="'Mysql Server Status'" width="list">
 
 <div class="nx-box">
-{{ $serverRunningText }}
+{{ $vm->serverRunningText }}
 </div>
 
 <ul>
@@ -20,18 +20,18 @@
                         </tr></thead></x-slot:head>
                         <tr>
                             <td>&nbsp;Received&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $receivedTotal }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $receivedPerHour }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->receivedTotal }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->receivedPerHour }}&nbsp;</td>
                         </tr>
                         <tr>
                             <td>&nbsp;Sent&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $sentTotal }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $sentPerHour }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->sentTotal }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->sentPerHour }}&nbsp;</td>
                         </tr>
                         <tr class="nx-mysql-total">
                             <td>&nbsp;Total&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $totalBytesTotal }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $totalBytesPerHour }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->totalBytesTotal }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->totalBytesPerHour }}&nbsp;</td>
                         </tr>
                     </x-data-table>
                     <x-data-table caption="Connections" captionHidden><x-slot:head><thead><tr>
@@ -41,20 +41,20 @@
                         </tr></thead></x-slot:head>
                         <tr>
                             <td>&nbsp;Failed Attempts&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $abortedConnects }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $abortedConnectsPerHour }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $abortedConnectsPct }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->abortedConnects }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->abortedConnectsPerHour }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->abortedConnectsPct }}&nbsp;</td>
                         </tr>
                         <tr>
                             <td>&nbsp;Aborted Clients&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $abortedClients }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $abortedClientsPerHour }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $abortedClientsPct }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->abortedClients }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->abortedClientsPerHour }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->abortedClientsPct }}&nbsp;</td>
                         </tr>
                         <tr class="nx-mysql-total">
                             <td>&nbsp;Total&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $connectionsTotal }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $connectionsPerHour }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->connectionsTotal }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->connectionsPerHour }}&nbsp;</td>
                             <td class="text-right">&nbsp;{{ number_format(100, 2, '.', ',') }}&nbsp;%&nbsp;</td>
                         </tr>
                     </x-data-table>
@@ -62,7 +62,7 @@
         <br />
     </li>
     <li>
-        <b>{{ __('mysqlstats.query_stats') }}</b> Since it's start up, {{ $questionsTotal }} queries have been sent to the server.
+        <b>{{ __('mysqlstats.query_stats') }}</b> Since it's start up, {{ $vm->questionsTotal }} queries have been sent to the server.
         <div>
                     <br />
                     <x-data-table caption="Query Statistics" captionHidden><x-slot:head><thead><tr>
@@ -72,14 +72,14 @@
                             <th scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Second&nbsp;</th>
                         </tr></thead></x-slot:head>
                         <tr>
-                            <td class="text-right">&nbsp;{{ $questionsTotal }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $questionsPerHour }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $questionsPerMinute }}&nbsp;</td>
-                            <td class="text-right">&nbsp;{{ $questionsPerSecond }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->questionsTotal }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->questionsPerHour }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->questionsPerMinute }}&nbsp;</td>
+                            <td class="text-right">&nbsp;{{ $vm->questionsPerSecond }}&nbsp;</td>
                         </tr>
                     </x-data-table>
             <div class="flex items-start">
-@foreach ($queryStatColumns as $column)
+@foreach ($vm->queryStatColumns as $column)
                     <x-data-table caption="Query Type" captionHidden><x-slot:head><thead><tr>
                             <th colspan="2" scope="colgroup">&nbsp;Query&nbsp;Type&nbsp;</th>
                             <th scope="col">&nbsp;&oslash;&nbsp;Per&nbsp;Hour&nbsp;</th>
@@ -98,12 +98,12 @@
             </div>
         </div>
     </li>
-@if ($hasServerStatus)
+@if ($vm->hasServerStatus)
     <li>
     <br />
         <b>{{ __('mysqlstats.more_vars') }}</b><br />
         <div class="flex items-start">
-@foreach ($statusColumns as $column)
+@foreach ($vm->statusColumns as $column)
                     <x-data-table caption="More status variables" captionHidden><x-slot:head><thead><tr>
                             <th scope="col">&nbsp;Variable&nbsp;</th>
                             <th scope="col">&nbsp;Value&nbsp;</th>

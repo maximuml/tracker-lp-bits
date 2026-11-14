@@ -42,6 +42,7 @@ use App\Support\SetlistLookup;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\IncrementBulkPageViewModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -344,18 +345,19 @@ class SystemBulkController extends BasePageController
         $returnto = $request->query('returnto', '');
 
         return $this->renderPage($request, 'increment-bulk', true, [
-            'stdheadMsgalert' => false,
-            'validTypeMap' => $validTypeMap,
-            'type' => $type,
-            'classes' => $classes,
-            'receiver' => $receiver,
-            'body' => $body,
-            'sent' => $sent,
-            'returnto' => $returnto,
-            'httpReferer' => RequestValues::serverValue('HTTP_REFERER'),
-            'submitLabel' => Locale::trans('label.submit', [], null),
-            'CURUSER' => $this->actor->toLegacyArray(),
-        ]);
+            'vm' => IncrementBulkPageViewModel::fromPageData([
+                'stdheadMsgalert' => false,
+                'validTypeMap' => $validTypeMap,
+                'type' => $type,
+                'classes' => $classes,
+                'receiver' => $receiver,
+                'body' => $body,
+                'sent' => $sent,
+                'returnto' => $returnto,
+                'httpReferer' => RequestValues::serverValue('HTTP_REFERER'),
+                'submitLabel' => Locale::trans('label.submit', [], null),
+                'CURUSER' => $this->actor->toLegacyArray(),
+            ])]);
     }
 
     public function setlistLookup(Request $request): JsonResponse

@@ -133,10 +133,12 @@ class MessageController extends BasePageController
                 'returnto' => $returnto,
                 'title' => $title,
                 'frameTitle' => $frameTitle,
-                'stdheadMsgalert' => false,
                 'deleteChecked' => $this->actor->yes('deletepms'),
                 'saveChecked' => $this->actor->yes('savepms'),
-            ])]);
+            ]),
+            // chrome-level flag read by SiteChromeComposer from top-level view data
+            'stdheadMsgalert' => false,
+        ]);
     }
 
     public function send(StoreMessageRequest $request): Response|RedirectResponse

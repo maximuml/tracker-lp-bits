@@ -7,7 +7,7 @@ namespace App\ViewModels;
 /**
  * ViewModel for the sendmessage page (sendmessage/index.blade.php).
  *
- * Assembled by MessageController::sendmessage(); dead key stdheadMsgalert dropped.
+ * Assembled by MessageController::sendmessage(); stdheadMsgalert is a chrome-level flag passed beside vm.
  */
 final class SendmessagePageViewModel extends ViewModel
 {

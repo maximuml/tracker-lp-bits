@@ -3,10 +3,10 @@
 @section('title', "Torrent Info")
 
 @section('content')
-<x-page :title="($torrentName ?? '')" width="list">
+<x-page :title="($vm->torrentName ?? '')" width="list">
 <div class="nx-box nx-box--750">
 <ul id="torrent-structure">
-{{ $structureHtml ?? '' }}
+{{ $vm->structureHtml ?? '' }}
 </ul>
 </div>
 </x-page>

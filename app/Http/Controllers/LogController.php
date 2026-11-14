@@ -21,6 +21,7 @@ use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
+use App\ViewModels\LogPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -140,7 +141,7 @@ class LogController extends BasePageController
         }
         unset($row);
 
-        return $this->renderPage($request, 'log', true, [
+        return $this->renderPage($request, 'log', true, ['vm' => LogPageViewModel::fromPageData([
             'logTabs' => $this->logTabs($request),
             'mode' => 'dailylog',
             'q' => $q,
@@ -153,7 +154,7 @@ class LogController extends BasePageController
             'userDisplayMap' => $userDisplayMap,
             'canConfidentialLog' => $canConfidential,
             'title' => __('log.head_site_log'),
-        ]);
+        ])]);
     }
 
     private function chronicle(Request $request, int $userId): View|RedirectResponse|Response
@@ -340,7 +341,7 @@ class LogController extends BasePageController
         }
         unset($row);
 
-        return $this->renderPage($request, 'log', true, [
+        return $this->renderPage($request, 'log', true, ['vm' => LogPageViewModel::fromPageData([
             'logTabs' => $this->logTabs($request),
             'mode' => 'chronicle',
             'q' => $q,
@@ -352,7 +353,7 @@ class LogController extends BasePageController
             'pager' => $pager,
             'canManage' => $canManage,
             'title' => __('log.head_chronicle'),
-        ]);
+        ])]);
     }
 
     private function newsLog(Request $request): View|RedirectResponse
@@ -375,7 +376,7 @@ class LogController extends BasePageController
         }
         unset($row);
 
-        return $this->renderPage($request, 'log', true, [
+        return $this->renderPage($request, 'log', true, ['vm' => LogPageViewModel::fromPageData([
             'logTabs' => $this->logTabs($request),
             'mode' => 'news',
             'q' => $q,
@@ -386,7 +387,7 @@ class LogController extends BasePageController
             'pagerbottom' => $pagerbottom,
             'pager' => $pager,
             'title' => __('log.head_news'),
-        ]);
+        ])]);
     }
 
     private function pollLog(Request $request): View|RedirectResponse|Response
@@ -453,13 +454,13 @@ class LogController extends BasePageController
             ];
         }
 
-        return $this->renderPage($request, 'log', true, [
+        return $this->renderPage($request, 'log', true, ['vm' => LogPageViewModel::fromPageData([
             'logTabs' => $this->logTabs($request),
             'mode' => 'poll',
             'pollData' => $pollData,
             'canPollManage' => Permission::can(PermissionEnum::POLL_MANAGE),
             'title' => __('log.head_previous_polls'),
-        ]);
+        ])]);
     }
 
     /**

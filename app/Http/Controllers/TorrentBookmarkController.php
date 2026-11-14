@@ -10,6 +10,7 @@ use App\Http\Requests\ThanksTorrentRequest;
 use App\Services\TorrentBookmarkService;
 use App\Support\PageResponses;
 use App\Support\SafeExceptionMessage;
+use App\ViewModels\ThanksPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -72,8 +73,7 @@ class TorrentBookmarkController extends BasePageController
         }
 
         return $this->renderPage($request, 'thanks', true, [
-            'torrentid' => $torrentid,
-            'message' => 'Thank you has been recorded.',
+            'vm' => new ThanksPageViewModel(torrentid: $torrentid, message: 'Thank you has been recorded.'),
         ]);
     }
 }

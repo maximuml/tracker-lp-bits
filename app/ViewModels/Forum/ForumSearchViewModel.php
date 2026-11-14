@@ -27,7 +27,6 @@ final class ForumSearchViewModel
         public readonly array $results,
         public readonly int $page,
         public readonly int $pages,
-        public readonly string $imageUrl,
     ) {}
 
     /**

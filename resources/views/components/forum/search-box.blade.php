@@ -7,7 +7,7 @@
             <div>{{ __('forums.text_by_keyword') }}</div>
             <div class="nx-search-form__row">
                 <input name="keywords" type="text" value="{{ $search->keywords }}" class="nx-search-form__input" aria-label="{{ __('forums.text_keywords') }}" />
-                <input name="image" type="image" class="nx-search-form__submit" src="{{ $search->imageUrl }}" alt="Search" />
+                <button type="submit" class="nx-btn nx-btn--primary">{{ __('forums.text_search') }}</button>
             </div>
         </form>
     </div>

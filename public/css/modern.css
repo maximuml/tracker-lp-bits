@@ -1966,7 +1966,6 @@ select.nx-field__input {
 .nx-search-form { margin-left: 3.3rem; margin-top: 0.8rem; }
 .nx-search-form__row { display: flex; gap: 0.4rem; align-items: center; margin-top: 0.25rem; }
 .nx-search-form__input { width: 25rem; max-width: 100%; }
-.nx-search-form__submit { vertical-align: middle; }
 #order { cursor: pointer; }
 .nx-dim { color: var(--nxm-text-dim); }
 

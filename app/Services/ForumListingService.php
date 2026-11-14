@@ -375,7 +375,6 @@ final class ForumListingService
             results: $results,
             page: (int) $page,
             pages: $pages,
-            imageUrl: $this->forumLookup->picFolder().'/search_button.gif',
         );
     }
 

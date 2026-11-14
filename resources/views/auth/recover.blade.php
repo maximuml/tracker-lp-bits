@@ -7,7 +7,7 @@
         <div class="nx-auth__error">{{ $resetError ?? $error }}</div>
     @endif
 
-    <x-auth.errors />
+    <x-auth.errors :errors="$errors ?? null" />
 
     @if ($status === 'requested')
         <div class="nx-auth__success">{{ __('recover.text_reset_link_sent') }}</div>

@@ -7,7 +7,7 @@
         <div class="nx-auth__error">{{ $error }}</div>
     @endif
 
-    <x-auth.errors />
+    <x-auth.errors :errors="$errors ?? null" />
 
     <form method="get" action="/signup" class="nx-auth__lang">
         @if ($isInvite)

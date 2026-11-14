@@ -49,7 +49,9 @@ final class CoverThumb
         $filename = $key.'.jpg';
         $absoluteDir = Path::makeFolder($saveDir.'/', $relativeDir, $rootPath);
         $absolutePath = rtrim($absoluteDir, '/').'/'.$filename;
-        $publicUrl = $httpDir.'/'.$relativeDir.'/'.$filename;
+        // nginx serves /attachments/ as `internal` (X-Accel-Redirect only) —
+        // generated covers go through the app.
+        $publicUrl = '/web/coverimage?p='.rawurlencode($relativeDir.'/'.$filename);
 
         if (is_file($absolutePath) && filesize($absolutePath) > 0) {
             return $publicUrl;

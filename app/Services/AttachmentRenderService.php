@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Support\AttachmentStorage;
-use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Json;
@@ -109,7 +108,6 @@ final class AttachmentRenderService
      */
     public function rowAndUrlByKey(string $dlkey): array
     {
-        $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
         $row = Cache::get('attachment_'.$dlkey.'_content');
 
         if (empty($row) && strlen($dlkey) == 32) {
@@ -123,11 +121,9 @@ final class AttachmentRenderService
 
         $driver = $row['driver'] ?? 'local';
         if ($driver == 'local') {
-            if (($row['thumb'] ?? 0) == 1) {
-                $url = Url::rootRelative($httpdirectory.'/'.$row['location'].'.thumb.jpg');
-            } else {
-                $url = Url::rootRelative($httpdirectory.'/'.$row['location']);
-            }
+            // nginx serves /attachments/ as `internal` (X-Accel-Redirect
+            // only) — local images must go through the app.
+            $url = Url::rootRelative(self::inlineUrl($row, $dlkey));
         } else {
             $url = AttachmentStorage::driver($driver)->getImageUrl($row['location']);
         }
@@ -180,7 +176,6 @@ final class AttachmentRenderService
 
         return (string) preg_replace_callback($pattern, function ($matches) {
             $dlkey = $matches[1];
-            $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
             $cached = Cache::get('attachment_'.$dlkey.'_content');
             $row = is_array($cached) ? $cached : ($this->attachmentRepository->findByDlkey($dlkey) ?? []);
             Cache::put('attachment_'.$dlkey.'_content', $row, 86400);
@@ -193,17 +188,29 @@ final class AttachmentRenderService
 
             $driver = $row['driver'] ?? 'local';
             if ($driver === 'local') {
-                $url = $httpdirectory.'/'.$row['location'];
-                if (($row['thumb'] ?? 0) == 1) {
-                    $url .= '.thumb.jpg';
-                }
-                $url = sprintf('%s/%s', Url::schemeAndHost(true), trim($url, '/'));
+                $url = sprintf('%s%s', Url::schemeAndHost(true), self::inlineUrl($row, $dlkey));
             } else {
                 $url = AttachmentStorage::driver($driver)->getImageUrl($row['location']);
             }
 
             return '[img]'.$url.'[/img]';
         }, $text, 20);
+    }
+
+    /**
+     * App-served URL for a locally stored attachment image (id + dlkey
+     * gate, optional thumbnail variant).
+     *
+     * @param  array<string, mixed>  $row
+     */
+    private static function inlineUrl(array $row, string $dlkey): string
+    {
+        $url = sprintf('/web/getattachment?id=%d&dlkey=%s&inline=1', (int) ($row['id'] ?? 0), $dlkey);
+        if (($row['thumb'] ?? 0) == 1) {
+            $url .= '&thumb=1';
+        }
+
+        return $url;
     }
 
     private function iconForFileType(string $filetype): SafeHtml

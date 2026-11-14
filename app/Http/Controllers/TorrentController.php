@@ -24,6 +24,7 @@ use App\Repositories\TorrentApprovalRepository;
 use App\Repositories\TorrentModerationRepository;
 use App\Repositories\UploadRepository;
 use App\Support\Logger;
+use App\ViewModels\Torrent\TorrentApprovalPageViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -128,12 +129,14 @@ class TorrentController extends Controller
         $theme = $actor->value('theme');
 
         return view('torrent/approval', [
-            'torrent' => $torrent,
-            'denyReasons' => $denyReasons,
-            'logs' => $logs,
-            'approvalStatuses' => Torrent::listApprovalStatus(true),
-            'theme' => UserTheme::fromStringSafe(is_string($theme) ? $theme : null)->value,
-            'fontSize' => UserFontsize::fromMixed($actor->value('fontsize'))->stringValue(),
+            'vm' => new TorrentApprovalPageViewModel(
+                torrent: $torrent,
+                denyReasons: $denyReasons,
+                logs: $logs,
+                approvalStatuses: Torrent::listApprovalStatus(true),
+                theme: UserTheme::fromStringSafe(is_string($theme) ? $theme : null)->value,
+                fontSize: UserFontsize::fromMixed($actor->value('fontsize'))->stringValue(),
+            ),
         ]);
     }
 

@@ -16,6 +16,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\RedisGuard;
 use App\Support\RequestValues;
 use App\Support\Url;
+use App\ViewModels\SearchPageViewModel;
 use App\ViewModels\TorrentListViewFactory;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Http\RedirectResponse;
@@ -43,12 +44,20 @@ class SearchController extends BasePageController
         }
 
         $data = $this->searchPageRepository->dataForSearch($request, $currentUser);
-        $data['listVm'] = $this->torrentListFactory->create(
+        $listVm = $this->torrentListFactory->create(
             $data['rows'] ?? [],
             (int) SearchBox::getBrowseMode(),
         );
 
-        return $this->renderPage($request, 'search', true, $data);
+        $vm = new SearchPageViewModel(
+            search: (string) ($data['search'] ?? ''),
+            hasResults: (bool) ($data['hasResults'] ?? false),
+            pager: $data['pager'] ?? [],
+            searchstr_ori: (string) ($data['searchstr_ori'] ?? ''),
+            listVm: $listVm,
+        );
+
+        return $this->renderPage($request, 'search', true, ['vm' => $vm]);
     }
 
     public function usersearch(Request $request): View|Response|RedirectResponse

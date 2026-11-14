@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="nx-main nx-embedded w-[97%]">
-@if (($search ?? '') === '')
+@if ($vm->search === '')
     <h1 class="text-left">{{ __('search.global_search') }}</h1>
     <form class="nx-box flex flex-wrap items-end gap-3 text-left" action="/web/search" method="get" role="search">
         <div class="flex flex-col gap-1 grow min-w-[12rem]">
@@ -25,12 +25,12 @@
 @else
     <h1 class="nx-sr-only">{{ __('search.global_search') }}</h1>
 @endif
-@if (! empty($hasResults))
-    <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
-    @include('components.torrents.table')
-    <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
-@elseif (($search ?? '') !== '')
-    <x-std-message :text="__('torrents.std_try_again')" :htmlstrip="false"><x-slot:heading>{{ __('torrents.std_search_results_for') }}{{ \App\Support\Html\SafeHtml::fromUntrustedHtml($searchstr_ori ?? '') }}"</x-slot></x-std-message>
+@if ($vm->hasResults)
+    <x-pagination :page="$vm->pager['page']" :pages="$vm->pager['pages']" :href="$vm->pager['href']" :prev-label="$vm->pager['prevLabel']" :next-label="$vm->pager['nextLabel']" :zero-based="$vm->pager['zeroBased']" label="Pagination top" />
+    @include('components.torrents.table', ['listVm' => $vm->listVm])
+    <x-pagination :page="$vm->pager['page']" :pages="$vm->pager['pages']" :href="$vm->pager['href']" :prev-label="$vm->pager['prevLabel']" :next-label="$vm->pager['nextLabel']" :zero-based="$vm->pager['zeroBased']" label="Pagination bottom" />
+@elseif ($vm->search !== '')
+    <x-std-message :text="__('torrents.std_try_again')" :htmlstrip="false"><x-slot:heading>{{ __('torrents.std_search_results_for') }}{{ \App\Support\Html\SafeHtml::fromUntrustedHtml($vm->searchstr_ori) }}"</x-slot></x-std-message>
 @endif
 </div>
 @endsection

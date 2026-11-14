@@ -21,6 +21,7 @@ use App\Support\Time;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\ReportsPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -348,10 +349,10 @@ class ModerationController extends BasePageController
         }
 
         return $this->renderPage($request, 'reports', true, [
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'pager' => $pager,
-            'rows' => $rows,
+            'vm' => new ReportsPageViewModel(
+                rows: $rows,
+                pager: $pager,
+            ),
         ]);
 
     }

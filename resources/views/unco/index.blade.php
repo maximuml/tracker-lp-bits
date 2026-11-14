@@ -4,10 +4,10 @@
 
 @section('content')
 <x-page :title="__('unco.title')" width="list">
-@if (! empty($rows ?? []))
+@if (! empty($vm->rows ?? []))
     <x-frame :center="false">
     <x-data-table :caption="__('unco.title')" captionHidden>
-        @if ($status ?? '')
+        @if ($vm->status ?? '')
             <tr>
                 <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim" colspan="5"><span class="text-nxm-danger text-[10px]">{{ __('unco.text_account_updated') }}</span></td>
             </tr>
@@ -19,7 +19,7 @@
             <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim text-center">{{ __('unco.col_set_status') }}</td>
             <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim text-center">{{ __('unco.col_confirm') }}</td>
         </tr>
-        @foreach ($rows as $row)
+        @foreach ($vm->rows as $row)
             <tr>
                 <form method="post" action="/web/staff/modtask">@csrf
                     <input type="hidden" name="action" value="confirmuser">

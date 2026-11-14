@@ -19,6 +19,7 @@ use App\Support\Http\SafeReturnUrl;
 use App\Support\RequestValues;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\StaffmessPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -44,14 +45,17 @@ class StaffMessageController extends BasePageController
         $httpReferer = RequestValues::serverValue('HTTP_REFERER');
 
         return $this->renderPage($request, 'staffmess', true, [
+            'vm' => StaffmessPageViewModel::fromPageData([
+                'classes' => $classes,
+                'body' => SafeHtml::fromPlainText((string) $request->query('body')),
+                'receiver' => (int) ($request->query('receiver') ?? 0),
+                'username' => SafeHtml::fromPlainText((string) ($this->actor->username)),
+                'sent' => (int) ($request->query('sent') ?? 0),
+                'showReturnto' => (bool) ($returntoQuery || $httpReferer),
+                'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),
+            ]),
+            // chrome-level flag read by SiteChromeComposer from top-level view data
             'stdheadMsgalert' => false,
-            'classes' => $classes,
-            'body' => SafeHtml::fromPlainText((string) $request->query('body')),
-            'receiver' => (int) ($request->query('receiver') ?? 0),
-            'username' => SafeHtml::fromPlainText((string) ($this->actor->username)),
-            'sent' => (int) ($request->query('sent') ?? 0),
-            'showReturnto' => (bool) ($returntoQuery || $httpReferer),
-            'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),
         ]);
     }
 

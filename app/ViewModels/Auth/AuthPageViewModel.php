@@ -20,7 +20,6 @@ final class AuthPageViewModel extends ViewModel
     /**
      * @param  array<int, array<string, mixed>>  $languages
      * @param  array<int, mixed>  $countries
-     * @param  mixed  $invite
      */
     public function __construct(
         // Shared auth chrome

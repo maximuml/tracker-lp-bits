@@ -42,6 +42,7 @@ final class TorrentListRow
         public readonly bool $showDownload,
         public readonly string $downloadUrl,
         public readonly bool $showBookmark,
+        public readonly bool $bookmarked,
         public readonly ?string $waitText,
         public readonly ?string $waitClass,
         public readonly string $commentsUrl,

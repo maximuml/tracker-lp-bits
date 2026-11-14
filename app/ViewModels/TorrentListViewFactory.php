@@ -25,6 +25,7 @@ use App\Support\SearchBox;
 use App\Support\Time;
 use App\Support\Torrent\TorrentStatus;
 use App\Support\TorrentAccess;
+use App\Support\TorrentBookmark;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use App\ViewModels\Torrent\ApprovalBadge;
@@ -168,6 +169,10 @@ final class TorrentListViewFactory
 
             return $html;
         };
+
+        $bookmarkIds = ((bool) $this->actor->value('bmicon', false)) && $this->actor->id > 0
+            ? TorrentBookmark::bookmarkArray($cache, $this->actor->id)
+            : [];
 
         $outRows = [];
         $lastcomTooltip = [];
@@ -320,6 +325,7 @@ final class TorrentListViewFactory
                 showDownload: $showDownload,
                 downloadUrl: '/download?id='.$id,
                 showBookmark: $showBookmark,
+                bookmarked: in_array($id, $bookmarkIds, true),
                 waitText: $waitText,
                 waitClass: $waitClass,
                 commentsUrl: '/web/details/'.$id.'?hit=1&cmtpage=1#startcomments',

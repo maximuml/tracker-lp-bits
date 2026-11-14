@@ -1439,6 +1439,34 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 })();
 
+/* data-nx-bookmark anchors (x-torrent.bookmark): POST the toggle to
+   torrents/bookmark and flip the icon + localized labels in place —
+   replaces the per-row Livewire BookmarkIcon snapshots on torrent lists
+   and the details download row. */
+(function () {
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest('a[data-nx-bookmark]');
+        if (!link) { return; }
+        e.preventDefault();
+        if (link.getAttribute('data-busy') === '1') { return; }
+        var tid = link.getAttribute('data-nx-bookmark');
+        link.setAttribute('data-busy', '1');
+        function done() { link.removeAttribute('data-busy'); }
+        ajax.postText('/web/bookmark', 'torrentid=' + encodeURIComponent(tid)).then(function (status) {
+            done();
+            if (status !== 'added' && status !== 'deleted') { return; }
+            var on = status === 'added';
+            link.setAttribute('data-bookmarked', on ? '1' : '0');
+            var icon = link.querySelector('i');
+            if (icon) {
+                icon.className = on ? 'bookmark' : 'delbookmark';
+                icon.setAttribute('aria-label', link.getAttribute(on ? 'data-label-on' : 'data-label-off') || '');
+                icon.setAttribute('title', link.getAttribute(on ? 'data-title-on' : 'data-title-off') || '');
+            }
+        }).catch(done);
+    });
+})();
+
 /* messages.php: reveal the bulk-action bar once any message checkbox is
    checked, and keep the selected counter in sync. */
 (function () {

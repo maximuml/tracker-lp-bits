@@ -58,9 +58,9 @@ class MessageController extends BasePageController
             return $actionRedirect;
         }
 
-        $data = $this->pageService->build($request)->toArray();
-
-        return $this->renderPage($request, 'messages', true, $data);
+        return $this->renderPage($request, 'messages', true, [
+            'vm' => $this->pageService->build($request),
+        ]);
     }
 
     public function moveOrDelete(MoveOrDeleteMessageRequest $request): RedirectResponse

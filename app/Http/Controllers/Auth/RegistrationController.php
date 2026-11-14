@@ -20,6 +20,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Network;
+use App\ViewModels\Auth\AuthPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -90,27 +91,29 @@ class RegistrationController extends Controller
         AssetAppender::js('js/auth-form.js', 'footer', true, 'auth-form');
 
         return view('auth.signup', [
-            'langFolder' => $langFolder,
-            'languages' => Locale::languageList('site_lang', true),
-            'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => $captchaMarkup,
-            'secret' => $secret,
-            'type' => $type,
-            'isInvite' => $isInvite,
-            'invite' => $invite,
-            'code' => $code,
-            'countries' => $countries,
-            'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
-            'maxAttempts' => $this->authService->maxLoginAttempts(),
-            'error' => $request->session()->get('error'),
-            'siteName' => Setting::getSiteName(),
-            'headTitle' => $isInvite
-                ? (__('signup.head_invite_signup'))
-                : (__('signup.head_signup')),
-            'usernameValue' => $usernameValue,
-            'usernameReadonly' => $preUsername !== '',
-            'emailValue' => $emailValue,
-            'emailReadonly' => $preEmail !== '',
+            'vm' => new AuthPageViewModel(
+                langFolder: $langFolder,
+                languages: Locale::languageList('site_lang', true),
+                captchaEnabled: $captchaEnabled,
+                captchaMarkup: $captchaMarkup,
+                remaining: $this->authService->remainingAttempts(Network::clientIp()),
+                maxAttempts: $this->authService->maxLoginAttempts(),
+                error: $request->session()->get('error'),
+                siteName: Setting::getSiteName(),
+                secret: $secret,
+                type: $type,
+                isInvite: $isInvite,
+                invite: $invite,
+                code: $code,
+                countries: $countries,
+                headTitle: $isInvite
+                    ? (__('signup.head_invite_signup'))
+                    : (__('signup.head_signup')),
+                usernameValue: $usernameValue,
+                usernameReadonly: $preUsername !== '',
+                emailValue: $emailValue,
+                emailReadonly: $preEmail !== '',
+            ),
         ]);
     }
 
@@ -182,15 +185,17 @@ class RegistrationController extends Controller
         }
 
         return view('auth.confirm_resend', [
-            'langFolder' => $langFolder,
-            'languages' => Locale::languageList('site_lang', true),
-            'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => $captchaMarkup,
-            'secret' => $secret,
-            'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
-            'maxAttempts' => $this->authService->maxLoginAttempts(),
-            'error' => $request->session()->get('error'),
-            'siteName' => Setting::getSiteName(),
+            'vm' => new AuthPageViewModel(
+                langFolder: $langFolder,
+                languages: Locale::languageList('site_lang', true),
+                captchaEnabled: $captchaEnabled,
+                captchaMarkup: $captchaMarkup,
+                remaining: $this->authService->remainingAttempts(Network::clientIp()),
+                maxAttempts: $this->authService->maxLoginAttempts(),
+                error: $request->session()->get('error'),
+                siteName: Setting::getSiteName(),
+                secret: $secret,
+            ),
         ]);
     }
 

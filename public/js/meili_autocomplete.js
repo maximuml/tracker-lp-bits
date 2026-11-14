@@ -45,6 +45,11 @@ function meiliAutoInit()
             meiliAutoClose();
         }
     });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && meiliAutoContainer.style.display !== 'none') {
+            meiliAutoClose();
+        }
+    });
 }
 
 function meiliSuggestInput(value)

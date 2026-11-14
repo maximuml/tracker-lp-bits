@@ -82,7 +82,7 @@ class TorrentAjaxController extends BasePageController
         $data['seederTable'] = $this->peerTableFactory->buildTable((string) (__('viewpeerlist.text_seeders')), $data['seeders'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
         $data['leecherTable'] = $this->peerTableFactory->buildTable((string) (__('viewpeerlist.text_leechers')), $data['leechers'], $data['torrent'], $data['privacyData'], $data['showLocationColumn'], $data['enablelocationTweak'], $data['peerIpInfo'], $data['usernameHtmlMap'], $curUserArr);
 
-        return response()->view('viewpeerlist.index', $data, 200, $headers);
+        return response()->view('viewpeerlist.document', $data, 200, $headers);
     }
 
     public function viewSnatches(Request $request): View|RedirectResponse|Response

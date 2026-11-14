@@ -8,15 +8,18 @@ services:
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+      - ./.docker/php/dev-mailhog.ini:/usr/local/etc/php/conf.d/zz-dev-mailhog.ini:ro
 
   queue:
     volumes:
       - .:/var/www/html
+      - ./.docker/php/dev-mailhog.ini:/usr/local/etc/php/conf.d/zz-dev-mailhog.ini:ro
 
   scheduler:
     volumes:
       - .:/var/www/html
       - ${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}:${NP_BACKUP_EXPORT_PATH:-/tmp/nexusphp_backup}
+      - ./.docker/php/dev-mailhog.ini:/usr/local/etc/php/conf.d/zz-dev-mailhog.ini:ro
 
   openresty:
     volumes:
@@ -28,6 +31,24 @@ services:
       - ./.docker/openresty/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf
       - ./.docker/openresty/lua:/usr/local/openresty/lua
       - .:/var/www/html
+
+  # Dev-only SMTP sink: .env.example already points MAIL_HOST at "mailhog".
+  # Web UI on :8025, SMTP on :1025 (both inside appnet only).
+  mailhog:
+    image: mailhog/mailhog@sha256:8d76a3d4ffa32a3661311944007a415332c4bb855657f4f6c57996405c009bea
+    container_name: nexusphp-mailhog
+    # BusyBox sendmail only speaks to port 25 (no host:port) — the Web UI
+    # keeps the stock :8025 inside appnet.
+    command: ["-smtp-bind-addr", ":25"]
+    profiles:
+      - debug
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1024m"
+        max-file: "3"
+    networks:
+      - appnet
 
   # W1-09: phpMyAdmin moved from docker-compose.yml to dev-only overrides.
   # Never available in production or CI stacks.

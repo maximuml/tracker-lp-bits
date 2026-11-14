@@ -72,7 +72,7 @@ class InfoController extends BasePageController
         if ($action === 'viewposts') {
             $result = $this->infoRepository->getUserHistoryPosts($userid, (int) ($this->actor->class->value), $perpage, $phpSelf);
             if (empty($result['posts'])) {
-                return $this->abortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_posts_found')));
+                return $this->abortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_posts_found')), true, 404);
             }
             $data = array_merge($data, $result);
             $data['items'] = $this->decorateHistoryPosts(
@@ -84,7 +84,7 @@ class InfoController extends BasePageController
         } elseif ($action === 'viewcomments') {
             $result = $this->infoRepository->getUserHistoryComments($userid, $perpage, $phpSelf);
             if (empty($result['comments'])) {
-                return $this->abortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_comments_found')));
+                return $this->abortResponse((string) (__('userhistory.std_error')), (string) (__('userhistory.std_no_comments_found')), true, 404);
             }
             $data = array_merge($data, $result);
             $data['items'] = $this->decorateHistoryComments(
@@ -92,9 +92,9 @@ class InfoController extends BasePageController
                 (array) ($result['commentPageMap'] ?? []),
             );
         } elseif ($action === '') {
-            return $this->abortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')), false);
+            return $this->abortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')), false, 400);
         } else {
-            return $this->abortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')));
+            return $this->abortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')), true, 400);
         }
 
         return $this->renderPage($request, 'userhistory', true, $data);

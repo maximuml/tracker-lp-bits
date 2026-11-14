@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', $title ?? (__('downloadnotice.head_download_notice')))
+@section('title', $vm->title ?? (__('downloadnotice.head_download_notice')))
 
 @section('content')
-<x-page :title="($title ?? '')" width="form">
+<x-page :title="($vm->title ?? '')" width="form">
 <div>
-<div class="p-[10pt]"><p>{{ $note }}</p></div>
+<div class="p-[10pt]"><p>{{ $vm->note }}</p></div>
 <div class="flex items-start">
-@if (! empty($showrationotice))
+@if (! empty($vm->showrationotice))
 <div class="p-[10pt] grow">
 <h3>{{ __('downloadnotice.text_this_is_private_tracker')}}</h3>
 <p>{{ __('downloadnotice.text_private_tracker_note_one') }} <b>{{ __('downloadnotice.text_exclusive') }}</b> {{ __('downloadnotice.text_private_tracker_note_one_end') }}<i>({{ __('downloadnotice.text_learn_more')}}<a class="faqlink" href="{{ NEXUSWIKIURL ?? '' }}/Private Tracker" target="_blank" rel="noopener">{{ __('downloadnotice.text_nexuswiki')}}</a>)</i></p>
@@ -17,7 +17,7 @@
 <p><b>{{ __('downloadnotice.text_private_tracker_note_four') }}</b><br /> {{ __('downloadnotice.text_private_tracker_note_four_two') }} <b>{{ __('downloadnotice.text_keep_seeding') }}</b> {{ __('downloadnotice.text_private_tracker_note_four_end') }}</p>
 </div>
 @endif
-@if (! empty($showclientnotice))
+@if (! empty($vm->showclientnotice))
 <div class="p-[10pt] grow">
 <h3>{{ __('downloadnotice.text_use_allowed_clients')}}</h3>
 <p>{{ __('downloadnotice.text_allowed_clients_note_one') }} <b>{{ __('downloadnotice.text_only') }}</b> {{ __('downloadnotice.text_allowed_clients_note_one_two') }} <span class='striking'>{{ __('downloadnotice.text_banned') }}</span> {{ __('downloadnotice.text_allowed_clients_note_one_end') }}</p>
@@ -43,17 +43,17 @@
 </div>
 @endif
 </div>
-@if (! empty($torrentid))
+@if (! empty($vm->torrentid))
 <div class="p-[10pt]">
 <form action="/web/torrents/download-notice" method="post">@csrf<p>{{ __('downloadnotice.text_for_more_information_read')}}<a class="faqlink" href="/web/rules" target="_blank" rel="noopener">{{ __('downloadnotice.text_rules')}}</a>{{ __('downloadnotice.text_and')}}<a class="faqlink" href="/web/faq" target="_blank" rel="noopener">{{ __('downloadnotice.text_faq')}}</a><br />
-<input type="hidden" name="id" value="{{ $torrentid }}" />
-<input type="hidden" name="type" value="{{ (string) $type }}" />
-<input type="checkbox" name="hidenotice" id="hidenotice" value="1"@if (! empty($forcecheck)) disabled="disabled"@else checked="checked"@endif /><label for="hidenotice">{{ $noticenexttime }}</label>
-@if (! empty($forcecheck))
-<br /><input type="checkbox" name="letmedown" id="letmedown" value="{{ (string) $type }}" /><label for="letmedown"><span class="big">{{ __('downloadnotice.text_let_me_download')}}</span></label>
+<input type="hidden" name="id" value="{{ $vm->torrentid }}" />
+<input type="hidden" name="type" value="{{ (string) $vm->type }}" />
+<input type="checkbox" name="hidenotice" id="hidenotice" value="1"@if (! empty($vm->forcecheck)) disabled="disabled"@else checked="checked"@endif /><label for="hidenotice">{{ $vm->noticenexttime }}</label>
+@if (! empty($vm->forcecheck))
+<br /><input type="checkbox" name="letmedown" id="letmedown" value="{{ (string) $vm->type }}" /><label for="letmedown"><span class="big">{{ __('downloadnotice.text_let_me_download')}}</span></label>
 @endif
 </p>
-<div><input type="submit" name="submit" id="continuedownload" class="dlnotice-submit nx-btn nx-btn--primary" value="{{ __('downloadnotice.submit_download_the_torrent')}}"@if (! empty($forcecheck)) disabled="disabled"@endif  data-submit-once /></div>
+<div><input type="submit" name="submit" id="continuedownload" class="dlnotice-submit nx-btn nx-btn--primary" value="{{ __('downloadnotice.submit_download_the_torrent')}}"@if (! empty($vm->forcecheck)) disabled="disabled"@endif  data-submit-once /></div>
 </form>
 </div>
 @endif

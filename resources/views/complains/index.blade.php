@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
-@section('title', $title)
+@section('title', $vm->title)
 
 @section('content')
-<x-page :title="$title" width="list">
-@if ($mode === 'list')
-    @if ($page === null)
+<x-page :title="$vm->title" width="list">
+@if ($vm->mode === 'list')
+    @if ($vm->page === null)
         <x-frame :caption="__('complains.pending_complaints')" :center="false">
-            @if (! empty($pendingRows))
+            @if (! empty($vm->pendingRows))
                 <x-data-table :caption="__('complains.pending_complaints')" captionHidden><x-slot:head><thead><tr>
                     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') }}</th>
                     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') }}</th>
                     <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_action_view') }}</th>
                 </tr></thead></x-slot:head>
-                @foreach ($pendingRows as $row)
+                @foreach ($vm->pendingRows as $row)
                     <tr>
                         <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
                         <td class="align-top px-2.5 py-1.5">{{ $row['email'] ?? '' }}</td>
@@ -28,14 +28,14 @@
     @endif
 
     <x-frame :caption="__('complains.complaints_processed')" :center="false">
-        @if (! empty($processedRows))
-            <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
+        @if (! empty($vm->processedRows))
+            <x-pagination :page="$vm->pager['page']" :pages="$vm->pager['pages']" :href="$vm->pager['href']" :prev-label="$vm->pager['prevLabel']" :next-label="$vm->pager['nextLabel']" :zero-based="$vm->pager['zeroBased']" label="Pagination top" />
             <x-data-table :caption="__('complains.complaints_processed')" captionHidden><x-slot:head><thead><tr>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_at') }}</th>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_complain_account') }}</th>
                 <th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('complains.th_action_view') }}</th>
             </tr></thead></x-slot:head>
-            @foreach ($processedRows as $row)
+            @foreach ($vm->processedRows as $row)
                 <tr>
                     <td class="align-top px-2.5 py-1.5"><x-time :value="$row['added'] ?? ''" /></td>
                     <td class="align-top px-2.5 py-1.5">{{ $row['email'] ?? '' }}</td>
@@ -43,38 +43,38 @@
                 </tr>
             @endforeach
             </x-data-table>
-            <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
+            <x-pagination :page="$vm->pager['page']" :pages="$vm->pager['pages']" :href="$vm->pager['href']" :prev-label="$vm->pager['prevLabel']" :next-label="$vm->pager['nextLabel']" :zero-based="$vm->pager['zeroBased']" label="Pagination bottom" />
         @else
             {{ __('complains.no_complaints_have_been_processed') }}
         @endif
     </x-frame>
 
-@elseif ($mode === 'view')
-    @if (! $isLogin)
+@elseif ($vm->mode === 'view')
+    @if (! $vm->isLogin)
         <x-frame :caption="__('complains.text_created_title')" :center="false">
             <p>{{ __('complains.text_created_note') }}</p>
         </x-frame>
     @endif
 
     <x-frame :caption="__('complains.text_new_body')" :center="false">
-        {{ __('complains.text_added') }}：<x-time :value="$complain['added'] ?? ''" /><br />{{ __('complains.text_new_email') }} {{ $complain['email'] ?? '' }}
-        @if ($isAdmin)
-            @if (! empty($user))
-                [<a href="/userdetails?id={{ (int) ($user['id'] ?? 0) }}" class="faqlink" target="_blank" rel="noopener">{{ $user['username'] ?? '' }}</a>]
-                [<a href="/web/user-ban-log?q={{ urlencode((string) ($user['username'] ?? '')) }}" class="faqlink" target="_blank" rel="noopener">{{ __('complains.text_view_band_log') }}</a>]
+        {{ __('complains.text_added') }}：<x-time :value="$vm->complain['added'] ?? ''" /><br />{{ __('complains.text_new_email') }} {{ $vm->complain['email'] ?? '' }}
+        @if ($vm->isAdmin)
+            @if (! empty($vm->user))
+                [<a href="/userdetails?id={{ (int) ($vm->user['id'] ?? 0) }}" class="faqlink" target="_blank" rel="noopener">{{ $vm->user['username'] ?? '' }}</a>]
+                [<a href="/web/user-ban-log?q={{ urlencode((string) ($vm->user['username'] ?? '')) }}" class="faqlink" target="_blank" rel="noopener">{{ __('complains.text_view_band_log') }}</a>]
             @else
-                [<a href="/web/usersearch?em={{ urlencode((string) ($complain['email'] ?? '')) }}" class="faqlink" target="_blank" rel="noopener">{{ __('complains.text_search_account') }}</a>]
+                [<a href="/web/usersearch?em={{ urlencode((string) ($vm->complain['email'] ?? '')) }}" class="faqlink" target="_blank" rel="noopener">{{ __('complains.text_search_account') }}</a>]
             @endif
-            <br />IP: {{ $complain['ip'] ?? '' }}
+            <br />IP: {{ $vm->complain['ip'] ?? '' }}
         @endif
-        <hr />{{ \App\Support\Format::formatComment($complain['body'] ?? '') }}
+        <hr />{{ \App\Support\Format::formatComment($vm->complain['body'] ?? '') }}
     </x-frame>
 
     <x-frame :caption="__('complains.text_replies')" :center="false">
-        @if (! empty($replyRows))
-            @foreach ($replyRows as $row)
-                <b>{{ (int) ($row['userid'] ?? 0) !== 0 ? ($replyUserMap[(int) $row['userid']] ?? \App\Support\UserDisplay::plainUsername((int) $row['userid'])) : (__('complains.text_complainer')) }} @ <x-time :value="$row['added'] ?? ''" />
-                @if ($isAdmin)
+        @if (! empty($vm->replyRows))
+            @foreach ($vm->replyRows as $row)
+                <b>{{ (int) ($row['userid'] ?? 0) !== 0 ? ($vm->replyUserMap[(int) $row['userid']] ?? \App\Support\UserDisplay::plainUsername((int) $row['userid'])) : (__('complains.text_complainer')) }} @ <x-time :value="$row['added'] ?? ''" />
+                @if ($vm->isAdmin)
                     ({{ $row['ip'] ?? '' }})
                 @endif
                 : </b>
@@ -85,16 +85,16 @@
         @endif
     </x-frame>
 
-    @if (! empty($complain['answered']) && (int) $complain['answered'] !== 0)
+    @if (! empty($vm->complain['answered']) && (int) $vm->complain['answered'] !== 0)
         <p class="text-center">{{ __('complains.text_closed') }}</p>
     @else
-        <br /><br /><div class="nx-box text-center"><b>{{ __('complains.text_reply') }}</b><br /><br /><form id="reply" method="post" action="/web/complains/reply">@csrf<input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $complain['uuid'] ?? '' }}" /><br />
-        {{ $replyBoxHtml }}
+        <br /><br /><div class="nx-box text-center"><b>{{ __('complains.text_reply') }}</b><br /><br /><form id="reply" method="post" action="/web/complains/reply">@csrf<input type="hidden" name="id" value="{{ (int) ($vm->complain['id'] ?? 0) }}" /><input type="hidden" name="uuid" value="{{ $vm->complain['uuid'] ?? '' }}" /><br />
+        {{ $vm->replyBoxHtml }}
         </form></div>
     @endif
 
-    @if ($isAdmin)
-        <form action="{{ ! empty($complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post">@csrf<input type="hidden" name="id" value="{{ (int) ($complain['id'] ?? 0) }}" /><button type="submit" class="nx-btn" data-submit-once>{{ ! empty($complain['answered']) ? (__('complains.text_unanswer_it')) : (__('complains.text_answer_it')) }}</button></form>
+    @if ($vm->isAdmin)
+        <form action="{{ ! empty($vm->complain['answered']) ? '/web/complains/unanswered' : '/web/complains/answered' }}" method="post">@csrf<input type="hidden" name="id" value="{{ (int) ($vm->complain['id'] ?? 0) }}" /><button type="submit" class="nx-btn" data-submit-once>{{ ! empty($vm->complain['answered']) ? (__('complains.text_unanswer_it')) : (__('complains.text_answer_it')) }}</button></form>
     @endif
 
 @else
@@ -105,7 +105,7 @@
         <div class="nx-fgrid nx-fgrid--flat">
             <label class="nx-fhead" for="complain-email">{{ __('complains.text_new_email') }}</label><div class="nx-fcell"><input id="complain-email" type="email" name="email" autocomplete="email" /></div>
             <div class="nx-fhead">{{ __('complains.text_new_body') }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('complains.text_new_body_placeholder') }}"></textarea></div>
-            {{ $captchaHtml }}
+            {{ $vm->captchaHtml }}
             <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') }}" class="nx-btn nx-btn--primary"  data-submit-once /></div>
         </div>
     </form>

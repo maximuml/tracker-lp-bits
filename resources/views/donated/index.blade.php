@@ -4,8 +4,8 @@
 
 @section('content')
 <x-page :title="__('donate.head_update_amounts')" width="form">
-@if (($error ?? '') !== '')
-    <p class="text-center"><span class="striking">{{ $error }}</span></p>
+@if (($vm->error ?? '') !== '')
+    <p class="text-center"><span class="striking">{{ $vm->error }}</span></p>
 @endif
 <form method="post" action="/web/info/donated">
 @csrf

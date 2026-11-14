@@ -1467,6 +1467,52 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 })();
 
+/* data-nx-torrentlist links (user details torrent sections): lazily GET
+   /web/getusertorrentlistajax on first expand, cache the returned markup
+   in the row, then toggle visibility — replaces five per-section Livewire
+   UserTorrentList snapshots. */
+(function () {
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest('a[data-nx-torrentlist]');
+        if (!link) { return; }
+        e.preventDefault();
+        var cell = link.closest('td');
+        var body = cell ? cell.querySelector('[data-nx-torrentlist-body]') : null;
+        var icon = link.querySelector('i');
+        if (!body) { return; }
+        if (!body.hidden) {
+            body.hidden = true;
+            link.setAttribute('aria-expanded', 'false');
+            if (icon) { icon.className = 'plus'; }
+            return;
+        }
+        if (body.getAttribute('data-loaded') === '1') {
+            body.hidden = false;
+            link.setAttribute('aria-expanded', 'true');
+            if (icon) { icon.className = 'minus'; }
+            return;
+        }
+        if (link.getAttribute('data-busy') === '1') { return; }
+        link.setAttribute('data-busy', '1');
+        var loading = cell.querySelector('[data-nx-torrentlist-loading]');
+        if (loading) { loading.hidden = false; }
+        function done() {
+            link.removeAttribute('data-busy');
+            if (loading) { loading.hidden = true; }
+        }
+        var url = '/web/getusertorrentlistajax?userid=' + encodeURIComponent(link.getAttribute('data-userid'))
+            + '&type=' + encodeURIComponent(link.getAttribute('data-type'));
+        ajax.fetchText(url).then(function (html) {
+            done();
+            body.innerHTML = html;
+            body.setAttribute('data-loaded', '1');
+            body.hidden = false;
+            link.setAttribute('aria-expanded', 'true');
+            if (icon) { icon.className = 'minus'; }
+        }).catch(done);
+    });
+})();
+
 /* messages.php: reveal the bulk-action bar once any message checkbox is
    checked, and keep the selected counter in sync. */
 (function () {

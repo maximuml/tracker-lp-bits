@@ -10,6 +10,8 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UtilityController;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
+use App\ViewModels\MoresmiliesPageViewModel;
+use App\ViewModels\PreviewPageViewModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -188,7 +190,9 @@ final class UtilityControllerTest extends TestCase
     public function test_preview_renders_legacy_page(): void
     {
         $this->mockCurrentUser(['id' => 1]);
-        View::shouldReceive('make')->once()->with('preview.index', ['body' => 'hello'])->andReturn($this->fakeView());
+        View::shouldReceive('make')->once()->with('preview.index', Mockery::on(static function (array $data): bool {
+            return $data['vm'] instanceof PreviewPageViewModel && $data['vm']->body === 'hello';
+        }))->andReturn($this->fakeView());
 
         $controller = app(UtilityController::class);
         $request = Request::create('/preview', 'POST', ['body' => 'hello']);
@@ -202,7 +206,9 @@ final class UtilityControllerTest extends TestCase
     public function test_moresmilies_renders_legacy_page(): void
     {
         $this->mockCurrentUser(['id' => 1]);
-        View::shouldReceive('make')->once()->with('moresmilies.index', ['form' => '', 'text' => ''])->andReturn($this->fakeView());
+        View::shouldReceive('make')->once()->with('moresmilies.index', Mockery::on(static function (array $data): bool {
+            return $data['vm'] instanceof MoresmiliesPageViewModel && $data['vm']->form === '' && $data['vm']->text === '';
+        }))->andReturn($this->fakeView());
 
         $controller = app(UtilityController::class);
         $request = Request::create('/moresmilies', 'GET');

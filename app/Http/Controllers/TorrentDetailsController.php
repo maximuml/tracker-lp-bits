@@ -27,6 +27,7 @@ use App\Support\Strings;
 use App\Support\Torrent\BdInfoExtra;
 use App\Support\Torrent\TechnicalInformation;
 use App\Support\TorrentBookmark;
+use App\ViewModels\Torrent\TorrentDetailsPageViewModel;
 use App\ViewModels\Torrent\TorrentDetailsViewFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -134,20 +135,22 @@ class TorrentDetailsController extends Controller
 
         $viewData = $this->buildDetailsViewData($id, $row, $currentUser, $denyLog, $hasBuy, $tagIds, $requestFlags, $customField);
 
-        return response()->view('torrent.details', array_merge([
-            'id' => $id,
-            'torrentId' => $id,
-            'torrentRow' => $row,
-            'user' => $user,
-            'currentUser' => $currentUser,
-            'headTitle' => $headTitle,
-            'tagIds' => $tagIds,
-            'denyLog' => $denyLog,
-            'hasBuy' => $hasBuy,
-            'requestFlags' => $requestFlags,
-            'torrentBookmarked' => ActorContext::current()->id > 0
-                && TorrentBookmark::isBookmarked($this->cache, ActorContext::current()->id, $id),
-        ], $viewData), 200, $headers);
+        return response()->view('torrent.details', [
+            'vm' => new TorrentDetailsPageViewModel(...array_merge([
+                'id' => $id,
+                'torrentId' => $id,
+                'torrentRow' => $row,
+                'user' => $user,
+                'currentUser' => $currentUser,
+                'headTitle' => $headTitle,
+                'tagIds' => $tagIds,
+                'denyLog' => $denyLog,
+                'hasBuy' => $hasBuy,
+                'requestFlags' => $requestFlags,
+                'torrentBookmarked' => ActorContext::current()->id > 0
+                    && TorrentBookmark::isBookmarked($this->cache, ActorContext::current()->id, $id),
+            ], $viewData)),
+        ], 200, $headers);
     }
 
     /**

@@ -30,6 +30,10 @@ use App\Support\Time;
 use App\Support\User;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
+use App\ViewModels\ResetPageViewModel;
+use App\ViewModels\SelfEnablePageViewModel;
+use App\ViewModels\UncoPageViewModel;
+use App\ViewModels\UsersPageViewModel;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -136,18 +140,14 @@ class UserAdminController extends BasePageController
         }
 
         return $this->renderPage($request, 'users', true, [
-            'search' => $search,
-            'class' => $class,
-            'country' => $country,
-            'letter' => $letter,
-            'classOptions' => $classOptions,
-            'countryOptions' => $countryOptions,
-            'pagerParam' => $q,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'pager' => $pager,
-            'rows' => $rows,
-            'letterItems' => $letterItems,
+            'vm' => new UsersPageViewModel(
+                search: $search,
+                classOptions: $classOptions,
+                countryOptions: $countryOptions,
+                letterItems: $letterItems,
+                pager: $pager,
+                rows: $rows,
+            ),
         ]);
 
     }
@@ -223,8 +223,10 @@ class UserAdminController extends BasePageController
     private function resetPage(Request $request, bool $success, string $message): View|RedirectResponse
     {
         return $this->renderPage($request, 'reset', true, [
-            'success' => $success,
-            'message' => SafeHtml::fromTrustedHtml($message),
+            'vm' => new ResetPageViewModel(
+                success: $success,
+                message: SafeHtml::fromTrustedHtml($message),
+            ),
         ]);
 
     }
@@ -262,18 +264,18 @@ class UserAdminController extends BasePageController
         AssetAppender::css('#ban-info td {border: none}', 'header', false);
 
         if ($unit <= 0) {
-            return $this->renderPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
         }
 
         if (($this->actor->enabled())) {
-            return $this->renderPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
         }
 
         $latestBanLog = $this->userModerationRepository->latestBanLogForUser($currentUserId);
         if (! $latestBanLog) {
             $viewData['latestBanLog'] = null;
 
-            return $this->renderPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
         }
 
         $latestBanLogCreatedAt = $latestBanLog->created_at;
@@ -291,7 +293,7 @@ class UserAdminController extends BasePageController
         $viewData['isUserBonusEnough'] = $isUserBonusEnough;
         $viewData['insufficientMessage'] = $insufficientMessage;
 
-        return $this->renderPage($request, 'self-enable', true, $viewData);
+        return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
 
     }
 
@@ -329,18 +331,18 @@ class UserAdminController extends BasePageController
         AssetAppender::css('#ban-info td {border: none}', 'header', false);
 
         if ($unit <= 0) {
-            return $this->renderPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
         }
 
         if (($this->actor->enabled())) {
-            return $this->renderPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
         }
 
         $latestBanLog = $this->userModerationRepository->latestBanLogForUser($currentUserId);
         if (! $latestBanLog) {
             $viewData['latestBanLog'] = null;
 
-            return $this->renderPage($request, 'self-enable', true, $viewData);
+            return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
         }
 
         $latestBanLogCreatedAt = $latestBanLog->created_at;
@@ -361,7 +363,7 @@ class UserAdminController extends BasePageController
                 $viewData['insufficientMessage'] = $insufficientMessage;
                 $viewData['showError'] = true;
 
-                return $this->renderPage($request, 'self-enable', true, $viewData);
+                return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
             }
 
             $userRep = $this->userRepository;
@@ -379,7 +381,7 @@ class UserAdminController extends BasePageController
         $viewData['isUserBonusEnough'] = $isUserBonusEnough;
         $viewData['insufficientMessage'] = $insufficientMessage;
 
-        return $this->renderPage($request, 'self-enable', true, $viewData);
+        return $this->renderPage($request, 'self-enable', true, ['vm' => SelfEnablePageViewModel::fromPageData($viewData)]);
     }
 
     public function unco(Request $request): View|RedirectResponse|Response
@@ -412,8 +414,7 @@ class UserAdminController extends BasePageController
         }
 
         return $this->renderPage($request, 'unco', true, [
-            'status' => $status,
-            'rows' => $rows,
+            'vm' => new UncoPageViewModel(status: $status !== null ? (int) $status : null, rows: $rows),
         ]);
     }
 

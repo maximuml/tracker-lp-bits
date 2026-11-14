@@ -6,23 +6,23 @@
 <x-page :title="__('incrementbulk.page_title')" width="form">
 <div class="nx-main nx-embedded nx-box--737">
                     <form method="post" action="/web/system/increment-bulk">@csrf
-                        @if ($returnto || $httpReferer)
-                            <input type="hidden" name="returnto" value="{{ $returnto }}">
+                        @if ($vm->returnto || $vm->httpReferer)
+                            <input type="hidden" name="returnto" value="{{ $vm->returnto }}">
                         @endif
                         <div class="nx-fgrid nx-fgrid--flat">
-                            @if ($sent !== null && $sent == 1)
-                            <div class="nx-ffull p-[10pt] text-center"><span class="text-nxm-danger"><b> {{ $validTypeMap[$type] ?? '' }}{{ __('incrementbulk.sent_success') }}</b></span></div>
+                            @if ($vm->sent !== null && $vm->sent == 1)
+                            <div class="nx-ffull p-[10pt] text-center"><span class="text-nxm-danger"><b> {{ $vm->validTypeMap[$vm->type] ?? '' }}{{ __('incrementbulk.sent_success') }}</b></span></div>
                             @endif
                                 <div class="nx-fhead">{{ __('incrementbulk.labels')['type'] }}</div>
                                 <div class="nx-fcell">
-                                    @foreach ($validTypeMap as $name => $text)
+                                    @foreach ($vm->validTypeMap as $name => $text)
                                     <label><input type="radio" name="type" value="{{ $name }}">{{ $text }}@if ($name == 'uploaded')&nbsp;(GB)@endif</label>
                                     @endforeach
                                 </div>
                             <label class="nx-fhead" for="ib-amount">{{ __('incrementbulk.labels')['amount'] }} </label><div class="nx-fcell"><input id="ib-amount" type="text" name="amount" size="10" inputmode="decimal"></div>
                             <label class="nx-fhead" for="ib-duration">{{ __('incrementbulk.labels')['duration'] }}</label><div class="nx-fcell"><input id="ib-duration" type="number" min="1" name="duration" size="10"> {{ __('incrementbulk.labels')['duration_help'] }}</div>
                                 <div class="nx-fhead">{{ __('incrementbulk.labels')['user_class'] }}</div><div class="nx-fcell">
-                                        @foreach ($classes as $chunk)
+                                        @foreach ($vm->classes as $chunk)
                                         <div class="flex flex-wrap items-start">
                                             @foreach ($chunk as $class => $info)
                                             <div class="nx-fcell"><label><input type="checkbox" name="classes[]" value="{{ $class }}" />{{ $info }}</label></div>
@@ -31,14 +31,14 @@
                                         @endforeach
                                 </div>
                             <label class="nx-fhead" for="ib-subject">{{ __('incrementbulk.labels')['msg_subject'] }} </label><div class="nx-fcell"><input id="ib-subject" type="text" name="subject" size="82" class="w-full"></div>
-                            <div class="nx-fhead">{{ __('incrementbulk.labels')['msg_body'] }} </div><div class="nx-fcell"><textarea aria-label="{{ __('incrementbulk.labels')['msg_body'] ?? 'Message' }}" name="msg" cols="80" rows="5" class="w-full">{{ $body }}</textarea></div>
+                            <div class="nx-fhead">{{ __('incrementbulk.labels')['msg_body'] }} </div><div class="nx-fcell"><textarea aria-label="{{ __('incrementbulk.labels')['msg_body'] ?? 'Message' }}" name="msg" cols="80" rows="5" class="w-full">{{ $vm->body }}</textarea></div>
                                 <div class="nx-ffull"><div class="text-center"><b>{{ __('incrementbulk.labels')['operator'] }}:&nbsp;&nbsp;</b>
-                                        <label><input name="sender" type="radio" value="self" checked>{{ $CURUSER['username'] ?? '' }}</label>
+                                        <label><input name="sender" type="radio" value="self" checked>{{ $vm->CURUSER['username'] ?? '' }}</label>
                                         &nbsp; <label><input name="sender" type="radio" value="system">{{ __('staffbox.text_system') }}</label>
                                     </div></div>
-                            <div class="nx-ffull text-center"><input type="submit" value="{{ $submitLabel }}" class="nx-btn nx-btn--primary" data-submit-once></div>
+                            <div class="nx-ffull text-center"><input type="submit" value="{{ $vm->submitLabel }}" class="nx-btn nx-btn--primary" data-submit-once></div>
                         </div>
-                        <input type="hidden" name="receiver" value="{{ $receiver }}">
+                        <input type="hidden" name="receiver" value="{{ $vm->receiver }}">
                     </form>
 
 </div>

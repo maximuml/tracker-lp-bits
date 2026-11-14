@@ -56,9 +56,9 @@ class ForumController extends BasePageController
             return $result;
         }
 
-        $data = $this->pageService->build($request)->toArray();
-
-        return $this->renderPage($request, 'forum', true, $data);
+        return $this->renderPage($request, 'forum', true, [
+            'vm' => $this->pageService->build($request),
+        ]);
     }
 
     public function legacyAction(Request $request): Response|RedirectResponse

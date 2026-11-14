@@ -10,7 +10,7 @@
 <div class="nx-fhead">{{ __('getrss.row_categories_to_retrieve') }}
 </div>
 <div class="nx-fcell">
-<x-search-category-table :vm="$categoriesTable" />
+<x-search-category-table :vm="$vm->categoriesTable" />
 </div>
 <div class="nx-fhead">{{ __('getrss.row_show_bookmarked') }}
 </div>
@@ -20,11 +20,11 @@
         <div class="nx-fhead">{{ __('getrss.row_sticky') }}
         </div>
         <div class="nx-fcell">
-            @foreach ($stickyTypes as $key => $value)
+            @foreach ($vm->stickyTypes as $key => $value)
             <label><input type="checkbox" name="sticky[]" value="{{ $key }}">{{ $value }}</label>
             @endforeach
         </div>
-    @if ($paidTorrentEnabled)
+    @if ($vm->paidTorrentEnabled)
     <div class="nx-fhead">{{ __('getrss.row_paid') }}
     </div>
     <div class="nx-fcell">
@@ -40,7 +40,7 @@
 <label><input type="checkbox" name="itemcategory" value="1" />{{ __('getrss.text_item_category') }}</label>&nbsp;<label><input type="checkbox" name="itemtitle" checked="checked" disabled="disabled" />{{ __('getrss.text_item_title') }}</label>&nbsp;<label><input type="checkbox" name="itemsize" value="1" />{{ __('getrss.text_item_size') }}</label>&nbsp;<label><input type="checkbox" name="itemuploader" value="1" />{{ __('getrss.text_item_uploader') }}</label>
 </div>
 <label class="nx-fhead" for="showrows">{{ __('getrss.row_rows_per_page') }}</label><div class="nx-fcell"><select name="showrows" id="showrows">
-@foreach ($allowed_showrows as $showrow)
+@foreach ($vm->allowed_showrows as $showrow)
 <option value="{{ $showrow }}">{{ $showrow }}</option>
 @endforeach
 </select></div>

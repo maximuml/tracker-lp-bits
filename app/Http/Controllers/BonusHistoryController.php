@@ -23,6 +23,8 @@ use App\Support\Locale;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\BonusLogPageViewModel;
+use App\ViewModels\UploadersPageViewModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -133,31 +135,32 @@ JS;
         AssetAppender::js($resetJs, 'footer', false);
 
         return $this->renderPage($request, 'bonus-log', true, [
-            'title' => $title,
-            'uid' => $uid,
-            'username' => $user->username,
-            'category' => $category,
-            'businessType' => $businessType,
-            'categoryText' => $categoryText,
-            'businessTypeText' => $businessTypeText,
-            'textSelectOnePlease' => $textSelectOnePlease,
-            'resetText' => $resetText,
-            'submitText' => $submitText,
-            'categoryOptionList' => $categoryOptionList,
-            'businessTypeOptionList' => $businessTypeOptionList,
-            'pagerParam' => $pagerParam,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'pager' => $pager,
-            'rows' => $rows,
-            'requestUri' => (string) $request->server->get('REQUEST_URI', ''),
-            'columnBusinessTypeLabel' => Locale::trans('bonus-log.fields.business_type', [], null),
-            'columnOldTotalLabel' => Locale::trans('bonus-log.fields.old_total_value', [], null),
-            'columnValueLabel' => Locale::trans('bonus-log.fields.value', [], null),
-            'columnNewTotalLabel' => Locale::trans('bonus-log.fields.new_total_value', [], null),
-            'columnCommentLabel' => Locale::trans('label.comment', [], null),
-            'columnCreatedAtLabel' => Locale::trans('label.created_at', [], null),
-        ]);
+            'vm' => BonusLogPageViewModel::fromPageData([
+                'title' => $title,
+                'uid' => $uid,
+                'username' => $user->username,
+                'category' => $category,
+                'businessType' => $businessType,
+                'categoryText' => $categoryText,
+                'businessTypeText' => $businessTypeText,
+                'textSelectOnePlease' => $textSelectOnePlease,
+                'resetText' => $resetText,
+                'submitText' => $submitText,
+                'categoryOptionList' => $categoryOptionList,
+                'businessTypeOptionList' => $businessTypeOptionList,
+                'pagerParam' => $pagerParam,
+                'pagertop' => $pagertop,
+                'pagerbottom' => $pagerbottom,
+                'pager' => $pager,
+                'rows' => $rows,
+                'requestUri' => (string) $request->server->get('REQUEST_URI', ''),
+                'columnBusinessTypeLabel' => Locale::trans('bonus-log.fields.business_type', [], null),
+                'columnOldTotalLabel' => Locale::trans('bonus-log.fields.old_total_value', [], null),
+                'columnValueLabel' => Locale::trans('bonus-log.fields.value', [], null),
+                'columnNewTotalLabel' => Locale::trans('bonus-log.fields.new_total_value', [], null),
+                'columnCommentLabel' => Locale::trans('label.comment', [], null),
+                'columnCreatedAtLabel' => Locale::trans('label.created_at', [], null),
+            ])]);
 
     }
 
@@ -260,16 +263,17 @@ JS;
         }
 
         return $this->renderPage($request, 'uploaders', true, [
-            'year' => $year,
-            'month' => $month,
-            'order' => $order,
-            'yearOptions' => $yearOptionList,
-            'monthOptions' => $monthOptionList,
-            'datefounded' => $dateFounded,
-            'timeStart' => $timeStart,
-            'naText' => $naText,
-            'rows' => $rows,
-        ]);
+            'vm' => UploadersPageViewModel::fromPageData([
+                'year' => $year,
+                'month' => $month,
+                'order' => $order,
+                'yearOptions' => $yearOptionList,
+                'monthOptions' => $monthOptionList,
+                'datefounded' => $dateFounded,
+                'timeStart' => $timeStart,
+                'naText' => $naText,
+                'rows' => $rows,
+            ])]);
 
     }
 

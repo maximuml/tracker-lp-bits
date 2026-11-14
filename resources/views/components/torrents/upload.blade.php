@@ -1,9 +1,9 @@
 <form id="compose" enctype="multipart/form-data" action="/takeupload" method="post" name="upload">
     @csrf
-    @if (count($uploadErrorList) > 0)
+    @if (count($vm->uploadErrorList) > 0)
         <x-alert type="error" :title="__('upload.error_summary')">
             <ul>
-                @foreach ($uploadErrorList as $uploadError)
+                @foreach ($vm->uploadErrorList as $uploadError)
                     <li>@if ($uploadError['anchor'] !== null)<a href="{{ $uploadError['anchor'] }}">{{ $uploadError['message'] }}</a>@else{{ $uploadError['message'] }}@endif</li>
                 @endforeach
             </ul>
@@ -16,10 +16,10 @@
                 <span class="nx-setrow__label" id="upl-announce-label">{{ __('upload.row_announce_url') }}</span>
                 <div class="nx-setrow__control" aria-labelledby="upl-announce-label">
                     <span class="nx-copyfield">
-                        <input type="text" class="nx-copyfield__input" id="announce-url" readonly value="{{ $trackerUrl }}" aria-label="{{ __('upload.row_announce_url') }}" />
+                        <input type="text" class="nx-copyfield__input" id="announce-url" readonly value="{{ $vm->trackerUrl }}" aria-label="{{ __('upload.row_announce_url') }}" />
                         <button type="button" class="nx-postbtn" data-copy="#announce-url" data-copy-done="{{ __('functions.text_copied') }}">{{ __('functions.text_copy') }}</button>
                     </span>
-                    @unless ($torrentDirWritable)
+                    @unless ($vm->torrentDirWritable)
                         <div class="nx-field__error" role="alert"><b>{{ __('upload.attention') }}</b>{{ __('upload.dir_not_writable') }}</div>
                     @endunless
                     @if (empty($max_torrent_size))
@@ -60,17 +60,17 @@
                 <div class="nx-setrow">
                     <label class="nx-setrow__label" for="name">{{ __('upload.row_torrent_name') }}</label>
                     <div class="nx-setrow__control">
-                        <livewire:setlist-lookup :name="$nameValue ?? ''" :invalid="$nameInvalid ?? false" />
+                        <livewire:setlist-lookup :name="$vm->nameValue ?? ''" :invalid="$vm->nameInvalid ?? false" />
                         @error('name')<div class="nx-field__error" id="name-error" role="alert">{{ $message }}</div>@enderror
                     </div>
                 </div>
             @endif
-            @if ($priceEnabled ?? false)
+            @if ($vm->priceEnabled ?? false)
                 <div class="nx-setrow">
-                    <label class="nx-setrow__label" for="price">{{ $priceLabel }}</label>
+                    <label class="nx-setrow__label" for="price">{{ $vm->priceLabel }}</label>
                     <div class="nx-setrow__control">
-                        <input type="number" min="0" id="price" name="price" value="{{ $priceValue ?? '' }}" placeholder="{{ $pricePlaceholder ?? '' }}"@if($priceInvalid ?? false) aria-invalid="true" aria-describedby="price-error"@endif />
-                        <p class="nx-field__help">{{ $priceHelp ?? '' }}</p>
+                        <input type="number" min="0" id="price" name="price" value="{{ $vm->priceValue ?? '' }}" placeholder="{{ $vm->pricePlaceholder ?? '' }}"@if($vm->priceInvalid ?? false) aria-invalid="true" aria-describedby="price-error"@endif />
+                        <p class="nx-field__help">{{ $vm->priceHelp ?? '' }}</p>
                         @error('price')<div class="nx-field__error" id="price-error" role="alert">{{ $message }}</div>@enderror
                     </div>
                 </div>
@@ -79,7 +79,7 @@
 
         <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="upl-sec-descr">
             <h2 class="nx-setcard__title" id="upl-sec-descr">{{ __('upload.section_description') }}<span class="text-nxm-danger">*</span></h2>
-            <livewire:bbcode-editor form="upload" text="descr" :content="$descrContent ?? ''" :invalid="$descrInvalid ?? false" described-by="descr-error" :label="__('upload.section_description')" :compact="true" :required="true" />
+            <livewire:bbcode-editor form="upload" text="descr" :content="$vm->descrContent ?? ''" :invalid="$vm->descrInvalid ?? false" described-by="descr-error" :label="__('upload.section_description')" :compact="true" :required="true" />
             @error('descr')<div class="nx-field__error" id="descr-error" role="alert">{{ $message }}</div>@enderror
         </section>
 
@@ -90,7 +90,7 @@
                 <div class="nx-setrow__control">
                     <select name="type" id="browsecat" data-mode="{{ $browsecatmode }}" aria-label="{{ __('upload.row_type') }}" required @error('type') aria-invalid="true" aria-describedby="type-error"@enderror>
                         <option value="0">{{ __('upload.select_choose_one') }}</option>
-                        @foreach ($cats as $row)
+                        @foreach ($vm->cats as $row)
                             <option value="{{ $row['id'] }}"@selected((string) old('type', '') === (string) $row['id'])>{{ $row['name'] }}</option>
                         @endforeach
                     </select>
@@ -101,7 +101,7 @@
                 <div class="nx-setrow nx-grouprow" relation="{{ 'mode_'.$browsecatmode }}">
                     <span class="nx-setrow__label" id="upl-quality-label">{{ __('upload.row_quality') }}</span>
                     <div class="nx-setrow__control" aria-labelledby="upl-quality-label">
-                        {{ $taxonomySelectHtml ?? '' }}
+                        {{ $vm->taxonomySelectHtml ?? '' }}
                         @foreach ($errors->keys() as $errorKey)
                             @if (str_ends_with((string) $errorKey, '_sel'))
                                 @foreach ($errors->get($errorKey) as $errorMessage)
@@ -111,18 +111,18 @@
                         @endforeach
                     </div>
                 </div>
-                {{ $customFieldsHtml ?? '' }}
-                {{ $hitAndRunHtml ?? '' }}
+                {{ $vm->customFieldsHtml ?? '' }}
+                {{ $vm->hitAndRunHtml ?? '' }}
                 @error('hr')<div class="nx-field__error" id="hr-error" role="alert">{{ $message }}</div>@enderror
                 <div class="nx-setrow nx-grouprow" relation="{{ 'mode_'.$browsecatmode }}">
                     <span class="nx-setrow__label" id="upl-tags-label">{{ __('functions.text_tags') }}</span>
                     <div class="nx-setrow__control" aria-labelledby="upl-tags-label">
-                        {{ $tagsHtml ?? '' }}
+                        {{ $vm->tagsHtml ?? '' }}
                         @error('tags')<div class="nx-field__error" id="tags-error" role="alert">{{ $message }}</div>@enderror
                     </div>
                 </div>
             </div>
-            @if ($enableTechnicalInfo)
+            @if ($vm->enableTechnicalInfo)
                 <div class="nx-setrow">
                     <label class="nx-setrow__label" for="technical_info">{{ __('functions.text_technical_info') }}</label>
                     <div class="nx-setrow__control">
@@ -136,13 +136,13 @@
 
         <section class="nx-ucard nx-setcard nx-setcard--wide" aria-labelledby="upl-sec-publish">
             <h2 class="nx-setcard__title" id="upl-sec-publish">{{ __('upload.section_publish') }}</h2>
-            @if (! empty($offerRows))
+            @if (! empty($vm->offerRows))
                 <div class="nx-setrow">
-                    <label class="nx-setrow__label" for="offer">{{ __('upload.row_your_offer') }}@if (! $uploadFreely)<span class="text-nxm-danger">*</span>@endif</label>
+                    <label class="nx-setrow__label" for="offer">{{ __('upload.row_your_offer') }}@if (! $vm->uploadFreely)<span class="text-nxm-danger">*</span>@endif</label>
                     <div class="nx-setrow__control">
                         <select name="offer" id="offer"@error('offer') aria-invalid="true" aria-describedby="offer-error"@enderror>
                             <option value="0">{{ __('upload.select_choose_one') }}</option>
-                            @foreach ($offerRows as $offerrow)
+                            @foreach ($vm->offerRows as $offerrow)
                                 <option value="{{ (int) $offerrow['id'] }}"@selected((string) old('offer', '0') === (string) $offerrow['id'])>{{ $offerrow['name'] }}</option>
                             @endforeach
                         </select>
@@ -151,17 +151,17 @@
                     </div>
                 </div>
             @endif
-            @if ($pickEnabled ?? false)
+            @if ($vm->pickEnabled ?? false)
                 <div class="nx-setrow" role="group" aria-labelledby="upl-g-pick">
                     <span class="nx-setrow__label" id="upl-g-pick">{{ __('edit.row_pick') }}</span>
                     <div class="nx-setrow__control">
                         <div class="nx-up__pair">
                             <div class="nx-up__pair-field">
                                 <label for="pos_state"><b>{{ __('edit.row_torrent_position') }}</b></label>
-                                <select name="pos_state" id="pos_state" aria-label="{{ __('edit.row_pick') }}"@if($posStateInvalid ?? false) aria-invalid="true" aria-describedby="pos_state-error"@endif>@foreach($posStates as $posKey => $posState)<option value="{{ $posKey }}"@if((string) $posKey === (string) $posStateOld) selected @endif>{{ $posState['text'] }}</option>@endforeach</select>
+                                <select name="pos_state" id="pos_state" aria-label="{{ __('edit.row_pick') }}"@if($vm->posStateInvalid ?? false) aria-invalid="true" aria-describedby="pos_state-error"@endif>@foreach($vm->posStates as $posKey => $posState)<option value="{{ $posKey }}"@if((string) $posKey === (string) $vm->posStateOld) selected @endif>{{ $posState['text'] }}</option>@endforeach</select>
                             </div>
                             <div class="nx-up__pair-field">
-                                @include('components.datetime-input', ['label' => new \Illuminate\Support\HtmlString(App\Support\Locale::trans('label.deadline', [], null)), 'name' => 'pos_state_until', 'value' => $posStateUntil ?? ''])
+                                @include('components.datetime-input', ['label' => new \Illuminate\Support\HtmlString(App\Support\Locale::trans('label.deadline', [], null)), 'name' => 'pos_state_until', 'value' => $vm->posStateUntil ?? ''])
                             </div>
                         </div>
                         @error('pos_state')<div class="nx-field__error" id="pos_state-error" role="alert">{{ $message }}</div>@enderror
@@ -169,7 +169,7 @@
                     </div>
                 </div>
             @endif
-            @if ($canBeAnonymous)
+            @if ($vm->canBeAnonymous)
                 <div class="nx-setrow">
                     <span class="nx-setrow__label" id="upl-uplver-label">{{ __('upload.row_show_uploader') }}</span>
                     <div class="nx-setrow__control">

@@ -5,7 +5,7 @@
 @section('content')
 <x-page :title="'FAQ Management'" width="list">
 <form method="post" action="/web/faq/actions?action=reorder">@csrf
-@foreach (($faqCateg ?? []) as $lang => $temp2)
+@foreach (($vm->faqCateg ?? []) as $lang => $temp2)
     @foreach ($temp2 as $id => $temp)
 <br />
 <x-data-table :caption="$temp['title'] ?? 'FAQ section'" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" colspan="2" scope="colgroup">{{ __('faqmanage.col_position') }}</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('faqmanage.col_title') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('functions.text_language') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('label.status') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('label.actions') }}</th></tr></thead></x-slot:head>
@@ -27,12 +27,12 @@
 </x-data-table>
     @endforeach
 @endforeach
-@if (! empty($faqOrphaned))
+@if (! empty($vm->faqOrphaned))
 <br />
 <x-data-table caption="Orphaned Items" captionHidden>
 <tr><td class="text-center" colspan="3"><b>{{ __('faqmanage.orphaned') }}</b></td></tr>
 <tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('faqmanage.item_title') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('label.status') }}</th><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('label.actions') }}</th></tr>
-    @foreach ($faqOrphaned as $lang => $temp2)
+    @foreach ($vm->faqOrphaned as $lang => $temp2)
         @foreach ($temp2 as $id => $temp)
 <tr><td>{{ $temp['question'] ?? '' }}</td><td class="text-center w-[60px]">@if (($temp['flag'] ?? '') == "0")<span class="text-nxm-danger">{{ __('faqmanage.status_hidden') }}</span>@elseif (($temp['flag'] ?? '') == "2")<span class="text-nxm-accent-text">{{ __('faqmanage.status_updated') }}</span>@elseif (($temp['flag'] ?? '') == "3")<span class="text-nxm-success">{{ __('faqmanage.status_new') }}</span>@else Normal @endif</td><td class="text-center w-[60px]"><a href="/web/faqactions?action=edit&id={{ (int) $id }}">edit</a> <a href="/web/faqactions?action=delete&id={{ (int) $id }}">delete</a></td></tr>
         @endforeach

@@ -892,12 +892,12 @@ a.nxm-logo:link, a.nxm-logo:visited {
         flex-direction: column;
         align-items: stretch;
     }
-    .nxm-nav__list {
+    .nxm-collapse .nxm-nav__list {
         flex-direction: column;
         align-items: stretch;
         gap: 0;
     }
-    .nxm-nav__list > li > a,
+    .nxm-collapse .nxm-nav__list > li > a,
     .nxm-more > summary {
         min-height: 44px;
         box-shadow: none;

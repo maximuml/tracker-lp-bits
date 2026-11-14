@@ -7,7 +7,7 @@ namespace App\ViewModels;
 /**
  * ViewModel for the increment-bulk page (increment-bulk/index.blade.php).
  *
- * Assembled by SystemBulkController::incrementBulk(); dead key stdheadMsgalert dropped.
+ * Assembled by SystemBulkController::incrementBulk(); stdheadMsgalert is a chrome-level flag passed beside vm.
  */
 final class IncrementBulkPageViewModel extends ViewModel
 {

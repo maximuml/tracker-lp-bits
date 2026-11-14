@@ -346,7 +346,6 @@ class SystemBulkController extends BasePageController
 
         return $this->renderPage($request, 'increment-bulk', true, [
             'vm' => IncrementBulkPageViewModel::fromPageData([
-                'stdheadMsgalert' => false,
                 'validTypeMap' => $validTypeMap,
                 'type' => $type,
                 'classes' => $classes,
@@ -357,7 +356,10 @@ class SystemBulkController extends BasePageController
                 'httpReferer' => RequestValues::serverValue('HTTP_REFERER'),
                 'submitLabel' => Locale::trans('label.submit', [], null),
                 'CURUSER' => $this->actor->toLegacyArray(),
-            ])]);
+            ]),
+            // chrome-level flag read by SiteChromeComposer from top-level view data
+            'stdheadMsgalert' => false,
+        ]);
     }
 
     public function setlistLookup(Request $request): JsonResponse

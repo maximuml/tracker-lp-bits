@@ -23,6 +23,8 @@ use App\Support\RequestValues;
 use App\Support\Time;
 use App\Support\Url;
 use App\Support\UserDisplay;
+use App\ViewModels\TakereseedPageViewModel;
+use App\ViewModels\TorrentInfoPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -62,8 +64,10 @@ class TorrentMaintenanceController extends BasePageController
         $dict = Bencode::load($filePath);
 
         return $this->renderPage($request, 'torrent_info', true, [
-            'torrentName' => (string) $torrent->name,
-            'structureHtml' => SafeHtml::fromTrustedHtml($this->torrentStructureBuilder(['root' => $dict])),
+            'vm' => new TorrentInfoPageViewModel(
+                torrentName: (string) $torrent->name,
+                structureHtml: SafeHtml::fromTrustedHtml($this->torrentStructureBuilder(['root' => $dict])),
+            ),
         ]);
     }
 
@@ -187,7 +191,7 @@ class TorrentMaintenanceController extends BasePageController
         ]);
 
         return $this->renderPage($request, 'takereseed', true, [
-            'message' => __('takereseed.std_it_worked'),
+            'vm' => new TakereseedPageViewModel(message: __('takereseed.std_it_worked')),
         ]);
     }
 }

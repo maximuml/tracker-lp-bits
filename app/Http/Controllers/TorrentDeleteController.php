@@ -20,6 +20,7 @@ use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\TorrentOps;
+use App\ViewModels\DeletePageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -126,7 +127,7 @@ class TorrentDeleteController extends BasePageController
 
         $id = (int) $id;
         if ($id <= 0) {
-            return $this->renderPage($request, 'delete', true);
+            return $this->renderPage($request, 'delete', true, ['vm' => new DeletePageViewModel]);
         }
 
         if (! $this->permissionChecker->userCan(PermissionEnum::TORRENT_DELETE->value, false, $currentUserId)) {
@@ -135,7 +136,7 @@ class TorrentDeleteController extends BasePageController
 
         $torrent = $this->torrentRepository->findById($id, ['name', 'owner', 'seeders', 'anonymous']);
         if ($torrent === null) {
-            return $this->renderPage($request, 'delete', true);
+            return $this->renderPage($request, 'delete', true, ['vm' => new DeletePageViewModel]);
         }
         $ownerId = (int) ($torrent->owner ?? 0);
         $name = (string) ($torrent->name ?? '');
@@ -174,7 +175,7 @@ class TorrentDeleteController extends BasePageController
         // double-delete: the loser gets [] and must not deduct the upload
         // bonus, log or send the PM a second time.
         if (TorrentOps::deleteTorrents($id, false) === []) {
-            return $this->renderPage($request, 'delete', true);
+            return $this->renderPage($request, 'delete', true, ['vm' => new DeletePageViewModel]);
         }
 
         if ($anonymous == 1 && $currentUserId == $ownerId) {
@@ -208,8 +209,10 @@ class TorrentDeleteController extends BasePageController
         $returnto = (string) $request->post('returnto');
 
         return $this->renderPage($request, 'delete', true, [
-            'returnto' => $returnto === '' ? '' : SafeReturnUrl::filter($returnto, '/web/index'),
-            'message' => __('delete.text_torrent_deleted'),
+            'vm' => new DeletePageViewModel(
+                returnto: $returnto === '' ? '' : SafeReturnUrl::filter($returnto, '/web/index'),
+                message: __('delete.text_torrent_deleted'),
+            ),
         ]);
     }
 }

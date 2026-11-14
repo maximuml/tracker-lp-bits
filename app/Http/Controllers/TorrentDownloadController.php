@@ -22,6 +22,7 @@ use App\Support\Security\PasskeyGenerator;
 use App\Support\Time;
 use App\Support\Tracker;
 use App\Support\Url;
+use App\ViewModels\DownloadnoticePageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -187,15 +188,17 @@ class TorrentDownloadController extends BasePageController
         $tdattr = ($showrationotice && $showclientnotice) ? 'width="50%"' : 'colspan="2" width="100%"';
 
         return $this->renderPage($request, 'downloadnotice', true, [
-            'torrentid' => $torrentid,
-            'type' => $type,
-            'title' => $title,
-            'note' => SafeHtml::fromTrustedHtml($note),
-            'noticenexttime' => $noticenexttime,
-            'showrationotice' => $showrationotice,
-            'showclientnotice' => $showclientnotice,
-            'forcecheck' => $forcecheck,
-            'tdattr' => $tdattr,
+            'vm' => new DownloadnoticePageViewModel(
+                torrentid: $torrentid,
+                type: $type,
+                title: $title,
+                note: SafeHtml::fromTrustedHtml($note),
+                noticenexttime: $noticenexttime,
+                showrationotice: $showrationotice,
+                showclientnotice: $showclientnotice,
+                forcecheck: $forcecheck,
+                tdattr: $tdattr,
+            ),
         ]);
     }
 

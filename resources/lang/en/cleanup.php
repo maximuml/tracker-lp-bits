@@ -22,7 +22,7 @@ return [
     'msg_demoted_from' => 'You have been auto-demoted from [b]',
     'msg_to' => '[/b] to [b]',
     'msg_because_ratio_drop_below' => '[/b] because your share ratio has dropped below ',
-    'msg_must_fix_ratio_within' => 'You have been warned and auto-demoted  from [b]User[/b] to [b]Peasant[/b] because of having low ratio. You need to fix it within ',
+    'msg_must_fix_ratio_within' => 'You have been warned and auto-demoted from [b]User[/b] to [b]Peasant[/b] because of having low ratio. You need to fix it within ',
     'msg_days_or_get_banned' => ' days or your account will be banned. If you have no idea of what is ratio or how it affects you, we suggest you read the [url=/web/faq#idid17][b]FAQ[/b][/url].',
     'msg_vip_status_removed' => 'VIP status removed by system.',
     'msg_vip_status_removed_body' => 'Your VIP status has timed out and has been auto-removed by the system. Become a VIP again by exchanging some Karma Bonus Points. Cheers!',

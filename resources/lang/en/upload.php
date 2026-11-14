@@ -69,7 +69,7 @@ View more detailed information and download it (you may need to log in), please 
     'std_unauthorized_to_upload' => 'You are not authorized to upload torrents. Read ',
     'text_unauthorized_to_upload' => 'You are not authorized to upload torrents.',
     'text_inbox' => 'Inbox',
-    'std_please_offer' => 'You are not authorized to upload torrents.  (See ',
+    'std_please_offer' => 'You are not authorized to upload torrents. (See ',
     'text_uploading' => 'Uploading',
     'text_in_faq' => ' in the FAQ.)',
     'std_please_offer_note' => 'If you think that you are qualified for uploading rights, please propose your offer ',

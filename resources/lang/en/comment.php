@@ -39,7 +39,7 @@ return [
     'std_unknown_action' => 'Unknown action.',
     'row_editor_notes' => "Editor's Notes",
     'row_bouns_change' => 'Bonus Change',
-    'text_bouns_change_notes' => '  0 to 1000, based on the quality of review(over 1000 will be treated as 1000 and others not in the range will be treated as 0)',
+    'text_bouns_change_notes' => '0 to 1000, based on the quality of review (over 1000 will be treated as 1000 and others not in the range will be treated as 0)',
     'std_review_no_external_info' => 'Could not mark comments with no external info!',
     'std_review_unmark' => 'Unmark Review',
     'std_unmark_review_note' => "You are about to unmark a review. Click\n",

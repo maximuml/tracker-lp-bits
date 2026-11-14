@@ -28,26 +28,14 @@
     </div>
 
     <nav class="nx-bshop__chips" aria-label="{{ __('mybonus.text_shop_sections') }}">
-        @foreach ([
-            'upload' => __('mybonus.group_upload'),
-            'download' => __('mybonus.group_download'),
-            'invites' => __('mybonus.group_invites'),
-            'profile' => __('mybonus.group_profile'),
-            'gifts' => __('mybonus.group_gifts'),
-        ] as $group => $label)
+        @foreach ($shop->groupLabels() as $group => $label)
             @if (collect($shop->items)->where('group', $group)->isNotEmpty())
                 <a class="nx-bshop__chip" href="/web/mybonus#bonus-{{ $group }}">{{ $label }}</a>
             @endif
         @endforeach
     </nav>
 
-    @foreach ([
-        'upload' => __('mybonus.group_upload'),
-        'download' => __('mybonus.group_download'),
-        'invites' => __('mybonus.group_invites'),
-        'profile' => __('mybonus.group_profile'),
-        'gifts' => __('mybonus.group_gifts'),
-    ] as $group => $label)
+    @foreach ($shop->groupLabels() as $group => $label)
         @if (collect($shop->items)->where('group', $group)->isNotEmpty())
             <section class="nx-bshop__group" aria-labelledby="bonus-{{ $group }}">
                 <h2 id="bonus-{{ $group }}" class="nx-bshop__group-title">{{ $label }}</h2>

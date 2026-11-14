@@ -26,4 +26,18 @@ final readonly class BonusShopViewModel
         public string $lockText,
         public array $items,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public function groupLabels(): array
+    {
+        return [
+            'upload' => __('mybonus.group_upload'),
+            'download' => __('mybonus.group_download'),
+            'invites' => __('mybonus.group_invites'),
+            'profile' => __('mybonus.group_profile'),
+            'gifts' => __('mybonus.group_gifts'),
+        ];
+    }
 }

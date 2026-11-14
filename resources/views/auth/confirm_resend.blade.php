@@ -7,24 +7,11 @@
         <div class="nx-auth__error">{{ $error }}</div>
     @endif
 
-    @if ($errors->any())
-        <div class="nx-auth__error">
-            @foreach ($errors->all() as $message)
-                <div>{{ $message }}</div>
-            @endforeach
-        </div>
-    @endif
+    <x-auth.errors :errors="$errors ?? null" />
 
     <form method="get" action="/confirm_resend" class="nx-auth__lang">
         <input type="hidden" name="secret" value="{{ $secret }}" />
-        <label for="sitelanguage">{{ __('confirm_resend.text_select_lang')}}</label>
-        <select id="sitelanguage" name="sitelanguage">
-            @foreach ($languages as $row)
-                <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
-                    {{ $row['lang_name'] }}
-                </option>
-            @endforeach
-        </select>
+        <x-auth.language-select :label="__('confirm_resend.text_select_lang')" :languages="$languages" :lang-folder="$langFolder" />
     </form>
 
     <h1>{{ __('confirm_resend.text_resend_confirmation_mail_note') }} </h1><p>{{ __('confirm_resend.text_resend_confirmation_mail_note_two') }}</p><p>{{ __('confirm_resend.text_resend_confirmation_mail_note_three') }}<br />{{ __('confirm_resend.text_resend_confirmation_mail_note_four') }}</p>

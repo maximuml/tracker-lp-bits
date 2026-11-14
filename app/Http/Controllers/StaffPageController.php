@@ -13,6 +13,8 @@ use App\Services\PermissionChecker;
 use App\Support\Country;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
+use App\ViewModels\StaffPageViewModel;
+use App\ViewModels\StaffpanelPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -104,11 +106,13 @@ class StaffPageController extends BasePageController
             ->all();
 
         return $this->renderPage($request, 'staff', true, [
-            'supportRows' => $supportRows,
-            'forumModRows' => $forumModRows,
-            'staffRows' => $staffRows,
-            'vipRows' => $vipRows,
-            'siteName' => Setting::getSiteName(),
+            'vm' => new StaffPageViewModel(
+                supportRows: $supportRows,
+                forumModRows: $forumModRows,
+                staffRows: $staffRows,
+                vipRows: $vipRows,
+                siteName: Setting::getSiteName(),
+            ),
         ]);
 
     }
@@ -138,9 +142,11 @@ class StaffPageController extends BasePageController
         }
 
         return $this->renderPage($request, 'staffpanel', true, [
-            'sysopPanels' => $sysopPanels,
-            'adminPanels' => $adminPanels,
-            'modPanels' => $modPanels,
+            'vm' => new StaffpanelPageViewModel(
+                sysopPanels: $sysopPanels,
+                adminPanels: $adminPanels,
+                modPanels: $modPanels,
+            ),
         ]);
 
     }

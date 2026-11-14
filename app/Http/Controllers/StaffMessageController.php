@@ -46,7 +46,6 @@ class StaffMessageController extends BasePageController
 
         return $this->renderPage($request, 'staffmess', true, [
             'vm' => StaffmessPageViewModel::fromPageData([
-                'stdheadMsgalert' => false,
                 'classes' => $classes,
                 'body' => SafeHtml::fromPlainText((string) $request->query('body')),
                 'receiver' => (int) ($request->query('receiver') ?? 0),
@@ -54,7 +53,10 @@ class StaffMessageController extends BasePageController
                 'sent' => (int) ($request->query('sent') ?? 0),
                 'showReturnto' => (bool) ($returntoQuery || $httpReferer),
                 'returnto' => htmlspecialchars((string) ($returntoQuery ?? $httpReferer)),
-            ])]);
+            ]),
+            // chrome-level flag read by SiteChromeComposer from top-level view data
+            'stdheadMsgalert' => false,
+        ]);
     }
 
     public function staffmessSubmit(StaffmessSubmitRequest $request): View|RedirectResponse|Response

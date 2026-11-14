@@ -9,7 +9,7 @@ use App\Support\Html\SafeHtml;
 /**
  * ViewModel for the staffmess page (staffmess/index.blade.php).
  *
- * Assembled by StaffMessageController::staffmess(); dead key stdheadMsgalert dropped.
+ * Assembled by StaffMessageController::staffmess(); stdheadMsgalert is a chrome-level flag passed beside vm.
  */
 final class StaffmessPageViewModel extends ViewModel
 {

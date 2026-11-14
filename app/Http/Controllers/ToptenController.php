@@ -10,6 +10,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Support\Locale;
 use App\Support\RedisGuard;
+use App\ViewModels\ToptenPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -48,9 +49,9 @@ class ToptenController extends Controller
             return $page;
         });
 
-        $page['toptenTabs'] = $this->toptenTabs();
+        $vm = ToptenPageViewModel::fromPage($page, $this->toptenTabs());
 
-        return response(view('topten.index', $page)->render());
+        return response(view('topten.index', $vm->toArray())->render());
     }
 
     /**

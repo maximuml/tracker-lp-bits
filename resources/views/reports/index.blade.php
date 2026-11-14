@@ -15,7 +15,7 @@
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><span class="nx-nobr">{{ __('reports.col_dealt_with')}}</span></th>
     <th class="bg-nxm-surface-alt font-semibold" scope="col"><span class="nx-nobr">{{ __('reports.col_action')}}</span></th>
 </tr>
-@foreach ($rows as $row)
+@foreach ($vm->rows as $row)
     <tr>
         <td class="align-top px-2.5 py-1.5"><span class="nx-nobr">{{ $row['added_formatted'] }}</span></td>
         <td class="align-top px-2.5 py-1.5">{{ $row['reporterHtml'] }}</td>
@@ -34,6 +34,6 @@
 </tr>
 </form>
 </x-data-table>
-<x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
+<x-pagination :page="$vm->pager['page']" :pages="$vm->pager['pages']" :href="$vm->pager['href']" :prev-label="$vm->pager['prevLabel']" :next-label="$vm->pager['nextLabel']" :zero-based="$vm->pager['zeroBased']" label="Pagination bottom" />
 </x-page>
 @endsection

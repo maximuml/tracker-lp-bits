@@ -22,6 +22,10 @@ use App\Support\RequestValues;
 use App\Support\Time;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\BitbucketlogPageViewModel;
+use App\ViewModels\DonatedPageViewModel;
+use App\ViewModels\DonatePageViewModel;
+use App\ViewModels\UserhistoryPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -97,7 +101,9 @@ class InfoController extends BasePageController
             return $this->abortResponse((string) (__('userhistory.std_history_error')), (string) (__('userhistory.std_unkown_action')), true, 400);
         }
 
-        return $this->renderPage($request, 'userhistory', true, $data);
+        return $this->renderPage($request, 'userhistory', true, [
+            'vm' => UserhistoryPageViewModel::fromPageData($data),
+        ]);
     }
 
     /**
@@ -172,7 +178,9 @@ class InfoController extends BasePageController
         $data = $this->infoRepository->donationPageData();
         $data['thanks'] = $request->query('do') === 'thanks';
 
-        return $this->renderPage($request, 'donate', false, $data);
+        return $this->renderPage($request, 'donate', false, [
+            'vm' => DonatePageViewModel::fromPageData($data),
+        ]);
     }
 
     public function donateSubmit(DonateSubmitRequest $request): View|RedirectResponse|Response
@@ -219,7 +227,7 @@ class InfoController extends BasePageController
     private function donatedPage(Request $request, string $error): View|RedirectResponse
     {
         return $this->renderPage($request, 'donated', true, [
-            'error' => $error,
+            'vm' => new DonatedPageViewModel(error: $error),
         ]);
     }
 
@@ -295,12 +303,12 @@ class InfoController extends BasePageController
         }
 
         return $this->renderPage($request, 'bitbucketlog', true, [
-            'items' => $items,
-            'count' => $count,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'pager' => $pager,
-            'isModerator' => $isModerator,
+            'vm' => new BitbucketlogPageViewModel(
+                items: $items,
+                count: $count,
+                pager: $pager,
+                isModerator: $isModerator,
+            ),
         ]);
     }
 

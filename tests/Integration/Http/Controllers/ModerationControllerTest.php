@@ -14,6 +14,7 @@ use App\Repositories\ModerationRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Permissions;
+use App\ViewModels\ReportsPageViewModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
@@ -139,7 +140,9 @@ final class ModerationControllerTest extends TestCase
         $response = $controller->reports($request);
 
         $this->assertInstanceOf(View::class, $response);
-        $rows = $response->getData()['rows'];
+        /** @var ReportsPageViewModel $vm */
+        $vm = $response->getData()['vm'];
+        $rows = $vm->rows;
         $this->assertSame('Torrent', $rows[0]['type_label']);
         $this->assertStringContainsString('/web/details/'.$torrent->id, (string) $rows[0]['reporting']);
         $this->assertStringContainsString('EnumCheckTorrent', (string) $rows[0]['reporting']);
@@ -180,7 +183,9 @@ final class ModerationControllerTest extends TestCase
         $response = $controller->reports($request);
 
         $this->assertInstanceOf(View::class, $response);
-        $rows = $response->getData()['rows'];
+        /** @var ReportsPageViewModel $vm */
+        $vm = $response->getData()['vm'];
+        $rows = $vm->rows;
         $this->assertSame('User', $rows[0]['type_label']);
         $this->assertStringContainsString((string) $reported->username, (string) $rows[0]['reporting']);
         $this->assertSame('user report reason', $rows[0]['reason']);

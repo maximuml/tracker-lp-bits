@@ -24,6 +24,7 @@ use App\Support\Ratio;
 use App\Support\SafeExceptionMessage;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\InvitePageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -146,7 +147,7 @@ class InviteController extends BasePageController
             }
         }
 
-        return $this->renderPage($request, 'invite', true, $data);
+        return $this->renderPage($request, 'invite', true, ['vm' => InvitePageViewModel::fromPageData($data)]);
     }
 
     /**

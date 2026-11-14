@@ -28,6 +28,7 @@ use App\Support\Locale;
 use App\Support\PageResponses;
 use App\Support\Path;
 use App\Support\Tracker;
+use App\ViewModels\Torrent\TorrentUploadPageViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -145,35 +146,37 @@ class TorrentUploadController extends Controller
         $customField = $this->customField;
 
         return view('torrents.upload', [
-            'uploadErrorList' => $uploadErrorList,
-            'uploadFreely' => $uploadFreely,
-            'allowtorrents' => $allowtorrents,
-            'offerRows' => $offerRows,
-            'pageTitle' => __('upload.head_upload'),
-            'cats' => Category::listByModeWithContext($browsecatmode),
-            'trackerUrl' => Tracker::schemaAndHost((int) (ActorContext::current()->value('tracker_url_id', 0)), true),
-            'torrentDirWritable' => is_writable(Path::resolve(SiteConfig::current()->main->torrentDir(), ROOT_PATH)),
-            'nameValue' => $nameValue,
-            'nameInvalid' => $nameInvalid,
-            'priceLabel' => Locale::trans('label.torrent.price', [], null),
-            'priceEnabled' => $priceEnabled,
-            'priceValue' => $this->oldScalar($request, 'price'),
-            'pricePlaceholder' => $pricePlaceholder,
-            'priceInvalid' => $fieldHasError('price'),
-            'priceHelp' => Locale::trans('label.torrent.price_help', ['tax_factor' => $torrentConfig->taxFactor() * 100 .'%'], null),
-            'descrContent' => $descrContent,
-            'descrInvalid' => $descrInvalid,
-            'enableTechnicalInfo' => SiteConfig::current()->main->enableTechnicalInfo(),
-            'taxonomySelectHtml' => $this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode, $taxonomyValues),
-            'customFieldsHtml' => $customField->renderOnUploadPage(0, $browsecatmode, is_array($oldCustomFields) ? $oldCustomFields : []),
-            'hitAndRunHtml' => $this->hitAndRunRepository->renderOnUploadPage(is_scalar($oldHr) ? $oldHr : '', $browsecatmode),
-            'tagsHtml' => $this->tagRepository->renderCheckbox($browsecatmode, $checkedTags),
-            'pickEnabled' => Permission::can(PermissionEnum::TORRENT_SET_STICKY),
-            'posStates' => Torrent::listPosStates(),
-            'posStateOld' => $this->oldScalar($request, 'pos_state', (string) TorrentPosState::NONE->value),
-            'posStateInvalid' => $fieldHasError('pos_state'),
-            'posStateUntil' => $this->oldScalar($request, 'pos_state_until'),
-            'canBeAnonymous' => Permission::can(PermissionEnum::BE_ANONYMOUS),
+            'vm' => new TorrentUploadPageViewModel(
+                uploadErrorList: $uploadErrorList,
+                uploadFreely: $uploadFreely,
+                allowtorrents: $allowtorrents,
+                offerRows: $offerRows,
+                pageTitle: __('upload.head_upload'),
+                cats: Category::listByModeWithContext($browsecatmode),
+                trackerUrl: Tracker::schemaAndHost((int) (ActorContext::current()->value('tracker_url_id', 0)), true),
+                torrentDirWritable: is_writable(Path::resolve(SiteConfig::current()->main->torrentDir(), ROOT_PATH)),
+                nameValue: $nameValue,
+                nameInvalid: $nameInvalid,
+                priceLabel: Locale::trans('label.torrent.price', [], null),
+                priceEnabled: $priceEnabled,
+                priceValue: $this->oldScalar($request, 'price'),
+                pricePlaceholder: $pricePlaceholder,
+                priceInvalid: $fieldHasError('price'),
+                priceHelp: Locale::trans('label.torrent.price_help', ['tax_factor' => $torrentConfig->taxFactor() * 100 .'%'], null),
+                descrContent: $descrContent,
+                descrInvalid: $descrInvalid,
+                enableTechnicalInfo: SiteConfig::current()->main->enableTechnicalInfo(),
+                taxonomySelectHtml: $this->searchBoxSchemaBuilder->renderTaxonomySelect($browsecatmode, $taxonomyValues),
+                customFieldsHtml: $customField->renderOnUploadPage(0, $browsecatmode, is_array($oldCustomFields) ? $oldCustomFields : []),
+                hitAndRunHtml: $this->hitAndRunRepository->renderOnUploadPage(is_scalar($oldHr) ? $oldHr : '', $browsecatmode),
+                tagsHtml: $this->tagRepository->renderCheckbox($browsecatmode, $checkedTags),
+                pickEnabled: Permission::can(PermissionEnum::TORRENT_SET_STICKY),
+                posStates: Torrent::listPosStates(),
+                posStateOld: $this->oldScalar($request, 'pos_state', (string) TorrentPosState::NONE->value),
+                posStateInvalid: $fieldHasError('pos_state'),
+                posStateUntil: $this->oldScalar($request, 'pos_state_until'),
+                canBeAnonymous: Permission::can(PermissionEnum::BE_ANONYMOUS),
+            ),
         ]);
     }
 

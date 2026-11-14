@@ -20,6 +20,8 @@ use App\Support\Pagination;
 use App\Support\Strings;
 use App\Support\Time;
 use App\Support\UserDisplay;
+use App\ViewModels\MakepollPageViewModel;
+use App\ViewModels\PolloverviewPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -86,13 +88,15 @@ class PollController extends BasePageController
         $pollid = (int) ($poll['id'] ?? $pollid);
 
         return $this->renderPage($request, 'makepoll', true, [
-            'poll' => $poll,
-            'pollid' => $pollid,
-            'returnto' => htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
-            'pollAge' => $pollAge,
-            'title' => $pollid > 0
-                ? (__('makepoll.head_edit_poll'))
-                : (__('makepoll.head_new_poll')),
+            'vm' => new MakepollPageViewModel(
+                poll: $poll,
+                pollid: $pollid,
+                returnto: htmlspecialchars((string) ($request->input('returnto') ?? $request->headers->get('referer') ?? '')),
+                pollAge: $pollAge,
+                title: $pollid > 0
+                    ? (__('makepoll.head_edit_poll'))
+                    : (__('makepoll.head_new_poll')),
+            ),
         ]);
     }
 
@@ -173,15 +177,15 @@ class PollController extends BasePageController
             }
 
             return $this->renderPage($request, 'polloverview', true, [
-                'mode' => 'detail',
-                'poll' => $poll,
-                'pollAdded' => Time::formatHtml($poll['added'] ?? ''),
-                'pollOptions' => $pollOptions,
-                'count' => $count,
-                'answers' => $answerRows,
-                'pagertop' => $pagertop,
-                'pagerbottom' => $pagerbottom,
-                'pager' => $pager,
+                'vm' => new PolloverviewPageViewModel(
+                    mode: 'detail',
+                    poll: $poll,
+                    pollAdded: Time::formatHtml($poll['added'] ?? ''),
+                    pollOptions: $pollOptions,
+                    count: $count,
+                    answers: $answerRows,
+                    pager: $pager,
+                ),
             ]);
         }
 
@@ -198,8 +202,7 @@ class PollController extends BasePageController
         }, $polls);
 
         return $this->renderPage($request, 'polloverview', true, [
-            'mode' => 'list',
-            'polls' => $pollRows,
+            'vm' => new PolloverviewPageViewModel(mode: 'list', polls: $pollRows),
         ]);
     }
 

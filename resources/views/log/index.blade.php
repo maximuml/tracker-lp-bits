@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', $title ?? (__('log.head_site_log')))
+@section('title', $vm->title ?? (__('log.head_site_log')))
 
 @section('content')
-<x-page :title="$title ?? (__('log.head_site_log'))" width="list">
-<x-slot:tabs><x-tabs :tabs="$logTabs" :active="$mode" :label="__('log.head_site_log')" /></x-slot:tabs>
+<x-page :title="$vm->title ?? (__('log.head_site_log'))" width="list">
+<x-slot:tabs><x-tabs :tabs="$vm->logTabs" :active="$vm->mode" :label="__('log.head_site_log')" /></x-slot:tabs>
 
-@if ($mode === 'dailylog')
+@if ($vm->mode === 'dailylog')
     <x-data-table :caption="__('log.text_search_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.text_search_log')}}</th></tr></thead></x-slot:head>
         <tr><td class="toolbox">
             <form method="get" action="">
-                <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
-                @if ($canConfidentialLog)
+                <input type="text" name="query" value="{{ $vm->q }}" aria-label="{{ __('log.text_search_log') }}">
+                @if ($vm->canConfidentialLog)
                     {{ __('log.text_in')}}<select name="search" aria-label="{{ __('log.text_in') }}{{ __('log.text_search_log') }}">
                     @foreach (['all' => (__('log.text_all')), 'normal' => (__('log.text_normal')), 'mod' => (__('log.text_mod'))] as $value => $text)
-                        <option value='{{ $value }}'{{ $value === $search ? ' selected' : '' }}>{{ $text }}</option>
+                        <option value='{{ $value }}'{{ $value === $vm->search ? ' selected' : '' }}>{{ $text }}</option>
                     @endforeach
                     </select>
                 @endif
@@ -22,91 +22,91 @@
                 &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
         </td></tr>
     </x-data-table><br />
-    @if (empty($logRows))
+    @if (empty($vm->logRows))
         <x-empty-state :title="__('log.text_log_empty')" />
     @else
         <x-data-table :caption="__('log.text_daily_log')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col"><i class="time" role="img" aria-label="{{ __('log.title_time_added')}}" title="{{ __('log.title_time_added')}}"></i></th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>
-        @if ($canConfidentialLog)
+        @if ($vm->canConfidentialLog)
             <th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_user')}}</th>
         @endif
         </tr></thead></x-slot:head>
-        @foreach ($logRows as $arr)
+        @foreach ($vm->logRows as $arr)
             <tr><td class="align-top px-2.5 py-1.5 whitespace-nowrap text-center">{{ $arr['dateHtml'] ?? '' }}</td><td class="align-top px-2.5 py-1.5"><x-status-pill :cls="($arr['colorClass'] ?? '') !== '' ? $arr['colorClass'] : null">{{ $arr['txt'] ?? '' }}</x-status-pill></td>
-            @if ($canConfidentialLog)
+            @if ($vm->canConfidentialLog)
                 <td class="align-top px-2.5 py-1.5">{{ $arr['usernameHtml'] ?? '' }}</td>
             @endif
             </tr>
         @endforeach
         </x-data-table>
-        {{ $pagerbottom ?? '' }}
+        {{ $vm->pagerbottom ?? '' }}
     @endif
     <p>{{ __('log.time_zone_note') }}</p>
 
-@elseif ($mode === 'chronicle')
+@elseif ($vm->mode === 'chronicle')
     <x-data-table :caption="__('log.text_search_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.text_search_chronicle')}}</th></tr></thead></x-slot:head>
         <tr><td class="toolbox">
             <form method="get" action="">
-                <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
+                <input type="text" name="query" value="{{ $vm->q }}" aria-label="{{ __('log.text_search_log') }}">
                 <input type="hidden" name="action" value="chronicle">
                 &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
         </td></tr>
     </x-data-table><br />
-    @if ($canManage)
-        <x-data-table :caption="! empty($editItem) ? __('log.text_edit_chronicle') : __('log.text_add_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ ! empty($editItem) ? (__('log.text_edit_chronicle')) : (__('log.text_add_chronicle')) }}</th></tr></thead></x-slot:head>
+    @if ($vm->canManage)
+        <x-data-table :caption="! empty($vm->editItem) ? __('log.text_edit_chronicle') : __('log.text_add_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ ! empty($vm->editItem) ? (__('log.text_edit_chronicle')) : (__('log.text_add_chronicle')) }}</th></tr></thead></x-slot:head>
             <tr><td class="toolbox">
-                <form method="post" action="/web/log/chronicle/{{ ! empty($editItem) ? 'update' : 'add' }}">@csrf
-                    <textarea name="txt" rows="3" aria-label="{{ __('log.text_add_chronicle') }}">{{ ! empty($editItem) ? ($editItem['txt'] ?? '') : (__('log.text_add_chronicle')) }}</textarea>
-                    @if (! empty($editItem))
-                        <input type="hidden" name="id" value="{{ (int) ($editItem['id'] ?? 0) }}">
+                <form method="post" action="/web/log/chronicle/{{ ! empty($vm->editItem) ? 'update' : 'add' }}">@csrf
+                    <textarea name="txt" rows="3" aria-label="{{ __('log.text_add_chronicle') }}">{{ ! empty($vm->editItem) ? ($vm->editItem['txt'] ?? '') : (__('log.text_add_chronicle')) }}</textarea>
+                    @if (! empty($vm->editItem))
+                        <input type="hidden" name="id" value="{{ (int) ($vm->editItem['id'] ?? 0) }}">
                     @endif
                     <input type="submit" class="nx-btn" value="{{ __('log.submit_add') }}" data-submit-once></form>
             </td></tr>
         </x-data-table><br />
     @endif
-    @if (empty($chronicleRows))
+    @if (empty($vm->chronicleRows))
         <x-empty-state :title="__('log.text_chronicle_empty')" />
     @else
-        <x-data-table :caption="__('log.text_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_date')}}</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>@if ($canManage)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_modify')}}</th>@endif</tr></thead></x-slot:head>
-        @foreach ($chronicleRows as $arr)
-            <tr><td class="align-top px-2.5 py-1.5 text-center"><span class="nx-nobr">{{ $arr['dateHtml'] ?? '' }}</span></td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($canManage)<td class="text-center whitespace-nowrap"><b><a href="{{ request()->getPathInfo() }}?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="/web/log/chronicle/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-postbtn nx-postbtn--danger" data-confirm="{{ __('log.confirm_delete_chronicle') }}" data-submit-once>{{ __('log.text_delete')}}</button></form></b></td>@endif</tr>
+        <x-data-table :caption="__('log.text_chronicle')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_date')}}</th><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.col_event')}}</th>@if ($vm->canManage)<th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.col_modify')}}</th>@endif</tr></thead></x-slot:head>
+        @foreach ($vm->chronicleRows as $arr)
+            <tr><td class="align-top px-2.5 py-1.5 text-center"><span class="nx-nobr">{{ $arr['dateHtml'] ?? '' }}</span></td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td>@if ($vm->canManage)<td class="text-center whitespace-nowrap"><b><a href="{{ request()->getPathInfo() }}?action=chronicle&do=edit&id={{ (int) ($arr['id'] ?? 0) }}">{{ __('log.text_edit')}}</a>&nbsp;|&nbsp;<form method="post" action="/web/log/chronicle/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ (int) ($arr['id'] ?? 0) }}"><button type="submit" class="nx-postbtn nx-postbtn--danger" data-confirm="{{ __('log.confirm_delete_chronicle') }}" data-submit-once>{{ __('log.text_delete')}}</button></form></b></td>@endif</tr>
         @endforeach
         </x-data-table>
-        {{ $pagerbottom ?? '' }}
+        {{ $vm->pagerbottom ?? '' }}
     @endif
     <p>{{ __('log.time_zone_note') }}</p>
 
-@elseif ($mode === 'news')
+@elseif ($vm->mode === 'news')
     <x-data-table :caption="__('log.text_search_news')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold text-left" scope="col">{{ __('log.text_search_news')}}</th></tr></thead></x-slot:head>
         <tr><td class="toolbox">
             <form method="get" action="">
-                <input type="text" name="query" value="{{ $q }}" aria-label="{{ __('log.text_search_log') }}">
+                <input type="text" name="query" value="{{ $vm->q }}" aria-label="{{ __('log.text_search_log') }}">
                 {{ __('log.text_in')}}<select name="search" aria-label="{{ __('log.text_in') }}{{ __('log.text_search_log') }}">
                 @foreach (['title' => (__('log.text_title')), 'body' => (__('log.text_body')), 'both' => (__('log.text_both'))] as $value => $text)
-                    <option value='{{ $value }}'{{ $value === $search ? ' selected' : '' }}>{{ $text }}</option>
+                    <option value='{{ $value }}'{{ $value === $vm->search ? ' selected' : '' }}>{{ $text }}</option>
                 @endforeach
                 </select>
                 <input type="hidden" name="action" value="news">
                 &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
         </td></tr>
     </x-data-table><br />
-    @if (empty($newsRows))
+    @if (empty($vm->newsRows))
         <x-empty-state :title="__('log.text_news_empty')" />
     @else
-        @foreach ($newsRows as $arr)
+        @foreach ($vm->newsRows as $arr)
             <x-data-table :caption="__('log.text_news')" captionHidden>
             <tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim w-[10%]">{{ __('log.col_title')}}</td><td class="align-top px-2.5 py-1.5">{{ $arr['title'] ?? '' }}</td></tr><tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim w-[10%]">{{ __('log.col_date')}}</td><td class="align-top px-2.5 py-1.5">{{ $arr['dateHtml'] ?? '' }}</td></tr><tr><td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim w-[10%]">{{ __('log.col_body')}}</td><td class="align-top px-2.5 py-1.5">{{ $arr['bodyHtml'] ?? '' }}</td></tr>
             </x-data-table><br />
         @endforeach
-        {{ $pagerbottom ?? '' }}
+        {{ $vm->pagerbottom ?? '' }}
     @endif
     <p>{{ __('log.time_zone_note') }}</p>
 
-@elseif ($mode === 'poll')
+@elseif ($vm->mode === 'poll')
     <x-data-table :caption="__('log.text_previous_polls')" captionHidden><x-slot:head><thead><tr><th class="bg-nxm-surface-alt font-semibold" scope="col">{{ __('log.text_previous_polls')}}</th></tr></thead></x-slot:head>
-    @foreach ($pollData as $item)
+    @foreach ($vm->pollData as $item)
         <tr><td class="text-center">
         <p class=sub>{{ $item['added'] ?? '' }}
-        @if ($canPollManage)
+        @if ($vm->canPollManage)
             - [<a href="/web/makepoll?action=edit&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ __('log.text_edit')}}</b></a>]
             - [<a href="{{ request()->getPathInfo() }}?action=poll&do=delete&pollid={{ (int) ($item['poll']['id'] ?? 0) }}"><b>{{ __('log.text_delete')}}</b></a>]
         @endif

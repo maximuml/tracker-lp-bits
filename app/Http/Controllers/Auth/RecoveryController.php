@@ -15,6 +15,7 @@ use App\Support\Captcha;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Network;
+use App\ViewModels\Auth\AuthPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -135,21 +136,23 @@ class RecoveryController extends Controller
         }
 
         $response = response()->view('auth.recover', [
-            'langFolder' => $langFolder,
-            'languages' => Locale::languageList('site_lang', true),
-            'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => $captchaMarkup,
-            'resetUserId' => $resetUserId,
-            'resetToken' => $resetToken,
-            'resetError' => $resetError,
-            'status' => $request->query('status', ''),
-            'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
-            'maxAttempts' => $this->authService->maxLoginAttempts(),
-            'siteName' => Setting::getSiteName(),
-            'error' => $request->hasSession() ? $request->session()->get('error') : null,
-            'errors' => $request->hasSession()
-                ? $request->session()->get('errors', new ViewErrorBag)
-                : new ViewErrorBag,
+            'vm' => new AuthPageViewModel(
+                langFolder: $langFolder,
+                languages: Locale::languageList('site_lang', true),
+                captchaEnabled: $captchaEnabled,
+                captchaMarkup: $captchaMarkup,
+                remaining: $this->authService->remainingAttempts(Network::clientIp()),
+                maxAttempts: $this->authService->maxLoginAttempts(),
+                error: $request->hasSession() ? $request->session()->get('error') : null,
+                siteName: Setting::getSiteName(),
+                errors: $request->hasSession()
+                    ? $request->session()->get('errors', new ViewErrorBag)
+                    : new ViewErrorBag,
+                resetUserId: $resetUserId,
+                resetToken: $resetToken,
+                resetError: $resetError,
+                status: $request->query('status', ''),
+            ),
         ]);
 
         if ($isResetLink) {

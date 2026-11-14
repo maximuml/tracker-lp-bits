@@ -18,6 +18,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\Network;
+use App\ViewModels\Auth\AuthPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -78,20 +79,22 @@ class WebController extends Controller
         }
 
         $view = view('auth.login', [
-            'languages' => Locale::languageList('site_lang', true),
-            'langFolder' => $langFolder,
-            'secret' => $secret,
-            'returnto' => $returnto,
-            'captchaEnabled' => $captchaEnabled,
-            'captchaMarkup' => SafeHtml::fromTrustedHtml($captchaMarkup),
-            'remaining' => $this->authService->remainingAttempts(Network::clientIp()),
-            'maxAttempts' => $this->authService->maxLoginAttempts(),
-            'nowarn' => $nowarn,
-            'error' => $request->session()->get('error'),
-            'isComplainEnabled' => Setting::getIsComplainEnabled(),
-            'siteName' => Setting::getSiteName(),
-            'showWarn' => $returnto !== '' && ! $nowarn,
-            'isSmtpEnabled' => SiteConfig::current()->smtp->type() !== 'none',
+            'vm' => new AuthPageViewModel(
+                langFolder: $langFolder,
+                languages: Locale::languageList('site_lang', true),
+                captchaEnabled: $captchaEnabled,
+                captchaMarkup: SafeHtml::fromTrustedHtml($captchaMarkup),
+                remaining: $this->authService->remainingAttempts(Network::clientIp()),
+                maxAttempts: $this->authService->maxLoginAttempts(),
+                error: $request->session()->get('error'),
+                siteName: Setting::getSiteName(),
+                secret: $secret,
+                returnto: $returnto,
+                showWarn: $returnto !== '' && ! $nowarn,
+                nowarn: $nowarn,
+                isComplainEnabled: Setting::getIsComplainEnabled(),
+                isSmtpEnabled: SiteConfig::current()->smtp->type() !== 'none',
+            ),
         ]);
 
         AssetAppender::js('js/passkey.js', 'footer', true);

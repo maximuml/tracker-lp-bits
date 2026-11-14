@@ -3,28 +3,28 @@
 @section('title', __('donate.head_donation'))
 
 @section('content')
-@if ($thanks)
-    <x-std-message :heading="__('donate.std_success')" :htmlstrip="false">{{ __('donate.std_donation_success_note_one') }}<a href="/web/sendmessage?receiver={{ $accountantId }}"><b>{{ __('donate.std_here') }}</b></a>{{ __('donate.std_donation_success_note_two') }}</x-std-message>
-@elseif (! $enabled)
+@if ($vm->thanks)
+    <x-std-message :heading="__('donate.std_success')" :htmlstrip="false">{{ __('donate.std_donation_success_note_one') }}<a href="/web/sendmessage?receiver={{ $vm->accountantId }}"><b>{{ __('donate.std_here') }}</b></a>{{ __('donate.std_donation_success_note_two') }}</x-std-message>
+@elseif (! $vm->enabled)
     <x-std-message :heading="__('donate.std_sorry')" :text="__('donate.std_do_not_accept_donation')" />
-@elseif (! $showAny)
+@elseif (! $vm->showAny)
     <x-std-message :heading="__('donate.std_error')" :text="__('donate.std_no_donation_account_available')" :htmlstrip="false" />
 @else
     <x-page :title="__('donate.text_donate')" width="list">
     <div>
         <div class="p-[10pt]">{{ __('donate.text_donation_note') }}</div>
-        @if ($showCustom)
-            <div class="p-[10pt]">{{ \App\Support\Format::formatComment($custom) }}</div>
+        @if ($vm->showCustom)
+            <div class="p-[10pt]">{{ \App\Support\Format::formatComment($vm->custom) }}</div>
         @endif
-        @if ($showPaypal || $crypto !== [])
+        @if ($vm->showPaypal || $vm->crypto !== [])
             <div class="flex items-start">
-                @if ($showPaypal)
+                @if ($vm->showPaypal)
                     <div class="p-[10pt] grow">
                         <b>{{ __('donate.text_donate_with_paypal') }}</b><br /><br />
                         {{ __('donate.text_donate_paypal_note') }} <br />{{ __('donate.text_donate_paypal_note_two') }} <br />{{ __('donate.text_donate_paypal_note_three') }}
                         <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
                             <input type="hidden" name="cmd" value="_xclick">
-                            <input type="hidden" name="business" value="{{ $paypal }}">
+                            <input type="hidden" name="business" value="{{ $vm->paypal }}">
                             <input type="hidden" name="item_name" value="Donation to {{ $SITENAME }}">
                             <p class="text-center">
                                 <br />
@@ -43,8 +43,8 @@
                             <input type="hidden" name="image_url" value="">
                             <input type="hidden" name="shipping" value="0">
                             <input type="hidden" name="currency_code" value="USD">
-                            <input type="hidden" name="return" value="{{ $baseUrl }}/web/donate?do=thanks">
-                            <input type="hidden" name="cancel_return" value="{{ $baseUrl }}/web/donate">
+                            <input type="hidden" name="return" value="{{ $vm->baseUrl }}/web/donate?do=thanks">
+                            <input type="hidden" name="cancel_return" value="{{ $vm->baseUrl }}/web/donate">
                             <p class="text-center">
                                 <input type="image" src="/pic/paypalbutton.gif" name="I1" alt="Make payments with PayPal">
                                 <br /><br />
@@ -52,11 +52,11 @@
                         </form>
                     </div>
                 @endif
-                @if ($crypto !== [])
+                @if ($vm->crypto !== [])
                     <div class="p-[10pt] grow">
                         <b>{{ __('donate.text_donate_with_crypto') }}</b><br /><br />
                         {{ __('donate.text_donate_crypto_note') }}<br /><br />
-                        @foreach ($crypto as $wallet)
+                        @foreach ($vm->crypto as $wallet)
                             <p>
                                 <img src="{{ $wallet['qr'] }}" width="160" height="160" alt="{{ $wallet['coin'] }}" loading="lazy" decoding="async"><br />
                                 <b>{{ $wallet['coin'] }}:</b>&nbsp;<code class="nx-addr">{{ $wallet['address'] }}</code>
@@ -68,7 +68,7 @@
         @endif
         <div class="p-[10pt]">
             {{ __('donate.text_after_donation_note_one') }}
-            <a href="/web/sendmessage?receiver={{ $accountantId }}"><span class="striking"><b>{{ __('donate.text_send_us') }}</b></span></a>
+            <a href="/web/sendmessage?receiver={{ $vm->accountantId }}"><span class="striking"><b>{{ __('donate.text_send_us') }}</b></span></a>
             {{ __('donate.text_after_donation_note_two') }} <b>{{ __('donate.text_transaction_information') }}</b>{{ __('donate.text_after_donation_note_two_end') }}
         </div>
     </div>

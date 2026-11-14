@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $theme }}" data-fontsize="{{ $fontSize }}"><head>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $vm->theme }}" data-fontsize="{{ $vm->fontSize }}"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -31,12 +31,12 @@
     <div class="form-comments">
         <form class="approval-form form" id="approval-form" action="/web/torrent-approval" method="post">
             @csrf
-            <input type="hidden" name="torrent_id" value="{{ $torrent->id }}">
+            <input type="hidden" name="torrent_id" value="{{ $vm->torrent->id }}">
             <div class="row">
                 <label class="main">{{ __('torrent.approval.status_label') }}</label>
                 <div>
-                    @foreach ($approvalStatuses as $status => $text)
-                    <label class="radio"><input type="radio" name="approval_status" value="{{ $status }}" @if($status == $torrent->approval_status) checked @endif> {{ $text }}</label>
+                    @foreach ($vm->approvalStatuses as $status => $text)
+                    <label class="radio"><input type="radio" name="approval_status" value="{{ $status }}" @if($status == $vm->torrent->approval_status) checked @endif> {{ $text }}</label>
                     @endforeach
                 </div>
             </div>
@@ -53,7 +53,7 @@
             </div>
         </form>
         <div class="comments">
-            @foreach($denyReasons as $reason)
+            @foreach($vm->denyReasons as $reason)
             <span class="comment">{{ $reason->name }}</span>
             @endforeach
         </div>
@@ -69,7 +69,7 @@
                 <th scope="col">{{ __('label.created_at') }}</th>
             </tr></thead>
         </x-slot:head>
-        @foreach ($logs as $log)
+        @foreach ($vm->logs as $log)
         <tr>
             <td>{{ $log->id }}</td>
             <td>{{ $log->user?->username ?? '' }}</td>
@@ -79,7 +79,7 @@
         </tr>
         @endforeach
     </x-data-table>
-    {{ $logs->links() }}
+    {{ $vm->logs->links() }}
 <script nonce="{{ $cspNonce ?? '' }}">
     var approvalComment = document.getElementById('approval-comment');
     document.querySelector('.comments').addEventListener('click', function (e) {

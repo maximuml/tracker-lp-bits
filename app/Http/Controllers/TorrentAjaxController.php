@@ -19,6 +19,7 @@ use App\Support\Torrent\FileBadge;
 use App\Support\UserDisplay;
 use App\ViewModels\Torrent\PeerTableFactory;
 use App\ViewModels\Torrent\UserTorrentListVmFactory;
+use App\ViewModels\ViewsnatchesPageViewModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -101,7 +102,7 @@ class TorrentAjaxController extends BasePageController
         $data['canViewConfidential'] = Permission::can(PermissionEnum::VIEW_USER_CONFIDENTIAL_INFO);
         unset($data['snatchedRows']);
 
-        return $this->renderPage($request, 'viewsnatches', true, $data);
+        return $this->renderPage($request, 'viewsnatches', true, ['vm' => ViewsnatchesPageViewModel::fromPageData($data)]);
     }
 
     /**

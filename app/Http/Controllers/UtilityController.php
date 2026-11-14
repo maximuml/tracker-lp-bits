@@ -19,6 +19,9 @@ use App\Support\Captcha;
 use App\Support\HeaderBag;
 use App\Support\Logger;
 use App\Support\RedisGuard;
+use App\ViewModels\MoresmiliesPageViewModel;
+use App\ViewModels\OkPageViewModel;
+use App\ViewModels\PreviewPageViewModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -122,15 +125,17 @@ class UtilityController extends BasePageController
     private function renderPreview(Request $request): View|RedirectResponse
     {
         return $this->renderPage($request, 'preview', true, [
-            'body' => (string) $request->post('body', ''),
+            'vm' => new PreviewPageViewModel(body: (string) $request->post('body', '')),
         ]);
     }
 
     public function moresmilies(Request $request): View|RedirectResponse
     {
         return $this->renderPage($request, 'moresmilies', true, [
-            'form' => (string) $request->query('form', ''),
-            'text' => (string) $request->query('text', ''),
+            'vm' => new MoresmiliesPageViewModel(
+                form: (string) $request->query('form', ''),
+                text: (string) $request->query('text', ''),
+            ),
         ]);
     }
 
@@ -197,11 +202,13 @@ class UtilityController extends BasePageController
         };
 
         return $this->renderPage($request, 'ok', false, [
-            'type' => $type,
-            'email' => $email,
-            'title' => $title,
-            'siteName' => Setting::getSiteName(),
-            'CURUSER' => $this->actor->toLegacyArray(),
+            'vm' => new OkPageViewModel(
+                type: $type,
+                email: $email,
+                title: $title,
+                siteName: Setting::getSiteName(),
+                CURUSER: $this->actor->toLegacyArray(),
+            ),
         ]);
     }
 }

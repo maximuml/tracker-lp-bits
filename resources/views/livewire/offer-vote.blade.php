@@ -1,6 +1,6 @@
-<tr>
-    <td class="whitespace-nowrap align-top px-2.5 py-1.5 text-right font-semibold text-nxm-text-dim">{{ __('offers.row_vote') }}</td>
-    <td class="align-top px-2.5 py-1.5">
+<div class="flex items-start px-2.5 py-1.5">
+    <span class="whitespace-nowrap font-semibold text-nxm-text-dim">{{ __('offers.row_vote') }}</span>
+    <span class="px-2.5">
         @if ($error !== '')
             <span class="text-nxm-danger">{{ $error }}</span>&nbsp;
         @elseif (! $alreadyVoted)
@@ -9,5 +9,5 @@
             <i>{{ __('offers.std_already_voted') }}</i>&nbsp;
         @endif
         <b>{{ __('offers.text_for') }}:</b> {{ $yeah }} <b>{{ __('offers.text_against') }}:</b> {{ $against }} &nbsp; &nbsp; <a href="{{ request()->getPathInfo() }}?id={{ $offerId }}&amp;offer_vote=1"><i>{{ __('offers.text_see_vote_detail') }}</i></a>
-    </td>
-</tr>
+    </span>
+</div>

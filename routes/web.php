@@ -322,8 +322,8 @@ Route::group(['prefix' => 'web', 'middleware' => ['auth.nexus:nexus-web', 'throt
     Route::get('smilies', [UtilityController::class, 'smilies'])->name('smilies.legacy');
     Route::get('downloadnotice', [TorrentDownloadController::class, 'downloadnotice'])->name('downloadnotice.legacy');
     Route::get('attachment', [AttachmentController::class, 'attachment'])->middleware('throttle:attachment')->name('attachment.legacy');
-    Route::get('getattachment', [AttachmentController::class, 'getattachment'])->middleware('throttle:attachment')->name('getattachment.legacy');
-    Route::get('coverimage', [AttachmentController::class, 'coverImage'])->middleware('throttle:attachment')->name('coverimage');
+    Route::get('getattachment', [AttachmentController::class, 'getattachment'])->middleware('throttle:attachment_read')->name('getattachment.legacy');
+    Route::get('coverimage', [AttachmentController::class, 'coverImage'])->middleware('throttle:attachment_read')->name('coverimage');
     Route::get('modtask', [StaffModerationController::class, 'modtask'])->name('modtask.legacy');
     Route::get('staff', [StaffPageController::class, 'staff'])->name('staff.legacy');
     Route::get('staffmess', [StaffMessageController::class, 'staffmess'])->name('staffmess.legacy');

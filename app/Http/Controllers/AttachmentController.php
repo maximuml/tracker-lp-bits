@@ -146,12 +146,13 @@ class AttachmentController extends BasePageController
             $location .= '.thumb.jpg';
         }
 
-        $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
-        // savedirectory is resolved against ROOT_PATH on upload; resolve the
-        // same way here — a bare relative path would resolve against the
-        // php-fpm CWD (public/) and miss the real location.
-        $basePath = realpath(base_path($httpdirectory));
-        $realFile = realpath(base_path($httpdirectory.'/'.$location));
+        // Uploads are written under savedirectory (resolved against
+        // ROOT_PATH) — resolve reads the same way; a bare relative path
+        // would resolve against the php-fpm CWD (public/) and miss the
+        // real location.
+        $saveDirectory = SiteConfig::current()->attachment->saveDirectory();
+        $basePath = realpath(base_path($saveDirectory !== '' ? $saveDirectory : 'attachments'));
+        $realFile = realpath(base_path($saveDirectory.'/'.$location));
 
         // Prefix must include the trailing separator — a bare prefix
         // match would also admit sibling dirs like "attachments_evil/".
@@ -248,7 +249,9 @@ class AttachmentController extends BasePageController
             'Content-Type' => 'image/jpeg',
             'Content-Disposition' => 'inline',
             'X-Content-Type-Options' => 'nosniff',
-            'Cache-Control' => 'public, max-age=604800, immutable',
+            // 'private': the route is auth-gated — a shared cache must not
+            // serve a stored cover to a later, unauthenticated request.
+            'Cache-Control' => 'private, max-age=86400',
         ]);
     }
 }

@@ -18,6 +18,8 @@ use App\Support\RedisGuard;
 use App\Support\RequestValues;
 use App\Support\Url;
 use App\Support\UserDisplay;
+use App\ViewModels\FaqactionsPageViewModel;
+use App\ViewModels\FaqmanagePageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -84,7 +86,7 @@ class FaqController extends BasePageController
 
         $faqData = $this->infoRepository->faqManageData();
 
-        return $this->renderPage($request, 'faqmanage', true, $faqData);
+        return $this->renderPage($request, 'faqmanage', true, ['vm' => FaqmanagePageViewModel::fromPageData($faqData)]);
     }
 
     public function faqManageSubmit(FaqManageSubmitRequest $request): View|RedirectResponse|Response
@@ -124,10 +126,11 @@ class FaqController extends BasePageController
             }
 
             return $this->renderPage($request, 'faqactions', true, [
-                'mode' => 'edit',
-                'arr' => $arr,
-                'categories' => $categories,
-            ]);
+                'vm' => FaqactionsPageViewModel::fromPageData([
+                    'mode' => 'edit',
+                    'arr' => $arr,
+                    'categories' => $categories,
+                ])]);
         }
 
         if ($action === 'additem') {
@@ -135,10 +138,11 @@ class FaqController extends BasePageController
             $langId = (int) ($request->query('langid') ?? 0);
 
             return $this->renderPage($request, 'faqactions', true, [
-                'mode' => 'additem',
-                'inid' => $inId,
-                'langid' => $langId,
-            ]);
+                'vm' => FaqactionsPageViewModel::fromPageData([
+                    'mode' => 'additem',
+                    'inid' => $inId,
+                    'langid' => $langId,
+                ])]);
         }
 
         if ($action === 'addsection') {
@@ -146,10 +150,11 @@ class FaqController extends BasePageController
             $defLang = SiteConfig::current()->main->defaultLang();
 
             return $this->renderPage($request, 'faqactions', true, [
-                'mode' => 'addsection',
-                'languages' => $languages,
-                'deflang' => $defLang,
-            ]);
+                'vm' => FaqactionsPageViewModel::fromPageData([
+                    'mode' => 'addsection',
+                    'languages' => $languages,
+                    'deflang' => $defLang,
+                ])]);
         }
 
         return redirect($redirectBase.'/web/faqmanage');
@@ -203,9 +208,10 @@ class FaqController extends BasePageController
             }
 
             return $this->renderPage($request, 'faqactions', true, [
-                'mode' => 'confirm_delete',
-                'id' => $id,
-            ]);
+                'vm' => FaqactionsPageViewModel::fromPageData([
+                    'mode' => 'confirm_delete',
+                    'id' => $id,
+                ])]);
         }
 
         if ($action === 'addnewitem' && $request->isMethod('post')) {

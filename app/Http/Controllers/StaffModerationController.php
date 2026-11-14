@@ -29,6 +29,7 @@ use App\Support\User as SupportUser;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\ModrulesPageViewModel;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -402,10 +403,11 @@ class StaffModerationController extends BasePageController
             $defLang = SiteConfig::current()->main->defaultLang();
 
             return $this->renderPage($request, 'modrules', true, [
-                'mode' => 'newsect',
-                'langs' => $langs,
-                'deflang' => $defLang,
-            ]);
+                'vm' => ModrulesPageViewModel::fromPageData([
+                    'mode' => 'newsect',
+                    'langs' => $langs,
+                    'deflang' => $defLang,
+                ])]);
         }
 
         if ($act === 'edit') {
@@ -414,10 +416,11 @@ class StaffModerationController extends BasePageController
             $langs = Locale::languageList('site_lang', null);
 
             return $this->renderPage($request, 'modrules', true, [
-                'mode' => 'edit',
-                'rule' => $rule,
-                'langs' => $langs,
-            ]);
+                'vm' => ModrulesPageViewModel::fromPageData([
+                    'mode' => 'edit',
+                    'rule' => $rule,
+                    'langs' => $langs,
+                ])]);
         }
 
         $rules = array_map(function (array $arr): array {
@@ -427,9 +430,10 @@ class StaffModerationController extends BasePageController
         }, $this->ruleRepository->listAllWithLang());
 
         return $this->renderPage($request, 'modrules', true, [
-            'mode' => 'list',
-            'rows' => $rules,
-        ]);
+            'vm' => ModrulesPageViewModel::fromPageData([
+                'mode' => 'list',
+                'rows' => $rules,
+            ])]);
 
     }
 

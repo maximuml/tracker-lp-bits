@@ -19,6 +19,7 @@ use App\Support\Html;
 use App\Support\Network;
 use App\Support\Pagination;
 use App\Support\UserDisplay;
+use App\ViewModels\ComplainsPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -198,18 +199,19 @@ class SupportController extends BasePageController
         $processedRows = $this->complainRepository->listAnswered($offset, $rpp);
 
         return $this->renderPage($request, 'complains', false, [
-            'mode' => 'list',
-            'pendingRows' => $pendingRows,
-            'processedRows' => $processedRows,
-            'count' => $count,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'pager' => $pager,
-            'page' => $request->input('page'),
-            'title' => __('complains.text_complain'),
-            'isAdmin' => $isAdmin,
-            'isLogin' => true,
-        ]);
+            'vm' => ComplainsPageViewModel::fromPageData([
+                'mode' => 'list',
+                'pendingRows' => $pendingRows,
+                'processedRows' => $processedRows,
+                'count' => $count,
+                'pagertop' => $pagertop,
+                'pagerbottom' => $pagerbottom,
+                'pager' => $pager,
+                'page' => $request->input('page'),
+                'title' => __('complains.text_complain'),
+                'isAdmin' => $isAdmin,
+                'isLogin' => true,
+            ])]);
     }
 
     private function complainView(Request $request, int $uid, bool $isAdmin): View|RedirectResponse|Response
@@ -237,16 +239,17 @@ class SupportController extends BasePageController
         $replyBoxHtml = Html::quickReply('reply', 'body', __('complains.text_reply'));
 
         return $this->renderPage($request, 'complains', false, [
-            'mode' => 'view',
-            'complain' => $complain,
-            'user' => $user?->toArray(),
-            'replyRows' => $replyRows,
-            'replyUserMap' => $replyUserMap,
-            'isAdmin' => $isAdmin,
-            'isLogin' => $uid > 0,
-            'title' => __('complains.text_complain'),
-            'replyBoxHtml' => $replyBoxHtml,
-        ]);
+            'vm' => ComplainsPageViewModel::fromPageData([
+                'mode' => 'view',
+                'complain' => $complain,
+                'user' => $user?->toArray(),
+                'replyRows' => $replyRows,
+                'replyUserMap' => $replyUserMap,
+                'isAdmin' => $isAdmin,
+                'isLogin' => $uid > 0,
+                'title' => __('complains.text_complain'),
+                'replyBoxHtml' => $replyBoxHtml,
+            ])]);
     }
 
     private function complainCompose(Request $request, int $uid): View|RedirectResponse
@@ -254,9 +257,10 @@ class SupportController extends BasePageController
         $captchaHtml = Captcha::renderHtml(layout: 'grid');
 
         return $this->renderPage($request, 'complains', false, [
-            'mode' => 'compose',
-            'title' => __('complains.text_complain'),
-            'captchaHtml' => $captchaHtml,
-        ]);
+            'vm' => ComplainsPageViewModel::fromPageData([
+                'mode' => 'compose',
+                'title' => __('complains.text_complain'),
+                'captchaHtml' => $captchaHtml,
+            ])]);
     }
 }

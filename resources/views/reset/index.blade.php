@@ -4,8 +4,8 @@
 
 @section('content')
 <x-page :title="__('reset.title')" width="form">
-@if (! empty($success))
-<p>{{ $message ?? '' }}</p>
+@if (! empty($vm->success))
+<p>{{ $vm->message ?? '' }}</p>
 @endif
 <form method="post">@csrf
 <div class="nx-fgrid">

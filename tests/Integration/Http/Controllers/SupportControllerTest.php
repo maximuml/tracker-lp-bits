@@ -15,6 +15,7 @@ use App\Repositories\ToolRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Permissions;
+use App\ViewModels\ComplainsPageViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
@@ -61,7 +62,7 @@ final class SupportControllerTest extends TestCase
         $response = $controller->complains($request);
 
         $this->assertInstanceOf(View::class, $response);
-        /** @var \App\ViewModels\ComplainsPageViewModel $vm */
+        /** @var ComplainsPageViewModel $vm */
         $vm = $response->getData()['vm'];
         $this->assertSame('compose', $vm->mode);
     }

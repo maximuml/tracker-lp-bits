@@ -59,7 +59,16 @@ final class Description
                     if ($item === null) {
                         return $matches[1];
                     }
-                    $url = AttachmentStorage::driver($item['driver'])->getImageUrl($item['location']);
+                    if (($item['driver'] ?? 'local') === 'local') {
+                        // nginx serves /attachments/ as `internal` — local
+                        // images must go through the app.
+                        $url = sprintf('/web/getattachment?id=%d&dlkey=%s&inline=1', (int) ($item['id'] ?? 0), $matches[2]);
+                        if (($item['thumb'] ?? 0) == 1) {
+                            $url .= '&thumb=1';
+                        }
+                    } else {
+                        $url = AttachmentStorage::driver($item['driver'])->getImageUrl($item['location']);
+                    }
                     Logger::writeWithContext(sprintf('location: %s, driver: %s, url: %s', $item['location'], $item['driver'], $url));
 
                     return str_replace($matches[2], $url, $matches[1]);

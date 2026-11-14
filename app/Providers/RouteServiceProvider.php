@@ -147,6 +147,13 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip() ?? 'default');
         });
 
+        // Reads (downloads, inline images, covers): a single page can embed
+        // dozens of attachment images — keep them off the 30/min upload
+        // bucket, at the same allowance as legacy page loads.
+        RateLimiter::for('attachment_read', function (Request $request) {
+            return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip() ?? 'default');
+        });
+
         RateLimiter::for('setlist', function (Request $request) {
             return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip() ?? 'default');
         });

@@ -132,12 +132,27 @@ class AttachmentController extends BasePageController
             return response('No attachment found.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
-        $httpdirectory = SiteConfig::current()->attachment->httpDirectory();
-        // savedirectory is resolved against ROOT_PATH on upload; resolve the
-        // same way here — a bare relative path would resolve against the
-        // php-fpm CWD (public/) and miss the real location.
-        $basePath = realpath(base_path($httpdirectory));
-        $realFile = realpath(base_path($httpdirectory.'/'.$row['location']));
+        // `inline` serves the file for <img> embedding instead of download —
+        // /attachments/ is `internal` in nginx (X-Accel-Redirect only), so
+        // stored images must go through the app. Restricted to isimage rows.
+        $inline = (string) $request->input('inline', '') === '1'
+            && (int) ($row['isimage'] ?? 0) === 1;
+        $thumb = $inline
+            && (string) $request->input('thumb', '') === '1'
+            && (int) ($row['thumb'] ?? 0) === 1;
+
+        $location = (string) ($row['location'] ?? '');
+        if ($thumb) {
+            $location .= '.thumb.jpg';
+        }
+
+        // Uploads are written under savedirectory (resolved against
+        // ROOT_PATH) — resolve reads the same way; a bare relative path
+        // would resolve against the php-fpm CWD (public/) and miss the
+        // real location.
+        $saveDirectory = SiteConfig::current()->attachment->saveDirectory();
+        $basePath = realpath(base_path($saveDirectory !== '' ? $saveDirectory : 'attachments'));
+        $realFile = realpath(base_path($saveDirectory.'/'.$location));
 
         // Prefix must include the trailing separator — a bare prefix
         // match would also admit sibling dirs like "attachments_evil/".
@@ -155,10 +170,71 @@ class AttachmentController extends BasePageController
             $filename = 'attachment';
         }
 
+        $stream = function () use ($realFile) {
+            $f = fopen($realFile, 'rb');
+            if (! $f) {
+                return;
+            }
+
+            fpassthru($f);
+            fclose($f);
+        };
+
+        if ($inline) {
+            $contentType = $thumb ? 'image/jpeg' : (string) ($row['filetype'] ?? '');
+            if (! str_starts_with($contentType, 'image/')) {
+                $contentType = 'image/jpeg';
+            }
+
+            return new StreamedResponse($stream, 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => 'inline; filename="'.$filename.'"',
+                'X-Content-Type-Options' => 'nosniff',
+                'Cache-Control' => 'private, max-age=86400',
+            ]);
+        }
+
         $this->attachmentRepository->incrementDownloads($id);
 
         if ($this->cache !== null) {
             $this->cache->forget('attachment_'.$dlkey.'_content');
+        }
+
+        return new StreamedResponse($stream, 200, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'X-Content-Type-Options' => 'nosniff',
+            // No X-Accel-Redirect here: the body is streamed by PHP, and a
+            // user-controlled location value in the redirect header could
+            // point nginx's internal alias outside the attachments dir.
+        ]);
+    }
+
+    /**
+     * Serve generated cover thumbnails (attachments/covers/<xx>/<md5>.jpg).
+     * Cover files have no attachments row/dlkey — they are deterministic
+     * JPEGs derived from torrent covers — so this route only validates the
+     * path stays inside the covers directory.
+     */
+    public function coverImage(Request $request): Response|StreamedResponse
+    {
+        $path = ltrim((string) $request->query('p', ''), '/');
+
+        if ($path === '' || ! str_starts_with($path, 'covers/') || ! str_ends_with($path, '.jpg')) {
+            return response('Invalid path.', 400, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+
+        $saveDirectory = SiteConfig::current()->attachment->saveDirectory();
+        $basePath = realpath(base_path($saveDirectory !== '' ? $saveDirectory : 'attachments'));
+        $coversPath = $basePath === false ? false : realpath($basePath.DIRECTORY_SEPARATOR.'covers');
+        $realFile = $coversPath === false ? false : realpath($coversPath.DIRECTORY_SEPARATOR.substr($path, strlen('covers/')));
+
+        if ($coversPath === false
+            || $realFile === false
+            || ! str_starts_with($realFile, $coversPath.DIRECTORY_SEPARATOR)
+            || ! is_file($realFile)
+            || ! is_readable($realFile)) {
+            return response('File not found or cannot be read.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
         }
 
         return new StreamedResponse(function () use ($realFile) {
@@ -170,12 +246,12 @@ class AttachmentController extends BasePageController
             fpassthru($f);
             fclose($f);
         }, 200, [
-            'Content-Type' => 'application/octet-stream',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => 'inline',
             'X-Content-Type-Options' => 'nosniff',
-            // No X-Accel-Redirect here: the body is streamed by PHP, and a
-            // user-controlled location value in the redirect header could
-            // point nginx's internal alias outside the attachments dir.
+            // 'private': the route is auth-gated — a shared cache must not
+            // serve a stored cover to a later, unauthenticated request.
+            'Cache-Control' => 'private, max-age=86400',
         ]);
     }
 }

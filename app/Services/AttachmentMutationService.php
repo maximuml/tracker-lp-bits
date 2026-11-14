@@ -43,7 +43,6 @@ class AttachmentMutationService
         $config = SiteConfig::current()->attachment;
         $savedirectorytype_attachment = $config->saveDirectoryType('monthdir');
         $savedirectory_attachment = $config->saveDirectory('attachments');
-        $httpdirectory_attachment = $config->httpDirectory('attachments');
         $thumbnailtype_attachment = $config->thumbnailType('createthumb');
         $thumbwidth_attachment = $config->thumbWidth(200);
         $thumbheight_attachment = $config->thumbHeight(200);
@@ -209,10 +208,7 @@ class AttachmentMutationService
                         $warning = (string) __('attachment.text_cannot_move_file');
                     }
                 }
-                $url = $httpdirectory_attachment.'/'.$db_file_location.".$ext";
-                if ($hasthumb) {
-                    $url .= '.thumb.jpg';
-                }
+                $url = '';
                 $location = $db_file_location.'.'.$ext;
             } else {
                 try {
@@ -242,6 +238,18 @@ class AttachmentMutationService
                 ]);
                 $count_left--;
                 $Attach->countsofar++; // keep the shared quota in sync for multi-file batches
+                if ($url === '') {
+                    // Local driver: nginx serves /attachments/ as `internal`
+                    // (X-Accel-Redirect only), so the preview URL must go
+                    // through the app — emit the dlkey-gated inline route.
+                    $inserted = $this->attachmentRepository->findByDlkey($dlkey);
+                    if ($inserted !== null) {
+                        $url = sprintf('/web/getattachment?id=%d&dlkey=%s&inline=1', (int) ($inserted['id'] ?? 0), $dlkey);
+                        if (($inserted['thumb'] ?? 0) == 1) {
+                            $url .= '&thumb=1';
+                        }
+                    }
+                }
                 $nonce = (string) request()->attributes->get('csp_nonce', '');
                 $callback = ! empty($callbackFunc) && preg_match('/^preview_custom_field_image_\d+$/', $callbackFunc)
                     ? (string) $callbackFunc

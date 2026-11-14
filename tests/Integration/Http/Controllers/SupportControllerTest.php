@@ -61,7 +61,9 @@ final class SupportControllerTest extends TestCase
         $response = $controller->complains($request);
 
         $this->assertInstanceOf(View::class, $response);
-        $this->assertSame('compose', $response->getData()['mode']);
+        /** @var \App\ViewModels\ComplainsPageViewModel $vm */
+        $vm = $response->getData()['vm'];
+        $this->assertSame('compose', $vm->mode);
     }
 
     public function test_complains_allows_guest_on_post_new(): void

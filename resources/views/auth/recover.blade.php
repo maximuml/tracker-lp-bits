@@ -7,13 +7,7 @@
         <div class="nx-auth__error">{{ $resetError ?? $error }}</div>
     @endif
 
-    @if ($errors->any())
-        <div class="nx-auth__error">
-            @foreach ($errors->all() as $message)
-                <div>{{ $message }}</div>
-            @endforeach
-        </div>
-    @endif
+    <x-auth.errors />
 
     @if ($status === 'requested')
         <div class="nx-auth__success">{{ __('recover.text_reset_link_sent') }}</div>
@@ -24,14 +18,7 @@
             <input type="hidden" name="id" value="{{ $resetUserId }}" />
             <input type="hidden" name="secret" value="{{ $resetToken }}" />
         @endif
-        <label for="sitelanguage">{{ __('recover.text_select_lang')}}</label>
-        <select id="sitelanguage" name="sitelanguage">
-            @foreach ($languages as $row)
-                <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
-                    {{ $row['lang_name'] }}
-                </option>
-            @endforeach
-        </select>
+        <x-auth.language-select :label="__('recover.text_select_lang')" :languages="$languages" :lang-folder="$langFolder" />
     </form>
 
     @if ($resetToken !== null)

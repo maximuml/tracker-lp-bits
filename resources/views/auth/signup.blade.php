@@ -7,13 +7,7 @@
         <div class="nx-auth__error">{{ $error }}</div>
     @endif
 
-    @if ($errors->any())
-        <div class="nx-auth__error">
-            @foreach ($errors->all() as $message)
-                <div>{{ $message }}</div>
-            @endforeach
-        </div>
-    @endif
+    <x-auth.errors />
 
     <form method="get" action="/signup" class="nx-auth__lang">
         @if ($isInvite)
@@ -21,14 +15,7 @@
             <input type="hidden" name="invitenumber" value="{{ $code }}" />
         @endif
         <input type="hidden" name="secret" value="{{ $secret }}" />
-        <label for="sitelanguage">{{ __('signup.text_select_lang')}}</label>
-        <select id="sitelanguage" name="sitelanguage">
-            @foreach ($languages as $row)
-                <option value="{{ $row['id'] }}" @if (($row['site_lang_folder'] ?? '') === $langFolder) selected @endif>
-                    {{ $row['lang_name'] }}
-                </option>
-            @endforeach
-        </select>
+        <x-auth.language-select :label="__('signup.text_select_lang')" :languages="$languages" :lang-folder="$langFolder" />
     </form>
 
     <h1>{{ $headTitle }}</h1>

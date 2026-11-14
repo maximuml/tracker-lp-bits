@@ -23,6 +23,7 @@ use App\Services\MessageService;
 use App\Support\MessageSubject;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\SendmessagePageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -124,17 +125,18 @@ class MessageController extends BasePageController
         $frameTitle = new HtmlString($messageTo.UserDisplay::username($receiver));
 
         return $this->renderPage($request, 'sendmessage', true, [
-            'receiver' => $receiver,
-            'replyto' => $replyto,
-            'subject' => $subject,
-            'body' => $body,
-            'returnto' => $returnto,
-            'title' => $title,
-            'frameTitle' => $frameTitle,
-            'stdheadMsgalert' => false,
-            'deleteChecked' => $this->actor->yes('deletepms'),
-            'saveChecked' => $this->actor->yes('savepms'),
-        ]);
+            'vm' => SendmessagePageViewModel::fromPageData([
+                'receiver' => $receiver,
+                'replyto' => $replyto,
+                'subject' => $subject,
+                'body' => $body,
+                'returnto' => $returnto,
+                'title' => $title,
+                'frameTitle' => $frameTitle,
+                'stdheadMsgalert' => false,
+                'deleteChecked' => $this->actor->yes('deletepms'),
+                'saveChecked' => $this->actor->yes('savepms'),
+            ])]);
     }
 
     public function send(StoreMessageRequest $request): Response|RedirectResponse

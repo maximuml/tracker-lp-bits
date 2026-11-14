@@ -20,6 +20,7 @@ use App\Repositories\NewsRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Http\SafeReturnUrl;
+use App\ViewModels\NewsPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -74,17 +75,18 @@ class NewsController extends BasePageController
             $returnto = (string) ($request->input('returnto') ?? $request->headers->get('referer', ''));
 
             return $this->renderPage($request, 'news', true, [
-                'mode' => 'edit',
-                'newsid' => $newsid,
-                'body' => $news->body ?? '',
-                'subject' => $news->title ?? '',
-                'notify' => ($news->notify ?? false) ? 'yes' : 'no',
-                'returnto' => $returnto,
-                'title' => $newsTitle,
-                'composeTitle' => $newsTitle,
-                'checked' => ($news->notify ?? false) ? ' checked' : '',
-                'actionUrl' => '/web/news/edit?newsid='.$newsid,
-            ]);
+                'vm' => NewsPageViewModel::fromPageData([
+                    'mode' => 'edit',
+                    'newsid' => $newsid,
+                    'body' => $news->body ?? '',
+                    'subject' => $news->title ?? '',
+                    'notify' => ($news->notify ?? false) ? 'yes' : 'no',
+                    'returnto' => $returnto,
+                    'title' => $newsTitle,
+                    'composeTitle' => $newsTitle,
+                    'checked' => ($news->notify ?? false) ? ' checked' : '',
+                    'actionUrl' => '/web/news/edit?newsid='.$newsid,
+                ])]);
         }
 
         // Default: show compose form
@@ -94,17 +96,18 @@ class NewsController extends BasePageController
         $composeTitle = __('news.text_submit_news_item');
 
         return $this->renderPage($request, 'news', true, [
-            'mode' => 'add',
-            'newsid' => 0,
-            'body' => '',
-            'subject' => '',
-            'notify' => 'no',
-            'returnto' => '',
-            'title' => $composeTitle,
-            'composeTitle' => $composeTitle,
-            'checked' => '',
-            'actionUrl' => '/web/news/add',
-        ]);
+            'vm' => NewsPageViewModel::fromPageData([
+                'mode' => 'add',
+                'newsid' => 0,
+                'body' => '',
+                'subject' => '',
+                'notify' => 'no',
+                'returnto' => '',
+                'title' => $composeTitle,
+                'composeTitle' => $composeTitle,
+                'checked' => '',
+                'actionUrl' => '/web/news/add',
+            ])]);
     }
 
     /**

@@ -13,6 +13,7 @@ use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
+use App\ViewModels\AttendancePageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -110,7 +111,7 @@ class AttendanceController extends BasePageController
         AssetAppender::js($this->calendarScript($data), 'footer', false);
         $data['bonusLines'] = $this->bonusLines();
 
-        return $this->renderPage($request, 'attendance', true, $data);
+        return $this->renderPage($request, 'attendance', true, ['vm' => AttendancePageViewModel::fromPageData($data)]);
     }
 
     /**

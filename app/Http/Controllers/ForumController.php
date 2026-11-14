@@ -23,6 +23,7 @@ use App\Support\Format;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserDisplay;
+use App\ViewModels\LatestcommentsPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -179,14 +180,15 @@ class ForumController extends BasePageController
         unset($row);
 
         return $this->renderPage($request, 'latestcomments', true, [
-            'rows' => $rows,
-            'count' => $count,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'pager' => $pager,
-            'offset' => $offset,
-            'perpage' => $perpage,
-        ]);
+            'vm' => LatestcommentsPageViewModel::fromPageData([
+                'rows' => $rows,
+                'count' => $count,
+                'pagertop' => $pagertop,
+                'pagerbottom' => $pagerbottom,
+                'pager' => $pager,
+                'offset' => $offset,
+                'perpage' => $perpage,
+            ])]);
     }
 
     /**

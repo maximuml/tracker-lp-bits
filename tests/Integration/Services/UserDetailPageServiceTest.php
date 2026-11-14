@@ -12,6 +12,7 @@ use App\Repositories\HitAndRunRepository;
 use App\Repositories\UserDetailRepository;
 use App\Services\SeedBonusService;
 use App\Services\UserDetailPageService;
+use App\Support\RuntimeContext;
 use App\Support\Settings;
 use App\ViewModels\UserDetailPageViewModel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -103,6 +104,7 @@ final class UserDetailPageServiceTest extends TestCase
     {
         $actor = $this->actor($actorData);
         app()->instance(ActorContext::class, $actor);
+        app(RuntimeContext::class)->bootEntry(true);
 
         return new UserDetailPageService(
             $this->userRepository,

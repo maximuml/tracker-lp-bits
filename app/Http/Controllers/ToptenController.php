@@ -51,7 +51,7 @@ class ToptenController extends Controller
 
         $vm = ToptenPageViewModel::fromPage($page, $this->toptenTabs());
 
-        return response(view('topten.index', $vm->toArray())->render());
+        return response(view('topten.index', ['vm' => $vm])->render());
     }
 
     /**

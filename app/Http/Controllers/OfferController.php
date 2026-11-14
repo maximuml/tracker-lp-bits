@@ -89,9 +89,9 @@ class OfferController extends BasePageController
             return $actionRedirect;
         }
 
-        $data = $this->pageService->build($request)->toArray();
-
-        return $this->renderPage($request, 'offers', true, $data);
+        return $this->renderPage($request, 'offers', true, [
+            'vm' => $this->pageService->build($request),
+        ]);
     }
 
     public function store(StoreOfferRequest $request): RedirectResponse

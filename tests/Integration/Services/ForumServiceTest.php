@@ -21,7 +21,6 @@ use App\Support\Cache\NexusCache;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\Concerns\MakesCurrentUser;
@@ -685,7 +684,7 @@ final class ForumServiceTest extends TestCase
         ]);
         $this->topicRepo->shouldReceive('topicExists')->with(1)->andReturn(1);
         // W1-04: locked-topic check now uses Topic model + TopicPolicy
-        DB::table('topics')->updateOrInsert(['id' => 1], Topic::factory()->raw(['locked' => true]));
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn(Topic::factory()->make(['id' => 1, 'locked' => true, 'forumid' => 1]));
         // Code continues after abort(die=false) to flood check and post creation
         $repo->shouldReceive('incrementForumPostCount')->with(1)->andReturn(true);
         $this->postRepo->shouldReceive('createPost')->andReturn(1);
@@ -729,7 +728,7 @@ final class ForumServiceTest extends TestCase
             'minclasscreate' => 0,
         ]);
         // W1-04: locked-topic check now uses Topic model; ensure topic is not locked
-        DB::table('topics')->updateOrInsert(['id' => 1], Topic::factory()->raw(['locked' => false]));
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn(null);
 
         $request = Request::create('/forums.php', 'POST', [
             'action' => 'post',
@@ -760,7 +759,7 @@ final class ForumServiceTest extends TestCase
             'minclasscreate' => 0,
         ]);
         // W1-04: locked-topic check now uses Topic model + TopicPolicy
-        DB::table('topics')->updateOrInsert(['id' => 1], Topic::factory()->raw(['locked' => false]));
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn(Topic::factory()->make(['id' => 1, 'locked' => false, 'forumid' => 1]));
         $repo->shouldReceive('incrementForumPostCount')->with(1)->andReturn(true);
         $this->postRepo->shouldReceive('createPost')->andReturn(1);
         $this->topicRepo->shouldReceive('getTopicWithUser')->with(1)->andReturn(null);
@@ -839,7 +838,7 @@ final class ForumServiceTest extends TestCase
             'minclasscreate' => 0,
         ]);
         // W1-04: locked-topic check now uses Topic model + TopicPolicy
-        DB::table('topics')->updateOrInsert(['id' => 1], Topic::factory()->raw(['locked' => false]));
+        $this->topicRepo->shouldReceive('getTopic')->with(1)->andReturn(Topic::factory()->make(['id' => 1, 'locked' => false, 'forumid' => 1]));
         $repo->shouldReceive('incrementForumPostCount')->with(1)->andReturn(true);
         $this->postRepo->shouldReceive('createPost')->with(1, 1, Mockery::any(), Mockery::any())->andReturn(0);
 

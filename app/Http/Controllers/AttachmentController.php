@@ -15,6 +15,7 @@ use App\Support\Cache\NexusCache;
 use App\Support\Config\SiteConfig;
 use App\Support\Html\SafeHtml;
 use App\Support\Style;
+use App\ViewModels\AttachmentPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -99,20 +100,20 @@ class AttachmentController extends BasePageController
         }
 
         $content = view('attachment.index', [
-            'CURUSER' => $currentUser,
-            'Attach' => $Attach,
-            'enableAttachment' => $Attach->enable_attachment(),
-            'count_limit' => (int) $Attach->get_count_limit(),
-            'count_left' => $countLeft ?? $Attach->get_count_left(),
-            'size_limit' => $Attach->get_size_limit_byte(),
-            'allowedextsblock' => $allowedextsblock,
-            'css_uri' => Style::cssUriWithContext(),
-            'altsize' => (string) $request->input('altsize', ''),
-            'callback_func' => (string) $request->input('callback_func', ''),
-            'warning' => $warning,
-            'script' => SafeHtml::fromTrustedHtml($script),
-            'theme' => UserTheme::fromStringSafe(is_string($this->actor->value('theme', null)) ? $this->actor->value('theme') : null)->value,
-            'fontSize' => UserFontsize::fromMixed($this->actor->value('fontsize', null))->stringValue(),
+            'vm' => new AttachmentPageViewModel(
+                theme: UserTheme::fromStringSafe(is_string($this->actor->value('theme', null)) ? $this->actor->value('theme') : null)->value,
+                fontSize: UserFontsize::fromMixed($this->actor->value('fontsize', null))->stringValue(),
+                css_uri: Style::cssUriWithContext(),
+                script: SafeHtml::fromTrustedHtml($script),
+                enableAttachment: $Attach->enable_attachment(),
+                callback_func: (string) $request->input('callback_func', ''),
+                altsize: (string) $request->input('altsize', ''),
+                warning: $warning,
+                count_left: $countLeft ?? $Attach->get_count_left(),
+                count_limit: (int) $Attach->get_count_limit(),
+                size_limit: $Attach->get_size_limit_byte(),
+                allowedextsblock: $allowedextsblock,
+            ),
         ])->render();
 
         return response($content, 200, ['Content-Type' => 'text/html; charset=utf-8']);

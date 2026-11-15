@@ -4,23 +4,23 @@
 
 @section('content')
 
-    @if ($results !== [])
+    @if ($vm->results !== [])
         <h1>{{ __('bitbucketupload.std_success') }}</h1>
-        @foreach ($results as $result)
+        @foreach ($vm->results as $result)
             <p>{{ __('bitbucketupload.std_use_following_url') }}<br><b><a href="{{ $result['url'] }}">{{ $result['url'] }}</a></b></p>
             <p><img src="{{ $result['url'] }}" alt="{{ __('bitbucketupload.std_image') }}" loading="lazy" decoding="async"></p>
             <p>{{ __('bitbucketupload.std_image') }} {{ (! ($result['width'] == $result['newwidth'] && $result['height'] == $result['newheight'])) ? __('bitbucketupload.std_rescaled_from') . $result['height'] . ' x ' . $result['width'] . __('bitbucketupload.std_to') . $result['newheight'] . ' x ' . $result['newwidth'] : __('bitbucketupload.std_need_not_rescaling') }}</p>
         @endforeach
         <p>{{ __('bitbucketupload.std_bbcode_for_description') }}<br>
-            <textarea rows="{{ min(10, count($results) + 1) }}" cols="60" readonly>@foreach ($results as $result)[img]{{ $result['url'] }}[/img]
+            <textarea rows="{{ min(10, count($vm->results) + 1) }}" cols="60" readonly>@foreach ($vm->results as $result)[img]{{ $result['url'] }}[/img]
 @endforeach</textarea>
         </p>
         <p>{{ __('bitbucketupload.std_profile_updated') }}</p>
     @endif
-    @if ($errors !== [])
+    @if ($vm->errors !== [])
         <h1>{{ __('bitbucketupload.std_failed_files') }}</h1>
         <ul>
-            @foreach ($errors as $error)
+            @foreach ($vm->errors as $error)
                 <li><b>{{ $error['filename'] }}</b>: {{ \App\Support\Html\SafeHtml::fromUntrustedHtml($error['message']) }}</li>
             @endforeach
         </ul>

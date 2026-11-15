@@ -92,11 +92,11 @@ final class BitbucketUploadControllerTest extends TestCase
 
         $this->assertInstanceOf(View::class, $response);
         $data = $response->getData();
-        $this->assertCount(2, $data['results']);
-        $this->assertCount(1, $data['errors']);
-        $this->assertSame($bad->getClientOriginalName(), $data['errors'][0]['filename']);
+        $this->assertCount(2, $data['vm']->results);
+        $this->assertCount(1, $data['vm']->errors);
+        $this->assertSame($bad->getClientOriginalName(), $data['vm']->errors[0]['filename']);
 
-        foreach ($data['results'] as $result) {
+        foreach ($data['vm']->results as $result) {
             $path = public_path('bitbucket/'.$result['filename']);
             $this->assertFileExists($path);
             @unlink($path);

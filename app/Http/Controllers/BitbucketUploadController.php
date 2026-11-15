@@ -12,6 +12,8 @@ use App\Support\Config\SiteConfig;
 use App\Support\CurrentUser;
 use App\Support\PageResponses;
 use App\Support\Path;
+use App\ViewModels\BitbucketResultViewModel;
+use App\ViewModels\BitbucketUploadViewModel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -53,11 +55,13 @@ class BitbucketUploadController extends Controller
         $bucketWritable = is_dir($bucketDir) ? is_writable($bucketDir) : is_writable(public_path());
 
         return view('bitbucket.upload', [
-            'pageTitle' => __('bitbucketupload.head_avatar_upload'),
-            'maxFileSize' => 256 * 1024,
-            'scaleHeight' => 200,
-            'scaleWidth' => 150,
-            'bucketWritable' => $bucketWritable,
+            'vm' => new BitbucketUploadViewModel(
+                pageTitle: __('bitbucketupload.head_avatar_upload'),
+                maxFileSize: 256 * 1024,
+                scaleHeight: 200,
+                scaleWidth: 150,
+                bucketWritable: $bucketWritable,
+            ),
         ]);
     }
 
@@ -120,8 +124,10 @@ class BitbucketUploadController extends Controller
         }
 
         return view('bitbucket.result', [
-            'results' => $results,
-            'errors' => $errors,
+            'vm' => new BitbucketResultViewModel(
+                results: $results,
+                errors: $errors,
+            ),
         ]);
     }
 

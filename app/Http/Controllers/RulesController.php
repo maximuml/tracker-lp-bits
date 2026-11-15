@@ -9,6 +9,8 @@ use App\Models\Setting;
 use App\Support\Locale;
 use App\Support\RedisGuard;
 use App\Support\Url;
+use App\ViewModels\AboutnexusPageViewModel;
+use App\ViewModels\UseragreementPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -58,13 +60,16 @@ class RulesController extends BasePageController
     public function userAgreement(Request $request): View|RedirectResponse|Response
     {
         return $this->renderPage($request, 'useragreement', false, [
-            'SITENAME' => Setting::getSiteName(),
-            'BASEURL' => Url::schemeAndHost(false),
-        ]);
+            'vm' => UseragreementPageViewModel::fromPageData([
+                'SITENAME' => Setting::getSiteName(),
+                'BASEURL' => Url::schemeAndHost(false),
+            ])]);
     }
 
     public function aboutNexus(Request $request): View|RedirectResponse|Response
     {
-        return $this->renderPage($request, 'aboutnexus', false, $this->infoRepository->aboutNexus());
+        return $this->renderPage($request, 'aboutnexus', false, [
+            'vm' => AboutnexusPageViewModel::fromPageData($this->infoRepository->aboutNexus()),
+        ]);
     }
 }

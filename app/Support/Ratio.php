@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Support\Html\SafeHtml;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
 /**
  * Stateless helpers for computing and rendering share / seed-leech
@@ -266,11 +267,11 @@ final class Ratio
         int|float $downloaded,
         string $tooltip,
         string $infinite,
-    ): SafeHtml {
+    ): Htmlable {
         if ($downloaded > 0) {
             $ratio = $uploaded / $downloaded;
             if (self::color($ratio) !== '') {
-                return SafeHtml::fromTrustedHtml(trim(view('components.support.span-class', ['cls' => self::colorClass($ratio), 'text' => number_format($ratio, 3)])->render()));
+                return new HtmlString(trim(view('components.support.span-class', ['cls' => self::colorClass($ratio), 'text' => number_format($ratio, 3)])->render()));
             }
 
             return SafeHtml::fromPlainText(number_format($ratio, 3));
@@ -331,7 +332,7 @@ final class Ratio
      * User ratio by id — fetches the user row and renders the HTML
      * form. Mirrors `get_ratio()`.
      */
-    public static function forUserId(int|string $userId): SafeHtml
+    public static function forUserId(int|string $userId): Htmlable
     {
         $row = UserDisplay::row($userId);
         if (empty($row)) {

@@ -77,8 +77,12 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
      * lang string with a plain comment → fromPlainText. ChromeAlerts
      * stays trusted: ratio/inactivity warnings embed a Time::format()
      * countdown span.
+     * 77 → 72 (2026-11-15): Tag::settingsRow/settingsFrow,
+     * Smilies::quickRow, Ratio::userRatioHtml colored branch and the
+     * moderation reporting cell now return Htmlable (HtmlString/View);
+     * SafeHtml::append() accepts any Htmlable.
      */
-    private const BASELINE_TRUSTED_HTML_CALLS = 77;
+    private const BASELINE_TRUSTED_HTML_CALLS = 72;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

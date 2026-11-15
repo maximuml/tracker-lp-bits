@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Support\Html\Escape;
 use App\Support\Html\SafeHtml;
 use App\Support\Html\Tag;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
 
@@ -46,7 +47,7 @@ final class Html
         string|SafeHtml $follow,
         bool $escape = true,
         string $relation = '',
-    ): SafeHtml {
+    ): Htmlable {
         return Tag::settingsRow($head, $follow, $escape, $relation);
     }
 

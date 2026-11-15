@@ -47,7 +47,7 @@ final class TorrentUploadPageViewModel extends ViewModel
         public readonly bool $enableTechnicalInfo,
         public readonly SafeHtml|string $taxonomySelectHtml,
         public readonly Htmlable|string $customFieldsHtml,
-        public readonly SafeHtml|string $hitAndRunHtml,
+        public readonly Htmlable|string $hitAndRunHtml,
         public readonly Htmlable|string $tagsHtml,
         public readonly bool $pickEnabled,
         public readonly array $posStates,

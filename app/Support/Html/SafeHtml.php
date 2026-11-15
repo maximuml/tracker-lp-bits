@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Html;
 
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -64,7 +65,7 @@ final class SafeHtml extends HtmlString
     /**
      * Concatenate with another SafeHtml instance.
      */
-    public function append(self $other): self
+    public function append(Htmlable $other): self
     {
         return new self($this->toHtml().$other->toHtml());
     }

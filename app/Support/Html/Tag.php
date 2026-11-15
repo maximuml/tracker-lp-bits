@@ -9,6 +9,7 @@ use App\Support\Comment;
 use App\Support\Security;
 use App\Support\Smilies;
 use App\Support\Url;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\View;
 
@@ -95,12 +96,12 @@ final class Tag
         string|SafeHtml $follow,
         bool $escape = true,
         string $relation = '',
-    ): SafeHtml {
+    ): Htmlable {
         $cell = $follow instanceof SafeHtml
             ? $follow
             : SafeHtml::fromTrustedHtml($escape ? nl2br(htmlspecialchars($follow)) : $follow);
 
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.tag.settings-row', [
+        return new HtmlString(trim(view('components.support.tag.settings-row', [
             'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => $cell,
@@ -120,12 +121,12 @@ final class Tag
         string|SafeHtml $follow,
         bool $escape = true,
         string $relation = '',
-    ): SafeHtml {
+    ): Htmlable {
         $cell = $follow instanceof SafeHtml
             ? $follow
             : SafeHtml::fromTrustedHtml($escape ? nl2br(htmlspecialchars($follow)) : $follow);
 
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.tag.settings-frow', [
+        return new HtmlString(trim(view('components.support.tag.settings-frow', [
             'relation' => $relation,
             'head' => SafeHtml::fromTrustedHtml($head),
             'cell' => $cell,

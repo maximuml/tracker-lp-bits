@@ -3,7 +3,7 @@
 @section('title', $vm->title)
 
 @section('content')
-<x-page :title="__('friends.text_personallist').' '.$vm->titleUsername" width="list">
+<x-page :title="\App\Support\Html\SafeHtml::fromPlainText(__('friends.text_personallist').' ')->append($vm->titleUsername)" width="list">
 <section class="nx-idx-card">
 <h2><a name="friends">{{ __('friends.text_friendlist')}}</a></h2>
 <div>

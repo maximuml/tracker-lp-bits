@@ -46,7 +46,7 @@ class SysoppanelTableSeeder extends Seeder
             4 => [
                 'id' => 5,
                 'name' => 'Do cleanup',
-                'url' => '/docleanup.php',
+                'url' => 'post:/web/system/cleanup',
                 'info' => 'Do cleanup functions',
             ],
             5 => [

@@ -21,20 +21,22 @@
         </tr>
         @foreach ($vm->rows as $row)
             <tr>
-                <form method="post" action="/web/staff/modtask">@csrf
-                    <input type="hidden" name="action" value="confirmuser">
-                    <input type="hidden" name="userid" value="{{ $row['id'] }}">
-                    <td><a href="/userdetails?id={{ $row['id'] }}">{{ $row['username'] }}</a></td>
-                    <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['email'] }}</td>
-                    <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['added'] }}</td>
-                    <td class="text-center">
-                        <select name="confirm">
-                            <option value="pending">{{ __('unco.status_pending') }}</option>
-                            <option value="confirmed">{{ __('unco.status_confirmed') }}</option>
-                        </select>
-                    </td>
-                    <td class="text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('unco.submit_go') }}" data-submit-once></td>
-                </form>
+                <td>
+                    <form id="unco-row-{{ $row['id'] }}" method="post" action="/web/staff/modtask">@csrf
+                        <input type="hidden" name="action" value="confirmuser">
+                        <input type="hidden" name="userid" value="{{ $row['id'] }}">
+                    </form>
+                    <a href="/userdetails?id={{ $row['id'] }}">{{ $row['username'] }}</a>
+                </td>
+                <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['email'] }}</td>
+                <td class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;{{ $row['added'] }}</td>
+                <td class="text-center">
+                    <select name="confirm" form="unco-row-{{ $row['id'] }}">
+                        <option value="pending">{{ __('unco.status_pending') }}</option>
+                        <option value="confirmed">{{ __('unco.status_confirmed') }}</option>
+                    </select>
+                </td>
+                <td class="text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('unco.submit_go') }}" data-submit-once form="unco-row-{{ $row['id'] }}"></td>
             </tr>
         @endforeach
     </x-data-table>

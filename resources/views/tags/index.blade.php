@@ -4,22 +4,22 @@
 
 @section('content')
 <x-page :title="__('tags.head_tags')" width="list">
-<p>{{ __('tags.text_bb_tags_note') }} <b>{{ $siteName }}</b> {{ __('tags.text_bb_tags_note_two') }} <i>{{ __('tags.text_bb_tags') }}</i> {{ __('tags.text_bb_tags_note_end') }}</p>
+<p>{{ __('tags.text_bb_tags_note') }} <b>{{ $vm->siteName }}</b> {{ __('tags.text_bb_tags_note_two') }} <i>{{ __('tags.text_bb_tags') }}</i> {{ __('tags.text_bb_tags_note_end') }}</p>
 
 <form method="post" action="?">@csrf
 <label for="nx-tag-test" class="mb-1 block font-bold">{{ __('tags.submit_test_this_code') }}</label>
-<textarea id="nx-tag-test" name="test" cols="60" rows="3" class="box-border w-full">{{ $test ?? '' }}</textarea>
+<textarea id="nx-tag-test" name="test" cols="60" rows="3" class="box-border w-full">{{ $vm->test ?? '' }}</textarea>
 <input type="submit" class="nx-btn nx-btn--primary" value="{{ __('tags.submit_test_this_code')}}">
 </form>
 
-@if (($test ?? '') !== '')
-    <p><hr>{{ \App\Support\Format::formatComment($test) }}</hr></p>
+@if (($vm->test ?? '') !== '')
+    <p><hr>{{ \App\Support\Format::formatComment($vm->test) }}</hr></p>
 @endif
 
-@if (empty($tagItems))
+@if (empty($vm->tagItems))
     <x-empty-state :title="__('tags.text_no_tags')" />
 @endif
-@foreach ($tagItems ?? [] as $item)
+@foreach ($vm->tagItems ?? [] as $item)
     <p class=sub><b>{{ $item['name'] }}</b></p>
     <x-data-table :caption="__('tags.text_tags')" captionHidden class="nx-main">
     <tr class="align-top"><td class="w-[25%]">{{ __('tags.text_description')}}</td><td>{{ $item['description'] }}

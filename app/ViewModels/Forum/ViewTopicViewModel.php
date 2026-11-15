@@ -39,9 +39,9 @@ final readonly class ViewTopicViewModel
         public array $moveForums,
         /** @var list<array{value: int, label: string}> */
         public array $highlightColorOptions,
-        public ?SafeHtml $quickReply,
+        public ?Htmlable $quickReply,
         public ?Htmlable $deniedNotice,
-        public SafeHtml $keyScript,
+        public Htmlable $keyScript,
     ) {}
 
     public function pagerHref(): string

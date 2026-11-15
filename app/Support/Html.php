@@ -7,6 +7,8 @@ namespace App\Support;
 use App\Support\Html\Escape;
 use App\Support\Html\SafeHtml;
 use App\Support\Html\Tag;
+use Illuminate\Support\HtmlString;
+use Illuminate\View\View;
 
 /**
  * Stateless HTML-string emitters extracted from `include/functions.php`
@@ -29,7 +31,7 @@ final class Html
 
     // ── Tag ─────────────────────────────────────────────────────────
 
-    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): SafeHtml
+    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): HtmlString
     {
         return Tag::keyShortcutScript($page, $pages, $nonce);
     }
@@ -56,7 +58,7 @@ final class Html
         return Tag::tooltipContainer($items, $width);
     }
 
-    public static function quickReply(string $formName, string $textareaName, string $submitLabel): SafeHtml
+    public static function quickReply(string $formName, string $textareaName, string $submitLabel): View
     {
         return Tag::quickReply($formName, $textareaName, $submitLabel);
     }

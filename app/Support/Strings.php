@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\View\View;
 
 /**
  * Stateless string helpers extracted from `include/functions.php`.
@@ -101,12 +102,12 @@ final class Strings
      * Does NOT escape the input — every existing call site already
      * passes an escaped value (e.g. an IP address). Pinned by test.
      */
-    public static function hidden(string $text): SafeHtml
+    public static function hidden(string $text): View
     {
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.span-class', [
+        return view('components.support.span-class', [
             'cls' => 'hidden-text',
             'text' => SafeHtml::fromTrustedHtml($text),
-        ])->render()));
+        ]);
     }
 
     /**

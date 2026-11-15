@@ -18,13 +18,14 @@ use Tests\Attributes\TestCategory;
  * design: `e()` calls `toHtml()` on Htmlable instead of escaping, which
  * is exactly why `UserDisplay::username()`,
  * `Format::formatComment()`, `Comment::format()`, `PageRenderer::*Html()`,
- * `Ratio::*`, `UserClass::*` and
- * `Smilies::link()` are legitimate inside `{{ }}` today.
+ * `Ratio::*`, `UserClass::*`,
+ * `Smilies::link()` and `UserDisplay::avatarImage*()` are legitimate
+ * inside `{{ }}` today.
  *
  * The check is reflection-driven, so a signature regression
- * (`SafeHtml` → `string`) on any of those helpers — or a brand-new
- * string-returning HTML helper — fails the suite without editing this
- * file. `Html::*`, `Time::format()` and `UserDisplay::avatarImage*()`
+ * (`SafeHtml`/`View` → `string`) on any of those helpers — or a
+ * brand-new string-returning HTML helper — fails the suite without
+ * editing this file. `Html::*` and `Time::format()`
  * return raw HTML strings and can never appear under `{{ }}`.
  *
  * Markup-bearing legacy language keys under `{{ }}` are pinned by

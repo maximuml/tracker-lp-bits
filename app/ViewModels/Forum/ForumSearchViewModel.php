@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Forum;
 
-use App\View\Components\Pagination;
-
 /**
  * View model for the forum search section (ADR 0021): the keyword form
  * and, once `searched`, the result rows with pagination.
@@ -35,17 +33,6 @@ final class ForumSearchViewModel
     public function pagerHref(): string
     {
         return '/forums?action=search&keywords='.rawurlencode($this->keywords).'&';
-    }
-
-    /**
-     * 1-based display window for `x-forum.pager` (maps back to the
-     * 0-based `page=` URLs inside the component).
-     *
-     * @return list<int|string>
-     */
-    public function pagerItems(): array
-    {
-        return Pagination::window($this->page + 1, $this->pages);
     }
 
     /**

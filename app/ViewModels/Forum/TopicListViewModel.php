@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\ViewModels\Forum;
 
 use App\Support\Html\SafeHtml;
-use App\View\Components\Pagination;
 
 /**
  * View model for the view-forum section (ADR 0021): the topic list of a
  * single forum with sort links, fast-search form and pagination.
  *
- * `page` is the 0-based legacy `page=` query value — `x-forum.pager`
+ * `page` is the 0-based legacy `page=` query value — `x-pagination`
  * renders the 1-based display while keeping the legacy URL semantics.
  * `tooltips` are the hidden tooltip containers for last-post previews;
  * `content` is `Format::formatComment()` output (BBCode-rendered, the
@@ -52,17 +51,6 @@ final class TopicListViewModel
     public function pagerHref(): string
     {
         return '/forums?action=viewforum&forumid='.$this->forumId.$this->addParam().'&';
-    }
-
-    /**
-     * 1-based display window for `x-forum.pager` (maps back to the
-     * 0-based `page=` URLs inside the component).
-     *
-     * @return list<int|string>
-     */
-    public function pagerItems(): array
-    {
-        return Pagination::window($this->page + 1, $this->pages);
     }
 
     /**

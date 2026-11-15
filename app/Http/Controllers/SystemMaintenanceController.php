@@ -13,6 +13,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Email;
 use App\Support\Mail;
 use App\Support\UserDisplay;
+use App\ViewModels\MysqlStatsPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -155,29 +156,30 @@ class SystemMaintenanceController extends BasePageController
         }
 
         return $this->renderPage($request, 'mysql_stats', true, [
-            'serverRunningText' => 'This MySQL server has been running for '.$rep->timespanFormat($uptimeSeconds).'. It started up on '.$rep->localisedDate($status['startTime']),
-            'receivedTotal' => $byteTotal($status['bytesReceived']),
-            'receivedPerHour' => $byteTotal($status['bytesReceived'] * 3600 / $uptimeSeconds),
-            'sentTotal' => $byteTotal($status['bytesSent']),
-            'sentPerHour' => $byteTotal($status['bytesSent'] * 3600 / $uptimeSeconds),
-            'totalBytesTotal' => $byteTotal($status['totalBytes']),
-            'totalBytesPerHour' => $byteTotal($status['totalBytes'] * 3600 / $uptimeSeconds),
-            'abortedConnects' => $num($status['abortedConnects']),
-            'abortedConnectsPerHour' => $num($status['abortedConnects'] * 3600 / $uptimeSeconds, 2),
-            'abortedConnectsPct' => $connections > 0 ? $num($status['abortedConnects'] * 100 / $connections, 2)."\u{00A0}%" : '---',
-            'abortedClients' => $num($status['abortedClients']),
-            'abortedClientsPerHour' => $num($status['abortedClients'] * 3600 / $uptimeSeconds, 2),
-            'abortedClientsPct' => $connections > 0 ? $num($status['abortedClients'] * 100 / $connections, 2)."\u{00A0}%" : '---',
-            'connectionsTotal' => $num($connections),
-            'connectionsPerHour' => $num($connections * 3600 / $uptimeSeconds, 2),
-            'questionsTotal' => $num($questions),
-            'questionsPerHour' => $num($questions * 3600 / $uptimeSeconds, 2),
-            'questionsPerMinute' => $num($questions * 60 / $uptimeSeconds, 2),
-            'questionsPerSecond' => $num($questions / $uptimeSeconds, 2),
-            'queryStatColumns' => $queryStatColumns,
-            'statusColumns' => $statusColumns,
-            'hasServerStatus' => $statusRows !== [],
-        ]);
+            'vm' => MysqlStatsPageViewModel::fromPageData([
+                'serverRunningText' => 'This MySQL server has been running for '.$rep->timespanFormat($uptimeSeconds).'. It started up on '.$rep->localisedDate($status['startTime']),
+                'receivedTotal' => $byteTotal($status['bytesReceived']),
+                'receivedPerHour' => $byteTotal($status['bytesReceived'] * 3600 / $uptimeSeconds),
+                'sentTotal' => $byteTotal($status['bytesSent']),
+                'sentPerHour' => $byteTotal($status['bytesSent'] * 3600 / $uptimeSeconds),
+                'totalBytesTotal' => $byteTotal($status['totalBytes']),
+                'totalBytesPerHour' => $byteTotal($status['totalBytes'] * 3600 / $uptimeSeconds),
+                'abortedConnects' => $num($status['abortedConnects']),
+                'abortedConnectsPerHour' => $num($status['abortedConnects'] * 3600 / $uptimeSeconds, 2),
+                'abortedConnectsPct' => $connections > 0 ? $num($status['abortedConnects'] * 100 / $connections, 2)."\u{00A0}%" : '---',
+                'abortedClients' => $num($status['abortedClients']),
+                'abortedClientsPerHour' => $num($status['abortedClients'] * 3600 / $uptimeSeconds, 2),
+                'abortedClientsPct' => $connections > 0 ? $num($status['abortedClients'] * 100 / $connections, 2)."\u{00A0}%" : '---',
+                'connectionsTotal' => $num($connections),
+                'connectionsPerHour' => $num($connections * 3600 / $uptimeSeconds, 2),
+                'questionsTotal' => $num($questions),
+                'questionsPerHour' => $num($questions * 3600 / $uptimeSeconds, 2),
+                'questionsPerMinute' => $num($questions * 60 / $uptimeSeconds, 2),
+                'questionsPerSecond' => $num($questions / $uptimeSeconds, 2),
+                'queryStatColumns' => $queryStatColumns,
+                'statusColumns' => $statusColumns,
+                'hasServerStatus' => $statusRows !== [],
+            ])]);
     }
 
     public function cron(Request $request): Response

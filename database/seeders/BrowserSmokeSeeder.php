@@ -39,12 +39,13 @@ class BrowserSmokeSeeder extends Seeder
             // MeiliSearch may not be running when this seeder runs (CI
             // seeds before the search container is up) — the browser
             // suite does not need the index, so skip Scout syncing.
-            Torrent::withoutSyncingToSearch(
+            $smokeTorrent = Torrent::withoutSyncingToSearch(
                 fn () => Torrent::factory()->owner($owner)->create([
                     'name' => 'Browser Smoke Fixture Torrent',
                     'category' => $category->id,
                 ]),
             );
+            $this->seedFilesAndPeers($smokeTorrent, $owner);
         }
 
         $hrTorrentName = 'Browser Smoke H&R Fixture Torrent';
@@ -62,35 +63,7 @@ class BrowserSmokeSeeder extends Seeder
 
         // File-list and peer fixtures: details.php renders an empty file
         // list and an empty peer list without them.
-        foreach (['smoke-fixture-video.mkv' => 1_500_000_000, 'smoke-fixture-info.nfo' => 4_096] as $filename => $size) {
-            File::query()->firstOrCreate(
-                ['torrent' => $hrTorrent->id, 'filename' => $filename],
-                ['size' => $size],
-            );
-        }
-        if (! DB::table('peers')->where('torrent', $hrTorrent->id)->where('peer_id', '-qB4250-smokefixtur')->exists()) {
-            DB::table('peers')->insert([
-                'torrent' => $hrTorrent->id,
-                'peer_id' => '-qB4250-smokefixtur',
-                'ip' => '127.0.0.1',
-                'port' => 51413,
-                'uploaded' => 900_000_000,
-                'downloaded' => 647_865_608,
-                'to_go' => 0,
-                'started' => now()->subDay()->toDateTimeString(),
-                'last_action' => now()->toDateTimeString(),
-                'userid' => $owner->id,
-                'agent' => 'qBittorrent/4.2.5',
-                'finishedat' => 0,
-                'downloadoffset' => 0,
-                'uploadoffset' => 0,
-                'passkey' => str_repeat('0', 32),
-                'ipv4' => '127.0.0.1',
-                'ipv6' => '::1',
-                'connectable' => 1,
-                'seeder' => 1,
-            ]);
-        }
+        $this->seedFilesAndPeers($hrTorrent, $owner);
 
         $hrSnatch = Snatch::query()->firstOrCreate(
             ['torrentid' => $hrTorrent->id, 'userid' => $owner->id],
@@ -155,5 +128,38 @@ class BrowserSmokeSeeder extends Seeder
         /** @var Post $post */
         $post = Post::factory()->topic($topic)->author($owner)->create();
         $topic->update(['firstpost' => $post->id, 'lastpost' => $post->id]);
+    }
+
+    private function seedFilesAndPeers(Torrent $torrent, User $owner): void
+    {
+        foreach (['smoke-fixture-video.mkv' => 1_500_000_000, 'smoke-fixture-info.nfo' => 4_096] as $filename => $size) {
+            File::query()->firstOrCreate(
+                ['torrent' => $torrent->id, 'filename' => $filename],
+                ['size' => $size],
+            );
+        }
+        if (! DB::table('peers')->where('torrent', $torrent->id)->where('peer_id', '-qB4250-smokefixtur')->exists()) {
+            DB::table('peers')->insert([
+                'torrent' => $torrent->id,
+                'peer_id' => '-qB4250-smokefixtur',
+                'ip' => '127.0.0.1',
+                'port' => 51413,
+                'uploaded' => 900_000_000,
+                'downloaded' => 647_865_608,
+                'to_go' => 0,
+                'started' => now()->subDay()->toDateTimeString(),
+                'last_action' => now()->toDateTimeString(),
+                'userid' => $owner->id,
+                'agent' => 'qBittorrent/4.2.5',
+                'finishedat' => 0,
+                'downloadoffset' => 0,
+                'uploadoffset' => 0,
+                'passkey' => str_repeat('0', 32),
+                'ipv4' => '127.0.0.1',
+                'ipv6' => '::1',
+                'connectable' => 1,
+                'seeder' => 1,
+            ]);
+        }
     }
 }

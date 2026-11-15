@@ -14,6 +14,7 @@ use App\Support\PageResponses;
 use App\Support\RequestValues;
 use App\Support\SearchBox;
 use App\Support\Url;
+use App\ViewModels\GetrssPageViewModel;
 use App\ViewModels\Search\SearchCategoryTableFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,7 +34,9 @@ class RssController extends BasePageController
             return redirect('/web/getrss');
         }
 
-        return $this->renderPage($request, 'getrss', true, $this->getrssData());
+        return $this->renderPage($request, 'getrss', true, [
+            'vm' => GetrssPageViewModel::fromPageData($this->getrssData()),
+        ]);
     }
 
     public function getrssSubmit(GetrssRequest $request): Response|RedirectResponse

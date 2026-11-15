@@ -81,8 +81,12 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
      * Smilies::quickRow, Ratio::userRatioHtml colored branch and the
      * moderation reporting cell now return Htmlable (HtmlString/View);
      * SafeHtml::append() accepts any Htmlable.
+     * 72 → 65 (2026-11-15): UserDisplay::username()/inlineWrap()
+     * compose via the new SafeHtml::fromView() factory (blade-rendered
+     * markup trimmed) instead of fromTrustedHtml(trim(view()->render()));
+     * the pics fragment and linkExt prop become HtmlString.
      */
-    private const BASELINE_TRUSTED_HTML_CALLS = 72;
+    private const BASELINE_TRUSTED_HTML_CALLS = 65;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

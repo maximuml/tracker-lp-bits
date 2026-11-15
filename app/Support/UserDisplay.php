@@ -353,40 +353,40 @@ final class UserDisplay
             $title = $arr['title'] ?? '';
 
             if ($link) {
-                $username = SafeHtml::fromTrustedHtml(trim(view('components.support.user-link', [
-                    'linkExt' => SafeHtml::fromTrustedHtml($link_ext),
+                $username = SafeHtml::fromView('components.support.user-link', [
+                    'linkExt' => is_string($link_ext) ? new HtmlString($link_ext) : $link_ext,
                     'href' => $href,
                     'target' => $target,
                     'cls' => $classNameColored,
                     'inner' => $username,
-                ])->render()));
+                ]);
             }
 
-            $username = $username->append(SafeHtml::fromTrustedHtml($pics));
+            $username = $username->append(new HtmlString($pics));
             if ($withtitle) {
                 $username = $username
                     ->append(SafeHtml::fromPlainText(' ('))
                     ->append($title === ''
                         ? $className
-                        : SafeHtml::fromTrustedHtml(trim(view('components.support.user-title', [
+                        : SafeHtml::fromView('components.support.user-title', [
                             'cls' => $classNameColored,
                             'title' => $title,
-                        ])->render())))
+                        ]))
                     ->append(SafeHtml::fromPlainText(')'));
             }
 
-            $username = SafeHtml::fromTrustedHtml(trim(view('components.support.user-nowrap', [
+            $username = SafeHtml::fromView('components.support.user-nowrap', [
                 'inner' => $bracket
                     ? SafeHtml::fromPlainText('(')->append($username)->append(SafeHtml::fromPlainText(')'))
                     : $username,
-            ])->render()));
+            ]);
         } else {
             $username = self::inlineWrap('i', false, SafeHtml::fromPlainText((string) Locale::trans('nexus.user_not_exists')));
-            $username = SafeHtml::fromTrustedHtml(trim(view('components.support.user-nowrap', [
+            $username = SafeHtml::fromView('components.support.user-nowrap', [
                 'inner' => $bracket
                     ? SafeHtml::fromPlainText('(')->append($username)->append(SafeHtml::fromPlainText(')'))
                     : $username,
-            ])->render()));
+            ]);
         }
 
         if (func_num_args() === 1) {
@@ -398,11 +398,11 @@ final class UserDisplay
 
     private static function inlineWrap(string $tag, bool $isRainbow, SafeHtml $inner): SafeHtml
     {
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.user-inline', [
+        return SafeHtml::fromView('components.support.user-inline', [
             'tag' => $tag,
             'isRainbow' => $isRainbow,
             'inner' => $inner,
-        ])->render()));
+        ]);
     }
 
     private static function userRepository(): UserRepositoryInterface

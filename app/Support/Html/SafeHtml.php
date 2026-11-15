@@ -41,6 +41,21 @@ final class SafeHtml extends HtmlString
     }
 
     /**
+     * Create a SafeHtml instance from a Blade view render.
+     *
+     * The view is rendered with escaped `{{ }}` props, so the
+     * resulting markup is trusted by construction. Equivalent to
+     * `fromTrustedHtml(trim(view($view, $data)->render()))`.
+     *
+     * @param  view-string  $view
+     * @param  array<string, mixed>  $data
+     */
+    public static function fromView(string $view, array $data = []): self
+    {
+        return new self(trim(view($view, $data)->render()));
+    }
+
+    /**
      * Create a SafeHtml instance by sanitizing untrusted HTML.
      *
      * Uses the HtmlSanitizer to strip dangerous tags, attributes,

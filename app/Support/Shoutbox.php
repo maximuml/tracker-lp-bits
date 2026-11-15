@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Contracts\Repositories\ShoutboxRepositoryInterface;
 use App\Support\Html\SafeHtml;
 use App\Support\State\ShoutboxState;
+use Illuminate\View\View;
 
 /**
  * Helpers for the shoutbox / live chat UI: formatting, reactions,
@@ -69,13 +70,13 @@ final class Shoutbox
      * @param  string  $formName  Name of the form wrapping the textarea
      * @param  string  $fieldName  Name of the textarea element
      */
-    public static function toolbar(string $formName = 'shbox', string $fieldName = 'shbox_text'): SafeHtml
+    public static function toolbar(string $formName = 'shbox', string $fieldName = 'shbox_text'): View
     {
-        return SafeHtml::fromTrustedHtml(view('components.shoutbox.toolbar', [
+        return view('components.shoutbox.toolbar', [
             'formName' => $formName,
             'fieldName' => $fieldName,
             'smiliesHtml' => Smilies::quickRow($formName, $fieldName),
-        ])->render());
+        ]);
     }
 
     /**

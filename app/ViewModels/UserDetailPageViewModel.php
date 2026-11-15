@@ -6,6 +6,7 @@ namespace App\ViewModels;
 
 use App\Models\User;
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\Support\Renderable;
 
 /**
@@ -51,7 +52,7 @@ final class UserDetailPageViewModel extends ViewModel
         public readonly string $countryName,
         public readonly array $locationInfo,
         public readonly string $locationInfoHtml,
-        public readonly ?SafeHtml $clientSelectHtml,
+        public readonly ?Htmlable $clientSelectHtml,
         public readonly array $trueTraffic,
         public readonly float $trueDownload,
         public readonly float $trueUpload,
@@ -65,8 +66,8 @@ final class UserDetailPageViewModel extends ViewModel
         public readonly string $elapsedLastWarn,
         public readonly ?string $warnedUntilPretty,
         public readonly ?string $leechwarnUntilPretty,
-        public readonly ?SafeHtml $warnedByHtml,
-        public readonly SafeHtml $migratedHelp,
+        public readonly ?Htmlable $warnedByHtml,
+        public readonly Htmlable $migratedHelp,
         public readonly string $userManageSystemUrl,
         public readonly SafeHtml $usernameHtml,
         public readonly SafeHtml $invitedByHtml,

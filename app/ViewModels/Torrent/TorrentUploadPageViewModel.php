@@ -6,6 +6,7 @@ namespace App\ViewModels\Torrent;
 
 use App\Support\Html\SafeHtml;
 use App\ViewModels\ViewModel;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * ViewModel for the torrent upload page (GET /upload).
@@ -45,9 +46,9 @@ final class TorrentUploadPageViewModel extends ViewModel
         public readonly bool $descrInvalid,
         public readonly bool $enableTechnicalInfo,
         public readonly SafeHtml|string $taxonomySelectHtml,
-        public readonly SafeHtml|string $customFieldsHtml,
+        public readonly Htmlable|string $customFieldsHtml,
         public readonly SafeHtml|string $hitAndRunHtml,
-        public readonly SafeHtml|string $tagsHtml,
+        public readonly Htmlable|string $tagsHtml,
         public readonly bool $pickEnabled,
         public readonly array $posStates,
         public readonly string $posStateOld,

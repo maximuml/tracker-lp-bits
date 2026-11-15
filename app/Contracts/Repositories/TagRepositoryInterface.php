@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Contracts\Repositories;
 
 use App\Models\Tag;
-use App\Support\Html\SafeHtml;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\View\View;
 
 interface TagRepositoryInterface
 {
@@ -50,7 +50,7 @@ interface TagRepositoryInterface
      * @param  array<int|string, mixed>  $checked
      * @param  mixed  $ignorePermission
      */
-    public function renderCheckbox(int $searchBoxId, array $checked = [], $ignorePermission = false): SafeHtml;
+    public function renderCheckbox(int $searchBoxId, array $checked = [], $ignorePermission = false): View;
 
     /**
      * @param  array<int|string, mixed>  $renderIdArr

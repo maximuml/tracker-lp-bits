@@ -255,7 +255,6 @@ final class IndexPageServiceTest extends TestCase
 
         $this->assertTrue($result->shoutbox->show);
         $this->assertNotEmpty($result->shoutbox->title);
-        $this->assertNotNull($result->shoutbox->toolbar);
     }
 
     public function test_forum_posts_hidden_when_setting_is_no(): void

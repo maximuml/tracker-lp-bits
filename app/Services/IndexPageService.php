@@ -17,7 +17,6 @@ use App\Support\Format;
 use App\Support\Html\SafeHtml;
 use App\Support\Locale;
 use App\Support\Ratio;
-use App\Support\Shoutbox;
 use App\Support\Url;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
@@ -142,7 +141,6 @@ final class IndexPageService
             canManage: $canManage,
             clearLabel: __('index.clear_shout_box'),
             clearConfirm: __('index.sure_to_clear_shout_box'),
-            toolbar: Shoutbox::toolbar('shbox', 'shbox_text'),
             messageLabel: __('index.text_message'),
             submitLabel: __('index.sumbit_shout'),
             clearButtonLabel: __('index.submit_clear'),

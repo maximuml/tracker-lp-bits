@@ -12,6 +12,7 @@ use App\Services\ShoutboxService;
 use App\Support\Shoutbox as ShoutboxSupport;
 use App\Support\UserDisplay;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -290,7 +291,7 @@ final class Shoutbox extends Component
 
         return view('livewire.shoutbox', [
             'items' => $items,
-            'toolbar' => ShoutboxSupport::toolbar('shbox', 'shbox_text'),
+            'toolbar' => new HtmlString(ShoutboxSupport::toolbar('shbox', 'shbox_text')->render()),
         ]);
     }
 }

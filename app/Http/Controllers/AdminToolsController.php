@@ -22,6 +22,7 @@ use App\Support\Validators;
 use App\ViewModels\ClearcachePageViewModel;
 use App\ViewModels\LocationPageViewModel;
 use App\ViewModels\TestipPageViewModel;
+use App\ViewModels\UserBanLogPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -67,14 +68,15 @@ class AdminToolsController extends BasePageController
         ];
 
         return $this->renderPage($request, 'user-ban-log', true, [
-            'q' => $q,
-            'header' => $header,
-            'rows' => $rows,
-            'paginationTop' => $paginationTop,
-            'paginationBottom' => $paginationBottom,
-            'pager' => $pager,
-            'serverRequestUri' => RequestValues::serverValue('REQUEST_URI'),
-        ]);
+            'vm' => UserBanLogPageViewModel::fromPageData([
+                'q' => $q,
+                'header' => $header,
+                'rows' => $rows,
+                'paginationTop' => $paginationTop,
+                'paginationBottom' => $paginationBottom,
+                'pager' => $pager,
+                'serverRequestUri' => RequestValues::serverValue('REQUEST_URI'),
+            ])]);
     }
 
     public function userBanLogSubmit(UserBanLogRequest $request): View|RedirectResponse|Response

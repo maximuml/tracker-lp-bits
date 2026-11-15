@@ -115,4 +115,49 @@ class NexusUrlRewriterTest extends TestCase
         $this->assertSame('/auth/passkey', $rewritten->server->get('REQUEST_URI'));
         $this->assertSame('/auth.php', $rewritten->server->get('SCRIPT_NAME'));
     }
+
+    public function test_announce_wrapper_script_name_is_preserved(): void
+    {
+        // OpenResty serves /announce with SCRIPT_NAME=/announce.php so the
+        // rewriter treats it as a wrapper request and keeps the script name.
+        $request = Request::create('http://localhost/announce?passkey=ab12', server: [
+            'SCRIPT_NAME' => '/announce.php',
+            'SCRIPT_FILENAME' => public_path('index.php'),
+        ]);
+
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
+
+        $this->assertSame('/announce?passkey=ab12', $rewritten->server->get('REQUEST_URI'));
+        $this->assertSame('/announce.php', $rewritten->server->get('SCRIPT_NAME'));
+        $this->assertSame(public_path('announce.php'), $rewritten->server->get('SCRIPT_FILENAME'));
+    }
+
+    public function test_scrape_php_wrapper_url_collapses_to_scrape(): void
+    {
+        $request = Request::create('http://localhost/scrape.php?info_hash=ab', server: [
+            'SCRIPT_NAME' => '/scrape.php',
+            'SCRIPT_FILENAME' => public_path('index.php'),
+        ]);
+
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
+
+        $this->assertSame('/scrape?info_hash=ab', $rewritten->server->get('REQUEST_URI'));
+        $this->assertSame('/scrape.php', $rewritten->server->get('SCRIPT_NAME'));
+    }
+
+    public function test_confirmemail_php_pathinfo_becomes_route_path(): void
+    {
+        // Segment-style legacy URL — the path tail must stay in REQUEST_URI
+        // so /confirmemail/{path?} can capture it; PATH_INFO must not be set.
+        $request = Request::create('http://localhost/confirmemail.php/12/deadbeef/user@example.com', server: [
+            'SCRIPT_NAME' => '/index.php',
+            'SCRIPT_FILENAME' => public_path('index.php'),
+            'PATH_INFO' => '/12/deadbeef/user@example.com',
+        ]);
+
+        $rewritten = (new NexusUrlRewriter)->rewrite($request);
+
+        $this->assertSame('/confirmemail/12/deadbeef/user@example.com', $rewritten->server->get('REQUEST_URI'));
+        $this->assertNull($rewritten->server->get('PATH_INFO'));
+    }
 }

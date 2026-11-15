@@ -147,18 +147,20 @@ Decision → Consequences). Add new ADRs here as numbered subsections.
   forcing re-login, and BitTorrent clients authenticate via passkey, not
   sessions.
 - **Decision:** Custom `NexusWebGuard` (`StatefulGuard`) reads the cookie via
-  `AuthCookie::verifyToken()`, falls back to legacy HMAC verification using
-  `users.auth_key`, resolves the `User` via `NexusWebUserProvider`, and is
-  registered as the `nexus-web` guard in `config/auth.php`. Cookie payloads
-  must carry the current `users.auth_version`; password changes, password
-  resets, auth-key rotation, hash upgrades, and logout-all increment it.
-  Cookies without a version are rejected. A separate `passkey` guard handles
-  tracker clients; Sanctum handles the API.
+  `AuthCookie::verifyToken()`, resolves the `User` via
+  `NexusWebUserProvider`, and is registered as the `nexus-web` guard in
+  `config/auth.php`. Cookie payloads must carry the current
+  `users.auth_version`; password changes, password resets, auth-key
+  rotation, hash upgrades, and logout-all increment it. Cookies without a
+  version are rejected. A separate `passkey` guard handles tracker
+  clients; Sanctum handles the API.
 - **Consequences:** Sessions survive the migration; clear web/API/tracker
   separation, and password/reset flows revoke previously issued web cookies.
   Cost: custom guard needs its own security review and manual implementation
-  of standard auth features. The legacy HMAC fallback should be removed once
-  all cookies have rotated to the encrypted format (W1-04).
+  of standard auth features. The legacy HMAC fallback (`users.auth_key`)
+  was removed in W1-04 (commit 7fe8f4a) — only APP_KEY-encrypted tokens are
+  accepted; stale HMAC cookies now fail verification like any invalid
+  token.
 
 ### ADR 0002: NexusRequestMiddleware for URL rewriting (Accepted, Sprint 17; worker-safe since T-11)
 

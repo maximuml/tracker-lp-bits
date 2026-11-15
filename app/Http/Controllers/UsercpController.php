@@ -105,9 +105,9 @@ class UsercpController extends BasePageController
             );
         }
 
-        $data = $this->pageService->build($action, $type)->toArray();
-
-        return $this->renderPage($request, 'usercp', true, $data);
+        return $this->renderPage($request, 'usercp', true, [
+            'vm' => $this->pageService->build($action, $type),
+        ]);
     }
 
     /**
@@ -181,9 +181,9 @@ class UsercpController extends BasePageController
             return redirect('/usercp');
         }
 
-        $data = $this->pageService->build('security', 'save')->toArray();
-
-        return $this->renderPage($request, 'usercp', true, $data);
+        return $this->renderPage($request, 'usercp', true, [
+            'vm' => $this->pageService->build('security', 'save'),
+        ]);
     }
 
     public function confirmSecurity(UpdateSecuritySettingsRequest $request): RedirectResponse

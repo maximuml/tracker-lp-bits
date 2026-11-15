@@ -11,8 +11,8 @@
             </tr>
         </thead>
     </x-slot:head>
-    @forelse ($files as $file)
-        <tr><td><span class="fileicon fi-{{ $file['badge']['cat'] }}" title="{{ $file['badge']['cat'] }}">{{ $file['badge']['label'] }}</span>{{ $file['filename'] }}</td><td class="text-right">{{ $file['size'] }}</td></tr>
+    @forelse ($vm->files as $file)
+        <tr><td><span class="fileicon fi-{{ $file->badge['cat'] }}" title="{{ $file->badge['cat'] }}">{{ $file->badge['label'] }}</span>{{ $file->filename }}</td><td class="text-right">{{ $file->size }}</td></tr>
     @empty
         <tr><td colspan="2" class="text-nxm-text-dim">{{ __('viewfilelist.text_no_files') }}</td></tr>
     @endforelse

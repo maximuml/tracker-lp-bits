@@ -1,6 +1,6 @@
-{{ sprintf(__('takeinvite.mail_one'), $siteName) }}{{ $senderUsername }}{{ sprintf(__('takeinvite.mail_two'), $siteName, $siteName) }}
-<b><a href="{{ $signupUrl }}">{{ __('takeinvite.mail_here') }}</a></b><br />
-{{ $signupUrl }}
-<br />{{ __('takeinvite.mail_three') }}{{ $inviteTimeout }}{{ sprintf(__('takeinvite.mail_four'), $siteName) }}{{ $senderUsername }}{{ __('takeinvite.mail_five') }}<br />
-{{ $personalBody }}
-<br /><br />{{ sprintf(__('takeinvite.mail_six'), $reportMail, $siteName) }}
+{{ sprintf(__('takeinvite.mail_one'), $vm->siteName) }}{{ $vm->senderUsername }}{{ sprintf(__('takeinvite.mail_two'), $vm->siteName, $vm->siteName) }}
+<b><a href="{{ $vm->signupUrl }}">{{ __('takeinvite.mail_here') }}</a></b><br />
+{{ $vm->signupUrl }}
+<br />{{ __('takeinvite.mail_three') }}{{ $vm->inviteTimeout }}{{ sprintf(__('takeinvite.mail_four'), $vm->siteName) }}{{ $vm->senderUsername }}{{ __('takeinvite.mail_five') }}<br />
+{{ $vm->personalBody }}
+<br /><br />{{ sprintf(__('takeinvite.mail_six'), $vm->reportMail, $vm->siteName) }}

@@ -25,6 +25,8 @@ use App\Support\Strings;
 use App\Support\TorrentBookmark;
 use App\Support\Url;
 use App\Support\UserDisplay;
+use App\ViewModels\Rss\TorrentRssItem;
+use App\ViewModels\Rss\TorrentRssViewModel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
@@ -278,34 +280,34 @@ class TorrentRssController extends BasePageController
                 $title .= '['.$author.']';
             }
 
-            $items[] = [
-                'title' => $cdata($title),
-                'url' => $itemurl,
-                'content' => $cdata((string) Format::formatComment((string) ($row['descr'] ?? ''), true, false, false, false)),
-                'author' => $author,
-                'categoryId' => (int) ($row['category'] ?? 0),
-                'categoryName' => (string) ($row['category_name'] ?? ''),
-                'commentsUrl' => $cdata($baseUrl.'/web/details/'.(int) ($row['id'] ?? 0).'?cmtpage=0#startcomments'),
-                'downloadUrl' => $itemdlurl,
-                'size' => (int) ($row['size'] ?? 0),
-                'guid' => preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))),
-                'pubDate' => date('r', strtotime((string) ($row['added'] ?? 'now')) ?: time()),
-            ];
+            $items[] = new TorrentRssItem(
+                title: $cdata($title),
+                url: $itemurl,
+                content: $cdata((string) Format::formatComment((string) ($row['descr'] ?? ''), true, false, false, false)),
+                author: $author,
+                categoryId: (int) ($row['category'] ?? 0),
+                categoryName: (string) ($row['category_name'] ?? ''),
+                commentsUrl: $cdata($baseUrl.'/web/details/'.(int) ($row['id'] ?? 0).'?cmtpage=0#startcomments'),
+                downloadUrl: $itemdlurl,
+                size: (int) ($row['size'] ?? 0),
+                guid: preg_replace_callback('/./s', $hexEsc, Strings::padHash((string) ($row['info_hash'] ?? ''))) ?? '',
+                pubDate: date('r', strtotime((string) ($row['added'] ?? 'now')) ?: time()),
+            );
         }
 
         $xml = '<?xml version="1.0" encoding="utf-8"?>'
-            .view('rss.torrents', [
-                'channelTitle' => $siteName.' Torrents',
-                'baseUrl' => $cdata($baseUrl),
-                'description' => $cdata('Latest torrents from '.$siteName.' - '.htmlspecialchars($slogan)),
-                'copyright' => $copyright,
-                'siteEmail' => $siteEmail,
-                'siteName' => $siteName,
-                'pubDate' => date('r'),
-                'projectName' => $projectName,
-                'httpHost' => $httpHost,
-                'items' => $items,
-            ])->render();
+            .view('rss.torrents', ['vm' => new TorrentRssViewModel(
+                channelTitle: $siteName.' Torrents',
+                baseUrl: $cdata($baseUrl),
+                description: $cdata('Latest torrents from '.$siteName.' - '.htmlspecialchars($slogan)),
+                copyright: $copyright,
+                siteEmail: $siteEmail,
+                siteName: $siteName,
+                pubDate: date('r'),
+                projectName: $projectName,
+                httpHost: $httpHost,
+                items: $items,
+            )])->render();
 
         Log::writeWithContext('rss cache generated');
         RedisGuard::attempt(static fn () => Cache::put($cacheKey, $xml, 300));

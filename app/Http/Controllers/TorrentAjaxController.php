@@ -19,6 +19,8 @@ use App\Support\Torrent\FileBadge;
 use App\Support\UserDisplay;
 use App\ViewModels\Torrent\PeerTableFactory;
 use App\ViewModels\Torrent\UserTorrentListVmFactory;
+use App\ViewModels\ViewFileListRow;
+use App\ViewModels\ViewFileListViewModel;
 use App\ViewModels\ViewsnatchesPageViewModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -43,14 +45,14 @@ class TorrentAjaxController extends BasePageController
         }
 
         $files = $this->torrentAjaxRepository->fileList($torrentId)
-            ->map(fn ($fileRow): array => [
-                'badge' => FileBadge::forFilename((string) (((array) $fileRow)['filename'] ?? '')),
-                'filename' => (string) (((array) $fileRow)['filename'] ?? ''),
-                'size' => Format::size((float) (((array) $fileRow)['size'] ?? 0)),
-            ])
+            ->map(fn ($fileRow): ViewFileListRow => new ViewFileListRow(
+                badge: FileBadge::forFilename((string) (((array) $fileRow)['filename'] ?? '')),
+                filename: (string) (((array) $fileRow)['filename'] ?? ''),
+                size: Format::size((float) (((array) $fileRow)['size'] ?? 0)),
+            ))
             ->all();
 
-        return response()->view('viewfilelist.index', ['files' => $files], 200, [
+        return response()->view('viewfilelist.index', ['vm' => new ViewFileListViewModel(array_values($files))], 200, [
             'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
             'Last-Modified' => gmdate('D, d M Y H:i:s').' GMT',
             'Cache-Control' => 'no-cache, must-revalidate',

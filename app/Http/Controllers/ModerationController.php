@@ -15,7 +15,6 @@ use App\Repositories\CommentRepository;
 use App\Repositories\ModerationRepository;
 use App\Services\PermissionChecker;
 use App\Support\Cache\NexusCache;
-use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
@@ -267,7 +266,7 @@ class ModerationController extends BasePageController
                             'kind' => 'torrent',
                             'id' => $torrent->id ?? 0,
                             'name' => (string) ($torrent->name ?? ''),
-                        ])->render();
+                        ]);
                     }
                     break;
                 case 'user':
@@ -279,7 +278,7 @@ class ModerationController extends BasePageController
                         $reporting = view('components.moderation.reporting_cell', [
                             'kind' => 'user',
                             'userHtml' => UserDisplay::username($userId),
-                        ])->render();
+                        ]);
                     }
                     break;
                 case 'offer':
@@ -292,7 +291,7 @@ class ModerationController extends BasePageController
                             'kind' => 'offer',
                             'id' => $offer->id ?? 0,
                             'name' => (string) ($offer->name ?? ''),
-                        ])->render();
+                        ]);
                     }
                     break;
                 case 'post':
@@ -307,7 +306,7 @@ class ModerationController extends BasePageController
                             'topicid' => $arr['topicid'],
                             'subject' => (string) $arr['subject'],
                             'userHtml' => UserDisplay::username($arr['postuserid']),
-                        ])->render();
+                        ]);
                     }
                     break;
                 case 'comment':
@@ -336,13 +335,13 @@ class ModerationController extends BasePageController
                             'url' => $url,
                             'name' => (string) $name,
                             'userHtml' => UserDisplay::username((int) ($arr['user'] ?? 0)),
-                        ])->render();
+                        ]);
                     }
                     break;
             }
 
             $row['type_label'] = $type;
-            $row['reporting'] = SafeHtml::fromTrustedHtml($reporting);
+            $row['reporting'] = $reporting;
             $row['added_formatted'] = Time::formatHtml($row['added']);
             $row['reporterHtml'] = UserDisplay::username($row['addedby']);
             $rows[] = $row;

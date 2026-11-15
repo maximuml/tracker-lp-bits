@@ -16,6 +16,7 @@ use App\Support\Html\Tag;
 use App\Support\Locale;
 use App\Support\Logger;
 use Carbon\Carbon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
@@ -249,7 +250,7 @@ class HitAndRunRepository extends BaseRepository
      * @param  mixed  $value
      * @param  mixed  $searchBoxId
      */
-    public function renderOnUploadPage($value, $searchBoxId): SafeHtml
+    public function renderOnUploadPage($value, $searchBoxId): Htmlable
     {
         if (HitAndRunMode::fromStringSafe(
             is_string($mode = HitAndRun::getConfig('mode')) ? $mode : null

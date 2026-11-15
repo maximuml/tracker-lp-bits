@@ -34,7 +34,7 @@ final class TorrentEditPageViewModel extends ViewModel
         public readonly SafeHtml|string $taxonomySelect,
         public readonly Htmlable|string $tagCheckbox,
         public readonly Htmlable|string $customFieldsHtml,
-        public readonly SafeHtml|string $hitAndRunHtml,
+        public readonly Htmlable|string $hitAndRunHtml,
         public readonly bool $canEdit,
         public readonly ?array $priceRow,
         public readonly int $sectionMode,

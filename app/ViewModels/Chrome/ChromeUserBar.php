@@ -17,6 +17,7 @@ use App\Support\PageLayoutContext;
 use App\Support\Ratio;
 use App\Support\Slots;
 use App\Support\UserDisplay;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * Per-user chrome row data: greeting links, message/transfer stats and
@@ -28,7 +29,7 @@ final class ChromeUserBar
 {
     private function __construct(
         public readonly SafeHtml $usernameHtml,
-        public readonly SafeHtml $ratio,
+        public readonly Htmlable $ratio,
         public readonly string $uploaded,
         public readonly string $downloaded,
         public readonly string $seedbonus,

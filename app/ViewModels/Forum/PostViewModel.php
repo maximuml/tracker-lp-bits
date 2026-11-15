@@ -35,7 +35,7 @@ final readonly class PostViewModel
         public int $postCount,
         public string $uploaded,
         public string $downloaded,
-        public SafeHtml $ratio,
+        public Htmlable $ratio,
         public SafeHtml $body,
         public ?SafeHtml $signature,
         public ?SafeHtml $editedBy,

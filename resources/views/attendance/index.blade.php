@@ -4,9 +4,9 @@
 
 @section('content')
 <x-page :title="__('attendance.title')" width="list">
-@if ($hasAttendedToday)
+@if ($vm->hasAttendedToday)
     <x-frame :caption="__('attendance.success')" :center="false">
-    <p>{{ $headerLeft ?? '' }}<span>{{ $headerRight ?? '' }}</span></p>
+    <p>{{ $vm->headerLeft ?? '' }}<span>{{ $vm->headerRight ?? '' }}</span></p>
     </x-frame>
 @else
     <x-frame :caption="__('attendance.title')" :center="false">
@@ -14,7 +14,7 @@
     <div>
     <form method="post" action="/web/user/attendance" class="nx-inline-block">@csrf
     <div class="nx-fgrid nx-fgrid--flat">
-    {{ $captchaHtml ?? '' }}
+    {{ $vm->captchaHtml ?? '' }}
     <div class="nx-ffull text-center"><input type="submit" value="{{ __('attendance.attend_button')}}" class="nx-btn nx-btn--primary"  data-submit-once /></div>
     </div>
     </form>
@@ -24,11 +24,11 @@
 @endif
     <div class="nx-flex-center"><div id="calendar" class="nx-calendar"></div></div>
     <ul>
-        @foreach ($bonusLines['lines'] ?? [] as $line)
+        @foreach ($vm->bonusLines['lines'] ?? [] as $line)
             <li>{{ $line }}</li>
         @endforeach
         <li><ol>
-            @foreach ($bonusLines['continuous'] ?? [] as $line)
+            @foreach ($vm->bonusLines['continuous'] ?? [] as $line)
                 <li>{{ $line }}</li>
             @endforeach
         </ol></li>

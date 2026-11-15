@@ -17,6 +17,7 @@ use App\Support\RequestValues;
 use App\Support\UserClass;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\FriendsPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -104,14 +105,15 @@ class FriendsController extends BasePageController
         }
 
         return $this->renderPage($request, 'friends', true, [
-            'userid' => $userid,
-            'friendsList' => $friendsList,
-            'blocks' => $blocks,
-            'titleUsername' => $userDisplayMap[$userid] ?? UserDisplay::username($userid),
-            'title' => (__('friends.head_personal_lists_for'))
-                .(string) ($titleRow['username'] ?? $currentUser['username'] ?? ''),
-            'canViewUserList' => Permission::can(PermissionEnum::VIEW_USER_LIST),
-        ]);
+            'vm' => FriendsPageViewModel::fromPageData([
+                'userid' => $userid,
+                'friendsList' => $friendsList,
+                'blocks' => $blocks,
+                'titleUsername' => $userDisplayMap[$userid] ?? UserDisplay::username($userid),
+                'title' => (__('friends.head_personal_lists_for'))
+                    .(string) ($titleRow['username'] ?? $currentUser['username'] ?? ''),
+                'canViewUserList' => Permission::can(PermissionEnum::VIEW_USER_LIST),
+            ])]);
     }
 
     public function friendsPost(Request $request): Response|RedirectResponse|View

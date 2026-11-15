@@ -290,8 +290,8 @@ JS, \json_encode($approvalTitle)), 'footer', false);
         }
 
         return new DenyBanner(
-            message: SafeHtml::fromTrustedHtml(
-                (string) Locale::trans('torrent.approval.deny_comment_show', ['reason' => e($denyLog->comment)], null)
+            message: SafeHtml::fromPlainText(
+                (string) Locale::trans('torrent.approval.deny_comment_show', ['reason' => $denyLog->comment], null)
             ),
         );
     }

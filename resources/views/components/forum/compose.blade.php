@@ -8,7 +8,7 @@
     @endif
     <input type="hidden" name="id" value="{{ $vm->hiddenId }}" />
     <input type="hidden" name="type" value="{{ $vm->hiddenType }}" />
-    <h2 class="nx-compose__title">@if (! $vm->titleHtml->isEmpty()){{ $vm->titleHtml }}@else{{ $vm->frameCaption() }}@endif</h2>
+    <h2 class="nx-compose__title">@if ($vm->hasTitleHtml()){{ $vm->titleHtml }}@else{{ $vm->frameCaption() }}@endif</h2>
     @if ($vm->hasSubject)
     <div class="nx-compose__field">
         <label for="subject">{{ __('functions.row_subject') }}</label>

@@ -17,7 +17,11 @@ class RulesTableSeeder extends Seeder
 
         DB::table('rules')->delete();
 
-        DB::table('rules')->insert([
+        DB::table('rules')->insert(array_map(function (array $row): array {
+            $row['title'] = html_entity_decode(strip_tags((string) $row['title']), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            return $row;
+        }, [
             0 => [
                 'id' => 21,
                 'lang_id' => 6,
@@ -279,7 +283,7 @@ class RulesTableSeeder extends Seeder
             You can join [color=#1cc6d5][b]Retiree[/b][/color] [b]unconditionally[/b].
             ',
             ],
-        ]);
+        ]));
 
     }
 }

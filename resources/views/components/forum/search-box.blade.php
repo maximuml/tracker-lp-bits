@@ -12,7 +12,7 @@
         </form>
     </div>
     @if ($search->searched && $search->hits > 0)
-        <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" label="Pagination top" />
+        <x-pagination :page="$search->page + 1" :pages="$search->pages" :href="$search->pagerHref().'page={page}'" :prev-label="__('functions.text_prev')" :next-label="__('functions.text_next')" :zero-based="true" label="Pagination top" />
         <x-data-table :caption="__('forums.head_forum_search')" captionHidden>
             <x-slot:head>
                 <thead>
@@ -33,6 +33,6 @@
                 </tr>
             @endforeach
         </x-data-table>
-        <x-forum.pager :page="$search->page" :pages="$search->pages" :href="$search->pagerHref()" :items="$search->pagerItems()" label="Pagination bottom" />
+        <x-pagination :page="$search->page + 1" :pages="$search->pages" :href="$search->pagerHref().'page={page}'" :prev-label="__('functions.text_prev')" :next-label="__('functions.text_next')" :zero-based="true" label="Pagination bottom" />
     @endif
 </x-page>

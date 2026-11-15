@@ -8,7 +8,9 @@ use App\Models\Comment;
 use App\Models\Torrent;
 use App\Models\User;
 use App\Support\Cache\NexusCache;
+use App\Support\Pagination;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -91,12 +93,12 @@ final class UiLinksAndTitleTest extends TestCase
     {
         $this->app->instance('request', Request::create('/forums', 'GET'));
 
-        $html = (string) view('components.forum.pager', [
-            'page' => 0,
-            'pages' => 3,
-            'href' => '?action=viewforum&forumid=1&',
-            'items' => [1, 2, 3],
-        ])->render();
+        [, , , , , , $pager] = Pagination::pager(10, 30, '?action=viewforum&forumid=1&');
+
+        $html = (string) Blade::render(
+            '<x-pagination :page="$page" :pages="$pages" :href="$href" :zero-based="true" />',
+            $pager
+        );
 
         $this->assertStringContainsString('href="/forums?action=viewforum', $html);
         $this->assertStringNotContainsString('href="?action=', $html);

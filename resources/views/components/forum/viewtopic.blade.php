@@ -12,7 +12,7 @@
             <a class="nx-btn nx-btn--primary" href="{{ request()->getPathInfo() }}?action=reply&amp;topicid={{ $topic->topicid }}" title="{{ __('forums.title_reply_directly') }}">{{ __('forums.text_add_reply') }}</a>
         @endif
     </x-slot:actions>
-    <x-forum.pager :page="$topic->page" :pages="$topic->pages" :href="$topic->pagerHref()" :items="$topic->pagerItems()" label="Pagination top" />
+    <x-pagination :page="$topic->page + 1" :pages="$topic->pages" :href="$topic->pagerHref().'page={page}'" :prev-label="__('functions.text_prev')" :next-label="__('functions.text_next')" :zero-based="true" label="Pagination top" />
     <div class="nx-postbar">
         <span>{{ __('forums.there_is') }}<b>{{ $topic->views }}</b>{{ __('forums.hits_on_this_topic') }}</span>
         <span class="nx-postbar__actions">
@@ -67,7 +67,7 @@
         @endif
     @endforeach
     </x-frame>
-    <x-forum.pager :page="$topic->page" :pages="$topic->pages" :href="$topic->pagerHref()" :items="$topic->pagerItems()" label="Pagination bottom" />
+    <x-pagination :page="$topic->page + 1" :pages="$topic->pages" :href="$topic->pagerHref().'page={page}'" :prev-label="__('functions.text_prev')" :next-label="__('functions.text_next')" :zero-based="true" label="Pagination bottom" />
     @if ($topic->mayPost)
         <div class="nx-quickreply">
             <b>{{ __('forums.text_quick_reply') }}</b>

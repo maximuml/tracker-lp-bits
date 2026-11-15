@@ -101,10 +101,13 @@ final class ForumTopicViewService
         }
         if ($page === 'last') {
             $page = $pages - 1;
-        } elseif ($page < 0) {
-            $page = 0;
-        } elseif ($page > $pages - 1) {
-            $page = $pages - 1;
+        } elseif ($request->query->has('page')) {
+            $page = (int) $page;
+            if ($page < 0) {
+                $page = 0;
+            } elseif ($page > $pages - 1) {
+                $page = $pages - 1;
+            }
         } elseif ($actor->value('clicktopic', 1) == UserClickTopic::FIRSTPAGE->value) {
             $page = 0;
         } else {

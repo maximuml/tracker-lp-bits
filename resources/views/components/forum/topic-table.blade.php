@@ -47,7 +47,7 @@
             </td>
         </tr>
     </x-data-table>
-    <x-forum.pager :page="$list->page" :pages="$list->pages" :href="$list->pagerHref()" :items="$list->pagerItems()" />
+    <x-pagination :page="$list->page + 1" :pages="$list->pages" :href="$list->pagerHref().'page={page}'" :prev-label="__('functions.text_prev')" :next-label="__('functions.text_next')" :zero-based="true" />
     @foreach ($list->tooltips as $tip)
         @if ($loop->first)<div class="nx-hidden">@endif
         <div id="{{ $tip['id'] }}">{{ $tip['content'] }}@if($tip['contentTail'] ?? '')<br />{{ $tip['contentTail'] }}@endif</div>

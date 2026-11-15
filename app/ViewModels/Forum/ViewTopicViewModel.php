@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace App\ViewModels\Forum;
 
 use App\Support\Html\SafeHtml;
-use App\View\Components\Pagination;
 use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * The `viewtopic` section: breadcrumb, paginated posts, moderator
  * toolbox and quick reply.
  *
- * `page` is the 0-based legacy `page=` query value — `x-forum.pager`
+ * `page` is the 0-based legacy `page=` query value — `x-pagination`
  * maps it to the 1-based display window.
  */
 final readonly class ViewTopicViewModel
@@ -50,16 +49,5 @@ final readonly class ViewTopicViewModel
         $href = '/forums?action=viewtopic&topicid='.$this->topicid;
 
         return $this->authorid !== 0 ? $href.'&authorid='.$this->authorid.'&' : $href.'&';
-    }
-
-    /**
-     * 1-based display window for `x-forum.pager` (maps back to the
-     * 0-based `page=` param).
-     *
-     * @return list<int|string>
-     */
-    public function pagerItems(): array
-    {
-        return Pagination::window($this->page + 1, $this->pages);
     }
 }

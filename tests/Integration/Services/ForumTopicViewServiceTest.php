@@ -1029,4 +1029,40 @@ final class ForumTopicViewServiceTest extends TestCase
         $keyScript = (string) $vm->keyScript;
         $this->assertStringContainsString('var maxpage=0;', $keyScript);
     }
+
+    public function test_viewtopic_explicit_page_is_honored(): void
+    {
+        $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1, 'page' => '1'], [], 21);
+
+        $this->assertSame(1, $vm->page);
+        $this->assertSame(3, $vm->pages);
+    }
+
+    public function test_viewtopic_page_is_clamped_to_last_page(): void
+    {
+        $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1, 'page' => '9'], [], 21);
+
+        $this->assertSame(2, $vm->page);
+    }
+
+    public function test_viewtopic_page_last_resolves_to_last_page(): void
+    {
+        $vm = $this->viewTopicVm([], [], [], [], ['topicid' => 1, 'page' => 'last'], [], 21);
+
+        $this->assertSame(2, $vm->page);
+    }
+
+    public function test_viewtopic_absent_page_uses_clicktopic_firstpage(): void
+    {
+        $vm = $this->viewTopicVm(['clicktopic' => 0], [], [], [], ['topicid' => 1], [], 21);
+
+        $this->assertSame(0, $vm->page);
+    }
+
+    public function test_viewtopic_absent_page_uses_clicktopic_lastpage(): void
+    {
+        $vm = $this->viewTopicVm(['clicktopic' => 1], [], [], [], ['topicid' => 1], [], 21);
+
+        $this->assertSame(2, $vm->page);
+    }
 }

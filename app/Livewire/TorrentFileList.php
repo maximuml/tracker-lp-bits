@@ -8,6 +8,8 @@ use App\Contracts\Repositories\TorrentAjaxRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Support\Format;
 use App\Support\Torrent\FileBadge;
+use App\ViewModels\ViewFileListRow;
+use App\ViewModels\ViewFileListViewModel;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -53,15 +55,15 @@ final class TorrentFileList extends Component
     {
         $files = $this->open
             ? $this->torrentAjaxRepository()->fileList($this->torrentId)
-                ->map(fn ($fileRow): array => [
-                    'badge' => FileBadge::forFilename((string) (((array) $fileRow)['filename'] ?? '')),
-                    'filename' => (string) (((array) $fileRow)['filename'] ?? ''),
-                    'size' => Format::size((float) (((array) $fileRow)['size'] ?? 0)),
-                ])
+                ->map(fn ($fileRow): ViewFileListRow => new ViewFileListRow(
+                    badge: FileBadge::forFilename((string) (((array) $fileRow)['filename'] ?? '')),
+                    filename: (string) (((array) $fileRow)['filename'] ?? ''),
+                    size: Format::size((float) (((array) $fileRow)['size'] ?? 0)),
+                ))
                 ->all()
             : [];
 
-        return view('livewire.torrent-file-list', ['files' => $files, 'CURUSER' => $this->actor()->toLegacyArray()]);
+        return view('livewire.torrent-file-list', ['vm' => new ViewFileListViewModel(array_values($files)), 'CURUSER' => $this->actor()->toLegacyArray()]);
     }
 
     private function torrentAjaxRepository(): TorrentAjaxRepositoryInterface

@@ -42,6 +42,7 @@ use App\Support\SetlistLookup;
 use App\Support\Url;
 use App\Support\UserDisplay;
 use App\Support\Validators;
+use App\ViewModels\Email\InviteEmailViewModel;
 use App\ViewModels\IncrementBulkPageViewModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -234,14 +235,14 @@ class SystemBulkController extends BasePageController
             $reportMail = SiteConfig::current()->main->reportEmail();
             $inviteTimeout = (string) SiteConfig::current()->main->inviteTimeout();
 
-            $message = nl2br(view('emails.invite', [
-                'senderUsername' => $this->actor->username,
-                'signupUrl' => $signupUrl,
-                'inviteTimeout' => $inviteTimeout,
-                'personalBody' => $body,
-                'siteName' => $siteName,
-                'reportMail' => $reportMail,
-            ])->render());
+            $message = nl2br(view('emails.invite', ['vm' => new InviteEmailViewModel(
+                senderUsername: $this->actor->username,
+                signupUrl: $signupUrl,
+                inviteTimeout: $inviteTimeout,
+                personalBody: $body,
+                siteName: $siteName,
+                reportMail: $reportMail,
+            )])->render());
 
             $sendResult = Mail::sentLegacy(
                 $email,

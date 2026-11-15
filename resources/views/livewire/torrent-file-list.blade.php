@@ -3,6 +3,6 @@
     <span @if (! $open) class="nx-hidden" @endif><a href="#" wire:click.prevent="hide">{{ __('details.text_hide_list') }}</a></span>
     <i wire:loading>{{ __('functions.text_loading') }}</i>
     @if ($open)
-        @include('viewfilelist.index', ['files' => $files, 'CURUSER' => $CURUSER])
+        @include('viewfilelist.index', ['vm' => $vm, 'CURUSER' => $CURUSER])
     @endif
 </div>

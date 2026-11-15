@@ -11,7 +11,6 @@ use App\Enums\Permission\PermissionEnum;
 use App\Repositories\PostLookupRepository;
 use App\Repositories\TopicRepository;
 use App\Support\Config\SiteConfig;
-use App\Support\Html\SafeHtml;
 use App\Support\PageResponses;
 use App\ViewModels\Forum\ForumComposeViewModel;
 use Illuminate\Http\Request;
@@ -47,13 +46,13 @@ final class ForumComposeService
         switch ($type) {
             case 'new':
                 $forumname = $this->forumRepository->getForumName((int) $id) ?? '';
-                $title = view('components.title-link', ['before' => __('forums.text_new_topic_in').' ', 'url' => '/forums?action=viewforum&forumid='.$id, 'text' => $forumname, 'after' => ' '.__('forums.text_forum')])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_new_topic_in').' ', 'url' => '/forums?action=viewforum&forumid='.$id, 'text' => $forumname, 'after' => ' '.__('forums.text_forum')]);
                 $hassubject = true;
                 break;
 
             case 'reply':
                 $topicname = $this->topicRepository->getTopicSubject((int) $id) ?? '';
-                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '/forums?action=viewtopic&topicid='.$id, 'text' => $topicname, 'after' => ' '])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '/forums?action=viewtopic&topicid='.$id, 'text' => $topicname, 'after' => ' ']);
                 break;
 
             case 'quote':
@@ -63,7 +62,7 @@ final class ForumComposeService
                 }
                 $topicid = $post['topicid'];
                 $topicname = $post['topic_subject'] ?? '';
-                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '/forums?action=viewtopic&topicid='.$topicid, 'text' => $topicname, 'after' => ' '])->render();
+                $title = view('components.title-link', ['before' => __('forums.text_reply_to_topic').' ', 'url' => '/forums?action=viewtopic&topicid='.$topicid, 'text' => $topicname, 'after' => ' ']);
                 $body = '[quote='.(string) $post['username'].']'.(string) $post['body'].'[/quote]';
                 $postid = $id;
                 $hiddenId = $topicid;
@@ -80,7 +79,7 @@ final class ForumComposeService
                     $hassubject = true;
                 }
                 $body = (string) $post['body'];
-                $title = __('forums.text_edit_post');
+                $title = (string) __('forums.text_edit_post');
                 break;
 
             default:
@@ -88,7 +87,7 @@ final class ForumComposeService
         }
 
         return new ForumComposeViewModel(
-            titleHtml: SafeHtml::fromTrustedHtml((string) $title),
+            titleHtml: $title,
             hiddenId: (int) $hiddenId,
             hiddenType: $hiddenType,
             postid: $postid,

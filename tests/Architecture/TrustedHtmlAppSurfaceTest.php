@@ -72,8 +72,11 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
      * Strings::hidden (BBCode::hidden delegates), UserDisplay::
      * avatarImage(+WithContext); consumers accept them via Htmlable
      * props or `(string)` casts.
+     * 79 → 76 (2026-11-15): compose title keeps `View` objects (titleHtml
+     * → Htmlable|string + hasTitleHtml()); chrome alert texts and the
+     * deny-banner message are lang/plain strings → fromPlainText.
      */
-    private const BASELINE_TRUSTED_HTML_CALLS = 79;
+    private const BASELINE_TRUSTED_HTML_CALLS = 76;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

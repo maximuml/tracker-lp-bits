@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', $title)
+@section('title', $vm->title)
 
 @section('content')
-<x-page :title="__('friends.text_personallist').' '.$titleUsername" width="list">
+<x-page :title="__('friends.text_personallist').' '.$vm->titleUsername" width="list">
 <section class="nx-idx-card">
 <h2><a name="friends">{{ __('friends.text_friendlist')}}</a></h2>
 <div>
 
-@if (empty($friendsList))
+@if (empty($vm->friendsList))
     <x-empty-state :title="__('friends.text_friends_empty')" />
 @else
     <div class="nx-fcards">
-    @foreach ($friendsList as $friend)
+    @foreach ($vm->friendsList as $friend)
         <div>
         <div class="nx-fcard nx-main">
         <div class="text-center">
@@ -20,7 +20,7 @@
         </div><div class="grow">
         <div class="flex items-start nx-main">
         <div class="nx-embedded w-[80%]">{{ $friend['usernameHtml'] }} ({{ $friend['titleHtml'] }})<br /><br />{{ __('friends.text_last_seen_on') }}<x-time :value="$friend['lastSeen']" /></div>
-        <div class="nx-embedded w-[20%]"><form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $friend['id'] }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('friends.text_remove_from_friends') }}</button></form><br /><br /><a href="/web/sendmessage?receiver={{ $friend['id'] }}">{{ __('friends.text_send_pm') }}</a></div>
+        <div class="nx-embedded w-[20%]"><form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $vm->userid }}" /><input type="hidden" name="type" value="friend" /><input type="hidden" name="targetid" value="{{ $friend['id'] }}" /><button type="submit" class="nxm-linkbtn" data-submit-once>{{ __('friends.text_remove_from_friends') }}</button></form><br /><br /><a href="/web/sendmessage?receiver={{ $friend['id'] }}">{{ __('friends.text_send_pm') }}</a></div>
         </div>
         </div>
         </div>
@@ -35,14 +35,14 @@
 <section class="nx-idx-card">
 <h2><a name="blocks">{{ __('friends.text_blocked_users')}}</a></h2>
 <div>
-@if ($blocks === [])
+@if ($vm->blocks === [])
 <x-empty-state :title="__('friends.text_blocklist_empty')" />
 @else
-<div class="nxm-grid-6">@foreach ($blocks as $block)<div>[<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $userid }}" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $block['id'] }}" /><button type="submit" class="nxm-linkbtn small" data-submit-once>D</button></form>] {{ $block['usernameHtml'] }}</div>@endforeach</div>
+<div class="nxm-grid-6">@foreach ($vm->blocks as $block)<div>[<form method="post" action="/web/friends/delete" class="nx-inline">@csrf<input type="hidden" name="id" value="{{ $vm->userid }}" /><input type="hidden" name="type" value="block" /><input type="hidden" name="targetid" value="{{ $block['id'] }}" /><button type="submit" class="nxm-linkbtn small" data-submit-once>D</button></form>] {{ $block['usernameHtml'] }}</div>@endforeach</div>
 @endif
 </div>
 </section>
-@if ($canViewUserList)
+@if ($vm->canViewUserList)
     <p><a href="/web/users"><b>{{ __('friends.text_find_user')}}</b></a></p>
 @endif
 </x-page>

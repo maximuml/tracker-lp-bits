@@ -16,6 +16,7 @@ use App\Support\Shoutbox;
 use App\Support\SseEventId;
 use App\Support\SseWriter;
 use App\Support\UserDisplay;
+use App\ViewModels\ShoutboxHistoryPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -108,13 +109,14 @@ class ShoutboxController extends BasePageController
             : '';
 
         return $this->renderPage($request, 'shoutbox_history', true, [
-            'items' => $this->decorateHistoryRows($rows, $currentUserId, $isStaff, $reactionData, $userDisplayMap),
-            'page' => (int) ($result['page'] ?? 1),
-            'totalPages' => $totalPages,
-            'paginationBase' => $paginationBase,
-            'filters' => $filters,
-            'csrfToken' => Shoutbox::csrfToken($currentUserId),
-        ]);
+            'vm' => ShoutboxHistoryPageViewModel::fromPageData([
+                'items' => $this->decorateHistoryRows($rows, $currentUserId, $isStaff, $reactionData, $userDisplayMap),
+                'page' => (int) ($result['page'] ?? 1),
+                'totalPages' => $totalPages,
+                'paginationBase' => $paginationBase,
+                'filters' => $filters,
+                'csrfToken' => Shoutbox::csrfToken($currentUserId),
+            ])]);
     }
 
     /**

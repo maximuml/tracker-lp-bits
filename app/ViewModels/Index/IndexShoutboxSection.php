@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\ViewModels\Index;
 
-use App\Support\Html\SafeHtml;
-
 /**
  * Shoutbox iframe + compose form section on the index page.
  */
@@ -20,7 +18,6 @@ final readonly class IndexShoutboxSection
         public bool $canManage = false,
         public string $clearLabel = '',
         public string $clearConfirm = '',
-        public ?SafeHtml $toolbar = null,
         public string $messageLabel = '',
         public string $submitLabel = '',
         public string $clearButtonLabel = '',

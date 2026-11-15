@@ -61,8 +61,14 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
      * disabled) became bools or `{{ $openAttr }}` echoes; class-name-b
      * `inner` is now plain text; Shoutbox username uses instanceof +
      * fromPlainText; mysql_stats percent values carry a literal NBSP.
+     * 100 → 83 (2026-11-15): render-and-wrap sites became `View`
+     * objects — technical_info/bdinfo/shoutbox toolbar/upload_fields/
+     * tag checkboxes/userdetails partials/attendance headers now pass
+     * the view to `{{ }}` as Htmlable props; attach-icon data flows to
+     * attach-file as scalars + @include; the dead IndexShoutboxSection
+     * toolbar prop was removed.
      */
-    private const BASELINE_TRUSTED_HTML_CALLS = 100;
+    private const BASELINE_TRUSTED_HTML_CALLS = 83;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

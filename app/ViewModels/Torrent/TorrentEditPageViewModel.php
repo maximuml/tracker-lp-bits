@@ -6,6 +6,7 @@ namespace App\ViewModels\Torrent;
 
 use App\Support\Html\SafeHtml;
 use App\ViewModels\ViewModel;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * ViewModel for the torrent edit page (GET /edit?id=N).
@@ -31,8 +32,8 @@ final class TorrentEditPageViewModel extends ViewModel
         public readonly string $returnto,
         public readonly string $requestUri,
         public readonly SafeHtml|string $taxonomySelect,
-        public readonly SafeHtml|string $tagCheckbox,
-        public readonly SafeHtml|string $customFieldsHtml,
+        public readonly Htmlable|string $tagCheckbox,
+        public readonly Htmlable|string $customFieldsHtml,
         public readonly SafeHtml|string $hitAndRunHtml,
         public readonly bool $canEdit,
         public readonly ?array $priceRow,

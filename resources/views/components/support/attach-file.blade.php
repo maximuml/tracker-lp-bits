@@ -1,2 +1,2 @@
-@props(['icon', 'href', 'id', 'filename', 'downloadsLabel', 'downloadCount', 'timeText', 'sizeText'])
-<div class="attach">{{ $icon }}&nbsp;&nbsp;<a href="{{ $href }}" target="_blank" rel="noopener" id="attach{{ $id }}" data-domtt-promo>{{ $filename }}</a><template class="nx-tt"><strong>{{ $downloadsLabel }}</strong>: {{ $downloadCount }}<br />{{ $timeText }}</template>&nbsp;&nbsp;<span class="size">({{ $sizeText }})</span></div>
+@props(['iconAlt', 'iconName', 'href', 'id', 'filename', 'downloadsLabel', 'downloadCount', 'timeText', 'sizeText'])
+<div class="attach">@include('components.support.attach-icon', ['alt' => $iconAlt, 'icon' => $iconName])&nbsp;&nbsp;<a href="{{ $href }}" target="_blank" rel="noopener" id="attach{{ $id }}" data-domtt-promo>{{ $filename }}</a><template class="nx-tt"><strong>{{ $downloadsLabel }}</strong>: {{ $downloadCount }}<br />{{ $timeText }}</template>&nbsp;&nbsp;<span class="size">({{ $sizeText }})</span></div>

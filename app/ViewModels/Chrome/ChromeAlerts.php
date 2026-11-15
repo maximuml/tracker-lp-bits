@@ -194,7 +194,7 @@ final class ChromeAlerts
         return array_map(
             static fn (array $alert): array => [
                 'url' => (string) ($alert['url'] ?? ''),
-                'text' => SafeHtml::fromPlainText((string) ($alert['text'] ?? '')),
+                'text' => SafeHtml::fromTrustedHtml((string) ($alert['text'] ?? '')),
                 'color' => self::alertColor((string) ($alert['color'] ?? '')),
             ],
             $alerts,

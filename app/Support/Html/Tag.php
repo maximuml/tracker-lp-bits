@@ -9,6 +9,8 @@ use App\Support\Comment;
 use App\Support\Security;
 use App\Support\Smilies;
 use App\Support\Url;
+use Illuminate\Support\HtmlString;
+use Illuminate\View\View;
 
 /**
  * HTML tag builders extracted from the legacy Html facade.
@@ -24,16 +26,16 @@ final class Tag
      * `pic/key_shortcut.js`. The order is `maxpage` first, then
      * `currentpage` — preserved verbatim.
      */
-    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): SafeHtml
+    public static function keyShortcutScript(int $page = 1, int $pages = 1, string $nonce = ''): HtmlString
     {
         $currentpage = 'var currentpage='.$page.';';
         $maxpage = 'var maxpage='.$pages.';';
 
-        return SafeHtml::fromTrustedHtml("\n".ltrim(view('components.support.tag.key-shortcut', [
+        return new HtmlString("\n".view('components.support.tag.key-shortcut', [
             'nonce' => $nonce,
             'maxpage' => $maxpage,
             'currentpage' => $currentpage,
-        ])->render(), "\n"));
+        ])->render());
     }
 
     /**
@@ -195,14 +197,14 @@ final class Tag
      *
      * Mirrors `quickreply()`.
      */
-    public static function quickReply(string $formName, string $textareaName, string $submitLabel): SafeHtml
+    public static function quickReply(string $formName, string $textareaName, string $submitLabel): View
     {
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.tag.quick-reply', [
+        return view('components.support.tag.quick-reply', [
             'name' => $textareaName,
             'label' => (string) (__('functions.row_body')),
             'smileRow' => Smilies::quickRow($formName, $textareaName),
             'submitLabel' => $submitLabel,
-        ])->render()));
+        ]);
     }
 
     /**

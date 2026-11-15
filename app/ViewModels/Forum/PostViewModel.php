@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ViewModels\Forum;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * One post row inside `x-forum.viewtopic`.
@@ -28,7 +29,7 @@ final readonly class PostViewModel
         public SafeHtml $by,
         public string $authorToggleUrl,
         public string $authorToggleLabel,
-        public SafeHtml $avatarImage,
+        public Htmlable $avatarImage,
         public string $classImage,
         public string $className,
         public int $postCount,

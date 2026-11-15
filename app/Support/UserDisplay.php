@@ -13,6 +13,7 @@ use App\Support\Html\SafeHtml;
 use App\Support\State\UserDisplayState;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
+use Illuminate\View\View;
 
 /**
  * Legacy user display helpers extracted from `include/functions.php`.
@@ -255,15 +256,15 @@ final class UserDisplay
         return (string) ($row['username'] ?? '');
     }
 
-    public static function avatarImage(string $url, string $langFolder): SafeHtml
+    public static function avatarImage(string $url, string $langFolder): View
     {
-        return SafeHtml::fromTrustedHtml(trim(view('components.support.avatar-img', ['url' => $url, 'langFolder' => $langFolder])->render()));
+        return view('components.support.avatar-img', ['url' => $url, 'langFolder' => $langFolder]);
     }
 
     /**
      * Context-aware wrapper for {@see avatarImage()}.
      */
-    public static function avatarImageWithContext(string $url): SafeHtml
+    public static function avatarImageWithContext(string $url): View
     {
         return self::avatarImage($url, Locale::currentLangDir());
     }

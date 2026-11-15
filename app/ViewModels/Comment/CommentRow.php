@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ViewModels\Comment;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * One rendered comment inside the shared comment table.
@@ -17,7 +18,7 @@ final class CommentRow
         public readonly SafeHtml $author,
         public readonly SafeHtml $addedTime,
         public readonly bool $showViewOriginal,
-        public readonly SafeHtml $avatar,
+        public readonly Htmlable $avatar,
         public readonly SafeHtml $text,
         public readonly ?SafeHtml $editedBy,
         public readonly ?SafeHtml $editedAt,

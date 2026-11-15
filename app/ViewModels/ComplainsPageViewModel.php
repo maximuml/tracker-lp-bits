@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ViewModels;
 
 use App\Support\Html\SafeHtml;
+use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * ViewModel for the complains page (complains/index.blade.php).
@@ -36,7 +37,7 @@ final class ComplainsPageViewModel extends ViewModel
         public readonly ?array $user = null,
         public readonly array $replyRows = [],
         public readonly array $replyUserMap = [],
-        public readonly SafeHtml|string $replyBoxHtml = '',
+        public readonly Htmlable|string $replyBoxHtml = '',
         public readonly SafeHtml|string $captchaHtml = '',
     ) {}
 

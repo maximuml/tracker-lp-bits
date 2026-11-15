@@ -71,7 +71,7 @@ final class UserDetailPageViewModel extends ViewModel
         public readonly string $userManageSystemUrl,
         public readonly SafeHtml $usernameHtml,
         public readonly SafeHtml $invitedByHtml,
-        public readonly SafeHtml|string $avatarHtml,
+        public readonly Htmlable|string $avatarHtml,
         public readonly SafeHtml $bonusTableHtml,
         public readonly SafeHtml $hrStatusHtml,
         public readonly int $ipHistoryCount,

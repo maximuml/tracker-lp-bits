@@ -67,8 +67,13 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
      * the view to `{{ }}` as Htmlable props; attach-icon data flows to
      * attach-file as scalars + @include; the dead IndexShoutboxSection
      * toolbar prop was removed.
+     * 83 → 79 (2026-11-15): four more render-and-wrap helpers return
+     * `View`/`HtmlString` — Tag::keyShortcutScript/quickReply,
+     * Strings::hidden (BBCode::hidden delegates), UserDisplay::
+     * avatarImage(+WithContext); consumers accept them via Htmlable
+     * props or `(string)` casts.
      */
-    private const BASELINE_TRUSTED_HTML_CALLS = 83;
+    private const BASELINE_TRUSTED_HTML_CALLS = 79;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

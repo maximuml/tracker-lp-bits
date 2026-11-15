@@ -21,7 +21,7 @@ use App\Support\AssetAppender;
 use App\Support\Locale;
 use App\Support\PageResponses;
 use App\Support\Pagination;
-use App\Support\RequestValues;
+use App\ViewModels\HitAndRun\MyHrPageViewModel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -91,7 +91,6 @@ class MyController extends Controller
             return redirect('/web/myhr'.($qs ? '?'.$qs : ''));
         }
 
-        $curUser = $this->actor->toLegacyArray();
         $viewerId = $this->actor->id;
         $userid = $viewerId;
         $pagerParams = [];
@@ -125,7 +124,7 @@ class MyController extends Controller
         $q = htmlspecialchars((string) ($request->query('q') ?? ''));
 
         $rescount = $this->hitAndRunRepository->countForUser($userid, $status);
-        [$pagertop, $pagerbottom, $limit, $offset, $pageSize, , $pager] = Pagination::pager(50, $rescount, sprintf('?%s&', $queryString));
+        [, , $limit, $offset, $pageSize, , $pager] = Pagination::pager(50, $rescount, sprintf('?%s&', $queryString));
 
         $list = [];
         if ($rescount > 0) {
@@ -161,22 +160,17 @@ JS;
         }
 
         return view('my.hr', [
-            'CURUSER' => $curUser,
-            'userInfo' => $userInfo,
-            'userid' => $userid,
-            'status' => $status,
-            'allStatus' => $allStatus,
-            'headerFilters' => $headerFilters,
-            'queryString' => $queryString,
-            'q' => $q,
-            'requestUri' => RequestValues::serverValue('REQUEST_URI'),
-            'rescount' => $rescount,
-            'pagertop' => $pagertop,
-            'pagerbottom' => $pagerbottom,
-            'pager' => $pager,
-            'list' => $list,
-            'cancelHrBonus' => $cancelHrBonus,
-            'page' => $page,
+            'vm' => new MyHrPageViewModel(
+                userInfo: $userInfo,
+                userid: $userid,
+                status: (string) $status,
+                headerFilters: $headerFilters,
+                queryString: $queryString,
+                q: $q,
+                rescount: $rescount,
+                pager: $pager,
+                page: $page,
+            ),
         ]);
     }
 }

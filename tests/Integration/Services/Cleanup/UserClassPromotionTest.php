@@ -55,6 +55,101 @@ final class UserClassPromotionTest extends TestCase
         $this->assertNotNull($user);
         $this->assertSame(UserClass::VETERAN_USER->value, (int) $user->class);
         $this->assertSame(UserClass::VETERAN_USER->value, (int) $user->max_class_once);
+        // First-time reaching Veteran grants the seeded 3 invites.
+        $this->assertSame(3, (int) $user->invites);
+    }
+
+    public function test_missing_promotion_dl_disables_that_tier(): void
+    {
+        $this->setVeteranPromotionSettings();
+        DB::table('settings')->where('name', 'account.vudl')->delete();
+        Settings::resetCache();
+
+        $uid = $this->insertUser([
+            'class' => UserClass::ELITE_USER->value,
+            'max_class_once' => UserClass::ELITE_USER->value,
+            'downloaded' => 2 * 1024 * 1024 * 1024,
+            'uploaded' => 1024 * 1024 * 1024,
+            'seed_points' => 0,
+        ]);
+
+        $this->promotion->promoteUsersByClass();
+
+        $this->assertSame(
+            UserClass::ELITE_USER->value,
+            (int) DB::table('users')->where('id', $uid)->value('class'),
+        );
+    }
+
+    public function test_missing_promotion_ratio_means_no_ratio_gate(): void
+    {
+        $this->setVeteranPromotionSettings();
+        DB::table('settings')->where('name', 'account.vuprratio')->delete();
+        Settings::resetCache();
+
+        $uid = $this->insertUser([
+            'class' => UserClass::ELITE_USER->value,
+            'max_class_once' => UserClass::ELITE_USER->value,
+            'downloaded' => 2 * 1024 * 1024 * 1024,
+            'uploaded' => 1024 * 1024 * 1024,
+            'seed_points' => 0,
+        ]);
+
+        $this->promotion->promoteUsersByClass();
+
+        $this->assertSame(
+            UserClass::VETERAN_USER->value,
+            (int) DB::table('users')->where('id', $uid)->value('class'),
+        );
+    }
+
+    public function test_missing_promotion_time_means_no_membership_gate(): void
+    {
+        $this->setVeteranPromotionSettings();
+        DB::table('settings')->where('name', 'account.vutime')->delete();
+        Settings::resetCache();
+
+        $uid = $this->insertUser([
+            'class' => UserClass::ELITE_USER->value,
+            'max_class_once' => UserClass::ELITE_USER->value,
+            'downloaded' => 2 * 1024 * 1024 * 1024,
+            'uploaded' => 1024 * 1024 * 1024,
+            'seed_points' => 0,
+            'added' => now()->subDay()->toDateTimeString(),
+        ]);
+
+        $this->promotion->promoteUsersByClass();
+
+        $this->assertSame(
+            UserClass::VETERAN_USER->value,
+            (int) DB::table('users')->where('id', $uid)->value('class'),
+        );
+    }
+
+    public function test_promotion_grants_zero_invites_when_tier_missing_from_map(): void
+    {
+        $this->setVeteranPromotionSettings();
+        DB::table('settings')->updateOrInsert(
+            ['name' => 'account.getInvitesByPromotion'],
+            ['value' => '{"2":"1","3":"0","8":"5"}', 'autoload' => 1],
+        );
+        Settings::resetCache();
+
+        $uid = $this->insertUser([
+            'class' => UserClass::ELITE_USER->value,
+            'max_class_once' => UserClass::ELITE_USER->value,
+            'downloaded' => 2 * 1024 * 1024 * 1024,
+            'uploaded' => 1024 * 1024 * 1024,
+            'seed_points' => 0,
+            'invites' => 0,
+        ]);
+
+        $this->promotion->promoteUsersByClass();
+
+        $user = DB::table('users')->where('id', $uid)->first();
+        $this->assertNotNull($user);
+        $this->assertSame(UserClass::VETERAN_USER->value, (int) $user->class);
+        $this->assertSame(0, (int) $user->invites);
     }
 
     public function test_retired_tier_is_not_a_promotion_candidate(): void

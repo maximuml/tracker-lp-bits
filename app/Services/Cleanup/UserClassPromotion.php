@@ -143,7 +143,10 @@ final class UserClassPromotion
         }
 
         $predecessor = UserClassEnum::fromIntSafe($class)->autoPredecessor();
-        $oriclass = $predecessor !== null ? $predecessor->value : (int) $class - 1;
+        if ($predecessor === null) {
+            return;
+        }
+        $oriclass = $predecessor->value;
 
         $res = $this->userCleanupRepository->listPromotionCandidates(
             $oriclass,

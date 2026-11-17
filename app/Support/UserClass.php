@@ -25,9 +25,9 @@ use Illuminate\Contracts\Support\Htmlable;
  * that tier → key mapping. It is extracted here as {@see langKey()} and
  * both legacy switches collapse into a single lookup.
  *
- * The class-icon resolution from `get_user_class_image()` also lives
- * here as {@see imagePath()} / {@see allImagePaths()}: a pure map from
- * the *English* class-name string to its `pic/*.gif` icon path.
+ * Themed class badges (replacing the legacy `pic/*.gif` icons) resolve
+ * through {@see badgeSlug()}: the lowercase compact English tier name
+ * used to pick the `--nxm-name-*` design token.
  *
  * Lives under `App\Support` (not `App\Services`) because every method
  * is pure — no DI, no DB, no config, no global state. Same convention
@@ -96,74 +96,40 @@ final class UserClass
     }
 
     /**
-     * Map of English class names → image paths. Matches the legacy
-     * `$UC` array in `get_user_class_image()` exactly, including the
-     * `"pic/"` prefix convention — paths anchored at the web root so
-     * nested /web/* pages resolve them without <base href>.
+     * Slug used by `<x-support.class-badge>` to pick the tier's
+     * `--nxm-name-*` design token: the lowercase compact English tier
+     * name (`Power User` -> `poweruser`), or `banned` for null /
+     * unrecognised values.
      *
-     * @var array<string, string>
+     * Accepts the integer `UC_*` tier, or an English class-name string
+     * (the shape `UserClass::name($class, false, false, false)` returns);
+     * an `(Alias)` suffix is stripped before slugging -- matching the
+     * legacy `strstr($className, '(', true)` behaviour.
      */
-    private const IMAGE_MAP = [
-        'Staff Leader' => '/pic/staffleader.gif',
-        'SysOp' => '/pic/sysop.gif',
-        'Administrator' => '/pic/administrator.gif',
-        'Moderator' => '/pic/moderator.gif',
-        'Forum Moderator' => '/pic/forummoderator.gif',
-        'Uploader' => '/pic/uploader.gif',
-        'Retiree' => '/pic/retiree.gif',
-        'VIP' => '/pic/vip.gif',
-        'Nexus Master' => '/pic/nexus.gif',
-        'Ultimate User' => '/pic/ultimate.gif',
-        'Extreme User' => '/pic/extreme.gif',
-        'Veteran User' => '/pic/veteran.gif',
-        'Insane User' => '/pic/insane.gif',
-        'Crazy User' => '/pic/crazy.gif',
-        'Elite User' => '/pic/elite.gif',
-        'Power User' => '/pic/power.gif',
-        'User' => '/pic/user.gif',
-        'Peasant' => '/pic/peasant.gif',
-    ];
-
-    /** Image path for unrecognised / null class values. */
-    private const BANNED_IMAGE = '/pic/banned.gif';
-
-    /**
-     * Resolve the class-icon image path for a given user class.
-     *
-     * Accepts either the integer `UC_*` tier or the *English* class-name
-     * string (the same shape that `\App\Support\UserClass::name($class,
-     * false, false, false)` returns). Integer tiers are resolved to their
-     * English name first so callers like `get_user_class_image()` keep
-     * working without extra plumbing.
-     *
-     * If the name contains parentheses (e.g. `"Power User(Custom Alias)"`)
-     * the alias suffix is stripped before lookup — matching the legacy
-     * `strstr($className, '(', true)` behaviour.
-     *
-     * Returns the relative image path (e.g. `"pic/power.gif"`) or
-     * `"pic/banned.gif"` when the class is null / unrecognised.
-     */
-    public static function imagePath(int|string|null $class): string
+    public static function badgeSlug(int|string|null $class): string
     {
         if ($class === null || $class === '') {
-            return self::BANNED_IMAGE;
+            return 'banned';
         }
 
         if (is_int($class) || ctype_digit($class)) {
-            $className = (string) self::name((int) $class, false, false, false);
-        } else {
-            $className = $class;
+            $case = UserClassEnum::tryFrom((int) $class);
+
+            return $case === null
+                ? 'banned'
+                : strtolower(str_replace(' ', '', $case->label()));
         }
 
-        // Strip alias suffix: "Power User(Custom)" → "Power User"
-        if (str_contains($className, '(')) {
-            $className = strstr($className, '(', true);
-            if ($className === false || $className === '') {
-                return self::BANNED_IMAGE;
+        if (str_contains($class, '(')) {
+            $class = strstr($class, '(', true);
+            if ($class === false || $class === '') {
+                return 'banned';
             }
         }
 
-        return self::IMAGE_MAP[$className] ?? self::BANNED_IMAGE;
+        $slug = strtolower(str_replace(' ', '', $class));
+
+        return $slug === '' ? 'banned' : $slug;
     }
 
     /**

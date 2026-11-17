@@ -67,75 +67,67 @@ class UserClassTest extends TestCase
         $this->assertNull(UserClass::langKey(999));
     }
 
-    // ---------- imagePath() ----------
+    // ---------- badgeSlug() ----------
 
-    public function test_image_path_returns_correct_gif_for_each_class(): void
+    public function test_badge_slug_returns_compact_lowercase_for_each_class(): void
     {
         $expected = [
-            'Staff Leader' => '/pic/staffleader.gif',
-            'SysOp' => '/pic/sysop.gif',
-            'Administrator' => '/pic/administrator.gif',
-            'Moderator' => '/pic/moderator.gif',
-            'Forum Moderator' => '/pic/forummoderator.gif',
-            'Uploader' => '/pic/uploader.gif',
-            'Retiree' => '/pic/retiree.gif',
-            'VIP' => '/pic/vip.gif',
-            'Nexus Master' => '/pic/nexus.gif',
-            'Ultimate User' => '/pic/ultimate.gif',
-            'Extreme User' => '/pic/extreme.gif',
-            'Veteran User' => '/pic/veteran.gif',
-            'Insane User' => '/pic/insane.gif',
-            'Crazy User' => '/pic/crazy.gif',
-            'Elite User' => '/pic/elite.gif',
-            'Power User' => '/pic/power.gif',
-            'User' => '/pic/user.gif',
-            'Peasant' => '/pic/peasant.gif',
+            'Staff Leader' => 'staffleader',
+            'SysOp' => 'sysop',
+            'Administrator' => 'administrator',
+            'Moderator' => 'moderator',
+            'Forum Moderator' => 'forummoderator',
+            'Uploader' => 'uploader',
+            'Retiree' => 'retiree',
+            'VIP' => 'vip',
+            'Nexus Master' => 'nexusmaster',
+            'Ultimate User' => 'ultimateuser',
+            'Extreme User' => 'extremeuser',
+            'Veteran User' => 'veteranuser',
+            'Insane User' => 'insaneuser',
+            'Crazy User' => 'crazyuser',
+            'Elite User' => 'eliteuser',
+            'Power User' => 'poweruser',
+            'User' => 'user',
+            'Peasant' => 'peasant',
         ];
 
-        foreach ($expected as $className => $path) {
-            $this->assertSame($path, UserClass::imagePath($className), "Class '$className' should map to '$path'");
+        foreach ($expected as $className => $slug) {
+            $this->assertSame($slug, UserClass::badgeSlug($className), "Class '$className' should slug to '$slug'");
         }
     }
 
-    public function test_image_path_null_returns_banned(): void
+    public function test_badge_slug_int_tier_resolves_via_enum_label(): void
     {
-        $this->assertSame('/pic/banned.gif', UserClass::imagePath(null));
+        $this->assertSame('poweruser', UserClass::badgeSlug(UserClass::POWER_USER));
+        $this->assertSame('peasant', UserClass::badgeSlug(UserClass::PEASANT));
+        $this->assertSame('sysop', UserClass::badgeSlug(UserClass::SYSOP));
     }
 
-    public function test_image_path_empty_string_returns_banned(): void
+    public function test_badge_slug_null_and_empty_return_banned(): void
     {
-        $this->assertSame('/pic/banned.gif', UserClass::imagePath(''));
+        $this->assertSame('banned', UserClass::badgeSlug(null));
+        $this->assertSame('banned', UserClass::badgeSlug(''));
     }
 
-    public function test_image_path_unknown_class_returns_banned(): void
+    public function test_badge_slug_unknown_int_tier_returns_banned(): void
     {
-        $this->assertSame('/pic/banned.gif', UserClass::imagePath('NonExistent'));
+        $this->assertSame('banned', UserClass::badgeSlug(17));
+        $this->assertSame('banned', UserClass::badgeSlug(999));
     }
 
-    public function test_image_path_strips_alias_suffix(): void
+    public function test_badge_slug_strips_alias_suffix(): void
     {
         // Legacy `get_user_class_name` can return "Power User(Custom Alias)"
         // when $options['with_alias'] is set. The parenthesized suffix
-        // must be stripped before image lookup.
-        $this->assertSame('/pic/power.gif', UserClass::imagePath('Power User(Pro)'));
-        $this->assertSame('/pic/vip.gif', UserClass::imagePath('VIP(Lifetime)'));
+        // must be stripped before slugging.
+        $this->assertSame('poweruser', UserClass::badgeSlug('Power User(Pro)'));
+        $this->assertSame('vip', UserClass::badgeSlug('VIP(Lifetime)'));
     }
 
-    public function test_image_path_alias_only_parenthesis_returns_banned(): void
+    public function test_badge_slug_alias_only_parenthesis_returns_banned(): void
     {
         // Edge case: string starts with "(" → strstr returns "" → banned
-        $this->assertSame('/pic/banned.gif', UserClass::imagePath('(OnlyAlias)'));
-    }
-
-    // ---------- name() ----------
-
-    public function test_name_returns_english_class_text(): void
-    {
-        $this->assertSame('User', (string) UserClass::name(1));
-    }
-
-    public function test_name_compact_removes_spaces(): void
-    {
-        $this->assertSame('PowerUser', (string) UserClass::name(2, true, false, false));
+        $this->assertSame('banned', UserClass::badgeSlug('(OnlyAlias)'));
     }
 }

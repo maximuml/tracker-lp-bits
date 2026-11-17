@@ -3259,14 +3259,41 @@ html[data-theme="dark"] .nxm-main .nx-hr .nx-hr__table thead th { background: va
     .nx-hr__need { margin-top: 0.45rem; }
 }
 
-/* Pixel-art class badges (pic/*.gif): keep nearest-neighbor scaling on
-   HiDPI/Retina instead of bilinear blur — the artwork is intentionally
-   pixelated, so crisp blocks are the faithful rendering. */
+/* Class rank badge — pill styled from the tier's --nxm-name-* token
+   (replaces the legacy pic/*.gif pixel-art icons). */
 .nx-class-badge {
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
-    image-rendering: pixelated;
+    display: inline-block;
+    padding: 0.15em 0.6em;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: color-mix(in srgb, currentColor 14%, transparent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
+
+.nx-class-badge--staffleader { color: var(--nxm-name-staffleader); }
+.nx-class-badge--sysop { color: var(--nxm-name-sysop); }
+.nx-class-badge--administrator { color: var(--nxm-name-administrator); }
+.nx-class-badge--moderator { color: var(--nxm-name-moderator); }
+.nx-class-badge--forummoderator { color: var(--nxm-name-forummoderator); }
+.nx-class-badge--uploader { color: var(--nxm-name-uploader); }
+.nx-class-badge--retiree { color: var(--nxm-name-retiree); }
+.nx-class-badge--vip { color: var(--nxm-name-vip); }
+.nx-class-badge--nexusmaster { color: var(--nxm-name-nexusmaster); }
+.nx-class-badge--ultimateuser { color: var(--nxm-name-ultimateuser); }
+.nx-class-badge--extremeuser { color: var(--nxm-name-extremeuser); }
+.nx-class-badge--veteranuser { color: var(--nxm-name-veteranuser); }
+.nx-class-badge--insaneuser { color: var(--nxm-name-insaneuser); }
+.nx-class-badge--crazyuser { color: var(--nxm-name-crazyuser); }
+.nx-class-badge--eliteuser { color: var(--nxm-name-eliteuser); }
+.nx-class-badge--poweruser { color: var(--nxm-name-poweruser); }
+.nx-class-badge--user { color: var(--nxm-name-user); }
+.nx-class-badge--peasant { color: var(--nxm-name-peasant); }
+.nx-class-badge--banned { color: var(--nxm-danger); }
 
 /* Offers list + detail + form (nx-off) */
 .nx-off__top {

@@ -107,6 +107,14 @@ td.shoutrow .shout-class-badge {
     background: color-mix(in srgb, currentColor 16%, transparent);
 }
 
+td.shoutrow .shout-class-badge--poweruser { color: var(--nxm-name-poweruser); }
+td.shoutrow .shout-class-badge--eliteuser { color: var(--nxm-name-eliteuser); }
+td.shoutrow .shout-class-badge--crazyuser { color: var(--nxm-name-crazyuser); }
+td.shoutrow .shout-class-badge--insaneuser { color: var(--nxm-name-insaneuser); }
+td.shoutrow .shout-class-badge--veteranuser { color: var(--nxm-name-veteranuser); }
+td.shoutrow .shout-class-badge--extremeuser { color: var(--nxm-name-extremeuser); }
+td.shoutrow .shout-class-badge--ultimateuser { color: var(--nxm-name-ultimateuser); }
+td.shoutrow .shout-class-badge--nexusmaster { color: var(--nxm-name-nexusmaster); }
 td.shoutrow .shout-class-badge--vip { color: var(--nxm-name-vip); }
 td.shoutrow .shout-class-badge--retiree { color: var(--nxm-name-retiree); }
 td.shoutrow .shout-class-badge--uploader { color: var(--nxm-name-uploader); }

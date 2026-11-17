@@ -103,16 +103,17 @@ td.shoutrow .shout-class-badge {
     margin-right: 3px;
     text-transform: uppercase;
     vertical-align: middle;
-    color: #fff;
+    border: 1px solid currentColor;
+    background: color-mix(in srgb, currentColor 16%, transparent);
 }
 
-td.shoutrow .shout-class-badge--vip { background: #9c27b0; }
-td.shoutrow .shout-class-badge--retiree { background: #546b78; }
-td.shoutrow .shout-class-badge--uploader { background: #1976d2; }
-td.shoutrow .shout-class-badge--moderator { background: #2e7d32; }
-td.shoutrow .shout-class-badge--administrator { background: #d32f2f; }
-td.shoutrow .shout-class-badge--sysop { background: #b71c1c; }
-td.shoutrow .shout-class-badge--staffleader { background: #bf360c; }
+td.shoutrow .shout-class-badge--vip { color: var(--nxm-name-vip); }
+td.shoutrow .shout-class-badge--retiree { color: var(--nxm-name-retiree); }
+td.shoutrow .shout-class-badge--uploader { color: var(--nxm-name-uploader); }
+td.shoutrow .shout-class-badge--moderator { color: var(--nxm-name-moderator); }
+td.shoutrow .shout-class-badge--administrator { color: var(--nxm-name-administrator); }
+td.shoutrow .shout-class-badge--sysop { color: var(--nxm-name-sysop); }
+td.shoutrow .shout-class-badge--staffleader { color: var(--nxm-name-staffleader); }
 
 .shout-actions {
     font-size: 11px;

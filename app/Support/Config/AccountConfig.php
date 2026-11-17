@@ -133,13 +133,13 @@ final class AccountConfig extends Config
     private function promotionKeyAndDefault(int|string $class, string $metric): array
     {
         $map = [
-            '2' => 'p',
-            '3' => 'e',
-            '4' => 'c',
-            '5' => 'i',
-            '6' => 'v',
-            '7' => 'ex',
-            '8' => 'u',
+            '2' => 'pu',
+            '3' => 'eu',
+            '4' => 'cu',
+            '5' => 'iu',
+            '6' => 'vu',
+            '7' => 'exu',
+            '8' => 'uu',
             '9' => 'nm',
         ];
         $prefix = $map[(string) $class] ?? null;

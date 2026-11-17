@@ -397,7 +397,6 @@
         [\App\Enums\UserClass::ELITE_USER->value, 'eu', 15, 300, 2.05, 1.95, 0],
         [\App\Enums\UserClass::VETERAN_USER->value, 'vu', 40, 750, 3.05, 2.95, 3],
         [\App\Enums\UserClass::ULTIMATE_USER->value, 'uu', 80, 1536, 4.05, 3.95, 5],
-        [\App\Enums\UserClass::NEXUS_MASTER->value, 'nm', 100, 3072, 4.55, 4.45, 10],
     ] as [$class, $prefix, $time, $dl, $prratio, $deratio, $invites])
     <x-settings-row layout="grid">
         <x-slot:label>{{ __('settings.row_promote_to_one') }}{{ \App\Support\UserClass::name($class, false, false, true) }}{{ __('settings.row_promote_to_two') }}</x-slot:label>

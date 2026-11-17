@@ -89,7 +89,6 @@ class SettingsController extends BasePageController
             'eutime', 'eudl', UserClassEnum::ELITE_USER->value.'_min_seed_points', 'euprratio', 'euderatio', UserClassEnum::ELITE_USER->value.'_alias',
             'vutime', 'vudl', UserClassEnum::VETERAN_USER->value.'_min_seed_points', 'vuprratio', 'vuderatio', UserClassEnum::VETERAN_USER->value.'_alias',
             'uutime', 'uudl', UserClassEnum::ULTIMATE_USER->value.'_min_seed_points', 'uuprratio', 'uuderatio', UserClassEnum::ULTIMATE_USER->value.'_alias',
-            'nmtime', 'nmdl', UserClassEnum::NEXUS_MASTER->value.'_min_seed_points', 'nmprratio', 'nmderatio', UserClassEnum::NEXUS_MASTER->value.'_alias',
             'getInvitesByPromotion', 'destroy_disabled',
         ],
         'torrent' => [

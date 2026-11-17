@@ -27,7 +27,7 @@ trait HasClassLadder
         UserClassEnum::VETERAN_USER->value => ['text' => 'Veteran User', 'min_seed_points' => 400000],
         UserClassEnum::EXTREME_USER->value => ['text' => 'Extreme User'],
         UserClassEnum::ULTIMATE_USER->value => ['text' => 'Ultimate User', 'min_seed_points' => 800000],
-        UserClassEnum::NEXUS_MASTER->value => ['text' => 'Nexus Master', 'min_seed_points' => 1000000],
+        UserClassEnum::NEXUS_MASTER->value => ['text' => 'Nexus Master'],
         UserClassEnum::VIP->value => ['text' => 'VIP'],
         UserClassEnum::RETIREE->value => ['text' => 'Retiree'],
         UserClassEnum::UPLOADER->value => ['text' => 'Uploader'],

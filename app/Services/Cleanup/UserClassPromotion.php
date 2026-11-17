@@ -117,24 +117,13 @@ final class UserClassPromotion
     {
         $getInvitesByPromotion = SiteConfig::current()->account->getInvitesByPromotion([]);
 
-        $promotions = [
-            UserClassEnum::POWER_USER->value,
-            UserClassEnum::ELITE_USER->value,
-            UserClassEnum::CRAZY_USER->value,
-            UserClassEnum::INSANE_USER->value,
-            UserClassEnum::VETERAN_USER->value,
-            UserClassEnum::EXTREME_USER->value,
-            UserClassEnum::ULTIMATE_USER->value,
-            UserClassEnum::NEXUS_MASTER->value,
-        ];
-
-        foreach ($promotions as $class) {
+        foreach (UserClassEnum::autoPromotable() as $target) {
             $this->promoteUsers(
-                $class,
-                SiteConfig::current()->account->promotionDl($class, 0),
-                SiteConfig::current()->account->promotionRatio($class, 0.0),
-                SiteConfig::current()->account->promotionTime($class, 0),
-                (int) ($getInvitesByPromotion[(int) $class] ?? 0),
+                $target->value,
+                SiteConfig::current()->account->promotionDl($target->value, 0),
+                SiteConfig::current()->account->promotionRatio($target->value, 0.0),
+                SiteConfig::current()->account->promotionTime($target->value, 0),
+                (int) ($getInvitesByPromotion[$target->value] ?? 0),
             );
         }
     }
@@ -153,7 +142,8 @@ final class UserClassPromotion
             throw new \RuntimeException("class: {$class} can't get min seed points.");
         }
 
-        $oriclass = (int) $class - 1;
+        $predecessor = UserClassEnum::fromIntSafe($class)->autoPredecessor();
+        $oriclass = $predecessor !== null ? $predecessor->value : (int) $class - 1;
 
         $res = $this->userCleanupRepository->listPromotionCandidates(
             $oriclass,

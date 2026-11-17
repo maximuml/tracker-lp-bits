@@ -46,31 +46,26 @@ final class UserClassManagementTask implements CleanupTask
 
     private function demoteUsersByClass(): void
     {
-        $demotions = [
-            UserClassEnum::NEXUS_MASTER->value,
-            UserClassEnum::ULTIMATE_USER->value,
-            UserClassEnum::EXTREME_USER->value,
-            UserClassEnum::VETERAN_USER->value,
-            UserClassEnum::INSANE_USER->value,
-            UserClassEnum::CRAZY_USER->value,
-            UserClassEnum::ELITE_USER->value,
-            UserClassEnum::POWER_USER->value,
-        ];
-
-        foreach ($demotions as $class) {
-            $this->demoteUsers($class, SiteConfig::current()->account->demotionRatio($class, 0.0));
+        foreach (array_reverse(UserClassEnum::autoPromotable()) as $target) {
+            $this->demoteUsers(
+                $target,
+                SiteConfig::current()->account->demotionRatio($target->value, 0.0),
+            );
         }
     }
 
-    private function demoteUsers(int|string $class, float $deRatio): void
+    private function demoteUsers(UserClassEnum $class, float $deRatio): void
     {
         if ($deRatio <= 0) {
             return;
         }
 
-        $newclass = (int) $class - 1;
+        $newclass = $class->autoPredecessor()?->value;
+        if ($newclass === null) {
+            return;
+        }
 
-        $res = $this->userCleanupRepository->listUserIdsByClassRatioBelow((int) $class, $deRatio);
+        $res = $this->userCleanupRepository->listUserIdsByClassRatioBelow($class->value, $deRatio);
 
         Logger::writeWithContext((string) ('match user count: '.$res->count()), (string) 'info', (bool) false);
 
@@ -86,7 +81,7 @@ final class UserClassManagementTask implements CleanupTask
         foreach ($res as $arr) {
             $uid = $arr->id;
             $locale = Locale::userLocale($uid);
-            $className = User::getUserClassName($class, false, false, false);
+            $className = User::getUserClassName($class->value, false, false, false);
             $newClassName = User::getUserClassName((string) $newclass, false, false, false);
 
             $subject = Locale::trans('cleanup.msg_demoted_to', [], $locale).$newClassName;

@@ -44,7 +44,7 @@ final class CurrentUserUsageRatchetTest extends TestCase
         'DTOs/Auth/ActorContext.php',
     ];
 
-    private const BASELINE = 32;
+    private const BASELINE = 30;
 
     public function test_current_user_references_do_not_exceed_baseline(): void
     {

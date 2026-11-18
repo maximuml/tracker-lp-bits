@@ -66,7 +66,7 @@ final class ActorContextRatchetTest extends TestCase
      * invalidation) and TorrentDownloadState (downhash hkdf memo, scoped
      * so a passkey rotation cannot serve a stale hash).
      */
-    private const BASELINE_APP_CALLS = 97;
+    private const BASELINE_APP_CALLS = 88;
 
     private const APP_DIR = __DIR__.'/../../app';
 

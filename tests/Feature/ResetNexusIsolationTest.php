@@ -21,7 +21,7 @@ use App\Support\State\ForumState;
 use App\Support\State\PromotionState;
 use App\Support\State\SearchBoxModelState;
 use App\Support\State\SearchBoxState;
-use App\Support\State\SettingState;
+use App\Support\State\SettingsState;
 use App\Support\State\ShoutboxState;
 use App\Support\State\StyleRepositoryState;
 use App\Support\State\TagRepositoryState;
@@ -301,7 +301,7 @@ final class ResetNexusIsolationTest extends TestCase
         // on #[Scoped] state holders now, dropped by forgetScopedInstances().
         app(TurnstileRenderState::class)->scriptInjected = true;
         PromotionState::instance()->globalSpecialState = 5;
-        SettingState::instance()->autoloadedSettings = ['k' => 'v'];
+        SettingsState::instance()->settings = ['k' => 'v'];
         SearchBoxModelState::instance()->categoryIdsBySearchBox = ['0' => [1, 2]];
         CommentState::instance()->tempCode = ['snippet-A'];
         ForumState::instance()->topics = [1 => new Topic];
@@ -328,7 +328,7 @@ final class ResetNexusIsolationTest extends TestCase
         // scoped instances expose defaults again.
         $this->assertFalse(app(TurnstileRenderState::class)->scriptInjected, 'state leaked: TurnstileRenderState::$scriptInjected');
         $this->assertNull(PromotionState::instance()->globalSpecialState, 'state leaked: PromotionState::$globalSpecialState');
-        $this->assertNull(SettingState::instance()->autoloadedSettings, 'state leaked: SettingState::$autoloadedSettings');
+        $this->assertNull(SettingsState::instance()->settings, 'state leaked: SettingsState::$settings');
         $this->assertSame([], SearchBoxModelState::instance()->categoryIdsBySearchBox, 'state leaked: SearchBoxModelState::$categoryIdsBySearchBox');
         $this->assertSame([], CommentState::instance()->tempCode, 'state leaked: CommentState::$tempCode');
         $this->assertSame([], ForumState::instance()->topics, 'state leaked: ForumState::$topics');

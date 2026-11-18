@@ -187,7 +187,6 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         if (! isset(User::classes()[$class])) {
             throw new \InvalidArgumentException("Invalid user class: $class");
         }
-        $setting = SiteConfig::current()->main->toArray();
         $secret = Token::randomHex((int) 20);
         $passhash = PasswordHasher::hash($password);
         $data = [
@@ -198,7 +197,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             'auth_key' => Token::randomHex((int) 20),
             'editsecret' => '',
             'passhash' => $passhash,
-            'stylesheet' => $setting['defstylesheet'],
+            'stylesheet' => SiteConfig::current()->main->defStylesheet(),
             'added' => now()->toDateTimeString(),
             'status' => UserStatus::CONFIRMED->value,
             'class' => $class,

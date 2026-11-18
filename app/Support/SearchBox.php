@@ -85,15 +85,15 @@ final class SearchBox
      */
     public static function requiredIds(): array
     {
-        $setting = SiteConfig::current()->main->toArray();
+        $browseCat = SiteConfig::current()->main->browseCat();
         $maps = [
-            'torrents' => [$setting['browsecat']],
-            'usercp' => [$setting['browsecat']],
-            'getrss' => [$setting['browsecat']],
-            'userdetails' => [$setting['browsecat']],
-            'offers' => [$setting['browsecat']],
-            'details' => [$setting['browsecat']],
-            'search' => [$setting['browsecat']],
+            'torrents' => [$browseCat],
+            'usercp' => [$browseCat],
+            'getrss' => [$browseCat],
+            'userdetails' => [$browseCat],
+            'offers' => [$browseCat],
+            'details' => [$browseCat],
+            'search' => [$browseCat],
         ];
         $script = RequestContext::instance()->getScript();
 

@@ -157,4 +157,14 @@ final class TorrentConfig extends Config
     {
         return $this->int('randomthirtypercentdown', $default);
     }
+
+    public function stickyFirstLevelBackgroundColor(string $default = ''): string
+    {
+        return $this->string('sticky_first_level_background_color', $default);
+    }
+
+    public function stickySecondLevelBackgroundColor(string $default = ''): string
+    {
+        return $this->string('sticky_second_level_background_color', $default);
+    }
 }

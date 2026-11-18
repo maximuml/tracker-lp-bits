@@ -92,12 +92,12 @@ final class UpgradeService
         }
         // fix base url, since beta8
         if (Schema::hasTable('settings')) {
-            $settingBasic = SiteConfig::current()->basic->toArray();
-            if (isset($settingBasic['BASEURL']) && Str::startsWith($settingBasic['BASEURL'], 'localhost')) {
+            $basic = SiteConfig::current()->basic;
+            if (Str::startsWith($basic->baseUrl(), 'localhost')) {
                 $this->log($log, '[RESET CONFIG basic.BASEURL]');
                 Setting::query()->where('name', 'basic.BASEURL')->update(['value' => '']);
             }
-            if (isset($settingBasic['announce_url']) && Str::startsWith($settingBasic['announce_url'], 'localhost')) {
+            if (Str::startsWith($basic->announceUrl(), 'localhost')) {
                 $this->log($log, '[RESET CONFIG basic.announce_url]');
                 Setting::query()->where('name', 'basic.announce_url')->update(['value' => '']);
             }

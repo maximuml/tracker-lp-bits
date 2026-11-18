@@ -89,13 +89,12 @@ final class SiteAccess
      */
     public static function canDoLogin(): bool
     {
-        $setting = SiteConfig::current()->security->toArray();
+        $security = SiteConfig::current()->security;
+        $loginType = (string) $security->loginType();
 
-        if (empty($setting['login_type']) || $setting['login_type'] === 'normal') {
+        if ($loginType === '' || $loginType === 'normal') {
             return true;
         }
-
-        $loginType = $setting['login_type'];
 
         if ($loginType === 'secret') {
             if (empty(request()->input('secret'))) {
@@ -104,13 +103,14 @@ final class SiteAccess
                 return false;
             }
             $secret = request()->input('secret');
-            if (! is_string($secret) || ! hash_equals((string) $setting['login_secret'], $secret)) {
+            if (! is_string($secret) || ! hash_equals($security->loginSecret(), $secret)) {
                 Logger::writeWithContext('invalid login secret supplied');
 
                 return false;
             }
-            if ($setting['login_secret_deadline'] < date('Y-m-d H:i:s')) {
-                Logger::writeWithContext("login secret expired (deadline: {$setting['login_secret_deadline']})");
+            $deadline = (string) $security->loginSecretDeadline();
+            if ($deadline < date('Y-m-d H:i:s')) {
+                Logger::writeWithContext("login secret expired (deadline: {$deadline})");
 
                 return false;
             }

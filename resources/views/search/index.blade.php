@@ -27,7 +27,7 @@
 @endif
 @if ($vm->hasResults)
     <x-pagination :page="$vm->pager['page']" :pages="$vm->pager['pages']" :href="$vm->pager['href']" :prev-label="$vm->pager['prevLabel']" :next-label="$vm->pager['nextLabel']" :zero-based="$vm->pager['zeroBased']" label="Pagination top" />
-    @include('components.torrents.table', ['listVm' => $vm->listVm])
+    @include('components.torrents.list', ['listVm' => $vm->listVm])
     <x-pagination :page="$vm->pager['page']" :pages="$vm->pager['pages']" :href="$vm->pager['href']" :prev-label="$vm->pager['prevLabel']" :next-label="$vm->pager['nextLabel']" :zero-based="$vm->pager['zeroBased']" label="Pagination bottom" />
 @elseif ($vm->search !== '')
     <x-std-message :text="__('torrents.std_try_again')" :htmlstrip="false"><x-slot:heading>{{ __('torrents.std_search_results_for') }}{{ \App\Support\Html\SafeHtml::fromUntrustedHtml($vm->searchstr_ori) }}"</x-slot></x-std-message>

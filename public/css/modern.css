@@ -1699,6 +1699,12 @@ ul.menu li.selected a:hover { text-decoration: none; }
 .nxm-sortmenu__item:hover { background: var(--nxm-surface-alt); }
 .nxm-sortmenu__item.nxm-th--sorted { font-weight: 700; color: var(--nxm-accent-text, var(--nxm-accent)); }
 
+.nxm-viewseg { display: inline-flex; border: 1px solid var(--nxm-border); border-radius: var(--nxm-radius); overflow: hidden; margin-left: auto; }
+.nxm-viewseg__btn { padding: 3px 10px; font-size: .85rem; color: var(--nxm-muted); text-decoration: none; }
+.nxm-viewseg__btn + .nxm-viewseg__btn { border-left: 1px solid var(--nxm-border); }
+.nxm-viewseg__btn:hover { color: var(--nxm-text); }
+.nxm-viewseg__btn.is-active { background: var(--nxm-accent); color: var(--nxm-accent-text, #fff); font-weight: 700; }
+
 @media (min-width: 721px) {
     .nxm-trow__main { min-width: 0; }
 }

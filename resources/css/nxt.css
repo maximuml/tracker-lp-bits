@@ -532,6 +532,80 @@ table.msg-alert td a:link, table.msg-alert td a:visited { color: var(--nxm-accen
 .lt-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* Poster-grid listing (torrents.php grid view) — .lt-card extensions. */
+.nxm-tgrid .lt-card { position: relative; }
+
+.nxm-tgrid .lt-card--sticky { border-left: 3px solid var(--nxm-warning, #d0a020); }
+
+.nxm-tgrid .lt-coverwrap { position: relative; }
+
+.nxm-tgrid .lt-badges {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: calc(100% - 60px);
+    pointer-events: none;
+}
+
+.nxm-tgrid .lt-stats {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    gap: 10px;
+    padding: 14px 8px 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(transparent, rgba(0, 0, 0, .75));
+    pointer-events: none;
+}
+
+.nxm-tgrid .lt-cover-empty .lt-stats { display: none; }
+
+.nxm-tgrid .lt-acts {
+    position: absolute;
+    right: 6px;
+    bottom: 30px;
+    z-index: 3;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity .15s;
+}
+
+.nxm-tgrid .lt-cover.lt-cover-empty + .lt-acts { top: 6px; bottom: auto; }
+.nxm-tgrid .lt-cover.lt-cover-empty .lt-type { top: auto; bottom: 6px; }
+
+.nxm-tgrid .lt-card:hover .lt-acts,
+.nxm-tgrid .lt-card:focus-within .lt-acts { opacity: 1; }
+
+@media (hover: none) {
+    .nxm-tgrid .lt-acts { opacity: 1; }
+}
+
+.nxm-tgrid .lt-act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, .72);
+    color: #fff;
+    text-decoration: none;
+}
+
+.nxm-tgrid .lt-act a, .nxm-tgrid .lt-act .nxm-bookmark { display: inline-flex; }
+
+.nxm-tgrid .lt-progress { padding: 0 8px 6px; }
+
 .fileicon { display:inline-block; box-sizing:border-box; min-width:38px; padding:1px 5px; margin-right:6px; border-radius:3px; font:10px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:bold; letter-spacing:.3px; color:#fff; text-align:center; vertical-align:1px; text-transform:uppercase; }
 
 .fileicon.fi-video { background:#3498db; }

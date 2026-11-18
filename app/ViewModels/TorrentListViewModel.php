@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\Enums\TorrentListView;
 use App\Support\Html\SafeHtml;
 
 /**
@@ -29,6 +30,7 @@ final class TorrentListViewModel
         public readonly bool $showPromotionNote,
         public readonly array $lastCommentTooltips,
         public readonly string $sortLabel,
+        public readonly TorrentListView $viewMode = TorrentListView::List,
     ) {}
 
     /**

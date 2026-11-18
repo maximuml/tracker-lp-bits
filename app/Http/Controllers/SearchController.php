@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\DTOs\Auth\ActorContext;
+use App\Enums\TorrentListView;
 use App\Models\SearchBox;
 use App\Models\Setting;
 use App\Repositories\SearchPageRepository;
 use App\Repositories\TorrentListingRepository;
 use App\Services\UsersearchPageService;
+use App\Support\Cache;
 use App\Support\Config\SiteConfig;
 use App\Support\Format;
 use App\Support\Html\SafeHtml;
@@ -44,10 +46,18 @@ class SearchController extends BasePageController
             return redirect('/web/search'.($qs ? '?'.$qs : ''));
         }
 
+        $viewMode = TorrentListView::resolve($request->query('view'), (string) ($currentUser->torrents_view ?? 'list'));
+        if ($request->query('view') !== null && $viewMode->value !== $currentUser->torrents_view) {
+            $currentUser->torrents_view = $viewMode->value;
+            $currentUser->save();
+            Cache::clearUser($currentUser->id, (string) $currentUser->passkey);
+        }
+
         $data = $this->searchPageRepository->dataForSearch($request, $currentUser);
         $listVm = $this->torrentListFactory->create(
             $data['rows'] ?? [],
             (int) SearchBox::getBrowseMode(),
+            $viewMode,
         );
 
         $vm = new SearchPageViewModel(

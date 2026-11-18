@@ -217,4 +217,41 @@ final class TorrentsModernPageTest extends TestCase
         $this->assertMatchesRegularExpression('/<div class="nxm-empty"[^>]*>.*?href="\/web\/torrents">Reset all<\/a>/s', $html);
         $this->assertStringNotContainsString('No Torrents :(', $html);
     }
+
+    public function test_torrents_view_toggle_switches_listing_and_persists_preference(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['torrents_view' => 'list']);
+        Torrent::factory()->create([
+            'category' => 1,
+            'owner' => $user->id,
+            'visible' => 1,
+            'banned' => 0,
+        ]);
+
+        $default = $this->withNexusCookie($user)->get('/web/torrents');
+        $default->assertOk();
+        $html = (string) $default->getContent();
+        $this->assertStringContainsString('nxm-tlist', $html);
+        $this->assertStringNotContainsString('nxm-tgrid', $html);
+        $this->assertStringContainsString('nxm-viewseg', $html);
+
+        $grid = $this->withNexusCookie($user)->get('/web/torrents?view=grid');
+        $grid->assertOk();
+        $html = (string) $grid->getContent();
+        $this->assertStringContainsString('nxm-tgrid', $html);
+        $this->assertStringContainsString('lt-card', $html);
+        $user->refresh();
+        $this->assertSame('grid', $user->torrents_view);
+
+        $persisted = $this->withNexusCookie($user)->get('/web/torrents');
+        $persisted->assertOk();
+        $this->assertStringContainsString('nxm-tgrid', (string) $persisted->getContent());
+
+        $back = $this->withNexusCookie($user)->get('/web/torrents?view=list');
+        $back->assertOk();
+        $this->assertStringContainsString('nxm-tlist', (string) $back->getContent());
+        $user->refresh();
+        $this->assertSame('list', $user->torrents_view);
+    }
 }

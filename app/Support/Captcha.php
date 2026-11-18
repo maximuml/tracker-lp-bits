@@ -41,15 +41,15 @@ final class Captcha
             return SafeHtml::fromPlainText('');
         }
 
-        return SafeHtml::fromTrustedHtml(self::markup($secret ?? (string) request()->query('secret', ''), $layout));
+        return self::markup($secret ?? (string) request()->query('secret', ''), $layout);
     }
 
-    private static function markup(string $secret, string $layout): string
+    private static function markup(string $secret, string $layout): SafeHtml
     {
         $driver = self::manager()->driver();
 
         if (! $driver->isEnabled()) {
-            return '';
+            return SafeHtml::fromPlainText('');
         }
 
         $labelKey = $driver instanceof ImageCaptchaDriver

@@ -54,7 +54,7 @@ class SearchBoxSchemaBuilder
             }
         }
 
-        return SafeHtml::fromTrustedHtml(implode('&nbsp;&nbsp;', $results));
+        return SafeHtml::fromView('components.upload.taxonomy-selects', ['selects' => $results]);
     }
 
     /**
@@ -144,12 +144,12 @@ class SearchBoxSchemaBuilder
                 ];
             }
 
-            return view('components.upload.taxonomy_select', [
+            return SafeHtml::fromView('components.upload.taxonomy_select', [
                 'label' => $searchBox->getTaxonomyLabel($torrentField),
                 'field' => $torrentField,
                 'searchBoxId' => $searchBoxId,
                 'options' => $options,
-            ])->render();
+            ]);
         }
     }
 

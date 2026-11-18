@@ -200,14 +200,14 @@ final class UserClass
         array $labels = [],
         ?string $ariaLabel = null,
     ): Htmlable {
-        $options = '';
+        $options = [];
 
         if ($includeNoClass) {
-            $options .= trim(view('components.support.tag.option', [
+            $options[] = SafeHtml::fromView('components.support.tag.option', [
                 'value' => Setting::PERMISSION_NO_CLASS,
                 'label' => $labels['select_an_user_class'] ?? '---',
                 'selected' => false,
-            ])->render());
+            ]);
         }
 
         foreach (UserClassEnum::cases() as $case) {
@@ -215,17 +215,17 @@ final class UserClass
             if ($i < $minClass || $i > $maxClass) {
                 continue;
             }
-            $options .= trim(view('components.support.tag.option', [
+            $options[] = SafeHtml::fromView('components.support.tag.option', [
                 'value' => $i,
                 'label' => self::name($i, false, false, true),
                 'selected' => (int) $selected === $i,
-            ])->render())."\n";
+            ]);
         }
 
         return view('components.support.class-select', [
             'name' => $selectName,
             'disabled' => $disabled,
-            'options' => SafeHtml::fromTrustedHtml($options),
+            'options' => $options,
             'ariaLabel' => $ariaLabel,
         ]);
     }

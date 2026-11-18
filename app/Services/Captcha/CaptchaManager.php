@@ -7,6 +7,7 @@ namespace App\Services\Captcha;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\Config;
 use App\Support\Config\SiteConfig;
+use App\Support\Html\SafeHtml;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Arr;
 
@@ -36,7 +37,7 @@ class CaptchaManager
     /**
      * @param  array<string, mixed>  $context
      */
-    public function render(array $context = []): string
+    public function render(array $context = []): SafeHtml
     {
         return $this->driver()->render($context);
     }

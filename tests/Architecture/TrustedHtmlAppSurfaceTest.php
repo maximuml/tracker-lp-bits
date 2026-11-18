@@ -85,8 +85,15 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
      * compose via the new SafeHtml::fromView() factory (blade-rendered
      * markup trimmed) instead of fromTrustedHtml(trim(view()->render()));
      * the pics fragment and linkExt prop become HtmlString.
+     * 65 → 63 (2026-11-18): Pagination::pager composes via fromView.
+     * 63 → 55 (2026-11-18): captcha drivers return SafeHtml via fromView
+     * (Captcha::markup + login controller dedupe on renderHtml); option
+     * lists (classSelect, promotionSelectOptions, taxonomy selects) join
+     * SafeHtml children in blade; the torrent listing pager passes the
+     * repository's SafeHtml through; downloadnotice note and the
+     * reset-page message compose via fromView.
      */
-    private const BASELINE_TRUSTED_HTML_CALLS = 63;
+    private const BASELINE_TRUSTED_HTML_CALLS = 55;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

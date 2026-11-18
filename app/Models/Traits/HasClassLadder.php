@@ -43,6 +43,15 @@ trait HasClassLadder
         return self::$ladderMap;
     }
 
+    /**
+     * Drop the memoized ladder map (mutable-static ratchet requires a
+     * reset path; also lets tests re-derive after locale/config changes).
+     */
+    public static function resetLadder(): void
+    {
+        self::$ladderMap = null;
+    }
+
     public function getClassTextAttribute(): string
     {
         return self::getClassText((int) $this->class);

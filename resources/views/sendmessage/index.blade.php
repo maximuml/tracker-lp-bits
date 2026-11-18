@@ -26,7 +26,7 @@
         @if ($vm->replyto)<label><input type="checkbox" name="delete" value="yes" @checked($vm->deleteChecked)> {{ __('sendmessage.checkbox_delete_message_replying_to') }}</label>@endif
         <label><input type="checkbox" name="save" value="yes" @checked($vm->saveChecked)> {{ __('sendmessage.checkbox_save_message_to_sendbox') }}</label>
     </div>
-    <input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('messages.submit_send') }}" data-submit-once>
+    <button id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('messages.submit_send') }}" data-submit-once>{{ __('messages.submit_send') }}</button>
 </div>
 <p class="nx-compose__help"><a href="/web/tags" target="_blank" rel="noopener">{{ __('functions.text_tags') }}</a> · <a href="/web/smilies" target="_blank" rel="noopener">{{ __('functions.text_smilies') }}</a></p>
 </form>

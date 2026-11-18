@@ -106,7 +106,7 @@
 <div class="nx-fcell {{ $vm->form['dip_hl'] ?? '' }}"><input id="us-dip" name="dip" type="checkbox" value="1" {{ $vm->form['dip'] ? 'checked' : '' }}></div>
 </div>
 <div class="nx-grouprow">
-<div class="nx-ffull text-center"><input name="submit" type="submit" class="nx-btn nx-btn--primary"></div>
+<div class="nx-ffull text-center"><button name="submit" type="submit" class="nx-btn nx-btn--primary" value="">{{ __('functions.submit_submit') }}</button></div>
 </div>
 </div>
 <br /><br />

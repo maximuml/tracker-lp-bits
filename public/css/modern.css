@@ -1429,7 +1429,8 @@ a { color: var(--nxm-accent-text, var(--nxm-accent)); }
 a:hover { color: var(--nxm-accent-text-hover, var(--nxm-accent-hover)); }
 
 input[type="submit"]:not([class]),
-input[type="button"]:not([class]) {
+input[type="button"]:not([class]),
+button[type="submit"]:not([class]) {
     background: var(--nxm-accent);
     color: var(--nxm-on-accent);
     border: none;
@@ -1438,8 +1439,10 @@ input[type="button"]:not([class]) {
     cursor: pointer;
     font: inherit;
 }
-input[type="submit"]:not([class]):hover { background: var(--nxm-accent-hover); }
-input[type="submit"]:not([class]):disabled { background: var(--nxm-accent); opacity: var(--nxm-disabled-opacity); cursor: default; }
+input[type="submit"]:not([class]):hover,
+button[type="submit"]:not([class]):hover { background: var(--nxm-accent-hover); }
+input[type="submit"]:not([class]):disabled,
+button[type="submit"]:not([class]):disabled { background: var(--nxm-accent); opacity: var(--nxm-disabled-opacity); cursor: default; }
 button:disabled, .nx-btn:disabled, .nx-btn[disabled],
 input[type="button"]:disabled, input[type="reset"]:disabled {
     opacity: var(--nxm-disabled-opacity);
@@ -2159,7 +2162,8 @@ html[data-theme="dark"] .nx-hl-40 { color: color-mix(in srgb, white 80%, var(--n
 .nx-post__status--on { background: var(--nxm-userbar-ok); }
 
 .nx-postbtn,
-input.nx-postbtn {
+input.nx-postbtn,
+button.nx-postbtn {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -2958,14 +2962,14 @@ html[data-theme="dark"] .nxm-main .nx-msgview__actions a.nx-btn--primary { color
     padding-top: 0.9rem;
 }
 .nx-bshop__price { color: var(--nxm-text); }
-.nx-bshop__buy input[type="submit"] { margin-left: auto; }
+.nx-bshop__buy :is(input, button)[type="submit"] { margin-left: auto; }
 .nx-bshop__buy .nx-btn--primary { color: var(--nxm-on-accent); }
-.nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled,
-.nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled:hover,
-.nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled:focus,
-html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled,
-html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled:hover,
-html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy input[type="submit"]:disabled:focus {
+.nxm-main .nx-bshop .nx-bshop__buy :is(input, button)[type="submit"]:disabled,
+.nxm-main .nx-bshop .nx-bshop__buy :is(input, button)[type="submit"]:disabled:hover,
+.nxm-main .nx-bshop .nx-bshop__buy :is(input, button)[type="submit"]:disabled:focus,
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy :is(input, button)[type="submit"]:disabled,
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy :is(input, button)[type="submit"]:disabled:hover,
+html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__buy :is(input, button)[type="submit"]:disabled:focus {
     background-color: var(--nxm-surface-alt);
     background-image: none;
     border: 1px solid var(--nxm-border);
@@ -3003,7 +3007,7 @@ html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__chip,
 html[data-theme="dark"] .nxm-main .nx-bshop .nx-bshop__history a {
     color: var(--nxm-text);
 }
-html[data-theme="dark"] .nxm-main .nx-bshop input.nx-btn--primary {
+html[data-theme="dark"] .nxm-main .nx-bshop :is(input, button).nx-btn--primary {
     color: var(--nxm-on-accent);
 }
 
@@ -3014,7 +3018,7 @@ html[data-theme="dark"] .nxm-main .nx-bshop input.nx-btn--primary {
     .nx-bshop__grid,
     .nx-bshop__fields { grid-template-columns: minmax(0, 1fr); }
     .nx-bshop__item--wide { grid-column: auto; }
-    .nx-bshop__buy input[type="submit"] { width: 100%; }
+    .nx-bshop__buy :is(input, button)[type="submit"] { width: 100%; }
 }
 
 .nx-hr {
@@ -3392,7 +3396,7 @@ meter.nx-off__bar::-moz-meter-bar { background: var(--nxm-success, #2e7d32); bor
 
 /* offers: a11y contrast fixes */
 .nx-off a.nx-btn--primary,
-.nx-off input.nx-btn--primary { color: var(--nxm-on-accent); }
+.nx-off :is(input, button).nx-btn--primary { color: var(--nxm-on-accent); }
 .nx-off .text-nxm-success { color: #146414; }
 .nx-off .text-nxm-danger { color: #a93226; }
 html[data-theme="dark"] .nx-off .text-nxm-success { color: var(--nxm-success); }

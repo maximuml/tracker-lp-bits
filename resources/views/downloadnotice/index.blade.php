@@ -53,7 +53,7 @@
 <br /><input type="checkbox" name="letmedown" id="letmedown" value="{{ (string) $vm->type }}" /><label for="letmedown"><span class="big">{{ __('downloadnotice.text_let_me_download')}}</span></label>
 @endif
 </p>
-<div><input type="submit" name="submit" id="continuedownload" class="dlnotice-submit nx-btn nx-btn--primary" value="{{ __('downloadnotice.submit_download_the_torrent')}}"@if (! empty($vm->forcecheck)) disabled="disabled"@endif  data-submit-once /></div>
+<div><button type="submit" name="submit" id="continuedownload" class="dlnotice-submit nx-btn nx-btn--primary" value="{{ __('downloadnotice.submit_download_the_torrent')}}"@if (! empty($vm->forcecheck)) disabled="disabled"@endif  data-submit-once>{{ __('downloadnotice.submit_download_the_torrent')}}</button></div>
 </form>
 </div>
 @endif

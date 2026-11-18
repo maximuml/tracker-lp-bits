@@ -189,7 +189,7 @@ final class IndexRepositoryTest extends TestCase
 
         $this->assertArrayHasKey(UC_PEASANT, $stats);
         $this->assertArrayHasKey(UC_USER, $stats);
-        $this->assertArrayHasKey(UC_NEXUS_MASTER, $stats);
+        $this->assertArrayHasKey(UC_ULTIMATE_USER, $stats);
         $this->assertIsInt($stats[UC_USER]);
     }
 

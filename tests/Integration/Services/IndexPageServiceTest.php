@@ -156,12 +156,8 @@ final class IndexPageServiceTest extends TestCase
             UC_USER => 0,
             UC_POWER_USER => 0,
             UC_ELITE_USER => 0,
-            UC_CRAZY_USER => 0,
-            UC_INSANE_USER => 0,
             UC_VETERAN_USER => 0,
-            UC_EXTREME_USER => 0,
             UC_ULTIMATE_USER => 0,
-            UC_NEXUS_MASTER => 0,
         ]);
 
         return $this->indexRepository;

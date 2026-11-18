@@ -354,12 +354,8 @@ final class IndexPageService
                 new IndexClassStatRow(UserClass::name(UC_USER, false, false, true), number_format($classStats[UC_USER])),
                 new IndexClassStatRow(UserClass::name(UC_POWER_USER, false, false, true), number_format($classStats[UC_POWER_USER])),
                 new IndexClassStatRow(UserClass::name(UC_ELITE_USER, false, false, true), number_format($classStats[UC_ELITE_USER])),
-                new IndexClassStatRow(UserClass::name(UC_CRAZY_USER, false, false, true), number_format($classStats[UC_CRAZY_USER])),
-                new IndexClassStatRow(UserClass::name(UC_INSANE_USER, false, false, true), number_format($classStats[UC_INSANE_USER])),
                 new IndexClassStatRow(UserClass::name(UC_VETERAN_USER, false, false, true), number_format($classStats[UC_VETERAN_USER])),
-                new IndexClassStatRow(UserClass::name(UC_EXTREME_USER, false, false, true), number_format($classStats[UC_EXTREME_USER])),
                 new IndexClassStatRow(UserClass::name(UC_ULTIMATE_USER, false, false, true), number_format($classStats[UC_ULTIMATE_USER])),
-                new IndexClassStatRow(UserClass::name(UC_NEXUS_MASTER, false, false, true), number_format($classStats[UC_NEXUS_MASTER])),
             ],
             todayUsers: new IndexTodayUsers(
                 count: (int) ($todayUsers['count'] ?? 0),

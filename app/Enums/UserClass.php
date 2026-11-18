@@ -12,6 +12,9 @@ namespace App\Enums;
  * type-safe source of truth.
  *
  * Tier order (ascending): Peasant → User → Power User → … → Staff Leader.
+ * The retired legacy tiers (4, 5, 7, 9 — Crazy/Insane/Extreme/Nexus Master) are
+ * absent on purpose: `tryFrom()` returns null for those stored values and
+ * callers fall back the same way they do for any unknown tier.
  */
 enum UserClass: int
 {
@@ -19,12 +22,8 @@ enum UserClass: int
     case USER = 1;
     case POWER_USER = 2;
     case ELITE_USER = 3;
-    case CRAZY_USER = 4;
-    case INSANE_USER = 5;
     case VETERAN_USER = 6;
-    case EXTREME_USER = 7;
     case ULTIMATE_USER = 8;
-    case NEXUS_MASTER = 9;
     case VIP = 10;
     case RETIREE = 11;
     case UPLOADER = 12;
@@ -43,12 +42,8 @@ enum UserClass: int
             self::USER => 'User',
             self::POWER_USER => 'Power User',
             self::ELITE_USER => 'Elite User',
-            self::CRAZY_USER => 'Crazy User',
-            self::INSANE_USER => 'Insane User',
             self::VETERAN_USER => 'Veteran User',
-            self::EXTREME_USER => 'Extreme User',
             self::ULTIMATE_USER => 'Ultimate User',
-            self::NEXUS_MASTER => 'Nexus Master',
             self::VIP => 'VIP',
             self::RETIREE => 'Retiree',
             self::UPLOADER => 'Uploader',
@@ -73,12 +68,8 @@ enum UserClass: int
             self::USER => 'text_user',
             self::POWER_USER => 'text_power_user',
             self::ELITE_USER => 'text_elite_user',
-            self::CRAZY_USER => 'text_crazy_user',
-            self::INSANE_USER => 'text_insane_user',
             self::VETERAN_USER => 'text_veteran_user',
-            self::EXTREME_USER => 'text_extreme_user',
             self::ULTIMATE_USER => 'text_ultimate_user',
-            self::NEXUS_MASTER => 'text_nexus_master',
             self::VIP => 'text_vip',
             self::RETIREE => 'text_retiree',
             self::UPLOADER => 'text_uploader',
@@ -93,23 +84,15 @@ enum UserClass: int
      * Minimum seed points required to reach this tier (0 if not applicable).
      *
      * VIP and above do not have seed-point thresholds — they are assigned manually.
-     * Retired tiers (Crazy/Insane/Extreme/Nexus Master) also return 0: they stay in the enum
-     * for stored values but left the auto-promotion ladder.
      */
     public function minSeedPoints(): int
     {
         return match ($this) {
-            self::PEASANT => 0,
-            self::USER => 0,
             self::POWER_USER => 40000,
             self::ELITE_USER => 150000,
             self::VETERAN_USER => 400000,
             self::ULTIMATE_USER => 800000,
-            self::CRAZY_USER, self::INSANE_USER, self::EXTREME_USER,
-            self::NEXUS_MASTER,
-            self::VIP, self::RETIREE, self::UPLOADER,
-            self::MODERATOR, self::ADMINISTRATOR,
-            self::SYSOP, self::STAFFLEADER => 0,
+            default => 0,
         };
     }
 

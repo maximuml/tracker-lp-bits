@@ -229,14 +229,16 @@ final class TorrentsModernPageTest extends TestCase
             'banned' => 0,
         ]);
 
-        $default = $this->withNexusCookie($user)->get('/web/torrents');
+        // cat= pins the category filter deterministically — the default
+        // listing is cached under 'category_list_mode_*' in Redis.
+        $default = $this->withNexusCookie($user)->get('/web/torrents?cat=1');
         $default->assertOk();
         $html = (string) $default->getContent();
         $this->assertStringContainsString('nxm-tlist', $html);
         $this->assertStringNotContainsString('nxm-tgrid', $html);
         $this->assertStringContainsString('nxm-viewseg', $html);
 
-        $grid = $this->withNexusCookie($user)->get('/web/torrents?view=grid');
+        $grid = $this->withNexusCookie($user)->get('/web/torrents?cat=1&view=grid');
         $grid->assertOk();
         $html = (string) $grid->getContent();
         $this->assertStringContainsString('nxm-tgrid', $html);
@@ -244,11 +246,11 @@ final class TorrentsModernPageTest extends TestCase
         $user->refresh();
         $this->assertSame('grid', $user->torrents_view);
 
-        $persisted = $this->withNexusCookie($user)->get('/web/torrents');
+        $persisted = $this->withNexusCookie($user)->get('/web/torrents?cat=1');
         $persisted->assertOk();
         $this->assertStringContainsString('nxm-tgrid', (string) $persisted->getContent());
 
-        $back = $this->withNexusCookie($user)->get('/web/torrents?view=list');
+        $back = $this->withNexusCookie($user)->get('/web/torrents?cat=1&view=list');
         $back->assertOk();
         $this->assertStringContainsString('nxm-tlist', (string) $back->getContent());
         $user->refresh();

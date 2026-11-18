@@ -103,14 +103,16 @@ final class UsersearchPageService
             $class = '';
         }
 
-        // Build class select options
+        // Build class select options; option value N selects class N-2
+        // (1 is reserved for "(any)"). Iterating the enum skips retired
+        // tier values, whose gaps the old break-on-empty loop truncated at.
         $classOptions = [['value' => 1, 'label' => '(any)', 'selected' => false]];
-        $maxClass = UserClassEnum::STAFFLEADER->value;
-        for ($i = 2; $i - 2 <= $maxClass; $i++) {
-            if (($c = UserClass::name($i - 2, false, true, true))->isEmpty()) {
-                continue; // retired tier values leave gaps in the ladder
-            }
-            $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => (bool) $class && $class == $i];
+        foreach (UserClassEnum::cases() as $case) {
+            $classOptions[] = [
+                'value' => $case->value + 2,
+                'label' => UserClass::name($case->value, false, true, true),
+                'selected' => (bool) $class && $class == $case->value + 2,
+            ];
         }
 
         return [

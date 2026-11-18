@@ -9,6 +9,7 @@ use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Services\UsersearchPageService;
+use App\Support\UserClass;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -394,11 +395,30 @@ final class UsersearchPageServiceTest extends TestCase
 
         $options = $data['form']['c_options'];
         $values = array_column($options, 'value');
-        // Option value N selects class N-2; the ladder tops out at
-        // STAFFLEADER — its option must be present (kills mutants that
-        // drop array_keys() from the max-class derivation).
-        $topValue = max(array_keys(User::classes())) + 2;
-        $this->assertContains($topValue, $values);
+        // Option value N selects class N-2; every enum case must be
+        // present, and none of the retired-tier gaps may appear.
+        $this->assertContains(UserClassEnum::STAFFLEADER->value + 2, $values);
         $this->assertContains(UserClassEnum::POWER_USER->value + 2, $values);
+        $this->assertNotContains(6, $values); // Crazy(4) + 2 — retired
+        $this->assertNotContains(11, $values); // Nexus Master(9) + 2 — retired
+
+        $power = $options[array_search(UserClassEnum::POWER_USER->value + 2, $values, true)];
+        $this->assertSame((string) UserClass::name(UserClassEnum::POWER_USER->value, false, true, true), (string) $power['label']);
+        $this->assertFalse($power['selected']);
+    }
+
+    public function test_build_class_options_marks_the_requested_class_selected(): void
+    {
+        $this->authenticatedUser();
+        $this->mockUserListingRepo();
+
+        $request = Request::create('/usersearch.php', 'GET', ['c' => (string) (UserClassEnum::ELITE_USER->value + 2)]);
+
+        $data = $this->callBuild($request);
+
+        $options = $data['form']['c_options'];
+        $selected = array_column($options, 'selected', 'value');
+        $this->assertTrue($selected[UserClassEnum::ELITE_USER->value + 2]);
+        $this->assertCount(1, array_filter($selected));
     }
 }

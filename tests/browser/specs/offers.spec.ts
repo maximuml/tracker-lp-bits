@@ -104,7 +104,7 @@ test('add offer form keeps the field contract', async ({ page }) => {
   await expect(form.locator('select[name="type"]')).toBeVisible();
   await expect(form.locator('input[name="name"]')).toBeVisible();
   await expect(form.locator('input[name="picture"]')).toBeVisible();
-  await expect(form.locator('input#qr[type="submit"]')).toBeVisible();
+  await expect(form.locator('button#qr[type="submit"]')).toBeVisible();
   await expect(page.locator('.nx-savebar')).toBeVisible();
 });
 

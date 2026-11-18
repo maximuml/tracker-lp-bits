@@ -121,7 +121,7 @@ test('private message: sysop sends, recipient reads it in their inbox', async ({
   await page.fill('#compose textarea[name="body"]', text);
   await Promise.all([
     page.waitForLoadState('networkidle'),
-    page.click('#compose input[type="submit"]'),
+    page.click('#compose button[type="submit"]'),
   ]);
   expect(issues.pageErrors).toEqual([]);
 

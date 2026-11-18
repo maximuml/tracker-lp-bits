@@ -269,7 +269,7 @@ test('disabled and invalid states use the shared tokens', async ({ page }) => {
           ['text input', 'input[type="text"]'],
           ['textarea', 'textarea'],
           ['select', 'select'],
-          ['submit input', 'input[type="submit"]'],
+          ['submit button', 'button[type="submit"]'],
           ...(currentPath === '/web/torrents' ? [['button', '.nx-btn'] as const] : []),
         ];
         const seen = new Set<Element>();

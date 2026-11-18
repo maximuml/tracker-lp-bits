@@ -125,7 +125,7 @@ test('bonus shop fits a 390px viewport and keeps a buy button visible', async ({
   );
   expect(overflow).toBeLessThanOrEqual(1);
 
-  const button = page.locator('.nx-bshop__buy input[type="submit"]').first();
+  const button = page.locator('.nx-bshop__buy button[type="submit"]').first();
   await button.scrollIntoViewIfNeeded();
   await expect(button).toBeVisible();
   const box = await button.boundingBox();
@@ -143,7 +143,7 @@ test('one-time submit reset preserves disabled shop buttons', async ({ page }) =
       'DOMContentLoaded',
       () => {
         const buttons = document.querySelectorAll<HTMLInputElement>(
-          '.nx-bshop__buy input[type="submit"][data-submit-once]',
+          '.nx-bshop__buy button[type="submit"][data-submit-once]',
         );
         if (buttons.length > 1) {
           buttons[0].disabled = true;
@@ -157,7 +157,7 @@ test('one-time submit reset preserves disabled shop buttons', async ({ page }) =
 
   const state = await page.evaluate(() => {
     const buttons = Array.from(
-      document.querySelectorAll<HTMLInputElement>('.nx-bshop__buy input[type="submit"][data-submit-once]'),
+      document.querySelectorAll<HTMLInputElement>('.nx-bshop__buy button[type="submit"][data-submit-once]'),
     );
     const permanentlyDisabled = buttons.find((button) => button.disabled);
     const enabled = buttons.find((button) => !button.disabled);

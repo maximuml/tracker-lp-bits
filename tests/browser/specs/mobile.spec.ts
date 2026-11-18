@@ -116,7 +116,7 @@ test.describe('mobile viewport', () => {
 
   test('torrents listing renders as cards at 390px', async ({ page }) => {
     await page.goto('/torrents.php', { waitUntil: 'networkidle' });
-    const row = page.locator('table.nx-torrents tbody tr').first();
+    const row = page.locator('.nx-torrents .nxm-trow').first();
     if (await row.count() === 0) {
       test.skip(true, 'no torrents seeded');
     }
@@ -125,7 +125,7 @@ test.describe('mobile viewport', () => {
     // Card stays inside the viewport and meta labels are rendered.
     const width = await row.evaluate((el) => el.getBoundingClientRect().width);
     expect(width).toBeLessThanOrEqual(390);
-    await expect(row.locator('.nxm-td-name a').first()).toBeVisible();
+    await expect(row.locator('.nxm-trow__name').first()).toBeVisible();
   });
 
   test('burger hidden on desktop viewport', async ({ browser }) => {

@@ -25,10 +25,11 @@ async function useUnshatterStylesheet(page: Page, enabled: boolean): Promise<voi
 }
 
 function nameSortLink(page: Page) {
-  return page
-    .getByRole('columnheader')
-    .filter({ hasText: 'Name' })
-    .getByRole('link');
+  return page.locator('.nxm-sortmenu__item', { hasText: 'Name' });
+}
+
+async function openSortMenu(page: Page) {
+  await page.locator('.nxm-sortmenu__current').click();
 }
 
 test.describe('catalog navigation', () => {
@@ -37,6 +38,7 @@ test.describe('catalog navigation', () => {
   }) => {
     await page.goto('/web/torrents', { waitUntil: 'networkidle' });
 
+    await openSortMenu(page);
     const nameLink = nameSortLink(page);
     await expect(nameLink).toBeVisible();
     await Promise.all([
@@ -54,9 +56,10 @@ test.describe('catalog navigation', () => {
     expect(url.searchParams.get('sort')).toBe('1');
     expect(url.searchParams.get('type')).toBe('asc');
     await expect(
-      page.locator('.nx-torrents thead th.nxm-th--sorted'),
+      page.locator('.nxm-sortmenu .nxm-th--sorted'),
     ).toHaveCount(1);
 
+    await openSortMenu(page);
     await Promise.all([
       page.waitForURL(
         (nextUrl) =>
@@ -72,6 +75,7 @@ test.describe('catalog navigation', () => {
     expect(url.searchParams.get('type')).toBe('desc');
 
     await page.goto('/web/torrents', { waitUntil: 'networkidle' });
+    await openSortMenu(page);
     await nameSortLink(page).focus();
     await Promise.all([
       page.waitForURL(
@@ -165,7 +169,7 @@ test.describe('catalog navigation', () => {
   }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/web/torrents?sort=4&type=desc', { waitUntil: 'networkidle' });
-    const table = page.locator('table.nx-torrents');
+    const firstRow = page.locator('.nx-torrents .nxm-trow').first();
 
     for (const pack of ['Classic', 'Unshatter'] as const) {
       await useUnshatterStylesheet(page, pack === 'Unshatter');
@@ -173,24 +177,21 @@ test.describe('catalog navigation', () => {
         await page.evaluate((value) => {
           document.documentElement.dataset.theme = value;
         }, theme);
-        const frame = await table.evaluate((element) => ({
+        const frame = await firstRow.evaluate((element) => ({
           radius: parseFloat(getComputedStyle(element).borderTopLeftRadius),
           radiusToken: parseFloat(
             getComputedStyle(document.documentElement).getPropertyValue('--nxm-radius'),
           ),
-          overflow: getComputedStyle(element).overflow,
-          firstHeader: getComputedStyle(element.querySelector('th')!).backgroundColor,
+          background: getComputedStyle(element).backgroundColor,
         }));
         expect(frame.radius).toBe(frame.radiusToken);
         if (frame.radiusToken > 0) {
           expect(frame.radius).toBeGreaterThan(0);
         }
-        expect(frame.overflow).toBe('hidden');
-        expect(frame.firstHeader).not.toBe('rgba(0, 0, 0, 0)');
-        const sorted = page.locator('.nx-torrents th.nxm-th--sorted');
-        await expect(sorted).toHaveAttribute('aria-sort', 'descending');
-        const arrow = await sorted.evaluate((element) => getComputedStyle(element, '::after').content);
-        expect(arrow).toContain('▼');
+        expect(frame.background).not.toBe('rgba(0, 0, 0, 0)');
+        const sorted = page.locator('.nxm-sortmenu__item.nxm-th--sorted');
+        await expect(sorted).toHaveCount(1);
+        await expect(sorted).toContainText('▼');
         const axe = await new AxeBuilder({ page }).include('.nx-torrents').analyze();
         expect(axe.violations).toEqual([]);
       }
@@ -202,10 +203,11 @@ test.describe('catalog navigation', () => {
     });
     const mobile = await page.evaluate(() => ({
       overflow: document.documentElement.scrollWidth > window.innerWidth,
-      border: getComputedStyle(document.querySelector('table.nx-torrents')!).borderTopWidth,
+      rowWidth: document.querySelector('.nxm-trow')?.getBoundingClientRect().width ?? 0,
     }));
     expect(mobile.overflow).toBe(false);
-    expect(mobile.border).toBe('0px');
+    expect(mobile.rowWidth).toBeGreaterThan(0);
+    expect(mobile.rowWidth).toBeLessThanOrEqual(390);
 
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/web/log?action=dailylog', { waitUntil: 'networkidle' });
@@ -440,6 +442,7 @@ test.describe('catalog navigation', () => {
     await page.goto(`/web/torrents?${encodeURIComponent(categoryName!)}=1`, {
       waitUntil: 'networkidle',
     });
+    await openSortMenu(page);
     await Promise.all([
       page.waitForURL(
         (url) =>
@@ -447,7 +450,7 @@ test.describe('catalog navigation', () => {
           url.searchParams.get(categoryName!) === '1' &&
           url.searchParams.get('sort') === '1',
       ),
-      nameSortLink(page).click(),
+      page.locator('.nxm-sortmenu__item', { hasText: 'Name' }).first().click(),
     ]);
 
     const url = new URL(page.url());
@@ -464,7 +467,7 @@ test.describe('catalog navigation', () => {
 
     const offCatalogLinks = await page
       .locator(
-        '#ksearchboxmain a[href], .nx-torrents thead a[href], nav[aria-label^="Pagination"] a[href]',
+        '#ksearchboxmain a[href], .nxm-sortmenu a[href], nav[aria-label^="Pagination"] a[href]',
       )
       .evaluateAll((anchors) =>
         anchors.flatMap((element) => {

@@ -111,8 +111,8 @@ final class TorrentsModernPageTest extends TestCase
 
         $this->assertStringContainsString('nx-torrents', $html);
         $this->assertStringContainsString('data-nx="data"', $html);
-        $this->assertStringContainsString('colhead', $html);
-        $this->assertStringContainsString('nxm-nameblock', $html);
+        $this->assertStringContainsString('nxm-trow', $html);
+        $this->assertStringContainsString('nxm-trow__title', $html);
         $this->assertStringContainsString('/web/details/'.$torrent->id, $html);
         $this->assertStringContainsString('Structural Marker Torrent', $html);
     }
@@ -169,18 +169,17 @@ final class TorrentsModernPageTest extends TestCase
             'audiocodec' => 1,
         ]);
 
-        foreach (['asc' => 'ascending', 'desc' => 'descending'] as $type => $direction) {
+        foreach (['asc' => '▲', 'desc' => '▼'] as $type => $arrow) {
             $response = $this->withNexusCookie($user)->get('/web/torrents?sort=4&type='.$type.'&cat=1');
             $response->assertOk();
             $html = (string) $response->getContent();
-            $this->assertMatchesRegularExpression('/<th\b[^>]*class="[^"]*nxm-th--sorted[^"]*"[^>]*aria-sort="'.$direction.'"/', $html);
-            $this->assertSame(1, preg_match_all('/<th\b[^>]*\baria-sort=/i', $html));
+            $this->assertMatchesRegularExpression('/<a\b[^>]*class="[^"]*nxm-sortmenu__item[^"]*nxm-th--sorted[^"]*"[^>]*>[^<]*'.preg_quote($arrow, '/').'</', $html);
+            $this->assertSame(1, preg_match_all('/nxm-th--sorted/', $html));
         }
 
-        foreach (['S' => 'Seeders', 'L' => 'Leechers', 'Sn' => 'Snatched'] as $abbr => $title) {
-            $this->assertStringContainsString('nxm-th__label" title="'.$title.'">'.$abbr.'</abbr>', $html);
+        foreach (['s' => 'Seeders', 'l' => 'Leechers', 'sn' => 'Snatched'] as $key => $title) {
+            $this->assertStringContainsString('nxm-trow__stat--'.$key.'" title="'.$title.'"', $html);
         }
-        $this->assertStringContainsString('data-label="Seeders"', $html);
     }
 
     public function test_torrents_results_line_shows_count_and_current_sort(): void

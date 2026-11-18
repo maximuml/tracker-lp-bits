@@ -349,9 +349,7 @@ test('highlighted rows keep text contrast', async ({ page }) => {
   await forEachPackScheme(page, async (pack, scheme) => {
     await gotoPage(page, '/web/torrents');
     await setScheme(page, scheme);
-    const rows = page.locator('table[data-nx="data"] tbody tr').filter({
-      has: page.locator('td'),
-    });
+    const rows = page.locator('[data-nx="data"] .nxm-trow');
     expect(await rows.count()).toBeGreaterThan(1);
     const highlights = [
       { className: 'bg-nxm-highlight', index: 0 },

@@ -34,7 +34,7 @@ final class AppCallByNamespaceRatchetTest extends TestCase
         // service-location sprawl.
         'Services' => 2,
         'Repositories' => 0,
-        'Other' => 108,
+        'Other' => 86,
     ];
 
     public function test_app_calls_in_controllers_do_not_exceed_baseline(): void

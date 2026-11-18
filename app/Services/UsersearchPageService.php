@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\Repositories\UserSearchRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Support\Format;
@@ -104,7 +105,7 @@ final class UsersearchPageService
 
         // Build class select options
         $classOptions = [['value' => 1, 'label' => '(any)', 'selected' => false]];
-        $maxClass = max(array_keys(User::classes()));
+        $maxClass = UserClassEnum::STAFFLEADER->value;
         for ($i = 2; $i - 2 <= $maxClass; $i++) {
             if (($c = UserClass::name($i - 2, false, true, true))->isEmpty()) {
                 continue; // retired tier values leave gaps in the ladder

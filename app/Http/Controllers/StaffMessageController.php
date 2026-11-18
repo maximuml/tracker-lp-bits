@@ -40,7 +40,7 @@ class StaffMessageController extends BasePageController
         }
 
         $currentUser = $this->actor->toLegacyArray();
-        $classes = array_chunk(User::$classes, 4, true);
+        $classes = array_chunk(User::classes(), 4, true);
         $returntoQuery = $request->query('returnto');
         $httpReferer = RequestValues::serverValue('HTTP_REFERER');
 

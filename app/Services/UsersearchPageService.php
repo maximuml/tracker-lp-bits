@@ -104,7 +104,7 @@ final class UsersearchPageService
 
         // Build class select options
         $classOptions = [['value' => 1, 'label' => '(any)', 'selected' => false]];
-        $classKeys = array_map('intval', array_keys(User::$classes));
+        $classKeys = array_map('intval', array_keys(User::classes()));
         $maxClass = $classKeys !== [] ? max($classKeys) : 0;
         for ($i = 2; $i - 2 <= $maxClass; $i++) {
             if (! ($c = UserClass::name($i - 2, false, true, true))->isEmpty()) {

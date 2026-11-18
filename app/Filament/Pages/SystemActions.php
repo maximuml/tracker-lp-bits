@@ -137,7 +137,7 @@ class SystemActions extends Page implements HasForms
     public function massmailForm(Schema $schema): Schema
     {
         $classes = [];
-        foreach (User::$classes as $classId => $info) {
+        foreach (User::classes() as $classId => $info) {
             $classes[(int) $classId] = $info['text'] ?? "Class {$classId}";
         }
 

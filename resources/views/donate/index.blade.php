@@ -13,9 +13,6 @@
     <x-page :title="__('donate.text_donate')" width="list">
     <div>
         <div class="p-[10pt]">{{ __('donate.text_donation_note') }}</div>
-        @if ($vm->showCustom)
-            <div class="p-[10pt]">{{ \App\Support\Format::formatComment($vm->custom) }}</div>
-        @endif
         @if ($vm->showPaypal || $vm->crypto !== [])
             <div class="flex items-start">
                 @if ($vm->showPaypal)

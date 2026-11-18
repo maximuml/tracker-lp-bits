@@ -131,7 +131,6 @@ final class InfoRepository implements InfoRepositoryInterface
     public function donationPageData(): array
     {
         $enabled = Settings::get('main.donation', 'no') === 'yes';
-        $custom = (string) Settings::fromDb('misc.donation_custom', '');
         $paypal = Email::sanitizeForDisplay((string) Settings::get('main.PAYPALACCOUNT', ''));
         $showPaypal = $paypal !== '' && Email::isWellFormed($paypal);
 
@@ -151,12 +150,10 @@ final class InfoRepository implements InfoRepositoryInterface
 
         return [
             'enabled' => $enabled,
-            'custom' => $custom,
             'paypal' => $paypal,
             'showPaypal' => $showPaypal,
             'crypto' => $crypto,
-            'showCustom' => $custom !== '',
-            'showAny' => $showPaypal || $custom !== '' || $crypto !== [],
+            'showAny' => $showPaypal || $crypto !== [],
             'accountantId' => $accountantId,
             'baseUrl' => Url::schemeAndHost(false),
         ];

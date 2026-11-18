@@ -202,10 +202,7 @@ final class ForumTopicViewService
                 $this->cache?->forget('user_'.$actor->id.'_last_read_post_list');
             }
 
-            $canViewProtected = $pn + $offset <= 1 || $this->forumAccess->canViewPost($userId, $arr);
-            $bodyContent = $canViewProtected
-                ? $renderFmt('fmt_post_'.md5((string) ($arr['body'] ?? '')), static fn () => Format::formatComment((string) ($arr['body'] ?? '')))
-                : Format::formatComment((string) (__('forums.text_post_protected')));
+            $bodyContent = $renderFmt('fmt_post_'.md5((string) ($arr['body'] ?? '')), static fn () => Format::formatComment((string) ($arr['body'] ?? '')));
             if ($highlight !== '') {
                 $bodyContent = Format::highlight(htmlspecialchars($highlight), (string) $bodyContent);
             }
@@ -248,7 +245,7 @@ final class ForumTopicViewService
                 online: ($arr2['last_access'] ?? '') > $dt,
                 posterId: $posterid,
                 posterName: (string) ($arr2['username'] ?? ''),
-                canQuote: $maypost && $canViewProtected,
+                canQuote: $maypost,
                 canDelete: $isMod,
                 canEdit: ($actor->id == $posterid && ! $locked) || $isMod,
             );

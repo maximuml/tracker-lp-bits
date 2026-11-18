@@ -110,9 +110,6 @@ final class ForumComposeService
     {
         $postid = (int) (request()->query('postid') ?? 0);
         $this->checkWhetherExist($postid, 'post');
-        if (! $this->forumAccess->canViewPost($actor->id, $postid)) {
-            PageResponses::permissionDenied();
-        }
 
         return $this->buildComposeFrame($postid, 'quote');
     }

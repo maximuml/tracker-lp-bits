@@ -19,8 +19,8 @@ use Tests\Concerns\MakesCurrentUser;
 use Tests\TestCase;
 
 /**
- * Protected-forum visibility and moderator checks drained from
- * `Support\Forum` — pins isModerator() / canViewPost() semantics.
+ * Forum moderator checks drained from `Support\Forum` — pins
+ * isModerator() semantics across post / topic / forum scopes.
  */
 #[TestCategory(TestCategory::SERVICE_INTEGRATION)]
 final class ForumAccessServiceTest extends TestCase
@@ -59,14 +59,6 @@ final class ForumAccessServiceTest extends TestCase
             'sort' => 1,
             'forid' => 0,
         ]);
-    }
-
-    private function protectForum(int $forumId): void
-    {
-        DB::table('settings')->updateOrInsert(
-            ['name' => 'misc.protected_forum'],
-            ['value' => (string) $forumId]
-        );
     }
 
     /** @return array{0: Topic, 1: Post} */
@@ -117,77 +109,5 @@ final class ForumAccessServiceTest extends TestCase
 
         $this->assertFalse($this->service->isModerator(1, 'weird'));
         $this->assertFalse($this->service->isModerator(PHP_INT_MAX, 'post'));
-    }
-
-    public function test_can_view_post_allows_regular_forum(): void
-    {
-        $forumId = $this->makeForum();
-        $author = User::factory()->create();
-        [, $post] = $this->makeTopicAndPost($forumId, $author->id, $author->id);
-        $viewer = User::factory()->create();
-        $this->setActor($viewer->id, 1);
-
-        $this->assertTrue($this->service->canViewPost($viewer->id, $post->id));
-    }
-
-    public function test_can_view_post_denies_protected_forum_to_outsider(): void
-    {
-        $forumId = $this->makeForum();
-        $this->protectForum($forumId);
-        $author = User::factory()->create();
-        [, $post] = $this->makeTopicAndPost($forumId, $author->id, $author->id);
-        $outsider = User::factory()->create();
-        $this->setActor($outsider->id, 1);
-
-        $this->assertFalse($this->service->canViewPost($outsider->id, $post->id));
-    }
-
-    public function test_can_view_post_allows_post_owner_in_protected_forum(): void
-    {
-        $forumId = $this->makeForum();
-        $this->protectForum($forumId);
-        $author = User::factory()->create();
-        $other = User::factory()->create();
-        [, $post] = $this->makeTopicAndPost($forumId, $other->id, $author->id);
-        $this->setActor($author->id, 1);
-
-        $this->assertTrue($this->service->canViewPost($author->id, $post->id));
-    }
-
-    public function test_can_view_post_allows_topic_owner_in_protected_forum(): void
-    {
-        $forumId = $this->makeForum();
-        $this->protectForum($forumId);
-        $topicOwner = User::factory()->create();
-        $postAuthor = User::factory()->create();
-        [, $post] = $this->makeTopicAndPost($forumId, $topicOwner->id, $postAuthor->id);
-        $this->setActor($topicOwner->id, 1);
-
-        $this->assertTrue($this->service->canViewPost($topicOwner->id, $post->id));
-    }
-
-    public function test_can_view_post_allows_forum_mod_in_protected_forum(): void
-    {
-        $forumId = $this->makeForum();
-        $this->protectForum($forumId);
-        $author = User::factory()->create();
-        [, $post] = $this->makeTopicAndPost($forumId, $author->id, $author->id);
-        $mod = User::factory()->create();
-        DB::table('forummods')->insert(['forumid' => $forumId, 'userid' => $mod->id]);
-        $this->setActor($mod->id, 1);
-
-        $this->assertTrue($this->service->canViewPost($mod->id, $post->id));
-    }
-
-    public function test_can_view_post_allows_admin_class_in_protected_forum(): void
-    {
-        $forumId = $this->makeForum();
-        $this->protectForum($forumId);
-        $author = User::factory()->create();
-        [, $post] = $this->makeTopicAndPost($forumId, $author->id, $author->id);
-        $admin = User::factory()->create();
-        $this->setActor($admin->id, 14);
-
-        $this->assertTrue($this->service->canViewPost($admin->id, $post->id));
     }
 }

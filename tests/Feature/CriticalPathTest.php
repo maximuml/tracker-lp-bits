@@ -78,7 +78,7 @@ class CriticalPathTest extends TestCase
         // The FPM workers cache settings in Redis. Clear those keys so the
         // updated values are loaded on the next legacy request.
         try {
-            Redis::connection()->client()->del('nexus_settings_in_nexus', 'nexus_settings_in_laravel', 'setting_protected_forum');
+            Redis::connection()->client()->del('nexus_settings_in_nexus', 'nexus_settings_in_laravel');
         } catch (\Throwable $e) {
             // Redis may not be reachable in this environment; the request may
             // still work if the cache already holds compatible values.

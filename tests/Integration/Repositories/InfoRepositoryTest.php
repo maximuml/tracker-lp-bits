@@ -293,22 +293,6 @@ final class InfoRepositoryTest extends TestCase
         $this->assertTrue($result['enabled']);
     }
 
-    public function test_donation_page_data_includes_custom_text(): void
-    {
-        Settings::resetCache();
-        DB::table('settings')->updateOrInsert(
-            ['name' => 'misc.donation_custom'],
-            ['value' => 'Custom donation text', 'autoload' => 1]
-        );
-        Settings::resetCache();
-
-        $result = $this->repository->donationPageData();
-
-        $this->assertSame('Custom donation text', $result['custom']);
-        $this->assertTrue($result['showCustom']);
-        $this->assertTrue($result['showAny']);
-    }
-
     public function test_get_user_history_posts_returns_empty_when_none(): void
     {
         /** @var User $user */

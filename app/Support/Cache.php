@@ -52,7 +52,6 @@ final class Cache
         Logger::writeWithContext('clear_setting_cache');
         self::forgetWithLocales('nexus_settings_in_laravel');
         self::forgetWithLocales('nexus_settings_in_nexus');
-        self::forgetWithLocales('setting_protected_forum');
         $channel = Env::get('CHANNEL_NAME_SETTING');
         if (! empty($channel)) {
             Redis::connection()->client()->publish($channel, 'update');

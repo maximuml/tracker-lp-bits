@@ -16,11 +16,9 @@ final class DonatePageViewModel extends ViewModel
      */
     public function __construct(
         public readonly bool $enabled = false,
-        public readonly string $custom = '',
         public readonly string $paypal = '',
         public readonly bool $showPaypal = false,
         public readonly array $crypto = [],
-        public readonly bool $showCustom = false,
         public readonly bool $showAny = false,
         public readonly int $accountantId = 0,
         public readonly string $baseUrl = '',
@@ -34,7 +32,7 @@ final class DonatePageViewModel extends ViewModel
      */
     public static function fromPageData(array $data): self
     {
-        return new self(...array_intersect_key($data, array_flip(['enabled', 'custom', 'paypal', 'showPaypal', 'crypto', 'showCustom', 'showAny', 'accountantId', 'baseUrl', 'thanks'])));
+        return new self(...array_intersect_key($data, array_flip(['enabled', 'paypal', 'showPaypal', 'crypto', 'showAny', 'accountantId', 'baseUrl', 'thanks'])));
     }
 
     /**

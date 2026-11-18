@@ -28,17 +28,4 @@ class ForumModRepository extends BaseRepository
             ->where('userid', $userId)
             ->exists();
     }
-
-    /**
-     * @return array<int, int>
-     */
-    public function getForumMods(): array
-    {
-        $mods = [];
-        foreach (ForumMod::query()->get() as $item) {
-            $mods[(int) $item->forumid] = (int) $item->userid;
-        }
-
-        return $mods;
-    }
 }

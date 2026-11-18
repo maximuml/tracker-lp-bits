@@ -6,7 +6,6 @@ namespace Tests\Feature;
 
 use App\Listeners\ResetNexus;
 use App\Models\Setting;
-use App\Models\Topic;
 use App\Models\User;
 use App\Services\ToolMaintenanceService;
 use App\Support\Cache\NexusCache;
@@ -302,7 +301,7 @@ final class ResetNexusIsolationTest extends TestCase
         SettingsState::instance()->settings = ['k' => 'v'];
         SearchBoxModelState::instance()->categoryIdsBySearchBox = ['0' => [1, 2]];
         CommentState::instance()->tempCode = ['snippet-A'];
-        ForumState::instance()->topics = [1 => new Topic];
+        ForumState::instance()->moderatorsArray = [1 => [2]];
         ShoutboxState::instance()->mentionUserCache = ['nick' => false];
         UserClassState::instance()->settingAccount = ['k' => 'v'];
         TagRepositoryState::instance()->allTags = new EloquentCollection;
@@ -328,7 +327,7 @@ final class ResetNexusIsolationTest extends TestCase
         $this->assertNull(SettingsState::instance()->settings, 'state leaked: SettingsState::$settings');
         $this->assertSame([], SearchBoxModelState::instance()->categoryIdsBySearchBox, 'state leaked: SearchBoxModelState::$categoryIdsBySearchBox');
         $this->assertSame([], CommentState::instance()->tempCode, 'state leaked: CommentState::$tempCode');
-        $this->assertSame([], ForumState::instance()->topics, 'state leaked: ForumState::$topics');
+        $this->assertNull(ForumState::instance()->moderatorsArray, 'state leaked: ForumState::$moderatorsArray');
         $this->assertSame([], ShoutboxState::instance()->mentionUserCache, 'state leaked: ShoutboxState::$mentionUserCache');
         $this->assertNull(UserClassState::instance()->settingAccount, 'state leaked: UserClassState::$settingAccount');
         $this->assertNull(TagRepositoryState::instance()->allTags, 'state leaked: TagRepositoryState::$allTags');

@@ -1,7 +1,7 @@
 {{-- Modern torrents listing (Variant A, ADR 0014). Row-cards replace TorrentTable::render — data arrives prepared in $listVm. --}}
 <div class="nx-torrents nxm-tlist" data-nx="data" role="list" aria-label="{{ __('torrents.head_torrents') }}">
 @foreach ($listVm->rows as $row)
-<article class="nxm-trow @if ($row->stickyCount > 0) nxm-trow--sticky @endif @if ($row->rowClass !== null){{ $row->rowClass }}@endif" role="listitem" @if ($row->stickyCount > 0 && $row->stickyTitle !== '') title="{{ $row->stickyTitle }}" @endif>
+<div class="nxm-trow @if ($row->stickyCount > 0) nxm-trow--sticky @endif @if ($row->rowClass !== null){{ $row->rowClass }}@endif" role="listitem" @if ($row->stickyCount > 0 && $row->stickyTitle !== '') title="{{ $row->stickyTitle }}" @endif>
     <a class="nxm-trow__poster" href="{{ $row->nameUrl }}" aria-hidden="true" tabindex="-1">
         @if ($row->coverSrc !== null)
         <img src="/pic/misc/cover.svg" data-src="{{ $row->coverSrc }}" class="nexus-lazy-load nxm-trow__cover" alt="" />
@@ -53,7 +53,7 @@
         @if ($row->showDownload)<a class="nxm-trow__act" href="{{ $row->downloadUrl }}"><i class="download" role="img" aria-label="{{ __('functions.title_download_torrent') }}" title="{{ __('functions.title_download_torrent') }}"></i></a>@endif
         @if ($row->showBookmark)<span class="nxm-trow__act"><x-torrent.bookmark :torrent-id="$row->id" :bookmarked="$row->bookmarked" /></span>@endif
     </div>
-</article>
+</div>
 @endforeach
 </div>
 @if ($listVm->showPromotionNote)

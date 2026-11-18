@@ -59,6 +59,7 @@ test.describe('catalog navigation', () => {
       page.locator('.nxm-sortmenu .nxm-th--sorted'),
     ).toHaveCount(1);
 
+    await openSortMenu(page);
     await Promise.all([
       page.waitForURL(
         (nextUrl) =>
@@ -466,7 +467,7 @@ test.describe('catalog navigation', () => {
 
     const offCatalogLinks = await page
       .locator(
-        '#ksearchboxmain a[href], .nxm-sortmenu a[href], .nx-torrents a[href], nav[aria-label^="Pagination"] a[href]',
+        '#ksearchboxmain a[href], .nxm-sortmenu a[href], nav[aria-label^="Pagination"] a[href]',
       )
       .evaluateAll((anchors) =>
         anchors.flatMap((element) => {

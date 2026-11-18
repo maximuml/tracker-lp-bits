@@ -108,7 +108,7 @@ final class BonusShopPageTest extends TestCase
         preg_match('/<form id="bx0"[^>]*>.*?<\/form>/s', $html, $form);
         $formHtml = $form[0] ?? '';
         $this->assertNotSame('', $formHtml);
-        $this->assertMatchesRegularExpression('/<input type="submit"[^>]*\sdisabled(?:\s|>)/', $formHtml);
+        $this->assertMatchesRegularExpression('/<button type="submit"[^>]*\sdisabled(?:\s|>)/', $formHtml);
     }
 
     public function test_progress_uses_numeric_balance_for_large_values(): void
@@ -139,7 +139,7 @@ final class BonusShopPageTest extends TestCase
         $response = $this->withNexusCookie($user)->get('/web/mybonus');
 
         $response->assertOk();
-        $buttonPattern = '/<input type="submit"[^>]*class="nx-btn nx-btn--primary"[^>]*value="Exchange!"[^>]*>/';
+        $buttonPattern = '/<button type="submit"[^>]*class="nx-btn nx-btn--primary"[^>]*value="Exchange!"[^>]*>Exchange!<\/button>/';
         $this->assertMatchesRegularExpression($buttonPattern, (string) $response->getContent());
         preg_match($buttonPattern, (string) $response->getContent(), $button);
         $buttonHtml = $button[0] ?? '';

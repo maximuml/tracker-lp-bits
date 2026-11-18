@@ -29,7 +29,6 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
@@ -438,61 +437,13 @@ class EditSetting extends Page implements HasForms
         $schema = [];
         $name = "$id.driver";
         $schema[] = Radio::make($name)
-            ->options(['local' => 'local', 'chevereto' => 'chevereto', 'lsky' => 'lsky'])
+            ->options(['local' => 'local'])
             ->inline(true)
             ->label(__("label.setting.$name"))
             ->helperText(__("label.setting.{$name}_help"))
             ->columnSpanFull();
 
-        // chevereto
-        $driverName = 'chevereto';
-        $driverId = sprintf('%s_%s', $id, $driverName);
-        $driverSchemas = [];
-        $field = 'upload_api_endpoint';
-        $driverSchemas[] = TextInput::make("$driverId.$field")
-            ->label(__("label.setting.$id.$field"));
-        $field = 'upload_token';
-        $driverSchemas[] = TextInput::make("$driverId.$field")
-            ->label(__("label.setting.$id.$field"));
-        $field = 'base_url';
-        $driverSchemas[] = TextInput::make("$driverId.$field")
-            ->label(__("label.setting.$id.$field"))
-            ->rule(static fn (): \Closure => self::baseUrlRule());
-
-        $driverSection = Section::make($driverName)->schema($driverSchemas);
-        $schema[] = $driverSection;
-
-        // lsky
-        $driverName = 'lsky';
-        $driverId = sprintf('%s_%s', $id, $driverName);
-        $driverSchemas = [];
-        $field = 'upload_api_endpoint';
-        $driverSchemas[] = TextInput::make("$driverId.$field")
-            ->label(__("label.setting.$id.$field"));
-        $field = 'upload_token';
-        $driverSchemas[] = TextInput::make("$driverId.$field")
-            ->label(__("label.setting.$id.$field"));
-        $field = 'base_url';
-        $driverSchemas[] = TextInput::make("$driverId.$field")
-            ->label(__("label.setting.$id.$field"))
-            ->rule(static fn (): \Closure => self::baseUrlRule());
-        $driverSection = Section::make($driverName)->schema($driverSchemas);
-        $schema[] = $driverSection;
-
         return $schema;
-    }
-
-    /**
-     * Filament closure rule: image-hosting base URLs share the site URL
-     * contract — canonical scheme://host[:port][/path] or empty.
-     */
-    private static function baseUrlRule(): \Closure
-    {
-        return static function (string $attribute, mixed $value, \Closure $fail): void {
-            if (is_string($value) && $value !== '' && Url::normalize($value) === null) {
-                $fail(__('validation.url', ['attribute' => $attribute]));
-            }
-        };
     }
 
     /** @return array<Component> */

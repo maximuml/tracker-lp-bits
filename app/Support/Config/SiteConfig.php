@@ -56,14 +56,7 @@ final class SiteConfig
         $this->authority = new AuthorityConfig($data['authority'] ?? []);
         $this->tweak = new TweakConfig($data['tweak'] ?? []);
 
-        $imageHostingData = $data['image_hosting'] ?? [];
-        if (! empty($data['image_hosting_chevereto'])) {
-            $imageHostingData['chevereto'] = $data['image_hosting_chevereto'];
-        }
-        if (! empty($data['image_hosting_lsky'])) {
-            $imageHostingData['lsky'] = $data['image_hosting_lsky'];
-        }
-        $this->imageHosting = new ImageHostingConfig($imageHostingData);
+        $this->imageHosting = new ImageHostingConfig($data['image_hosting'] ?? []);
     }
 
     public static function current(): self

@@ -10,9 +10,11 @@ use InvalidArgumentException;
 /**
  * Image-hosting driver manager extracted from `Nexus\Attachment\Storage`.
  *
- * Resolves the configured image-hosting driver (local, Chevereto, Lsky)
- * and proxies `upload()` / `getImageUrl()` calls to the underlying
- * driver implementation. Drivers are cached per name for the request.
+ * Resolves the configured image-hosting driver and proxies
+ * `upload()` / `getImageUrl()` calls to the underlying driver
+ * implementation. Only the local driver ships now — the Chevereto
+ * and Lsky integrations were removed; drivers are cached per name
+ * for the request.
  */
 final class AttachmentStorage
 {
@@ -20,10 +22,6 @@ final class AttachmentStorage
     private static array $drivers = [];
 
     public const DRIVER_LOCAL = 'local';
-
-    public const DRIVER_CHEVERETO = 'chevereto';
-
-    public const DRIVER_LSKY = 'lsky';
 
     /**
      * Resolve the configured driver (or the one named explicitly).
@@ -39,8 +37,6 @@ final class AttachmentStorage
     {
         return match ($name) {
             self::DRIVER_LOCAL => new Drivers\LocalAttachmentDriver,
-            self::DRIVER_CHEVERETO => new Drivers\CheveretoAttachmentDriver,
-            self::DRIVER_LSKY => new Drivers\LskyAttachmentDriver,
             default => throw new InvalidArgumentException("Unsupported attachment driver: {$name}"),
         };
     }

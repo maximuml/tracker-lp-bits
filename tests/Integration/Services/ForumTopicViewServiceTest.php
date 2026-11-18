@@ -632,7 +632,7 @@ final class ForumTopicViewServiceTest extends TestCase
 
     public function test_viewtopic_maypost_true_when_class_equals_minwrite(): void
     {
-        $vm = $this->viewTopicVm(['class' => 5], ['minclasswrite' => 5]);
+        $vm = $this->viewTopicVm(['class' => 6], ['minclasswrite' => 6]);
 
         $this->assertTrue($vm->mayPost);
     }

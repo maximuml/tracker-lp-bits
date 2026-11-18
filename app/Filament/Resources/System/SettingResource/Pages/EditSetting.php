@@ -15,7 +15,6 @@ use App\Repositories\TokenRepository;
 use App\Repositories\ToolRepository;
 use App\Support\Admin;
 use App\Support\Cache;
-use App\Support\Env;
 use App\Support\Settings;
 use App\Support\Url;
 use Filament\Actions\Action;
@@ -28,10 +27,8 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
@@ -257,48 +254,12 @@ class EditSetting extends Page implements HasForms
 
         $driverOptions = [
             'image' => __('label.setting.captcha.drivers.image'),
-            'cloudflare_turnstile' => __('label.setting.captcha.drivers.cloudflare_turnstile'),
-            'google_recaptcha_v2' => __('label.setting.captcha.drivers.google_recaptcha_v2'),
         ];
 
         $defaultDriver = Settings::get('captcha.default');
-        if ($defaultDriver === null) {
-            $defaultDriver = Settings::get('captcha.driver', Env::get('CAPTCHA_DRIVER', 'image'));
+        if ($defaultDriver === null || ! array_key_exists($defaultDriver, $driverOptions)) {
+            $defaultDriver = 'image';
         }
-
-        $turnstileSiteKey = Settings::get(
-            'captcha.drivers.cloudflare_turnstile.site_key',
-            Settings::get('captcha.turnstile.site_key', Env::get('TURNSTILE_SITE_KEY', null))
-        );
-        $turnstileSecretKey = Settings::get(
-            'captcha.drivers.cloudflare_turnstile.secret_key',
-            Settings::get('captcha.turnstile.secret_key', Env::get('TURNSTILE_SECRET_KEY', null))
-        );
-        $turnstileTheme = Settings::get(
-            'captcha.drivers.cloudflare_turnstile.theme',
-            Settings::get('captcha.turnstile.theme', Env::get('TURNSTILE_THEME', 'auto'))
-        );
-        $turnstileSize = Settings::get(
-            'captcha.drivers.cloudflare_turnstile.size',
-            Settings::get('captcha.turnstile.size', Env::get('TURNSTILE_SIZE', 'flexible'))
-        );
-
-        $recaptchaSiteKey = Settings::get(
-            'captcha.drivers.google_recaptcha_v2.site_key',
-            Settings::get('captcha.recaptcha.site_key', Env::get('RECAPTCHA_SITE_KEY', null))
-        );
-        $recaptchaSecretKey = Settings::get(
-            'captcha.drivers.google_recaptcha_v2.secret_key',
-            Settings::get('captcha.recaptcha.secret_key', Env::get('RECAPTCHA_SECRET_KEY', null))
-        );
-        $recaptchaTheme = Settings::get(
-            'captcha.drivers.google_recaptcha_v2.theme',
-            Settings::get('captcha.recaptcha.theme', Env::get('RECAPTCHA_THEME', 'light'))
-        );
-        $recaptchaSize = Settings::get(
-            'captcha.drivers.google_recaptcha_v2.size',
-            Settings::get('captcha.recaptcha.size', Env::get('RECAPTCHA_SIZE', 'normal'))
-        );
 
         $attendanceCaptchaSetting = Settings::get('captcha.attendance.enabled', true);
         if (is_string($attendanceCaptchaSetting)) {
@@ -317,70 +278,7 @@ class EditSetting extends Page implements HasForms
                 ->options($driverOptions)
                 ->label(__('label.setting.captcha.driver'))
                 ->helperText(__('label.setting.captcha.driver_help'))
-                ->default($defaultDriver)
-                ->reactive(),
-            Fieldset::make(__('label.setting.captcha.turnstile.section'))
-                ->visible(fn (Get $get) => $get('captcha.default') === 'cloudflare_turnstile')
-                ->schema([
-                    TextInput::make('captcha.drivers.cloudflare_turnstile.site_key')
-                        ->label(__('label.setting.captcha.turnstile.site_key'))
-                        ->helperText(__('label.setting.captcha.turnstile.site_key_help'))
-                        ->default($turnstileSiteKey),
-                    TextInput::make('captcha.drivers.cloudflare_turnstile.secret_key')
-                        ->label(__('label.setting.captcha.turnstile.secret_key'))
-                        ->helperText(__('label.setting.captcha.turnstile.secret_key_help'))
-                        ->password()
-                        ->revealable()
-                        ->default($turnstileSecretKey),
-                    Select::make('captcha.drivers.cloudflare_turnstile.theme')
-                        ->label(__('label.setting.captcha.turnstile.theme'))
-                        ->helperText(__('label.setting.captcha.turnstile.theme_help'))
-                        ->options([
-                            'auto' => __('label.setting.captcha.turnstile.theme_auto'),
-                            'light' => __('label.setting.captcha.turnstile.theme_light'),
-                            'dark' => __('label.setting.captcha.turnstile.theme_dark'),
-                        ])
-                        ->default($turnstileTheme),
-                    Select::make('captcha.drivers.cloudflare_turnstile.size')
-                        ->label(__('label.setting.captcha.turnstile.size'))
-                        ->helperText(__('label.setting.captcha.turnstile.size_help'))
-                        ->options([
-                            'normal' => __('label.setting.captcha.turnstile.size_normal'),
-                            'compact' => __('label.setting.captcha.turnstile.size_compact'),
-                            'flexible' => __('label.setting.captcha.turnstile.size_flexible'),
-                        ])
-                        ->default($turnstileSize),
-                ]),
-            Fieldset::make(__('label.setting.captcha.recaptcha.section'))
-                ->visible(fn (Get $get) => $get('captcha.default') === 'google_recaptcha_v2')
-                ->schema([
-                    TextInput::make('captcha.drivers.google_recaptcha_v2.site_key')
-                        ->label(__('label.setting.captcha.recaptcha.site_key'))
-                        ->helperText(__('label.setting.captcha.recaptcha.site_key_help'))
-                        ->default($recaptchaSiteKey),
-                    TextInput::make('captcha.drivers.google_recaptcha_v2.secret_key')
-                        ->label(__('label.setting.captcha.recaptcha.secret_key'))
-                        ->helperText(__('label.setting.captcha.recaptcha.secret_key_help'))
-                        ->password()
-                        ->revealable()
-                        ->default($recaptchaSecretKey),
-                    Select::make('captcha.drivers.google_recaptcha_v2.theme')
-                        ->label(__('label.setting.captcha.recaptcha.theme'))
-                        ->helperText(__('label.setting.captcha.recaptcha.theme_help'))
-                        ->options([
-                            'light' => __('label.setting.captcha.recaptcha.theme_light'),
-                            'dark' => __('label.setting.captcha.recaptcha.theme_dark'),
-                        ])
-                        ->default($recaptchaTheme),
-                    Select::make('captcha.drivers.google_recaptcha_v2.size')
-                        ->label(__('label.setting.captcha.recaptcha.size'))
-                        ->helperText(__('label.setting.captcha.recaptcha.size_help'))
-                        ->options([
-                            'normal' => __('label.setting.captcha.recaptcha.size_normal'),
-                            'compact' => __('label.setting.captcha.recaptcha.size_compact'),
-                        ])
-                        ->default($recaptchaSize),
-                ]),
+                ->default($defaultDriver),
         ];
 
         return $schema;

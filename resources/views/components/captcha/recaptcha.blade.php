@@ -1,1 +1,0 @@
-<x-captcha.row :grid="$grid" :label="$label"><div class="g-recaptcha" data-sitekey="{{ $siteKey }}" data-theme="{{ $theme }}" data-size="{{ $size }}"></div><script src="https://www.recaptcha.net/recaptcha/api.js" async defer></script></x-captcha.row>

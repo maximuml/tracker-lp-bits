@@ -21,7 +21,7 @@ class ResetNexus
      *
      * Container `#[Scoped]`/scoped-bound state (CurrentUser, ActorContext,
      * HeaderBag, PageRenderer, RuntimeContext, RequestContext, NexusContext,
-     * AssetAppender, MsgAlert, TurnstileRenderState, ToolMaintenanceService,
+     * AssetAppender, MsgAlert, ToolMaintenanceService,
      * plus the App\Support\State\* holders behind the Permissions, Category,
      * Style, Settings, Forum, Promotion, Shoutbox, UserClass, SearchBox,
      * Comment, TagRepository, StyleRepository, CleanupRepository, Setting,

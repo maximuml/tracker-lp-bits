@@ -42,7 +42,7 @@ final class SecurityHeadersTest extends TestCase
         // new Function() — nonce-strict script-src leaves every wire:click dead.
         $this->assertStringContainsString("'unsafe-eval'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
-        $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
+        $this->assertStringNotContainsString('https://challenges.cloudflare.com', $csp);
         $this->assertStringNotContainsString('https://fonts.googleapis.com', $csp);
         $this->assertStringNotContainsString('https://cdnjs.cloudflare.com', $csp);
         $this->assertStringContainsString('https://www.paypal.com', $csp);

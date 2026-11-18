@@ -64,14 +64,14 @@ final class SecurityHeaders
             ? "style-src 'self' 'unsafe-inline'"
             : "style-src 'self' 'nonce-{$nonce}'; style-src-elem 'self' 'nonce-{$nonce}'; style-src-attr 'unsafe-inline'";
         $scriptSrc = $isFilament
-            ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
-            : "script-src 'self' 'unsafe-eval' 'nonce-{$nonce}' https://challenges.cloudflare.com";
+            ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+            : "script-src 'self' 'unsafe-eval' 'nonce-{$nonce}'";
 
         // Violation reporting: report-uri covers Firefox/legacy agents,
         // report-to + Reporting-Endpoints covers the Reporting API (Chrome).
         $reportUri = '/csp-report';
         $response->headers->set('Reporting-Endpoints', 'csp-endpoint="'.$reportUri.'"');
-        $response->headers->set('Content-Security-Policy', "default-src 'self'; {$scriptSrc}; {$styleSrc}; img-src 'self' data: blob: https:; connect-src 'self' https://challenges.cloudflare.com; font-src 'self' data:; frame-ancestors 'self'; frame-src 'self' https://www.youtube-nocookie.com; form-action 'self' https://www.paypal.com; base-uri 'self'; object-src 'none'; report-uri {$reportUri}; report-to csp-endpoint;");
+        $response->headers->set('Content-Security-Policy', "default-src 'self'; {$scriptSrc}; {$styleSrc}; img-src 'self' data: blob: https:; connect-src 'self'; font-src 'self' data:; frame-ancestors 'self'; frame-src 'self' https://www.youtube-nocookie.com; form-action 'self' https://www.paypal.com; base-uri 'self'; object-src 'none'; report-uri {$reportUri}; report-to csp-endpoint;");
 
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

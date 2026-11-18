@@ -164,11 +164,8 @@ return [
         ],
         'image_hosting' => [
             'driver' => 'Storage location',
-            'driver_help' => 'If you choose local, the default is to save it locally on the server where the website is located, otherwise upload it to the corresponding image server',
+            'driver_help' => 'Where uploaded attachment images are stored. Only local storage on this server is supported.',
             'tab_header' => 'Image hosting',
-            'upload_api_endpoint' => 'Upload interface address',
-            'base_url' => 'Image URL prefix',
-            'upload_token' => 'Upload token',
         ],
         'permission' => [
             'tab_header' => 'Permission',

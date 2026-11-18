@@ -9,7 +9,6 @@ use App\Support\Attachment\AttachmentService;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
 use Mockery\MockInterface;
@@ -582,17 +581,14 @@ final class AttachmentMutationServiceTest extends TestCase
         $this->assertMatchesRegularExpression('#^\d{14}[0-9a-f]{32}\.jpg$#', (string) $row->location);
     }
 
-    public function test_process_upload_with_nonlocal_driver_returns_driver_warning(): void
+    public function test_process_upload_with_unknown_driver_returns_driver_warning(): void
     {
         $this->configureLocalImageUpload();
-        // The Lsky endpoint rejects the upload, so the driver throws
+        // An unrecognized driver name makes AttachmentStorage throw,
         // and the exception message becomes the warning.
         $this->setSettings([
-            'image_hosting.driver' => 'lsky',
-            'image_hosting_lsky.upload_api_endpoint' => 'https://lsky.test/api/v1/upload',
-            'image_hosting_lsky.upload_token' => 'test-token',
+            'image_hosting.driver' => 'removed-driver',
         ]);
-        Http::fake(['lsky.test/*' => Http::response('Server Error', 500)]);
         $attach = $this->mockAttachService();
         $file = $this->makeImageFile(800, 400);
 

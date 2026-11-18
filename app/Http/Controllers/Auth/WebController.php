@@ -9,12 +9,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Setting;
 use App\Models\User;
-use App\Services\Captcha\Drivers\ImageCaptchaDriver;
 use App\Services\WebAuthService;
 use App\Support\AssetAppender;
 use App\Support\Captcha;
 use App\Support\Config\SiteConfig;
-use App\Support\Html\SafeHtml;
 use App\Support\Http\SafeReturnUrl;
 use App\Support\Locale;
 use App\Support\Network;
@@ -61,29 +59,14 @@ class WebController extends Controller
         $nowarn = $request->has('nowarn');
 
         $captchaEnabled = $this->authService->isCaptchaEnabled();
-        $captchaMarkup = '';
-        if ($captchaEnabled) {
-            $driver = Captcha::manager()->driver();
-            $imageLabelKey = $driver instanceof ImageCaptchaDriver
-                ? 'row_security_image'
-                : 'row_security_challenge';
-
-            $captchaMarkup = $driver->render([
-                'labels' => [
-                    'image' => __('functions.'.$imageLabelKey),
-                    'code' => __('functions.row_security_code'),
-                ],
-                'secret' => $secret,
-                'layout' => 'grid',
-            ]);
-        }
+        $captchaMarkup = Captcha::renderHtml($captchaEnabled ? 'yes' : 'no', $secret, 'grid');
 
         $view = view('auth.login', [
             'vm' => new AuthPageViewModel(
                 langFolder: $langFolder,
                 languages: Locale::languageList('site_lang', true),
                 captchaEnabled: $captchaEnabled,
-                captchaMarkup: SafeHtml::fromTrustedHtml($captchaMarkup),
+                captchaMarkup: $captchaMarkup,
                 remaining: $this->authService->remainingAttempts(Network::clientIp()),
                 maxAttempts: $this->authService->maxLoginAttempts(),
                 error: $request->session()->get('error'),

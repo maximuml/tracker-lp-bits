@@ -162,7 +162,7 @@ class UserAdminController extends BasePageController
         $actor = $this->actor->toLegacyArray();
         $currentUsername = (string) ($this->actor->username);
 
-        return $this->resetPage($request, false, '');
+        return $this->resetPage($request, false, SafeHtml::fromPlainText(''));
     }
 
     public function resetSubmit(ResetUserRequest $request): View|RedirectResponse|Response
@@ -176,7 +176,6 @@ class UserAdminController extends BasePageController
         $currentUsername = (string) ($this->actor->username);
 
         $success = false;
-        $message = '';
 
         $username = trim((string) $request->post('username'));
         $newpassword = trim((string) $request->post('newpassword'));
@@ -215,17 +214,17 @@ class UserAdminController extends BasePageController
 
         Log::writeWithContext("Password Reset For {$username} by {$currentUsername}");
         $success = true;
-        $message = sprintf('The password of account <b>%s</b> is reset, please inform user of this change.', e($username));
+        $message = SafeHtml::fromView('components.useradmin.reset-message', ['username' => $username]);
 
         return $this->resetPage($request, $success, $message);
     }
 
-    private function resetPage(Request $request, bool $success, string $message): View|RedirectResponse
+    private function resetPage(Request $request, bool $success, SafeHtml $message): View|RedirectResponse
     {
         return $this->renderPage($request, 'reset', true, [
             'vm' => new ResetPageViewModel(
                 success: $success,
-                message: SafeHtml::fromTrustedHtml($message),
+                message: $message,
             ),
         ]);
 

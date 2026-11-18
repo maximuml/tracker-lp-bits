@@ -26,7 +26,7 @@ final class AuthPageViewModel extends ViewModel
         public readonly string $langFolder,
         public readonly array $languages,
         public readonly bool $captchaEnabled,
-        public readonly SafeHtml|string $captchaMarkup,
+        public readonly SafeHtml $captchaMarkup,
         public readonly int $remaining,
         public readonly int $maxAttempts,
         public readonly ?string $error,

@@ -60,20 +60,19 @@ final class Tag
             7 => 'thirty_percent_down',
         ];
 
-        $html = '';
+        $children = [];
         foreach ($options as $id => $key) {
             if ($hide === $id) {
                 continue;
             }
-            $label = (string) ($labels[$key] ?? '');
-            $html .= trim(view('components.support.tag.option', [
+            $children[] = [
                 'value' => $id,
                 'selected' => $selected === $id,
-                'label' => $label,
-            ])->render());
+                'label' => (string) ($labels[$key] ?? ''),
+            ];
         }
 
-        return SafeHtml::fromTrustedHtml($html);
+        return SafeHtml::fromView('components.support.tag.options', ['options' => $children]);
     }
 
     /**

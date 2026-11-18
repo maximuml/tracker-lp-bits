@@ -46,7 +46,7 @@ class TorrentListingController extends Controller
 
         $data = $this->torrentSearchRepository->getListingData($request->query->all(), $this->requestContext->getScript());
         foreach (['pagertop', 'pagerbottom'] as $pagerKey) {
-            $data[$pagerKey] = SafeHtml::fromTrustedHtml((string) ($data[$pagerKey] ?? ''));
+            $data[$pagerKey] = $data[$pagerKey] instanceof SafeHtml ? $data[$pagerKey] : SafeHtml::fromPlainText((string) ($data[$pagerKey] ?? ''));
         }
         $data['bookmarkedUsername'] = UserDisplay::username(ActorContext::current()->id);
         $data['listVm'] = $this->torrentListFactory->create(

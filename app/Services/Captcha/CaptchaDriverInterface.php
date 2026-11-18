@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Captcha;
 
+use App\Support\Html\SafeHtml;
+
 interface CaptchaDriverInterface
 {
     public function isEnabled(): bool;
@@ -13,7 +15,7 @@ interface CaptchaDriverInterface
      *
      * @param  array<string, mixed>  $context
      */
-    public function render(array $context = []): string;
+    public function render(array $context = []): SafeHtml;
 
     /**
      * Verify the captcha response.

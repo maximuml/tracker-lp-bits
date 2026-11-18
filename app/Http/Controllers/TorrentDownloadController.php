@@ -155,7 +155,7 @@ class TorrentDownloadController extends BasePageController
         switch ($type) {
             case 'client':
                 $title = __('downloadnotice.text_client_banned_notice');
-                $note = view('components.downloadnotice.note', ['type' => 'client'])->render();
+                $note = SafeHtml::fromView('components.downloadnotice.note', ['type' => 'client']);
                 $noticenexttime = __('downloadnotice.text_notice_not_show_again');
                 $showrationotice = false;
                 $showclientnotice = true;
@@ -163,10 +163,10 @@ class TorrentDownloadController extends BasePageController
                 break;
             case 'ratio':
                 $leechwarnuntiltime = strtotime((string) ($this->actor->value('leechwarnuntil', '')));
-                $note = '';
+                $note = SafeHtml::fromPlainText('');
                 if ($leechwarnuntiltime && $timenow < $leechwarnuntiltime) {
                     $kicktimeout = Time::format($this->actor->value('leechwarnuntil'), false, false, true);
-                    $note = view('components.downloadnotice.note', ['type' => 'ratio', 'kicktimeout' => $kicktimeout])->render();
+                    $note = SafeHtml::fromView('components.downloadnotice.note', ['type' => 'ratio', 'kicktimeout' => $kicktimeout]);
                 }
                 $title = __('downloadnotice.text_low_ratio_notice');
                 $noticenexttime = __('downloadnotice.text_notice_always_show');
@@ -178,7 +178,7 @@ class TorrentDownloadController extends BasePageController
             default:
                 $type = 'firsttime';
                 $title = __('downloadnotice.text_first_time_download_notice');
-                $note = view('components.downloadnotice.note', ['type' => 'firsttime'])->render();
+                $note = SafeHtml::fromView('components.downloadnotice.note', ['type' => 'firsttime']);
                 $noticenexttime = __('downloadnotice.text_notice_not_show_again');
                 $showrationotice = true;
                 $showclientnotice = true;
@@ -192,7 +192,7 @@ class TorrentDownloadController extends BasePageController
                 torrentid: $torrentid,
                 type: $type,
                 title: $title,
-                note: SafeHtml::fromTrustedHtml($note),
+                note: $note,
                 noticenexttime: $noticenexttime,
                 showrationotice: $showrationotice,
                 showclientnotice: $showclientnotice,

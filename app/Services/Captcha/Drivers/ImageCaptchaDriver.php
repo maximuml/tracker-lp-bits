@@ -8,6 +8,7 @@ use App\Repositories\RegImageRepository;
 use App\Services\Captcha\CaptchaDriverInterface;
 use App\Services\Captcha\Exceptions\CaptchaValidationException;
 use App\Support\HeaderBag;
+use App\Support\Html\SafeHtml;
 use App\Support\Strings;
 
 class ImageCaptchaDriver implements CaptchaDriverInterface
@@ -31,7 +32,7 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
     /**
      * @param  array<string, mixed>  $context
      */
-    public function render(array $context = []): string
+    public function render(array $context = []): SafeHtml
     {
         $labels = $context['labels'] ?? [];
         $imageLabel = $labels['image'] ?? 'Security Image';
@@ -40,13 +41,13 @@ class ImageCaptchaDriver implements CaptchaDriverInterface
 
         $imagehash = $this->issue();
 
-        return view('components.captcha.image', [
+        return SafeHtml::fromView('components.captcha.image', [
             'grid' => ($context['layout'] ?? '') === 'grid',
             'imageLabel' => $imageLabel,
             'imageUrl' => sprintf('/web/image?action=regimage&imagehash=%s&secret=%s', $imagehash, $secret),
             'codeLabel' => $codeLabel,
             'imagehash' => $imagehash,
-        ])->render();
+        ]);
     }
 
     /**

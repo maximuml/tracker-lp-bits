@@ -36,7 +36,7 @@
                                         <label><input name="sender" type="radio" value="self" checked>{{ $vm->CURUSER['username'] ?? '' }}</label>
                                         &nbsp; <label><input name="sender" type="radio" value="system">{{ __('staffbox.text_system') }}</label>
                                     </div></div>
-                            <div class="nx-ffull text-center"><input type="submit" value="{{ $vm->submitLabel }}" class="nx-btn nx-btn--primary" data-submit-once></div>
+                            <div class="nx-ffull text-center"><button type="submit" value="{{ $vm->submitLabel }}" class="nx-btn nx-btn--primary" data-submit-once>{{ $vm->submitLabel }}</button></div>
                         </div>
                         <input type="hidden" name="receiver" value="{{ $vm->receiver }}">
                     </form>

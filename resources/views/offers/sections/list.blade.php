@@ -33,7 +33,7 @@
 <option value="{{ $cat->id }}"@if ((string) $cat->id === (string) request('category')) selected @endif>{{ $cat->name }}</option>
 @endforeach
         </select>
-        <input type="submit" class="nx-btn nx-btn--primary" value="{{ __('offers.submit_search') }}" />
+        <button type="submit" class="nx-btn nx-btn--primary" value="{{ __('offers.submit_search') }}">{{ __('offers.submit_search') }}</button>
     </form>
 </section>
 @if ($list->table !== null)

@@ -9,7 +9,7 @@
 <form method="post" action="?">@csrf
 <label for="nx-tag-test" class="mb-1 block font-bold">{{ __('tags.submit_test_this_code') }}</label>
 <textarea id="nx-tag-test" name="test" cols="60" rows="3" class="box-border w-full">{{ $vm->test ?? '' }}</textarea>
-<input type="submit" class="nx-btn nx-btn--primary" value="{{ __('tags.submit_test_this_code')}}">
+<button type="submit" class="nx-btn nx-btn--primary" value="{{ __('tags.submit_test_this_code')}}">{{ __('tags.submit_test_this_code')}}</button>
 </form>
 
 @if (($vm->test ?? '') !== '')

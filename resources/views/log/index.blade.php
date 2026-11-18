@@ -19,7 +19,7 @@
                     </select>
                 @endif
                 <input type="hidden" name="action" value="dailylog">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
+                &nbsp;&nbsp;<button type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once>{{ __('log.submit_search') }}</button></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($vm->logRows))
@@ -48,7 +48,7 @@
             <form method="get" action="">
                 <input type="text" name="query" value="{{ $vm->q }}" aria-label="{{ __('log.text_search_log') }}">
                 <input type="hidden" name="action" value="chronicle">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
+                &nbsp;&nbsp;<button type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once>{{ __('log.submit_search') }}</button></form>
         </td></tr>
     </x-data-table><br />
     @if ($vm->canManage)
@@ -59,7 +59,7 @@
                     @if (! empty($vm->editItem))
                         <input type="hidden" name="id" value="{{ (int) ($vm->editItem['id'] ?? 0) }}">
                     @endif
-                    <input type="submit" class="nx-btn" value="{{ __('log.submit_add') }}" data-submit-once></form>
+                    <button type="submit" class="nx-btn" value="{{ __('log.submit_add') }}" data-submit-once>{{ __('log.submit_add') }}</button></form>
             </td></tr>
         </x-data-table><br />
     @endif
@@ -86,7 +86,7 @@
                 @endforeach
                 </select>
                 <input type="hidden" name="action" value="news">
-                &nbsp;&nbsp;<input type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once></form>
+                &nbsp;&nbsp;<button type="submit" class="nx-btn" value="{{ __('log.submit_search') }}" data-submit-once>{{ __('log.submit_search') }}</button></form>
         </td></tr>
     </x-data-table><br />
     @if (empty($vm->newsRows))

@@ -23,6 +23,6 @@
     <div class="nx-compose__opts">
         <label><input type="checkbox" name="save" value="yes"{{ \App\Support\YesNo::isYes($curUser['savepms'] ?? null) ? ' checked' : '' }}> {{ __('messages.checkbox_save_message') }}</label>
     </div>
-    <input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('messages.submit_forward') }}">
+    <button id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ __('messages.submit_forward') }}">{{ __('messages.submit_forward') }}</button>
 </div>
 </form>

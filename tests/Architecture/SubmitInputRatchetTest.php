@@ -24,7 +24,7 @@ final class SubmitInputRatchetTest extends TestCase
     private const BASE_DIR = __DIR__.'/../..';
 
     /** Baseline: `<input type="submit">` occurrences across Blade views. */
-    private const BASELINE_SUBMIT_INPUTS = 73;
+    private const BASELINE_SUBMIT_INPUTS = 0;
 
     public function test_submit_inputs_do_not_exceed_baseline(): void
     {

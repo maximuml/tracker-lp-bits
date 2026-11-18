@@ -162,7 +162,7 @@
 <x-settings-row :label="__('userdetails.row_change_email')" for="mod-email"><input type="text" size="80" id="mod-email" name="email" value="{{ $vm->user['email'] }}" /></x-settings-row>
 @endif
 <x-settings-row :label="__('userdetails.row_passkey')"><label><input name="resetkey" value="yes" type="checkbox" />{{ __('userdetails.checkbox_reset_passkey') }}</label></x-settings-row>
-<tr><td class="toolbox text-center" colspan="2"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') }}"  data-submit-once /></td></tr>
+<tr><td class="toolbox text-center" colspan="2"><button type="submit" class="nx-btn nx-btn--primary" value="{{ __('userdetails.submit_okay') }}"  data-submit-once>{{ __('userdetails.submit_okay') }}</button></td></tr>
 </x-data-table>
 </form>
 </x-frame>

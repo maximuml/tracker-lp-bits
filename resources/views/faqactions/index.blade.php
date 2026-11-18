@@ -29,7 +29,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}" data-submit-once></div>
+            <div class="nx-ffull text-center"><button type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}" data-submit-once>{{ __('functions.text_edit') }}</button></div>
             </div>
         </form>
     @elseif (($vm->arr['type'] ?? '') === 'categ')
@@ -45,7 +45,7 @@
                     <option value="1"@if (($vm->arr['flag'] ?? -1) == 1) selected="selected"@endif>{{ __('faqactions.status_normal') }}</option>
                 </select>
             </div>
-            <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}" data-submit-once></div>
+            <div class="nx-ffull text-center"><button type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('functions.text_edit') }}" data-submit-once>{{ __('functions.text_edit') }}</button></div>
             </div>
         </form>
     @endif
@@ -69,7 +69,7 @@
         </div>
         <input type="hidden" name="categ" value="{{ (int) ($vm->inid ?? 0) }}">
         <input type="hidden" name="langid" value="{{ (int) ($vm->langid ?? 0) }}">
-        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once></div>
+        <div class="nx-ffull text-center"><button type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once>{{ __('fields.text_add') }}</button></div>
         </div>
     </form>
 @elseif (($vm->mode ?? '') === 'addsection')
@@ -90,7 +90,7 @@
                 <option value="1" selected="selected">{{ __('faqactions.status_normal') }}</option>
             </select>
         </div>
-        <div class="nx-ffull text-center"><input type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once></div>
+        <div class="nx-ffull text-center"><button type="submit" name="edit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once>{{ __('fields.text_add') }}</button></div>
         </div>
     </form>
 @endif

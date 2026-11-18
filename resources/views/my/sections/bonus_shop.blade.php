@@ -122,7 +122,7 @@
                                             {{ $item->pointsLabel }}@if ($item->pointsLabel2 !== null) {{ $item->pointsLabel2 }}@endif
                                             <small>{{ __('mybonus.text_pts') }}</small>
                                         </span>
-                                        <input type="submit" name="submit" class="nx-btn{{ $item->trade->disabled ? '' : ' nx-btn--primary' }}" @disabled($item->trade->disabled) data-submit-once value="{{ $item->trade->label }}">
+                                        <button type="submit" name="submit" class="nx-btn{{ $item->trade->disabled ? '' : ' nx-btn--primary' }}" @disabled($item->trade->disabled) data-submit-once value="{{ $item->trade->label }}">{{ $item->trade->label }}</button>
                                     </div>
                                 </form>
                             </article>

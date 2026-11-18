@@ -18,7 +18,7 @@
 <form method=post action="/web/system/test-ip">@csrf
 <div class="nx-fgrid">
 <label class="nx-fhead" for="testip-ip">{{ ('IP address')}}</label><div class="nx-fcell"><input id="testip-ip" type=text name=ip value="{{ $vm->ip ?? '' }}"></div>
-<div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="OK"></div>
+<div class="nx-ffull text-center"><button type="submit" class="nx-btn nx-btn--primary" value="OK">OK</button></div>
 </div>
 </form>
 </x-page>

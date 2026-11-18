@@ -41,7 +41,7 @@
                 </div>
             </div>
         </section>
-        <div class="nx-savebar"><span class="nx-off__req">{{ __('offers.text_red_star_required') }}<span class="text-nxm-danger">*</span>{{ __('offers.text_red_star_required_end') }}</span><input id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ $submitLabel }}"  data-submit-once /></div>
+        <div class="nx-savebar"><span class="nx-off__req">{{ __('offers.text_red_star_required') }}<span class="text-nxm-danger">*</span>{{ __('offers.text_red_star_required_end') }}</span><button id="qr" type="submit" class="nx-btn nx-btn--primary" value="{{ $submitLabel }}"  data-submit-once>{{ $submitLabel }}</button></div>
     </form>
 </div>
 </div>

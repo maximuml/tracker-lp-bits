@@ -18,7 +18,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once></div>
+        <div class="nx-ffull text-center"><button type="submit" class="nx-btn nx-btn--primary" value="{{ __('fields.text_add') }}" data-submit-once>{{ __('fields.text_add') }}</button></div>
     </div>
 </form>
 @elseif ($vm->mode === 'edit')
@@ -35,7 +35,7 @@
                     @endforeach
                 </select>
             </div>
-        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($vm->rule['id'] ?? 0) }}" name="id"><input type="submit" class="nx-btn nx-btn--primary" value="{{ __('label.save') }}" data-submit-once></div>
+        <div class="nx-ffull text-center"><input type="hidden" value="{{ (int) ($vm->rule['id'] ?? 0) }}" name="id"><button type="submit" class="nx-btn nx-btn--primary" value="{{ __('label.save') }}" data-submit-once>{{ __('label.save') }}</button></div>
     </div>
 </form>
 @else

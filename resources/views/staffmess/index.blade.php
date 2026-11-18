@@ -34,7 +34,7 @@
 &nbsp; System
 <input name="sender" type="radio" value="system" aria-label="{{ __('staffbox.text_system') }}">
 </div></div>
-<div class="nx-ffull text-center"><input type="submit" class="nx-btn nx-btn--primary" value="Send!"></div>
+<div class="nx-ffull text-center"><button type="submit" class="nx-btn nx-btn--primary" value="Send!">Send!</button></div>
 </div>
 <input type=hidden name=receiver value={{ (int) $vm->receiver }}>
 </form>

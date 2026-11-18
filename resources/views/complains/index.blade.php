@@ -106,7 +106,7 @@
             <label class="nx-fhead" for="complain-email">{{ __('complains.text_new_email') }}</label><div class="nx-fcell"><input id="complain-email" type="email" name="email" autocomplete="email" /></div>
             <div class="nx-fhead">{{ __('complains.text_new_body') }}</div><div class="nx-fcell"><textarea name="body" placeholder="{{ __('complains.text_new_body_placeholder') }}"></textarea></div>
             {{ $vm->captchaHtml }}
-            <div class="nx-ffull text-center"><input type="submit" value="{{ __('complains.text_new_submit') }}" class="nx-btn nx-btn--primary"  data-submit-once /></div>
+            <div class="nx-ffull text-center"><button type="submit" value="{{ __('complains.text_new_submit') }}" class="nx-btn nx-btn--primary"  data-submit-once>{{ __('complains.text_new_submit') }}</button></div>
         </div>
     </form>
 </section>

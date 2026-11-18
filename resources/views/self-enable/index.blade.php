@@ -27,7 +27,7 @@
     <p>{{ $vm->t['deductTotal'] ?? '' }}</p>
     @if ($vm->isUserBonusEnough)
         <p>{{ $vm->t['enableDesc'] ?? '' }}</p>
-        <form method="post">@csrf<input type="hidden" name="submit" value="1"><input type="submit" class="nx-btn nx-btn--primary" value="{{ $vm->t['enableButton'] ?? '' }}" data-submit-once></form>
+        <form method="post">@csrf<input type="hidden" name="submit" value="1"><button type="submit" class="nx-btn nx-btn--primary" value="{{ $vm->t['enableButton'] ?? '' }}" data-submit-once>{{ $vm->t['enableButton'] ?? '' }}</button></form>
     @else
         <p>{{ $vm->insufficientMessage }}</p>
     @endif

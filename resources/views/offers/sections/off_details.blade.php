@@ -8,7 +8,7 @@
     </div>
     <p class="nx-off__meta">{{ __('offers.text_offered_by')}}{{ $off_details->offeredBy }}{{ $off_details->offerTime }}</p>
     @if ($off_details->showAllowRow)
-    <div class="nx-off__actions"><form method="post" action="/web/offers/allow">@csrf<input type="hidden" value="{{ $off_details->id }}" name="offerid" /><input class="nx-btn nx-btn--primary" type="submit" value="{{ __('offers.submit_allow') }}" /></form><form method="post" action="/web/offers/finish">@csrf<input type="hidden" value="{{ $off_details->id }}" name="finish" /><input class="nx-btn" type="submit" value="{{ __('offers.submit_let_votes_decide') }}" /></form></div>
+    <div class="nx-off__actions"><form method="post" action="/web/offers/allow">@csrf<input type="hidden" value="{{ $off_details->id }}" name="offerid" /><button class="nx-btn nx-btn--primary" type="submit" value="{{ __('offers.submit_allow') }}">{{ __('offers.submit_allow') }}</button></form><form method="post" action="/web/offers/finish">@csrf<input type="hidden" value="{{ $off_details->id }}" name="finish" /><button class="nx-btn" type="submit" value="{{ __('offers.submit_let_votes_decide') }}">{{ __('offers.submit_let_votes_decide') }}</button></form></div>
     @endif
     @if ($off_details->isPending)
     <div class="nx-off__votetable"><livewire:offer-vote :offer-id="$off_details->id" :can-against="$off_details->canAgainst" :yeah="$off_details->yeah" :against="$off_details->against" /></div>

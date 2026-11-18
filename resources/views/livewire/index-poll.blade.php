@@ -34,7 +34,7 @@
     @endforeach
     <br />
     <label><input type="radio" name="choice" value="255" wire:model.number="choice">{{ $polls->blankVoteLabel }}</label><br />
-    <p class="text-center"><input type="submit" class="nx-btn nx-btn--primary" value="{{ $polls->submitVoteLabel }}" /></p>
+    <p class="text-center"><button type="submit" class="nx-btn nx-btn--primary" value="{{ $polls->submitVoteLabel }}">{{ $polls->submitVoteLabel }}</button></p>
     </form>
 @endif
 </div>

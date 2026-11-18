@@ -24,7 +24,19 @@
 @endif
 
 @if ($count && isset($rows))
-    <p class="nxm-results" role="status">{{ __('torrents.results_found', ['count' => number_format($count)]) }} <span class="nxm-results__sort">&middot; {{ $listVm->sortLabel }}</span></p>
+    <div class="nxm-results" role="status">
+        <span>{{ __('torrents.results_found', ['count' => number_format($count)]) }}</span>
+        <details class="nxm-sortmenu">
+            <summary class="nxm-sortmenu__current">{{ $listVm->sortLabel }}</summary>
+            <div class="nxm-sortmenu__list">
+                @foreach ($listVm->columns as $col)
+                    @if ($col['sortUrl'] !== null)
+                    <a class="nxm-sortmenu__item @if (($col['ariaSort'] ?? null) !== null) nxm-th--sorted @endif" href="{{ $col['sortUrl'] }}">{{ $col['abbrTitle'] ?? $col['shortLabel'] ?? $col['label'] }}@if (($col['ariaSort'] ?? null) === 'descending') ▼@elseif (($col['ariaSort'] ?? null) === 'ascending') ▲@endif</a>
+                    @endif
+                @endforeach
+            </div>
+        </details>
+    </div>
 
     <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
     @include('components.torrents.table')

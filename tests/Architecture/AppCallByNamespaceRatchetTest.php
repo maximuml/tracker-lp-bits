@@ -29,10 +29,10 @@ final class AppCallByNamespaceRatchetTest extends TestCase
      */
     private const BASELINES = [
         'Controllers' => 0,
-        // +3 for #[Scoped] accessor funnels (TurnstileRenderState lookup/
-        // forget in the captcha driver, ToolMaintenanceService::resetState)
-        // — one app() per lifecycle seam, not service-location sprawl.
-        'Services' => 4,
+        // Scoped lifecycle seams: PermissionChecker::instance() and
+        // ToolMaintenanceService::resetState() — one app() per seam, not
+        // service-location sprawl.
+        'Services' => 2,
         'Repositories' => 0,
         'Other' => 108,
     ];

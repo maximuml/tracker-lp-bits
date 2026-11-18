@@ -8,7 +8,6 @@ use App\Listeners\ResetNexus;
 use App\Models\Setting;
 use App\Models\Topic;
 use App\Models\User;
-use App\Services\Captcha\TurnstileRenderState;
 use App\Services\ToolMaintenanceService;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
@@ -299,7 +298,6 @@ final class ResetNexusIsolationTest extends TestCase
     {
         // Seed worker-global caches the way "request A" would — they live
         // on #[Scoped] state holders now, dropped by forgetScopedInstances().
-        app(TurnstileRenderState::class)->scriptInjected = true;
         PromotionState::instance()->globalSpecialState = 5;
         SettingsState::instance()->settings = ['k' => 'v'];
         SearchBoxModelState::instance()->categoryIdsBySearchBox = ['0' => [1, 2]];
@@ -326,7 +324,6 @@ final class ResetNexusIsolationTest extends TestCase
 
         // Request B must not inherit request A's memoized state — fresh
         // scoped instances expose defaults again.
-        $this->assertFalse(app(TurnstileRenderState::class)->scriptInjected, 'state leaked: TurnstileRenderState::$scriptInjected');
         $this->assertNull(PromotionState::instance()->globalSpecialState, 'state leaked: PromotionState::$globalSpecialState');
         $this->assertNull(SettingsState::instance()->settings, 'state leaked: SettingsState::$settings');
         $this->assertSame([], SearchBoxModelState::instance()->categoryIdsBySearchBox, 'state leaked: SearchBoxModelState::$categoryIdsBySearchBox');

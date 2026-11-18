@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Config;
  * @property int $user_id
  * @property int $stylesheet
  * @property string $theme
+ * @property string $torrents_view
  * @property int $caticon
  * @property string $fontsize
  * @property int $torrentsperpage
@@ -84,7 +85,7 @@ class UserPreference extends Model
 
     /** @var list<string> */
     protected $fillable = [
-        'user_id', 'stylesheet', 'theme', 'caticon', 'fontsize', 'torrentsperpage',
+        'user_id', 'stylesheet', 'theme', 'torrents_view', 'caticon', 'fontsize', 'torrentsperpage',
         'topicsperpage', 'postsperpage', 'clicktopic', 'tooltip', 'timetype',
         'appendpromotion', 'appendnew', 'appendpicked', 'appendsticky', 'avatars',
         'bmicon', 'commentpm', 'deletepms', 'dlicon', 'forumpost', 'savepms',

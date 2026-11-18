@@ -36,10 +36,11 @@
                 @endforeach
             </div>
         </details>
+        @include('components.torrents.view-toggle')
     </div>
 
     <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination top" />
-    @include('components.torrents.table')
+    @include('components.torrents.list')
     <x-pagination :page="$pager['page']" :pages="$pager['pages']" :href="$pager['href']" :prev-label="$pager['prevLabel']" :next-label="$pager['nextLabel']" :zero-based="$pager['zeroBased']" label="Pagination bottom" />
 @else
     <div class="nxm-empty" role="status">

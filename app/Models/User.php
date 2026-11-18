@@ -62,6 +62,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int|null $privacy
  * @property int|null $stylesheet
  * @property string $theme
+ * @property string $torrents_view
  * @property int|null $caticon
  * @property int|null $fontsize
  * @property string|null $info
@@ -213,6 +214,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         // user_preferences
         'stylesheet' => 'user_preferences',
         'theme' => 'user_preferences',
+        'torrents_view' => 'user_preferences',
         'caticon' => 'user_preferences',
         'fontsize' => 'user_preferences',
         'torrentsperpage' => 'user_preferences',

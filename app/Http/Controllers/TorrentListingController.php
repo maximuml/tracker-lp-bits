@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\DTOs\Auth\ActorContext;
+use App\Enums\TorrentListView;
 use App\Models\User;
 use App\Repositories\TorrentSearchRepository;
+use App\Support\Cache;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
 use App\Support\Html\SafeHtml;
@@ -44,6 +46,13 @@ class TorrentListingController extends Controller
         $this->currentUser->promoteIfAbsent($user);
         $currentUser = ActorContext::current()->toLegacyArray();
 
+        $viewMode = TorrentListView::resolve($request->query('view'), (string) ($user->torrents_view ?? 'list'));
+        if ($request->query('view') !== null && $viewMode->value !== $user->torrents_view) {
+            $user->torrents_view = $viewMode->value;
+            $user->save();
+            Cache::clearUser($user->id, (string) $user->passkey);
+        }
+
         $data = $this->torrentSearchRepository->getListingData($request->query->all(), $this->requestContext->getScript());
         foreach (['pagertop', 'pagerbottom'] as $pagerKey) {
             $data[$pagerKey] = ($data[$pagerKey] ?? null) instanceof SafeHtml ? $data[$pagerKey] : SafeHtml::fromPlainText((string) ($data[$pagerKey] ?? ''));
@@ -52,6 +61,7 @@ class TorrentListingController extends Controller
         $data['listVm'] = $this->torrentListFactory->create(
             $data['rows'] ?? [],
             (int) ($data['sectiontype'] ?? 0),
+            $viewMode,
         );
         $data['panelVm'] = $this->searchPanelFactory->create(
             (int) ($data['sectiontype'] ?? 0),

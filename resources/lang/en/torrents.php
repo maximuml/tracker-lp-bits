@@ -91,4 +91,6 @@ return [
     'applied_search' => 'Search: “:term”',
     'remove_filter' => 'Remove filter: :filter',
     'reset_all' => 'Reset all',
+    'view_list' => 'List',
+    'view_grid' => 'Posters',
 ];

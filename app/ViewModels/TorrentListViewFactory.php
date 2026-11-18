@@ -7,6 +7,7 @@ namespace App\ViewModels;
 use App\Auth\Permission;
 use App\Contracts\Repositories\TagRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
+use App\Enums\TorrentListView;
 use App\Enums\UserAppendPromotion;
 use App\Enums\UserTimeType;
 use App\Models\Torrent;
@@ -57,7 +58,7 @@ final class TorrentListViewFactory
     /**
      * @param  array<int, array<string, mixed>>  $rows
      */
-    public function create(array $rows, int $searchBoxId): TorrentListViewModel
+    public function create(array $rows, int $searchBoxId, TorrentListView $viewMode = TorrentListView::List): TorrentListViewModel
     {
         $cache = $this->cache;
         if ($cache === null) {
@@ -369,6 +370,7 @@ final class TorrentListViewFactory
         // container — dropped here; $torrent_tooltip was never populated.
         return new TorrentListViewModel(
             sortLabel: $sortLabel,
+            viewMode: $viewMode,
             columns: $columns,
             rows: $outRows,
             showComments: $showComments,

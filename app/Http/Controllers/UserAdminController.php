@@ -9,6 +9,7 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
 use App\Enums\BusinessType;
 use App\Enums\Permission\PermissionEnum;
+use App\Enums\UserClass as UserClassEnum;
 use App\Http\Requests\AddUserRequest;
 use App\Http\Requests\ResetUserRequest;
 use App\Http\Requests\SelfEnableRequest;
@@ -93,13 +94,12 @@ class UserAdminController extends BasePageController
             $q .= ($q ? '&' : '')."country={$country}";
         }
 
+        // Iterate the enum: retired tier values leave gaps the old
+        // "break at first unnamed class" loop would have stopped at.
         $classOptions = [];
-        for ($i = 0; ; $i++) {
-            $c = UserClass::name($i, false, true, true);
-            if ($c->isEmpty()) {
-                break;
-            }
-            $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => $class !== '-' && $class == $i];
+        foreach (UserClassEnum::cases() as $case) {
+            $i = $case->value;
+            $classOptions[] = ['value' => $i, 'label' => UserClass::name($i, false, true, true), 'selected' => $class !== '-' && $class == $i];
         }
 
         $countryOptions = [['value' => 0, 'label' => __('users.select_any_country'), 'selected' => $country === 0]];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\DTOs\Auth\ActorContext;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Services\UsersearchPageService;
@@ -380,5 +381,24 @@ final class UsersearchPageServiceTest extends TestCase
         $this->assertIsArray($options);
         $this->assertSame('(any)', $options[0]['label']);
         $this->assertSame(1, $options[0]['value']);
+    }
+
+    public function test_build_class_options_cover_the_full_ladder(): void
+    {
+        $this->authenticatedUser();
+        $this->mockUserListingRepo();
+
+        $request = Request::create('/usersearch.php', 'GET');
+
+        $data = $this->callBuild($request);
+
+        $options = $data['form']['c_options'];
+        $values = array_column($options, 'value');
+        // Option value N selects class N-2; the ladder tops out at
+        // STAFFLEADER — its option must be present (kills mutants that
+        // drop array_keys() from the max-class derivation).
+        $topValue = max(array_keys(User::classes())) + 2;
+        $this->assertContains($topValue, $values);
+        $this->assertContains(UserClassEnum::POWER_USER->value + 2, $values);
     }
 }

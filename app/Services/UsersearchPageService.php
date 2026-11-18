@@ -106,11 +106,10 @@ final class UsersearchPageService
         $classOptions = [['value' => 1, 'label' => '(any)', 'selected' => false]];
         $maxClass = max(array_keys(User::classes()));
         for ($i = 2; $i - 2 <= $maxClass; $i++) {
-            if (! ($c = UserClass::name($i - 2, false, true, true))->isEmpty()) {
-                $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => (bool) $class && $class == $i];
-            } else {
-                break;
+            if (($c = UserClass::name($i - 2, false, true, true))->isEmpty()) {
+                continue; // retired tier values leave gaps in the ladder
             }
+            $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => (bool) $class && $class == $i];
         }
 
         return [

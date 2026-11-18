@@ -1626,6 +1626,10 @@ ul.menu li.selected a:hover { text-decoration: none; }
 }
 .nxm-trow:hover { background: var(--nxm-surface-alt); }
 .nxm-trow--sticky { border-left: 3px solid var(--nxm-warning); background: color-mix(in srgb, var(--nxm-warning-bg) 35%, var(--nxm-surface)); }
+/* Highlight utilities must stay a light tint on row-cards so accent/muted text keeps WCAG contrast (the old table hid them under per-td surface backgrounds). */
+.nxm-trow.bg-nxm-highlight { background: color-mix(in srgb, var(--nxm-highlight) 15%, var(--nxm-surface)); }
+.nxm-trow.bg-nxm-highlight-ok { background: color-mix(in srgb, var(--nxm-highlight-ok) 15%, var(--nxm-surface)); }
+.nxm-trow:is(.bg-nxm-highlight, .bg-nxm-highlight-ok) :is(a, b, .nxm-trow__meta) { color: var(--nxm-text); }
 .nxm-trow__poster {
     flex: 0 0 46px; display: grid; place-items: center; align-self: center;
     min-height: 60px; border-radius: 4px; overflow: hidden;

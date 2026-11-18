@@ -195,8 +195,8 @@ class HitAndRunCronjobService
 
             return;
         }
-        $users = $this->userCleanupRepository->listBanCandidates($result->pluck('uid')->toArray());
-        Logger::writeWithContext((string) ("{$logPrefix}, Going to disable user: ".json_encode($users->toArray())), (string) 'info', (bool) false);
+        $users = $this->userCleanupRepository->listBanCandidates($result->pluck('uid')->all());
+        Logger::writeWithContext((string) ("{$logPrefix}, Going to disable user: ".json_encode($users)), (string) 'info', (bool) false);
         foreach ($users as $user) {
             $locale = $user->locale;
             $comment = Locale::trans('hr.unreached_disable_comment', [], $locale);

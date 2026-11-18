@@ -87,10 +87,10 @@ final class Promotion
         }
 
         if ($token === null) {
-            $torrentSettings = SiteConfig::current()->torrent->toArray();
-            if ($posState === TorrentPosState::STICKY_FIRST->value && ! empty($torrentSettings['sticky_first_level_background_color'])) {
+            $torrent = SiteConfig::current()->torrent;
+            if ($posState === TorrentPosState::STICKY_FIRST->value && $torrent->stickyFirstLevelBackgroundColor() !== '') {
                 $token = '';
-            } elseif ($posState === TorrentPosState::STICKY_SECOND->value && ! empty($torrentSettings['sticky_second_level_background_color'])) {
+            } elseif ($posState === TorrentPosState::STICKY_SECOND->value && $torrent->stickySecondLevelBackgroundColor() !== '') {
                 $token = '';
             }
         }

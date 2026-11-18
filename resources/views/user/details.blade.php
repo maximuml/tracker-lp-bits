@@ -63,7 +63,7 @@
 @if (! empty($vm->user['avatar']))
 <x-settings-row-small :label="__('userdetails.row_avatar')">{{ $vm->avatarHtml }}</x-settings-row-small>
 @endif
-<x-settings-row-small :label="__('userdetails.row_class')"><img class="nx-class-badge" alt="{{ \App\Support\UserClass::name($vm->user['class'], false, false, true) }}" title="{{ \App\Support\UserClass::name($vm->user['class'], false, false, true) }}" src="{{ \App\Support\UserClass::imagePath($vm->user['class']) }}" loading="lazy" decoding="async" />@if (($vm->user['title'] ?? '') !== '')&nbsp;{{ trim($vm->user['title']) }}@endif @if ((int) $vm->user['class'] === UC_VIP && ! empty($vm->user['vip_until']) && strtotime((string) $vm->user['vip_until'])){{ __('userdetails.row_vip_until') }}: {{ $vm->user['vip_until'] }}@endif</x-settings-row-small>
+<x-settings-row-small :label="__('userdetails.row_class')"><x-support.class-badge :class="$vm->user['class']" />@if (($vm->user['title'] ?? '') !== '')&nbsp;{{ trim($vm->user['title']) }}@endif @if ((int) $vm->user['class'] === UC_VIP && ! empty($vm->user['vip_until']) && strtotime((string) $vm->user['vip_until'])){{ __('userdetails.row_vip_until') }}: {{ $vm->user['vip_until'] }}@endif</x-settings-row-small>
 @if ($vm->userProps !== [])
 <x-settings-row-small :label="__('userdetails.row_user_props')"><div>@foreach ($vm->userProps as $prop){{ $prop }}@unless ($loop->last)&nbsp;|&nbsp;@endunless @endforeach</div></x-settings-row-small>
 @endif

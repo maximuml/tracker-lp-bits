@@ -234,7 +234,6 @@ final class ForumTopicViewService
                     ? __('forums.text_view_all_posts')
                     : __('forums.text_view_this_author_only')),
                 avatarImage: UserDisplay::avatarImageWithContext(htmlspecialchars($avatar)),
-                classImage: UserClass::imagePath((int) ($arr2['class'] ?? 0)),
                 className: $className,
                 postCount: (int) $forumposts,
                 uploaded: Format::size($arr2['uploaded'] ?? 0),

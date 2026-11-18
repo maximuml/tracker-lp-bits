@@ -30,7 +30,6 @@ final readonly class PostViewModel
         public string $authorToggleUrl,
         public string $authorToggleLabel,
         public Htmlable $avatarImage,
-        public string $classImage,
         public string $className,
         public int $postCount,
         public string $uploaded,

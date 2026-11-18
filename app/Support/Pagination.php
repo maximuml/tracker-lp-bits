@@ -117,14 +117,11 @@ final class Pagination
             links: $links,
         );
 
-        $pagertop = view('pagination.pager', ['vm' => $vm, 'top' => true])->render();
-        $pagerbottom = view('pagination.pager', ['vm' => $vm, 'top' => false])->render();
-
         $startOffset = $page * $rpp;
 
         return [
-            SafeHtml::fromTrustedHtml($pagertop),
-            SafeHtml::fromTrustedHtml($pagerbottom),
+            SafeHtml::fromView('pagination.pager', ['vm' => $vm, 'top' => true]),
+            SafeHtml::fromView('pagination.pager', ['vm' => $vm, 'top' => false]),
             "limit $rpp offset $startOffset",
             $startOffset,
             $rpp,

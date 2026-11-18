@@ -86,7 +86,7 @@ final class TrustedHtmlAppSurfaceTest extends TestCase
      * markup trimmed) instead of fromTrustedHtml(trim(view()->render()));
      * the pics fragment and linkExt prop become HtmlString.
      */
-    private const BASELINE_TRUSTED_HTML_CALLS = 65;
+    private const BASELINE_TRUSTED_HTML_CALLS = 63;
 
     /**
      * Files where fromTrustedHtml is part of the boundary itself and

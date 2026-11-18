@@ -94,7 +94,7 @@ final class Permissions
         $runtime = RuntimeContext::instance();
         if ($runtime->isLegacy() && ! $runtime->isTracker()) {
             $requireClass = SiteConfig::current()->authority->permission($permission);
-            if ($requireClass !== null && isset(User::$classes[$requireClass])) {
+            if ($requireClass !== null && isset(User::classes()[$requireClass])) {
                 PageResponses::abort(__('functions.std_sorry'), __('functions.std_permission_denied_only').UserClass::name($requireClass, false, true, true).__('functions.std_or_above_can_view').view('components.permission-faq-note', ['siteName' => SiteConfig::current()->basic->siteName()])->render(), false);
             } else {
                 PageResponses::abort(__('functions.std_error'), __('functions.std_permission_denied'));

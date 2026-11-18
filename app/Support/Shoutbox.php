@@ -104,7 +104,7 @@ final class Shoutbox
     /**
      * Rank badge data, rendered by the `x-shoutbox.class-badge`
      * component. Every tier above plain User gets a compact chip —
-     * ladder tiers (incl. retired) plus the manual staff roles.
+     * the active ladder tiers plus the manual staff roles.
      * Peasant/User return null: a chip on the default classes would
      * be noise on every message.
      *
@@ -117,12 +117,8 @@ final class Shoutbox
             $map = [
                 UC_POWER_USER => ['PWR', 'poweruser'],
                 UC_ELITE_USER => ['ELT', 'eliteuser'],
-                UC_CRAZY_USER => ['CRA', 'crazyuser'],
-                UC_INSANE_USER => ['INS', 'insaneuser'],
                 UC_VETERAN_USER => ['VET', 'veteranuser'],
-                UC_EXTREME_USER => ['EXT', 'extremeuser'],
                 UC_ULTIMATE_USER => ['ULT', 'ultimateuser'],
-                UC_NEXUS_MASTER => ['NXM', 'nexusmaster'],
                 UC_VIP => ['VIP', 'vip'],
                 UC_RETIREE => ['RET', 'retiree'],
                 UC_UPLOADER => ['UPL', 'uploader'],

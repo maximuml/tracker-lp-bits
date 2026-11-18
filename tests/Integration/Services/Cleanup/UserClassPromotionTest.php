@@ -152,15 +152,16 @@ final class UserClassPromotionTest extends TestCase
         $this->assertSame(0, (int) $user->invites);
     }
 
-    public function test_retired_tier_is_not_a_promotion_candidate(): void
+    public function test_stale_retired_tier_is_not_a_promotion_candidate(): void
     {
         $this->setVeteranPromotionSettings();
 
         // Veteran promotion sources Elite users on the new chain; a user
-        // stuck on retired Insane (5) cannot jump into the ladder.
+        // stuck on a stale legacy value (5 = retired Insane) cannot jump
+        // into the ladder.
         $uid = $this->insertUser([
-            'class' => UserClass::INSANE_USER->value,
-            'max_class_once' => UserClass::INSANE_USER->value,
+            'class' => 5,
+            'max_class_once' => 5,
             'downloaded' => 10 * 1024 * 1024 * 1024,
             'uploaded' => 10 * 1024 * 1024 * 1024,
             'seed_points' => 999999,
@@ -169,7 +170,7 @@ final class UserClassPromotionTest extends TestCase
         $this->promotion->promoteUsersByClass();
 
         $this->assertSame(
-            UserClass::INSANE_USER->value,
+            5,
             (int) DB::table('users')->where('id', $uid)->value('class'),
         );
     }

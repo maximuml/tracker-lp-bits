@@ -166,12 +166,8 @@ class IndexRepository
                 UC_USER => User::where('class', UC_USER)->count(),
                 UC_POWER_USER => User::where('class', UC_POWER_USER)->count(),
                 UC_ELITE_USER => User::where('class', UC_ELITE_USER)->count(),
-                UC_CRAZY_USER => User::where('class', UC_CRAZY_USER)->count(),
-                UC_INSANE_USER => User::where('class', UC_INSANE_USER)->count(),
                 UC_VETERAN_USER => User::where('class', UC_VETERAN_USER)->count(),
-                UC_EXTREME_USER => User::where('class', UC_EXTREME_USER)->count(),
                 UC_ULTIMATE_USER => User::where('class', UC_ULTIMATE_USER)->count(),
-                UC_NEXUS_MASTER => User::where('class', UC_NEXUS_MASTER)->count(),
             ];
         });
     }

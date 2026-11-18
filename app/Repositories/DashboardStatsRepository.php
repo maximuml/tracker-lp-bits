@@ -35,7 +35,7 @@ class DashboardStatsRepository
             ->get()
             ->pluck('counts', 'class');
         $result = [];
-        foreach (User::$classes as $class => $value) {
+        foreach (User::classes() as $class => $value) {
             if ($class >= UserClassEnum::VIP->value) {
                 break;
             }

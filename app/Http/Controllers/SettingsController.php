@@ -302,7 +302,7 @@ class SettingsController extends BasePageController
             foreach ($validConfig as $config) {
                 if (in_array($config, Setting::$permissionMustHaveClass, true)) {
                     $classValue = is_string($data[$config] ?? null) || is_int($data[$config] ?? null) ? (string) ($data[$config] ?? '') : '';
-                    if (! isset(User::$classes[$classValue])) {
+                    if (! isset(User::classes()[$classValue])) {
                         return $this->abortResponse('Error', 'Invalid user class: '.$classValue, true, 200);
                     }
                 }

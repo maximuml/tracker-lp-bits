@@ -48,7 +48,7 @@ final class UserClassManagementTaskTest extends TestCase
 
         $this->task->manageUserClasses();
 
-        // Was class - 1 = Insane (5) on the old ladder; now Elite (3).
+        // Veteran demotes one step down the ladder: to Elite (3).
         $this->assertSame(
             UserClass::ELITE_USER->value,
             (int) DB::table('users')->where('id', $uid)->value('class'),
@@ -104,12 +104,13 @@ final class UserClassManagementTaskTest extends TestCase
         );
     }
 
-    public function test_retired_tier_is_not_demoted(): void
+    public function test_stale_retired_tier_is_not_demoted(): void
     {
         $this->setVeteranDemotionSettings();
 
+        // Stale legacy value (5 = retired Insane) left by an older database.
         $uid = $this->insertUser([
-            'class' => UserClass::INSANE_USER->value,
+            'class' => 5,
             'downloaded' => 2 * 1024 * 1024 * 1024,
             'uploaded' => 1024 * 1024 * 1024,
         ]);
@@ -117,7 +118,7 @@ final class UserClassManagementTaskTest extends TestCase
         $this->task->manageUserClasses();
 
         $this->assertSame(
-            UserClass::INSANE_USER->value,
+            5,
             (int) DB::table('users')->where('id', $uid)->value('class'),
         );
     }

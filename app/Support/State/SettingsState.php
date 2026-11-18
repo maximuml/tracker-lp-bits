@@ -17,9 +17,6 @@ final class SettingsState implements RequestScopedState
     /** @var array<string, mixed>|null */
     public ?array $settings = null;
 
-    /** @var array<string, bool>|null */
-    public ?array $fromDb = null;
-
     public static function instance(): self
     {
         return app(self::class);
@@ -28,6 +25,5 @@ final class SettingsState implements RequestScopedState
     public function reset(): void
     {
         $this->settings = null;
-        $this->fromDb = null;
     }
 }

@@ -16,26 +16,41 @@ use App\Support\Locale;
  */
 trait HasClassLadder
 {
-    /** @var array<int|string, array<string, mixed>> */
-    public static array $classes = [
-        UserClassEnum::PEASANT->value => ['text' => 'Peasant'],
-        UserClassEnum::USER->value => ['text' => 'User', 'min_seed_points' => 0],
-        UserClassEnum::POWER_USER->value => ['text' => 'Power User', 'min_seed_points' => 40000],
-        UserClassEnum::ELITE_USER->value => ['text' => 'Elite User', 'min_seed_points' => 150000],
-        UserClassEnum::CRAZY_USER->value => ['text' => 'Crazy User'],
-        UserClassEnum::INSANE_USER->value => ['text' => 'Insane User'],
-        UserClassEnum::VETERAN_USER->value => ['text' => 'Veteran User', 'min_seed_points' => 400000],
-        UserClassEnum::EXTREME_USER->value => ['text' => 'Extreme User'],
-        UserClassEnum::ULTIMATE_USER->value => ['text' => 'Ultimate User', 'min_seed_points' => 800000],
-        UserClassEnum::NEXUS_MASTER->value => ['text' => 'Nexus Master'],
-        UserClassEnum::VIP->value => ['text' => 'VIP'],
-        UserClassEnum::RETIREE->value => ['text' => 'Retiree'],
-        UserClassEnum::UPLOADER->value => ['text' => 'Uploader'],
-        UserClassEnum::MODERATOR->value => ['text' => 'Moderator'],
-        UserClassEnum::ADMINISTRATOR->value => ['text' => 'Administrator'],
-        UserClassEnum::SYSOP->value => ['text' => 'Sysop'],
-        UserClassEnum::STAFFLEADER->value => ['text' => 'Staff Leader'],
-    ];
+    /** @var array<int, array{text: string, min_seed_points?: int}>|null */
+    private static ?array $ladderMap = null;
+
+    /**
+     * Tier metadata map, derived from {@see UserClassEnum} — the single
+     * source for labels and seed-point thresholds. `min_seed_points` is
+     * present only on the auto-promotion rungs plus User (the legacy map
+     * carried `0` there and omitted the key elsewhere).
+     *
+     * @return array<int, array{text: string, min_seed_points?: int}>
+     */
+    public static function classes(): array
+    {
+        if (self::$ladderMap === null) {
+            self::$ladderMap = [];
+            foreach (UserClassEnum::cases() as $case) {
+                $entry = ['text' => $case->label()];
+                if ($case === UserClassEnum::USER || $case->minSeedPoints() > 0) {
+                    $entry['min_seed_points'] = $case->minSeedPoints();
+                }
+                self::$ladderMap[$case->value] = $entry;
+            }
+        }
+
+        return self::$ladderMap;
+    }
+
+    /**
+     * Drop the memoized ladder map (mutable-static ratchet requires a
+     * reset path; also lets tests re-derive after locale/config changes).
+     */
+    public static function resetLadder(): void
+    {
+        self::$ladderMap = null;
+    }
 
     public function getClassTextAttribute(): string
     {
@@ -48,10 +63,10 @@ trait HasClassLadder
      */
     public static function getClassText($class)
     {
-        if (! is_numeric($class) || ! isset(self::$classes[$class])) {
+        if (! is_numeric($class) || ! isset(self::classes()[$class])) {
             return '';
         }
-        $classText = self::$classes[$class]['text'];
+        $classText = self::classes()[$class]['text'];
         if ($class >= UserClassEnum::VIP->value) {
             $alias = Locale::trans('user.class_names.'.$class, [], null);
         } else {
@@ -72,7 +87,7 @@ trait HasClassLadder
     public static function listClass($min = UserClassEnum::PEASANT->value, $max = UserClassEnum::STAFFLEADER->value): array
     {
         $result = [];
-        foreach (self::$classes as $class => $info) {
+        foreach (self::classes() as $class => $info) {
             if ($class >= $min && $class <= $max) {
                 $result[$class] = self::getClassText($class);
             }
@@ -90,11 +105,11 @@ trait HasClassLadder
      */
     public static function getClassName($class, $compact = false, $b_colored = false, $I18N = false)
     {
-        $class_name = self::$classes[$class]['text'] ?? '';
+        $class_name = self::classes()[$class]['text'] ?? '';
         if ($class >= UserClassEnum::VIP->value && $I18N) {
             $class_name = Locale::trans("user.class_names.{$class}", [], null);
         }
-        $class_name_color = self::$classes[$class]['text'] ?? '';
+        $class_name_color = self::classes()[$class]['text'] ?? '';
         if ($compact) {
             $class_name = str_replace(' ', '', $class_name);
         }
@@ -119,7 +134,7 @@ trait HasClassLadder
             return $setting;
         }
 
-        return self::$classes[$class]['min_seed_points'] ?? false;
+        return self::classes()[$class]['min_seed_points'] ?? false;
     }
 
     /** @return int|string */

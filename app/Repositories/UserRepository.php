@@ -184,7 +184,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             $class = UserClassEnum::USER->value;
         }
 
-        if (! isset(User::$classes[$class])) {
+        if (! isset(User::classes()[$class])) {
             throw new \InvalidArgumentException("Invalid user class: $class");
         }
         $setting = SiteConfig::current()->main->toArray();

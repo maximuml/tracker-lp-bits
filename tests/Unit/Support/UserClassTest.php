@@ -24,12 +24,8 @@ class UserClassTest extends TestCase
             'user' => [UserClass::USER, 'text_user'],
             'power user' => [UserClass::POWER_USER, 'text_power_user'],
             'elite user' => [UserClass::ELITE_USER, 'text_elite_user'],
-            'crazy user' => [UserClass::CRAZY_USER, 'text_crazy_user'],
-            'insane user' => [UserClass::INSANE_USER, 'text_insane_user'],
             'veteran user' => [UserClass::VETERAN_USER, 'text_veteran_user'],
-            'extreme user' => [UserClass::EXTREME_USER, 'text_extreme_user'],
             'ultimate user' => [UserClass::ULTIMATE_USER, 'text_ultimate_user'],
-            'nexus master' => [UserClass::NEXUS_MASTER, 'text_nexus_master'],
             'vip' => [UserClass::VIP, 'text_vip'],
             'retiree' => [UserClass::RETIREE, 'text_retiree'],
             'uploader' => [UserClass::UPLOADER, 'text_uploader'],
@@ -65,6 +61,11 @@ class UserClassTest extends TestCase
         $this->assertNull(UserClass::langKey(17));
         $this->assertNull(UserClass::langKey(-1));
         $this->assertNull(UserClass::langKey(999));
+        // Retired legacy tiers resolve the same way as any unknown value.
+        $this->assertNull(UserClass::langKey(4));
+        $this->assertNull(UserClass::langKey(5));
+        $this->assertNull(UserClass::langKey(7));
+        $this->assertNull(UserClass::langKey(9));
     }
 
     // ---------- badgeSlug() ----------
@@ -80,12 +81,8 @@ class UserClassTest extends TestCase
             'Uploader' => 'uploader',
             'Retiree' => 'retiree',
             'VIP' => 'vip',
-            'Nexus Master' => 'nexusmaster',
             'Ultimate User' => 'ultimateuser',
-            'Extreme User' => 'extremeuser',
             'Veteran User' => 'veteranuser',
-            'Insane User' => 'insaneuser',
-            'Crazy User' => 'crazyuser',
             'Elite User' => 'eliteuser',
             'Power User' => 'poweruser',
             'User' => 'user',

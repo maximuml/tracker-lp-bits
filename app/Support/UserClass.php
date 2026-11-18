@@ -51,17 +51,9 @@ final class UserClass
 
     public const ELITE_USER = UserClassEnum::ELITE_USER->value;
 
-    public const CRAZY_USER = UserClassEnum::CRAZY_USER->value;
-
-    public const INSANE_USER = UserClassEnum::INSANE_USER->value;
-
     public const VETERAN_USER = UserClassEnum::VETERAN_USER->value;
 
-    public const EXTREME_USER = UserClassEnum::EXTREME_USER->value;
-
     public const ULTIMATE_USER = UserClassEnum::ULTIMATE_USER->value;
-
-    public const NEXUS_MASTER = UserClassEnum::NEXUS_MASTER->value;
 
     public const VIP = UserClassEnum::VIP->value;
 
@@ -218,7 +210,11 @@ final class UserClass
             ])->render());
         }
 
-        for ($i = $minClass; $i <= $maxClass; $i++) {
+        foreach (UserClassEnum::cases() as $case) {
+            $i = $case->value;
+            if ($i < $minClass || $i > $maxClass) {
+                continue;
+            }
             $options .= trim(view('components.support.tag.option', [
                 'value' => $i,
                 'label' => self::name($i, false, false, true),

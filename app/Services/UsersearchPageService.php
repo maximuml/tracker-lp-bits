@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Contracts\Repositories\UserSearchRepositoryInterface;
 use App\DTOs\Auth\ActorContext;
+use App\Enums\UserClass as UserClassEnum;
 use App\Models\User;
 use App\Repositories\UserListingRepository;
 use App\Support\Format;
@@ -102,16 +103,16 @@ final class UsersearchPageService
             $class = '';
         }
 
-        // Build class select options
+        // Build class select options; option value N selects class N-2
+        // (1 is reserved for "(any)"). Iterating the enum skips retired
+        // tier values, whose gaps the old break-on-empty loop truncated at.
         $classOptions = [['value' => 1, 'label' => '(any)', 'selected' => false]];
-        $classKeys = array_map('intval', array_keys(User::$classes));
-        $maxClass = $classKeys !== [] ? max($classKeys) : 0;
-        for ($i = 2; $i - 2 <= $maxClass; $i++) {
-            if (! ($c = UserClass::name($i - 2, false, true, true))->isEmpty()) {
-                $classOptions[] = ['value' => $i, 'label' => $c, 'selected' => (bool) $class && $class == $i];
-            } else {
-                break;
-            }
+        foreach (UserClassEnum::cases() as $case) {
+            $classOptions[] = [
+                'value' => $case->value + 2,
+                'label' => UserClass::name($case->value, false, true, true),
+                'selected' => (bool) $class && $class == $case->value + 2,
+            ];
         }
 
         return [

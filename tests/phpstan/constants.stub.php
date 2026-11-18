@@ -13,12 +13,8 @@ if (! defined('UC_PEASANT')) {
     define('UC_USER', 1);
     define('UC_POWER_USER', 2);
     define('UC_ELITE_USER', 3);
-    define('UC_CRAZY_USER', 4);
-    define('UC_INSANE_USER', 5);
     define('UC_VETERAN_USER', 6);
-    define('UC_EXTREME_USER', 7);
     define('UC_ULTIMATE_USER', 8);
-    define('UC_NEXUS_MASTER', 9);
     define('UC_VIP', 10);
     define('UC_RETIREE', 11);
     define('UC_UPLOADER', 12);

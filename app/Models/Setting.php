@@ -14,11 +14,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Traits\NexusActivityLogTrait;
-use App\Support\RedisGuard;
 use App\Support\RequestValues;
-use App\Support\State\SettingState;
+use App\Support\Settings;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 
 class Setting extends NexusModel
@@ -41,11 +39,6 @@ class Setting extends NexusModel
     /** @var array<int|string, mixed> */
     public static array $permissionMustHaveClass = ['defaultclass', 'staffmem'];
 
-    public static function resetState(): void
-    {
-        SettingState::instance()->reset();
-    }
-
     const DIRECT_PERMISSION_CACHE_KEY_PREFIX = 'nexus_direct_permissions_';
 
     const ROLE_PERMISSION_CACHE_KEY_PREFIX = 'nexus_role_permissions_';
@@ -55,20 +48,16 @@ class Setting extends NexusModel
     const USER_TOKEN_PERMISSION_ALLOWED_CACHE_KRY = 'user_token_permission_allowed';
 
     /**
-     * get setting autoload = true with cache
+     * Read an autoloaded setting.
+     *
+     * Delegates to {@see Settings::get()} — the single read path, backed by
+     * `getFromDb()` with a per-request memo. The former 600 s
+     * `nexus_settings_in_laravel` Redis layer was dropped: writers that
+     * bypassed `saveBatch()` left it stale ("changed but not applied").
      */
     public static function get(?string $name = null, mixed $default = null): mixed
     {
-        if (SettingState::instance()->autoloadedSettings === null) {
-            SettingState::instance()->autoloadedSettings = RedisGuard::attempt(
-                static fn () => Cache::remember('nexus_settings_in_laravel', 600, static fn () => self::getFromDb()),
-            ) ?? self::getFromDb();
-        }
-        if ($name === null) {
-            return SettingState::instance()->autoloadedSettings;
-        }
-
-        return Arr::get(SettingState::instance()->autoloadedSettings ?? [], $name, $default);
+        return Settings::get($name, $default);
     }
 
     /**

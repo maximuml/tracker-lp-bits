@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Models\Setting;
 use App\Repositories\SettingRepository;
 use App\Support\State\SettingsState;
 
@@ -33,21 +34,13 @@ final class Settings
     }
 
     /**
-     * Read a setting directly from the database (no cache).
+     * Read a setting directly from the database (no cache, no request memo).
      *
      * Mirrors the legacy `get_setting_from_db()` helper.
      */
     public static function fromDb(?string $name = null, mixed $default = null): mixed
     {
-        if (SettingsState::instance()->fromDb === null) {
-            SettingsState::instance()->fromDb = self::settingRepository()->getAll();
-        }
-
-        if ($name === null) {
-            return SettingsState::instance()->fromDb;
-        }
-
-        return Arrays::get(SettingsState::instance()->fromDb, $name, $default);
+        return Setting::getFromDb($name, $default);
     }
 
     /**

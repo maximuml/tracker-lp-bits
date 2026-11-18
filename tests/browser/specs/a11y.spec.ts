@@ -306,7 +306,6 @@ test.describe('staff form accessible names', () => {
     '/web/settings?action=accountsettings',
     '/web/settings?action=torrentsettings',
     '/web/settings?action=attachmentsettings',
-    '/web/settings?action=miscsettings',
   ] as const;
 
   for (const path of FORM_PAGES) {

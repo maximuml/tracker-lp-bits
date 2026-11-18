@@ -100,7 +100,6 @@ class SettingsController extends BasePageController
             'nfo_view_style_default', 'tax_factor', 'max_price', 'paid_torrent_enabled', 'reward_bonus_options', 'reward_times_limit',
         ],
         'attachment' => ['enableattach', 'classone', 'countone', 'sizeone', 'extone', 'classtwo', 'counttwo', 'sizetwo', 'exttwo', 'classthree', 'countthree', 'sizethree', 'extthree', 'classfour', 'countfour', 'sizefour', 'extfour', 'savedirectory', 'httpdirectory', 'savedirectorytype', 'thumbnailtype', 'thumbquality', 'thumbwidth', 'thumbheight', 'altthumbwidth', 'altthumbheight'],
-        'misc' => ['donation_custom', 'protected_forum'],
     ];
 
     public function settings(Request $request): View|RedirectResponse|Response
@@ -114,7 +113,7 @@ class SettingsController extends BasePageController
         }
 
         $action = (string) ($request->query('action') ?? 'showmenu');
-        $allowedActions = ['showmenu', 'basicsettings', 'mainsettings', 'smtpsettings', 'securitysettings', 'authoritysettings', 'tweaksettings', 'bonussettings', 'accountsettings', 'torrentsettings', 'attachmentsettings', 'codesettings', 'miscsettings'];
+        $allowedActions = ['showmenu', 'basicsettings', 'mainsettings', 'smtpsettings', 'securitysettings', 'authoritysettings', 'tweaksettings', 'bonussettings', 'accountsettings', 'torrentsettings', 'attachmentsettings', 'codesettings'];
         if (! in_array($action, $allowedActions, true)) {
             $action = 'showmenu';
         }
@@ -137,7 +136,6 @@ class SettingsController extends BasePageController
             'torrentsettings' => 'torrent',
             'attachmentsettings' => 'attachment',
             'codesettings' => 'code',
-            'miscsettings' => 'misc',
         ];
 
         if (isset($sectionMap[$action])) {
@@ -197,7 +195,7 @@ class SettingsController extends BasePageController
         }
 
         $action = (string) ($request->post('action') ?? '');
-        $sectionActions = ['basicsettings', 'mainsettings', 'smtpsettings', 'securitysettings', 'authoritysettings', 'tweaksettings', 'bonussettings', 'accountsettings', 'torrentsettings', 'attachmentsettings', 'codesettings', 'miscsettings'];
+        $sectionActions = ['basicsettings', 'mainsettings', 'smtpsettings', 'securitysettings', 'authoritysettings', 'tweaksettings', 'bonussettings', 'accountsettings', 'torrentsettings', 'attachmentsettings', 'codesettings'];
         if (in_array($action, $sectionActions, true)) {
             return redirect("/web/settings?action=$action");
         }
@@ -224,7 +222,6 @@ class SettingsController extends BasePageController
             'savesettings_torrent' => 'torrent',
             'savesettings_attachment' => 'attachment',
             'savesettings_code' => 'code',
-            'savesettings_misc' => 'misc',
         ];
 
         if (! isset($saveMap[$action])) {
@@ -328,16 +325,7 @@ class SettingsController extends BasePageController
             $data[$urlField] = $normalized;
         }
 
-        // Special: misc protected_forum validation
-        if ($section === 'misc') {
-            $protectedForum = is_string($data['protected_forum'] ?? null) ? (string) $data['protected_forum'] : '';
-            if (! empty($protectedForum) && ! preg_match('/^[,\d]*\d+$/', $protectedForum)) {
-                return $this->abortResponse('Error', 'Forum format error: use comma-separated IDs.', true, 200);
-            }
-        }
-
-        $autoload = $section !== 'misc';
-        Settings::saveBatch($section, $data, $autoload);
+        Settings::saveBatch($section, $data);
 
         // Cache clearing
         if ($section === 'main') {

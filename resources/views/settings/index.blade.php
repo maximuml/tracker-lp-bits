@@ -21,7 +21,6 @@
         'accountsettings' => ['row_account_settings', 'submit_account_settings', 'text_account_settings_settings'],
         'torrentsettings' => ['row_torrents_settings', 'submit_torrents_settings', 'text_torrents_settings_note'],
         'attachmentsettings' => ['row_attachment_settings', 'submit_attachment_settings', 'text_attachment_settings_note'],
-        'miscsettings' => ['row_misc_settings', 'submit_misc_settings', 'text_misc_settings_note'],
     ] as $act => [$row, $btn, $note])
     <div class="nx-fhead whitespace-nowrap">{{ __('settings.'.$row) }}</div><div class="nx-fcell">
         <form method="post" action="/web/settings/submit"><input type="hidden" name="action" value="{{ $act }}">@csrf
@@ -514,13 +513,6 @@
     <x-settings-text layout="grid" :label="__('settings.row_sub_version')" name="subversion" :value="$config['subversion'] ?? '1.0'" :note="__('settings.text_sub_version_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_release_date')" name="releasedate" :value="$config['releasedate'] ?? '2008-12-10'" :note="__('settings.text_release_date_note')" />
     <x-settings-text layout="grid" :label="__('settings.row_web_site')" name="website" :value="$config['website'] ?? ''" :note="__('settings.text_web_site_note_two')" />
-    <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
-    </form>
-
-@elseif ($action === 'miscsettings')
-    <form class="nx-grouprow" method="post" action="/web/settings/submit"><input type="hidden" name="action" value="savesettings_misc">@csrf
-    <label class="nx-fhead whitespace-nowrap" for="donation_custom">{{ __('settings.row_misc_donation_custom') }}</label><div class="nx-fcell"><textarea cols="100" rows="10" id="donation_custom" name='donation_custom'>{{ (string)($config['donation_custom'] ?? '') }}</textarea><br>{{ __('settings.text_donation_custom_note') }}&nbsp;<b><a href="/web/tags" target="_blank" rel="noopener">{{ __('settings.text_bbcode_tag') }}</a></b></div>
-    <x-settings-text layout="grid" :label="__('settings.row_protected_forum')" name="protected_forum" :value="$config['protected_forum'] ?? ''" :note="__('settings.text_protected_forum')" />
     <x-settings-save layout="grid" :label="__('settings.row_save_settings')" :text="__('settings.submit_save_settings')" />
     </form>
 

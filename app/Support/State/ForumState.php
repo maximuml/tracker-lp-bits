@@ -17,15 +17,6 @@ final class ForumState implements RequestScopedState
     /** @var array<int|string, mixed>|null */
     public ?array $moderatorsArray = null;
 
-    /** @var array<int|string, mixed> */
-    public array $topics = [];
-
-    /** @var list<string>|null */
-    public ?array $protectedForumIds = null;
-
-    /** @var array<int, int>|null */
-    public ?array $forumMods = null;
-
     public static function instance(): self
     {
         return app(self::class);
@@ -34,8 +25,5 @@ final class ForumState implements RequestScopedState
     public function reset(): void
     {
         $this->moderatorsArray = null;
-        $this->topics = [];
-        $this->protectedForumIds = null;
-        $this->forumMods = null;
     }
 }

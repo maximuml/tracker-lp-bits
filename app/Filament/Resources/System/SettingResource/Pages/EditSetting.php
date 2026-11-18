@@ -124,15 +124,9 @@ class EditSetting extends Page implements HasForms
         static::authorizeResourceAccess();
 
         $formData = $this->contentSchema()->getState();
-        $notAutoloadNames = ['donation_custom'];
         $data = [];
         foreach ($formData as $prefix => $parts) {
             foreach ($parts as $name => $value) {
-                if (in_array($name, $notAutoloadNames)) {
-                    $autoload = false;
-                } else {
-                    $autoload = true;
-                }
                 if (is_array($value)) {
                     $value = json_encode($value);
                 }
@@ -144,7 +138,7 @@ class EditSetting extends Page implements HasForms
                 $data[] = [
                     'name' => "$prefix.$name",
                     'value' => $value,
-                    'autoload' => $autoload,
+                    'autoload' => true,
                 ];
 
             }

@@ -93,6 +93,8 @@ enum UserClass: int
      * Minimum seed points required to reach this tier (0 if not applicable).
      *
      * VIP and above do not have seed-point thresholds — they are assigned manually.
+     * Retired tiers (Crazy/Insane/Extreme/Nexus Master) also return 0: they stay in the enum
+     * for stored values but left the auto-promotion ladder.
      */
     public function minSeedPoints(): int
     {
@@ -100,16 +102,45 @@ enum UserClass: int
             self::PEASANT => 0,
             self::USER => 0,
             self::POWER_USER => 40000,
-            self::ELITE_USER => 80000,
-            self::CRAZY_USER => 150000,
-            self::INSANE_USER => 250000,
+            self::ELITE_USER => 150000,
             self::VETERAN_USER => 400000,
-            self::EXTREME_USER => 600000,
             self::ULTIMATE_USER => 800000,
-            self::NEXUS_MASTER => 1000000,
+            self::CRAZY_USER, self::INSANE_USER, self::EXTREME_USER,
+            self::NEXUS_MASTER,
             self::VIP, self::RETIREE, self::UPLOADER,
             self::MODERATOR, self::ADMINISTRATOR,
             self::SYSOP, self::STAFFLEADER => 0,
+        };
+    }
+
+    /**
+     * Tiers reachable through the automatic ratio/seed-point promotion,
+     * in ascending order. Peasant sits below the ladder — users recover
+     * from it via the peasant bands, not this chain.
+     *
+     * @return list<self>
+     */
+    public static function autoPromotable(): array
+    {
+        return [
+            self::POWER_USER,
+            self::ELITE_USER,
+            self::VETERAN_USER,
+            self::ULTIMATE_USER,
+        ];
+    }
+
+    /**
+     * Previous tier on the auto ladder, or null when this case is not on it.
+     */
+    public function autoPredecessor(): ?self
+    {
+        return match ($this) {
+            self::POWER_USER => self::USER,
+            self::ELITE_USER => self::POWER_USER,
+            self::VETERAN_USER => self::ELITE_USER,
+            self::ULTIMATE_USER => self::VETERAN_USER,
+            default => null,
         };
     }
 

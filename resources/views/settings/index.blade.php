@@ -394,13 +394,9 @@
     <div class="nx-ffull text-center"><b>{{ __('settings.text_user_promotion_demotion') }}</b></div>
     @foreach ([
         [\App\Enums\UserClass::POWER_USER->value, 'pu', 4, 50, 1.05, 0.95, 1],
-        [\App\Enums\UserClass::ELITE_USER->value, 'eu', 8, 120, 1.55, 1.45, 0],
-        [\App\Enums\UserClass::CRAZY_USER->value, 'cu', 15, 300, 2.05, 1.95, 2],
-        [\App\Enums\UserClass::INSANE_USER->value, 'iu', 25, 500, 2.55, 2.45, 0],
+        [\App\Enums\UserClass::ELITE_USER->value, 'eu', 15, 300, 2.05, 1.95, 0],
         [\App\Enums\UserClass::VETERAN_USER->value, 'vu', 40, 750, 3.05, 2.95, 3],
-        [\App\Enums\UserClass::EXTREME_USER->value, 'exu', 60, 1024, 3.55, 3.45, 0],
         [\App\Enums\UserClass::ULTIMATE_USER->value, 'uu', 80, 1536, 4.05, 3.95, 5],
-        [\App\Enums\UserClass::NEXUS_MASTER->value, 'nm', 100, 3072, 4.55, 4.45, 10],
     ] as [$class, $prefix, $time, $dl, $prratio, $deratio, $invites])
     <x-settings-row layout="grid">
         <x-slot:label>{{ __('settings.row_promote_to_one') }}{{ \App\Support\UserClass::name($class, false, false, true) }}{{ __('settings.row_promote_to_two') }}</x-slot:label>

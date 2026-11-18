@@ -807,7 +807,7 @@ final class ForumListingServiceTest extends TestCase
 
     public function test_build_view_forum_maypost_true_at_minclass_boundary(): void
     {
-        $vm = $this->viewForumVm(['class' => 5], ['minclasswrite' => 5, 'minclasscreate' => 5]);
+        $vm = $this->viewForumVm(['class' => 6], ['minclasswrite' => 6, 'minclasscreate' => 6]);
 
         $this->assertTrue($vm->mayPost);
     }

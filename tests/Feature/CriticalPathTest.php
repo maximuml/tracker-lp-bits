@@ -259,7 +259,7 @@ class CriticalPathTest extends TestCase
 
         // 4. Upload a torrent
         $this->torrentFile = $this->buildTorrentFile();
-        $catid = '401';
+        $catid = '404';
         $catmod = '4';
         $upload = $this->request('POST', '/takeupload.php', [
             '_token' => $loginToken,

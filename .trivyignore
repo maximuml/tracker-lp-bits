@@ -18,3 +18,18 @@
 # Trivy v0.74.0+ should handle this correctly; remove after verifying.
 CVE-2026-80256
 # expires: 2026-12-31 — reason: rejected CVE, no fix available, Trivy DB issue
+
+# OpenSSL 2026-11-10 advisory batch in the php image's Alpine packages.
+# Fixed upstream in openssl 3.5.10 / 4.0.4 / 4.1.1; the base image rebuild
+# has not picked the patched package up yet. The tracker does not exercise
+# the affected code paths (QUIC, CMS_encrypt, AES-GCM-SIV, PEM_X509_INFO).
+CVE-2026-107496
+# expires: 2026-12-31 — reason: openssl CMS_encrypt EC-order-1 loop; fix pending in base image
+CVE-2026-88822
+# expires: 2026-12-31 — reason: openssl AES-GCM-SIV IV-length OOB read; fix pending in base image
+CVE-2026-88823
+# expires: 2026-12-31 — reason: openssl AES-GCM-SIV zero-length AAD forgery; fix pending in base image
+CVE-2026-95691
+# expires: 2026-12-31 — reason: openssl QUIC CRYPTO frame UAF; fix pending in base image
+CVE-2026-95692
+# expires: 2026-12-31 — reason: openssl AES-GCM-SIV IV-commitment gap; fix pending in base image

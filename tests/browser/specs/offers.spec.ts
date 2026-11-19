@@ -50,8 +50,8 @@ test.beforeAll(() => {
   }
   mysql(
     `INSERT INTO offers (userid,name,descr,added,yeah,against,category,comments,allowed)
-     VALUES (${userId},'Spec Offer Alpha','First spec offer.',NOW(),15,8,401,0,1),
-            (${userId},'Spec Offer Beta','Second spec offer.',NOW(),2,1,402,3,1)`,
+     VALUES (${userId},'Spec Offer Alpha','First spec offer.',NOW(),15,8,404,0,1),
+            (${userId},'Spec Offer Beta','Second spec offer.',NOW(),2,1,406,3,1)`,
     db,
   );
   offerId = Number(mysql(`SELECT id FROM offers WHERE name='Spec Offer Alpha' LIMIT 1`, db).trim());

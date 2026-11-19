@@ -122,9 +122,9 @@ final class NoLeakedMarkupTest extends TestCase
     {
         $user = User::factory()->create(['appendpromotion' => UserAppendPromotion::HIGHLIGHT->value]);
         // The default browse mode only lists categories from its searchbox
-        // catlist (401-409); the factory's random category ID would be
+        // catlist (404-410); the factory's random category ID would be
         // filtered out and the empty list never reaches the legend.
-        Torrent::factory()->create(['category' => 401]);
+        Torrent::factory()->create(['category' => 404]);
         $this->seedBrowseSearchbox();
 
         $response = $this->withNexusCookie($user)->get('/web/torrents');

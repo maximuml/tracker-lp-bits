@@ -48,7 +48,7 @@ class CategoriesTableSeeder extends Seeder
             3 => [
                 'id' => 408,
                 'mode' => 4,
-                'class_name' => 'c_movies',
+                'class_name' => 'c_proshot',
                 'name' => 'Pro Shot Video',
                 'image' => 'catsprites.png',
                 'sort_index' => 2,
@@ -57,7 +57,7 @@ class CategoriesTableSeeder extends Seeder
             4 => [
                 'id' => 409,
                 'mode' => 4,
-                'class_name' => 'c_tvshows',
+                'class_name' => 'c_vidaud',
                 'name' => 'Video Audience Shot',
                 'image' => 'catsprites.png',
                 'sort_index' => 1,
@@ -66,7 +66,7 @@ class CategoriesTableSeeder extends Seeder
             5 => [
                 'id' => 410,
                 'mode' => 4,
-                'class_name' => 'c_misc',
+                'class_name' => 'c_audaud',
                 'name' => 'Audio Audience Shot',
                 'image' => 'catsprites.png',
                 'sort_index' => 0,

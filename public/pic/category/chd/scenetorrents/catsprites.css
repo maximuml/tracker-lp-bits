@@ -57,3 +57,21 @@ width:45px;
 height:46px;
 background-position: 0 -184px;
 }
+img.c_proshot
+{
+width:45px;
+height:46px;
+background-position: -45px -184px;
+}
+img.c_vidaud
+{
+width:45px;
+height:46px;
+background-position: 0 -230px;
+}
+img.c_audaud
+{
+width:45px;
+height:46px;
+background-position: -45px -230px;
+}

@@ -249,7 +249,7 @@ class UploadService
                 .Locale::trans('torrent.msg_was_uploaded_by', [], $locale)
                 .$user->username
                 .Locale::trans('torrent.msg_you_can_download', [], $locale)
-                .'[url='.Url::schemeAndHost().'/web/details/'.$torrent->id.'?hit=1]'
+                .'[url=/web/details/'.$torrent->id.'?hit=1]'
                 .Locale::trans('torrent.msg_here', [], $locale)
                 .'[/url]';
             $subject = Locale::trans('torrent.msg_offer', [], $locale)

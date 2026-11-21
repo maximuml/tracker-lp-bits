@@ -167,7 +167,7 @@ final class Description
     public static function imageFromDescription(array $descriptionArr, bool $first = false, bool $useDefault = true): array|string
     {
         if ($first) {
-            $defaultUrl = $useDefault ? Url::schemeAndHost().'/pic/nophoto.gif' : '';
+            $defaultUrl = $useDefault ? '/pic/nophoto.gif' : '';
 
             return self::firstImageUrl($descriptionArr, $defaultUrl);
         }

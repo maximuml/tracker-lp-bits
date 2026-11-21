@@ -10,6 +10,7 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\UserFontsize;
 use App\Enums\UserTheme;
+use App\Services\ShoutboxService;
 use App\Support\Html\SafeHtml;
 use App\Support\NotificationFeed;
 use App\Support\Shoutbox;
@@ -41,6 +42,16 @@ class ShoutboxController extends BasePageController
     public function index(Request $request): array
     {
         return $this->success($this->repository->history($request));
+    }
+
+    public function shoutboxPost(Request $request, ShoutboxService $shoutboxService): RedirectResponse
+    {
+        $text = trim((string) $request->input('shbox_text', $request->input('text', '')));
+        if ($text !== '' && mb_strlen($text) <= Shoutbox::MAX_MESSAGE_LENGTH) {
+            $shoutboxService->postMessage($this->actorContext, $text);
+        }
+
+        return back();
     }
 
     public function shoutbox(Request $request): Response

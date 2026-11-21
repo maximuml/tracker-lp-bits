@@ -22,7 +22,6 @@ use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\TorrentTags;
-use App\Support\Url;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

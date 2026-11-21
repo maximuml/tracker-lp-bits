@@ -202,7 +202,7 @@ class HitAndRunRepository extends BaseRepository
         $model->status = HitAndRunStatus::PARDONED->value;
         $prefix = date('Y-m-d').' - Pardon by '.$user->username;
         $existing = (string) $model->comment;
-        $model->comment = $existing === '' ? $prefix : "\n".$prefix.$existing;
+        $model->comment = $existing === '' ? $prefix : $prefix."\n".$existing;
         $model->save();
 
         return true;
@@ -225,7 +225,7 @@ class HitAndRunRepository extends BaseRepository
             ->update([
                 'status' => HitAndRunStatus::PARDONED->value,
                 'updated_at' => Carbon::now()->toDateTimeString(),
-                'comment' => DB::raw("CASE WHEN comment = '' THEN ".DB::getPdo()->quote($prefix)." ELSE CONCAT('\\n', ".DB::getPdo()->quote($prefix).', comment) END'), // @phpstan-ignore argument.type
+                'comment' => DB::raw("CASE WHEN comment = '' THEN ".DB::getPdo()->quote($prefix).' ELSE CONCAT('.DB::getPdo()->quote($prefix).", '\\n', comment) END'"), // @phpstan-ignore argument.type
             ]);
         Logger::writeWithContext((string) sprintf('user: %s bulk pardon by filter: %s, affected: %s', $user->id, json_encode($params), $affected), (string) 'alert', (bool) false);
         if ($affected) {

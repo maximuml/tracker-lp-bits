@@ -37,10 +37,12 @@ class TorrentUploadRepository
 
     public function finalizeOffer(int $offerId, int $uploaderId): void
     {
-        DB::table('offers')->where('id', $offerId)->delete();
-        DB::table('offervotes')->where('offerid', $offerId)->delete();
-        DB::table('comments')->where('offer', $offerId)->delete();
-        User::query()->where('id', $uploaderId)->increment('offer_allowed_count');
+        DB::transaction(function () use ($offerId, $uploaderId) {
+            DB::table('offers')->where('id', $offerId)->delete();
+            DB::table('offervotes')->where('offerid', $offerId)->delete();
+            DB::table('comments')->where('offer', $offerId)->delete();
+            User::query()->where('id', $uploaderId)->increment('offer_allowed_count');
+        });
     }
 
     /**

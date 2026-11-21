@@ -80,7 +80,12 @@ class UserResetIdAutoIncrement extends Command
         } finally {
             DB::statement('SET FOREIGN_KEY_CHECKS = 1');
         }
-        $statement = 'alter table users auto_increment = '.$options['auto_increment'];
+        if (! is_numeric($options['auto_increment']) || (int) $options['auto_increment'] < 1) {
+            $this->error('Invalid --auto_increment value: must be a positive integer.');
+
+            return 1;
+        }
+        $statement = 'alter table users auto_increment = '.(int) $options['auto_increment'];
         $this->info($statement);
         $result = DB::statement($statement);
         $insert = [

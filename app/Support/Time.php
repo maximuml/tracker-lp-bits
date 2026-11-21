@@ -451,6 +451,26 @@ final class Time
      * wall-clock time with millisecond / microsecond precision, optionally
      * including the timezone offset.
      */
+    /**
+     * Parse an arbitrary datetime string, returning null on failure
+     * instead of throwing (for user-supplied input).
+     */
+    public static function tryParse(mixed $datetime): ?Carbon
+    {
+        if ($datetime instanceof Carbon) {
+            return $datetime;
+        }
+        if (empty($datetime) || ! is_string($datetime)) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($datetime);
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
     public static function millis(bool $withTimeZone = false): string
     {
         $dt = \DateTime::createFromFormat('U.u', sprintf('%.6f', microtime(true)));

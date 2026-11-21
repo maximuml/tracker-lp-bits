@@ -209,9 +209,8 @@ class MessageRepository extends BaseRepository
 
     public function setUnreadForUser(int $messageId, int $userId, mixed $unread): int
     {
-        return Message::query()->where('id', $messageId)->where(function ($q) use ($userId) {
-            $q->where('receiver', $userId)->orWhere('sender', $userId);
-        })->update(['unread' => $unread]);
+        return Message::query()->where('id', $messageId)->where('receiver', $userId)
+            ->update(['unread' => $unread]);
     }
 
     /**

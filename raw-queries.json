@@ -66,13 +66,13 @@
         },
         {
             "file": "app/Console/Commands/UserResetIdAutoIncrement.php",
-            "line": 85,
+            "line": 90,
             "method": "handle",
             "pattern": "DB::statement",
             "purpose": "ALTER TABLE users AUTO_INCREMENT = <option> to reset the primary key counter for a fresh install",
             "bindings": false,
             "expected_index": "n/a",
-            "reason": "ALTER TABLE ... AUTO_INCREMENT is DDL with no schema-builder equivalent; the value is interpolated from the CLI option, not a bound parameter"
+            "reason": "ALTER TABLE ... AUTO_INCREMENT is DDL with no schema-builder equivalent; the interpolated CLI option is validated as numeric and cast to int before use"
         },
         {
             "file": "app/Jobs/PruneActivityLogJob.php",

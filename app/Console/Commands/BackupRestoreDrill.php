@@ -52,6 +52,11 @@ class BackupRestoreDrill extends Command
         $this->info("File size: {$fileSize} bytes");
 
         $testDb = (string) ($this->option('test-db') ?: 'nexusphp_restore_test');
+        if (! preg_match('/^[a-zA-Z0-9_]+$/', $testDb)) {
+            $this->error('Invalid --test-db value: must match /^[a-zA-Z0-9_]+$/');
+
+            return 1;
+        }
         $connectionName = config('database.default');
         $config = config("database.connections.{$connectionName}");
 

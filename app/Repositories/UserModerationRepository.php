@@ -19,6 +19,7 @@ use App\Services\ModerationService;
 use App\Support\Cache;
 use App\Support\Locale;
 use App\Support\Logger;
+use App\Support\Time;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache as CacheFacade;
@@ -262,7 +263,10 @@ class UserModerationRepository extends BaseRepository implements UserModerationR
                 $userUpdates['vip_added'] = false;
             }
             if (! empty($extra['vip_until'])) {
-                $until = Carbon::parse($extra['vip_until']);
+                $until = Time::tryParse($extra['vip_until']);
+                if ($until === null) {
+                    throw new \InvalidArgumentException("Invalid vip_until: {$extra['vip_until']}");
+                }
                 $userUpdates['vip_until'] = $until;
             } else {
                 $userUpdates['vip_until'] = null;

@@ -9,7 +9,7 @@ use App\Enums\TorrentApprovalStatus;
 use App\Support\Config\SiteConfig;
 use App\Support\Log;
 use App\Support\RequestValues;
-use Carbon\Carbon;
+use App\Support\Time;
 
 /**
  * Build SQL where clauses, sort order, and listing options from parsed
@@ -269,7 +269,10 @@ final class QueryBuilder
             $addparam .= 'added_begin='.$searchParams['added_begin'].'&';
         }
         if (isset($searchParams['added_end']) && ! empty($searchParams['added_end'])) {
-            $this->pushWhere($wherea, $whereBindings, 'torrents.added <= ?', [Carbon::parse($searchParams['added_end'])->endOfDay()->toDateTimeString()]);
+            $addedEnd = Time::tryParse($searchParams['added_end']);
+            if ($addedEnd !== null) {
+                $this->pushWhere($wherea, $whereBindings, 'torrents.added <= ?', [$addedEnd->endOfDay()->toDateTimeString()]);
+            }
             $addparam .= 'added_end='.$searchParams['added_end'].'&';
         }
 

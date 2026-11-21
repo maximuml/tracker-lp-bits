@@ -338,4 +338,15 @@ class TimeTest extends TestCase
     {
         $this->assertMatchesRegularExpression('/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}$/', Time::millis());
     }
+
+    public function test_try_parse_returns_null_on_garbage(): void
+    {
+        $this->assertNull(Time::tryParse('garbage'));
+        $this->assertNull(Time::tryParse(''));
+        $this->assertNull(Time::tryParse(null));
+        $this->assertNull(Time::tryParse(0));
+        $this->assertInstanceOf(Carbon::class, Time::tryParse('2026-11-21'));
+        $now = Carbon::now();
+        $this->assertSame($now, Time::tryParse($now));
+    }
 }

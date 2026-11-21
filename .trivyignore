@@ -33,3 +33,9 @@ CVE-2026-95691
 # expires: 2026-12-31 — reason: openssl QUIC CRYPTO frame UAF; fix pending in base image
 CVE-2026-95692
 # expires: 2026-12-31 — reason: openssl AES-GCM-SIV IV-commitment gap; fix pending in base image
+
+# libxml2 XInclude parseFlags propagation (XXE/SSRF via custom loader).
+# Fixed in libxml2 2.15.4; pending in the php image's Alpine packages.
+# The app never invokes xmlXIncludeProcess/xmlXIncludeProcessTree.
+CVE-2026-86144
+# expires: 2026-12-31 — reason: libxml2 xinclude parseFlags gap; fix pending in base image, XInclude never invoked

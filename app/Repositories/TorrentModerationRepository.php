@@ -17,8 +17,8 @@ use App\Models\TorrentTag;
 use App\Support\Config\SiteConfig;
 use App\Support\Logger;
 use App\Support\Path;
+use App\Support\Time;
 use App\Support\UserDisplay;
-use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -114,7 +114,8 @@ class TorrentModerationRepository extends BaseRepository
         if ($posState == TorrentPosState::NONE->value) {
             $posStateUntil = null;
         }
-        if ($posStateUntil && Carbon::parse($posStateUntil)->lte(now())) {
+        $posStateUntilParsed = $posStateUntil ? Time::tryParse($posStateUntil) : null;
+        if ($posStateUntil && ($posStateUntilParsed === null || $posStateUntilParsed->lte(now()))) {
             $posState = TorrentPosState::NONE->value;
             $posStateUntil = null;
         }
@@ -163,8 +164,11 @@ class TorrentModerationRepository extends BaseRepository
         }
         if (in_array((int) $promotionTimeType, [PromotionTimeType::GLOBAL->value, PromotionTimeType::PERMANENT->value])) {
             $promotionUntil = null;
-        } elseif (! $promotionUntil || Carbon::parse($promotionUntil)->lte(now())) {
-            throw new \InvalidArgumentException("Invalid promotionUntil: $promotionUntil");
+        } else {
+            $promotionUntilParsed = $promotionUntil ? Time::tryParse($promotionUntil) : null;
+            if ($promotionUntilParsed === null || $promotionUntilParsed->lte(now())) {
+                throw new \InvalidArgumentException("Invalid promotionUntil: $promotionUntil");
+            }
         }
         $update = [
             'sp_state' => $spState,

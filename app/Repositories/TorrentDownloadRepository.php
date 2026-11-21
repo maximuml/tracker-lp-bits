@@ -234,8 +234,10 @@ class TorrentDownloadRepository extends BaseRepository implements TorrentDownloa
             return $insert['secret'];
         }
 
-        TorrentSecret::query()->where('uid', $uid)->delete();
-        TorrentSecret::query()->insert($insert);
+        DB::transaction(function () use ($uid, $insert) {
+            TorrentSecret::query()->where('uid', $uid)->delete();
+            TorrentSecret::query()->insert($insert);
+        });
 
         return $insert['secret'];
 

@@ -15,6 +15,7 @@ use App\Support\Locale;
 use App\Support\Logger;
 use App\Support\QueryLog;
 use App\Support\RequestValues;
+use App\Support\Time;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -138,8 +139,11 @@ class AttendanceRepository extends BaseRepository
             ->where('uid', $uid)
             ->orderBy('id', 'desc');
         if (! empty($date)) {
-            $query->where('added', '>=', Carbon::parse($date)->startOfDay())
-                ->where('added', '<=', Carbon::parse($date)->endOfDay());
+            $day = Time::tryParse($date);
+            if ($day !== null) {
+                $query->where('added', '>=', $day->copy()->startOfDay())
+                    ->where('added', '<=', $day->endOfDay());
+            }
         }
 
         return $query->first();
@@ -173,7 +177,10 @@ class AttendanceRepository extends BaseRepository
      */
     public function getContinuousDays(Attendance $attendance, $start): int
     {
-        $start = Carbon::parse($start);
+        $start = Time::tryParse($start);
+        if ($start === null) {
+            return 0;
+        }
         $logQuery = $attendance->logs()->where('date', '<=', $start->format('Y-m-d'))->orderBy('date', 'desc');
         $attendanceLogs = $logQuery->get(['date'])->keyBy(fn ($log) => $log->date->format('Y-m-d'));
         $counts = $attendanceLogs->count();
@@ -213,7 +220,10 @@ class AttendanceRepository extends BaseRepository
         if (! $attendance) {
             throw new \LogicException(Locale::trans('attendance.have_not_attendance_yet', [], null));
         }
-        $date = Carbon::parse($dateStr);
+        $date = Time::tryParse($dateStr);
+        if ($date === null) {
+            throw new \LogicException(Locale::trans('attendance.target_date_can_no_be_retroactive', ['date' => $dateStr], null));
+        }
         $now = Carbon::now();
         if ($date->gte($now) || $now->diffInDays($date, true) > Attendance::MAX_RETROACTIVE_DAYS) {
             throw new \LogicException(Locale::trans('attendance.target_date_can_no_be_retroactive', ['date' => $date->format('Y-m-d')], null));
@@ -265,7 +275,7 @@ class AttendanceRepository extends BaseRepository
             // Increment total days and update days.
             $attendance->update([
                 'total_days' => DB::raw(DB::getQueryGrammar()->wrap('total_days').' + 1'), // @phpstan-ignore argument.type
-                'days' => $this->getContinuousDays($attendance, Carbon::today()),
+                'days' => $this->getContinuousDays($attendance, $attendance->added),
             ]);
 
             return $attendanceLog;

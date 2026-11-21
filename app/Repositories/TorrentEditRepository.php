@@ -21,6 +21,7 @@ use App\Support\Config\SiteConfig;
 use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
+use App\Support\Time;
 use App\Support\TorrentTags;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -148,7 +149,8 @@ class TorrentEditRepository extends BaseRepository
                 if ($posState == TorrentPosState::NONE->value) {
                     $posStateUntil = null;
                 }
-                if ($posStateUntil && Carbon::parse($posStateUntil)->lte(now())) {
+                $posStateUntilParsed = $posStateUntil ? Time::tryParse($posStateUntil) : null;
+                if ($posStateUntil && ($posStateUntilParsed === null || $posStateUntilParsed->lte(now()))) {
                     $posState = TorrentPosState::NONE->value;
                     $posStateUntil = null;
                 }

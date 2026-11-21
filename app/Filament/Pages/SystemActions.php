@@ -122,6 +122,13 @@ class SystemActions extends Page implements HasForms
             return;
         }
 
+        $actor = Auth::user();
+        if ($actor === null || $user->id === $actor->id || (int) $user->class >= (int) $actor->class) {
+            Notification::make()->title('Error')->body('Cannot delete this account.')->danger()->send();
+
+            return;
+        }
+
         $name = $user->username;
         $userRep = $this->userModerationRepository;
         $userRep->destroy((int) $user->id);

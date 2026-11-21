@@ -175,9 +175,14 @@ class UserPasskeyRepository extends BaseRepository
         }
 
         try {
-            $WebAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $passkey->public_key, $challenge, null, false, true);
+            $WebAuthn->processGet($clientDataJSON, $authenticatorData, $signature, $passkey->public_key, $challenge, $passkey->counter, false, true);
         } catch (Exception $e) {
             throw new RuntimeException(Locale::trans('passkey.passkey_error', [], null)."\n".$e->getMessage());
+        }
+
+        $signatureCounter = $WebAuthn->getSignatureCounter();
+        if ($signatureCounter !== null && $signatureCounter !== (int) $passkey->counter) {
+            $passkey->update(['counter' => $signatureCounter]);
         }
 
         $user = $passkey->user;
@@ -217,15 +222,23 @@ class UserPasskeyRepository extends BaseRepository
     /** @return  mixed */
     public function getAaguids()
     {
-        return Cache::remember('aaguids', 60 * 60 * 24 * 14, function () {
-            try {
-                $response = Http::timeout(5)->get('https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json');
-            } catch (ConnectionException) {
-                return false;
-            }
+        $cached = Cache::get('aaguids');
+        if ($cached !== null) {
+            return $cached;
+        }
 
-            return $response->successful() ? $response->json() : false;
-        });
+        try {
+            $response = Http::timeout(5)->get('https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/refs/heads/main/combined_aaguid.json');
+        } catch (ConnectionException) {
+            return false;
+        }
+        if (! $response->successful()) {
+            return false;
+        }
+        $json = $response->json();
+        Cache::put('aaguids', $json, 60 * 60 * 24 * 14);
+
+        return $json;
     }
 
     /** Fallback authenticator icon (URL-encoded inline SVG). */

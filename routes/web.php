@@ -393,6 +393,7 @@ Route::group(['prefix' => 'web', 'middleware' => ['throttle:legacy']], function 
     Route::get('ok', [UtilityController::class, 'ok'])->name('ok.legacy');
     Route::get('complains', [SupportController::class, 'complains'])->name('complains.legacy');
     Route::get('shoutbox', [ShoutboxController::class, 'shoutbox'])->middleware(['auth.nexus:nexus-web', 'throttle:shoutbox'])->name('shoutbox.legacy');
+    Route::post('shoutbox', [ShoutboxController::class, 'shoutboxPost'])->middleware(['auth.nexus:nexus-web', 'throttle:shoutbox'])->name('shoutbox.post');
     Route::get('viewfilelist', [TorrentAjaxController::class, 'viewFileList'])->name('viewfilelist.legacy');
     Route::get('viewpeerlist', [TorrentAjaxController::class, 'viewPeerList'])->middleware('auth.nexus:nexus-web')->name('viewpeerlist.legacy');
     // usercp lives at the root /usercp (the .php shim rewrites there) —

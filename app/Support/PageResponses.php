@@ -236,7 +236,7 @@ final class PageResponses
     public static function redirect(string $url): void
     {
         if (substr($url, 0, 4) != 'http') {
-            $url = Url::schemeAndHost().'/'.trim($url, '/');
+            $url = '/'.ltrim($url, '/');
         }
 
         // T-11: Use HeaderBag instead of SAPI headers_sent() to avoid

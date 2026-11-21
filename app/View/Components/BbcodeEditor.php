@@ -6,7 +6,6 @@ namespace App\View\Components;
 
 use App\Support\AssetAppender;
 use App\Support\Config\SiteConfig;
-use App\Support\Url;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
@@ -47,7 +46,7 @@ final class BbcodeEditor extends Component
     ) {
         $this->quickSmilies = self::QUICK_SMILIES;
         $this->enableAttach = SiteConfig::current()->attachment->enableAttach();
-        $this->attachUrl = Url::schemeAndHost().'/web/attachment';
+        $this->attachUrl = '/web/attachment';
     }
 
     public function render(): View

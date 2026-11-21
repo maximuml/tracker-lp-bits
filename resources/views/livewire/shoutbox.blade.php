@@ -24,7 +24,7 @@
     @if ($status !== '')
         <p>{{ $status }}</p>
     @endif
-    <form wire:submit="send" name="shbox" method="post" action="#">
+    <form wire:submit="send" name="shbox" method="post" action="/web/shoutbox">@csrf
         <div wire:ignore>{{ $toolbar }}</div>
         <div class="nx-flex nx-shbox-row">
             <label for="shbox_text">{{ __('index.text_message') }}</label>

@@ -103,7 +103,7 @@ class CustomField
         $customFieldIds = array_filter(array_map('intval', is_array($customFieldsRaw) ? $customFieldsRaw : explode(',', (string) ($customFieldsRaw ?? ''))));
         $res = $this->customFieldRepository->listFieldsByIdsOrdered($customFieldIds);
         $cspNonce = (string) request()->attributes->get('csp_nonce', '');
-        $baseUrl = Url::schemeAndHost(false);
+        $baseUrl = '';
         $fields = [];
         foreach ($res as $row) {
             $row = (array) $row;

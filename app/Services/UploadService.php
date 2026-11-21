@@ -22,7 +22,6 @@ use App\Support\Locale;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\TorrentTags;
-use App\Support\Url;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -249,7 +248,7 @@ class UploadService
                 .Locale::trans('torrent.msg_was_uploaded_by', [], $locale)
                 .$user->username
                 .Locale::trans('torrent.msg_you_can_download', [], $locale)
-                .'[url='.Url::schemeAndHost().'/web/details/'.$torrent->id.'?hit=1]'
+                .'[url=/web/details/'.$torrent->id.'?hit=1]'
                 .Locale::trans('torrent.msg_here', [], $locale)
                 .'[/url]';
             $subject = Locale::trans('torrent.msg_offer', [], $locale)

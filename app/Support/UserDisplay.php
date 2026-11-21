@@ -347,7 +347,7 @@ final class UserDisplay
                 }
             }
 
-            $href = Url::schemeAndHost()."/userdetails?id=$id";
+            $href = "/userdetails?id=$id";
             $classNameColored = UserClass::name($arr['class'], true, false, false);
             $className = UserClass::name($arr['class'], false, true, true, ['with_alias' => true]);
             $title = $arr['title'] ?? '';

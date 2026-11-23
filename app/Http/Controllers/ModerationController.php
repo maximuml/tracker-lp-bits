@@ -11,10 +11,12 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\Permission\PermissionEnum;
 use App\Enums\ReportType;
 use App\Http\Requests\ReportRequest;
+use App\Models\Comment;
 use App\Repositories\CommentRepository;
 use App\Repositories\ModerationRepository;
 use App\Services\PermissionChecker;
 use App\Support\Cache\NexusCache;
+use App\Support\Html\SafeHtml;
 use App\Support\Pagination;
 use App\Support\Time;
 use App\Support\UserClass;
@@ -169,7 +171,7 @@ class ModerationController extends BasePageController
         }
 
         if ($commentid && Validators::isId($commentid)) {
-            $comment = $this->commentRepository->findById((int) $commentid, ['id', 'user', 'torrent', 'offer']);
+            $comment = $this->commentRepository->findById((int) $commentid, ['id', 'user', 'torrent', 'offer', 'anonymous']);
             if (! $comment) {
                 return $this->abortResponse(__('report.std_error'), __('report.std_invalid_comment_id'), true, 404);
             }
@@ -191,7 +193,7 @@ class ModerationController extends BasePageController
                 'of' => (string) $of,
                 'url' => $url,
                 'name' => (string) $name,
-                'userHtml' => UserDisplay::username((int) ($comment->user ?? 0)),
+                'userHtml' => $this->commentAuthorHtml($comment, $currentUserId),
                 'mid' => (string) __('report.text_to_staff'),
                 'extraNote' => null,
                 'field' => 'takecommentid',
@@ -311,7 +313,7 @@ class ModerationController extends BasePageController
                     break;
                 case 'comment':
                     $type = __('reports.text_comment');
-                    $comment = $this->commentRepository->findById((int) $row['reportid'], ['id', 'user', 'torrent', 'offer']);
+                    $comment = $this->commentRepository->findById((int) $row['reportid'], ['id', 'user', 'torrent', 'offer', 'anonymous']);
                     if (! $comment) {
                         $reporting = (string) (__('reports.text_comment_does_not_exist'));
                     } else {
@@ -334,7 +336,7 @@ class ModerationController extends BasePageController
                             'of' => (string) $of,
                             'url' => $url,
                             'name' => (string) $name,
-                            'userHtml' => UserDisplay::username((int) ($comment->user ?? 0)),
+                            'userHtml' => $this->commentAuthorHtml($comment, $currentUserId),
                         ]);
                     }
                     break;
@@ -354,5 +356,16 @@ class ModerationController extends BasePageController
             ),
         ]);
 
+    }
+
+    private function commentAuthorHtml(Comment $comment, int $currentUserId): SafeHtml
+    {
+        if ($comment->anonymous
+            && (int) $comment->user !== $currentUserId
+            && ! $this->permissionChecker->userCan(PermissionEnum::VIEW_ANONYMOUS->value, false, $currentUserId)) {
+            return SafeHtml::fromPlainText((string) __('details.text_anonymous'));
+        }
+
+        return UserDisplay::username((int) ($comment->user ?? 0));
     }
 }

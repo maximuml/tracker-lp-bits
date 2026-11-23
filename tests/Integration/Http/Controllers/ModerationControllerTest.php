@@ -8,8 +8,10 @@ use App\DTOs\Auth\ActorContext;
 use App\Enums\ReportType;
 use App\Enums\UserClass;
 use App\Http\Controllers\ModerationController;
+use App\Models\Comment;
 use App\Models\Torrent;
 use App\Models\User;
+use App\Repositories\CommentRepository;
 use App\Repositories\ModerationRepository;
 use App\Support\Cache\NexusCache;
 use App\Support\CurrentUser;
@@ -189,6 +191,65 @@ final class ModerationControllerTest extends TestCase
         $this->assertSame('User', $rows[0]['type_label']);
         $this->assertStringContainsString((string) $reported->username, (string) $rows[0]['reporting']);
         $this->assertSame('user report reason', $rows[0]['reason']);
+    }
+
+    public function test_reports_renders_comment_report_with_comment_author(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::ADMINISTRATOR->value]);
+        $this->actingAs($user);
+        $this->mockCurrentUserWithDefaults($user->id, UserClass::ADMINISTRATOR->value);
+
+        /** @var User $author */
+        $author = User::factory()->create();
+        /** @var Torrent $torrent */
+        $torrent = Torrent::factory()->create(['name' => 'CommentHostTorrent']);
+        /** @var Comment $comment */
+        $comment = Comment::factory()->create([
+            'user' => $author->id,
+            'torrent' => $torrent->id,
+            'anonymous' => false,
+        ]);
+
+        /** @var CommentRepository&Mockery\MockInterface $commentRepository */
+        $commentRepository = Mockery::mock(CommentRepository::class);
+        $commentRepository->shouldReceive('findById')
+            ->once()
+            ->with($comment->id, ['id', 'user', 'torrent', 'offer', 'anonymous'])
+            ->andReturn($comment);
+        app()->instance(CommentRepository::class, $commentRepository);
+
+        /** @var ModerationRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(ModerationRepository::class);
+        $repository->shouldReceive('countReports')->once()->andReturn(1);
+        $repository->shouldReceive('getReports')->once()->andReturn([
+            [
+                'id' => 3,
+                'type' => ReportType::COMMENT->value,
+                'reportid' => $comment->id,
+                'addedby' => $user->id,
+                'added' => date('Y-m-d H:i:s'),
+                'dealtwith' => 0,
+                'dealtby' => 0,
+                'reason' => 'comment report reason',
+            ],
+        ]);
+        app()->instance(ModerationRepository::class, $repository);
+
+        $controller = app(ModerationController::class);
+        $request = Request::create('/reports', 'GET');
+        app()->instance('request', $request);
+
+        $response = $controller->reports($request);
+
+        $this->assertInstanceOf(View::class, $response);
+        /** @var ReportsPageViewModel $vm */
+        $vm = $response->getData()['vm'];
+        $rows = $vm->rows;
+        $this->assertSame('Comment', $rows[0]['type_label']);
+        $this->assertStringContainsString((string) $author->username, (string) $rows[0]['reporting']);
+        $this->assertStringContainsString('CommentHostTorrent', (string) $rows[0]['reporting']);
+        $this->assertSame('comment report reason', $rows[0]['reason']);
     }
 
     /**

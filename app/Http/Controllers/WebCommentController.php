@@ -178,8 +178,8 @@ class WebCommentController extends Controller
 
         if ($this->commentRepository->delete($commentId, $type, $parentId)) {
             $this->commentService->deleteCache($type, $parentId);
+            $this->commentService->applyBonus('-', $userPostId);
         }
-        $this->commentService->applyBonus('-', $userPostId);
 
         $defaultUrl = $this->buildScript($type, $parentId);
         $returnto = (string) $request->input('returnto', '');

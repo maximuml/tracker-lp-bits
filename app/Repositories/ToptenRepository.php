@@ -35,7 +35,6 @@ final class ToptenRepository implements ToptenRepositoryInterface
     {
         $type = in_array($type, self::VALID_TYPES, true) ? $type : 1;
         $limit = $limit < 1 || $limit > 250 ? 10 : $limit;
-        // At limit 10 every section is rendered, so subtype does not change the page.
         $subtype = $limit === 10 || ! in_array($subtype, self::VALID_SUBTYPES[$type], true) ? null : $subtype;
 
         return ['type' => $type, 'limit' => $limit, 'subtype' => $subtype];

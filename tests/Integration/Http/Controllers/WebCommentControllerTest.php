@@ -12,11 +12,13 @@ use App\Models\Torrent;
 use App\Models\User;
 use App\Repositories\CommentRepository;
 use App\Support\Permissions;
+use App\Support\Settings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
@@ -210,6 +212,37 @@ final class WebCommentControllerTest extends TestCase
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertStringContainsString('/web/details/5', $response->getTargetUrl());
+    }
+
+    public function test_destroy_does_not_deduct_bonus_when_delete_affects_no_rows(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value, 'seedbonus' => 100.0]);
+        $this->actingAs($user, 'nexus-web');
+
+        Settings::saveBatch('tweak', ['bonus' => 'enable']);
+        Settings::saveBatch('bonus', ['addcomment' => '10']);
+        Settings::resetCache();
+
+        /** @var CommentRepository&Mockery\MockInterface $repository */
+        $repository = Mockery::mock(CommentRepository::class);
+        $repository->shouldReceive('getForDelete')->once()->with(10, 'torrent')->andReturn([
+            'pid' => 5,
+            'user' => $user->id,
+        ]);
+        // A concurrent delete already removed the row.
+        $repository->shouldReceive('delete')->once()->with(10, 'torrent', 5)->andReturn(false);
+        app()->instance(CommentRepository::class, $repository);
+
+        $controller = app(WebCommentController::class);
+        $request = Request::create('/comment.php', 'POST', ['type' => 'torrent']);
+        app()->instance('request', $request);
+
+        $response = $controller->destroy($request, 10);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertSame(100.0, (float) DB::table('users')->where('id', $user->id)->value('seedbonus'));
+        $this->assertSame(0, DB::table('bonus_logs')->where('uid', $user->id)->count());
     }
 
     public function test_original_returns_view_with_original_comment_text(): void

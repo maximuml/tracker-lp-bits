@@ -11,6 +11,7 @@ use App\Http\Requests\UserBanLogRequest;
 use App\Models\User;
 use App\Repositories\UserModerationRepository;
 use App\Support\CurrentUser;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -104,7 +105,7 @@ final class AdminToolsControllerTest extends TestCase
 
         $repository = Mockery::mock(UserModerationRepository::class);
         $repository->shouldReceive('countBanLogs')->once()->with('a&b')->andReturn(0);
-        $repository->shouldReceive('listBanLogs')->once()->with('a&b', 0, 50)->andReturn(new \Illuminate\Database\Eloquent\Collection);
+        $repository->shouldReceive('listBanLogs')->once()->with('a&b', 0, 50)->andReturn(new Collection);
         app()->instance(UserModerationRepository::class, $repository);
 
         $controller = app(AdminToolsController::class);

@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Tests\Integration\Http\Controllers;
 
 use App\DTOs\Auth\ActorContext;
+use App\Enums\UserClass;
 use App\Http\Controllers\BonusShopController;
+use App\Http\Requests\FreeleechRequest;
 use App\Support\CurrentUser;
+use App\Support\RuntimeContext;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -59,6 +62,39 @@ final class BonusShopControllerTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Access denied', (string) $response->getContent());
+    }
+
+    public function test_freeleech_renders_post_forms_for_admin(): void
+    {
+        $this->mockCurrentUser(['class' => UserClass::ADMINISTRATOR->value]);
+        app(RuntimeContext::class)->bootEntry(true);
+
+        $controller = app(BonusShopController::class);
+        $request = Request::create('/freeleech', 'GET');
+        app()->instance('request', $request);
+
+        $response = $controller->freeleech($request);
+        $content = (string) $response->getContent();
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringContainsString('/web/bonus/freeleech', $content);
+        $this->assertStringContainsString('name="action" value="setallfree"', $content);
+        $this->assertStringNotContainsString('/web/freeleech?action=', $content);
+    }
+
+    public function test_freeleech_submit_returns_success_for_admin(): void
+    {
+        $this->mockCurrentUser(['class' => UserClass::ADMINISTRATOR->value]);
+        app(RuntimeContext::class)->bootEntry(true);
+
+        $controller = app(BonusShopController::class);
+        $request = FreeleechRequest::create('/web/bonus/freeleech', 'POST', ['action' => 'setallfree']);
+        app()->instance('request', $request);
+
+        $response = $controller->freeleechSubmit($request);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringContainsString('set free', (string) $response->getContent());
     }
 
     /**

@@ -9,11 +9,13 @@ use App\Http\Controllers\AdminToolsController;
 use App\Http\Requests\LocationPostRequest;
 use App\Http\Requests\UserBanLogRequest;
 use App\Models\User;
+use App\Repositories\UserModerationRepository;
 use App\Support\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Mockery;
 use Tests\Attributes\TestCategory;
 use Tests\Concerns\MakesCurrentUser;
@@ -90,6 +92,24 @@ final class AdminToolsControllerTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertStringContainsString('Permission denied', (string) $response->getContent());
+    }
+
+    public function test_user_ban_log_passes_raw_search_term_to_repository(): void
+    {
+        $this->mockCurrentUser(['id' => 1, 'username' => 'mod', 'class' => \constant('UC_MODERATOR')]);
+
+        $repository = Mockery::mock(UserModerationRepository::class);
+        $repository->shouldReceive('countBanLogs')->once()->with('a&b')->andReturn(0);
+        $repository->shouldReceive('listBanLogs')->once()->with('a&b', 0, 50)->andReturn(new \Illuminate\Database\Eloquent\Collection);
+        app()->instance(UserModerationRepository::class, $repository);
+
+        $controller = app(AdminToolsController::class);
+        $request = Request::create('/user-ban-log', 'GET', ['q' => 'a&b']);
+        app()->instance('request', $request);
+
+        $response = $controller->userBanLog($request);
+
+        $this->assertInstanceOf(View::class, $response);
     }
 
     public function test_clear_cache_denies_access_for_guest(): void

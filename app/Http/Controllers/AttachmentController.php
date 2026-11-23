@@ -151,7 +151,8 @@ class AttachmentController extends BasePageController
         // ROOT_PATH) — resolve reads the same way; a bare relative path
         // would resolve against the php-fpm CWD (public/) and miss the
         // real location.
-        $saveDirectory = SiteConfig::current()->attachment->saveDirectory('attachments');
+        $saveDirectory = SiteConfig::current()->attachment->saveDirectory();
+        $saveDirectory = $saveDirectory !== '' ? $saveDirectory : 'attachments';
         $basePath = realpath(base_path($saveDirectory));
         $realFile = realpath($basePath === false ? '' : $basePath.DIRECTORY_SEPARATOR.$location);
 

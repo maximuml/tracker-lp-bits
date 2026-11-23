@@ -334,7 +334,7 @@ class ModerationController extends BasePageController
                             'of' => (string) $of,
                             'url' => $url,
                             'name' => (string) $name,
-                            'userHtml' => UserDisplay::username((int) ($arr['user'] ?? 0)),
+                            'userHtml' => UserDisplay::username((int) ($comment->user ?? 0)),
                         ]);
                     }
                     break;

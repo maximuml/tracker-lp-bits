@@ -96,7 +96,11 @@ final class AdminToolsControllerTest extends TestCase
 
     public function test_user_ban_log_passes_raw_search_term_to_repository(): void
     {
-        $this->mockCurrentUser(['id' => 1, 'username' => 'mod', 'class' => \constant('UC_MODERATOR')]);
+        /** @var User $user */
+        $user = User::factory()->class(\constant('UC_MODERATOR'))->create();
+        $this->actingAs($user);
+        app(CurrentUser::class)->set($user->toLegacyArray());
+        app()->instance(ActorContext::class, ActorContext::fromAuth($user));
 
         $repository = Mockery::mock(UserModerationRepository::class);
         $repository->shouldReceive('countBanLogs')->once()->with('a&b')->andReturn(0);

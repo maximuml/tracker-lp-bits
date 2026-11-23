@@ -34,10 +34,12 @@ class ToptenController extends Controller
             abort(403);
         }
 
-        $type = (int) $request->query('type', 1);
-        $limit = $request->has('lim') ? (int) $request->query('lim') : 10;
         $subtype = $request->query('subtype');
-        $subtype = is_string($subtype) ? $subtype : null;
+        ['type' => $type, 'limit' => $limit, 'subtype' => $subtype] = $this->toptenRepository->normalize(
+            (int) $request->query('type', 1),
+            $request->has('lim') ? (int) $request->query('lim') : 10,
+            is_string($subtype) ? $subtype : null,
+        );
 
         $langFolder = Locale::currentLangDir('en');
         $cacheKey = "topten_data_{$type}_{$limit}_{$subtype}_{$langFolder}";

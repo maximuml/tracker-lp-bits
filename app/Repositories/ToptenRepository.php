@@ -18,13 +18,35 @@ final class ToptenRepository implements ToptenRepositoryInterface
         private readonly Topten\OtherSections $otherSections = new Topten\OtherSections,
     ) {}
 
+    private const VALID_TYPES = [1, 2, 3, 5, 6];
+
+    private const VALID_SUBTYPES = [
+        1 => ['bsh', 'dl', 'dls', 'ul', 'uls', 'wsh'],
+        2 => ['act', 'bse', 'mdt', 'sna', 'wse'],
+        3 => ['avg', 'r', 'ul', 'us'],
+        5 => ['btop', 'mcmt', 'mpos', 'mtop'],
+        6 => ['bo', 'charity', 'do_cny', 'do_usd', 'lang', 'mcli', 'ss'],
+    ];
+
+    /**
+     * @return array{type: 1|2|3|5|6, limit: int<1, 250>, subtype: ?string}
+     */
+    public function normalize(int $type, int $limit, ?string $subtype): array
+    {
+        $type = in_array($type, self::VALID_TYPES, true) ? $type : 1;
+        $limit = $limit < 1 || $limit > 250 ? 10 : $limit;
+        // At limit 10 every section is rendered, so subtype does not change the page.
+        $subtype = $limit === 10 || ! in_array($subtype, self::VALID_SUBTYPES[$type], true) ? null : $subtype;
+
+        return ['type' => $type, 'limit' => $limit, 'subtype' => $subtype];
+    }
+
     /**
      * @return array<string, mixed>
      */
     public function page(int $type, int $limit, ?string $subtype): array
     {
-        $type = in_array($type, [1, 2, 3, 5, 6], true) ? $type : 1;
-        $limit = $limit < 1 || $limit > 250 ? 10 : $limit;
+        ['type' => $type, 'limit' => $limit, 'subtype' => $subtype] = $this->normalize($type, $limit, $subtype);
 
         $enabledDonation = ((string) Settings::get('main.donation', 'no')) === 'yes';
         $dateFounded = SiteConfig::current()->tweak->dateFounded();

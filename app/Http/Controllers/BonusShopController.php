@@ -51,12 +51,9 @@ class BonusShopController extends BasePageController
             'setallnormal' => 'set all torrents normal',
         ];
 
-        $message = '';
-        foreach ($links as $key => $label) {
-            $message .= 'Click <a class=altlink href=/web/freeleech?action='.$key.'>here</a> to '.$label.'..<br />';
-        }
+        $message = view('partials.freeleech-actions', ['links' => $links])->render();
 
-        return $this->abortResponse('Select action', $message, false);
+        return $this->abortResponse('Select action', $message, false, 200);
 
     }
 
@@ -84,7 +81,7 @@ class BonusShopController extends BasePageController
             'setall2up' => 'All torrents have been set 2x up..',
             'setall2up_free' => 'All torrents have been set 2x up and free..',
             'setallhalf_down' => 'All torrents have been set half down..',
-            'setall2up_half_down' => 'All torrents have been set half down..',
+            'setall2up_half_down' => 'All torrents have been set 2x up and half down..',
             'setallnormal' => 'All torrents have been set normal..',
         ];
 
@@ -92,7 +89,7 @@ class BonusShopController extends BasePageController
             Promotion::setGlobalSpecialState($stateMap[$action]);
             $this->cache?->forget('global_promotion_state');
 
-            return $this->abortResponse('Success', $messages[$action]);
+            return $this->abortResponse('Success', $messages[$action], true, 200);
         }
 
         return $this->freeleech($request);

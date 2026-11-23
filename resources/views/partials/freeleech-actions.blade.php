@@ -1,0 +1,1 @@
+@foreach ($links as $key => $label)<form method="post" action="/web/bonus/freeleech" class="nx-inline">@csrf<input type="hidden" name="action" value="{{ $key }}">Click <button type="submit" class="n" data-submit-once>here</button> to {{ $label }}..</form><br />@endforeach

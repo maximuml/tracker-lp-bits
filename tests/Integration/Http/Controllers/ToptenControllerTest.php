@@ -105,4 +105,33 @@ final class ToptenControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
         $this->assertStringContainsString('2026-01-01 00:00:00', $response->getContent());
     }
+
+    public function test_legacy_reuses_cache_for_subtype_normalization(): void
+    {
+        $user = User::factory()->create(['class' => UserClass::STAFFLEADER->value]);
+        $this->actingAs($user);
+
+        $langFolder = Locale::currentLangDir('en');
+        foreach (['topten_data_2_100_act_', 'topten_data_2_100__'] as $key) {
+            Cache::put("{$key}{$langFolder}", [
+                'type' => 2,
+                'limit' => 100,
+                'subtype' => null,
+                'enabledDonation' => false,
+                'dateFounded' => '2007-01-01',
+                'generatedAt' => '2026-01-01 00:00:00',
+                'sections' => [],
+            ], 3600);
+        }
+
+        $controller = app(ToptenController::class);
+
+        $request = Request::create('/topten?type=2&lim=100&subtype=act', 'GET');
+        app()->instance('request', $request);
+        $this->assertStringContainsString('2026-01-01 00:00:00', $controller->legacy($request)->getContent());
+
+        $request = Request::create('/topten?type=2&lim=100&subtype=bogus', 'GET');
+        app()->instance('request', $request);
+        $this->assertStringContainsString('2026-01-01 00:00:00', $controller->legacy($request)->getContent());
+    }
 }

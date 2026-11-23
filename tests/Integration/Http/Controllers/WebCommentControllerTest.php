@@ -230,7 +230,6 @@ final class WebCommentControllerTest extends TestCase
             'pid' => 5,
             'user' => $user->id,
         ]);
-        // A concurrent delete already removed the row.
         $repository->shouldReceive('delete')->once()->with(10, 'torrent', 5)->andReturn(false);
         app()->instance(CommentRepository::class, $repository);
 

@@ -51,17 +51,9 @@ class BonusShopController extends BasePageController
             'setallnormal' => 'set all torrents normal',
         ];
 
-        $token = csrf_token();
-        $message = '';
-        foreach ($links as $key => $label) {
-            $message .= '<form method="post" action="/web/bonus/freeleech" class="nx-inline">'
-                .'<input type="hidden" name="_token" value="'.$token.'">'
-                .'<input type="hidden" name="action" value="'.$key.'">'
-                .'Click <button type="submit" class="n" data-submit-once>here</button> to '.$label.'..'
-                .'</form><br />';
-        }
+        $message = view('partials.freeleech-actions', ['links' => $links])->render();
 
-        return $this->abortResponse('Select action', $message, false);
+        return $this->abortResponse('Select action', $message, false, 200);
 
     }
 
@@ -97,7 +89,7 @@ class BonusShopController extends BasePageController
             Promotion::setGlobalSpecialState($stateMap[$action]);
             $this->cache?->forget('global_promotion_state');
 
-            return $this->abortResponse('Success', $messages[$action]);
+            return $this->abortResponse('Success', $messages[$action], true, 200);
         }
 
         return $this->freeleech($request);

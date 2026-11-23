@@ -61,6 +61,26 @@ final class ControllerTest extends TestCase
         $this->assertFalse($controller->extraField($request, 'z'));
     }
 
+    public function test_has_extra_field_ignores_array_input(): void
+    {
+        $request = Request::create('/x?extra_fields[]=a', 'GET');
+        app()->instance('request', $request);
+
+        $controller = $this->controller();
+        $this->assertFalse($controller->extraField($request, 'a'));
+    }
+
+    public function test_append_extra_settings_ignores_array_input(): void
+    {
+        $request = Request::create('/x?extra_settings[]=main.sitename', 'GET');
+        app()->instance('request', $request);
+
+        $additional = ['existing' => 1];
+        $this->controller()->extraSettings($request, $additional, ['main.sitename']);
+
+        $this->assertSame(['existing' => 1], $additional);
+    }
+
     public function test_append_extra_settings_only_adds_requested_names(): void
     {
         $request = Request::create('/x?extra_settings=main.sitename', 'GET');

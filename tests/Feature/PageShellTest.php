@@ -407,6 +407,17 @@ final class PageShellTest extends TestCase
         $this->assertStringNotContainsString('<h1 class="nx-sr-only">', $html);
     }
 
+    public function test_increment_bulk_page_shows_upload_sent_confirmation(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create(['class' => UserClass::SYSOP->value]);
+
+        $response = $this->withNexusCookie($user)->get('/web/increment-bulk?sent=1&type=uploaded');
+
+        $response->assertOk();
+        $this->assertStringContainsString('upload'.__('incrementbulk.sent_success'), (string) $response->getContent());
+    }
+
     public function test_faqmanage_page_has_single_visible_heading(): void
     {
         /** @var User $user */

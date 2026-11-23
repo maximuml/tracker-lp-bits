@@ -222,7 +222,7 @@ class InviteController extends BasePageController
 
         $canConfirm = $currentUserId === $id || UserDisplay::currentClass() >= (int) UserClassEnum::SYSOP->value;
         if ($canConfirm) {
-            $pendingCount = $this->inviteRepository->countPendingInvitees($currentUserId);
+            $pendingCount = $this->inviteRepository->countPendingInvitees($id);
         }
 
         UserDisplay::preload(array_values(array_map(fn ($r) => (int) ($r['id'] ?? 0), $inviteRows)));

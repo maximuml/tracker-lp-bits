@@ -28,7 +28,8 @@ final class Cache
 {
     public static function clearUser(int|string $uid, string $passkey = ''): void
     {
-        Logger::writeWithContext("clear_user_cache, uid: $uid, passkey: $passkey");
+        $passkeyTag = $passkey !== '' ? substr(hash('sha256', $passkey), 0, 12) : '';
+        Logger::writeWithContext("clear_user_cache, uid: $uid, passkey_sha256: $passkeyTag");
         self::forgetWithLocales("user_{$uid}_content");
         self::forgetWithLocales("user_{$uid}_roles");
         self::forgetWithLocales("announce_user_passkey_$uid");

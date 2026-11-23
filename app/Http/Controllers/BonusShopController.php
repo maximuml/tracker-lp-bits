@@ -51,9 +51,14 @@ class BonusShopController extends BasePageController
             'setallnormal' => 'set all torrents normal',
         ];
 
+        $token = csrf_token();
         $message = '';
         foreach ($links as $key => $label) {
-            $message .= 'Click <a class=altlink href=/web/freeleech?action='.$key.'>here</a> to '.$label.'..<br />';
+            $message .= '<form method="post" action="/web/bonus/freeleech" class="nx-inline">'
+                .'<input type="hidden" name="_token" value="'.$token.'">'
+                .'<input type="hidden" name="action" value="'.$key.'">'
+                .'Click <button type="submit" class="n" data-submit-once>here</button> to '.$label.'..'
+                .'</form><br />';
         }
 
         return $this->abortResponse('Select action', $message, false);
@@ -84,7 +89,7 @@ class BonusShopController extends BasePageController
             'setall2up' => 'All torrents have been set 2x up..',
             'setall2up_free' => 'All torrents have been set 2x up and free..',
             'setallhalf_down' => 'All torrents have been set half down..',
-            'setall2up_half_down' => 'All torrents have been set half down..',
+            'setall2up_half_down' => 'All torrents have been set 2x up and half down..',
             'setallnormal' => 'All torrents have been set normal..',
         ];
 

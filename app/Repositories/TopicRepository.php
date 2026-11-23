@@ -126,7 +126,7 @@ class TopicRepository extends BaseRepository
 
         $query = Topic::query()->where('forumid', $forumid);
         if ($search !== '') {
-            $query->where('subject', 'like', '%'.$search.'%');
+            $query->where('subject', 'like', '%'.addcslashes($search, '%_\\').'%');
         }
 
         $count = $knownCount ?? (int) $query->count();

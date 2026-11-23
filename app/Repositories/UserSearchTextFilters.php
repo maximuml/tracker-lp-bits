@@ -130,9 +130,9 @@ final class UserSearchTextFilters
                 foreach ($comments_inc as $comment) {
                     if (! $this->hasWildcard($comment)) {
                         $method = $first ? 'where' : 'orWhere';
-                        $query->$method('u.modcomment', 'like', '%'.$comment.'%');
+                        $query->$method('u.modcomment', 'like', '%'.addcslashes($comment, '%_\\').'%');
                     } else {
-                        $comment = str_replace(['?', '*'], ['_', '%'], $comment);
+                        $comment = str_replace(['?', '*'], ['_', '%'], addcslashes($comment, '%_\\'));
                         $method = $first ? 'where' : 'orWhere';
                         $query->$method('u.modcomment', 'like', $comment);
                     }
@@ -144,9 +144,9 @@ final class UserSearchTextFilters
             $userQuery->where(function ($query) use ($comments_exc) {
                 foreach ($comments_exc as $comment) {
                     if (! $this->hasWildcard($comment)) {
-                        $query->where('u.modcomment', 'not like', '%'.$comment.'%');
+                        $query->where('u.modcomment', 'not like', '%'.addcslashes($comment, '%_\\').'%');
                     } else {
-                        $comment = str_replace(['?', '*'], ['_', '%'], $comment);
+                        $comment = str_replace(['?', '*'], ['_', '%'], addcslashes($comment, '%_\\'));
                         $query->where('u.modcomment', 'not like', $comment);
                     }
                 }

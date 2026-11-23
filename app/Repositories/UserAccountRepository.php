@@ -141,7 +141,7 @@ final class UserAccountRepository extends BaseRepository
     public function pluckIdsByUsernameLike(string $term): array
     {
         return User::query()
-            ->where('username', 'LIKE', '%'.$term.'%')
+            ->where('username', 'LIKE', '%'.addcslashes($term, '%_\\').'%')
             ->pluck('id')
             ->all();
     }

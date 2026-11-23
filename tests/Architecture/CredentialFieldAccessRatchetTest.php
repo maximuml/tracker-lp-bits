@@ -56,7 +56,6 @@ final class CredentialFieldAccessRatchetTest extends TestCase
         'Http/Controllers/AuthenticateController.php' => ['secret' => 1],
         'Repositories/TorrentDownloadRepository.php' => ['secret' => 1],
         'Repositories/UsercpSecurityCommand.php' => ['passhash' => 2],
-        'Http/Controllers/StaffModerationController.php' => ['passhash' => 1],
         'Services/WebAuthService.php' => [
             'secret' => 1,
             'passhash' => 1,

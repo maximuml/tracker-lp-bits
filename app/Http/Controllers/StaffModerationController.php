@@ -377,7 +377,7 @@ class StaffModerationController extends BasePageController
             $this->userDetailRepository->insertUserModifyLogs($insert);
         }
 
-        Cache::clearUser($userId, (string) ($target->passhash ?? ''));
+        Cache::clearUser($userId);
 
         $returnto = (string) $request->post('returnto');
         $prefix = Url::absolute($baseUrl);

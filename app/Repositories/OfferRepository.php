@@ -127,7 +127,7 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
         }
 
         if ($search !== '') {
-            $query->where('offers.name', 'like', '%'.$search.'%');
+            $query->where('offers.name', 'like', '%'.addcslashes($search, '%_\\').'%');
         }
 
         $count = $knownCount ?? (int) $query->count('offers.id');
@@ -201,7 +201,7 @@ final class OfferRepository extends BaseRepository implements OfferRepositoryInt
         }
 
         if ($search !== '') {
-            $query->where('offers.name', 'like', '%'.$search.'%');
+            $query->where('offers.name', 'like', '%'.addcslashes($search, '%_\\').'%');
         }
 
         $count = (int) $query->count('offers.id');

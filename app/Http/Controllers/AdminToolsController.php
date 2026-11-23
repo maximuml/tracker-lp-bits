@@ -49,8 +49,7 @@ class AdminToolsController extends BasePageController
             return $this->abortResponse('Error', 'Permission denied.');
         }
 
-        $qRaw = is_scalar($request->input('q', '')) ? (string) $request->input('q', '') : '';
-        $q = htmlspecialchars($qRaw);
+        $q = is_scalar($request->input('q', '')) ? (string) $request->input('q', '') : '';
 
         $queryParam = $q === '' ? null : $q;
         $total = $this->userModerationRepository->countBanLogs($queryParam);

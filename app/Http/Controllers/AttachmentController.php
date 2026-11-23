@@ -152,8 +152,9 @@ class AttachmentController extends BasePageController
         // would resolve against the php-fpm CWD (public/) and miss the
         // real location.
         $saveDirectory = SiteConfig::current()->attachment->saveDirectory();
-        $basePath = realpath(base_path($saveDirectory !== '' ? $saveDirectory : 'attachments'));
-        $realFile = realpath(base_path($saveDirectory.'/'.$location));
+        $saveDirectory = $saveDirectory !== '' ? $saveDirectory : 'attachments';
+        $basePath = realpath(base_path($saveDirectory));
+        $realFile = realpath($basePath === false ? '' : $basePath.DIRECTORY_SEPARATOR.$location);
 
         // Prefix must include the trailing separator — a bare prefix
         // match would also admit sibling dirs like "attachments_evil/".

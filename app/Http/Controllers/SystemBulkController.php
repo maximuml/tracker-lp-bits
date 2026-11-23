@@ -34,7 +34,6 @@ use App\Support\Lock;
 use App\Support\Log;
 use App\Support\Logger;
 use App\Support\Mail;
-use App\Support\PageResponses;
 use App\Support\RedisGuard;
 use App\Support\RequestValues;
 use App\Support\SafeExceptionMessage;
@@ -71,19 +70,11 @@ class SystemBulkController extends BasePageController
         $this->cache = $cache;
     }
 
-    public function amountUpload(AmountUploadRequest $request): Response|RedirectResponse|View
+    public function amountUpload(AmountUploadRequest $request): Response|RedirectResponse
     {
         $sysopClass = defined('UC_SYSOP') ? \constant('UC_SYSOP') : 0;
         if (UserDisplay::currentClass() < $sysopClass) {
             return $this->abortResponse('Sorry', 'Permission denied.');
-        }
-
-        if ($request->isMethod('get')) {
-            if ($request->query('sent') == '1') {
-                return response(PageResponses::captureAbort('Success', 'Upload amount has been added successfully.', true, 'Add Upload'));
-            }
-
-            return $this->abortResponse('Error', 'Permission denied!');
         }
 
         $senderId = $request->post('sender') === 'system' ? null : $this->actor->id;
@@ -124,7 +115,7 @@ class SystemBulkController extends BasePageController
             dryRun: $dryRun,
         );
 
-        return redirect('takeamountupload.php?sent=1');
+        return redirect('/web/increment-bulk?sent=1&type=uploaded');
 
     }
 

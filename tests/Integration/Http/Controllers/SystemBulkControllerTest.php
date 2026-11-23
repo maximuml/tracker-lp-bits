@@ -29,7 +29,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\View\View;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\Attributes\TestCategory;
@@ -113,18 +112,8 @@ final class SystemBulkControllerTest extends TestCase
         ]);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertStringContainsString('takeamountupload.php?sent=1', $response->getTargetUrl());
+        $this->assertStringContainsString('/web/increment-bulk?sent=1&type=uploaded', $response->getTargetUrl());
         Queue::assertPushed(BulkUserIncrementJob::class, 1);
-    }
-
-    public function test_takeamountupload_get_sent_shows_success(): void
-    {
-        $this->loginAsSysop();
-
-        $response = $this->callTakeAmountUpload('GET', [], ['sent' => '1']);
-
-        $this->assertInstanceOf(Response::class, $response);
-        $this->assertStringContainsString('Upload amount has been added successfully', (string) $response->getContent());
     }
 
     // ─── takeIncrementBulk ───────────────────────────────────────────────
@@ -568,7 +557,7 @@ final class SystemBulkControllerTest extends TestCase
      * @param  array<string, mixed>  $post
      * @param  array<string, mixed>  $query
      */
-    private function callTakeAmountUpload(string $method, array $post = [], array $query = []): Response|RedirectResponse|View
+    private function callTakeAmountUpload(string $method, array $post = [], array $query = []): Response|RedirectResponse
     {
         $controller = app(SystemBulkController::class);
         $request = AmountUploadRequest::create('/web/system/amount-upload', $method, $post + $query);

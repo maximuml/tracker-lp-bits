@@ -28,8 +28,6 @@ final class Cache
 {
     public static function clearUser(int|string $uid, string $passkey = ''): void
     {
-        // Never log the raw passkey (a live tracker credential); the sha256
-        // prefix correlates with PasskeyUserLookup::userCacheKey() entries.
         $passkeyTag = $passkey !== '' ? substr(hash('sha256', $passkey), 0, 12) : '';
         Logger::writeWithContext("clear_user_cache, uid: $uid, passkey_sha256: $passkeyTag");
         self::forgetWithLocales("user_{$uid}_content");

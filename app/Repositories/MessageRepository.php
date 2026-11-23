@@ -34,15 +34,15 @@ class MessageRepository extends BaseRepository
         if ($keyword !== '') {
             switch ($place) {
                 case 'body':
-                    $query->where('msg', 'like', '%'.$keyword.'%');
+                    $query->where('msg', 'like', '%'.addcslashes($keyword, '%_\\').'%');
                     break;
                 case 'title':
-                    $query->where('subject', 'like', '%'.$keyword.'%');
+                    $query->where('subject', 'like', '%'.addcslashes($keyword, '%_\\').'%');
                     break;
                 default:
                     $query->where(function ($q) use ($keyword) {
-                        $q->where('msg', 'like', '%'.$keyword.'%')
-                            ->orWhere('subject', 'like', '%'.$keyword.'%');
+                        $q->where('msg', 'like', '%'.addcslashes($keyword, '%_\\').'%')
+                            ->orWhere('subject', 'like', '%'.addcslashes($keyword, '%_\\').'%');
                     });
             }
         }

@@ -37,12 +37,16 @@ final class Cache
         self::forgetWithLocales("user_role_ids:$uid");
         self::forgetWithLocales("direct_permissions:$uid");
 
-        if ($passkey) {
+        $userInfo = app(UserRepositoryInterface::class)->findForCacheClear($uid);
+
+        if ($passkey === '' && $userInfo !== null) {
+            $passkey = (string) ($userInfo->passkey ?? '');
+        }
+        if ($passkey !== '') {
             self::forgetWithLocales(PasskeyUserLookup::userCacheKey($passkey, 'content'));
             self::forgetWithLocales(PasskeyUserLookup::userCacheKey($passkey, 'rss'));
         }
 
-        $userInfo = app(UserRepositoryInterface::class)->findForCacheClear($uid);
         if ($userInfo) {
             event(new UserUpdated($userInfo));
         }

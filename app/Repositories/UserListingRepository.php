@@ -59,9 +59,9 @@ class UserListingRepository
         $query = DB::table('users as u')->where('u.status', UserStatus::CONFIRMED->value);
 
         if ($search !== '') {
-            $query->where('u.username', 'like', "%{$search}%");
+            $query->where('u.username', 'like', '%'.addcslashes($search, '%_\\').'%');
         } elseif ($letter !== '') {
-            $query->where('u.username', 'like', "{$letter}%");
+            $query->where('u.username', 'like', addcslashes($letter, '%_\\').'%');
         }
 
         if ($class !== '-') {

@@ -109,7 +109,7 @@ final class TorrentAjaxRepository implements TorrentAjaxRepositoryInterface
 
         $rows = DB::table('suggest')
             ->selectRaw('keywords AS suggest, COUNT(*) AS count')
-            ->where('keywords', 'like', $searchstr.'%')
+            ->where('keywords', 'like', addcslashes($searchstr, '%_\\').'%')
             ->groupBy('keywords')
             ->orderByDesc('count')
             ->orderByDesc('keywords')

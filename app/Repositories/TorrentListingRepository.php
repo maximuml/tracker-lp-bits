@@ -104,7 +104,7 @@ class TorrentListingRepository
     {
         return DB::table('suggest')
             ->selectRaw('keywords AS suggest, COUNT(*) AS count')
-            ->where('keywords', 'like', $prefix.'%')
+            ->where('keywords', 'like', addcslashes($prefix, '%_\\').'%')
             ->groupBy('keywords')
             ->orderByDesc('count')
             ->orderByDesc('keywords')

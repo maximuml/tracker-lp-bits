@@ -200,8 +200,8 @@ class FaqController extends BasePageController
         }
 
         if ($action === 'delete') {
-            $id = (int) ($request->query('id') ?? 0);
-            if ($request->query('confirm') === 'yes') {
+            $id = (int) ($request->input('id') ?? 0);
+            if ($request->input('confirm') === 'yes') {
                 $this->infoRepository->deleteFaq($id);
 
                 return redirect($redirectBase.'/web/faqmanage');

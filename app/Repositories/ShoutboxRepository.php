@@ -68,7 +68,7 @@ final class ShoutboxRepository extends BaseRepository implements ShoutboxReposit
         }
 
         if ($filters['search'] !== '') {
-            $like = '%'.$filters['search'].'%';
+            $like = '%'.addcslashes($filters['search'], '%_\\').'%';
             $query->where('text', 'like', $like);
             $countQuery->where('text', 'like', $like);
         }

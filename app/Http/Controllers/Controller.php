@@ -92,7 +92,7 @@ class Controller extends BaseController
     {
         if ($this->extraFields === null) {
             $extraFieldsStr = $request->input('extra_fields', '');
-            $this->extraFields = explode(',', $extraFieldsStr);
+            $this->extraFields = is_string($extraFieldsStr) ? explode(',', $extraFieldsStr) : [];
         }
         Logger::writeWithContext((string) sprintf('field: %s, extraFields: %s', $field, json_encode($this->extraFields)), (string) 'info', (bool) false);
 
@@ -107,7 +107,7 @@ class Controller extends BaseController
     {
         if ($this->extraSettingNames === null) {
             $extraSettingStr = $request->input('extra_settings', '');
-            $this->extraSettingNames = explode(',', $extraSettingStr);
+            $this->extraSettingNames = is_string($extraSettingStr) ? explode(',', $extraSettingStr) : [];
         }
         $results = [];
         foreach ($names as $name) {

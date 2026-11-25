@@ -16,6 +16,7 @@ use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumCollaborators;
 use App\Services\ForumModerationService;
+use App\Services\ForumPostingService;
 use App\Services\ForumService;
 use App\Support\Cache\NexusCache;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -161,14 +162,18 @@ final class ForumServiceTest extends TestCase
 
     private function service(): ForumService
     {
-        return new ForumService(
+        $posting = new ForumPostingService(
             $this->app->make(ForumCollaborators::class),
             $this->app->make(ActorContext::class),
             $this->app->make(NexusCache::class),
             $this->app->make(TopicPolicy::class),
             $this->app->make(PostPolicy::class),
-            $this->app->make(ForumModerationService::class),
             $this->app->make(MessageRepository::class),
+        );
+
+        return new ForumService(
+            $this->app->make(ForumModerationService::class),
+            $posting,
         );
     }
 

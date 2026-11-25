@@ -4,32 +4,21 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Auth\Permission;
-use App\DTOs\Auth\ActorContext;
-use App\Enums\BusinessType;
-use App\Enums\Permission\PermissionEnum;
-use App\Models\Post;
-use App\Models\Topic;
-use App\Models\User;
-use App\Policies\PostPolicy;
-use App\Policies\TopicPolicy;
-use App\Repositories\MessageRepository;
-use App\Support\Cache\NexusCache;
-use App\Support\Config\SiteConfig;
-use App\Support\Http\SafeReturnUrl;
-use App\Support\Locale;
-use App\Support\PageResponses;
-use App\Support\UserDisplay;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
- * Handles forum post submission (new topic, reply, edit). Moderation
- * mutations (move, delete, lock, sticky, highlight) live in
- * {@see ForumModerationService}.
+ * Dispatches forum action endpoints. Post submission (new topic, reply,
+ * edit) lives in {@see ForumPostingService}; moderation mutations (move,
+ * delete, lock, sticky, highlight) in {@see ForumModerationService}.
  */
 final class ForumService
 {
+    public function __construct(
+        private readonly ForumModerationService $moderation,
+        private readonly ForumPostingService $posting,
+    ) {}
+
     /**
      * @return array<string, mixed>|RedirectResponse
      */
@@ -46,7 +35,7 @@ final class ForumService
         }
 
         if ($action === 'post') {
-            return $this->handlePost($request);
+            return $this->posting->handlePost($request);
         }
         if ($action === 'movetopic') {
             return $this->moderation->moveTopic($request);
@@ -74,7 +63,7 @@ final class ForumService
 
     public function post(Request $request): RedirectResponse
     {
-        return $this->handlePost($request);
+        return $this->posting->handlePost($request);
     }
 
     public function moveTopic(Request $request): RedirectResponse
@@ -105,268 +94,5 @@ final class ForumService
     public function setSticky(Request $request): RedirectResponse
     {
         return $this->moderation->setSticky($request);
-    }
-
-    public function __construct(
-        private readonly ForumCollaborators $data,
-        private readonly ActorContext $actor,
-        private readonly NexusCache $cache,
-        private readonly TopicPolicy $topicPolicy,
-        private readonly PostPolicy $postPolicy,
-        private readonly ForumModerationService $moderation,
-        private readonly MessageRepository $messageRepository,
-    ) {}
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function user(): array
-    {
-        return $this->actor->toLegacyArray();
-    }
-
-    private function cacheDelete(string $key): void
-    {
-        $this->cache->forget($key);
-    }
-
-    private function cacheGet(string $key): mixed
-    {
-        return $this->cache->get($key);
-    }
-
-    private function redirectTo(string $path): RedirectResponse
-    {
-        if (str_starts_with($path, '?')) {
-            return redirect('/forums'.$path);
-        }
-
-        return redirect(SafeReturnUrl::filter($path, '/forums'));
-    }
-
-    private function handlePost(Request $request): RedirectResponse
-    {
-        $user = $this->user();
-
-        if (! ($user['forumpost'] ?? true)) {
-            PageResponses::abort(__('forums.std_sorry'), view('components.forums.unauthorized-post')->render(), false);
-        }
-
-        $id = (int) $request->input('id');
-        $type = (string) $request->input('type');
-        $subject = trim((string) $request->input('subject', ''));
-        $body = trim((string) $request->input('body', ''));
-        $hassubject = false;
-        $topicid = 0;
-        $forumid = 0;
-        $postid = 0;
-        $quotepostid = (int) $request->input('postid');
-
-        switch ($type) {
-            case 'new':
-                if (! $this->data->forums->forumExists($id)) {
-                    PageResponses::abort(__('forums.std_error'), __('forums.std_no_forum_id'));
-                }
-                $forumid = $id;
-                $hassubject = true;
-                break;
-
-            case 'reply':
-                $forumid = $this->data->topics->topicExists($id);
-                if ($forumid === null) {
-                    PageResponses::abort(__('forums.std_error'), __('forums.std_bad_topic_id'));
-                }
-                $topicid = $id;
-                break;
-
-            case 'edit':
-                $post = $this->data->postLookup->getPostEditInfo($id);
-                if ($post === null) {
-                    return $this->redirectTo('/forums');
-                }
-                $topicid = $post['topicid'];
-                $forumid = $post['forumid'];
-                $postid = $id;
-                $hassubject = (bool) $post['is_first_post'];
-                break;
-
-            default:
-                return $this->redirectTo('/forums');
-        }
-
-        if ($hassubject) {
-            $subject = trim($subject);
-            if ($subject === '') {
-                PageResponses::abort(__('forums.std_error'), __('forums.std_must_enter_subject'));
-            }
-            $maxsubjectlength = SiteConfig::current()->main->maxSubjectLength();
-            if (strlen($subject) > $maxsubjectlength) {
-                PageResponses::abort(__('forums.std_error'), __('forums.std_subject_limited'));
-            }
-        }
-
-        $forumRow = $this->data->forums->getForumRow($forumid);
-        if ($forumRow === null) {
-            return $this->redirectTo('/forums');
-        }
-
-        $userClass = UserDisplay::currentClass();
-        if (
-            $userClass < (int) ($forumRow['minclassread'] ?? 0)
-            || $userClass < (int) ($forumRow['minclasswrite'] ?? 0)
-            || ($type === 'new' && $userClass < (int) ($forumRow['minclasscreate'] ?? 0))
-        ) {
-            PageResponses::permissionDenied();
-        }
-
-        if ($body === '') {
-            PageResponses::abort(__('forums.std_error'), __('forums.std_no_body_text'));
-        }
-
-        $userid = (int) ($user['id'] ?? 0);
-        $date = date('Y-m-d H:i:s');
-
-        if ($type !== 'new') {
-            $topicModel = $this->data->topics->getTopic((int) $topicid);
-            if ($topicModel === null) {
-                return $this->redirectTo('/forums');
-            }
-
-            // W1-04: Use TopicPolicy for locked-topic reply authorization
-            $authUser = $this->actor->user;
-            if ($topicModel->locked && (! $authUser instanceof User || ! $this->topicPolicy->reply($authUser, $topicModel))) {
-                PageResponses::abort(__('forums.std_error'), __('forums.std_topic_locked'));
-            }
-        }
-
-        if ($type === 'edit') {
-            $postInfo = $this->data->postLookup->getPostWithUser($postid);
-            $topicInfo = $this->data->topics->getTopicWithUser($topicid);
-            if ($postInfo === null || $topicInfo === null) {
-                return $this->redirectTo('/forums');
-            }
-
-            // W1-04: Use PostPolicy for edit authorization
-            $postModel = $this->data->postLookup->getPost((int) $postid);
-            $authUser = $this->actor->user;
-            if (! $authUser instanceof User || $postModel === null || ! $this->postPolicy->update($authUser, $postModel)) {
-                PageResponses::permissionDenied();
-            }
-
-            if ($hassubject) {
-                $this->data->topics->updateTopicSubject($topicid, $subject);
-                $cached = $this->cacheGet('forum_'.$forumid.'_last_replied_topic_content');
-                if (is_array($cached) && ($cached['id'] ?? null) == $topicid) {
-                    $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
-                }
-            }
-
-            $this->data->posts->updatePostBody($postid, $body, $date, $userid);
-            $this->cacheDelete('post_'.$postid.'_content');
-
-            $postUrl = sprintf('[url=/forums?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $postid, $postid, $topicInfo->subject ?? '');
-            if ($postInfo->userid > 0 && $postInfo->userid !== $userid) {
-                $receiver = $postInfo->user;
-                if ($receiver !== null) {
-                    $locale = $receiver->locale;
-                    $this->messageRepository->add([
-                        'sender' => null,
-                        'receiver' => $receiver->id,
-                        'subject' => Locale::trans('forum.post.edited_notify_subject', [], $locale),
-                        'msg' => Locale::trans('forum.post.edited_notify_body', ['topic_subject' => $postUrl, 'editor' => $user['username'] ?? ''], $locale),
-                        'added' => now(),
-                    ]);
-                }
-            }
-
-            $headerstr = '/forums?action=viewtopic&topicid='.$topicid;
-
-            return $this->redirectTo($headerstr.'&page=p'.$postid.'#pid'.$postid);
-        }
-
-        if (! Permission::can(PermissionEnum::POST_MANAGE)) {
-            $lastPost = $user['last_post'] ?? '1970-01-01 00:00:00';
-            $timenow = defined('TIMENOW') ? (int) constant('TIMENOW') : time();
-            if (strtotime($lastPost) > ($timenow - 10)) {
-                $secs = 10 - ($timenow - strtotime($lastPost));
-                PageResponses::abort(__('forums.std_error'), (__('forums.std_post_flooding')).$secs.(__('forums.std_seconds_before_making')), false);
-            }
-        }
-
-        if ($type === 'new') {
-            $starttopicBonus = SiteConfig::current()->bonus->startTopic();
-            $this->data->ledger->award($userid, (float) $starttopicBonus, BusinessType::FORUM_TOPIC_BONUS, 'Start topic');
-
-            $topicid = $this->data->topics->createTopic($userid, $forumid, $subject);
-            if ($topicid <= 0) {
-                PageResponses::abort(__('forums.std_error'), __('forums.std_no_topic_id_returned'));
-            }
-            $this->data->forums->incrementForumTopicCount($forumid);
-            $this->data->forums->incrementForumPostCount($forumid);
-        } else {
-            $makepostBonus = SiteConfig::current()->bonus->makePost();
-            $this->data->ledger->award($userid, (float) $makepostBonus, BusinessType::FORUM_POST_BONUS, 'Make post');
-            $this->data->forums->incrementForumPostCount($forumid);
-        }
-
-        $newPostId = $this->data->posts->createPost($topicid, $userid, $body, $date);
-        if ($newPostId <= 0) {
-            return $this->redirectTo('/forums');
-        }
-
-        $topicInfo = $this->data->topics->getTopicWithUser($topicid);
-        $postUrl = sprintf('[url=/forums?action=viewtopic&topicid=%s&page=p%s#pid%s]%s[/url]', $topicid, $newPostId, $newPostId, $topicInfo ? $topicInfo->subject : '');
-
-        if ($type === 'reply') {
-            if ($topicInfo !== null && $topicInfo->userid > 0 && $topicInfo->userid !== $userid) {
-                $receiver = $topicInfo->user;
-                if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
-                    $locale = $receiver->locale;
-                    $this->messageRepository->add([
-                        'sender' => null,
-                        'receiver' => $receiver->id,
-                        'subject' => Locale::trans('forum.topic.replied_notify_subject', [], $locale),
-                        'msg' => Locale::trans('forum.topic.replied_notify_body', ['topic_subject' => $postUrl], $locale),
-                        'added' => now(),
-                    ]);
-                }
-            }
-
-            if ($quotepostid > 0) {
-                $quotePostInfo = $this->data->postLookup->getPostWithUser($quotepostid);
-                if ($quotePostInfo !== null && $quotePostInfo->userid !== $userid) {
-                    $receiver = $quotePostInfo->user;
-                    if ($receiver !== null && $receiver->acceptNotification('topic_reply')) {
-                        $locale = $receiver->locale;
-                        $this->messageRepository->add([
-                            'sender' => null,
-                            'receiver' => $receiver->id,
-                            'subject' => Locale::trans('forum.reply.replied_notify_subject', [], $locale),
-                            'msg' => Locale::trans('forum.reply.replied_notify_body', ['topic_subject' => $postUrl, 'replyer' => $user['username'] ?? ''], $locale),
-                            'added' => now(),
-                        ]);
-                    }
-                }
-            }
-        }
-
-        $todayDate = date('Y-m-d');
-        $this->cacheDelete('forum_'.$forumid.'_post_'.$todayDate.'_count');
-        $this->cacheDelete('today_'.$todayDate.'_posts_count');
-        $this->cacheDelete('forum_'.$forumid.'_last_replied_topic_content');
-        $this->cacheDelete('topic_'.$topicid.'_post_count');
-        $this->cacheDelete('user_'.$userid.'_post_count');
-
-        if ($type === 'new') {
-            $this->data->topics->updateTopicFirstLastPost($topicid, $newPostId);
-        } else {
-            $this->data->topics->setTopicLastPost($topicid, $newPostId);
-        }
-
-        $this->data->posts->updateUserLastPost($userid, $date);
-
-        $headerstr = '/forums?action=viewtopic&topicid='.$topicid;
-
-        return $this->redirectTo($headerstr.'&page=last#pid'.$newPostId);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration\Services;
 
 use App\DTOs\Auth\ActorContext;
+use App\Models\Post;
 use App\Models\Topic;
 use App\Models\User;
 use App\Policies\PostPolicy;
@@ -16,6 +17,7 @@ use App\Repositories\PostRepository;
 use App\Repositories\TopicRepository;
 use App\Services\ForumCollaborators;
 use App\Services\ForumModerationService;
+use App\Services\ForumPostingService;
 use App\Services\ForumService;
 use App\Support\Cache\NexusCache;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -161,14 +163,18 @@ final class ForumServiceTest extends TestCase
 
     private function service(): ForumService
     {
-        return new ForumService(
+        $posting = new ForumPostingService(
             $this->app->make(ForumCollaborators::class),
             $this->app->make(ActorContext::class),
             $this->app->make(NexusCache::class),
             $this->app->make(TopicPolicy::class),
             $this->app->make(PostPolicy::class),
-            $this->app->make(ForumModerationService::class),
             $this->app->make(MessageRepository::class),
+        );
+
+        return new ForumService(
+            $this->app->make(ForumModerationService::class),
+            $posting,
         );
     }
 
@@ -1099,5 +1105,138 @@ final class ForumServiceTest extends TestCase
         ]);
 
         $this->assertAbortContent($request, 'Permission denied!');
+    }
+
+    // ─── handlePost: happy paths (mutation coverage) ─────────────────
+
+    private function mockMessageRepo(): void
+    {
+        $repo = Mockery::mock(MessageRepository::class);
+        $repo->shouldIgnoreMissing();
+        $this->app->instance(MessageRepository::class, $repo);
+    }
+
+    public function test_handle_post_new_topic_success(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->actingAsUser(['id' => 1]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
+        $this->mockCache();
+        $this->mockMessageRepo();
+
+        $repo->shouldReceive('forumExists')->with(1)->andReturn(true);
+        $repo->shouldReceive('getForumRow')->with(1)->andReturn([
+            'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0,
+        ]);
+        $repo->shouldReceive('incrementForumTopicCount')->with(1)->andReturn(true);
+        $repo->shouldReceive('incrementForumPostCount')->with(1)->andReturn(true);
+
+        $this->topicRepo->shouldReceive('createTopic')->with(1, 1, 'My subject')->andReturn(5);
+        $this->topicRepo->shouldReceive('updateTopicFirstLastPost')->with(5, 9)->andReturn(true);
+
+        $this->postRepo->shouldReceive('createPost')->with(5, 1, 'Body text', Mockery::type('string'))->andReturn(9);
+        $this->postRepo->shouldReceive('updateUserLastPost')->with(1, Mockery::type('string'))->andReturn(true);
+
+        $request = Request::create('/forums.php', 'POST', [
+            'action' => 'post',
+            'type' => 'new',
+            'id' => 1,
+            'subject' => 'My subject',
+            'body' => 'Body text',
+        ]);
+
+        $response = $this->callService($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringContainsString('topicid=5', $response->getTargetUrl());
+        $this->assertStringContainsString('pid9', $response->getTargetUrl());
+    }
+
+    public function test_handle_post_reply_success(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->actingAsUser(['id' => 1]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
+        $this->mockCache();
+        $this->mockMessageRepo();
+
+        $topic = new Topic;
+        $topic->locked = false;
+
+        $this->topicRepo->shouldReceive('topicExists')->with(7)->andReturn(2);
+        $this->topicRepo->shouldReceive('getTopic')->with(7)->andReturn($topic);
+        $this->topicRepo->shouldReceive('setTopicLastPost')->with(7, 9)->andReturn(true);
+
+        $repo->shouldReceive('getForumRow')->with(2)->andReturn([
+            'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0,
+        ]);
+        $repo->shouldReceive('incrementForumPostCount')->with(2)->andReturn(true);
+
+        $this->postRepo->shouldReceive('createPost')->with(7, 1, 'Reply body', Mockery::type('string'))->andReturn(9);
+        $this->postRepo->shouldReceive('updateUserLastPost')->with(1, Mockery::type('string'))->andReturn(true);
+
+        $request = Request::create('/forums.php', 'POST', [
+            'action' => 'post',
+            'type' => 'reply',
+            'id' => 7,
+            'body' => 'Reply body',
+        ]);
+
+        $response = $this->callService($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringContainsString('topicid=7', $response->getTargetUrl());
+        $this->assertStringContainsString('pid9', $response->getTargetUrl());
+    }
+
+    public function test_handle_post_edit_success(): void
+    {
+        $repo = $this->mockForumRepo();
+        $this->actingAsUser(['id' => 1]);
+        $this->seedSettings(['maxsubjectlength' => 100]);
+        $this->mockCache();
+        $this->mockMessageRepo();
+
+        $topic = new Topic;
+        $topic->locked = false;
+
+        $topicWithUser = new Topic;
+        $topicWithUser->subject = 'Old subject';
+
+        $post = new Post;
+        $post->userid = 1;
+
+        $postWithUser = new Post;
+        $postWithUser->userid = 1;
+
+        $this->postLookupRepo->shouldReceive('getPostEditInfo')->with(3)->andReturn([
+            'topicid' => 7, 'forumid' => 2, 'is_first_post' => 1,
+        ]);
+        $this->postLookupRepo->shouldReceive('getPostWithUser')->with(3)->andReturn($postWithUser);
+        $this->postLookupRepo->shouldReceive('getPost')->with(3)->andReturn($post);
+
+        $this->topicRepo->shouldReceive('getTopic')->with(7)->andReturn($topic);
+        $this->topicRepo->shouldReceive('getTopicWithUser')->with(7)->andReturn($topicWithUser);
+        $this->topicRepo->shouldReceive('updateTopicSubject')->with(7, 'Edited subject')->andReturn(true);
+
+        $repo->shouldReceive('getForumRow')->with(2)->andReturn([
+            'minclassread' => 0, 'minclasswrite' => 0, 'minclasscreate' => 0,
+        ]);
+
+        $this->postRepo->shouldReceive('updatePostBody')->with(3, 'Edited body', Mockery::type('string'), 1)->andReturn(true);
+
+        $request = Request::create('/forums.php', 'POST', [
+            'action' => 'post',
+            'type' => 'edit',
+            'id' => 3,
+            'subject' => 'Edited subject',
+            'body' => 'Edited body',
+        ]);
+
+        $response = $this->callService($request);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringContainsString('topicid=7', $response->getTargetUrl());
+        $this->assertStringContainsString('page=p3#pid3', $response->getTargetUrl());
     }
 }

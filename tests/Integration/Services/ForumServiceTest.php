@@ -1120,7 +1120,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->actingAsUser(['id' => 1]);
-        $this->seedSettings(['maxsubjectlength' => 100, 'starttopic_bonus' => '10', 'makepost_bonus' => '5', 'bonus_tweak' => 'yes']);
+        $this->seedSettings(['maxsubjectlength' => 100, 'starttopic_bonus' => '10', 'makepost_bonus' => '5']);
         $this->mockCache();
         $this->mockMessageRepo();
 
@@ -1156,7 +1156,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->actingAsUser(['id' => 1]);
-        $this->seedSettings(['maxsubjectlength' => 100, 'starttopic_bonus' => '10', 'makepost_bonus' => '5', 'bonus_tweak' => 'yes']);
+        $this->seedSettings(['maxsubjectlength' => 100, 'starttopic_bonus' => '10', 'makepost_bonus' => '5']);
         $this->mockCache();
         $this->mockMessageRepo();
 
@@ -1193,7 +1193,7 @@ final class ForumServiceTest extends TestCase
     {
         $repo = $this->mockForumRepo();
         $this->actingAsUser(['id' => 1]);
-        $this->seedSettings(['maxsubjectlength' => 100, 'starttopic_bonus' => '10', 'makepost_bonus' => '5', 'bonus_tweak' => 'yes']);
+        $this->seedSettings(['maxsubjectlength' => 100, 'starttopic_bonus' => '10', 'makepost_bonus' => '5']);
         $this->mockCache();
         $this->mockMessageRepo();
 

@@ -9,6 +9,9 @@ use App\Repositories\BonusCalculationRepository;
 use App\Repositories\BonusConsumptionRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\SettingRepository;
+use App\Services\Bonus\GiftExchangeService;
+use App\Services\Bonus\PerkExchangeService;
+use App\Services\Bonus\TrafficExchangeService;
 use App\Services\BonusLedgerService;
 use App\Services\BonusPurchaseService;
 use App\Services\BonusService;
@@ -50,7 +53,12 @@ final class BonusServiceTest extends TestCase
         $this->app->instance(SettingRepository::class, $settingsRepo);
         Settings::resetCache();
 
-        return new BonusService($purchase, $calcRepo, $this->app->make(MessageRepository::class), $this->app->make(BonusLedgerService::class), $this->app->make(BonusConsumptionRepository::class));
+        $ledger = $this->app->make(BonusLedgerService::class);
+        $trafficExchange = new TrafficExchangeService($ledger);
+        $perkExchange = new PerkExchangeService($ledger, $purchase);
+        $giftExchange = new GiftExchangeService($ledger, $calcRepo, $this->app->make(BonusConsumptionRepository::class), $this->app->make(MessageRepository::class));
+
+        return new BonusService($purchase, $trafficExchange, $perkExchange, $giftExchange);
     }
 
     /**

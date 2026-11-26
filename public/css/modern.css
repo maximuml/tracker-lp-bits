@@ -1717,7 +1717,7 @@ ul.menu li.selected a:hover { text-decoration: none; }
     .nxm-trow__acts { opacity: 1; }
 }
 
-.nx-idx-card { border: 1px solid var(--nxm-border); border-radius: 10px; background: var(--nxm-surface); padding: .8rem 1rem; margin: 0 0 .9rem; }
+.nx-idx-card { border: 1px solid var(--nxm-border); border-radius: 10px; background: var(--nxm-surface); padding: .8rem 1rem; margin: 0 0 .9rem; box-shadow: 0 1px 3px rgb(20 20 23 / .05); }
 .nx-idx-card > h2, .nx-idx-card > h1 { margin: 0 0 .6rem; font-size: 1.05rem; }
 .nx-idx-card > :last-child { margin-bottom: 0; }
 

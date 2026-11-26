@@ -1205,6 +1205,20 @@ a.nxm-alert__action:visited {
    active colour scheme. */
 table { background-color: var(--nxm-surface); color: var(--nxm-text); }
 table.main, .nx-main, table.mainouter, .nx-mainouter { background-color: var(--nxm-surface); color: var(--nxm-text); }
+
+/* Card unification: every x-data-table renders inside the same rounded,
+   bordered, softly shadowed surface as the index/torrents cards. The
+   overflow-x-auto wrapper already clips overflow, so the radius applies. */
+div.overflow-x-auto:has(> .nx-data-table) {
+    border: 1px solid var(--nxm-border);
+    border-radius: 10px;
+    background: var(--nxm-surface);
+    box-shadow: 0 1px 3px rgb(20 20 23 / .05);
+}
+.nx-data-table th { border-bottom: 1px solid var(--nxm-border); }
+.nx-data-table td, .nx-data-table th { border-left: none; border-right: none; }
+.nx-data-table tr:first-child th:first-child { border-top-left-radius: 9px; }
+.nx-data-table tr:first-child th:last-child { border-top-right-radius: 9px; }
 td.embedded, .nx-embedded { background-color: var(--nxm-surface); color: var(--nxm-text); }
 .nx-attach-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
 .nx-attach-controls input[type=file] { max-width: 100%; }
@@ -1717,7 +1731,7 @@ ul.menu li.selected a:hover { text-decoration: none; }
     .nxm-trow__acts { opacity: 1; }
 }
 
-.nx-idx-card { border: 1px solid var(--nxm-border); border-radius: 10px; background: var(--nxm-surface); padding: .8rem 1rem; margin: 0 0 .9rem; }
+.nx-idx-card { border: 1px solid var(--nxm-border); border-radius: 10px; background: var(--nxm-surface); padding: .8rem 1rem; margin: 0 0 .9rem; box-shadow: 0 1px 3px rgb(20 20 23 / .05); }
 .nx-idx-card > h2, .nx-idx-card > h1 { margin: 0 0 .6rem; font-size: 1.05rem; }
 .nx-idx-card > :last-child { margin-bottom: 0; }
 

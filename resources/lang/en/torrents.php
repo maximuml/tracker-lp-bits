@@ -35,6 +35,7 @@ return [
     'std_nothing_found' => 'Nothing found!',
     'empty_no_torrents' => 'There are no torrents to show. Try removing a filter or check back later.',
     'results_found' => ':count torrents found',
+    'results_found_choice' => '{1} :count torrent found|[2,*] :count torrents found',
     'sorted_by' => 'Sorted by :field (:dir)',
     'sort_default' => 'Sorted by recently added',
     'sort_dir_ascending' => 'asc',

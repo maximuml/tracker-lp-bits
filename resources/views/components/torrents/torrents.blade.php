@@ -25,7 +25,7 @@
 
 @if ($count && isset($rows))
     <div class="nxm-results" role="status">
-        <span>{{ __('torrents.results_found', ['count' => number_format($count)]) }}</span>
+        <span>{{ trans_choice('torrents.results_found_choice', $count, ['count' => number_format($count)]) }}</span>
         <details class="nxm-sortmenu">
             <summary class="nxm-sortmenu__current">{{ $listVm->sortLabel }}</summary>
             <div class="nxm-sortmenu__list">

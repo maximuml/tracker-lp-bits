@@ -12,7 +12,7 @@
             </h2>
 
             <p class="fi-account-widget-user-name">
-                {{ filament()->getUserName(filament()->auth()->user()) . ' (' . filament()->auth()->user()->classText . ')' }}
+                {{ filament()->auth()->user()->username . ' (' . filament()->auth()->user()->classText . ')' }}
             </p>
         </div>
     </x-filament::section>

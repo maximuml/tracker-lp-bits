@@ -197,7 +197,7 @@ final class TorrentsModernPageTest extends TestCase
         $default->assertOk();
         $html = (string) $default->getContent();
         $this->assertStringContainsString('class="nxm-results"', $html);
-        $this->assertStringContainsString('torrents found', $html);
+        $this->assertStringContainsString('1 torrent found', $html);
         $this->assertStringContainsString('Sorted by recently added', $html);
 
         $sorted = $this->withNexusCookie($user)->get('/web/torrents?cat=1&sort=7&type=asc');

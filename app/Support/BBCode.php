@@ -355,7 +355,7 @@ final class BBCode
         return (string) preg_replace_callback(
             '/\[(list|ul|ol)(=[^\]]*)?\](.*?)\[\/\1\]/is',
             static function (array $m): string {
-                $tag = strtolower($m[1]) === 'ol' || (isset($m[2]) && $m[2] !== '') ? 'ol' : 'ul';
+                $tag = strtolower($m[1]) === 'ol' || $m[2] !== '' ? 'ol' : 'ul';
                 $items = preg_split('/\[\*\]/i', $m[3]) ?: [];
                 $items = array_values(array_filter(
                     array_map('trim', $items),

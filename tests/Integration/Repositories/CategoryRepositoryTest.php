@@ -7,6 +7,7 @@ namespace Tests\Integration\Repositories;
 use App\Repositories\CategoryRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Tests\Attributes\TestCategory;
 use Tests\TestCase;
 
@@ -58,9 +59,11 @@ final class CategoryRepositoryTest extends TestCase
         $this->assertSame('secondicons', $this->repository->tableNameForType('secondicon'));
     }
 
-    public function test_table_name_for_type_returns_input_for_unknown_type(): void
+    public function test_table_name_for_type_throws_for_unknown_type(): void
     {
-        $this->assertSame('unknown', $this->repository->tableNameForType('unknown'));
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->repository->tableNameForType('unknown');
     }
 
     public function test_get_record_returns_null_when_not_found(): void

@@ -319,9 +319,9 @@ final class PeerLifecycle
             if ($this->seeder !== (int) ($this->self['seeder'] ?? 0)) {
                 if ($this->seeder === 1) {
                     $this->torrentUpdate['seeders'] = DB::raw('seeders + 1');
-                    $this->torrentUpdate['leechers'] = DB::raw('leechers - 1');
+                    $this->torrentUpdate['leechers'] = DB::raw('GREATEST(leechers - 1, 0)');
                 } else {
-                    $this->torrentUpdate['seeders'] = DB::raw('seeders - 1');
+                    $this->torrentUpdate['seeders'] = DB::raw('GREATEST(seeders - 1, 0)');
                     $this->torrentUpdate['leechers'] = DB::raw('leechers + 1');
                 }
             }
@@ -339,7 +339,7 @@ final class PeerLifecycle
         $deleted = Peer::query()->where('id', (int) ($this->self['id'] ?? 0))->delete();
         if ($deleted) {
             $this->torrentUpdate[((int) ($this->self['seeder'] ?? 0)) === 1 ? 'seeders' : 'leechers'] = DB::raw(
-                ((int) ($this->self['seeder'] ?? 0)) === 1 ? 'seeders - 1' : 'leechers - 1'
+                ((int) ($this->self['seeder'] ?? 0)) === 1 ? 'GREATEST(seeders - 1, 0)' : 'GREATEST(leechers - 1, 0)'
             );
 
             if (! empty($this->snatchInfo)) {

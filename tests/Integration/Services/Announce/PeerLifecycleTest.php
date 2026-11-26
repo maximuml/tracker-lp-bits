@@ -317,6 +317,7 @@ final class PeerLifecycleTest extends TestCase
         $this->assertSame(0, DB::table('peers')->where('torrent', $torrent->id)->count());
         $this->assertArrayHasKey('leechers', $result->torrentUpdate);
         $this->assertArrayNotHasKey('seeders', $result->torrentUpdate);
+        $this->assertSame('GREATEST(leechers - 1, 0)', $result->torrentUpdate['leechers']->getValue(DB::connection()->getQueryGrammar()));
     }
 
     public function test_process_stopped_deletes_seeder_peer(): void
@@ -334,6 +335,7 @@ final class PeerLifecycleTest extends TestCase
         $this->assertSame(0, DB::table('peers')->where('torrent', $torrent->id)->count());
         $this->assertArrayHasKey('seeders', $result->torrentUpdate);
         $this->assertArrayNotHasKey('leechers', $result->torrentUpdate);
+        $this->assertSame('GREATEST(seeders - 1, 0)', $result->torrentUpdate['seeders']->getValue(DB::connection()->getQueryGrammar()));
     }
 
     public function test_process_ignores_duplicate_peer_insert(): void

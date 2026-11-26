@@ -78,15 +78,19 @@ class HitAndRunCronjobService
         $disabledUsers = [];
         $messages = [];
         DB::beginTransaction();
+        $lastId = 0;
         while (true) {
             $logPrefix = "page: $page, size: $size";
-            $rows = $query->forPage($page, $size)->get();
+            // Keyset pagination by id: rows get deleted mid-scan, so plain
+            // OFFSET paging would skip the rows that shift into earlier pages.
+            $rows = (clone $query)->where('hit_and_runs.id', '>', $lastId)->orderBy('hit_and_runs.id')->limit($size)->get();
             Logger::writeWithContext((string) ("{$logPrefix}, counts: ".$rows->count()), (string) 'info', (bool) false);
             if ($rows->isEmpty()) {
                 Logger::writeWithContext((string) ("{$logPrefix}, no more data...".QueryLog::last()), (string) 'info', (bool) false);
                 break;
             }
             foreach ($rows as $row) {
+                $lastId = max($lastId, (int) $row->id);
                 $currentLog = "$logPrefix, [HANDLING] ".$row->toJson();
                 Logger::writeWithContext((string) $logPrefix, (string) 'info', (bool) false);
                 if (! $row->user) {

@@ -474,7 +474,7 @@ final class AttachmentMutationServiceTest extends TestCase
         $this->assertSame([200, 100], $this->imageDims($written));
 
         $this->assertStringContainsString(
-            'parent.preview_custom_field_image_42("'.$row->dlkey.'", "/web/getattachment?id='.$row->id.'&dlkey='.$row->dlkey.'&inline=1")',
+            'parent.preview_custom_field_image_42("'.$row->dlkey.'", "\\/web\\/getattachment?id='.$row->id.'&dlkey='.$row->dlkey.'&inline=1")',
             $result['script'],
         );
         $this->assertStringContainsString('nonce="testnonce123"', (string) $result['script']);

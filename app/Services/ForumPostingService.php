@@ -214,9 +214,6 @@ final class ForumPostingService
         }
 
         if ($type === 'new') {
-            $starttopicBonus = SiteConfig::current()->bonus->startTopic();
-            $this->data->ledger->award($userid, (float) $starttopicBonus, BusinessType::FORUM_TOPIC_BONUS, 'Start topic');
-
             $topicid = $this->data->topics->createTopic($userid, $forumid, $subject);
             if ($topicid <= 0) {
                 PageResponses::abort(__('forums.std_error'), __('forums.std_no_topic_id_returned'));
@@ -224,14 +221,22 @@ final class ForumPostingService
             $this->data->forums->incrementForumTopicCount($forumid);
             $this->data->forums->incrementForumPostCount($forumid);
         } else {
-            $makepostBonus = SiteConfig::current()->bonus->makePost();
-            $this->data->ledger->award($userid, (float) $makepostBonus, BusinessType::FORUM_POST_BONUS, 'Make post');
             $this->data->forums->incrementForumPostCount($forumid);
         }
 
         $newPostId = $this->data->posts->createPost($topicid, $userid, $body, $date);
         if ($newPostId <= 0) {
             return $this->redirectTo('/forums');
+        }
+
+        // Award only after the post exists — otherwise a failed insert
+        // would leave a phantom bonus behind.
+        if ($type === 'new') {
+            $starttopicBonus = SiteConfig::current()->bonus->startTopic();
+            $this->data->ledger->award($userid, (float) $starttopicBonus, BusinessType::FORUM_TOPIC_BONUS, 'Start topic');
+        } else {
+            $makepostBonus = SiteConfig::current()->bonus->makePost();
+            $this->data->ledger->award($userid, (float) $makepostBonus, BusinessType::FORUM_POST_BONUS, 'Make post');
         }
 
         $topicInfo = $this->data->topics->getTopicWithUser($topicid);

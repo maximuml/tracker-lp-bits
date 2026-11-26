@@ -258,7 +258,7 @@ class AttachmentMutationService
                     'nonce' => $nonce,
                     'callback' => $callback,
                     'dlkey' => $dlkey,
-                    'url' => SafeHtml::fromTrustedHtml((string) json_encode($url, JSON_UNESCAPED_SLASHES)),
+                    'url' => SafeHtml::fromTrustedHtml((string) json_encode($url)),
                 ])->render();
             }
         }

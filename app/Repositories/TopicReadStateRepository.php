@@ -38,11 +38,15 @@ class TopicReadStateRepository extends BaseRepository
             ->first();
 
         if (! $readPost) {
-            return (bool) DB::table('readposts')->insert([
+            // insertOrIgnore: a concurrent mark-as-read may win the race for
+            // the (userid, topicid) unique key — either row records the read.
+            DB::table('readposts')->insertOrIgnore([
                 'userid' => $userId,
                 'topicid' => $topicId,
                 'lastpostread' => $postId,
             ]);
+
+            return true;
         }
 
         if ($lastCatchup < $postId) {

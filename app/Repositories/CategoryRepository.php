@@ -26,7 +26,7 @@ final class CategoryRepository implements CategoryRepositoryInterface
             'searchbox' => 'searchbox',
             'caticon' => 'caticons',
             'secondicon' => 'secondicons',
-            default => $type,
+            default => throw new \InvalidArgumentException('Unknown taxonomy type: '.$type),
         };
     }
 

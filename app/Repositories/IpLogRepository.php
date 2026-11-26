@@ -84,7 +84,7 @@ class IpLogRepository extends BaseRepository
             while ($arr_keys = $redis->hScan($key, $it, '*', $size)) {
                 $insert = [];
                 foreach ($arr_keys as $field => $value) {
-                    [$userId, $ip, $uri] = explode('|', $field);
+                    [$userId, $ip, $uri] = explode('|', $field, 3);
                     $insert[] = [
                         'userid' => $userId,
                         'ip' => $ip,

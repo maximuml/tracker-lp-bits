@@ -30,7 +30,10 @@ final class CronToken
         $expectedToken = (string) config('app.cron_token', '');
 
         if ($expectedToken !== '') {
-            $providedToken = (string) $request->query('token', '');
+            $providedToken = (string) $request->header('X-Cron-Token', '');
+            if ($providedToken === '') {
+                $providedToken = (string) $request->query('token', '');
+            }
 
             if ($providedToken !== '' && hash_equals($expectedToken, $providedToken)) {
                 return $next($request);

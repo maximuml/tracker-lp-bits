@@ -30,6 +30,8 @@ Route::post('/mybonus', [CompatRedirectController::class, 'post'])->middleware('
 $get301('/my_bonus', '/web/mybonus');
 Route::post('/my_bonus', [CompatRedirectController::class, 'post'])->middleware('reject.get.mutations');
 $get301('/myhr', '/web/myhr');
+$get301('/hitandrun', '/web/myhr');
+$get301('/bookmarks', '/web/torrents?inclbookmarked=1');
 $get301('/topten', '/web/topten');
 $get301('/log', '/web/log');
 Route::post('/log', [LogController::class, 'legacyPost']);
